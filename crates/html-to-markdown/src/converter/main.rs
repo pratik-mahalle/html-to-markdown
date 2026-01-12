@@ -49,7 +49,9 @@ use crate::converter::list::utils::{
     calculate_list_nesting_depth, is_loose_list, process_list_children,
 };
 use crate::converter::text::{dedent_code_block, normalize_heading_text};
-use crate::converter::utility::attributes::{is_hocr_document, may_be_hocr};
+use crate::converter::utility::attributes::{
+    element_has_navigation_hint, has_semantic_content_ancestor, is_hocr_document, may_be_hocr,
+};
 use crate::converter::utility::caching::build_dom_context;
 #[allow(unused_imports)]
 use crate::converter::utility::content::{
@@ -606,14 +608,37 @@ fn format_metadata_frontmatter(metadata: &BTreeMap<String, String>) -> String {
 
 /// Determine if a node should be dropped during preprocessing.
 fn should_drop_for_preprocessing(
-    _node_handle: &tl::NodeHandle,
-    _tag_name: &str,
-    _tag: &tl::HTMLTag,
-    _parser: &tl::Parser,
-    _dom_ctx: &DomContext,
-    _options: &ConversionOptions,
+    node_handle: &tl::NodeHandle,
+    tag_name: &str,
+    tag: &tl::HTMLTag,
+    parser: &tl::Parser,
+    dom_ctx: &DomContext,
+    options: &ConversionOptions,
 ) -> bool {
-    // For now, don't drop any nodes
+    if !options.preprocessing.remove_navigation {
+        return false;
+    }
+
+    let has_nav_hint = element_has_navigation_hint(tag);
+
+    if tag_name == "nav" {
+        return true;
+    }
+
+    if tag_name == "header" {
+        let inside_semantic_content = has_semantic_content_ancestor(node_handle, parser, dom_ctx);
+        if !inside_semantic_content {
+            return true;
+        }
+        if has_nav_hint {
+            return true;
+        }
+    } else if tag_name == "footer" || tag_name == "aside" {
+        if has_nav_hint {
+            return true;
+        }
+    }
+
     false
 }
 
