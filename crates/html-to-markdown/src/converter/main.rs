@@ -573,8 +573,52 @@ fn has_inline_block_misnest(dom_ctx: &DomContext, parser: &tl::Parser) -> bool {
 
 /// Check if HTML contains custom element tags.
 fn has_custom_element_tags(html: &str) -> bool {
-    // Custom elements must have a hyphen in their name
-    html.contains('<') && html.contains('-')
+    // Custom elements must have a hyphen in their TAG NAME, not in attributes
+    // Look for patterns like <foo-bar> or </foo-bar>
+    let bytes = html.as_bytes();
+    let len = bytes.len();
+    let mut i = 0;
+
+    while i < len {
+        if bytes[i] == b'<' {
+            i += 1;
+            if i >= len {
+                break;
+            }
+
+            // Skip closing tag marker
+            if bytes[i] == b'/' {
+                i += 1;
+                if i >= len {
+                    break;
+                }
+            }
+
+            // Skip whitespace
+            while i < len && bytes[i].is_ascii_whitespace() {
+                i += 1;
+            }
+
+            // Now we're at the start of a tag name - check if it contains a hyphen
+            let tag_start = i;
+            while i < len {
+                let ch = bytes[i];
+                if ch == b'>' || ch == b'/' || ch.is_ascii_whitespace() {
+                    // End of tag name
+                    let tag_name = &bytes[tag_start..i];
+                    if tag_name.contains(&b'-') {
+                        return true;
+                    }
+                    break;
+                }
+                i += 1;
+            }
+        } else {
+            i += 1;
+        }
+    }
+
+    false
 }
 
 /// Try to repair HTML using html5ever parser.
