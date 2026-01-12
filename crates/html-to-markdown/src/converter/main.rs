@@ -621,7 +621,7 @@ fn should_drop_for_preprocessing(
 fn extract_head_metadata(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
-    _options: &ConversionOptions,
+    options: &ConversionOptions,
 ) -> BTreeMap<String, String> {
     let mut metadata = BTreeMap::new();
 
@@ -632,14 +632,17 @@ fn extract_head_metadata(
             for child_handle in children.top().iter() {
                 if let Some(tl::Node::Tag(child_tag)) = child_handle.get(parser) {
                     // Look for meta tags
-                    if child_tag.name().as_utf8_str().eq_ignore_ascii_case("meta") {
+                    if child_tag.name().as_utf8_str().eq_ignore_ascii_case("meta")
+                        && !options.strip_tags.contains(&"meta".to_string())
+                        && !options.preserve_tags.contains(&"meta".to_string())
+                    {
                         if let (Some(name), Some(content)) = (
                             child_tag.attributes().get("name").flatten(),
                             child_tag.attributes().get("content").flatten(),
                         ) {
                             let name_str = name.as_utf8_str();
                             let content_str = content.as_utf8_str();
-                            metadata.insert(name_str.to_string(), content_str.to_string());
+                            metadata.insert(format!("meta-{}", name_str), content_str.to_string());
                         }
                         // Also check for property attribute (Open Graph, etc.)
                         if let (Some(property), Some(content)) = (
@@ -648,11 +651,14 @@ fn extract_head_metadata(
                         ) {
                             let property_str = property.as_utf8_str();
                             let content_str = content.as_utf8_str();
-                            metadata.insert(property_str.to_string(), content_str.to_string());
+                            metadata.insert(format!("meta-{}", property_str), content_str.to_string());
                         }
                     }
                     // Look for title tag
-                    if child_tag.name().as_utf8_str().eq_ignore_ascii_case("title") {
+                    if child_tag.name().as_utf8_str().eq_ignore_ascii_case("title")
+                        && !options.strip_tags.contains(&"title".to_string())
+                        && !options.preserve_tags.contains(&"title".to_string())
+                    {
                         // Extract text content from title tag
                         let mut title_content = String::new();
                         let title_children = child_tag.children();
@@ -693,7 +699,7 @@ fn extract_head_metadata(
             // If this is not a head tag, recursively search children for head tag
             let children = tag.children();
             for child_handle in children.top().iter() {
-                let child_metadata = extract_head_metadata(child_handle, parser, _options);
+                let child_metadata = extract_head_metadata(child_handle, parser, options);
                 if !child_metadata.is_empty() {
                     metadata.extend(child_metadata);
                     break; // Only process first head tag found
