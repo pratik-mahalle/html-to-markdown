@@ -2299,8 +2299,11 @@ pub(crate) fn walk_node(
                         Some(buf)
                     };
 
-                    if let Some(img_text) = image_output {
-                        output.push_str(&img_text);
+                    // Only output image if skip_images is not enabled
+                    if !options.skip_images {
+                        if let Some(img_text) = image_output {
+                            output.push_str(&img_text);
+                        }
                     }
 
                     #[cfg(feature = "metadata")]
