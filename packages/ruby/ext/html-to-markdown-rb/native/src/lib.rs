@@ -1534,10 +1534,11 @@ fn extended_metadata_to_ruby(ruby: &Ruby, metadata: RustExtendedMetadata) -> Res
 
 #[cfg(feature = "metadata")]
 fn convert_with_metadata_fn(ruby: &Ruby, args: &[Value]) -> Result<Value, Error> {
-    let parsed = scan_args::<(String,), (Option<Value>, Option<Value>), (), (), (), ()>(args)?;
+    let parsed = scan_args::<(String,), (Option<Value>, Option<Value>, Option<Value>), (), (), (), ()>(args)?;
     let html = parsed.required.0;
     let options = build_conversion_options(ruby, parsed.optional.0)?;
     let metadata_config = build_metadata_config(ruby, parsed.optional.1)?;
+    let _visitor = parsed.optional.2;
 
     let (markdown, metadata) = guard_panic(|| convert_with_metadata_inner(&html, Some(options), metadata_config, None))
         .map_err(conversion_error)?;
