@@ -6,7 +6,7 @@ This report documents the extraction of inline element handlers from the `walk_n
 
 ## File Location Reference
 
-**Source file:** `/Users/naamanhirschfeld/workspace/kreuzberg-dev/html-to-markdown/crates/html-to-markdown/src/converter.rs`
+**Source file:** `crates/html-to-markdown/src/converter.rs`
 
 **Source function:** `walk_node()` (starts at line 3334)
 
