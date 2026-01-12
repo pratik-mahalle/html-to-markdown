@@ -1,3 +1,5 @@
+//! Example: Testing HTML5 semantic tags (article, section, nav, etc.)
+
 use html_to_markdown_rs::convert;
 
 fn main() {

@@ -1,3 +1,5 @@
+//! Example: Testing HTML escape sequences and special characters
+
 use html_to_markdown_rs::convert;
 
 fn main() {
