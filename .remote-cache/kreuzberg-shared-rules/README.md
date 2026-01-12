@@ -411,10 +411,10 @@ See the LICENSE file in this repository for licensing information.
 
 ## Additional Resources
 
-- [CUSTOMIZATION.md](/Users/naamanhirschfeld/workspace/kreuzberg-dev/ai-rulez/CUSTOMIZATION.md) - Detailed customization guide
-- [PROFILES.md](/Users/naamanhirschfeld/workspace/kreuzberg-dev/ai-rulez/PROFILES.md) - Complete profile documentation
-- [config.yaml](/Users/naamanhirschfeld/workspace/kreuzberg-dev/ai-rulez/config.yaml) - Master configuration reference
-- [mcp.yaml](/Users/naamanhirschfeld/workspace/kreuzberg-dev/ai-rulez/mcp.yaml) - MCP server configuration
+- [CUSTOMIZATION.md](.ai-rulez/CUSTOMIZATION.md) - Detailed customization guide
+- [PROFILES.md](.ai-rulez/PROFILES.md) - Complete profile documentation
+- [config.yaml](.ai-rulez/config.yaml) - Master configuration reference
+- [mcp.yaml](.ai-rulez/mcp.yaml) - MCP server configuration
 
 ## Support
 
