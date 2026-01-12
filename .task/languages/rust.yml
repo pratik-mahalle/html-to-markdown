@@ -79,7 +79,7 @@ tasks:
     silent: false
     cmds:
       - cmd: |
-          RB_SYS_RUBY={{.RUBY_FULL_PATH}} RUBY={{.RUBY_FULL_PATH}} RUST_LOG={{.RUST_LOG}} cargo llvm-cov --all-features --workspace --exclude html-to-markdown-py --exclude html-to-markdown-rb --exclude html-to-markdown-php --exclude benchmark-harness --lcov --output-path rust-coverage.lcov -j {{.NUM_CPUS}}
+          RB_SYS_RUBY={{.RUBY_FULL_PATH}} RUBY={{.RUBY_FULL_PATH}} RUST_LOG={{.RUST_LOG}} cargo llvm-cov --all-features --workspace --exclude html-to-markdown-py --exclude html-to-markdown-rb --exclude html-to-markdown-php --exclude benchmark-harness --exclude html-to-markdown-wasm-wasmtime-tests --lcov --output-path rust-coverage.lcov -j {{.NUM_CPUS}}
         ignore_error: false
 
   lint:
