@@ -659,6 +659,11 @@ fn should_drop_for_preprocessing(
     dom_ctx: &DomContext,
     options: &ConversionOptions,
 ) -> bool {
+    // If preprocessing is globally disabled, don't drop any nodes
+    if !options.preprocessing.enabled {
+        return false;
+    }
+
     if !options.preprocessing.remove_navigation {
         return false;
     }
