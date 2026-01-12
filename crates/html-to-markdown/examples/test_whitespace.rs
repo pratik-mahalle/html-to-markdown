@@ -1,3 +1,5 @@
+//! Example: Testing whitespace handling and normalization
+
 use html_to_markdown_rs::convert;
 
 fn main() {

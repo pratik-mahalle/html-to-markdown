@@ -1,3 +1,5 @@
+//! Example: Testing HTML list conversion (ordered and unordered lists)
+
 use html_to_markdown_rs::convert;
 
 fn main() {
