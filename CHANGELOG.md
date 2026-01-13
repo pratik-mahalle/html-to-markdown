@@ -5,6 +5,13 @@ All notable changes to html-to-markdown will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.22.1] - 2026-01-13
+
+### Fixed
+
+- **Java Maven Central publishing** - Fixed Maven Central deployment by adding proper `publish` profile with `central-publishing-maven-plugin` configuration. The plugin is now correctly activated with `-Ppublish` flag and uses `ossrh` server credentials.
+- **Java Spotless formatting** - Updated google-java-format to 1.28.0 for Java 25 compatibility.
+
 ## [2.22.0] - 2026-01-13
 
 ### Fixed
