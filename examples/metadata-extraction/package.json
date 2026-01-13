@@ -1,6 +1,6 @@
 {
   "name": "html-to-markdown-metadata-examples",
-  "version": "2.21.0",
+  "version": "2.21.1",
   "description": "Metadata extraction examples for html-to-markdown",
   "private": true,
   "type": "module",

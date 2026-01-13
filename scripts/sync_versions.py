@@ -164,9 +164,15 @@ def update_cargo_toml(file_path: Path, version: str) -> tuple[bool, str, str]:
 
 
 def update_rust_dependency_versions(file_path: Path, version: str) -> bool:
-    """Update html-to-markdown-rs dependency version pins inside Cargo manifests."""
+    """Update html-to-markdown-* workspace dependency version pins inside Cargo manifests."""
     content = file_path.read_text()
-    pattern = re.compile(r'(html-to-markdown-rs\s*=\s*\{\s*version\s*=\s*")([^"]+)(")')
+
+    # Match all html-to-markdown-* dependencies with explicit version pins
+    # This pattern matches: html-to-markdown-xxx = { ... version = "X.Y.Z" ... }
+    # It handles cases with path, features, and other attributes in any order
+    pattern = re.compile(
+        r'(html-to-markdown-[a-z\-]+\s*=\s*\{[^}]*?version\s*=\s*")([^"]+)(")', re.MULTILINE | re.DOTALL
+    )
 
     def repl(match: re.Match[str]) -> str:
         return f"{match.group(1)}{version}{match.group(3)}"
@@ -437,11 +443,10 @@ class SyncReport:
 
 
 def sync_package_jsons(repo_root: Path, version: str, report: SyncReport) -> None:
-    """Sync package.json files, skipping build artifacts/deps."""
+    """Sync package.json files, including build artifacts but skipping deps."""
     for pkg_json in repo_root.rglob("package.json"):
+        # Skip node_modules, .git, and target directories
         if any(part in pkg_json.parts for part in ["node_modules", ".git", "target"]):
-            continue
-        if "wasm" in str(pkg_json) and any(part.startswith("dist") for part in pkg_json.parts):
             continue
 
         changed, old_ver, new_ver = update_package_json(pkg_json, version)

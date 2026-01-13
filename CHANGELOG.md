@@ -5,6 +5,31 @@ All notable changes to html-to-markdown will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.21.1] - 2026-01-13
+
+### Changed
+
+- **Major refactor: Complete Phase 1 modular architecture** - Restructured core converter into modular handler components:
+  - Extracted block element handlers (block-level HTML elements)
+  - Extracted inline element handlers (2,363 lines of focused code)
+  - Extracted table, list, and media handlers (2,528 lines)
+  - Extracted semantic and form handlers (1,532 lines)
+  - Improved code organization and maintainability across all language bindings
+- **Unified FFI bindings architecture** - Consolidated common binding logic into shared crate, reducing duplication across Python, TypeScript, Ruby, PHP, Go, and Java bindings
+- **Added visitor callback code generation system** - FFI now supports dynamic visitor callbacks for all language bindings (Python, Ruby, PHP, Elixir, etc.)
+- **Enhanced preprocessing system** - Footer and nav element removal now integrated into preprocessing pipeline
+- **Improved custom element detection** - Enhanced `has_custom_element_tags` to accurately detect only tag names with hyphens
+
+### Internal
+
+- Updated dependencies across all language bindings (Python, Ruby, PHP, JavaScript, Go, etc.)
+- Refactored benchmark harness to modularize script adapters and reduce code duplication
+- Refactored performance examples to extract and reuse shared utilities
+- Improved sync_versions.py to handle all internal workspace dependency version pins
+- Refactored README generation script to modularize template handling
+- Improved clippy lint handling and CI coverage workflows
+- Added documentation to Node.js binding example files
+
 ## [2.21.0] - 2026-01-10
 
 ### Added
