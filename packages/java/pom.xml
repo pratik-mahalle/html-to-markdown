@@ -270,7 +270,7 @@
                             <include>src/main/java/**/*.java</include>
                         </includes>
                         <googleJavaFormat>
-                            <version>1.25.2</version>
+                            <version>1.28.0</version>
                             <style>GOOGLE</style>
                         </googleJavaFormat>
                         <removeUnusedImports/>

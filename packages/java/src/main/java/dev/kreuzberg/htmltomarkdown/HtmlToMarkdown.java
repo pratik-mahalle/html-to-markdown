@@ -103,9 +103,9 @@ public final class HtmlToMarkdown {
   /**
    * Convert HTML to Markdown using a custom visitor for interception and customization.
    *
-   * <p>The visitor interface allows you to intercept and customize the conversion
-   * process for specific HTML elements. Each method in the visitor is called at
-   * appropriate points during tree traversal.
+   * <p>The visitor interface allows you to intercept and customize the conversion process for
+   * specific HTML elements. Each method in the visitor is called at appropriate points during tree
+   * traversal.
    *
    * <p><b>Example usage:</b>
    *
@@ -150,8 +150,7 @@ public final class HtmlToMarkdown {
 
       if (visitorHandle == null || visitorHandle.address() == 0) {
         String error = getLastError();
-        throw new ConversionException(
-            error != null ? error : "Failed to create visitor handle");
+        throw new ConversionException(error != null ? error : "Failed to create visitor handle");
       }
 
       try {
@@ -163,13 +162,13 @@ public final class HtmlToMarkdown {
 
         // Call convert with visitor
         MemorySegment resultSegment =
-            (MemorySegment) HtmlToMarkdownFFI.html_to_markdown_convert_with_visitor.invoke(
-                htmlSegment, visitorHandle, lenOut);
+            (MemorySegment)
+                HtmlToMarkdownFFI.html_to_markdown_convert_with_visitor.invoke(
+                    htmlSegment, visitorHandle, lenOut);
 
         if (resultSegment == null || resultSegment.address() == 0) {
           String error = getLastError();
-          throw new ConversionException(
-              error != null ? error : "Conversion with visitor failed");
+          throw new ConversionException(error != null ? error : "Conversion with visitor failed");
         }
 
         try {

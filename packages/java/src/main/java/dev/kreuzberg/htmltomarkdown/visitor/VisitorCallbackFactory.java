@@ -32,138 +32,112 @@ public final class VisitorCallbackFactory {
   /** Lookup for method handles. */
   private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
 
-  /**
-   * Function descriptor for callbacks with just context: fn(user_data, ctx) -> result.
-   */
-  private static final FunctionDescriptor CTX_ONLY_DESC = FunctionDescriptor.of(
-      ValueLayout.JAVA_LONG, // result (encoded)
-      ValueLayout.ADDRESS,   // user_data
-      ValueLayout.ADDRESS    // ctx
-  );
+  /** Function descriptor for callbacks with just context: fn(user_data, ctx) -> result. */
+  private static final FunctionDescriptor CTX_ONLY_DESC =
+      FunctionDescriptor.of(
+          ValueLayout.JAVA_LONG, // result (encoded)
+          ValueLayout.ADDRESS, // user_data
+          ValueLayout.ADDRESS // ctx
+          );
 
-  /**
-   * Function descriptor for callbacks with context + 1 string.
-   */
-  private static final FunctionDescriptor CTX_STR_DESC = FunctionDescriptor.of(
-      ValueLayout.JAVA_LONG,
-      ValueLayout.ADDRESS,
-      ValueLayout.ADDRESS,
-      ValueLayout.ADDRESS
-  );
+  /** Function descriptor for callbacks with context + 1 string. */
+  private static final FunctionDescriptor CTX_STR_DESC =
+      FunctionDescriptor.of(
+          ValueLayout.JAVA_LONG, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS);
 
-  /**
-   * Function descriptor for callbacks with context + 2 strings.
-   */
-  private static final FunctionDescriptor CTX_2STR_DESC = FunctionDescriptor.of(
-      ValueLayout.JAVA_LONG,
-      ValueLayout.ADDRESS,
-      ValueLayout.ADDRESS,
-      ValueLayout.ADDRESS,
-      ValueLayout.ADDRESS
-  );
+  /** Function descriptor for callbacks with context + 2 strings. */
+  private static final FunctionDescriptor CTX_2STR_DESC =
+      FunctionDescriptor.of(
+          ValueLayout.JAVA_LONG,
+          ValueLayout.ADDRESS,
+          ValueLayout.ADDRESS,
+          ValueLayout.ADDRESS,
+          ValueLayout.ADDRESS);
 
-  /**
-   * Function descriptor for callbacks with context + 3 strings.
-   */
-  private static final FunctionDescriptor CTX_3STR_DESC = FunctionDescriptor.of(
-      ValueLayout.JAVA_LONG,
-      ValueLayout.ADDRESS,
-      ValueLayout.ADDRESS,
-      ValueLayout.ADDRESS,
-      ValueLayout.ADDRESS,
-      ValueLayout.ADDRESS
-  );
+  /** Function descriptor for callbacks with context + 3 strings. */
+  private static final FunctionDescriptor CTX_3STR_DESC =
+      FunctionDescriptor.of(
+          ValueLayout.JAVA_LONG,
+          ValueLayout.ADDRESS,
+          ValueLayout.ADDRESS,
+          ValueLayout.ADDRESS,
+          ValueLayout.ADDRESS,
+          ValueLayout.ADDRESS);
 
-  /**
-   * Function descriptor for callbacks with context + 4 strings.
-   */
-  private static final FunctionDescriptor CTX_4STR_DESC = FunctionDescriptor.of(
-      ValueLayout.JAVA_LONG,
-      ValueLayout.ADDRESS,
-      ValueLayout.ADDRESS,
-      ValueLayout.ADDRESS,
-      ValueLayout.ADDRESS,
-      ValueLayout.ADDRESS,
-      ValueLayout.ADDRESS
-  );
+  /** Function descriptor for callbacks with context + 4 strings. */
+  private static final FunctionDescriptor CTX_4STR_DESC =
+      FunctionDescriptor.of(
+          ValueLayout.JAVA_LONG,
+          ValueLayout.ADDRESS,
+          ValueLayout.ADDRESS,
+          ValueLayout.ADDRESS,
+          ValueLayout.ADDRESS,
+          ValueLayout.ADDRESS,
+          ValueLayout.ADDRESS);
 
-  /**
-   * Function descriptor for heading callback: ctx, level (u32), text, id.
-   */
-  private static final FunctionDescriptor HEADING_DESC = FunctionDescriptor.of(
-      ValueLayout.JAVA_LONG,
-      ValueLayout.ADDRESS,
-      ValueLayout.ADDRESS,
-      ValueLayout.JAVA_INT,
-      ValueLayout.ADDRESS,
-      ValueLayout.ADDRESS
-  );
+  /** Function descriptor for heading callback: ctx, level (u32), text, id. */
+  private static final FunctionDescriptor HEADING_DESC =
+      FunctionDescriptor.of(
+          ValueLayout.JAVA_LONG,
+          ValueLayout.ADDRESS,
+          ValueLayout.ADDRESS,
+          ValueLayout.JAVA_INT,
+          ValueLayout.ADDRESS,
+          ValueLayout.ADDRESS);
 
-  /**
-   * Function descriptor for list item: ctx, ordered (bool), marker, text.
-   */
-  private static final FunctionDescriptor LIST_ITEM_DESC = FunctionDescriptor.of(
-      ValueLayout.JAVA_LONG,
-      ValueLayout.ADDRESS,
-      ValueLayout.ADDRESS,
-      ValueLayout.JAVA_BOOLEAN,
-      ValueLayout.ADDRESS,
-      ValueLayout.ADDRESS
-  );
+  /** Function descriptor for list item: ctx, ordered (bool), marker, text. */
+  private static final FunctionDescriptor LIST_ITEM_DESC =
+      FunctionDescriptor.of(
+          ValueLayout.JAVA_LONG,
+          ValueLayout.ADDRESS,
+          ValueLayout.ADDRESS,
+          ValueLayout.JAVA_BOOLEAN,
+          ValueLayout.ADDRESS,
+          ValueLayout.ADDRESS);
 
-  /**
-   * Function descriptor for list start/end with bool: ctx, ordered.
-   */
-  private static final FunctionDescriptor LIST_BOOL_DESC = FunctionDescriptor.of(
-      ValueLayout.JAVA_LONG,
-      ValueLayout.ADDRESS,
-      ValueLayout.ADDRESS,
-      ValueLayout.JAVA_BOOLEAN
-  );
+  /** Function descriptor for list start/end with bool: ctx, ordered. */
+  private static final FunctionDescriptor LIST_BOOL_DESC =
+      FunctionDescriptor.of(
+          ValueLayout.JAVA_LONG,
+          ValueLayout.ADDRESS,
+          ValueLayout.ADDRESS,
+          ValueLayout.JAVA_BOOLEAN);
 
-  /**
-   * Function descriptor for list end: ctx, ordered, output.
-   */
-  private static final FunctionDescriptor LIST_END_DESC = FunctionDescriptor.of(
-      ValueLayout.JAVA_LONG,
-      ValueLayout.ADDRESS,
-      ValueLayout.ADDRESS,
-      ValueLayout.JAVA_BOOLEAN,
-      ValueLayout.ADDRESS
-  );
+  /** Function descriptor for list end: ctx, ordered, output. */
+  private static final FunctionDescriptor LIST_END_DESC =
+      FunctionDescriptor.of(
+          ValueLayout.JAVA_LONG,
+          ValueLayout.ADDRESS,
+          ValueLayout.ADDRESS,
+          ValueLayout.JAVA_BOOLEAN,
+          ValueLayout.ADDRESS);
 
-  /**
-   * Function descriptor for table row: ctx, cells, cell_count, is_header.
-   */
-  private static final FunctionDescriptor TABLE_ROW_DESC = FunctionDescriptor.of(
-      ValueLayout.JAVA_LONG,
-      ValueLayout.ADDRESS,
-      ValueLayout.ADDRESS,
-      ValueLayout.ADDRESS,
-      ValueLayout.JAVA_LONG,
-      ValueLayout.JAVA_BOOLEAN
-  );
+  /** Function descriptor for table row: ctx, cells, cell_count, is_header. */
+  private static final FunctionDescriptor TABLE_ROW_DESC =
+      FunctionDescriptor.of(
+          ValueLayout.JAVA_LONG,
+          ValueLayout.ADDRESS,
+          ValueLayout.ADDRESS,
+          ValueLayout.ADDRESS,
+          ValueLayout.JAVA_LONG,
+          ValueLayout.JAVA_BOOLEAN);
 
-  /**
-   * Function descriptor for blockquote: ctx, content, depth.
-   */
-  private static final FunctionDescriptor BLOCKQUOTE_DESC = FunctionDescriptor.of(
-      ValueLayout.JAVA_LONG,
-      ValueLayout.ADDRESS,
-      ValueLayout.ADDRESS,
-      ValueLayout.ADDRESS,
-      ValueLayout.JAVA_LONG
-  );
+  /** Function descriptor for blockquote: ctx, content, depth. */
+  private static final FunctionDescriptor BLOCKQUOTE_DESC =
+      FunctionDescriptor.of(
+          ValueLayout.JAVA_LONG,
+          ValueLayout.ADDRESS,
+          ValueLayout.ADDRESS,
+          ValueLayout.ADDRESS,
+          ValueLayout.JAVA_LONG);
 
-  /**
-   * Function descriptor for details: ctx, open (bool).
-   */
-  private static final FunctionDescriptor DETAILS_DESC = FunctionDescriptor.of(
-      ValueLayout.JAVA_LONG,
-      ValueLayout.ADDRESS,
-      ValueLayout.ADDRESS,
-      ValueLayout.JAVA_BOOLEAN
-  );
+  /** Function descriptor for details: ctx, open (bool). */
+  private static final FunctionDescriptor DETAILS_DESC =
+      FunctionDescriptor.of(
+          ValueLayout.JAVA_LONG,
+          ValueLayout.ADDRESS,
+          ValueLayout.ADDRESS,
+          ValueLayout.JAVA_BOOLEAN);
 
   /** The visitor bridge instance. */
   private final VisitorBridge bridge;
@@ -185,8 +159,8 @@ public final class VisitorCallbackFactory {
   /**
    * Create the native visitor callbacks struct.
    *
-   * <p>Allocates a C struct containing function pointers for all visitor callbacks.
-   * The returned memory segment is valid for the lifetime of the arena.
+   * <p>Allocates a C struct containing function pointers for all visitor callbacks. The returned
+   * memory segment is valid for the lifetime of the arena.
    *
    * @return memory segment containing the callbacks struct
    */
@@ -303,68 +277,92 @@ public final class VisitorCallbackFactory {
   private long visitElementEnd(MemorySegment userData, MemorySegment ctx, MemorySegment output) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String outputStr = StringUtils.fromCString(output);
-    VisitResult result = bridge.getVisitor().visitElementEnd(nodeCtx, outputStr != null ? outputStr : "");
+    VisitResult result =
+        bridge.getVisitor().visitElementEnd(nodeCtx, outputStr != null ? outputStr : "");
     return bridge.encodeResult(result);
   }
 
-  private long visitLink(MemorySegment userData, MemorySegment ctx, MemorySegment href,
-      MemorySegment text, MemorySegment title) {
+  private long visitLink(
+      MemorySegment userData,
+      MemorySegment ctx,
+      MemorySegment href,
+      MemorySegment text,
+      MemorySegment title) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String hrefStr = StringUtils.fromCString(href);
     String textStr = StringUtils.fromCString(text);
     String titleStr = StringUtils.fromCString(title);
-    VisitResult result = bridge.getVisitor().visitLink(nodeCtx,
-        hrefStr != null ? hrefStr : "",
-        textStr != null ? textStr : "",
-        titleStr);
+    VisitResult result =
+        bridge
+            .getVisitor()
+            .visitLink(
+                nodeCtx, hrefStr != null ? hrefStr : "", textStr != null ? textStr : "", titleStr);
     return bridge.encodeResult(result);
   }
 
-  private long visitImage(MemorySegment userData, MemorySegment ctx, MemorySegment src,
-      MemorySegment alt, MemorySegment title) {
+  private long visitImage(
+      MemorySegment userData,
+      MemorySegment ctx,
+      MemorySegment src,
+      MemorySegment alt,
+      MemorySegment title) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String srcStr = StringUtils.fromCString(src);
     String altStr = StringUtils.fromCString(alt);
     String titleStr = StringUtils.fromCString(title);
-    VisitResult result = bridge.getVisitor().visitImage(nodeCtx,
-        srcStr != null ? srcStr : "",
-        altStr != null ? altStr : "",
-        titleStr);
+    VisitResult result =
+        bridge
+            .getVisitor()
+            .visitImage(
+                nodeCtx, srcStr != null ? srcStr : "", altStr != null ? altStr : "", titleStr);
     return bridge.encodeResult(result);
   }
 
-  private long visitHeading(MemorySegment userData, MemorySegment ctx, int level,
-      MemorySegment text, MemorySegment id) {
+  private long visitHeading(
+      MemorySegment userData, MemorySegment ctx, int level, MemorySegment text, MemorySegment id) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String textStr = StringUtils.fromCString(text);
     String idStr = StringUtils.fromCString(id);
-    VisitResult result = bridge.getVisitor().visitHeading(nodeCtx, level,
-        textStr != null ? textStr : "", idStr);
+    VisitResult result =
+        bridge.getVisitor().visitHeading(nodeCtx, level, textStr != null ? textStr : "", idStr);
     return bridge.encodeResult(result);
   }
 
-  private long visitCodeBlock(MemorySegment userData, MemorySegment ctx, MemorySegment lang, MemorySegment code) {
+  private long visitCodeBlock(
+      MemorySegment userData, MemorySegment ctx, MemorySegment lang, MemorySegment code) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String langStr = StringUtils.fromCString(lang);
     String codeStr = StringUtils.fromCString(code);
-    VisitResult result = bridge.getVisitor().visitCodeBlock(nodeCtx, langStr, codeStr != null ? codeStr : "");
+    VisitResult result =
+        bridge.getVisitor().visitCodeBlock(nodeCtx, langStr, codeStr != null ? codeStr : "");
     return bridge.encodeResult(result);
   }
 
   private long visitCodeInline(MemorySegment userData, MemorySegment ctx, MemorySegment code) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String codeStr = StringUtils.fromCString(code);
-    VisitResult result = bridge.getVisitor().visitCodeInline(nodeCtx, codeStr != null ? codeStr : "");
+    VisitResult result =
+        bridge.getVisitor().visitCodeInline(nodeCtx, codeStr != null ? codeStr : "");
     return bridge.encodeResult(result);
   }
 
-  private long visitListItem(MemorySegment userData, MemorySegment ctx, boolean ordered,
-      MemorySegment marker, MemorySegment text) {
+  private long visitListItem(
+      MemorySegment userData,
+      MemorySegment ctx,
+      boolean ordered,
+      MemorySegment marker,
+      MemorySegment text) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String markerStr = StringUtils.fromCString(marker);
     String textStr = StringUtils.fromCString(text);
-    VisitResult result = bridge.getVisitor().visitListItem(nodeCtx, ordered,
-        markerStr != null ? markerStr : "", textStr != null ? textStr : "");
+    VisitResult result =
+        bridge
+            .getVisitor()
+            .visitListItem(
+                nodeCtx,
+                ordered,
+                markerStr != null ? markerStr : "",
+                textStr != null ? textStr : "");
     return bridge.encodeResult(result);
   }
 
@@ -374,10 +372,12 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private long visitListEnd(MemorySegment userData, MemorySegment ctx, boolean ordered, MemorySegment output) {
+  private long visitListEnd(
+      MemorySegment userData, MemorySegment ctx, boolean ordered, MemorySegment output) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String outputStr = StringUtils.fromCString(output);
-    VisitResult result = bridge.getVisitor().visitListEnd(nodeCtx, ordered, outputStr != null ? outputStr : "");
+    VisitResult result =
+        bridge.getVisitor().visitListEnd(nodeCtx, ordered, outputStr != null ? outputStr : "");
     return bridge.encodeResult(result);
   }
 
@@ -387,8 +387,12 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private long visitTableRow(MemorySegment userData, MemorySegment ctx, MemorySegment cells,
-      long cellCount, boolean isHeader) {
+  private long visitTableRow(
+      MemorySegment userData,
+      MemorySegment ctx,
+      MemorySegment cells,
+      long cellCount,
+      boolean isHeader) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     List<String> cellList = bridge.parseCells(cells, (int) cellCount);
     VisitResult result = bridge.getVisitor().visitTableRow(nodeCtx, cellList, isHeader);
@@ -398,7 +402,8 @@ public final class VisitorCallbackFactory {
   private long visitTableEnd(MemorySegment userData, MemorySegment ctx, MemorySegment output) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String outputStr = StringUtils.fromCString(output);
-    VisitResult result = bridge.getVisitor().visitTableEnd(nodeCtx, outputStr != null ? outputStr : "");
+    VisitResult result =
+        bridge.getVisitor().visitTableEnd(nodeCtx, outputStr != null ? outputStr : "");
     return bridge.encodeResult(result);
   }
 
@@ -428,28 +433,32 @@ public final class VisitorCallbackFactory {
   private long visitStrikethrough(MemorySegment userData, MemorySegment ctx, MemorySegment text) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String textStr = StringUtils.fromCString(text);
-    VisitResult result = bridge.getVisitor().visitStrikethrough(nodeCtx, textStr != null ? textStr : "");
+    VisitResult result =
+        bridge.getVisitor().visitStrikethrough(nodeCtx, textStr != null ? textStr : "");
     return bridge.encodeResult(result);
   }
 
   private long visitUnderline(MemorySegment userData, MemorySegment ctx, MemorySegment text) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String textStr = StringUtils.fromCString(text);
-    VisitResult result = bridge.getVisitor().visitUnderline(nodeCtx, textStr != null ? textStr : "");
+    VisitResult result =
+        bridge.getVisitor().visitUnderline(nodeCtx, textStr != null ? textStr : "");
     return bridge.encodeResult(result);
   }
 
   private long visitSubscript(MemorySegment userData, MemorySegment ctx, MemorySegment text) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String textStr = StringUtils.fromCString(text);
-    VisitResult result = bridge.getVisitor().visitSubscript(nodeCtx, textStr != null ? textStr : "");
+    VisitResult result =
+        bridge.getVisitor().visitSubscript(nodeCtx, textStr != null ? textStr : "");
     return bridge.encodeResult(result);
   }
 
   private long visitSuperscript(MemorySegment userData, MemorySegment ctx, MemorySegment text) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String textStr = StringUtils.fromCString(text);
-    VisitResult result = bridge.getVisitor().visitSuperscript(nodeCtx, textStr != null ? textStr : "");
+    VisitResult result =
+        bridge.getVisitor().visitSuperscript(nodeCtx, textStr != null ? textStr : "");
     return bridge.encodeResult(result);
   }
 
@@ -472,13 +481,16 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private long visitCustomElement(MemorySegment userData, MemorySegment ctx,
-      MemorySegment tagName, MemorySegment html) {
+  private long visitCustomElement(
+      MemorySegment userData, MemorySegment ctx, MemorySegment tagName, MemorySegment html) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String tagNameStr = StringUtils.fromCString(tagName);
     String htmlStr = StringUtils.fromCString(html);
-    VisitResult result = bridge.getVisitor().visitCustomElement(nodeCtx,
-        tagNameStr != null ? tagNameStr : "", htmlStr != null ? htmlStr : "");
+    VisitResult result =
+        bridge
+            .getVisitor()
+            .visitCustomElement(
+                nodeCtx, tagNameStr != null ? tagNameStr : "", htmlStr != null ? htmlStr : "");
     return bridge.encodeResult(result);
   }
 
@@ -491,25 +503,31 @@ public final class VisitorCallbackFactory {
   private long visitDefinitionTerm(MemorySegment userData, MemorySegment ctx, MemorySegment text) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String textStr = StringUtils.fromCString(text);
-    VisitResult result = bridge.getVisitor().visitDefinitionTerm(nodeCtx, textStr != null ? textStr : "");
+    VisitResult result =
+        bridge.getVisitor().visitDefinitionTerm(nodeCtx, textStr != null ? textStr : "");
     return bridge.encodeResult(result);
   }
 
-  private long visitDefinitionDescription(MemorySegment userData, MemorySegment ctx, MemorySegment text) {
+  private long visitDefinitionDescription(
+      MemorySegment userData, MemorySegment ctx, MemorySegment text) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String textStr = StringUtils.fromCString(text);
-    VisitResult result = bridge.getVisitor().visitDefinitionDescription(nodeCtx, textStr != null ? textStr : "");
+    VisitResult result =
+        bridge.getVisitor().visitDefinitionDescription(nodeCtx, textStr != null ? textStr : "");
     return bridge.encodeResult(result);
   }
 
-  private long visitDefinitionListEnd(MemorySegment userData, MemorySegment ctx, MemorySegment output) {
+  private long visitDefinitionListEnd(
+      MemorySegment userData, MemorySegment ctx, MemorySegment output) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String outputStr = StringUtils.fromCString(output);
-    VisitResult result = bridge.getVisitor().visitDefinitionListEnd(nodeCtx, outputStr != null ? outputStr : "");
+    VisitResult result =
+        bridge.getVisitor().visitDefinitionListEnd(nodeCtx, outputStr != null ? outputStr : "");
     return bridge.encodeResult(result);
   }
 
-  private long visitForm(MemorySegment userData, MemorySegment ctx, MemorySegment action, MemorySegment method) {
+  private long visitForm(
+      MemorySegment userData, MemorySegment ctx, MemorySegment action, MemorySegment method) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String actionStr = StringUtils.fromCString(action);
     String methodStr = StringUtils.fromCString(method);
@@ -517,14 +535,20 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private long visitInput(MemorySegment userData, MemorySegment ctx, MemorySegment inputType,
-      MemorySegment name, MemorySegment value) {
+  private long visitInput(
+      MemorySegment userData,
+      MemorySegment ctx,
+      MemorySegment inputType,
+      MemorySegment name,
+      MemorySegment value) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String inputTypeStr = StringUtils.fromCString(inputType);
     String nameStr = StringUtils.fromCString(name);
     String valueStr = StringUtils.fromCString(value);
-    VisitResult result = bridge.getVisitor().visitInput(nodeCtx,
-        inputTypeStr != null ? inputTypeStr : "", nameStr, valueStr);
+    VisitResult result =
+        bridge
+            .getVisitor()
+            .visitInput(nodeCtx, inputTypeStr != null ? inputTypeStr : "", nameStr, valueStr);
     return bridge.encodeResult(result);
   }
 
@@ -578,241 +602,426 @@ public final class VisitorCallbackFactory {
   // Upcall stub creation methods
 
   private MemorySegment createVisitTextStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitText",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitText",
+            MethodType.methodType(
+                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
   private MemorySegment createVisitElementStartStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitElementStart",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitElementStart",
+            MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_ONLY_DESC, arena);
   }
 
   private MemorySegment createVisitElementEndStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitElementEnd",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitElementEnd",
+            MethodType.methodType(
+                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
   private MemorySegment createVisitLinkStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitLink",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class,
-            MemorySegment.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitLink",
+            MethodType.methodType(
+                long.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_4STR_DESC, arena);
   }
 
   private MemorySegment createVisitImageStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitImage",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class,
-            MemorySegment.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitImage",
+            MethodType.methodType(
+                long.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_4STR_DESC, arena);
   }
 
   private MemorySegment createVisitHeadingStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitHeading",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class,
-            int.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitHeading",
+            MethodType.methodType(
+                long.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                int.class,
+                MemorySegment.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, HEADING_DESC, arena);
   }
 
   private MemorySegment createVisitCodeBlockStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitCodeBlock",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class,
-            MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitCodeBlock",
+            MethodType.methodType(
+                long.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_2STR_DESC, arena);
   }
 
   private MemorySegment createVisitCodeInlineStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitCodeInline",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitCodeInline",
+            MethodType.methodType(
+                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
   private MemorySegment createVisitListItemStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitListItem",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class,
-            boolean.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitListItem",
+            MethodType.methodType(
+                long.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                boolean.class,
+                MemorySegment.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, LIST_ITEM_DESC, arena);
   }
 
   private MemorySegment createVisitListStartStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitListStart",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class, boolean.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitListStart",
+            MethodType.methodType(
+                long.class, MemorySegment.class, MemorySegment.class, boolean.class));
     return LINKER.upcallStub(mh, LIST_BOOL_DESC, arena);
   }
 
   private MemorySegment createVisitListEndStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitListEnd",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class,
-            boolean.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitListEnd",
+            MethodType.methodType(
+                long.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                boolean.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, LIST_END_DESC, arena);
   }
 
   private MemorySegment createVisitTableStartStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitTableStart",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitTableStart",
+            MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_ONLY_DESC, arena);
   }
 
   private MemorySegment createVisitTableRowStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitTableRow",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class,
-            MemorySegment.class, long.class, boolean.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitTableRow",
+            MethodType.methodType(
+                long.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                long.class,
+                boolean.class));
     return LINKER.upcallStub(mh, TABLE_ROW_DESC, arena);
   }
 
   private MemorySegment createVisitTableEndStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitTableEnd",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitTableEnd",
+            MethodType.methodType(
+                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
   private MemorySegment createVisitBlockquoteStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitBlockquote",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class,
-            MemorySegment.class, long.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitBlockquote",
+            MethodType.methodType(
+                long.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                long.class));
     return LINKER.upcallStub(mh, BLOCKQUOTE_DESC, arena);
   }
 
   private MemorySegment createVisitStrongStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitStrong",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitStrong",
+            MethodType.methodType(
+                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
   private MemorySegment createVisitEmphasisStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitEmphasis",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitEmphasis",
+            MethodType.methodType(
+                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
   private MemorySegment createVisitStrikethroughStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitStrikethrough",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitStrikethrough",
+            MethodType.methodType(
+                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
   private MemorySegment createVisitUnderlineStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitUnderline",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitUnderline",
+            MethodType.methodType(
+                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
   private MemorySegment createVisitSubscriptStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitSubscript",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitSubscript",
+            MethodType.methodType(
+                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
   private MemorySegment createVisitSuperscriptStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitSuperscript",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitSuperscript",
+            MethodType.methodType(
+                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
   private MemorySegment createVisitMarkStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitMark",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitMark",
+            MethodType.methodType(
+                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
   private MemorySegment createVisitLineBreakStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitLineBreak",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitLineBreak",
+            MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_ONLY_DESC, arena);
   }
 
   private MemorySegment createVisitHorizontalRuleStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitHorizontalRule",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitHorizontalRule",
+            MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_ONLY_DESC, arena);
   }
 
   private MemorySegment createVisitCustomElementStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitCustomElement",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class,
-            MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitCustomElement",
+            MethodType.methodType(
+                long.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_2STR_DESC, arena);
   }
 
   private MemorySegment createVisitDefinitionListStartStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitDefinitionListStart",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitDefinitionListStart",
+            MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_ONLY_DESC, arena);
   }
 
   private MemorySegment createVisitDefinitionTermStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitDefinitionTerm",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitDefinitionTerm",
+            MethodType.methodType(
+                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
   private MemorySegment createVisitDefinitionDescriptionStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitDefinitionDescription",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitDefinitionDescription",
+            MethodType.methodType(
+                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
   private MemorySegment createVisitDefinitionListEndStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitDefinitionListEnd",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitDefinitionListEnd",
+            MethodType.methodType(
+                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
   private MemorySegment createVisitFormStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitForm",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class,
-            MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitForm",
+            MethodType.methodType(
+                long.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_2STR_DESC, arena);
   }
 
   private MemorySegment createVisitInputStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitInput",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class,
-            MemorySegment.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitInput",
+            MethodType.methodType(
+                long.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_3STR_DESC, arena);
   }
 
   private MemorySegment createVisitButtonStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitButton",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitButton",
+            MethodType.methodType(
+                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
   private MemorySegment createVisitAudioStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitAudio",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitAudio",
+            MethodType.methodType(
+                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
   private MemorySegment createVisitVideoStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitVideo",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitVideo",
+            MethodType.methodType(
+                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
   private MemorySegment createVisitIframeStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitIframe",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitIframe",
+            MethodType.methodType(
+                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
   private MemorySegment createVisitDetailsStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitDetails",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class, boolean.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitDetails",
+            MethodType.methodType(
+                long.class, MemorySegment.class, MemorySegment.class, boolean.class));
     return LINKER.upcallStub(mh, DETAILS_DESC, arena);
   }
 
   private MemorySegment createVisitSummaryStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitSummary",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitSummary",
+            MethodType.methodType(
+                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
   private MemorySegment createVisitFigureStartStub() throws Exception {
-    MethodHandle mh = LOOKUP.bind(this, "visitFigureStart",
-        MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class));
+    MethodHandle mh =
+        LOOKUP.bind(
+            this,
+            "visitFigureStart",
+            MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_ONLY_DESC, arena);
   }
 }
