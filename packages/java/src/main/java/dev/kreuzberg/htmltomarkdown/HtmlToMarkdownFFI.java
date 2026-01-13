@@ -95,7 +95,8 @@ final class HtmlToMarkdownFFI {
 
   /** Function descriptor for convert with visitor. */
   private static final FunctionDescriptor CONVERT_WITH_VISITOR_DESC =
-      FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS);
+      FunctionDescriptor.of(
+          ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS);
 
   static {
     System.loadLibrary(LIBRARY_NAME);
