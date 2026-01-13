@@ -4,1977 +4,1029 @@
 // Template: crates/html-to-markdown-ffi/templates/csharp_bridge_callbacks.cs.j2
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace HtmlToMarkdown.Visitor
+namespace HtmlToMarkdown.Visitor;
+
+/// <summary>
+/// Generated visitor callback bridge methods.
+/// This partial class contains the callback implementations that marshal between native and managed code.
+/// </summary>
+internal partial class VisitorBridge
 {
     /// <summary>
-    /// Generated visitor callback bridge methods.
+    /// Called before entering any HTML element (pre-order traversal)
     /// </summary>
-    internal partial class VisitorBridge
+    /// <remarks>
+    /// HTML elements: All elements<br/>
+    /// Frequency: high
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitElementStartCallback(
+        IntPtr userData,
+        IntPtr ctx)
     {
-        /// <summary>
-        /// Called before entering any HTML element (pre-order traversal)
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: All elements<br/>
-        /// Frequency: high
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult ElementStartDelegate(
-            IntPtr userData,
-            IntPtr ctx);
-
-        private static NativeVisitResult ElementStartCallback(
-            IntPtr userData,
-            IntPtr ctx)
+        try
         {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);
-                // Call the managed visitor method
-                var result = visitor.VisitElementStart(
-                    nodeContext);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in ElementStart: {ex.Message}");
-            }
+            var context = UnmarshalNodeContext(ctx);
+            var result = _visitor.VisitElementStart(
+                context);
+            return MarshalVisitResult(result);
         }
-
-        /// <summary>
-        /// Called for line break elements
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <br>, <br/><br/>
-        /// Frequency: medium
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult LineBreakDelegate(
-            IntPtr userData,
-            IntPtr ctx);
-
-        private static NativeVisitResult LineBreakCallback(
-            IntPtr userData,
-            IntPtr ctx)
+        catch (Exception ex)
         {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);
-                // Call the managed visitor method
-                var result = visitor.VisitLineBreak(
-                    nodeContext);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in LineBreak: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for horizontal rule elements
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <hr>, <hr/><br/>
-        /// Frequency: low
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult HorizontalRuleDelegate(
-            IntPtr userData,
-            IntPtr ctx);
-
-        private static NativeVisitResult HorizontalRuleCallback(
-            IntPtr userData,
-            IntPtr ctx)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);
-                // Call the managed visitor method
-                var result = visitor.VisitHorizontalRule(
-                    nodeContext);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in HorizontalRule: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called before processing a table element
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <table><br/>
-        /// Frequency: low
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult TableStartDelegate(
-            IntPtr userData,
-            IntPtr ctx);
-
-        private static NativeVisitResult TableStartCallback(
-            IntPtr userData,
-            IntPtr ctx)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);
-                // Call the managed visitor method
-                var result = visitor.VisitTableStart(
-                    nodeContext);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in TableStart: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called before processing a definition list
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <dl><br/>
-        /// Frequency: low
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult DefinitionListStartDelegate(
-            IntPtr userData,
-            IntPtr ctx);
-
-        private static NativeVisitResult DefinitionListStartCallback(
-            IntPtr userData,
-            IntPtr ctx)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);
-                // Call the managed visitor method
-                var result = visitor.VisitDefinitionListStart(
-                    nodeContext);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in DefinitionListStart: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called before processing a figure element
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <figure><br/>
-        /// Frequency: low
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult FigureStartDelegate(
-            IntPtr userData,
-            IntPtr ctx);
-
-        private static NativeVisitResult FigureStartCallback(
-            IntPtr userData,
-            IntPtr ctx)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);
-                // Call the managed visitor method
-                var result = visitor.VisitFigureStart(
-                    nodeContext);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in FigureStart: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for each text node in the HTML document
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: Text nodes<br/>
-        /// Frequency: very_high
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult TextDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr text);
-
-        private static NativeVisitResult TextCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cText)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert string pointer to managed string
-                string text = Marshal.PtrToStringUTF8(cText) ?? string.Empty;
-                // Call the managed visitor method
-                var result = visitor.VisitText(
-                    nodeContext, text);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in Text: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for strong/bold elements
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <strong>, <b><br/>
-        /// Frequency: medium
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult StrongDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr text);
-
-        private static NativeVisitResult StrongCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cText)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert string pointer to managed string
-                string text = Marshal.PtrToStringUTF8(cText) ?? string.Empty;
-                // Call the managed visitor method
-                var result = visitor.VisitStrong(
-                    nodeContext, text);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in Strong: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for emphasis/italic elements
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <em>, <i><br/>
-        /// Frequency: medium
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult EmphasisDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr text);
-
-        private static NativeVisitResult EmphasisCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cText)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert string pointer to managed string
-                string text = Marshal.PtrToStringUTF8(cText) ?? string.Empty;
-                // Call the managed visitor method
-                var result = visitor.VisitEmphasis(
-                    nodeContext, text);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in Emphasis: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for strikethrough elements
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <s>, <del>, <strike><br/>
-        /// Frequency: low
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult StrikethroughDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr text);
-
-        private static NativeVisitResult StrikethroughCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cText)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert string pointer to managed string
-                string text = Marshal.PtrToStringUTF8(cText) ?? string.Empty;
-                // Call the managed visitor method
-                var result = visitor.VisitStrikethrough(
-                    nodeContext, text);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in Strikethrough: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for underline elements
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <u>, <ins><br/>
-        /// Frequency: low
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult UnderlineDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr text);
-
-        private static NativeVisitResult UnderlineCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cText)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert string pointer to managed string
-                string text = Marshal.PtrToStringUTF8(cText) ?? string.Empty;
-                // Call the managed visitor method
-                var result = visitor.VisitUnderline(
-                    nodeContext, text);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in Underline: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for subscript elements
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <sub><br/>
-        /// Frequency: low
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult SubscriptDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr text);
-
-        private static NativeVisitResult SubscriptCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cText)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert string pointer to managed string
-                string text = Marshal.PtrToStringUTF8(cText) ?? string.Empty;
-                // Call the managed visitor method
-                var result = visitor.VisitSubscript(
-                    nodeContext, text);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in Subscript: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for superscript elements
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <sup><br/>
-        /// Frequency: low
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult SuperscriptDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr text);
-
-        private static NativeVisitResult SuperscriptCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cText)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert string pointer to managed string
-                string text = Marshal.PtrToStringUTF8(cText) ?? string.Empty;
-                // Call the managed visitor method
-                var result = visitor.VisitSuperscript(
-                    nodeContext, text);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in Superscript: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for mark/highlight elements
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <mark><br/>
-        /// Frequency: low
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult MarkDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr text);
-
-        private static NativeVisitResult MarkCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cText)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert string pointer to managed string
-                string text = Marshal.PtrToStringUTF8(cText) ?? string.Empty;
-                // Call the managed visitor method
-                var result = visitor.VisitMark(
-                    nodeContext, text);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in Mark: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for inline code elements
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <code><br/>
-        /// Frequency: medium
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult CodeInlineDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr code);
-
-        private static NativeVisitResult CodeInlineCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cCode)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert string pointer to managed string
-                string code = Marshal.PtrToStringUTF8(cCode) ?? string.Empty;
-                // Call the managed visitor method
-                var result = visitor.VisitCodeInline(
-                    nodeContext, code);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in CodeInline: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called after exiting any HTML element (post-order traversal)
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: All elements<br/>
-        /// Frequency: high
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult ElementEndDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr output);
-
-        private static NativeVisitResult ElementEndCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cOutput)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert string pointer to managed string
-                string output = Marshal.PtrToStringUTF8(cOutput) ?? string.Empty;
-                // Call the managed visitor method
-                var result = visitor.VisitElementEnd(
-                    nodeContext, output);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in ElementEnd: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called after processing a table element
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: </table><br/>
-        /// Frequency: low
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult TableEndDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr output);
-
-        private static NativeVisitResult TableEndCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cOutput)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert string pointer to managed string
-                string output = Marshal.PtrToStringUTF8(cOutput) ?? string.Empty;
-                // Call the managed visitor method
-                var result = visitor.VisitTableEnd(
-                    nodeContext, output);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in TableEnd: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for definition term elements
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <dt><br/>
-        /// Frequency: low
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult DefinitionTermDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr text);
-
-        private static NativeVisitResult DefinitionTermCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cText)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert string pointer to managed string
-                string text = Marshal.PtrToStringUTF8(cText) ?? string.Empty;
-                // Call the managed visitor method
-                var result = visitor.VisitDefinitionTerm(
-                    nodeContext, text);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in DefinitionTerm: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for definition description elements
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <dd><br/>
-        /// Frequency: low
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult DefinitionDescriptionDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr text);
-
-        private static NativeVisitResult DefinitionDescriptionCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cText)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert string pointer to managed string
-                string text = Marshal.PtrToStringUTF8(cText) ?? string.Empty;
-                // Call the managed visitor method
-                var result = visitor.VisitDefinitionDescription(
-                    nodeContext, text);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in DefinitionDescription: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called after processing a definition list
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: </dl><br/>
-        /// Frequency: low
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult DefinitionListEndDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr output);
-
-        private static NativeVisitResult DefinitionListEndCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cOutput)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert string pointer to managed string
-                string output = Marshal.PtrToStringUTF8(cOutput) ?? string.Empty;
-                // Call the managed visitor method
-                var result = visitor.VisitDefinitionListEnd(
-                    nodeContext, output);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in DefinitionListEnd: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for summary elements inside details
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <summary><br/>
-        /// Frequency: low
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult SummaryDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr text);
-
-        private static NativeVisitResult SummaryCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cText)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert string pointer to managed string
-                string text = Marshal.PtrToStringUTF8(cText) ?? string.Empty;
-                // Call the managed visitor method
-                var result = visitor.VisitSummary(
-                    nodeContext, text);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in Summary: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for figcaption elements inside figure
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <figcaption><br/>
-        /// Frequency: low
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult FigcaptionDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr text);
-
-        private static NativeVisitResult FigcaptionCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cText)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert string pointer to managed string
-                string text = Marshal.PtrToStringUTF8(cText) ?? string.Empty;
-                // Call the managed visitor method
-                var result = visitor.VisitFigcaption(
-                    nodeContext, text);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in Figcaption: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for anchor links
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <a href="..."><br/>
-        /// Frequency: high
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult LinkDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr href, IntPtr text, IntPtr title);
-
-        private static NativeVisitResult LinkCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cHref, IntPtr cText, IntPtr cTitle)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert string pointer to managed string
-                string href = Marshal.PtrToStringUTF8(cHref) ?? string.Empty;                // Convert string pointer to managed string
-                string text = Marshal.PtrToStringUTF8(cText) ?? string.Empty;                // Convert nullable string pointer to managed string
-                string? title = cTitle != IntPtr.Zero
-                    ? Marshal.PtrToStringUTF8(cTitle)
-                    : null;
-                // Call the managed visitor method
-                var result = visitor.VisitLink(
-                    nodeContext, href, text, title);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in Link: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for image elements
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <img src="..." alt="..."><br/>
-        /// Frequency: medium
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult ImageDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr src, IntPtr alt, IntPtr title);
-
-        private static NativeVisitResult ImageCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cSrc, IntPtr cAlt, IntPtr cTitle)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert string pointer to managed string
-                string src = Marshal.PtrToStringUTF8(cSrc) ?? string.Empty;                // Convert string pointer to managed string
-                string alt = Marshal.PtrToStringUTF8(cAlt) ?? string.Empty;                // Convert nullable string pointer to managed string
-                string? title = cTitle != IntPtr.Zero
-                    ? Marshal.PtrToStringUTF8(cTitle)
-                    : null;
-                // Call the managed visitor method
-                var result = visitor.VisitImage(
-                    nodeContext, src, alt, title);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in Image: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for code block elements
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <pre><code><br/>
-        /// Frequency: medium
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult CodeBlockDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr lang, IntPtr code);
-
-        private static NativeVisitResult CodeBlockCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cLang, IntPtr cCode)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert nullable string pointer to managed string
-                string? lang = cLang != IntPtr.Zero
-                    ? Marshal.PtrToStringUTF8(cLang)
-                    : null;                // Convert string pointer to managed string
-                string code = Marshal.PtrToStringUTF8(cCode) ?? string.Empty;
-                // Call the managed visitor method
-                var result = visitor.VisitCodeBlock(
-                    nodeContext, lang, code);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in CodeBlock: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for list item elements
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <li><br/>
-        /// Frequency: medium
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult ListItemDelegate(
-            IntPtr userData,
-            IntPtr ctx, [MarshalAs(UnmanagedType.I1)] bool ordered, IntPtr marker, IntPtr text);
-
-        private static NativeVisitResult ListItemCallback(
-            IntPtr userData,
-            IntPtr ctx, bool cOrdered, IntPtr cMarker, IntPtr cText)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert string pointer to managed string
-                string marker = Marshal.PtrToStringUTF8(cMarker) ?? string.Empty;                // Convert string pointer to managed string
-                string text = Marshal.PtrToStringUTF8(cText) ?? string.Empty;
-                // Call the managed visitor method
-                var result = visitor.VisitListItem(
-                    nodeContext, cOrdered, marker, text);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in ListItem: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called after processing a list element
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: </ul>, </ol><br/>
-        /// Frequency: medium
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult ListEndDelegate(
-            IntPtr userData,
-            IntPtr ctx, [MarshalAs(UnmanagedType.I1)] bool ordered, IntPtr output);
-
-        private static NativeVisitResult ListEndCallback(
-            IntPtr userData,
-            IntPtr ctx, bool cOrdered, IntPtr cOutput)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert string pointer to managed string
-                string output = Marshal.PtrToStringUTF8(cOutput) ?? string.Empty;
-                // Call the managed visitor method
-                var result = visitor.VisitListEnd(
-                    nodeContext, cOrdered, output);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in ListEnd: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for blockquote elements
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <blockquote><br/>
-        /// Frequency: medium
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult BlockquoteDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr content, nuint depth);
-
-        private static NativeVisitResult BlockquoteCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cContent, nuint cDepth)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert string pointer to managed string
-                string content = Marshal.PtrToStringUTF8(cContent) ?? string.Empty;
-                // Call the managed visitor method
-                var result = visitor.VisitBlockquote(
-                    nodeContext, content, cDepth);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in Blockquote: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for custom or unknown HTML elements
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: Unknown elements<br/>
-        /// Frequency: low
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult CustomElementDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr tag_name, IntPtr content);
-
-        private static NativeVisitResult CustomElementCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cTagname, IntPtr cContent)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert string pointer to managed string
-                string tag_name = Marshal.PtrToStringUTF8(cTagname) ?? string.Empty;                // Convert string pointer to managed string
-                string content = Marshal.PtrToStringUTF8(cContent) ?? string.Empty;
-                // Call the managed visitor method
-                var result = visitor.VisitCustomElement(
-                    nodeContext, tag_name, content);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in CustomElement: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for form elements
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <form><br/>
-        /// Frequency: low
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult FormDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr action, IntPtr method);
-
-        private static NativeVisitResult FormCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cAction, IntPtr cMethod)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert nullable string pointer to managed string
-                string? action = cAction != IntPtr.Zero
-                    ? Marshal.PtrToStringUTF8(cAction)
-                    : null;                // Convert nullable string pointer to managed string
-                string? method = cMethod != IntPtr.Zero
-                    ? Marshal.PtrToStringUTF8(cMethod)
-                    : null;
-                // Call the managed visitor method
-                var result = visitor.VisitForm(
-                    nodeContext, action, method);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in Form: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for input form elements
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <input><br/>
-        /// Frequency: low
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult InputDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr input_type, IntPtr name, IntPtr value);
-
-        private static NativeVisitResult InputCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cInputtype, IntPtr cName, IntPtr cValue)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert nullable string pointer to managed string
-                string? input_type = cInputtype != IntPtr.Zero
-                    ? Marshal.PtrToStringUTF8(cInputtype)
-                    : null;                // Convert nullable string pointer to managed string
-                string? name = cName != IntPtr.Zero
-                    ? Marshal.PtrToStringUTF8(cName)
-                    : null;                // Convert nullable string pointer to managed string
-                string? value = cValue != IntPtr.Zero
-                    ? Marshal.PtrToStringUTF8(cValue)
-                    : null;
-                // Call the managed visitor method
-                var result = visitor.VisitInput(
-                    nodeContext, input_type, name, value);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in Input: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for button elements
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <button><br/>
-        /// Frequency: low
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult ButtonDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr text, IntPtr button_type);
-
-        private static NativeVisitResult ButtonCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cText, IntPtr cButtontype)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert string pointer to managed string
-                string text = Marshal.PtrToStringUTF8(cText) ?? string.Empty;                // Convert nullable string pointer to managed string
-                string? button_type = cButtontype != IntPtr.Zero
-                    ? Marshal.PtrToStringUTF8(cButtontype)
-                    : null;
-                // Call the managed visitor method
-                var result = visitor.VisitButton(
-                    nodeContext, text, button_type);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in Button: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for audio elements
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <audio><br/>
-        /// Frequency: low
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult AudioDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr src);
-
-        private static NativeVisitResult AudioCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cSrc)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert nullable string pointer to managed string
-                string? src = cSrc != IntPtr.Zero
-                    ? Marshal.PtrToStringUTF8(cSrc)
-                    : null;
-                // Call the managed visitor method
-                var result = visitor.VisitAudio(
-                    nodeContext, src);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in Audio: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for video elements
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <video><br/>
-        /// Frequency: low
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult VideoDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr src);
-
-        private static NativeVisitResult VideoCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cSrc)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert nullable string pointer to managed string
-                string? src = cSrc != IntPtr.Zero
-                    ? Marshal.PtrToStringUTF8(cSrc)
-                    : null;
-                // Call the managed visitor method
-                var result = visitor.VisitVideo(
-                    nodeContext, src);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in Video: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for iframe elements
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <iframe><br/>
-        /// Frequency: low
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult IframeDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr src);
-
-        private static NativeVisitResult IframeCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cSrc)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert nullable string pointer to managed string
-                string? src = cSrc != IntPtr.Zero
-                    ? Marshal.PtrToStringUTF8(cSrc)
-                    : null;
-                // Call the managed visitor method
-                var result = visitor.VisitIframe(
-                    nodeContext, src);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in Iframe: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for heading elements
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <h1> through <h6><br/>
-        /// Frequency: medium
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult HeadingDelegate(
-            IntPtr userData,
-            IntPtr ctx, uint level, IntPtr text, IntPtr id);
-
-        private static NativeVisitResult HeadingCallback(
-            IntPtr userData,
-            IntPtr ctx, uint cLevel, IntPtr cText, IntPtr cId)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert string pointer to managed string
-                string text = Marshal.PtrToStringUTF8(cText) ?? string.Empty;                // Convert nullable string pointer to managed string
-                string? id = cId != IntPtr.Zero
-                    ? Marshal.PtrToStringUTF8(cId)
-                    : null;
-                // Call the managed visitor method
-                var result = visitor.VisitHeading(
-                    nodeContext, cLevel, text, id);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in Heading: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called before processing a list element
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <ul>, <ol><br/>
-        /// Frequency: medium
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult ListStartDelegate(
-            IntPtr userData,
-            IntPtr ctx, [MarshalAs(UnmanagedType.I1)] bool ordered);
-
-        private static NativeVisitResult ListStartCallback(
-            IntPtr userData,
-            IntPtr ctx, bool cOrdered)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);
-                // Call the managed visitor method
-                var result = visitor.VisitListStart(
-                    nodeContext, cOrdered);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in ListStart: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for table row elements
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <tr><br/>
-        /// Frequency: low
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult TableRowDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cells,
-            nuint cellsCount, nuint cell_count, [MarshalAs(UnmanagedType.I1)] bool is_header);
-
-        private static NativeVisitResult TableRowCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cCells,
-            nuint cCellsCount, nuint cCellcount, bool cIsheader)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert string array to managed string[]
-                string[] cells = new string[cCellsCount];
-                if (cCells != IntPtr.Zero)
-                {
-                    unsafe
-                    {
-                        IntPtr* arrayPtr = (IntPtr*)cCells;
-                        for (int i = 0; i < (int)cCellsCount; i++)
-                        {
-                            cells[i] = Marshal.PtrToStringUTF8(arrayPtr[i]) ?? string.Empty;
-                        }
-                    }
-                }
-                // Call the managed visitor method
-                var result = visitor.VisitTableRow(
-                    nodeContext, cells, cCellcount, cIsheader);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in TableRow: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called for details/disclosure elements
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: <details><br/>
-        /// Frequency: low
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult DetailsDelegate(
-            IntPtr userData,
-            IntPtr ctx, [MarshalAs(UnmanagedType.I1)] bool open, IntPtr content);
-
-        private static NativeVisitResult DetailsCallback(
-            IntPtr userData,
-            IntPtr ctx, bool cOpen, IntPtr cContent)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert string pointer to managed string
-                string content = Marshal.PtrToStringUTF8(cContent) ?? string.Empty;
-                // Call the managed visitor method
-                var result = visitor.VisitDetails(
-                    nodeContext, cOpen, content);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in Details: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Called after processing a figure element
-        /// </summary>
-        /// <remarks>
-        /// HTML elements: </figure><br/>
-        /// Frequency: low
-        /// </remarks>
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate NativeVisitResult FigureEndDelegate(
-            IntPtr userData,
-            IntPtr ctx, IntPtr output);
-
-        private static NativeVisitResult FigureEndCallback(
-            IntPtr userData,
-            IntPtr ctx, IntPtr cOutput)
-        {
-            try
-            {
-                // Extract visitor from user data
-                if (userData == IntPtr.Zero)
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                var handle = GCHandle.FromIntPtr(userData);
-                if (!(handle.Target is IHtmlVisitor visitor))
-                {
-                    return NativeVisitResult.Continue();
-                }
-
-                // Convert native context to managed
-                var nodeContext = MarshalNodeContext(ctx);                // Convert string pointer to managed string
-                string output = Marshal.PtrToStringUTF8(cOutput) ?? string.Empty;
-                // Call the managed visitor method
-                var result = visitor.VisitFigureEnd(
-                    nodeContext, output);
-
-                // Convert managed result to native
-                return MarshalVisitResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NativeVisitResult.Error($"Exception in FigureEnd: {ex.Message}");
-            }
-        }
-
-
-        /// <summary>
-        /// Marshals a native NodeContext pointer to managed NodeContext.
-        /// </summary>
-        private static NodeContext MarshalNodeContext(IntPtr ctx)
-        {
-            if (ctx == IntPtr.Zero)
-            {
-                throw new ArgumentNullException(nameof(ctx));
-            }
-
-            var native = Marshal.PtrToStructure<NativeNodeContext>(ctx);
-            return new NodeContext
-            {
-                NodeType = (NodeType)native.NodeType,
-                TagName = Marshal.PtrToStringUTF8(native.TagName) ?? string.Empty,
-                Depth = (int)native.Depth,
-                IsFirstChild = native.IsFirstChild,
-                IsLastChild = native.IsLastChild,
-                HasSiblings = native.HasSiblings
-            };
-        }
-
-        /// <summary>
-        /// Marshals a managed VisitResult to native representation.
-        /// </summary>
-        private static NativeVisitResult MarshalVisitResult(VisitResult result)
-        {
-            return result.ResultType switch
-            {
-                VisitResultType.Continue => NativeVisitResult.Continue(),
-                VisitResultType.Custom => NativeVisitResult.Custom(result.CustomOutput ?? string.Empty),
-                VisitResultType.Skip => NativeVisitResult.Skip(),
-                VisitResultType.PreserveHtml => NativeVisitResult.PreserveHtml(),
-                VisitResultType.Error => NativeVisitResult.Error(result.ErrorMessage ?? "Unknown error"),
-                _ => NativeVisitResult.Continue()
-            };
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct NativeNodeContext
-        {
-            public uint NodeType;
-            public IntPtr TagName;
-            public nuint Depth;
-            [MarshalAs(UnmanagedType.I1)]
-            public bool IsFirstChild;
-            [MarshalAs(UnmanagedType.I1)]
-            public bool IsLastChild;
-            [MarshalAs(UnmanagedType.I1)]
-            public bool HasSiblings;
-            public nuint Reserved;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct NativeVisitResult
-        {
-            public uint ResultType;
-            public IntPtr CustomOutput;
-            public IntPtr ErrorMessage;
-
-            public static NativeVisitResult Continue() => new() { ResultType = 0 };
-
-            public static NativeVisitResult Custom(string output) => new()
-            {
-                ResultType = 1,
-                CustomOutput = Marshal.StringToCoTaskMemUTF8(output)
-            };
-
-            public static NativeVisitResult Skip() => new() { ResultType = 2 };
-
-            public static NativeVisitResult PreserveHtml() => new() { ResultType = 3 };
-
-            public static NativeVisitResult Error(string message) => new()
-            {
-                ResultType = 4,
-                ErrorMessage = Marshal.StringToCoTaskMemUTF8(message)
-            };
+            return MarshalVisitResult(VisitResult.Error($"VisitElementStart error: {ex.Message}"));
         }
     }
+
+    /// <summary>
+    /// Called for line break elements
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <br>, <br/><br/>
+    /// Frequency: medium
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitLineBreakCallback(
+        IntPtr userData,
+        IntPtr ctx)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var result = _visitor.VisitLineBreak(
+                context);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitLineBreak error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for horizontal rule elements
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <hr>, <hr/><br/>
+    /// Frequency: low
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitHorizontalRuleCallback(
+        IntPtr userData,
+        IntPtr ctx)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var result = _visitor.VisitHorizontalRule(
+                context);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitHorizontalRule error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called before processing a table element
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <table><br/>
+    /// Frequency: low
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitTableStartCallback(
+        IntPtr userData,
+        IntPtr ctx)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var result = _visitor.VisitTableStart(
+                context);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitTableStart error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called before processing a definition list
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <dl><br/>
+    /// Frequency: low
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitDefinitionListStartCallback(
+        IntPtr userData,
+        IntPtr ctx)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var result = _visitor.VisitDefinitionListStart(
+                context);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitDefinitionListStart error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called before processing a figure element
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <figure><br/>
+    /// Frequency: low
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitFigureStartCallback(
+        IntPtr userData,
+        IntPtr ctx)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var result = _visitor.VisitFigureStart(
+                context);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitFigureStart error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for each text node in the HTML document
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: Text nodes<br/>
+    /// Frequency: very_high
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitTextCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr text)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var textStr = PtrToStringUtf8(text) ?? "";
+            var result = _visitor.VisitText(
+                context, textStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitText error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for strong/bold elements
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <strong>, <b><br/>
+    /// Frequency: medium
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitStrongCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr text)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var textStr = PtrToStringUtf8(text) ?? "";
+            var result = _visitor.VisitStrong(
+                context, textStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitStrong error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for emphasis/italic elements
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <em>, <i><br/>
+    /// Frequency: medium
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitEmphasisCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr text)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var textStr = PtrToStringUtf8(text) ?? "";
+            var result = _visitor.VisitEmphasis(
+                context, textStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitEmphasis error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for strikethrough elements
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <s>, <del>, <strike><br/>
+    /// Frequency: low
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitStrikethroughCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr text)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var textStr = PtrToStringUtf8(text) ?? "";
+            var result = _visitor.VisitStrikethrough(
+                context, textStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitStrikethrough error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for underline elements
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <u>, <ins><br/>
+    /// Frequency: low
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitUnderlineCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr text)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var textStr = PtrToStringUtf8(text) ?? "";
+            var result = _visitor.VisitUnderline(
+                context, textStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitUnderline error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for subscript elements
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <sub><br/>
+    /// Frequency: low
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitSubscriptCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr text)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var textStr = PtrToStringUtf8(text) ?? "";
+            var result = _visitor.VisitSubscript(
+                context, textStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitSubscript error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for superscript elements
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <sup><br/>
+    /// Frequency: low
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitSuperscriptCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr text)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var textStr = PtrToStringUtf8(text) ?? "";
+            var result = _visitor.VisitSuperscript(
+                context, textStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitSuperscript error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for mark/highlight elements
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <mark><br/>
+    /// Frequency: low
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitMarkCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr text)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var textStr = PtrToStringUtf8(text) ?? "";
+            var result = _visitor.VisitMark(
+                context, textStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitMark error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for inline code elements
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <code><br/>
+    /// Frequency: medium
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitCodeInlineCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr code)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var codeStr = PtrToStringUtf8(code) ?? "";
+            var result = _visitor.VisitCodeInline(
+                context, codeStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitCodeInline error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called after exiting any HTML element (post-order traversal)
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: All elements<br/>
+    /// Frequency: high
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitElementEndCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr output)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var outputStr = PtrToStringUtf8(output) ?? "";
+            var result = _visitor.VisitElementEnd(
+                context, outputStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitElementEnd error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called after processing a table element
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: </table><br/>
+    /// Frequency: low
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitTableEndCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr output)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var outputStr = PtrToStringUtf8(output) ?? "";
+            var result = _visitor.VisitTableEnd(
+                context, outputStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitTableEnd error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for definition term elements
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <dt><br/>
+    /// Frequency: low
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitDefinitionTermCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr text)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var textStr = PtrToStringUtf8(text) ?? "";
+            var result = _visitor.VisitDefinitionTerm(
+                context, textStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitDefinitionTerm error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for definition description elements
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <dd><br/>
+    /// Frequency: low
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitDefinitionDescriptionCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr text)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var textStr = PtrToStringUtf8(text) ?? "";
+            var result = _visitor.VisitDefinitionDescription(
+                context, textStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitDefinitionDescription error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called after processing a definition list
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: </dl><br/>
+    /// Frequency: low
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitDefinitionListEndCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr output)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var outputStr = PtrToStringUtf8(output) ?? "";
+            var result = _visitor.VisitDefinitionListEnd(
+                context, outputStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitDefinitionListEnd error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for summary elements inside details
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <summary><br/>
+    /// Frequency: low
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitSummaryCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr text)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var textStr = PtrToStringUtf8(text) ?? "";
+            var result = _visitor.VisitSummary(
+                context, textStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitSummary error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for figcaption elements inside figure
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <figcaption><br/>
+    /// Frequency: low
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitFigCaptionCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr text)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var textStr = PtrToStringUtf8(text) ?? "";
+            var result = _visitor.VisitFigCaption(
+                context, textStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitFigCaption error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for anchor links
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <a href="..."><br/>
+    /// Frequency: high
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitLinkCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr href, IntPtr text, IntPtr title)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var hrefStr = PtrToStringUtf8(href) ?? "";
+            var textStr = PtrToStringUtf8(text) ?? "";
+            var titleStr = title != IntPtr.Zero ? PtrToStringUtf8(title) : null;
+            var result = _visitor.VisitLink(
+                context, hrefStr, textStr, titleStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitLink error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for image elements
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <img src="..." alt="..."><br/>
+    /// Frequency: medium
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitImageCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr src, IntPtr alt, IntPtr title)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var srcStr = PtrToStringUtf8(src) ?? "";
+            var altStr = PtrToStringUtf8(alt) ?? "";
+            var titleStr = title != IntPtr.Zero ? PtrToStringUtf8(title) : null;
+            var result = _visitor.VisitImage(
+                context, srcStr, altStr, titleStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitImage error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for code block elements
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <pre><code><br/>
+    /// Frequency: medium
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitCodeBlockCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr lang, IntPtr code)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var langStr = lang != IntPtr.Zero ? PtrToStringUtf8(lang) : null;
+            var codeStr = PtrToStringUtf8(code) ?? "";
+            var result = _visitor.VisitCodeBlock(
+                context, langStr, codeStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitCodeBlock error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for list item elements
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <li><br/>
+    /// Frequency: medium
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitListItemCallback(
+        IntPtr userData,
+        IntPtr ctx, bool ordered, IntPtr marker, IntPtr text)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var markerStr = PtrToStringUtf8(marker) ?? "";
+            var textStr = PtrToStringUtf8(text) ?? "";
+            var result = _visitor.VisitListItem(
+                context, ordered, markerStr, textStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitListItem error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called after processing a list element
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: </ul>, </ol><br/>
+    /// Frequency: medium
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitListEndCallback(
+        IntPtr userData,
+        IntPtr ctx, bool ordered, IntPtr output)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var outputStr = PtrToStringUtf8(output) ?? "";
+            var result = _visitor.VisitListEnd(
+                context, ordered, outputStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitListEnd error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for blockquote elements
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <blockquote><br/>
+    /// Frequency: medium
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitBlockquoteCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr content, nuint depth)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var contentStr = PtrToStringUtf8(content) ?? "";
+            var result = _visitor.VisitBlockquote(
+                context, contentStr, (int)depth);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitBlockquote error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for custom or unknown HTML elements
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: Unknown elements<br/>
+    /// Frequency: low
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitCustomElementCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr tag_name, IntPtr content)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var tag_nameStr = PtrToStringUtf8(tag_name) ?? "";
+            var contentStr = PtrToStringUtf8(content) ?? "";
+            var result = _visitor.VisitCustomElement(
+                context, tag_nameStr, contentStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitCustomElement error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for form elements
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <form><br/>
+    /// Frequency: low
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitFormCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr action, IntPtr method)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var actionStr = action != IntPtr.Zero ? PtrToStringUtf8(action) : null;
+            var methodStr = method != IntPtr.Zero ? PtrToStringUtf8(method) : null;
+            var result = _visitor.VisitForm(
+                context, actionStr, methodStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitForm error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for input form elements
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <input><br/>
+    /// Frequency: low
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitInputCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr input_type, IntPtr name, IntPtr value)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var input_typeStr = input_type != IntPtr.Zero ? PtrToStringUtf8(input_type) : null;
+            var nameStr = name != IntPtr.Zero ? PtrToStringUtf8(name) : null;
+            var valueStr = value != IntPtr.Zero ? PtrToStringUtf8(value) : null;
+            var result = _visitor.VisitInput(
+                context, input_typeStr, nameStr, valueStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitInput error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for button elements
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <button><br/>
+    /// Frequency: low
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitButtonCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr text)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var textStr = PtrToStringUtf8(text) ?? "";
+            var result = _visitor.VisitButton(
+                context, textStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitButton error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for audio elements
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <audio><br/>
+    /// Frequency: low
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitAudioCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr src)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var srcStr = src != IntPtr.Zero ? PtrToStringUtf8(src) : null;
+            var result = _visitor.VisitAudio(
+                context, srcStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitAudio error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for video elements
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <video><br/>
+    /// Frequency: low
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitVideoCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr src)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var srcStr = src != IntPtr.Zero ? PtrToStringUtf8(src) : null;
+            var result = _visitor.VisitVideo(
+                context, srcStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitVideo error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for iframe elements
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <iframe><br/>
+    /// Frequency: low
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitIFrameCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr src)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var srcStr = src != IntPtr.Zero ? PtrToStringUtf8(src) : null;
+            var result = _visitor.VisitIFrame(
+                context, srcStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitIFrame error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for heading elements
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <h1> through <h6><br/>
+    /// Frequency: medium
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitHeadingCallback(
+        IntPtr userData,
+        IntPtr ctx, uint level, IntPtr text, IntPtr id)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var textStr = PtrToStringUtf8(text) ?? "";
+            var idStr = id != IntPtr.Zero ? PtrToStringUtf8(id) : null;
+            var result = _visitor.VisitHeading(
+                context, (int)level, textStr, idStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitHeading error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called before processing a list element
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <ul>, <ol><br/>
+    /// Frequency: medium
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitListStartCallback(
+        IntPtr userData,
+        IntPtr ctx, bool ordered)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var result = _visitor.VisitListStart(
+                context, ordered);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitListStart error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for table row elements
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <tr><br/>
+    /// Frequency: low
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitTableRowCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr cells,
+        nuint cellsCount, bool is_header)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var cellsList = new List<string>();
+            if (cells != IntPtr.Zero)
+            {
+                for (nuint i = 0; i < cellsCount; i++)
+                {
+                    var cellPtrPtr = IntPtr.Add(cells, (int)i * IntPtr.Size);
+                    var cellPtr = Marshal.ReadIntPtr(cellPtrPtr);
+                    var cellStr = PtrToStringUtf8(cellPtr) ?? "";
+                    cellsList.Add(cellStr);
+                }
+            }
+            var result = _visitor.VisitTableRow(
+                context, cellsList.AsReadOnly(), is_header);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitTableRow error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called for details/disclosure elements
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: <details><br/>
+    /// Frequency: low
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitDetailsCallback(
+        IntPtr userData,
+        IntPtr ctx, bool open)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var result = _visitor.VisitDetails(
+                context, open);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitDetails error: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
+    /// Called after processing a figure element
+    /// </summary>
+    /// <remarks>
+    /// HTML elements: </figure><br/>
+    /// Frequency: low
+    /// </remarks>
+    private NativeVisitorStructures.NativeVisitResult VisitFigureEndCallback(
+        IntPtr userData,
+        IntPtr ctx, IntPtr output)
+    {
+        try
+        {
+            var context = UnmarshalNodeContext(ctx);
+            var outputStr = PtrToStringUtf8(output) ?? "";
+            var result = _visitor.VisitFigureEnd(
+                context, outputStr);
+            return MarshalVisitResult(result);
+        }
+        catch (Exception ex)
+        {
+            return MarshalVisitResult(VisitResult.Error($"VisitFigureEnd error: {ex.Message}"));
+        }
+    }
+
 }

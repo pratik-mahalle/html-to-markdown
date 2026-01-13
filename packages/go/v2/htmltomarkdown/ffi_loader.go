@@ -96,7 +96,7 @@ package htmltomarkdown
 // typedef char* (*convert_with_metadata_fn)(const char*, char**);
 // typedef bool (*profile_start_fn)(const char*, int32_t);
 // typedef bool (*profile_stop_fn)(void);
-// typedef char* (*convert_with_visitor_fn)(const char*, void*);
+// typedef char* (*convert_with_visitor_fn)(const char*, void*, size_t*);
 // typedef void* (*visitor_create_fn)(const void*);
 // typedef void (*visitor_free_fn)(void*);
 //
@@ -149,11 +149,11 @@ package htmltomarkdown
 // 	return ((profile_stop_fn)html_to_markdown_profile_stop_ptr)();
 // }
 //
-// char* html_to_markdown_convert_with_visitor_proxy(const char* html, void* visitor) {
+// char* html_to_markdown_convert_with_visitor_proxy(const char* html, void* visitor, size_t* len_out) {
 // 	if (!html_to_markdown_convert_with_visitor_ptr) {
 // 		return NULL;
 // 	}
-// 	return ((convert_with_visitor_fn)html_to_markdown_convert_with_visitor_ptr)(html, visitor);
+// 	return ((convert_with_visitor_fn)html_to_markdown_convert_with_visitor_ptr)(html, visitor, len_out);
 // }
 //
 // void* html_to_markdown_visitor_create_proxy(const void* callbacks) {

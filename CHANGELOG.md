@@ -5,6 +5,21 @@ All notable changes to html-to-markdown will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.22.0] - 2026-01-13
+
+### Fixed
+
+- **C FFI visitor implementation** - Fixed `html_to_markdown_convert_with_visitor` to properly use the visitor handle during conversion instead of discarding it. Previously the visitor was created but the plain `convert()` function was called instead of `convert_with_visitor()`.
+- **C# visitor callbacks** - P/Invoke bindings now correctly invoke visitor callbacks during HTML-to-Markdown conversion (42/42 tests passing).
+- **Go visitor callbacks** - Removed regex-based post-processing workaround; Go bindings now use real FFI visitor callbacks with proper struct field ordering.
+- **PHP visitor callbacks** - Wired up `PhpVisitorBridge` to pass visitor to Rust core instead of ignoring the visitor parameter.
+- **Java visitor callbacks** - Added Panama FFI upcall stubs for all 38 visitor callbacks, enabling full visitor pattern support (95/95 tests passing).
+
+### Added
+
+- **Java `VisitorCallbackFactory`** - New class that creates Panama FFI upcall stubs for visitor callbacks, enabling Java code to receive callbacks from the Rust core during conversion.
+- **Java `HtmlToMarkdown.convertWithVisitor()`** - Public API method for converting HTML with a custom visitor implementation.
+
 ## [2.21.1] - 2026-01-13
 
 ### Added

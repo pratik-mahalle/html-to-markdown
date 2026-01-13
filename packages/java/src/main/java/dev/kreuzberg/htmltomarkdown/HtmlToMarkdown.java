@@ -12,8 +12,11 @@ import dev.kreuzberg.htmltomarkdown.metadata.LinkType;
 import dev.kreuzberg.htmltomarkdown.metadata.MetadataExtraction;
 import dev.kreuzberg.htmltomarkdown.metadata.StructuredData;
 import dev.kreuzberg.htmltomarkdown.metadata.TextDirection;
+import dev.kreuzberg.htmltomarkdown.visitor.Visitor;
+import dev.kreuzberg.htmltomarkdown.visitor.VisitorCallbackFactory;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -94,6 +97,94 @@ public final class HtmlToMarkdown {
       throw e;
     } catch (Throwable e) {
       throw new ConversionException("Failed to convert HTML to Markdown", e);
+    }
+  }
+
+  /**
+   * Convert HTML to Markdown using a custom visitor for interception and customization.
+   *
+   * <p>The visitor interface allows you to intercept and customize the conversion
+   * process for specific HTML elements. Each method in the visitor is called at
+   * appropriate points during tree traversal.
+   *
+   * <p><b>Example usage:</b>
+   *
+   * <pre>{@code
+   * Visitor visitor = new Visitor() {
+   *     @Override
+   *     public VisitResult visitLink(NodeContext ctx, String href, String text, String title) {
+   *         if (href.startsWith("mailto:")) {
+   *             return VisitResult.Skip.INSTANCE;
+   *         }
+   *         return VisitResult.Continue.INSTANCE;
+   *     }
+   * };
+   *
+   * String html = "<a href=\"https://example.com\">Link</a>";
+   * String markdown = HtmlToMarkdown.convertWithVisitor(html, visitor);
+   * }</pre>
+   *
+   * @param html the HTML string to convert
+   * @param visitor the visitor implementation for customization
+   * @return the converted Markdown string
+   * @throws NullPointerException if html or visitor is null
+   * @throws ConversionException if the conversion fails
+   * @since 2.17.0
+   */
+  public static String convertWithVisitor(final String html, final Visitor visitor) {
+    if (html == null) {
+      throw new NullPointerException("HTML cannot be null");
+    }
+    if (visitor == null) {
+      throw new NullPointerException("Visitor cannot be null");
+    }
+
+    try (Arena arena = Arena.ofConfined()) {
+      // Create the callback factory and build the callbacks struct
+      VisitorCallbackFactory factory = new VisitorCallbackFactory(visitor, arena);
+      MemorySegment callbacksStruct = factory.createCallbacksStruct();
+
+      // Create native visitor handle
+      MemorySegment visitorHandle =
+          (MemorySegment) HtmlToMarkdownFFI.html_to_markdown_visitor_create.invoke(callbacksStruct);
+
+      if (visitorHandle == null || visitorHandle.address() == 0) {
+        String error = getLastError();
+        throw new ConversionException(
+            error != null ? error : "Failed to create visitor handle");
+      }
+
+      try {
+        // Convert the HTML string to native
+        MemorySegment htmlSegment = HtmlToMarkdownFFI.toCString(arena, html);
+
+        // Allocate output length pointer
+        MemorySegment lenOut = arena.allocate(ValueLayout.JAVA_LONG);
+
+        // Call convert with visitor
+        MemorySegment resultSegment =
+            (MemorySegment) HtmlToMarkdownFFI.html_to_markdown_convert_with_visitor.invoke(
+                htmlSegment, visitorHandle, lenOut);
+
+        if (resultSegment == null || resultSegment.address() == 0) {
+          String error = getLastError();
+          throw new ConversionException(
+              error != null ? error : "Conversion with visitor failed");
+        }
+
+        try {
+          return HtmlToMarkdownFFI.fromCString(resultSegment);
+        } finally {
+          HtmlToMarkdownFFI.html_to_markdown_free_string.invoke(resultSegment);
+        }
+      } finally {
+        // Free the visitor handle
+        HtmlToMarkdownFFI.html_to_markdown_visitor_free.invoke(visitorHandle);
+      }
+    } catch (ConversionException e) {
+      throw e;
+    } catch (Throwable e) {
+      throw new ConversionException("Failed to convert HTML to Markdown with visitor", e);
     }
   }
 

@@ -2,8 +2,14 @@
 #![cfg_attr(windows, feature(abi_vectorcall))]
 #![deny(clippy::all)]
 
+#[cfg(feature = "visitor")]
+use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::convert::TryFrom;
+#[cfg(feature = "visitor")]
+use std::panic::AssertUnwindSafe;
+#[cfg(feature = "visitor")]
+use std::rc::Rc;
 
 use ext_php_rs::binary::Binary;
 use ext_php_rs::boxed::ZBox;
@@ -16,6 +22,8 @@ use html_to_markdown_rs::metadata::{
     TextDirection,
 };
 use html_to_markdown_rs::safety::guard_panic;
+#[cfg(feature = "visitor")]
+use html_to_markdown_rs::visitor::HtmlVisitor;
 mod profiling;
 #[cfg(feature = "visitor")]
 mod visitor_support;
@@ -26,6 +34,8 @@ use html_to_markdown_rs::{
     PreprocessingPreset, WhitespaceMode,
 };
 use std::path::PathBuf;
+#[cfg(feature = "visitor")]
+use visitor_support::PhpVisitorBridge;
 
 fn to_php_exception(err: ConversionError) -> PhpException {
     PhpException::default(error_message(&err))
@@ -145,19 +155,27 @@ fn convert_with_metadata_impl(
 pub fn convert_html_with_visitor(
     html: String,
     options: Option<&ZendHashTable>,
-    _visitor: Option<&Zval>,
+    visitor: Option<&Zval>,
 ) -> PhpResult<String> {
     let rust_options = match options {
         Some(table) => Some(parse_conversion_options(table)?),
         None => None,
     };
 
-    // NOTE: PHP visitor support is not yet fully implemented with ext-php-rs.
-    // The visitor parameter is accepted for API compatibility but is currently ignored.
-    // TODO: Implement proper PHP visitor callback mechanism with ext-php-rs
-    guard_panic(|| {
-        profiling::maybe_profile(|| html_to_markdown_rs::convert_with_visitor(&html, rust_options.clone(), None))
-    })
+    // Create visitor bridge if a PHP visitor object is provided
+    let visitor_opt: Option<Rc<RefCell<dyn HtmlVisitor>>> = visitor.and_then(|v| {
+        if v.is_object() {
+            Some(Rc::new(RefCell::new(PhpVisitorBridge::new(v.shallow_clone()))) as Rc<RefCell<dyn HtmlVisitor>>)
+        } else {
+            None
+        }
+    });
+
+    guard_panic(AssertUnwindSafe(|| {
+        profiling::maybe_profile(|| {
+            html_to_markdown_rs::convert_with_visitor(&html, rust_options.clone(), visitor_opt.clone())
+        })
+    }))
     .map_err(to_php_exception)
 }
 
