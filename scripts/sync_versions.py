@@ -175,7 +175,11 @@ def update_rust_dependency_versions(file_path: Path, version: str) -> bool:
     )
 
     def repl(match: re.Match[str]) -> str:
-        return f"{match.group(1)}{version}{match.group(3)}"
+        old_version = match.group(2)
+        # Preserve exact version pin prefix (=) if present
+        # This is important for standalone builds like Ruby gems
+        prefix = "=" if old_version.startswith("=") else ""
+        return f"{match.group(1)}{prefix}{version}{match.group(3)}"
 
     new_content, count = pattern.subn(repl, content)
     if count == 0:
