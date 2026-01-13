@@ -27,4 +27,7 @@
 
     <!-- Allow magic numbers in test files (test data values) -->
     <suppress checks="MagicNumber" files=".*Test\.java"/>
+
+    <!-- Allow magic numbers in VisitorCallbackFactory (C struct field indices) -->
+    <suppress checks="MagicNumber" files="VisitorCallbackFactory\.java"/>
 </suppressions>

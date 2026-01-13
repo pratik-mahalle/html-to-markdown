@@ -565,7 +565,7 @@ callbacks:
     return: VisitResult
 
   - name: button
-    category: multiple_strings
+    category: single_string
     description: "Called for button elements"
     html_elements: "<button>"
     frequency: low
@@ -577,10 +577,6 @@ callbacks:
         type: string
         nullable: false
         description: "Button text"
-      - name: button_type
-        type: string
-        nullable: true
-        description: "Button type (submit, button, reset), or NULL"
     return: VisitResult
 
   - name: audio
@@ -678,9 +674,6 @@ callbacks:
         type: string_array
         nullable: false
         description: "Array of cell contents (NULL-terminated array of NULL-terminated strings)"
-      - name: cell_count
-        type: usize
-        description: "Number of cells in the row"
       - name: is_header
         type: bool
         description: "Whether this row is in a header section (true) or body (false)"
@@ -698,10 +691,6 @@ callbacks:
       - name: open
         type: bool
         description: "Whether the details element is open by default"
-      - name: content
-        type: string
-        nullable: false
-        description: "The details content"
     return: VisitResult
 
   - name: figure_end

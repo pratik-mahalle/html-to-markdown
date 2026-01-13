@@ -76,6 +76,27 @@ final class HtmlToMarkdownFFI {
   /** Method handle for html_to_markdown_profile_stop. */
   static final MethodHandle html_to_markdown_profile_stop;
 
+  /** Method handle for html_to_markdown_visitor_create. */
+  static final MethodHandle html_to_markdown_visitor_create;
+
+  /** Method handle for html_to_markdown_visitor_free. */
+  static final MethodHandle html_to_markdown_visitor_free;
+
+  /** Method handle for html_to_markdown_convert_with_visitor. */
+  static final MethodHandle html_to_markdown_convert_with_visitor;
+
+  /** Function descriptor for visitor create. */
+  private static final FunctionDescriptor VISITOR_CREATE_DESC =
+      FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS);
+
+  /** Function descriptor for visitor free. */
+  private static final FunctionDescriptor VISITOR_FREE_DESC =
+      FunctionDescriptor.ofVoid(ValueLayout.ADDRESS);
+
+  /** Function descriptor for convert with visitor. */
+  private static final FunctionDescriptor CONVERT_WITH_VISITOR_DESC =
+      FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS);
+
   static {
     System.loadLibrary(LIBRARY_NAME);
 
@@ -102,6 +123,16 @@ final class HtmlToMarkdownFFI {
 
     html_to_markdown_profile_stop =
         LINKER.downcallHandle(findSymbol("html_to_markdown_profile_stop"), PROFILE_STOP_DESC);
+
+    html_to_markdown_visitor_create =
+        LINKER.downcallHandle(findSymbol("html_to_markdown_visitor_create"), VISITOR_CREATE_DESC);
+
+    html_to_markdown_visitor_free =
+        LINKER.downcallHandle(findSymbol("html_to_markdown_visitor_free"), VISITOR_FREE_DESC);
+
+    html_to_markdown_convert_with_visitor =
+        LINKER.downcallHandle(
+            findSymbol("html_to_markdown_convert_with_visitor"), CONVERT_WITH_VISITOR_DESC);
   }
 
   /**

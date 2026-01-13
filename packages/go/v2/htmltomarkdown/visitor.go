@@ -252,18 +252,19 @@ package htmltomarkdown
 //     const char *output);
 //
 // // Visitor struct with callback function pointers
+// // MUST match field order in Rust's HtmlToMarkdownVisitorCallbacks
 // typedef struct {
 //     void *user_data;
+//     visit_text_fn visit_text;
 //     visit_element_start_fn visit_element_start;
 //     visit_element_end_fn visit_element_end;
-//     visit_text_fn visit_text;
 //     visit_link_fn visit_link;
 //     visit_image_fn visit_image;
 //     visit_heading_fn visit_heading;
 //     visit_code_block_fn visit_code_block;
 //     visit_code_inline_fn visit_code_inline;
-//     visit_list_start_fn visit_list_start;
 //     visit_list_item_fn visit_list_item;
+//     visit_list_start_fn visit_list_start;
 //     visit_list_end_fn visit_list_end;
 //     visit_table_start_fn visit_table_start;
 //     visit_table_row_fn visit_table_row;
@@ -313,10 +314,59 @@ package htmltomarkdown
 // // Proxy functions for dynamic loading of visitor API
 // char* html_to_markdown_convert_with_visitor_proxy(
 //     const char* html,
-//     void* visitor);
+//     void* visitor,
+//     size_t* len_out);
 // void* html_to_markdown_visitor_create_proxy(
 //     const html_to_markdown_visitor_t* callbacks);
 // void html_to_markdown_visitor_free_proxy(void* visitor);
+//
+// // Bridge function declared in visitor_bridge.c
+// // bridge_visitor_t has the same layout as html_to_markdown_visitor_t
+// // MUST match field order in Rust's HtmlToMarkdownVisitorCallbacks
+// typedef struct {
+//     void *user_data;
+//     void *visit_text;
+//     void *visit_element_start;
+//     void *visit_element_end;
+//     void *visit_link;
+//     void *visit_image;
+//     void *visit_heading;
+//     void *visit_code_block;
+//     void *visit_code_inline;
+//     void *visit_list_item;
+//     void *visit_list_start;
+//     void *visit_list_end;
+//     void *visit_table_start;
+//     void *visit_table_row;
+//     void *visit_table_end;
+//     void *visit_blockquote;
+//     void *visit_strong;
+//     void *visit_emphasis;
+//     void *visit_strikethrough;
+//     void *visit_underline;
+//     void *visit_subscript;
+//     void *visit_superscript;
+//     void *visit_mark;
+//     void *visit_line_break;
+//     void *visit_horizontal_rule;
+//     void *visit_custom_element;
+//     void *visit_definition_list_start;
+//     void *visit_definition_term;
+//     void *visit_definition_description;
+//     void *visit_definition_list_end;
+//     void *visit_form;
+//     void *visit_input;
+//     void *visit_button;
+//     void *visit_audio;
+//     void *visit_video;
+//     void *visit_iframe;
+//     void *visit_details;
+//     void *visit_summary;
+//     void *visit_figure_start;
+//     void *visit_figcaption;
+//     void *visit_figure_end;
+// } bridge_visitor_t;
+// bridge_visitor_t bridge_build_go_visitor(void* user_data);
 import "C"
 
 
@@ -515,12 +565,6 @@ func toVisitResult(vr *VisitResult) C.html_to_markdown_visit_result_t {
 // The visitor allows you to intercept and customize the conversion process
 // for specific HTML elements. Implement the callback fields you need.
 //
-// Implementation Note:
-// This implementation uses a post-processing approach: first convert HTML to markdown
-// via the standard FFI, then walk through callbacks for supported elements.
-// For performance-critical applications requiring low-level interception,
-// consider using the Rust core directly or the C FFI with a custom C visitor layer.
-//
 // Example:
 //
 //	visitor := &Visitor{
@@ -549,10 +593,27 @@ func ConvertWithVisitor(html string, visitor *Visitor) (string, error) {
 	visitorID := storeVisitor(visitor)
 	defer deleteVisitor(visitorID)
 
+	// Build C visitor struct with Go callbacks
+	cVisitor := buildCVisitorWithCallbacks(visitorID)
+
+	// Create native visitor handle via FFI
+	//nolint:gocritic // FFI wrapper function
+	nativeVisitor := C.html_to_markdown_visitor_create_proxy(&cVisitor)
+	if nativeVisitor == nil {
+		errMsg := C.html_to_markdown_last_error_proxy()
+		if errMsg != nil {
+			return "", errors.New(C.GoString(errMsg))
+		}
+		return "", errors.New("failed to create visitor")
+	}
+	defer C.html_to_markdown_visitor_free_proxy(nativeVisitor)
+
 	cHTML := C.CString(html)
 	defer C.free(unsafe.Pointer(cHTML))
 
-	result := C.html_to_markdown_convert_proxy(cHTML)
+	// Convert with visitor via FFI
+	var lenOut C.size_t
+	result := C.html_to_markdown_convert_with_visitor_proxy(cHTML, nativeVisitor, &lenOut)
 	if result == nil {
 		errMsg := C.html_to_markdown_last_error_proxy()
 		if errMsg != nil {
@@ -563,10 +624,19 @@ func ConvertWithVisitor(html string, visitor *Visitor) (string, error) {
 	defer C.html_to_markdown_free_string_proxy(result)
 
 	markdown := C.GoString(result)
-
-	processMarkdownWithVisitor(markdown, visitor, visitorID)
-
 	return markdown, nil
+}
+
+// buildCVisitorWithCallbacks creates a C visitor struct with all callback function pointers set.
+// It uses the bridge function from visitor_bridge.c which has access to the Go-exported callbacks.
+func buildCVisitorWithCallbacks(visitorID uint64) C.html_to_markdown_visitor_t {
+	// Use the C bridge function to build the visitor struct with Go callbacks
+	//nolint:govet // Converting uintptr to unsafe.Pointer is required for cgo callback context
+	bridgeVisitor := C.bridge_build_go_visitor(unsafe.Pointer(uintptr(visitorID)))
+
+	// Convert bridge_visitor_t to html_to_markdown_visitor_t
+	// Both structs have the same memory layout
+	return *(*C.html_to_markdown_visitor_t)(unsafe.Pointer(&bridgeVisitor))
 }
 
 // processMarkdownWithVisitor walks through the markdown and invokes visitor callbacks

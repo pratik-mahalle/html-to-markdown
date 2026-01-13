@@ -1250,7 +1250,7 @@ func goInputCallback(
 //export goButtonCallback
 func goButtonCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cText *C.char,	cButtontype *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t,	cText *C.char,) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -1271,14 +1271,9 @@ func goButtonCallback(
 		HasSiblings:  bool(ctx.has_siblings),
 	}
 	goText := C.GoString(cText)
-	var goButtontype *string
-	if cButtontype != nil {
-		s := C.GoString(cButtontype)
-		goButtontype = &s
-	}
 	// Call the user's Go callback
 	result := visitor.Button(
-		goCtx,		goText,		goButtontype,	)
+		goCtx,		goText,	)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -1496,7 +1491,7 @@ func goListStartCallback(
 func goTableRowCallback(
 	userData unsafe.Pointer,
 	ctx *C.html_to_markdown_node_context_t,	cCells **C.char,
-	cCellsCount C.size_t,	cCellcount C.size_t,	cIsheader C.bool,) C.html_to_markdown_visit_result_t {
+	cCellsCount C.size_t,	cIsheader C.bool,) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -1523,11 +1518,10 @@ func goTableRowCallback(
 			goCells[i] = C.GoString(cArray[i])
 		}
 	}
-	goCellcount := uint(cCellcount)
 	goIsheader := bool(cIsheader)
 	// Call the user's Go callback
 	result := visitor.TableRow(
-		goCtx,		goCells,		goCellcount,		goIsheader,	)
+		goCtx,		goCells,		goIsheader,	)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -1541,7 +1535,7 @@ func goTableRowCallback(
 //export goDetailsCallback
 func goDetailsCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cOpen C.bool,	cContent *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t,	cOpen C.bool,) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -1562,10 +1556,9 @@ func goDetailsCallback(
 		HasSiblings:  bool(ctx.has_siblings),
 	}
 	goOpen := bool(cOpen)
-	goContent := C.GoString(cContent)
 	// Call the user's Go callback
 	result := visitor.Details(
-		goCtx,		goOpen,		goContent,	)
+		goCtx,		goOpen,	)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
