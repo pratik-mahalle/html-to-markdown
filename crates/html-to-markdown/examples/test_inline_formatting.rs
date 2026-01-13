@@ -1,3 +1,5 @@
+//! Example: Testing inline formatting (bold, italic, code, etc.)
+
 use html_to_markdown_rs::{ConversionOptions, convert};
 
 fn main() {

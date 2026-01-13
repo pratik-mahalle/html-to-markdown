@@ -187,7 +187,7 @@ module HtmlToMarkdown
   # These are aliased from the Rust extension and available as both module and instance methods
   private
 
-  def self.native_convert: (String html, conversion_options? options, visitor? visitor) -> String
+  def self.native_convert: (String html, conversion_options? options) -> String
   def self.native_options: (conversion_options? options_hash) -> Options
   def self.native_convert_with_options: (String html, Options options_handle) -> String
   def self.native_convert_with_inline_images_handle: (
@@ -198,8 +198,7 @@ module HtmlToMarkdown
   def self.native_convert_with_inline_images: (
     String html,
     conversion_options? options,
-    inline_image_config? image_config,
-    visitor? visitor
+    inline_image_config? image_config
   ) -> html_extraction
   def self.native_convert_with_metadata_handle: (
     String html,
@@ -209,8 +208,7 @@ module HtmlToMarkdown
   def self.native_convert_with_metadata: (
     String html,
     conversion_options? options,
-    metadata_config? metadata_config,
-    visitor? visitor
+    metadata_config? metadata_config
   ) -> [String, extended_metadata]
   def self.native_convert_with_visitor: (
     String html,
@@ -218,7 +216,7 @@ module HtmlToMarkdown
     visitor? visitor
   ) -> String
 
-  def native_convert: (String html, conversion_options? options, visitor? visitor) -> String
+  def native_convert: (String html, conversion_options? options) -> String
   def native_options: (conversion_options? options_hash) -> Options
   def native_convert_with_options: (String html, Options options_handle) -> String
   def native_convert_with_inline_images_handle: (
@@ -229,8 +227,7 @@ module HtmlToMarkdown
   def native_convert_with_inline_images: (
     String html,
     conversion_options? options,
-    inline_image_config? image_config,
-    visitor? visitor
+    inline_image_config? image_config
   ) -> html_extraction
   def native_convert_with_metadata_handle: (
     String html,
@@ -240,8 +237,7 @@ module HtmlToMarkdown
   def native_convert_with_metadata: (
     String html,
     conversion_options? options,
-    metadata_config? metadata_config,
-    visitor? visitor
+    metadata_config? metadata_config
   ) -> [String, extended_metadata]
   def native_convert_with_visitor: (
     String html,

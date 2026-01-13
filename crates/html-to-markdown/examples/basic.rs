@@ -1,3 +1,5 @@
+//! Example: Basic HTML to Markdown conversion
+
 use html_to_markdown_rs::convert;
 
 fn main() {

@@ -1,3 +1,5 @@
+//! Example: Testing task list conversion (checkboxes)
+
 use html_to_markdown_rs::convert;
 
 fn main() {
