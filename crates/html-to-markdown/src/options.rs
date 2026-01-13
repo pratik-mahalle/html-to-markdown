@@ -201,6 +201,11 @@ impl PreprocessingPreset {
 
 /// Main conversion options for HTML to Markdown conversion.
 #[derive(Debug, Clone)]
+#[cfg_attr(
+    any(feature = "serde", feature = "metadata"),
+    derive(serde::Serialize, serde::Deserialize)
+)]
+#[cfg_attr(any(feature = "serde", feature = "metadata"), serde(rename_all = "camelCase"))]
 pub struct ConversionOptions {
     /// Heading style (Underlined, Atx, `AtxClosed`)
     pub heading_style: HeadingStyle,
@@ -307,7 +312,10 @@ pub struct ConversionOptions {
 /// Only specified fields (Some values) will override existing options; None values leave the
 /// corresponding fields unchanged when applied via [`ConversionOptions::apply_update`].
 #[derive(Debug, Clone, Default)]
-#[cfg_attr(any(feature = "serde", feature = "metadata"), derive(serde::Deserialize))]
+#[cfg_attr(
+    any(feature = "serde", feature = "metadata"),
+    derive(serde::Serialize, serde::Deserialize)
+)]
 #[cfg_attr(any(feature = "serde", feature = "metadata"), serde(rename_all = "camelCase"))]
 pub struct ConversionOptionsUpdate {
     /// Optional heading style override (Underlined, Atx, `AtxClosed`)
@@ -582,6 +590,11 @@ impl From<ConversionOptionsUpdate> for ConversionOptions {
 
 /// HTML preprocessing options for document cleanup before conversion.
 #[derive(Debug, Clone)]
+#[cfg_attr(
+    any(feature = "serde", feature = "metadata"),
+    derive(serde::Serialize, serde::Deserialize)
+)]
+#[cfg_attr(any(feature = "serde", feature = "metadata"), serde(rename_all = "camelCase"))]
 pub struct PreprocessingOptions {
     /// Enable HTML preprocessing globally
     pub enabled: bool,
@@ -602,7 +615,10 @@ pub struct PreprocessingOptions {
 /// Only specified fields (Some values) will override existing options; None values leave the
 /// corresponding fields unchanged when applied via [`PreprocessingOptions::apply_update`].
 #[derive(Debug, Clone, Default)]
-#[cfg_attr(any(feature = "serde", feature = "metadata"), derive(serde::Deserialize))]
+#[cfg_attr(
+    any(feature = "serde", feature = "metadata"),
+    derive(serde::Serialize, serde::Deserialize)
+)]
 #[cfg_attr(any(feature = "serde", feature = "metadata"), serde(rename_all = "camelCase"))]
 pub struct PreprocessingOptionsUpdate {
     /// Optional global preprocessing enablement override
@@ -633,7 +649,7 @@ mod serde_impls {
     use super::{
         CodeBlockStyle, HeadingStyle, HighlightStyle, ListIndentType, NewlineStyle, PreprocessingPreset, WhitespaceMode,
     };
-    use serde::Deserialize;
+    use serde::{Deserialize, Serialize, Serializer};
 
     macro_rules! impl_deserialize_from_parse {
         ($ty:ty, $parser:expr) => {
@@ -656,6 +672,103 @@ mod serde_impls {
     impl_deserialize_from_parse!(CodeBlockStyle, CodeBlockStyle::parse);
     impl_deserialize_from_parse!(HighlightStyle, HighlightStyle::parse);
     impl_deserialize_from_parse!(PreprocessingPreset, PreprocessingPreset::parse);
+
+    // Serialize implementations that convert enum variants to their string representations
+    impl Serialize for HeadingStyle {
+        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            let s = match self {
+                Self::Underlined => "underlined",
+                Self::Atx => "atx",
+                Self::AtxClosed => "atxclosed",
+            };
+            serializer.serialize_str(s)
+        }
+    }
+
+    impl Serialize for ListIndentType {
+        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            let s = match self {
+                Self::Spaces => "spaces",
+                Self::Tabs => "tabs",
+            };
+            serializer.serialize_str(s)
+        }
+    }
+
+    impl Serialize for WhitespaceMode {
+        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            let s = match self {
+                Self::Normalized => "normalized",
+                Self::Strict => "strict",
+            };
+            serializer.serialize_str(s)
+        }
+    }
+
+    impl Serialize for NewlineStyle {
+        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            let s = match self {
+                Self::Spaces => "spaces",
+                Self::Backslash => "backslash",
+            };
+            serializer.serialize_str(s)
+        }
+    }
+
+    impl Serialize for CodeBlockStyle {
+        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            let s = match self {
+                Self::Indented => "indented",
+                Self::Backticks => "backticks",
+                Self::Tildes => "tildes",
+            };
+            serializer.serialize_str(s)
+        }
+    }
+
+    impl Serialize for HighlightStyle {
+        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            let s = match self {
+                Self::DoubleEqual => "doubleequal",
+                Self::Html => "html",
+                Self::Bold => "bold",
+                Self::None => "none",
+            };
+            serializer.serialize_str(s)
+        }
+    }
+
+    impl Serialize for PreprocessingPreset {
+        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            let s = match self {
+                Self::Minimal => "minimal",
+                Self::Standard => "standard",
+                Self::Aggressive => "aggressive",
+            };
+            serializer.serialize_str(s)
+        }
+    }
 }
 
 impl Default for PreprocessingOptions {
@@ -717,5 +830,81 @@ impl PreprocessingOptions {
 impl From<PreprocessingOptionsUpdate> for PreprocessingOptions {
     fn from(update: PreprocessingOptionsUpdate) -> Self {
         Self::from_update(update)
+    }
+}
+
+#[cfg(all(test, any(feature = "serde", feature = "metadata")))]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_conversion_options_serde() {
+        let mut options = ConversionOptions::default();
+        options.heading_style = HeadingStyle::AtxClosed;
+        options.list_indent_width = 4;
+        options.bullets = "*".to_string();
+        options.escape_asterisks = true;
+        options.whitespace_mode = WhitespaceMode::Strict;
+
+        // Serialize to JSON
+        let json = serde_json::to_string(&options).expect("Failed to serialize");
+
+        // Deserialize back
+        let deserialized: ConversionOptions = serde_json::from_str(&json).expect("Failed to deserialize");
+
+        // Verify values
+        assert_eq!(deserialized.list_indent_width, 4);
+        assert_eq!(deserialized.bullets, "*");
+        assert_eq!(deserialized.escape_asterisks, true);
+        assert_eq!(deserialized.heading_style, HeadingStyle::AtxClosed);
+        assert_eq!(deserialized.whitespace_mode, WhitespaceMode::Strict);
+    }
+
+    #[test]
+    fn test_preprocessing_options_serde() {
+        let mut options = PreprocessingOptions::default();
+        options.enabled = true;
+        options.preset = PreprocessingPreset::Aggressive;
+        options.remove_navigation = false;
+
+        // Serialize to JSON
+        let json = serde_json::to_string(&options).expect("Failed to serialize");
+
+        // Deserialize back
+        let deserialized: PreprocessingOptions = serde_json::from_str(&json).expect("Failed to deserialize");
+
+        // Verify values
+        assert_eq!(deserialized.enabled, true);
+        assert_eq!(deserialized.preset, PreprocessingPreset::Aggressive);
+        assert_eq!(deserialized.remove_navigation, false);
+    }
+
+    #[test]
+    fn test_enum_serialization() {
+        // Test that enums serialize to lowercase strings
+        let heading = HeadingStyle::AtxClosed;
+        let json = serde_json::to_string(&heading).expect("Failed to serialize");
+        assert_eq!(json, r#""atxclosed""#);
+
+        let list_indent = ListIndentType::Tabs;
+        let json = serde_json::to_string(&list_indent).expect("Failed to serialize");
+        assert_eq!(json, r#""tabs""#);
+
+        let whitespace = WhitespaceMode::Strict;
+        let json = serde_json::to_string(&whitespace).expect("Failed to serialize");
+        assert_eq!(json, r#""strict""#);
+    }
+
+    #[test]
+    fn test_enum_deserialization() {
+        // Test that enums deserialize from strings (case insensitive)
+        let heading: HeadingStyle = serde_json::from_str(r#""atxclosed""#).expect("Failed");
+        assert_eq!(heading, HeadingStyle::AtxClosed);
+
+        let heading: HeadingStyle = serde_json::from_str(r#""ATXCLOSED""#).expect("Failed");
+        assert_eq!(heading, HeadingStyle::AtxClosed);
+
+        let list_indent: ListIndentType = serde_json::from_str(r#""tabs""#).expect("Failed");
+        assert_eq!(list_indent, ListIndentType::Tabs);
     }
 }
