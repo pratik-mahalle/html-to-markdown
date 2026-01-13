@@ -369,7 +369,6 @@ package htmltomarkdown
 // bridge_visitor_t bridge_build_go_visitor(void* user_data);
 import "C"
 
-
 import (
 	"errors"
 	"regexp"
