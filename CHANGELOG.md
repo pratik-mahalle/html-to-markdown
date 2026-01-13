@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.21.1] - 2026-01-13
 
+### Added
+
+- **Serde serialization support for ConversionOptions** - Added `Serialize` and `Deserialize` traits to `ConversionOptions`, `PreprocessingOptions`, and all related structs. Enables JSON serialization/deserialization with camelCase field naming and lowercase string enum representations.
+
 ### Changed
 
 - **Major refactor: Complete Phase 1 modular architecture** - Restructured core converter into modular handler components:
