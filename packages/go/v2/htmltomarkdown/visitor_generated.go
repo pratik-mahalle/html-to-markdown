@@ -64,7 +64,7 @@ import (
 //export goElementStartCallback
 func goElementStartCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -77,16 +77,16 @@ func goElementStartCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
 	}
 	// Call the user's Go callback
 	result := visitor.ElementStart(
-		goCtx,	)
+		goCtx)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -100,7 +100,7 @@ func goElementStartCallback(
 //export goLineBreakCallback
 func goLineBreakCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -113,16 +113,16 @@ func goLineBreakCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
 	}
 	// Call the user's Go callback
 	result := visitor.LineBreak(
-		goCtx,	)
+		goCtx)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -136,7 +136,7 @@ func goLineBreakCallback(
 //export goHorizontalRuleCallback
 func goHorizontalRuleCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -149,16 +149,16 @@ func goHorizontalRuleCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
 	}
 	// Call the user's Go callback
 	result := visitor.HorizontalRule(
-		goCtx,	)
+		goCtx)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -172,7 +172,7 @@ func goHorizontalRuleCallback(
 //export goTableStartCallback
 func goTableStartCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -185,16 +185,16 @@ func goTableStartCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
 	}
 	// Call the user's Go callback
 	result := visitor.TableStart(
-		goCtx,	)
+		goCtx)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -208,7 +208,7 @@ func goTableStartCallback(
 //export goDefinitionListStartCallback
 func goDefinitionListStartCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -221,16 +221,16 @@ func goDefinitionListStartCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
 	}
 	// Call the user's Go callback
 	result := visitor.DefinitionListStart(
-		goCtx,	)
+		goCtx)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -244,7 +244,7 @@ func goDefinitionListStartCallback(
 //export goFigureStartCallback
 func goFigureStartCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -257,16 +257,16 @@ func goFigureStartCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
 	}
 	// Call the user's Go callback
 	result := visitor.FigureStart(
-		goCtx,	)
+		goCtx)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -280,7 +280,7 @@ func goFigureStartCallback(
 //export goTextCallback
 func goTextCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cText *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cText *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -293,9 +293,9 @@ func goTextCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -303,7 +303,7 @@ func goTextCallback(
 	goText := C.GoString(cText)
 	// Call the user's Go callback
 	result := visitor.Text(
-		goCtx,		goText,	)
+		goCtx, goText)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -317,7 +317,7 @@ func goTextCallback(
 //export goStrongCallback
 func goStrongCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cText *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cText *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -330,9 +330,9 @@ func goStrongCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -340,7 +340,7 @@ func goStrongCallback(
 	goText := C.GoString(cText)
 	// Call the user's Go callback
 	result := visitor.Strong(
-		goCtx,		goText,	)
+		goCtx, goText)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -354,7 +354,7 @@ func goStrongCallback(
 //export goEmphasisCallback
 func goEmphasisCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cText *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cText *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -367,9 +367,9 @@ func goEmphasisCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -377,7 +377,7 @@ func goEmphasisCallback(
 	goText := C.GoString(cText)
 	// Call the user's Go callback
 	result := visitor.Emphasis(
-		goCtx,		goText,	)
+		goCtx, goText)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -391,7 +391,7 @@ func goEmphasisCallback(
 //export goStrikethroughCallback
 func goStrikethroughCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cText *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cText *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -404,9 +404,9 @@ func goStrikethroughCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -414,7 +414,7 @@ func goStrikethroughCallback(
 	goText := C.GoString(cText)
 	// Call the user's Go callback
 	result := visitor.Strikethrough(
-		goCtx,		goText,	)
+		goCtx, goText)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -428,7 +428,7 @@ func goStrikethroughCallback(
 //export goUnderlineCallback
 func goUnderlineCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cText *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cText *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -441,9 +441,9 @@ func goUnderlineCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -451,7 +451,7 @@ func goUnderlineCallback(
 	goText := C.GoString(cText)
 	// Call the user's Go callback
 	result := visitor.Underline(
-		goCtx,		goText,	)
+		goCtx, goText)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -465,7 +465,7 @@ func goUnderlineCallback(
 //export goSubscriptCallback
 func goSubscriptCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cText *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cText *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -478,9 +478,9 @@ func goSubscriptCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -488,7 +488,7 @@ func goSubscriptCallback(
 	goText := C.GoString(cText)
 	// Call the user's Go callback
 	result := visitor.Subscript(
-		goCtx,		goText,	)
+		goCtx, goText)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -502,7 +502,7 @@ func goSubscriptCallback(
 //export goSuperscriptCallback
 func goSuperscriptCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cText *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cText *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -515,9 +515,9 @@ func goSuperscriptCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -525,7 +525,7 @@ func goSuperscriptCallback(
 	goText := C.GoString(cText)
 	// Call the user's Go callback
 	result := visitor.Superscript(
-		goCtx,		goText,	)
+		goCtx, goText)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -539,7 +539,7 @@ func goSuperscriptCallback(
 //export goMarkCallback
 func goMarkCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cText *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cText *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -552,9 +552,9 @@ func goMarkCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -562,7 +562,7 @@ func goMarkCallback(
 	goText := C.GoString(cText)
 	// Call the user's Go callback
 	result := visitor.Mark(
-		goCtx,		goText,	)
+		goCtx, goText)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -576,7 +576,7 @@ func goMarkCallback(
 //export goCodeInlineCallback
 func goCodeInlineCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cCode *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cCode *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -589,9 +589,9 @@ func goCodeInlineCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -599,7 +599,7 @@ func goCodeInlineCallback(
 	goCode := C.GoString(cCode)
 	// Call the user's Go callback
 	result := visitor.CodeInline(
-		goCtx,		goCode,	)
+		goCtx, goCode)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -613,7 +613,7 @@ func goCodeInlineCallback(
 //export goElementEndCallback
 func goElementEndCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cOutput *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cOutput *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -626,9 +626,9 @@ func goElementEndCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -636,7 +636,7 @@ func goElementEndCallback(
 	goOutput := C.GoString(cOutput)
 	// Call the user's Go callback
 	result := visitor.ElementEnd(
-		goCtx,		goOutput,	)
+		goCtx, goOutput)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -650,7 +650,7 @@ func goElementEndCallback(
 //export goTableEndCallback
 func goTableEndCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cOutput *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cOutput *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -663,9 +663,9 @@ func goTableEndCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -673,7 +673,7 @@ func goTableEndCallback(
 	goOutput := C.GoString(cOutput)
 	// Call the user's Go callback
 	result := visitor.TableEnd(
-		goCtx,		goOutput,	)
+		goCtx, goOutput)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -687,7 +687,7 @@ func goTableEndCallback(
 //export goDefinitionTermCallback
 func goDefinitionTermCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cText *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cText *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -700,9 +700,9 @@ func goDefinitionTermCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -710,7 +710,7 @@ func goDefinitionTermCallback(
 	goText := C.GoString(cText)
 	// Call the user's Go callback
 	result := visitor.DefinitionTerm(
-		goCtx,		goText,	)
+		goCtx, goText)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -724,7 +724,7 @@ func goDefinitionTermCallback(
 //export goDefinitionDescriptionCallback
 func goDefinitionDescriptionCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cText *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cText *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -737,9 +737,9 @@ func goDefinitionDescriptionCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -747,7 +747,7 @@ func goDefinitionDescriptionCallback(
 	goText := C.GoString(cText)
 	// Call the user's Go callback
 	result := visitor.DefinitionDescription(
-		goCtx,		goText,	)
+		goCtx, goText)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -761,7 +761,7 @@ func goDefinitionDescriptionCallback(
 //export goDefinitionListEndCallback
 func goDefinitionListEndCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cOutput *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cOutput *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -774,9 +774,9 @@ func goDefinitionListEndCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -784,7 +784,7 @@ func goDefinitionListEndCallback(
 	goOutput := C.GoString(cOutput)
 	// Call the user's Go callback
 	result := visitor.DefinitionListEnd(
-		goCtx,		goOutput,	)
+		goCtx, goOutput)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -798,7 +798,7 @@ func goDefinitionListEndCallback(
 //export goSummaryCallback
 func goSummaryCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cText *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cText *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -811,9 +811,9 @@ func goSummaryCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -821,7 +821,7 @@ func goSummaryCallback(
 	goText := C.GoString(cText)
 	// Call the user's Go callback
 	result := visitor.Summary(
-		goCtx,		goText,	)
+		goCtx, goText)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -835,7 +835,7 @@ func goSummaryCallback(
 //export goFigcaptionCallback
 func goFigcaptionCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cText *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cText *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -848,9 +848,9 @@ func goFigcaptionCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -858,7 +858,7 @@ func goFigcaptionCallback(
 	goText := C.GoString(cText)
 	// Call the user's Go callback
 	result := visitor.Figcaption(
-		goCtx,		goText,	)
+		goCtx, goText)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -872,7 +872,7 @@ func goFigcaptionCallback(
 //export goLinkCallback
 func goLinkCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cHref *C.char,	cText *C.char,	cTitle *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cHref *C.char, cText *C.char, cTitle *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -885,9 +885,9 @@ func goLinkCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -901,7 +901,7 @@ func goLinkCallback(
 	}
 	// Call the user's Go callback
 	result := visitor.Link(
-		goCtx,		goHref,		goText,		goTitle,	)
+		goCtx, goHref, goText, goTitle)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -915,7 +915,7 @@ func goLinkCallback(
 //export goImageCallback
 func goImageCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cSrc *C.char,	cAlt *C.char,	cTitle *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cSrc *C.char, cAlt *C.char, cTitle *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -928,9 +928,9 @@ func goImageCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -944,7 +944,7 @@ func goImageCallback(
 	}
 	// Call the user's Go callback
 	result := visitor.Image(
-		goCtx,		goSrc,		goAlt,		goTitle,	)
+		goCtx, goSrc, goAlt, goTitle)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -958,7 +958,7 @@ func goImageCallback(
 //export goCodeBlockCallback
 func goCodeBlockCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cLang *C.char,	cCode *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cLang *C.char, cCode *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -971,9 +971,9 @@ func goCodeBlockCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -986,7 +986,7 @@ func goCodeBlockCallback(
 	goCode := C.GoString(cCode)
 	// Call the user's Go callback
 	result := visitor.CodeBlock(
-		goCtx,		goLang,		goCode,	)
+		goCtx, goLang, goCode)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -1000,7 +1000,7 @@ func goCodeBlockCallback(
 //export goListItemCallback
 func goListItemCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cOrdered C.bool,	cMarker *C.char,	cText *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cOrdered C.bool, cMarker *C.char, cText *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -1013,9 +1013,9 @@ func goListItemCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -1025,7 +1025,7 @@ func goListItemCallback(
 	goText := C.GoString(cText)
 	// Call the user's Go callback
 	result := visitor.ListItem(
-		goCtx,		goOrdered,		goMarker,		goText,	)
+		goCtx, goOrdered, goMarker, goText)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -1039,7 +1039,7 @@ func goListItemCallback(
 //export goListEndCallback
 func goListEndCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cOrdered C.bool,	cOutput *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cOrdered C.bool, cOutput *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -1052,9 +1052,9 @@ func goListEndCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -1063,7 +1063,7 @@ func goListEndCallback(
 	goOutput := C.GoString(cOutput)
 	// Call the user's Go callback
 	result := visitor.ListEnd(
-		goCtx,		goOrdered,		goOutput,	)
+		goCtx, goOrdered, goOutput)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -1077,7 +1077,7 @@ func goListEndCallback(
 //export goBlockquoteCallback
 func goBlockquoteCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cContent *C.char,	cDepth C.size_t,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cContent *C.char, cDepth C.size_t) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -1090,9 +1090,9 @@ func goBlockquoteCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -1101,7 +1101,7 @@ func goBlockquoteCallback(
 	goDepth := uint(cDepth)
 	// Call the user's Go callback
 	result := visitor.Blockquote(
-		goCtx,		goContent,		goDepth,	)
+		goCtx, goContent, goDepth)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -1115,7 +1115,7 @@ func goBlockquoteCallback(
 //export goCustomElementCallback
 func goCustomElementCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cTagname *C.char,	cContent *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cTagname *C.char, cContent *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -1128,9 +1128,9 @@ func goCustomElementCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -1139,7 +1139,7 @@ func goCustomElementCallback(
 	goContent := C.GoString(cContent)
 	// Call the user's Go callback
 	result := visitor.CustomElement(
-		goCtx,		goTagname,		goContent,	)
+		goCtx, goTagname, goContent)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -1153,7 +1153,7 @@ func goCustomElementCallback(
 //export goFormCallback
 func goFormCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cAction *C.char,	cMethod *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cAction *C.char, cMethod *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -1166,9 +1166,9 @@ func goFormCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -1185,7 +1185,7 @@ func goFormCallback(
 	}
 	// Call the user's Go callback
 	result := visitor.Form(
-		goCtx,		goAction,		goMethod,	)
+		goCtx, goAction, goMethod)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -1199,7 +1199,7 @@ func goFormCallback(
 //export goInputCallback
 func goInputCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cInputtype *C.char,	cName *C.char,	cValue *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cInputtype *C.char, cName *C.char, cValue *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -1212,9 +1212,9 @@ func goInputCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -1236,7 +1236,7 @@ func goInputCallback(
 	}
 	// Call the user's Go callback
 	result := visitor.Input(
-		goCtx,		goInputtype,		goName,		goValue,	)
+		goCtx, goInputtype, goName, goValue)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -1250,7 +1250,7 @@ func goInputCallback(
 //export goButtonCallback
 func goButtonCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cText *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cText *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -1263,9 +1263,9 @@ func goButtonCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -1273,7 +1273,7 @@ func goButtonCallback(
 	goText := C.GoString(cText)
 	// Call the user's Go callback
 	result := visitor.Button(
-		goCtx,		goText,	)
+		goCtx, goText)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -1287,7 +1287,7 @@ func goButtonCallback(
 //export goAudioCallback
 func goAudioCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cSrc *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cSrc *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -1300,9 +1300,9 @@ func goAudioCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -1314,7 +1314,7 @@ func goAudioCallback(
 	}
 	// Call the user's Go callback
 	result := visitor.Audio(
-		goCtx,		goSrc,	)
+		goCtx, goSrc)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -1328,7 +1328,7 @@ func goAudioCallback(
 //export goVideoCallback
 func goVideoCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cSrc *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cSrc *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -1341,9 +1341,9 @@ func goVideoCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -1355,7 +1355,7 @@ func goVideoCallback(
 	}
 	// Call the user's Go callback
 	result := visitor.Video(
-		goCtx,		goSrc,	)
+		goCtx, goSrc)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -1369,7 +1369,7 @@ func goVideoCallback(
 //export goIframeCallback
 func goIframeCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cSrc *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cSrc *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -1382,9 +1382,9 @@ func goIframeCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -1396,7 +1396,7 @@ func goIframeCallback(
 	}
 	// Call the user's Go callback
 	result := visitor.Iframe(
-		goCtx,		goSrc,	)
+		goCtx, goSrc)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -1410,7 +1410,7 @@ func goIframeCallback(
 //export goHeadingCallback
 func goHeadingCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cLevel C.uint,	cText *C.char,	cId *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cLevel C.uint, cText *C.char, cId *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -1423,9 +1423,9 @@ func goHeadingCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -1439,7 +1439,7 @@ func goHeadingCallback(
 	}
 	// Call the user's Go callback
 	result := visitor.Heading(
-		goCtx,		goLevel,		goText,		goId,	)
+		goCtx, goLevel, goText, goId)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -1453,7 +1453,7 @@ func goHeadingCallback(
 //export goListStartCallback
 func goListStartCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cOrdered C.bool,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cOrdered C.bool) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -1466,9 +1466,9 @@ func goListStartCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -1476,7 +1476,7 @@ func goListStartCallback(
 	goOrdered := bool(cOrdered)
 	// Call the user's Go callback
 	result := visitor.ListStart(
-		goCtx,		goOrdered,	)
+		goCtx, goOrdered)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -1490,8 +1490,8 @@ func goListStartCallback(
 //export goTableRowCallback
 func goTableRowCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cCells **C.char,
-	cCellsCount C.size_t,	cIsheader C.bool,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cCells **C.char,
+	cCellsCount C.size_t, cIsheader C.bool) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -1504,9 +1504,9 @@ func goTableRowCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -1521,7 +1521,7 @@ func goTableRowCallback(
 	goIsheader := bool(cIsheader)
 	// Call the user's Go callback
 	result := visitor.TableRow(
-		goCtx,		goCells,		goIsheader,	)
+		goCtx, goCells, goIsheader)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -1535,7 +1535,7 @@ func goTableRowCallback(
 //export goDetailsCallback
 func goDetailsCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cOpen C.bool,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cOpen C.bool) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -1548,9 +1548,9 @@ func goDetailsCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -1558,7 +1558,7 @@ func goDetailsCallback(
 	goOpen := bool(cOpen)
 	// Call the user's Go callback
 	result := visitor.Details(
-		goCtx,		goOpen,	)
+		goCtx, goOpen)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
@@ -1572,7 +1572,7 @@ func goDetailsCallback(
 //export goFigureEndCallback
 func goFigureEndCallback(
 	userData unsafe.Pointer,
-	ctx *C.html_to_markdown_node_context_t,	cOutput *C.char,) C.html_to_markdown_visit_result_t {
+	ctx *C.html_to_markdown_node_context_t, cOutput *C.char) C.html_to_markdown_visit_result_t {
 	// Extract the visitor from user data
 	if userData == nil {
 		return continueResult()
@@ -1585,9 +1585,9 @@ func goFigureEndCallback(
 
 	// Convert C types to Go types
 	goCtx := &NodeContext{
-		NodeType:   NodeType(ctx.node_type),
-		TagName:    C.GoString(ctx.tag_name),
-		Depth:      int(ctx.depth),
+		NodeType:     NodeType(ctx.node_type),
+		TagName:      C.GoString(ctx.tag_name),
+		Depth:        int(ctx.depth),
 		IsFirstChild: bool(ctx.is_first_child),
 		IsLastChild:  bool(ctx.is_last_child),
 		HasSiblings:  bool(ctx.has_siblings),
@@ -1595,12 +1595,11 @@ func goFigureEndCallback(
 	goOutput := C.GoString(cOutput)
 	// Call the user's Go callback
 	result := visitor.FigureEnd(
-		goCtx,		goOutput,	)
+		goCtx, goOutput)
 
 	// Convert Go VisitResult to C result
 	return visitResultToC(result)
 }
-
 
 // continueResult returns a Continue result.
 func continueResult() C.html_to_markdown_visit_result_t {
