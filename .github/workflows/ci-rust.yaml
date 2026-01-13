@@ -103,5 +103,5 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: coverage-report-${{ github.sha }}
-          path: coverage.lcov
+          path: rust-coverage.lcov
           retention-days: 7
