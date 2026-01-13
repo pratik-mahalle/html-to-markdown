@@ -11,7 +11,7 @@ namespace HtmlToMarkdown.Visitor
     /// <summary>
     /// Generated visitor callback bridge methods.
     /// </summary>
-    public partial class VisitorBridge
+    internal partial class VisitorBridge
     {
         /// <summary>
         /// Called before entering any HTML element (pre-order traversal)

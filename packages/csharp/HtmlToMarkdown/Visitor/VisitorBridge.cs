@@ -6,7 +6,7 @@ namespace HtmlToMarkdown.Visitor;
 /// <summary>
 /// Internal bridge for marshalling between C# visitor pattern and C FFI.
 /// </summary>
-internal sealed class VisitorBridge : IDisposable
+internal partial class VisitorBridge : IDisposable
 {
     private static class NativeMethods
     {
@@ -225,27 +225,6 @@ internal sealed class VisitorBridge : IDisposable
             (int)nativeCtx.IndexInParent,
             parentTag,
             nativeCtx.IsInline);
-    }
-
-    private NativeVisitorStructures.NativeVisitResult MarshalVisitResult(VisitResult result)
-    {
-        var nativeResult = new NativeVisitorStructures.NativeVisitResult
-        {
-            ResultType = (NativeVisitorStructures.NativeVisitResultType)result.ResultType,
-            CustomOutput = IntPtr.Zero,
-            ErrorMessage = IntPtr.Zero
-        };
-
-        if (result is CustomResult customResult)
-        {
-            nativeResult.CustomOutput = StringToUtf8Ptr(customResult.CustomOutput);
-        }
-        else if (result is ErrorResult errorResult)
-        {
-            nativeResult.ErrorMessage = StringToUtf8Ptr(errorResult.ErrorMessage);
-        }
-
-        return nativeResult;
     }
 
     private string? PtrToStringUtf8(IntPtr ptr)
