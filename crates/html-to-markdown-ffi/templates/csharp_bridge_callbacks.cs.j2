@@ -11,7 +11,7 @@ namespace HtmlToMarkdown.Visitor
     /// <summary>
     /// Generated visitor callback bridge methods.
     /// </summary>
-    public partial class VisitorBridge
+    internal partial class VisitorBridge
     {
 {% for callback in callbacks %}
 {%- set cs_method_name = callback.name | replace('_', ' ') | title | replace(' ', '') %}
