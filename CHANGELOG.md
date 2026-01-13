@@ -5,6 +5,14 @@ All notable changes to html-to-markdown will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.22.2] - 2026-01-13
+
+### Fixed
+
+- **Ruby gem standalone build** - Fixed Ruby gem failing to build when installed from RubyGems. Removed `lints.workspace = true` (which requires workspace context) and added inline lint configuration. This resolves issue #181.
+- **Ruby gem version pinning** - Changed `html-to-markdown-rs` dependency from loose semver (`"2.x.x"`) to exact pin (`"=2.22.2"`) to prevent older gems from pulling incompatible newer crate versions.
+- **Version sync script** - Updated `sync_versions.py` to preserve exact version pin prefix (`=`) when syncing Ruby gem dependencies.
+
 ## [2.22.1] - 2026-01-13
 
 ### Fixed
