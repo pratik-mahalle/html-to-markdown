@@ -106,3 +106,8 @@ jobs:
         working-directory: packages/ruby
         shell: pwsh
         run: ../../scripts/ci/ruby/run-rspec-windows.ps1
+
+      - name: Test gem installation
+        if: runner.os != 'Windows'
+        shell: bash
+        run: ./scripts/ci/ruby/run-gem-install.sh
