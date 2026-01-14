@@ -1633,7 +1633,11 @@ pub(crate) fn walk_node(
 
                     if is_table_continuation {
                         trim_trailing_whitespace(output);
-                        output.push_str("<br>");
+                        use crate::options::NewlineStyle;
+                        match options.newline_style {
+                            NewlineStyle::Spaces => output.push_str("  \n"),
+                            NewlineStyle::Backslash => output.push_str("\\\n"),
+                        }
                     } else if is_list_continuation {
                         add_list_continuation_indent(output, ctx.list_depth, true, options);
                     } else if needs_leading_sep {
@@ -5396,7 +5400,11 @@ pub(crate) fn walk_node(
 
                     if is_table_continuation {
                         trim_trailing_whitespace(output);
-                        output.push_str("<br>");
+                        use crate::options::NewlineStyle;
+                        match options.newline_style {
+                            NewlineStyle::Spaces => output.push_str("  \n"),
+                            NewlineStyle::Backslash => output.push_str("\\\n"),
+                        }
                     } else if is_list_continuation {
                         add_list_continuation_indent(output, ctx.list_depth, false, options);
                     } else if needs_leading_sep {

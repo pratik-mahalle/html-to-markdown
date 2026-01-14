@@ -41,6 +41,7 @@ class ConversionOptions:
     keep_inline_images_in: list[str]
     preprocessing: PreprocessingOptions
     encoding: str
+    skip_images: bool
 
     def __init__(
         self,
@@ -70,6 +71,7 @@ class ConversionOptions:
         keep_inline_images_in: list[str] = [],
         preprocessing: PreprocessingOptions | None = None,
         encoding: str = "utf-8",
+        skip_images: bool = False,
     ) -> None: ...
 
 class InlineImageConfig:

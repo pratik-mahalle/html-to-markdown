@@ -1,6 +1,6 @@
 {
 	"name": "@kreuzberg/html-to-markdown-node-linux-arm64-musl",
-	"version": "2.22.2",
+	"version": "2.22.3",
 	"cpu": [
 		"arm64"
 	],
