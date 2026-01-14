@@ -47,6 +47,7 @@ class ConversionOptions:
     debug: bool
     strip_tags: list[str]
     preserve_tags: list[str]
+    skip_images: bool
 
     def __init__(
         self,
@@ -82,6 +83,7 @@ class ConversionOptions:
         debug: bool = False,
         strip_tags: list[str] = [],
         preserve_tags: list[str] = [],
+        skip_images: bool = False,
     ) -> None: ...
 
 class InlineImageConfig:

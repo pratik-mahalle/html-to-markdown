@@ -98,6 +98,13 @@ class ConversionOptions:
     preserve_tags: set[str] | None = None
     """HTML tags to preserve as-is in the output (keep original HTML). Useful for complex elements like tables."""
 
+    skip_images: bool = False
+    """Skip all images during conversion.
+
+    When enabled, all `<img>` elements are completely omitted from output.
+    Useful for text-only extraction or filtering out visual content.
+    """
+
     convert_as_inline: bool = False
     """Treat block elements as inline during conversion."""
 

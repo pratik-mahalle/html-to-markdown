@@ -47,7 +47,8 @@ defmodule HtmlToMarkdown.Options do
     :newline_style,
     :code_block_style,
     :preprocessing,
-    :debug
+    :debug,
+    :skip_images
   ]
 
   defstruct heading_style: :atx,
@@ -80,7 +81,8 @@ defmodule HtmlToMarkdown.Options do
             newline_style: :spaces,
             code_block_style: :backticks,
             preprocessing: %PreprocessingOptions{},
-            debug: false
+            debug: false,
+            skip_images: false
 
   @type heading_style :: :underlined | :atx | :atx_closed
   @type list_indent_type :: :spaces | :tabs
@@ -120,7 +122,8 @@ defmodule HtmlToMarkdown.Options do
           newline_style: newline_style(),
           code_block_style: code_block_style(),
           preprocessing: PreprocessingOptions.t(),
-          debug: boolean()
+          debug: boolean(),
+          skip_images: boolean()
         }
 
   @doc """
@@ -276,7 +279,8 @@ defmodule HtmlToMarkdown.Options do
       "newline_style" => Atom.to_string(opts.newline_style),
       "code_block_style" => Atom.to_string(opts.code_block_style),
       "preprocessing" => PreprocessingOptions.to_map(opts.preprocessing),
-      "debug" => opts.debug
+      "debug" => opts.debug,
+      "skip_images" => opts.skip_images
     }
   end
 

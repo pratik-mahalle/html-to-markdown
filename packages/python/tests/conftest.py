@@ -57,6 +57,7 @@ def convert_v2() -> Callable[..., str]:
         strip: list[str] | None = None,
         strip_tags: list[str] | None = None,
         preserve_tags: list[str] | None = None,
+        skip_images: bool = False,
     ) -> str:
         final_strip_tags = strip_tags or strip
 
@@ -88,6 +89,7 @@ def convert_v2() -> Callable[..., str]:
             keep_inline_images_in=keep_inline_images_in,
             strip_tags=set(final_strip_tags) if final_strip_tags else None,
             preserve_tags=set(preserve_tags) if preserve_tags else None,
+            skip_images=skip_images,
         )
 
         preprocessing = PreprocessingOptions(
