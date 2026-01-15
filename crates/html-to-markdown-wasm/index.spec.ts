@@ -200,9 +200,12 @@ describe("html-to-markdown-wasm - WebAssembly Bindings", () => {
 		});
 
 		it("should use br in tables", () => {
+			// When brInTables is true, HTML <br> tags should convert to markdown line breaks
+			// (spaces-style by default: "  \n"), not literal "<br>" tags
 			const html = "<table><tr><td>Line 1<br>Line 2</td></tr></table>";
 			const markdown = convert(html, { brInTables: true });
-			expect(markdown).toContain("<br>");
+			expect(markdown).toContain("Line 1  \n");
+			expect(markdown).toContain("Line 2");
 		});
 	});
 
