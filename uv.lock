@@ -183,7 +183,7 @@ wheels = [
 
 [[package]]
 name = "html-to-markdown"
-version = "2.22.3"
+version = "2.22.4"
 source = { editable = "packages/python" }
 
 [package.dev-dependencies]
