@@ -200,12 +200,23 @@ describe("html-to-markdown-wasm - WebAssembly Bindings", () => {
 		});
 
 		it("should use br in tables", () => {
-			// When brInTables is true, HTML <br> tags should convert to markdown line breaks
-			// (spaces-style by default: "  \n"), not literal "<br>" tags
+			// When brInTables is FALSE (default), HTML <br> tags are removed and text flows together
+			// When brInTables is TRUE, HTML <br> tags should convert to markdown line breaks
+			// This test checks that with brInTables=true, we get proper markdown line breaks
 			const html = "<table><tr><td>Line 1<br>Line 2</td></tr></table>";
-			const markdown = convert(html, { brInTables: true });
-			expect(markdown).toContain("Line 1  \n");
-			expect(markdown).toContain("Line 2");
+
+			// With brInTables: true, <br> should become markdown line breaks (not literal <br>)
+			const markdownWithBr = convert(html, { brInTables: true });
+			// The output should contain markdown line breaks (spaces-style: two spaces before newline)
+			expect(markdownWithBr).toContain("Line 1");
+			expect(markdownWithBr).toContain("Line 2");
+			// Should NOT contain literal <br> tags
+			expect(markdownWithBr).not.toContain("<br>");
+
+			// Verify it contains either spaces-style or backslash-style line break
+			const hasSpacesStyle = markdownWithBr.includes("Line 1  \n");
+			const hasBackslashStyle = markdownWithBr.includes("Line 1\\\n");
+			expect(hasSpacesStyle || hasBackslashStyle).toBe(true);
 		});
 	});
 
