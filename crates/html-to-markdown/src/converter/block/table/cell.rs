@@ -162,16 +162,9 @@ pub fn convert_table_cell(
 
     let text = text.trim();
     let text = if options.br_in_tables {
-        let mut joined = String::with_capacity(text.len());
-        let mut first = true;
-        for segment in text.split('\n').filter(|s| !s.is_empty()) {
-            if !first {
-                joined.push_str("<br>");
-            }
-            first = false;
-            joined.push_str(segment);
-        }
-        joined
+        // When br_in_tables is enabled, markdown line breaks from <br> HTML tags
+        // are already properly formatted, just pass them through unchanged
+        text.to_string()
     } else if text.contains('\n') {
         text.replace('\n', " ")
     } else {
