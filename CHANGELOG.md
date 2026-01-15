@@ -5,6 +5,13 @@ All notable changes to html-to-markdown will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.22.4] - 2026-01-15
+
+### Fixed
+
+- **Core**: Fixed `br_in_tables` option not being respected correctly. HTML `<br>` tags in table cells now properly convert to markdown line breaks (spaces or backslash style based on `newline_style` option), while block elements (divs, paragraphs) continue to generate literal `<br>` tags when needed for rowspan scenarios (issue #184)
+- **WASM**: Updated GitHub Pages demo to v2.22.4 with latest BR tag handling fixes
+
 ## [2.22.3] - 2026-01-14
 
 ### Fixed
