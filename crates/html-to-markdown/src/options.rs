@@ -205,7 +205,10 @@ impl PreprocessingPreset {
     any(feature = "serde", feature = "metadata"),
     derive(serde::Serialize, serde::Deserialize)
 )]
-#[cfg_attr(any(feature = "serde", feature = "metadata"), serde(rename_all = "camelCase"))]
+#[cfg_attr(
+    any(feature = "serde", feature = "metadata"),
+    serde(rename_all = "camelCase", default)
+)]
 pub struct ConversionOptions {
     /// Heading style (Underlined, Atx, `AtxClosed`)
     pub heading_style: HeadingStyle,
@@ -858,6 +861,29 @@ mod tests {
         assert_eq!(deserialized.escape_asterisks, true);
         assert_eq!(deserialized.heading_style, HeadingStyle::AtxClosed);
         assert_eq!(deserialized.whitespace_mode, WhitespaceMode::Strict);
+    }
+
+    #[test]
+    fn test_conversion_options_partial_deserialization() {
+        // Test that partial JSON can be deserialized using defaults for missing fields
+        let partial_json = r#"{
+            "headingStyle": "atxClosed",
+            "listIndentWidth": 4,
+            "bullets": "*"
+        }"#;
+
+        let deserialized: ConversionOptions =
+            serde_json::from_str(partial_json).expect("Failed to deserialize partial JSON");
+
+        // Verify specified values
+        assert_eq!(deserialized.heading_style, HeadingStyle::AtxClosed);
+        assert_eq!(deserialized.list_indent_width, 4);
+        assert_eq!(deserialized.bullets, "*");
+
+        // Verify missing fields use defaults
+        assert_eq!(deserialized.escape_asterisks, false); // default
+        assert_eq!(deserialized.escape_underscores, false); // default
+        assert_eq!(deserialized.list_indent_type, ListIndentType::Spaces); // default
     }
 
     #[test]
