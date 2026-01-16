@@ -5,6 +5,12 @@ All notable changes to html-to-markdown will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.22.5] - 2026-01-16
+
+### Fixed
+
+- **Core**: Added `#[serde(default)]` attribute to `ConversionOptions` struct to enable partial JSON deserialization. This allows deserializing JSON with only a subset of fields specified, using default values for missing fields. Fixes compatibility with language bindings (C#, Go, Java) that serialize partial configuration objects.
+
 ## [2.22.4] - 2026-01-15
 
 ### Fixed
