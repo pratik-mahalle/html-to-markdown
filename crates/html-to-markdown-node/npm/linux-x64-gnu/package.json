@@ -1,6 +1,6 @@
 {
 	"name": "@kreuzberg/html-to-markdown-node-linux-x64-gnu",
-	"version": "2.22.5",
+	"version": "2.22.6",
 	"cpu": [
 		"x64"
 	],
