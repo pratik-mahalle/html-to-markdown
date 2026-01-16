@@ -1,6 +1,6 @@
 {
   "name": "html-to-markdown-test-app",
-  "version": "2.22.5",
+  "version": "2.22.6",
   "description": "Test app for html-to-markdown npm package",
   "type": "module",
   "scripts": {

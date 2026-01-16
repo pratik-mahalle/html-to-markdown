@@ -5,6 +5,17 @@ All notable changes to html-to-markdown will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.22.6] - 2026-01-16
+
+### Fixed
+
+- **Ruby gem dependency resolution**: Ruby native extension now uses workspace version inheritance with vendoring approach. During gem build, the entire `html-to-markdown` crate is vendored with exact dependency versions into `packages/ruby/vendor/`, making gems completely self-contained and eliminating crates.io dependency resolution during installation. Local development uses symlink to workspace crate for seamless workflow.
+- **URL parsing robustness**: Fixed IPv6 URL parsing error when processing malformed markdown-like URLs in HTML attributes (e.g., `//[domain.com/path](http://domain.com/path)`). New `sanitize_markdown_url()` function detects and extracts actual URLs from markdown syntax that wasn't properly converted in source HTML. Applied to both link `href` and image `src` attributes (fixes issue #186).
+
+### Changed
+
+- **Ruby gem build process**: Added `vendor-html-to-markdown.sh` script that creates standalone vendor workspace before gem packaging. Ruby native `Cargo.toml` now references vendored path for maximum reproducibility and build reliability.
+
 ## [2.22.5] - 2026-01-16
 
 ### Fixed

@@ -1,14 +1,14 @@
 [package]
 name = "html-to-markdown-rb"
-version ="2.22.5"
-edition = "2024"
-authors = ["Na'aman Hirschfeld <nhirschfeld@gmail.com>"]
-license = "MIT"
-repository = "https://github.com/kreuzberg-dev/html-to-markdown"
-homepage = "https://github.com/kreuzberg-dev/html-to-markdown"
-documentation = "https://docs.rs/html-to-markdown-rs"
-readme = "README.md"
-rust-version = "1.85"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+readme.workspace = true
+rust-version.workspace = true
 description = "Ruby bindings (Magnus) for html-to-markdown - high-performance HTML to Markdown converter"
 keywords = ["html", "markdown", "ruby", "magnus", "bindings"]
 categories = ["api-bindings"]
@@ -18,7 +18,7 @@ name = "html_to_markdown_rb"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-html-to-markdown-rs = { version = "=2.22.5", features = ["inline-images", "visitor", "metadata"] }
+html-to-markdown-rs = { workspace = true, features = ["inline-images", "visitor", "metadata"] }
 magnus = { git = "https://github.com/matsadler/magnus", rev = "f6db11769efb517427bf7f121f9c32e18b059b38", features = ["rb-sys"] }
 
 [target.'cfg(not(target_os = "windows"))'.dependencies]

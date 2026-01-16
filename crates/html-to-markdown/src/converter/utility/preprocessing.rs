@@ -532,3 +532,55 @@ pub(crate) fn matches_end_tag_start(bytes: &[u8], start: usize, tag: &[u8]) -> b
     }
     matches_tag_start(bytes, start + 1, tag)
 }
+
+/// Sanitize malformed markdown-like URLs in HTML attributes.
+///
+/// Handles cases like: `//[domain.com/path](http://domain.com/path)`
+/// Extracts the actual URL from parentheses.
+///
+/// # Arguments
+/// * `url` - The URL string to sanitize
+///
+/// # Returns
+/// * `Cow<str>` - Either the borrowed original URL or an owned sanitized version
+///
+/// # Examples
+/// ```
+/// use std::borrow::Cow;
+/// # use html_to_markdown_rs::converter::utility::preprocessing::sanitize_markdown_url;
+///
+/// let url = "//[p1.zemanta.com/v2/p/ns/45625/PAGE_VIEW/](http://p1.zemanta.com/v2/p/ns/45625/PAGE_VIEW/)";
+/// let sanitized = sanitize_markdown_url(url);
+/// assert_eq!(sanitized, "http://p1.zemanta.com/v2/p/ns/45625/PAGE_VIEW/");
+///
+/// let normal_url = "https://example.com";
+/// let unchanged = sanitize_markdown_url(normal_url);
+/// assert_eq!(unchanged, "https://example.com");
+/// ```
+pub(crate) fn sanitize_markdown_url(url: &str) -> Cow<'_, str> {
+    // Pattern: //[text](actual_url) or similar markdown-like syntax
+    // This handles malformed HTML where markdown syntax wasn't properly converted
+
+    // Quick check: if URL doesn't start with '//' or doesn't contain '[' and ']', skip regex
+    if !url.starts_with("//") || (!url.contains('[') && !url.contains(']')) {
+        return Cow::Borrowed(url);
+    }
+
+    // Use simple string parsing instead of regex for performance
+    // Look for pattern: //[...](...)
+    if let Some(bracket_start) = url.find('[') {
+        if let Some(bracket_end) = url[bracket_start..].find(']') {
+            let bracket_end = bracket_start + bracket_end;
+            if let Some(paren_start) = url[bracket_end..].find('(') {
+                let paren_start = bracket_end + paren_start + 1; // +1 to skip '('
+                if let Some(paren_end) = url[paren_start..].find(')') {
+                    let paren_end = paren_start + paren_end;
+                    // Extract URL from parentheses
+                    return Cow::Owned(url[paren_start..paren_end].to_string());
+                }
+            }
+        }
+    }
+
+    Cow::Borrowed(url)
+}

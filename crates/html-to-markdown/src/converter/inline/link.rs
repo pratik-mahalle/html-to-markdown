@@ -11,6 +11,7 @@
 //! - Block-level content within links (via inline context)
 
 use crate::converter::utility::content::{is_block_level_element, normalized_tag_name};
+use crate::converter::utility::preprocessing::sanitize_markdown_url;
 use crate::options::ConversionOptions;
 use std::collections::BTreeMap;
 use tl::{NodeHandle, Parser};
@@ -70,11 +71,10 @@ pub(crate) fn handle(
     };
 
     // Extract href and title attributes
-    let href_attr = tag
-        .attributes()
-        .get("href")
-        .flatten()
-        .map(|v| crate::text::decode_html_entities(&v.as_utf8_str()));
+    let href_attr = tag.attributes().get("href").flatten().map(|v| {
+        let decoded = crate::text::decode_html_entities(&v.as_utf8_str());
+        sanitize_markdown_url(&decoded).into_owned()
+    });
     let title = tag
         .attributes()
         .get("title")

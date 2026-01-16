@@ -2189,13 +2189,13 @@ pub(crate) fn walk_node(
                 }
 
                 "img" => {
+                    use crate::converter::utility::preprocessing::sanitize_markdown_url;
                     use std::borrow::Cow;
 
-                    let src = tag
-                        .attributes()
-                        .get("src")
-                        .flatten()
-                        .map_or(Cow::Borrowed(""), |v| v.as_utf8_str());
+                    let src = tag.attributes().get("src").flatten().map_or(Cow::Borrowed(""), |v| {
+                        let s = v.as_utf8_str();
+                        Cow::Owned(sanitize_markdown_url(&s).into_owned())
+                    });
 
                     let alt = tag
                         .attributes()

@@ -1,7 +1,7 @@
 defmodule HtmlToMarkdown.MixProject do
   use Mix.Project
 
-  @version "2.22.5"
+  @version "2.22.6"
   @source_url "https://github.com/kreuzberg-dev/html-to-markdown"
 
   def project do
