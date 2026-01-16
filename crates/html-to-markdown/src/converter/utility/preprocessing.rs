@@ -538,25 +538,14 @@ pub(crate) fn matches_end_tag_start(bytes: &[u8], start: usize, tag: &[u8]) -> b
 /// Handles cases like: `//[domain.com/path](http://domain.com/path)`
 /// Extracts the actual URL from parentheses.
 ///
+/// This is an internal function used during preprocessing to extract valid URLs
+/// from malformed HTML that contains markdown-like syntax.
+///
 /// # Arguments
 /// * `url` - The URL string to sanitize
 ///
 /// # Returns
 /// * `Cow<str>` - Either the borrowed original URL or an owned sanitized version
-///
-/// # Examples
-/// ```
-/// use std::borrow::Cow;
-/// # use html_to_markdown_rs::converter::utility::preprocessing::sanitize_markdown_url;
-///
-/// let url = "//[p1.zemanta.com/v2/p/ns/45625/PAGE_VIEW/](http://p1.zemanta.com/v2/p/ns/45625/PAGE_VIEW/)";
-/// let sanitized = sanitize_markdown_url(url);
-/// assert_eq!(sanitized, "http://p1.zemanta.com/v2/p/ns/45625/PAGE_VIEW/");
-///
-/// let normal_url = "https://example.com";
-/// let unchanged = sanitize_markdown_url(normal_url);
-/// assert_eq!(unchanged, "https://example.com");
-/// ```
 pub(crate) fn sanitize_markdown_url(url: &str) -> Cow<'_, str> {
     // Pattern: //[text](actual_url) or similar markdown-like syntax
     // This handles malformed HTML where markdown syntax wasn't properly converted

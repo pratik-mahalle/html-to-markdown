@@ -255,7 +255,15 @@ describe("html-to-markdown-node - NAPI-RS Bindings", () => {
 			const markdown = convert(html, {
 				brInTables: true,
 			});
-			expect(markdown).toContain("<br>");
+			// When brInTables is TRUE, HTML <br> tags should convert to markdown line breaks
+			expect(markdown).toContain("Line 1");
+			expect(markdown).toContain("Line 2");
+			// Should NOT contain literal <br> tags
+			expect(markdown).not.toContain("<br>");
+			// Verify it contains either spaces-style or backslash-style line break
+			const hasSpacesStyle = markdown.includes("Line 1  \n");
+			const hasBackslashStyle = markdown.includes("Line 1\\\n");
+			expect(hasSpacesStyle || hasBackslashStyle).toBe(true);
 		});
 
 		it("should handle hOCR spatial tables", () => {
