@@ -28,7 +28,11 @@ GEM
     csv (3.3.5)
     diff-lcs (1.6.2)
     drb (2.2.3)
+    ffi (1.17.3-aarch64-linux-gnu)
     ffi (1.17.3-arm64-darwin)
+    ffi (1.17.3-x64-mingw-ucrt)
+    ffi (1.17.3-x86_64-darwin)
+    ffi (1.17.3-x86_64-linux-gnu)
     fileutils (1.8.0)
     i18n (1.14.8)
       concurrent-ruby (~> 1.0)
@@ -122,7 +126,12 @@ GEM
     uri (1.1.1)
 
 PLATFORMS
+  aarch64-linux
   arm64-darwin
+  x64-mingw-ucrt
+  x86_64-darwin
+  x86_64-linux
+  x86_64-linux-gnu
 
 DEPENDENCIES
   html-to-markdown!
@@ -144,7 +153,11 @@ CHECKSUMS
   csv (3.3.5) sha256=6e5134ac3383ef728b7f02725d9872934f523cb40b961479f69cf3afa6c8e73f
   diff-lcs (1.6.2) sha256=9ae0d2cba7d4df3075fe8cd8602a8604993efc0dfa934cff568969efb1909962
   drb (2.2.3) sha256=0b00d6fdb50995fe4a45dea13663493c841112e4068656854646f418fda13373
+  ffi (1.17.3-aarch64-linux-gnu) sha256=28ad573df26560f0aedd8a90c3371279a0b2bd0b4e834b16a2baa10bd7a97068
   ffi (1.17.3-arm64-darwin) sha256=0c690555d4cee17a7f07c04d59df39b2fba74ec440b19da1f685c6579bb0717f
+  ffi (1.17.3-x64-mingw-ucrt) sha256=5f1d7d067a9a1058ad183dba25b05557cd51c85fc1768c49338eabc1cf242d7c
+  ffi (1.17.3-x86_64-darwin) sha256=1f211811eb5cfaa25998322cdd92ab104bfbd26d1c4c08471599c511f2c00bb5
+  ffi (1.17.3-x86_64-linux-gnu) sha256=3746b01f677aae7b16dc1acb7cb3cc17b3e35bdae7676a3f568153fb0e2c887f
   fileutils (1.8.0) sha256=8c6b1df54e2540bdb2f39258f08af78853aa70bad52b4d394bbc6424593c6e02
   html-to-markdown (2.22.6)
   i18n (1.14.8) sha256=285778639134865c5e0f6269e0b818256017e8cde89993fdfcbfb64d088824a5
