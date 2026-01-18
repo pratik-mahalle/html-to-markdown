@@ -311,7 +311,9 @@ public final class ConversionOptions {
    */
   public ConversionOptions setKeepInlineImagesIn(final Set<String> tagNames) {
     this.keepInlineImagesIn =
-        tagNames != null ? Collections.unmodifiableSet(new HashSet<>(tagNames)) : Collections.emptySet();
+        tagNames != null
+            ? Collections.unmodifiableSet(new HashSet<>(tagNames))
+            : Collections.emptySet();
     return this;
   }
 
@@ -469,7 +471,8 @@ public final class ConversionOptions {
    * @return this options object for method chaining
    */
   public ConversionOptions setStripTags(final Set<String> tags) {
-    this.stripTags = tags != null ? Collections.unmodifiableSet(new HashSet<>(tags)) : Collections.emptySet();
+    this.stripTags =
+        tags != null ? Collections.unmodifiableSet(new HashSet<>(tags)) : Collections.emptySet();
     return this;
   }
 
@@ -486,7 +489,8 @@ public final class ConversionOptions {
    * @return this options object for method chaining
    */
   public ConversionOptions setPreserveTags(final Set<String> tags) {
-    this.preserveTags = tags != null ? Collections.unmodifiableSet(new HashSet<>(tags)) : Collections.emptySet();
+    this.preserveTags =
+        tags != null ? Collections.unmodifiableSet(new HashSet<>(tags)) : Collections.emptySet();
     return this;
   }
 
@@ -590,8 +594,8 @@ public final class ConversionOptions {
   /**
    * Set the style for code blocks in Markdown.
    *
-   * @param style the style: "backticks" (default, better whitespace preservation), "indented"
-   *     (4 spaces), or "tildes" (~~~)
+   * @param style the style: "backticks" (default, better whitespace preservation), "indented" (4
+   *     spaces), or "tildes" (~~~)
    * @return this options object for method chaining
    */
   public ConversionOptions setCodeBlockStyle(final String style) {
