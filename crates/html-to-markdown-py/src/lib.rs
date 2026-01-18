@@ -17,7 +17,7 @@ mod profiling;
 use html_to_markdown_rs::visitor::{HtmlVisitor, NodeContext, VisitResult};
 use html_to_markdown_rs::{
     CodeBlockStyle, ConversionError, ConversionOptions as RustConversionOptions, HeadingStyle, HighlightStyle,
-    ListIndentType, NewlineStyle, PreprocessingOptions as RustPreprocessingOptions, PreprocessingPreset,
+    ListIndentType, NewlineStyle, OutputFormat, PreprocessingOptions as RustPreprocessingOptions, PreprocessingPreset,
     WhitespaceMode,
 };
 #[cfg(feature = "inline-images")]
@@ -346,6 +346,8 @@ struct ConversionOptions {
     encoding: String,
     #[pyo3(get, set)]
     skip_images: bool,
+    #[pyo3(get, set)]
+    output_format: String,
 }
 
 #[pymethods]
@@ -384,7 +386,8 @@ impl ConversionOptions {
         strip_tags=Vec::new(),
         preserve_tags=Vec::new(),
         encoding="utf-8".to_string(),
-        skip_images=false
+        skip_images=false,
+        output_format="markdown".to_string()
     ))]
     fn new(
         heading_style: String,
@@ -419,6 +422,7 @@ impl ConversionOptions {
         preserve_tags: Vec<String>,
         encoding: String,
         skip_images: bool,
+        output_format: String,
     ) -> Self {
         Self {
             heading_style,
@@ -454,6 +458,7 @@ impl ConversionOptions {
             preserve_tags,
             encoding,
             skip_images,
+            output_format,
         }
     }
 }
@@ -494,6 +499,7 @@ impl ConversionOptions {
             strip_tags: self.strip_tags.clone(),
             preserve_tags: self.preserve_tags.clone(),
             skip_images: self.skip_images,
+            output_format: OutputFormat::parse(self.output_format.as_str()),
         }
     }
 }
@@ -2934,6 +2940,7 @@ mod tests {
             Vec::new(),
             "utf-8".to_string(),
             false,
+            "markdown".to_string(),
         );
         let rust_opts = opts.to_rust();
         assert_eq!(rust_opts.list_indent_width, 4);

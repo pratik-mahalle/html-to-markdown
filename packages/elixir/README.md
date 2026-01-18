@@ -149,6 +149,7 @@ Extract base64-encoded inline images with metadata.
 - `wrap_width`: Wrap at column — default: `80`
 - `code_language`: Default fenced code block language — default: none
 - `extract_metadata`: Embed metadata as YAML frontmatter — default: `false`
+- `output_format`: Output markup format (`"markdown"` | `"djot"`) — default: `"markdown"`
 
 **`MetadataConfig`** – Selective metadata extraction:
 - `extract_headers`: h1-h6 elements — default: `true`
@@ -156,6 +157,41 @@ Extract base64-encoded inline images with metadata.
 - `extract_images`: Image elements — default: `true`
 - `extract_structured_data`: JSON-LD, Microdata, RDFa — default: `true`
 - `max_structured_data_size`: Size limit in bytes — default: `100KB`
+
+
+## Djot Output Format
+
+The library supports converting HTML to [Djot](https://djot.net/), a lightweight markup language similar to Markdown but with a different syntax for some elements. Set `output_format` to `"djot"` to use this format.
+
+### Syntax Differences
+
+| Element | Markdown | Djot |
+|---------|----------|------|
+| Strong | `**text**` | `*text*` |
+| Emphasis | `*text*` | `_text_` |
+| Strikethrough | `~~text~~` | `{-text-}` |
+| Inserted/Added | N/A | `{+text+}` |
+| Highlighted | N/A | `{=text=}` |
+| Subscript | N/A | `~text~` |
+| Superscript | N/A | `^text^` |
+
+### Example Usage
+
+```python
+from html_to_markdown import convert, ConversionOptions
+
+html = "<p>This is <strong>bold</strong> and <em>italic</em> text.</p>"
+
+# Default Markdown output
+markdown = convert(html)
+# Result: "This is **bold** and *italic* text."
+
+# Djot output
+djot = convert(html, ConversionOptions(output_format="djot"))
+# Result: "This is *bold* and _italic_ text."
+```
+
+Djot's extended syntax allows you to express more semantic meaning in lightweight text, making it useful for documents that require strikethrough, insertion tracking, or mathematical notation.
 
 
 

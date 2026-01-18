@@ -199,6 +199,32 @@ impl PreprocessingPreset {
     }
 }
 
+/// Output format for conversion.
+///
+/// Specifies the target markup language format for the conversion output.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum OutputFormat {
+    /// Standard Markdown (CommonMark compatible). Default.
+    #[default]
+    Markdown,
+    /// Djot lightweight markup language.
+    Djot,
+}
+
+impl OutputFormat {
+    /// Parse an output format from a string.
+    ///
+    /// Accepts "djot" or defaults to Markdown.
+    /// Input is normalized (lowercased, alphanumeric only).
+    #[must_use]
+    pub fn parse(value: &str) -> Self {
+        match normalize_token(value).as_str() {
+            "djot" => Self::Djot,
+            _ => Self::Markdown,
+        }
+    }
+}
+
 /// Main conversion options for HTML to Markdown conversion.
 #[derive(Debug, Clone)]
 #[cfg_attr(
@@ -307,6 +333,9 @@ pub struct ConversionOptions {
     /// When enabled, all `<img>` elements are completely omitted from output.
     /// Useful for text-only extraction or filtering out visual content.
     pub skip_images: bool,
+
+    /// Output format for conversion (Markdown or Djot)
+    pub output_format: OutputFormat,
 }
 
 /// Partial update for `ConversionOptions`.
@@ -416,6 +445,9 @@ pub struct ConversionOptionsUpdate {
 
     /// Optional skip images override
     pub skip_images: Option<bool>,
+
+    /// Optional output format override (Markdown or Djot)
+    pub output_format: Option<OutputFormat>,
 }
 
 impl Default for ConversionOptions {
@@ -453,6 +485,7 @@ impl Default for ConversionOptions {
             strip_tags: Vec::new(),
             preserve_tags: Vec::new(),
             skip_images: false,
+            output_format: OutputFormat::default(),
         }
     }
 }
@@ -563,6 +596,9 @@ impl ConversionOptions {
         if let Some(skip_images) = update.skip_images {
             self.skip_images = skip_images;
         }
+        if let Some(output_format) = update.output_format {
+            self.output_format = output_format;
+        }
     }
 
     /// Create new conversion options from a partial update.
@@ -650,7 +686,8 @@ fn normalize_token(value: &str) -> String {
 #[cfg(any(feature = "serde", feature = "metadata"))]
 mod serde_impls {
     use super::{
-        CodeBlockStyle, HeadingStyle, HighlightStyle, ListIndentType, NewlineStyle, PreprocessingPreset, WhitespaceMode,
+        CodeBlockStyle, HeadingStyle, HighlightStyle, ListIndentType, NewlineStyle, OutputFormat, PreprocessingPreset,
+        WhitespaceMode,
     };
     use serde::{Deserialize, Serialize, Serializer};
 
@@ -675,6 +712,7 @@ mod serde_impls {
     impl_deserialize_from_parse!(CodeBlockStyle, CodeBlockStyle::parse);
     impl_deserialize_from_parse!(HighlightStyle, HighlightStyle::parse);
     impl_deserialize_from_parse!(PreprocessingPreset, PreprocessingPreset::parse);
+    impl_deserialize_from_parse!(OutputFormat, OutputFormat::parse);
 
     // Serialize implementations that convert enum variants to their string representations
     impl Serialize for HeadingStyle {
@@ -768,6 +806,19 @@ mod serde_impls {
                 Self::Minimal => "minimal",
                 Self::Standard => "standard",
                 Self::Aggressive => "aggressive",
+            };
+            serializer.serialize_str(s)
+        }
+    }
+
+    impl Serialize for OutputFormat {
+        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            let s = match self {
+                Self::Markdown => "markdown",
+                Self::Djot => "djot",
             };
             serializer.serialize_str(s)
         }

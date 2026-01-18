@@ -38,6 +38,7 @@ module HtmlToMarkdown
   type whitespace_mode = :normalized | :strict
   type newline_style = :spaces | :backslash
   type code_block_style = :indented | :backticks | :tildes
+  type output_format = :markdown | :djot
   type preprocessing_preset = :minimal | :standard | :aggressive
 
   type preprocessing_options = {
@@ -79,6 +80,7 @@ module HtmlToMarkdown
     debug?: bool,
     strip_tags?: Array[String],
     preserve_tags?: Array[String],
+    output_format?: output_format,
     skip_images?: bool
   }
 

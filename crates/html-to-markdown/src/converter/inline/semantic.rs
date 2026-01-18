@@ -8,7 +8,7 @@
 //! - Subscript and superscript with configurable symbols
 //! - Visitor callbacks for custom processing (feature-gated)
 
-use crate::options::ConversionOptions;
+use crate::options::{ConversionOptions, OutputFormat};
 use tl::{NodeHandle, Parser};
 
 // Type aliases for Context and DomContext to avoid circular imports
@@ -102,12 +102,20 @@ fn handle_mark(
         use crate::options::HighlightStyle;
         match options.highlight_style {
             HighlightStyle::DoubleEqual => {
-                output.push_str("==");
+                if options.output_format == OutputFormat::Djot {
+                    output.push_str("{=");
+                } else {
+                    output.push_str("==");
+                }
                 let children = tag.children();
                 for child_handle in children.top().iter() {
                     walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
                 }
-                output.push_str("==");
+                if options.output_format == OutputFormat::Djot {
+                    output.push_str("=}");
+                } else {
+                    output.push_str("==");
+                }
             }
             HighlightStyle::Html => {
                 output.push_str("<mark>");
@@ -231,9 +239,17 @@ fn handle_strikethrough(
             let (prefix, suffix, trimmed) = chomp_inline(&content);
             if !content.trim().is_empty() {
                 output.push_str(prefix);
-                output.push_str("~~");
+                if options.output_format == OutputFormat::Djot {
+                    output.push_str("{-");
+                } else {
+                    output.push_str("~~");
+                }
                 output.push_str(trimmed);
-                output.push_str("~~");
+                if options.output_format == OutputFormat::Djot {
+                    output.push_str("-}");
+                } else {
+                    output.push_str("~~");
+                }
                 append_inline_suffix(output, suffix, !trimmed.is_empty(), node_handle, parser, dom_ctx);
             } else if !content.is_empty() {
                 output.push_str(prefix);
@@ -246,9 +262,17 @@ fn handle_strikethrough(
             let (prefix, suffix, trimmed) = chomp_inline(&content);
             if !content.trim().is_empty() {
                 output.push_str(prefix);
-                output.push_str("~~");
+                if options.output_format == OutputFormat::Djot {
+                    output.push_str("{-");
+                } else {
+                    output.push_str("~~");
+                }
                 output.push_str(trimmed);
-                output.push_str("~~");
+                if options.output_format == OutputFormat::Djot {
+                    output.push_str("-}");
+                } else {
+                    output.push_str("~~");
+                }
                 append_inline_suffix(output, suffix, !trimmed.is_empty(), node_handle, parser, dom_ctx);
             } else if !content.is_empty() {
                 output.push_str(prefix);
@@ -339,9 +363,17 @@ fn handle_inserted(
         let (prefix, suffix, trimmed) = chomp_inline(&content);
         if !trimmed.is_empty() {
             output.push_str(prefix);
-            output.push_str("==");
+            if options.output_format == OutputFormat::Djot {
+                output.push_str("{+");
+            } else {
+                output.push_str("==");
+            }
             output.push_str(trimmed);
-            output.push_str("==");
+            if options.output_format == OutputFormat::Djot {
+                output.push_str("+}");
+            } else {
+                output.push_str("==");
+            }
             append_inline_suffix(output, suffix, !trimmed.is_empty(), node_handle, parser, dom_ctx);
         }
     }
@@ -351,9 +383,17 @@ fn handle_inserted(
         let (prefix, suffix, trimmed) = chomp_inline(&content);
         if !trimmed.is_empty() {
             output.push_str(prefix);
-            output.push_str("==");
+            if options.output_format == OutputFormat::Djot {
+                output.push_str("{+");
+            } else {
+                output.push_str("==");
+            }
             output.push_str(trimmed);
-            output.push_str("==");
+            if options.output_format == OutputFormat::Djot {
+                output.push_str("+}");
+            } else {
+                output.push_str("==");
+            }
             append_inline_suffix(output, suffix, !trimmed.is_empty(), node_handle, parser, dom_ctx);
         }
     }
@@ -498,8 +538,12 @@ fn handle_subscript(
         _ => return,
     };
 
-    if !ctx.in_code && !options.sub_symbol.is_empty() {
-        output.push_str(&options.sub_symbol);
+    if !ctx.in_code {
+        if options.output_format == OutputFormat::Djot {
+            output.push('~');
+        } else if !options.sub_symbol.is_empty() {
+            output.push_str(&options.sub_symbol);
+        }
     }
 
     let children = tag.children();
@@ -507,11 +551,15 @@ fn handle_subscript(
         walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
     }
 
-    if !ctx.in_code && !options.sub_symbol.is_empty() {
-        if options.sub_symbol.starts_with('<') && !options.sub_symbol.starts_with("</") {
-            output.push_str(&options.sub_symbol.replace('<', "</"));
-        } else {
-            output.push_str(&options.sub_symbol);
+    if !ctx.in_code {
+        if options.output_format == OutputFormat::Djot {
+            output.push('~');
+        } else if !options.sub_symbol.is_empty() {
+            if options.sub_symbol.starts_with('<') && !options.sub_symbol.starts_with("</") {
+                output.push_str(&options.sub_symbol.replace('<', "</"));
+            } else {
+                output.push_str(&options.sub_symbol);
+            }
         }
     }
 }
@@ -537,8 +585,12 @@ fn handle_superscript(
         _ => return,
     };
 
-    if !ctx.in_code && !options.sup_symbol.is_empty() {
-        output.push_str(&options.sup_symbol);
+    if !ctx.in_code {
+        if options.output_format == OutputFormat::Djot {
+            output.push('^');
+        } else if !options.sup_symbol.is_empty() {
+            output.push_str(&options.sup_symbol);
+        }
     }
 
     let children = tag.children();
@@ -546,11 +598,15 @@ fn handle_superscript(
         walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
     }
 
-    if !ctx.in_code && !options.sup_symbol.is_empty() {
-        if options.sup_symbol.starts_with('<') && !options.sup_symbol.starts_with("</") {
-            output.push_str(&options.sup_symbol.replace('<', "</"));
-        } else {
-            output.push_str(&options.sup_symbol);
+    if !ctx.in_code {
+        if options.output_format == OutputFormat::Djot {
+            output.push('^');
+        } else if !options.sup_symbol.is_empty() {
+            if options.sup_symbol.starts_with('<') && !options.sup_symbol.starts_with("</") {
+                output.push_str(&options.sup_symbol.replace('<', "</"));
+            } else {
+                output.push_str(&options.sup_symbol);
+            }
         }
     }
 }

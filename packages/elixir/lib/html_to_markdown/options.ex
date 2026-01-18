@@ -15,6 +15,7 @@ defmodule HtmlToMarkdown.Options do
   @whitespace_modes [:normalized, :strict]
   @newline_styles [:spaces, :backslash]
   @code_block_styles [:indented, :backticks, :tildes]
+  @output_formats [:markdown, :djot]
 
   @option_keys [
     :heading_style,
@@ -48,7 +49,8 @@ defmodule HtmlToMarkdown.Options do
     :code_block_style,
     :preprocessing,
     :debug,
-    :skip_images
+    :skip_images,
+    :output_format
   ]
 
   defstruct heading_style: :atx,
@@ -82,7 +84,8 @@ defmodule HtmlToMarkdown.Options do
             code_block_style: :backticks,
             preprocessing: %PreprocessingOptions{},
             debug: false,
-            skip_images: false
+            skip_images: false,
+            output_format: :markdown
 
   @type heading_style :: :underlined | :atx | :atx_closed
   @type list_indent_type :: :spaces | :tabs
@@ -90,6 +93,7 @@ defmodule HtmlToMarkdown.Options do
   @type whitespace_mode :: :normalized | :strict
   @type newline_style :: :spaces | :backslash
   @type code_block_style :: :indented | :backticks | :tildes
+  @type output_format :: :markdown | :djot
 
   @type t :: %__MODULE__{
           heading_style: heading_style(),
@@ -123,7 +127,8 @@ defmodule HtmlToMarkdown.Options do
           code_block_style: code_block_style(),
           preprocessing: PreprocessingOptions.t(),
           debug: boolean(),
-          skip_images: boolean()
+          skip_images: boolean(),
+          output_format: output_format()
         }
 
   @doc """
@@ -187,6 +192,9 @@ defmodule HtmlToMarkdown.Options do
 
   defp normalize_value(:code_block_style, value),
     do: normalize_enum(value, @code_block_styles, :backticks)
+
+  defp normalize_value(:output_format, value),
+    do: normalize_enum(value, @output_formats, :markdown)
 
   defp normalize_value(:preprocessing, value), do: PreprocessingOptions.new(value)
 
@@ -280,7 +288,8 @@ defmodule HtmlToMarkdown.Options do
       "code_block_style" => Atom.to_string(opts.code_block_style),
       "preprocessing" => PreprocessingOptions.to_map(opts.preprocessing),
       "debug" => opts.debug,
-      "skip_images" => opts.skip_images
+      "skip_images" => opts.skip_images,
+      "output_format" => Atom.to_string(opts.output_format)
     }
   end
 

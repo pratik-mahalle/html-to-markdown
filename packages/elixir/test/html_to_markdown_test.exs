@@ -104,4 +104,34 @@ defmodule HtmlToMarkdownTest do
     assert [%{"src" => "https://example.com/image.jpg", "image_type" => "external"} | _] =
              metadata["images"]
   end
+
+  test "convert/2 accepts output_format option as atom" do
+    html = "<p>**Bold text**</p>"
+
+    # Test with default markdown format
+    assert {:ok, markdown_result} = HtmlToMarkdown.convert(html, output_format: :markdown)
+    assert is_binary(markdown_result)
+
+    # Test with djot format
+    assert {:ok, djot_result} = HtmlToMarkdown.convert(html, output_format: :djot)
+    assert is_binary(djot_result)
+  end
+
+  test "convert/2 accepts output_format option as string" do
+    html = "<h2>Heading</h2>"
+
+    # Test with string "markdown"
+    assert {:ok, _result} = HtmlToMarkdown.convert(html, output_format: "markdown")
+
+    # Test with string "djot"
+    assert {:ok, _result} = HtmlToMarkdown.convert(html, output_format: "djot")
+  end
+
+  test "options/1 accepts output_format option" do
+    handle = HtmlToMarkdown.options(output_format: :djot)
+    assert is_reference(handle)
+
+    assert {:ok, markdown} = HtmlToMarkdown.convert_with_options("<p>Test</p>", handle)
+    assert is_binary(markdown)
+  end
 end

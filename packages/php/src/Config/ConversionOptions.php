@@ -9,6 +9,7 @@ use HtmlToMarkdown\Enum\HeadingStyle;
 use HtmlToMarkdown\Enum\HighlightStyle;
 use HtmlToMarkdown\Enum\ListIndentType;
 use HtmlToMarkdown\Enum\NewlineStyle;
+use HtmlToMarkdown\Enum\OutputFormat;
 use HtmlToMarkdown\Enum\WhitespaceMode;
 use HtmlToMarkdown\Exception\InvalidOption;
 use HtmlToMarkdown\Internal\TypeAssertions;
@@ -47,6 +48,7 @@ use HtmlToMarkdown\Internal\TypeAssertions;
  *     skip_images?: bool,
  *     strip_tags?: list<string>,
  *     preserve_tags?: list<string>,
+ *     output_format?: value-of<OutputFormat>,
  *     preprocessing?: PreprocessingOptionsInput
  * }
  */
@@ -91,6 +93,7 @@ final readonly class ConversionOptions
         public bool $skipImages = false,
         public array $stripTags = [],
         public array $preserveTags = [],
+        public OutputFormat $outputFormat = OutputFormat::MARKDOWN,
         ?PreprocessingOptions $preprocessing = null,
     ) {
         if ($this->listIndentWidth < 0) {
@@ -202,6 +205,9 @@ final readonly class ConversionOptions
             preserveTags: \array_key_exists('preserve_tags', $input)
                 ? TypeAssertions::stringList($input['preserve_tags'], 'preserve_tags')
                 : $defaults->preserveTags,
+            outputFormat: \array_key_exists('output_format', $input)
+                ? OutputFormat::fromString(TypeAssertions::string($input['output_format'], 'output_format'))
+                : $defaults->outputFormat,
             preprocessing: \array_key_exists('preprocessing', $input)
                 ? PreprocessingOptions::fromArray(self::normalizeArray($input['preprocessing'], 'preprocessing'))
                 : $defaults->preprocessing,
@@ -311,6 +317,9 @@ final readonly class ConversionOptions
         }
         if ($this->preserveTags !== $defaults->preserveTags && $this->preserveTags !== []) {
             $payload['preserve_tags'] = \array_values($this->preserveTags);
+        }
+        if ($this->outputFormat !== $defaults->outputFormat) {
+            $payload['output_format'] = $this->outputFormat->value;
         }
 
         return $payload;

@@ -76,7 +76,7 @@ pub use metadata::{
 };
 pub use options::{
     CodeBlockStyle, ConversionOptions, ConversionOptionsUpdate, HeadingStyle, HighlightStyle, ListIndentType,
-    NewlineStyle, PreprocessingOptions, PreprocessingOptionsUpdate, PreprocessingPreset, WhitespaceMode,
+    NewlineStyle, OutputFormat, PreprocessingOptions, PreprocessingOptionsUpdate, PreprocessingPreset, WhitespaceMode,
 };
 
 const BINARY_SCAN_LIMIT: usize = 8192;

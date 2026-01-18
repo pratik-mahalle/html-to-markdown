@@ -77,7 +77,7 @@ use crate::converter::utility::siblings::{
 use crate::error::Result;
 #[cfg(feature = "inline-images")]
 use crate::inline_images::InlineImageCollector;
-use crate::options::{ConversionOptions, ListIndentType};
+use crate::options::{ConversionOptions, ListIndentType, OutputFormat};
 use crate::text;
 
 #[cfg(feature = "inline-images")]
@@ -1528,6 +1528,10 @@ pub(crate) fn walk_node(
                                 output.push_str(prefix);
                                 if ctx.in_strong {
                                     output.push_str(trimmed);
+                                } else if options.output_format == OutputFormat::Djot {
+                                    output.push('*');
+                                    output.push_str(trimmed);
+                                    output.push('*');
                                 } else {
                                     output.push(options.strong_em_symbol);
                                     output.push(options.strong_em_symbol);
@@ -1549,6 +1553,10 @@ pub(crate) fn walk_node(
                                 output.push_str(prefix);
                                 if ctx.in_strong {
                                     output.push_str(trimmed);
+                                } else if options.output_format == OutputFormat::Djot {
+                                    output.push('*');
+                                    output.push_str(trimmed);
+                                    output.push('*');
                                 } else {
                                     output.push(options.strong_em_symbol);
                                     output.push(options.strong_em_symbol);
@@ -1636,9 +1644,16 @@ pub(crate) fn walk_node(
                             let (prefix, suffix, trimmed) = chomp_inline(&content);
                             if !content.trim().is_empty() {
                                 output.push_str(prefix);
-                                output.push(options.strong_em_symbol);
-                                output.push_str(trimmed);
-                                output.push(options.strong_em_symbol);
+                                if options.output_format == OutputFormat::Djot {
+                                    // Djot uses underscore for emphasis
+                                    output.push('_');
+                                    output.push_str(trimmed);
+                                    output.push('_');
+                                } else {
+                                    output.push(options.strong_em_symbol);
+                                    output.push_str(trimmed);
+                                    output.push(options.strong_em_symbol);
+                                }
                                 append_inline_suffix(output, suffix, !trimmed.is_empty(), node_handle, parser, dom_ctx);
                             } else if !content.is_empty() {
                                 output.push_str(prefix);
@@ -1659,9 +1674,16 @@ pub(crate) fn walk_node(
                             let (prefix, suffix, trimmed) = chomp_inline(&content);
                             if !content.trim().is_empty() {
                                 output.push_str(prefix);
-                                output.push(options.strong_em_symbol);
-                                output.push_str(trimmed);
-                                output.push(options.strong_em_symbol);
+                                if options.output_format == OutputFormat::Djot {
+                                    // Djot uses underscore for emphasis
+                                    output.push('_');
+                                    output.push_str(trimmed);
+                                    output.push('_');
+                                } else {
+                                    output.push(options.strong_em_symbol);
+                                    output.push_str(trimmed);
+                                    output.push(options.strong_em_symbol);
+                                }
                                 append_inline_suffix(output, suffix, !trimmed.is_empty(), node_handle, parser, dom_ctx);
                             } else if !content.is_empty() {
                                 output.push_str(prefix);
@@ -2333,14 +2355,22 @@ pub(crate) fn walk_node(
                         use crate::options::HighlightStyle;
                         match options.highlight_style {
                             HighlightStyle::DoubleEqual => {
-                                output.push_str("==");
+                                if options.output_format == OutputFormat::Djot {
+                                    output.push_str("{=");
+                                } else {
+                                    output.push_str("==");
+                                }
                                 let children = tag.children();
                                 {
                                     for child_handle in children.top().iter() {
                                         walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
                                     }
                                 }
-                                output.push_str("==");
+                                if options.output_format == OutputFormat::Djot {
+                                    output.push_str("=}");
+                                } else {
+                                    output.push_str("==");
+                                }
                             }
                             HighlightStyle::Html => {
                                 output.push_str("<mark>");
@@ -2446,9 +2476,15 @@ pub(crate) fn walk_node(
                             let (prefix, suffix, trimmed) = chomp_inline(&content);
                             if !content.trim().is_empty() {
                                 output.push_str(prefix);
-                                output.push_str("~~");
-                                output.push_str(trimmed);
-                                output.push_str("~~");
+                                if options.output_format == OutputFormat::Djot {
+                                    output.push_str("{-");
+                                    output.push_str(trimmed);
+                                    output.push_str("-}");
+                                } else {
+                                    output.push_str("~~");
+                                    output.push_str(trimmed);
+                                    output.push_str("~~");
+                                }
                                 append_inline_suffix(output, suffix, !trimmed.is_empty(), node_handle, parser, dom_ctx);
                             } else if !content.is_empty() {
                                 output.push_str(prefix);
@@ -2461,9 +2497,15 @@ pub(crate) fn walk_node(
                             let (prefix, suffix, trimmed) = chomp_inline(&content);
                             if !content.trim().is_empty() {
                                 output.push_str(prefix);
-                                output.push_str("~~");
-                                output.push_str(trimmed);
-                                output.push_str("~~");
+                                if options.output_format == OutputFormat::Djot {
+                                    output.push_str("{-");
+                                    output.push_str(trimmed);
+                                    output.push_str("-}");
+                                } else {
+                                    output.push_str("~~");
+                                    output.push_str(trimmed);
+                                    output.push_str("~~");
+                                }
                                 append_inline_suffix(output, suffix, !trimmed.is_empty(), node_handle, parser, dom_ctx);
                             } else if !content.is_empty() {
                                 output.push_str(prefix);
@@ -2532,9 +2574,15 @@ pub(crate) fn walk_node(
                         let (prefix, suffix, trimmed) = chomp_inline(&content);
                         if !trimmed.is_empty() {
                             output.push_str(prefix);
-                            output.push_str("==");
-                            output.push_str(trimmed);
-                            output.push_str("==");
+                            if options.output_format == OutputFormat::Djot {
+                                output.push_str("{+");
+                                output.push_str(trimmed);
+                                output.push_str("+}");
+                            } else {
+                                output.push_str("==");
+                                output.push_str(trimmed);
+                                output.push_str("==");
+                            }
                             append_inline_suffix(output, suffix, !trimmed.is_empty(), node_handle, parser, dom_ctx);
                         }
                     }
@@ -2544,9 +2592,15 @@ pub(crate) fn walk_node(
                         let (prefix, suffix, trimmed) = chomp_inline(&content);
                         if !trimmed.is_empty() {
                             output.push_str(prefix);
-                            output.push_str("==");
-                            output.push_str(trimmed);
-                            output.push_str("==");
+                            if options.output_format == OutputFormat::Djot {
+                                output.push_str("{+");
+                                output.push_str(trimmed);
+                                output.push_str("+}");
+                            } else {
+                                output.push_str("==");
+                                output.push_str(trimmed);
+                                output.push_str("==");
+                            }
                             append_inline_suffix(output, suffix, !trimmed.is_empty(), node_handle, parser, dom_ctx);
                         }
                     }
@@ -2630,8 +2684,12 @@ pub(crate) fn walk_node(
                 }
 
                 "sub" => {
-                    if !ctx.in_code && !options.sub_symbol.is_empty() {
-                        output.push_str(&options.sub_symbol);
+                    if !ctx.in_code {
+                        if options.output_format == OutputFormat::Djot {
+                            output.push('~');
+                        } else if !options.sub_symbol.is_empty() {
+                            output.push_str(&options.sub_symbol);
+                        }
                     }
                     let children = tag.children();
                     {
@@ -2639,18 +2697,26 @@ pub(crate) fn walk_node(
                             walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
                         }
                     }
-                    if !ctx.in_code && !options.sub_symbol.is_empty() {
-                        if options.sub_symbol.starts_with('<') && !options.sub_symbol.starts_with("</") {
-                            output.push_str(&options.sub_symbol.replace('<', "</"));
-                        } else {
-                            output.push_str(&options.sub_symbol);
+                    if !ctx.in_code {
+                        if options.output_format == OutputFormat::Djot {
+                            output.push('~');
+                        } else if !options.sub_symbol.is_empty() {
+                            if options.sub_symbol.starts_with('<') && !options.sub_symbol.starts_with("</") {
+                                output.push_str(&options.sub_symbol.replace('<', "</"));
+                            } else {
+                                output.push_str(&options.sub_symbol);
+                            }
                         }
                     }
                 }
 
                 "sup" => {
-                    if !ctx.in_code && !options.sup_symbol.is_empty() {
-                        output.push_str(&options.sup_symbol);
+                    if !ctx.in_code {
+                        if options.output_format == OutputFormat::Djot {
+                            output.push('^');
+                        } else if !options.sup_symbol.is_empty() {
+                            output.push_str(&options.sup_symbol);
+                        }
                     }
                     let children = tag.children();
                     {
@@ -2658,11 +2724,15 @@ pub(crate) fn walk_node(
                             walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
                         }
                     }
-                    if !ctx.in_code && !options.sup_symbol.is_empty() {
-                        if options.sup_symbol.starts_with('<') && !options.sup_symbol.starts_with("</") {
-                            output.push_str(&options.sup_symbol.replace('<', "</"));
-                        } else {
-                            output.push_str(&options.sup_symbol);
+                    if !ctx.in_code {
+                        if options.output_format == OutputFormat::Djot {
+                            output.push('^');
+                        } else if !options.sup_symbol.is_empty() {
+                            if options.sup_symbol.starts_with('<') && !options.sup_symbol.starts_with("</") {
+                                output.push_str(&options.sup_symbol.replace('<', "</"));
+                            } else {
+                                output.push_str(&options.sup_symbol);
+                            }
                         }
                     }
                 }
