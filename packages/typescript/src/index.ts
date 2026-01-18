@@ -180,3 +180,92 @@ export async function convertStreamWithMetadata(
 
 	return convertWithMetadata(html, options ?? undefined, metadataConfig ?? undefined);
 }
+
+/**
+ * Type for visitor callback that receives parsed context object
+ */
+type VisitorCallback<TContext = unknown, TResult = { type: string; output?: string }> = (
+	context: TContext,
+) => Promise<TResult>;
+
+/**
+ * Type for wrapped visitor callback that handles JSON strings
+ */
+type WrappedVisitorCallback = (jsonString: string) => Promise<string>;
+
+/**
+ * Wraps a single visitor callback to handle JSON serialization/deserialization automatically.
+ *
+ * The native NAPI bindings expect visitor callbacks with signature:
+ *   `(jsonString: string) => Promise<string>`
+ *
+ * This wrapper allows you to write callbacks that receive parsed objects:
+ *   `(context: NodeContext) => Promise<{type: string}>`
+ *
+ * @param callback - Visitor callback that receives parsed context object
+ * @returns Wrapped callback that handles JSON string conversion
+ *
+ * @example
+ * ```ts
+ * const wrappedCallback = wrapVisitorCallback(async (ctx) => {
+ *   console.log('Tag name:', ctx.tagName);
+ *   return { type: 'continue' };
+ * });
+ * ```
+ */
+export function wrapVisitorCallback<TContext, TResult>(
+	callback: VisitorCallback<TContext, TResult>,
+): WrappedVisitorCallback {
+	return async (jsonString: string): Promise<string> => {
+		const context = JSON.parse(jsonString) as TContext;
+		const result = await callback(context);
+		return JSON.stringify(result);
+	};
+}
+
+/**
+ * Type for visitor object with callbacks that receive parsed objects
+ */
+type VisitorObject = Record<string, VisitorCallback>;
+
+/**
+ * Type for wrapped visitor object with JSON-handling callbacks
+ */
+type WrappedVisitorObject = Record<string, WrappedVisitorCallback>;
+
+/**
+ * Wraps all callbacks in a visitor object to handle JSON serialization/deserialization.
+ *
+ * This is a convenience function to wrap all callbacks in a visitor object at once.
+ *
+ * @param visitor - Visitor object with callbacks that receive parsed objects
+ * @returns Wrapped visitor object with JSON-handling callbacks
+ *
+ * @example
+ * ```ts
+ * const visitor = {
+ *   visitElementStart: async (ctx: NodeContext) => {
+ *     console.log('Tag:', ctx.tagName);
+ *     return { type: 'continue' };
+ *   },
+ *   visitText: async (ctx: NodeContext, text: string) => {
+ *     console.log('Text:', text);
+ *     return { type: 'continue' };
+ *   },
+ * };
+ *
+ * const wrapped = wrapVisitorCallbacks(visitor);
+ * const result = await convertWithVisitor(html, undefined, wrapped);
+ * ```
+ */
+export function wrapVisitorCallbacks(visitor: VisitorObject): WrappedVisitorObject {
+	const wrapped: WrappedVisitorObject = {};
+
+	for (const [methodName, callback] of Object.entries(visitor)) {
+		if (typeof callback === "function") {
+			wrapped[methodName] = wrapVisitorCallback(callback);
+		}
+	}
+
+	return wrapped;
+}

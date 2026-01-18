@@ -2114,6 +2114,19 @@ mod visitor_support {
                 return Ok(VisitResult::Continue);
             }
 
+            // Detect and await async coroutines
+            if result.hasattr("__await__")? {
+                let locals = PYTHON_TASK_LOCALS.get().ok_or_else(|| {
+                    pyo3::exceptions::PyRuntimeError::new_err("Async visitor event loop not initialized")
+                })?;
+
+                let fut = pyo3_async_runtimes::into_future_with_locals(locals, result)?;
+                let py_result: Py<PyAny> = py.detach(|| pyo3_async_runtimes::tokio::get_runtime().block_on(fut))?;
+                let result_dict: Bound<'_, pyo3::types::PyDict> = py_result.bind(py).extract()?;
+                return Self::result_from_dict(&result_dict);
+            }
+
+            // Sync path
             let result_dict: Bound<'_, pyo3::types::PyDict> = result.extract()?;
 
             Self::result_from_dict(&result_dict)

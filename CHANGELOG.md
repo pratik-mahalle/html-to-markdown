@@ -5,6 +5,24 @@ All notable changes to html-to-markdown will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **Python**: Fixed async visitor bridge to properly await coroutines. `PyAsyncVisitorBridge::call_visitor_method_sync()` now detects async methods via `__await__` attribute and uses `PYTHON_TASK_LOCALS` event loop for proper async execution (issue #187)
+- **Ruby**: Fixed visitor parameter being ignored in `convert()` wrapper method. Now correctly passes visitor to native `convert_with_visitor` function when provided (issue #187)
+
+### Added
+
+- **Documentation**: Added comprehensive visitor pattern support matrix showing which bindings support visitors (Rust, Python, TypeScript/Node.js, Ruby, PHP, Elixir, Go, Java, C# all supported)
+- **Documentation**: Documented WASM visitor pattern architectural limitation with four alternative approaches for edge/browser deployments
+- **Examples**: Added PHP visitor examples (`cdn-rewrite.php` for URL transformation, `content-filter.php` for element filtering)
+
+### Changed
+
+- **Rust**: Updated `async-visitor` feature to include required `tokio` "sync" feature for `Mutex` support
+- **Documentation**: Enhanced visitor pattern guide with language-specific import statements and platform support details
+
 ## [2.22.6] - 2026-01-16
 
 ### Fixed

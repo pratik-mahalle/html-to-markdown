@@ -96,6 +96,7 @@ pub mod form;
 pub mod inline;
 pub mod list;
 pub mod main;
+mod main_helpers;
 pub mod media;
 pub mod semantic;
 pub mod text;
@@ -107,8 +108,16 @@ pub use self::main::{Context, DomContext, convert_html};
 #[cfg(feature = "visitor")]
 pub use self::main::convert_html_with_visitor;
 
-// Import the tree walker and utility functions from main
-pub(crate) use self::main::{convert_html_impl, trim_trailing_whitespace, walk_node};
+#[cfg(feature = "async-visitor")]
+pub use self::main::convert_html_with_visitor_async;
+
+// Import the tree walker and utility functions from main and main_helpers
+pub(crate) use self::main::{convert_html_impl, walk_node};
+pub(crate) use self::main_helpers::trim_trailing_whitespace;
+
+#[cfg(feature = "async-visitor")]
+#[allow(unused_imports)]
+pub(crate) use self::main::convert_html_impl_async;
 
 // Re-export helper functions from utility modules (migrated from converter_legacy)
 pub(crate) use crate::converter::utility::content::{chomp_inline, get_text_content, normalized_tag_name};
