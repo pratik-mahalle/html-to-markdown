@@ -16,7 +16,7 @@ members = [
 exclude = [
     "packages/elixir/native/html_to_markdown_elixir",
     "tests/test_apps/elixir/deps",
-    "packages/ruby/vendor"
+    "packages/ruby/rust-vendor"
 ]
 
 [workspace.package]
