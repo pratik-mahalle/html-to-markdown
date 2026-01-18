@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { JsConversionOptions } from "@kreuzberg/html-to-markdown-node";
 import { convertWithVisitor } from "@kreuzberg/html-to-markdown-node";
+import { wrapVisitorCallbacks } from "../src/index.js";
 
 /**
  * VisitResult type representing the result of a visitor callback.
@@ -27,19 +28,16 @@ interface NodeContext {
 /**
  * Issue #187: Verifies that visitElementStart receives correct tagName in context
  *
- * IMPORTANT: This test file documents a known limitation in the TypeScript (and Python) bindings:
- * - visitElementStart is NOT called for generic HTML elements like div, p, script, style
- * - visitElementStart is ONLY called for semantic elements with dedicated visitor methods
- * - Users cannot filter arbitrary elements by tag name using visitElementStart
- * - This is different from the Rust API which supports full visit_element_start coverage
+ * This test verifies that the TypeScript NAPI bridge correctly implements visitElementStart
+ * for all generic HTML elements. After the fix, visitElementStart IS called for elements like
+ * div, p, section, etc., allowing users to filter arbitrary elements by tag name.
  *
- * This is the same issue as reported in GitHub issue #187.
- * The workaround is to use specific visitor methods like visitLink, visitImage, etc.
- * when available, and document the limitation for generic elements.
+ * IMPORTANT: Script and style tags are still NOT visible to visitors because they are
+ * automatically stripped during HTML sanitization before the visitor pattern runs.
  */
-describe("Issue #187: visitor tagName in context (KNOWN LIMITATION)", () => {
-	describe("visitElementStart limitations (KNOWN ISSUE)", () => {
-		it("visitElementStart is NOT called for div elements", async () => {
+describe("Issue #187: visitor tagName in context (FIXED)", () => {
+	describe("visitElementStart now works for generic elements", () => {
+		it("visitElementStart IS called for div elements", async () => {
 			const tagNames: string[] = [];
 
 			const visitor = {
@@ -57,14 +55,14 @@ describe("Issue #187: visitor tagName in context (KNOWN LIMITATION)", () => {
 				<div id="main">Main div</div>
 			`;
 
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = await convertWithVisitor(html, undefined, wrapVisitorCallbacks(visitor));
 
 			expect(result).toBeTruthy();
-			// KNOWN ISSUE: visitElementStart is NOT called for generic divs
-			expect(tagNames.length).toBe(0);
+			expect(tagNames.length).toBe(2);
+			expect(tagNames).toContain("div");
 		});
 
-		it("visitElementStart is NOT called for script elements", async () => {
+		it("visitElementStart is NOT called for script elements (stripped during sanitization)", async () => {
 			const tagNames: string[] = [];
 
 			const visitor = {
@@ -82,14 +80,14 @@ describe("Issue #187: visitor tagName in context (KNOWN LIMITATION)", () => {
 				<script src="test.js"></script>
 			`;
 
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = await convertWithVisitor(html, undefined, wrapVisitorCallbacks(visitor));
 
 			expect(result).toBeTruthy();
-			// KNOWN ISSUE: visitElementStart is NOT called for scripts
+			// Script elements are stripped during HTML sanitization before visitor runs
 			expect(tagNames.length).toBe(0);
 		});
 
-		it("visitElementStart is NOT called for style elements", async () => {
+		it("visitElementStart is NOT called for style elements (stripped during sanitization)", async () => {
 			const tagNames: string[] = [];
 
 			const visitor = {
@@ -107,14 +105,13 @@ describe("Issue #187: visitor tagName in context (KNOWN LIMITATION)", () => {
 				<style>div { color: blue; }</style>
 			`;
 
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = await convertWithVisitor(html, undefined, wrapVisitorCallbacks(visitor));
 
 			expect(result).toBeTruthy();
-			// KNOWN ISSUE: visitElementStart is NOT called for styles
 			expect(tagNames.length).toBe(0);
 		});
 
-		it("visitElementStart is NOT called for p elements", async () => {
+		it("visitElementStart IS called for p elements", async () => {
 			const tagNames: string[] = [];
 
 			const visitor = {
@@ -132,24 +129,22 @@ describe("Issue #187: visitor tagName in context (KNOWN LIMITATION)", () => {
 				<p>Second paragraph</p>
 			`;
 
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = await convertWithVisitor(html, undefined, wrapVisitorCallbacks(visitor));
 
 			expect(result).toBeTruthy();
-			// KNOWN ISSUE: visitElementStart is NOT called for generic p elements
-			expect(tagNames.length).toBe(0);
+			expect(tagNames.length).toBe(2);
+			expect(tagNames).toEqual(["p", "p"]);
 		});
 
-		it("documents the architectural limitation of the TypeScript binding", async () => {
-			// Issue #187 documents that in TypeScript and Python bindings,
-			// the visitor callback model only supports:
-			// - Semantic visitors: visitLink, visitImage, visitHeading, visitCodeBlock, etc.
-			// - Generic visitors: visitText, visitElementStart, visitElementEnd
-			//
-			// HOWEVER: visitElementStart is only called for elements with semantic meaning,
-			// not for generic elements like div, p, script, style.
-			//
-			// This is different from the Rust API which fully implements visit_element_start
-			// for ALL elements including generic divs.
+		it("demonstrates the fixed visitor pattern implementation", async () => {
+			const capturedTags: string[] = [];
+
+			const visitor = {
+				visitElementStart: async (ctx: NodeContext) => {
+					capturedTags.push(ctx.tagName);
+					return { type: "continue" };
+				},
+			};
 
 			const html = `
 				<h1>Title</h1>
@@ -159,21 +154,23 @@ describe("Issue #187: visitor tagName in context (KNOWN LIMITATION)", () => {
 				<style>css</style>
 			`;
 
-			const result = await convertWithVisitor(html, undefined, {});
+			const result = await convertWithVisitor(html, undefined, wrapVisitorCallbacks(visitor));
 
-			// The conversion still works - generic elements are handled by default logic
 			expect(result).toBeTruthy();
 			expect(result).toContain("Title");
 			expect(result).toContain("Content");
 			expect(result).toContain("Text");
 
-			// But users CANNOT filter these elements via visitElementStart.
-			// This is the core issue reported in GitHub issue #187.
+			expect(capturedTags).toContain("h1");
+			expect(capturedTags).toContain("div");
+			expect(capturedTags).toContain("p");
+			expect(capturedTags).not.toContain("script");
+			expect(capturedTags).not.toContain("style");
 		});
 	});
 
-	describe("Tag-based filtering CANNOT be done with visitElementStart", () => {
-		it("cannot filter divs with class attributes using visitElementStart", async () => {
+	describe("Tag-based filtering with visitElementStart", () => {
+		it("can filter divs with class attributes using visitElementStart", async () => {
 			const skippedElements: { tag: string; class?: string }[] = [];
 
 			const visitor = {
@@ -201,17 +198,19 @@ describe("Issue #187: visitor tagName in context (KNOWN LIMITATION)", () => {
 				<div class="tracking analytics">Tracking div</div>
 			`;
 
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = await convertWithVisitor(html, undefined, wrapVisitorCallbacks(visitor));
 
 			expect(result).toBeTruthy();
-			// KNOWN ISSUE: visitElementStart is never called for divs, so filtering doesn't work
-			expect(skippedElements.length).toBe(0);
-			// The undesired content remains because filtering via visitElementStart doesn't work
-			expect(result).toContain("Advertisement");
-			expect(result).toContain("Tracking div");
+			expect(skippedElements.length).toBe(2);
+			expect(skippedElements[0].class).toContain("ad");
+			expect(skippedElements[1].class).toContain("tracking");
+			expect(result).not.toContain("Advertisement");
+			expect(result).not.toContain("Tracking div");
+			expect(result).toContain("Main content");
+			expect(result).toContain("Legitimate div");
 		});
 
-		it("cannot skip script elements using visitElementStart", async () => {
+		it("cannot skip script elements (stripped during sanitization)", async () => {
 			const skippedScripts: string[] = [];
 
 			const visitor = {
@@ -232,14 +231,13 @@ describe("Issue #187: visitor tagName in context (KNOWN LIMITATION)", () => {
 				<p>After script</p>
 			`;
 
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = await convertWithVisitor(html, undefined, wrapVisitorCallbacks(visitor));
 
 			expect(result).toBeTruthy();
-			// KNOWN ISSUE: visitElementStart is never called for scripts
 			expect(skippedScripts.length).toBe(0);
 		});
 
-		it("cannot skip style elements using visitElementStart", async () => {
+		it("cannot skip style elements (stripped during sanitization)", async () => {
 			const skippedStyles: string[] = [];
 
 			const visitor = {
@@ -258,45 +256,49 @@ describe("Issue #187: visitor tagName in context (KNOWN LIMITATION)", () => {
 				<style>div { color: blue; }</style>
 			`;
 
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = await convertWithVisitor(html, undefined, wrapVisitorCallbacks(visitor));
 
 			expect(result).toBeTruthy();
-			// KNOWN ISSUE: visitElementStart is never called for styles
 			expect(skippedStyles.length).toBe(0);
 		});
 	});
 
-	describe("Partial workaround: Using semantic visitor methods", () => {
-		it("can only filter specific elements: links and images", async () => {
-			// The TypeScript binding DOES support filtering for semantic elements:
-			// - visitLink: filter links by href
-			// - visitImage: filter images by src
-			// - visitHeading: modify headings
-			// - visitCodeBlock: modify code
-			// - visitStrong, visitEmphasis, visitStrikethrough, etc.
-			//
-			// However, it CANNOT filter generic elements like:
-			// - div (use for layout)
-			// - p (use for text grouping)
-			// - script (inline scripts)
-			// - style (inline styles)
-			// - section, article, aside (semantic containers)
+	describe("Visitor method coverage", () => {
+		it("supports both semantic and generic element filtering", async () => {
+			const filteredTags: string[] = [];
+
+			const visitor = {
+				visitElementStart: async (ctx: NodeContext) => {
+					filteredTags.push(ctx.tagName);
+					if (ctx.tagName === "div" && ctx.attributes?.class?.includes("ad")) {
+						return { type: "skip" };
+					}
+					return { type: "continue" };
+				},
+			};
 
 			const html = `
 				<article>
 					<h1>Title</h1>
-					<div class="ad">Ad content that cannot be filtered</div>
+					<div class="ad">Ad content filtered via visitElementStart</div>
 					<p>Text content</p>
-					<script>console.log("cannot filter");</script>
+					<script>console.log("stripped during sanitization");</script>
 					<style>body { color: blue; }</style>
 				</article>
 			`;
 
-			const result = await convertWithVisitor(html, undefined, {});
+			const result = await convertWithVisitor(html, undefined, wrapVisitorCallbacks(visitor));
 
 			expect(result).toBeTruthy();
-			// Ad div, script, and style tags remain in the output because
-			// visitElementStart is not called for generic elements
+			expect(filteredTags).toContain("article");
+			expect(filteredTags).toContain("h1");
+			expect(filteredTags).toContain("div");
+			expect(filteredTags).toContain("p");
+			expect(filteredTags).not.toContain("script");
+			expect(filteredTags).not.toContain("style");
+			expect(result).not.toContain("Ad content");
+			expect(result).toContain("Title");
+			expect(result).toContain("Text content");
 		});
 	});
 
@@ -337,8 +339,7 @@ describe("Issue #187: visitor tagName in context (KNOWN LIMITATION)", () => {
 			// tag_name (Rust) → tagName (JavaScript)
 		});
 
-		it("demonstrates how to build a context object like NAPI returns", () => {
-			// This simulates what the NAPI-RS binding should return for a div element
+		it("demonstrates context object structure returned by NAPI", () => {
 			const simulatedNapiContext: NodeContext = {
 				nodeType: "Element",
 				tagName: "div",
@@ -354,10 +355,6 @@ describe("Issue #187: visitor tagName in context (KNOWN LIMITATION)", () => {
 
 			expect(simulatedNapiContext.tagName).toBe("div");
 			expect(simulatedNapiContext.attributes.class).toBe("container");
-
-			// If this context were passed to a visitor callback, users could filter like:
-			// if (ctx.tagName === "div" && ctx.attributes.class?.includes("ad")) { return skip; }
-			// BUT: visitElementStart is NOT called for generic elements in TypeScript/Python bindings
 		});
 	});
 });

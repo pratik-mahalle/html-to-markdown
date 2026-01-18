@@ -17,12 +17,17 @@ module HtmlToMarkdown
     alias native_convert_with_options convert_with_options
     alias native_convert_with_metadata convert_with_metadata
     alias native_convert_with_metadata_handle convert_with_metadata_handle
+    alias native_convert_with_visitor convert_with_visitor
   end
 
   module_function
 
-  def convert(html, options = nil, _visitor = nil)
-    native_convert(html.to_s, options)
+  def convert(html, options = nil, visitor = nil)
+    if visitor
+      native_convert_with_visitor(html.to_s, options, visitor)
+    else
+      native_convert(html.to_s, options)
+    end
   end
 
   def convert_with_options(html, options_handle)
@@ -30,6 +35,8 @@ module HtmlToMarkdown
   end
 
   def convert_with_inline_images(html, options = nil, image_config = nil, _visitor = nil)
+    # NOTE: visitor parameter is accepted for API compatibility but not used in inline images mode
+    # The visitor pattern is only supported in the standard convert() method
     native_convert_with_inline_images(html.to_s, options, image_config)
   end
 
@@ -164,6 +171,8 @@ module HtmlToMarkdown
   # @see #convert_with_inline_images Extract inline images during conversion
   # @see ConversionOptions Detailed conversion configuration
   def convert_with_metadata(html, options = nil, metadata_config = nil, _visitor = nil)
+    # NOTE: visitor parameter is accepted for API compatibility but not used in metadata extraction mode
+    # The visitor pattern is only supported in the standard convert() method
     native_convert_with_metadata(html.to_s, options, metadata_config)
   end
 

@@ -602,4 +602,4 @@ RSpec.describe HtmlToMarkdown, 'Issue #187: Visitor tag_name context validation'
   end
 end
 
-# rubocop:enable RSpec/VerifiedDoubles
+# rubocop:enable RSpec/VerifiedDoubles, RSpec/DescribeMethod

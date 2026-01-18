@@ -245,11 +245,13 @@ impl VisitorDispatch {
     }
 }
 
-/// Type alias for an async visitor handle (Rc-wrapped `RefCell` for interior mutability).
+/// Type alias for an async visitor handle (Arc-wrapped `Mutex` for interior mutability).
 ///
 /// This allows async visitors to be passed around and shared while still being mutable.
+/// Uses Arc<Mutex<>> instead of Rc<RefCell<>> to enable Send across thread boundaries.
+/// The + Send + 'static bounds allow the visitor to be moved to other threads.
 #[cfg(feature = "async-visitor")]
-pub type AsyncVisitorHandle = std::rc::Rc<std::cell::RefCell<dyn AsyncHtmlVisitor>>;
+pub type AsyncVisitorHandle = std::sync::Arc<tokio::sync::Mutex<dyn AsyncHtmlVisitor + Send + 'static>>;
 
 /// Dispatch an async visitor callback and handle the result.
 ///
@@ -570,6 +572,534 @@ macro_rules! try_async_visitor_element_end {
     ($visitor:expr, $ctx:expr, $output:expr) => {{
         $crate::try_async_visitor!($visitor, visit_element_end, $ctx, $output);
     }};
+}
+
+/// Bridge that wraps an async visitor and implements the sync `HtmlVisitor` trait.
+///
+/// This bridge uses a channel-based approach to avoid blocking:
+/// 1. Sync converter sends visitor call request through channel
+/// 2. Async runtime receives request and awaits JS callback
+/// 3. Result sent back through response channel
+/// 4. Sync converter receives result and continues
+///
+/// This approach avoids deadlock by never blocking on async operations.
+#[cfg(feature = "async-visitor")]
+pub struct AsyncToSyncVisitorBridge {
+    async_visitor: AsyncVisitorHandle,
+    // Using tokio::sync::mpsc for async communication (request) and std::sync::mpsc for sync (response)
+    request_tx: tokio::sync::mpsc::UnboundedSender<VisitorRequest>,
+    response_rx: std::sync::mpsc::Receiver<crate::visitor::VisitResult>,
+}
+
+#[cfg(feature = "async-visitor")]
+enum VisitorRequest {
+    ElementStart(crate::visitor::NodeContext),
+    ElementEnd(crate::visitor::NodeContext, String),
+    Text(crate::visitor::NodeContext, String),
+    Link(crate::visitor::NodeContext, String, String, Option<String>),
+    Image(crate::visitor::NodeContext, String, String, Option<String>),
+    Heading(crate::visitor::NodeContext, u32, String, Option<String>),
+    CodeBlock(crate::visitor::NodeContext, Option<String>, String),
+    CodeInline(crate::visitor::NodeContext, String),
+    ListItem(crate::visitor::NodeContext, bool, String, String),
+    ListStart(crate::visitor::NodeContext, bool),
+    ListEnd(crate::visitor::NodeContext, bool, String),
+    TableStart(crate::visitor::NodeContext),
+    TableRow(crate::visitor::NodeContext, Vec<String>, bool),
+    TableEnd(crate::visitor::NodeContext, String),
+    Blockquote(crate::visitor::NodeContext, String, usize),
+    Strong(crate::visitor::NodeContext, String),
+    Emphasis(crate::visitor::NodeContext, String),
+    Strikethrough(crate::visitor::NodeContext, String),
+    Underline(crate::visitor::NodeContext, String),
+    Subscript(crate::visitor::NodeContext, String),
+    Superscript(crate::visitor::NodeContext, String),
+    Mark(crate::visitor::NodeContext, String),
+    LineBreak(crate::visitor::NodeContext),
+    HorizontalRule(crate::visitor::NodeContext),
+    CustomElement(crate::visitor::NodeContext, String, String),
+}
+
+#[cfg(feature = "async-visitor")]
+impl std::fmt::Debug for AsyncToSyncVisitorBridge {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("AsyncToSyncVisitorBridge")
+            .field("async_visitor", &self.async_visitor)
+            .finish_non_exhaustive()
+    }
+}
+
+#[cfg(feature = "async-visitor")]
+impl AsyncToSyncVisitorBridge {
+    /// Create a new async-to-sync visitor bridge with channel-based communication.
+    pub fn new(async_visitor: AsyncVisitorHandle) -> Self {
+        // Use tokio::sync::mpsc for async channels (not std::sync::mpsc which blocks)
+        let (request_tx, mut request_rx) = tokio::sync::mpsc::unbounded_channel();
+        let (response_tx, response_rx) = std::sync::mpsc::channel();
+
+        // Spawn async task to handle visitor requests
+        let visitor_clone = async_visitor.clone();
+        tokio::spawn(async move {
+            while let Some(request) = request_rx.recv().await {
+                let result = match request {
+                    VisitorRequest::ElementStart(ctx) => {
+                        let mut visitor = visitor_clone.lock().await;
+                        visitor.visit_element_start(&ctx).await
+                    }
+                    VisitorRequest::ElementEnd(ctx, output) => {
+                        let mut visitor = visitor_clone.lock().await;
+                        visitor.visit_element_end(&ctx, &output).await
+                    }
+                    VisitorRequest::Text(ctx, text) => {
+                        let mut visitor = visitor_clone.lock().await;
+                        visitor.visit_text(&ctx, &text).await
+                    }
+                    VisitorRequest::Link(ctx, href, text, title) => {
+                        let mut visitor = visitor_clone.lock().await;
+                        visitor.visit_link(&ctx, &href, &text, title.as_deref()).await
+                    }
+                    VisitorRequest::Image(ctx, src, alt, title) => {
+                        let mut visitor = visitor_clone.lock().await;
+                        visitor.visit_image(&ctx, &src, &alt, title.as_deref()).await
+                    }
+                    VisitorRequest::Heading(ctx, level, text, id) => {
+                        let mut visitor = visitor_clone.lock().await;
+                        visitor.visit_heading(&ctx, level, &text, id.as_deref()).await
+                    }
+                    VisitorRequest::CodeBlock(ctx, lang, code) => {
+                        let mut visitor = visitor_clone.lock().await;
+                        visitor.visit_code_block(&ctx, lang.as_deref(), &code).await
+                    }
+                    VisitorRequest::CodeInline(ctx, code) => {
+                        let mut visitor = visitor_clone.lock().await;
+                        visitor.visit_code_inline(&ctx, &code).await
+                    }
+                    VisitorRequest::ListItem(ctx, ordered, marker, text) => {
+                        let mut visitor = visitor_clone.lock().await;
+                        visitor.visit_list_item(&ctx, ordered, &marker, &text).await
+                    }
+                    VisitorRequest::ListStart(ctx, ordered) => {
+                        let mut visitor = visitor_clone.lock().await;
+                        visitor.visit_list_start(&ctx, ordered).await
+                    }
+                    VisitorRequest::ListEnd(ctx, ordered, output) => {
+                        let mut visitor = visitor_clone.lock().await;
+                        visitor.visit_list_end(&ctx, ordered, &output).await
+                    }
+                    VisitorRequest::TableStart(ctx) => {
+                        let mut visitor = visitor_clone.lock().await;
+                        visitor.visit_table_start(&ctx).await
+                    }
+                    VisitorRequest::TableRow(ctx, cells, is_header) => {
+                        let mut visitor = visitor_clone.lock().await;
+                        visitor.visit_table_row(&ctx, &cells, is_header).await
+                    }
+                    VisitorRequest::TableEnd(ctx, output) => {
+                        let mut visitor = visitor_clone.lock().await;
+                        visitor.visit_table_end(&ctx, &output).await
+                    }
+                    VisitorRequest::Blockquote(ctx, content, depth) => {
+                        let mut visitor = visitor_clone.lock().await;
+                        visitor.visit_blockquote(&ctx, &content, depth).await
+                    }
+                    VisitorRequest::Strong(ctx, text) => {
+                        let mut visitor = visitor_clone.lock().await;
+                        visitor.visit_strong(&ctx, &text).await
+                    }
+                    VisitorRequest::Emphasis(ctx, text) => {
+                        let mut visitor = visitor_clone.lock().await;
+                        visitor.visit_emphasis(&ctx, &text).await
+                    }
+                    VisitorRequest::Strikethrough(ctx, text) => {
+                        let mut visitor = visitor_clone.lock().await;
+                        visitor.visit_strikethrough(&ctx, &text).await
+                    }
+                    VisitorRequest::Underline(ctx, text) => {
+                        let mut visitor = visitor_clone.lock().await;
+                        visitor.visit_underline(&ctx, &text).await
+                    }
+                    VisitorRequest::Subscript(ctx, text) => {
+                        let mut visitor = visitor_clone.lock().await;
+                        visitor.visit_subscript(&ctx, &text).await
+                    }
+                    VisitorRequest::Superscript(ctx, text) => {
+                        let mut visitor = visitor_clone.lock().await;
+                        visitor.visit_superscript(&ctx, &text).await
+                    }
+                    VisitorRequest::Mark(ctx, text) => {
+                        let mut visitor = visitor_clone.lock().await;
+                        visitor.visit_mark(&ctx, &text).await
+                    }
+                    VisitorRequest::LineBreak(ctx) => {
+                        let mut visitor = visitor_clone.lock().await;
+                        visitor.visit_line_break(&ctx).await
+                    }
+                    VisitorRequest::HorizontalRule(ctx) => {
+                        let mut visitor = visitor_clone.lock().await;
+                        visitor.visit_horizontal_rule(&ctx).await
+                    }
+                    VisitorRequest::CustomElement(ctx, tag_name, html) => {
+                        let mut visitor = visitor_clone.lock().await;
+                        visitor.visit_custom_element(&ctx, &tag_name, &html).await
+                    }
+                };
+                let _ = response_tx.send(result);
+            }
+        });
+
+        Self {
+            async_visitor,
+            request_tx,
+            response_rx,
+        }
+    }
+}
+
+#[cfg(feature = "async-visitor")]
+impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
+    fn visit_element_start(&mut self, ctx: &crate::visitor::NodeContext) -> crate::visitor::VisitResult {
+        // Send request through channel
+        if self.request_tx.send(VisitorRequest::ElementStart(ctx.clone())).is_err() {
+            return crate::visitor::VisitResult::Continue;
+        }
+        // Wait for response
+        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+    }
+
+    fn visit_element_end(&mut self, ctx: &crate::visitor::NodeContext, output: &str) -> crate::visitor::VisitResult {
+        // Send request through channel
+        if self
+            .request_tx
+            .send(VisitorRequest::ElementEnd(ctx.clone(), output.to_string()))
+            .is_err()
+        {
+            return crate::visitor::VisitResult::Continue;
+        }
+        // Wait for response
+        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+    }
+
+    fn visit_text(&mut self, ctx: &crate::visitor::NodeContext, text: &str) -> crate::visitor::VisitResult {
+        if self
+            .request_tx
+            .send(VisitorRequest::Text(ctx.clone(), text.to_string()))
+            .is_err()
+        {
+            return crate::visitor::VisitResult::Continue;
+        }
+        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+    }
+
+    fn visit_link(
+        &mut self,
+        ctx: &crate::visitor::NodeContext,
+        href: &str,
+        text: &str,
+        title: Option<&str>,
+    ) -> crate::visitor::VisitResult {
+        if self
+            .request_tx
+            .send(VisitorRequest::Link(
+                ctx.clone(),
+                href.to_string(),
+                text.to_string(),
+                title.map(std::string::ToString::to_string),
+            ))
+            .is_err()
+        {
+            return crate::visitor::VisitResult::Continue;
+        }
+        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+    }
+
+    fn visit_image(
+        &mut self,
+        ctx: &crate::visitor::NodeContext,
+        src: &str,
+        alt: &str,
+        title: Option<&str>,
+    ) -> crate::visitor::VisitResult {
+        if self
+            .request_tx
+            .send(VisitorRequest::Image(
+                ctx.clone(),
+                src.to_string(),
+                alt.to_string(),
+                title.map(std::string::ToString::to_string),
+            ))
+            .is_err()
+        {
+            return crate::visitor::VisitResult::Continue;
+        }
+        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+    }
+
+    fn visit_heading(
+        &mut self,
+        ctx: &crate::visitor::NodeContext,
+        level: u32,
+        text: &str,
+        id: Option<&str>,
+    ) -> crate::visitor::VisitResult {
+        if self
+            .request_tx
+            .send(VisitorRequest::Heading(
+                ctx.clone(),
+                level,
+                text.to_string(),
+                id.map(std::string::ToString::to_string),
+            ))
+            .is_err()
+        {
+            return crate::visitor::VisitResult::Continue;
+        }
+        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+    }
+
+    fn visit_code_block(
+        &mut self,
+        ctx: &crate::visitor::NodeContext,
+        language: Option<&str>,
+        code: &str,
+    ) -> crate::visitor::VisitResult {
+        if self
+            .request_tx
+            .send(VisitorRequest::CodeBlock(
+                ctx.clone(),
+                language.map(std::string::ToString::to_string),
+                code.to_string(),
+            ))
+            .is_err()
+        {
+            return crate::visitor::VisitResult::Continue;
+        }
+        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+    }
+
+    fn visit_code_inline(&mut self, ctx: &crate::visitor::NodeContext, code: &str) -> crate::visitor::VisitResult {
+        if self
+            .request_tx
+            .send(VisitorRequest::CodeInline(ctx.clone(), code.to_string()))
+            .is_err()
+        {
+            return crate::visitor::VisitResult::Continue;
+        }
+        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+    }
+
+    fn visit_list_item(
+        &mut self,
+        ctx: &crate::visitor::NodeContext,
+        ordered: bool,
+        marker: &str,
+        text: &str,
+    ) -> crate::visitor::VisitResult {
+        if self
+            .request_tx
+            .send(VisitorRequest::ListItem(
+                ctx.clone(),
+                ordered,
+                marker.to_string(),
+                text.to_string(),
+            ))
+            .is_err()
+        {
+            return crate::visitor::VisitResult::Continue;
+        }
+        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+    }
+
+    fn visit_list_start(&mut self, ctx: &crate::visitor::NodeContext, ordered: bool) -> crate::visitor::VisitResult {
+        if self
+            .request_tx
+            .send(VisitorRequest::ListStart(ctx.clone(), ordered))
+            .is_err()
+        {
+            return crate::visitor::VisitResult::Continue;
+        }
+        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+    }
+
+    fn visit_list_end(
+        &mut self,
+        ctx: &crate::visitor::NodeContext,
+        ordered: bool,
+        output: &str,
+    ) -> crate::visitor::VisitResult {
+        if self
+            .request_tx
+            .send(VisitorRequest::ListEnd(ctx.clone(), ordered, output.to_string()))
+            .is_err()
+        {
+            return crate::visitor::VisitResult::Continue;
+        }
+        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+    }
+
+    fn visit_table_start(&mut self, ctx: &crate::visitor::NodeContext) -> crate::visitor::VisitResult {
+        if self.request_tx.send(VisitorRequest::TableStart(ctx.clone())).is_err() {
+            return crate::visitor::VisitResult::Continue;
+        }
+        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+    }
+
+    fn visit_table_row(
+        &mut self,
+        ctx: &crate::visitor::NodeContext,
+        cells: &[String],
+        is_header: bool,
+    ) -> crate::visitor::VisitResult {
+        if self
+            .request_tx
+            .send(VisitorRequest::TableRow(ctx.clone(), cells.to_vec(), is_header))
+            .is_err()
+        {
+            return crate::visitor::VisitResult::Continue;
+        }
+        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+    }
+
+    fn visit_table_end(&mut self, ctx: &crate::visitor::NodeContext, output: &str) -> crate::visitor::VisitResult {
+        if self
+            .request_tx
+            .send(VisitorRequest::TableEnd(ctx.clone(), output.to_string()))
+            .is_err()
+        {
+            return crate::visitor::VisitResult::Continue;
+        }
+        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+    }
+
+    fn visit_blockquote(
+        &mut self,
+        ctx: &crate::visitor::NodeContext,
+        content: &str,
+        depth: usize,
+    ) -> crate::visitor::VisitResult {
+        if self
+            .request_tx
+            .send(VisitorRequest::Blockquote(ctx.clone(), content.to_string(), depth))
+            .is_err()
+        {
+            return crate::visitor::VisitResult::Continue;
+        }
+        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+    }
+
+    fn visit_strong(&mut self, ctx: &crate::visitor::NodeContext, text: &str) -> crate::visitor::VisitResult {
+        if self
+            .request_tx
+            .send(VisitorRequest::Strong(ctx.clone(), text.to_string()))
+            .is_err()
+        {
+            return crate::visitor::VisitResult::Continue;
+        }
+        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+    }
+
+    fn visit_emphasis(&mut self, ctx: &crate::visitor::NodeContext, text: &str) -> crate::visitor::VisitResult {
+        if self
+            .request_tx
+            .send(VisitorRequest::Emphasis(ctx.clone(), text.to_string()))
+            .is_err()
+        {
+            return crate::visitor::VisitResult::Continue;
+        }
+        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+    }
+
+    fn visit_strikethrough(&mut self, ctx: &crate::visitor::NodeContext, text: &str) -> crate::visitor::VisitResult {
+        if self
+            .request_tx
+            .send(VisitorRequest::Strikethrough(ctx.clone(), text.to_string()))
+            .is_err()
+        {
+            return crate::visitor::VisitResult::Continue;
+        }
+        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+    }
+
+    fn visit_underline(&mut self, ctx: &crate::visitor::NodeContext, text: &str) -> crate::visitor::VisitResult {
+        if self
+            .request_tx
+            .send(VisitorRequest::Underline(ctx.clone(), text.to_string()))
+            .is_err()
+        {
+            return crate::visitor::VisitResult::Continue;
+        }
+        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+    }
+
+    fn visit_subscript(&mut self, ctx: &crate::visitor::NodeContext, text: &str) -> crate::visitor::VisitResult {
+        if self
+            .request_tx
+            .send(VisitorRequest::Subscript(ctx.clone(), text.to_string()))
+            .is_err()
+        {
+            return crate::visitor::VisitResult::Continue;
+        }
+        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+    }
+
+    fn visit_superscript(&mut self, ctx: &crate::visitor::NodeContext, text: &str) -> crate::visitor::VisitResult {
+        if self
+            .request_tx
+            .send(VisitorRequest::Superscript(ctx.clone(), text.to_string()))
+            .is_err()
+        {
+            return crate::visitor::VisitResult::Continue;
+        }
+        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+    }
+
+    fn visit_line_break(&mut self, ctx: &crate::visitor::NodeContext) -> crate::visitor::VisitResult {
+        if self.request_tx.send(VisitorRequest::LineBreak(ctx.clone())).is_err() {
+            return crate::visitor::VisitResult::Continue;
+        }
+        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+    }
+
+    fn visit_mark(&mut self, ctx: &crate::visitor::NodeContext, text: &str) -> crate::visitor::VisitResult {
+        if self
+            .request_tx
+            .send(VisitorRequest::Mark(ctx.clone(), text.to_string()))
+            .is_err()
+        {
+            return crate::visitor::VisitResult::Continue;
+        }
+        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+    }
+
+    fn visit_horizontal_rule(&mut self, ctx: &crate::visitor::NodeContext) -> crate::visitor::VisitResult {
+        if self
+            .request_tx
+            .send(VisitorRequest::HorizontalRule(ctx.clone()))
+            .is_err()
+        {
+            return crate::visitor::VisitResult::Continue;
+        }
+        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+    }
+
+    fn visit_custom_element(
+        &mut self,
+        ctx: &crate::visitor::NodeContext,
+        tag_name: &str,
+        html: &str,
+    ) -> crate::visitor::VisitResult {
+        if self
+            .request_tx
+            .send(VisitorRequest::CustomElement(
+                ctx.clone(),
+                tag_name.to_string(),
+                html.to_string(),
+            ))
+            .is_err()
+        {
+            return crate::visitor::VisitResult::Continue;
+        }
+        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+    }
 }
 
 #[cfg(test)]

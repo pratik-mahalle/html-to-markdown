@@ -120,9 +120,111 @@ return { type: 'error', message: 'Invalid link' };
 
 ---
 
+## Language & Platform Support
+
+### Binding Support Matrix
+
+The visitor pattern is supported in the following language bindings:
+
+| Language | Visitor Support | Async | Import |
+|----------|-----------------|-------|--------|
+| **Rust** | ✅ Core | ✅ Via Tokio | Use trait |
+| **Python** | ✅ Full | ✅ `convert_with_async_visitor` | `from html_to_markdown import convert_with_visitor` |
+| **TypeScript/Node.js** | ✅ Full | ✅ `convertWithAsyncVisitor` | `import { convertWithVisitor } from '@kreuzberg/html-to-markdown-node'` |
+| **Ruby** | ✅ Full | ❌ Sync only | `HtmlToMarkdown.convert_with_visitor` |
+| **PHP** | ✅ Full | ❌ Sync only | `Converter::convertWithVisitor` |
+| **WebAssembly (WASM)** | ❌ Not supported | — | See [WASM alternatives](#wasm-visitor-pattern-workarounds) |
+| **Go** | ❌ Not supported | — | Basic conversion only |
+| **Java** | ❌ Not supported | — | Basic conversion only |
+| **C#** | ❌ Not supported | — | Basic conversion only |
+| **Elixir** | ❌ Not supported | — | Basic conversion only |
+
+### WASM Visitor Pattern Workarounds
+
+The WebAssembly binding does **not** support the visitor pattern due to fundamental FFI limitations:
+
+1. **Memory safety**: Cannot safely pass mutable callbacks across WASM boundary
+2. **Single-threaded**: No equivalent to Node.js's `ThreadsafeFunction` primitive
+3. **Serialization overhead**: Converting context between WASM and JS per callback would eliminate performance benefits
+
+**Recommended alternatives for WASM users:**
+
+- **Use Node.js binding instead**: `@kreuzberg/html-to-markdown-node` for ~3× better performance with full visitor support
+- **Use server-side bindings**: Python, Ruby, or PHP for visitor pattern with callback support
+- **Preprocess HTML**: Manipulate HTML before passing to WASM converter
+- **Post-process Markdown**: Transform output Markdown after conversion
+
+See [WASM README: Visitor Pattern Support](../../crates/html-to-markdown-wasm/README.md#visitor-pattern-support) for detailed alternatives and code examples.
+
 ## Supported Visitor Methods
 
-The visitor pattern supports 40+ methods for different HTML elements:
+The visitor pattern supports 40+ methods for different HTML elements.
+
+> **⚠️ Important Limitations:**
+>
+> 1. **Script and Style Tags**: `<script>` and `<style>` elements are **automatically stripped** during HTML sanitization before the visitor pattern runs. You cannot intercept or process these elements with visitor callbacks.
+>
+> 2. **Generic Elements**: For elements without dedicated visitor methods (like `<div>`, `<span>`, `<section>`, etc.), use `visit_element_start` and `visit_element_end` to filter by checking `ctx.tag_name`.
+>
+> 3. **Element-Specific Methods**: When available, prefer using specific methods like `visit_link`, `visit_image`, `visit_heading` over the generic `visit_element_start` for better type safety and clearer code.
+>
+> 4. **WASM Not Supported**: WebAssembly binding does not support visitor pattern. See [WASM alternatives](#wasm-visitor-pattern-workarounds) above.
+
+### Generic Element Visitor
+
+| Method | Parameters | Description |
+|--------|------------|-------------|
+| `visit_element_start` | `(ctx)` | Called for ALL elements at entry (generic catch-all) |
+| `visit_element_end` | `(ctx, output)` | Called for ALL elements at exit (generic catch-all) |
+
+**Example - Filtering generic elements:**
+
+**Python:**
+```python
+class ElementFilter:
+    def visit_element_start(self, ctx):
+        # Filter divs with specific class
+        if ctx.tag_name == "div" and "ad" in ctx.attributes.get("class", ""):
+            return {"type": "skip"}
+        # Filter section elements
+        if ctx.tag_name == "section":
+            return {"type": "skip"}
+        return {"type": "continue"}
+```
+
+**TypeScript:**
+```typescript
+const visitor = {
+  visitElementStart(ctx: NodeContext): VisitResult {
+    // Filter divs with specific class
+    if (ctx.tagName === 'div' && ctx.attributes.class?.includes('ad')) {
+      return { type: 'skip' };
+    }
+    // Filter section elements
+    if (ctx.tagName === 'section') {
+      return { type: 'skip' };
+    }
+    return { type: 'continue' };
+  },
+};
+```
+
+**Ruby:**
+```ruby
+class ElementFilter
+  def visit_element_start(ctx)
+    # Filter divs with specific class
+    if ctx[:tag_name] == "div" && ctx[:attributes]["class"]&.include?("ad")
+      { type: :skip }
+    # Filter section elements
+    elsif ctx[:tag_name] == "section"
+      { type: :skip }
+    else
+      { type: :continue }
+    end
+  end
+end
+```
 
 ### Text & Inline Elements
 
@@ -171,7 +273,6 @@ The visitor pattern supports 40+ methods for different HTML elements:
 | `visit_blockquote` | `(ctx, content)` | Blockquotes `<blockquote>` |
 | `visit_code_block` | `(ctx, code, language?)` | Code blocks `<pre><code>` |
 | `visit_horizontal_rule` | `(ctx)` | Horizontal rules `<hr>` |
-| `visit_div` | `(ctx, content)` | Generic containers `<div>` |
 
 ### Tables
 
@@ -337,10 +438,12 @@ markdown = HtmlToMarkdown.convert_with_visitor(html, visitor: MyVisitor.new)
 # Output: "[Download](https://new-cdn.com/file.pdf)"
 ```
 
-### PHP
+### PHP (Synchronous)
 
 ```php
 <?php
+declare(strict_types=1);
+
 use HtmlToMarkdown\Converter;
 
 readonly class MyVisitor {
@@ -389,7 +492,7 @@ visitor = CdnRewriter("https://old.cdn.com", "https://new.cdn.com")
 markdown = convert_with_visitor(html, visitor=visitor)
 ```
 
-See: [`cdn-rewrite.py`](./cdn-rewrite.py), [`cdn-rewrite.ts`](./cdn-rewrite.ts), [`cdn-rewrite.rb`](./cdn-rewrite.rb)
+See: [`cdn-rewrite.py`](./cdn-rewrite.py), [`cdn-rewrite.ts`](./cdn-rewrite.ts), [`cdn-rewrite.rb`](./cdn-rewrite.rb), [`cdn-rewrite.php`](./cdn-rewrite.php)
 
 ### 2. Content Filtering
 
@@ -397,16 +500,14 @@ Remove unwanted elements like ads, tracking pixels, or specific classes:
 
 ```python
 class ContentFilter:
-    def visit_div(self, ctx, content):
+    def visit_element_start(self, ctx):
         # Remove divs with class="ad" or class="tracking"
-        classes = ctx.attributes.get("class", "")
-        if "ad" in classes or "tracking" in classes:
-            return {"type": "skip"}
+        # Note: Script and style tags are automatically stripped during HTML parsing
+        if ctx.tag_name == "div":
+            classes = ctx.attributes.get("class", "")
+            if "ad" in classes or "tracking" in classes:
+                return {"type": "skip"}
         return {"type": "continue"}
-
-    def visit_script(self, ctx):
-        # Always remove scripts
-        return {"type": "skip"}
 
     def visit_image(self, ctx, src, alt, title):
         # Remove tracking pixels (1x1 images)
@@ -419,7 +520,7 @@ class ContentFilter:
 markdown = convert_with_visitor(html, visitor=ContentFilter())
 ```
 
-See: [`content-filter.py`](./content-filter.py), [`content-filter.ts`](./content-filter.ts)
+See: [`content-filter.py`](./content-filter.py), [`content-filter.ts`](./content-filter.ts), [`content-filter.php`](./content-filter.php)
 
 ### 3. Link Footnote References
 
@@ -590,14 +691,15 @@ Returning `{"type": "error"}` immediately stops conversion and raises an excepti
 
 ## Working Examples
 
-This directory contains executable examples demonstrating the visitor pattern:
+This directory contains executable examples demonstrating the visitor pattern across multiple language bindings:
 
-- **`cdn-rewrite.py`**, **`cdn-rewrite.ts`**, **`cdn-rewrite.rb`** - CDN URL rewriting
-- **`content-filter.py`**, **`content-filter.ts`** - Content filtering and element removal
+### Python
+- **`cdn-rewrite.py`** - CDN URL rewriting
+- **`content-filter.py`** - Content filtering and element removal
 - **`accessibility-check.py`** - Accessibility validation (alt text, heading hierarchy)
-- **`async-validation.py`**, **`async-validation.ts`** - Asynchronous URL validation
+- **`async-validation.py`** - Asynchronous URL validation
 
-Run the Python examples:
+Run Python examples:
 ```bash
 cd examples/visitor-pattern
 pip install -r requirements.txt
@@ -605,7 +707,12 @@ python cdn-rewrite.py
 python async-validation.py
 ```
 
-Run the TypeScript examples:
+### TypeScript/JavaScript
+- **`cdn-rewrite.ts`** - CDN URL rewriting
+- **`content-filter.ts`** - Content filtering and element removal
+- **`async-validation.ts`** - Asynchronous URL validation
+
+Run TypeScript examples:
 ```bash
 cd examples/visitor-pattern
 npm install
@@ -613,11 +720,25 @@ npx tsx cdn-rewrite.ts
 npx tsx async-validation.ts
 ```
 
-Run the Ruby examples:
+### Ruby
+- **`cdn-rewrite.rb`** - CDN URL rewriting
+
+Run Ruby examples:
 ```bash
 cd examples/visitor-pattern
 bundle install
 ruby cdn-rewrite.rb
+```
+
+### PHP
+- **`cdn-rewrite.php`** - CDN URL rewriting
+- **`content-filter.php`** - Content filtering and element removal
+
+Run PHP examples:
+```bash
+cd examples/visitor-pattern
+php cdn-rewrite.php
+php content-filter.php
 ```
 
 ---
