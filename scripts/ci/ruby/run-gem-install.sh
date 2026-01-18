@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Vendor html-to-markdown crate for standalone gem build
+ruby scripts/publish/ruby/vendor-html-to-markdown.rb
+
 pushd packages/ruby >/dev/null
 bundle exec rake clean
 ruby ../../scripts/prepare_ruby_gem.rb
