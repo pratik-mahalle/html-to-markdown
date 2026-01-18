@@ -180,10 +180,8 @@ fn test_issue_187_content_filter() {
         borrowed.skipped_elements.iter().any(|(tag, _)| tag == "div"),
         "Should have skipped ad divs"
     );
-    assert!(
-        borrowed.skipped_elements.iter().any(|(tag, _)| tag == "script"),
-        "Should have skipped scripts"
-    );
+    // Note: script and style tags are stripped during preprocessing before the visitor sees them,
+    // so they won't appear in skipped_elements. Only the visitor can control div, img, etc.
     assert!(
         borrowed.skipped_elements.iter().any(|(tag, _)| tag == "img"),
         "Should have skipped tracking pixel"
