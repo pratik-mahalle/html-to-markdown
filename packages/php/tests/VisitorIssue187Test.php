@@ -73,11 +73,14 @@ HTML;
                 self::assertArrayHasKey(
                     $tag,
                     $visitor->tagNames,
-                    "Expected tag '{$tag}' not found in visited elements. Got: " . \implode(', ', \array_keys($visitor->tagNames))
+                    "Expected tag '{$tag}' not found in visited elements. Got: "
+                        . \implode(', ', \array_keys($visitor->tagNames))
                 );
             }
         } catch (Throwable $e) {
-            $this->markTestSkipped('PHP visitor integration not yet fully implemented in ext-php-rs bindings: ' . $e->getMessage());
+            $this->markTestSkipped(
+                'PHP visitor integration not yet fully implemented in ext-php-rs bindings: ' . $e->getMessage()
+            );
         }
     }
 
@@ -127,7 +130,9 @@ HTML;
             // Hidden content should not appear in output
             self::assertStringNotContainsString('Hidden div', $result);
         } catch (Throwable $e) {
-            $this->markTestSkipped('PHP visitor integration not yet fully implemented in ext-php-rs bindings: ' . $e->getMessage());
+            $this->markTestSkipped(
+                'PHP visitor integration not yet fully implemented in ext-php-rs bindings: ' . $e->getMessage()
+            );
         }
     }
 
@@ -186,7 +191,9 @@ HTML;
                 );
             }
         } catch (Throwable $e) {
-            $this->markTestSkipped('PHP visitor integration not yet fully implemented in ext-php-rs bindings: ' . $e->getMessage());
+            $this->markTestSkipped(
+                'PHP visitor integration not yet fully implemented in ext-php-rs bindings: ' . $e->getMessage()
+            );
         }
     }
 
@@ -242,7 +249,9 @@ HTML;
             self::assertContains('script', $visitor->capturedTagNames, 'script tag not captured');
             self::assertContains('style', $visitor->capturedTagNames, 'style tag not captured');
         } catch (Throwable $e) {
-            $this->markTestSkipped('PHP visitor integration not yet fully implemented in ext-php-rs bindings: ' . $e->getMessage());
+            $this->markTestSkipped(
+                'PHP visitor integration not yet fully implemented in ext-php-rs bindings: ' . $e->getMessage()
+            );
         }
     }
 
@@ -305,7 +314,9 @@ HTML;
             // But p tag with skip-me class should still be in output (we only skipped divs)
             // This demonstrates that tagName filtering works correctly
         } catch (Throwable $e) {
-            $this->markTestSkipped('PHP visitor integration not yet fully implemented in ext-php-rs bindings: ' . $e->getMessage());
+            $this->markTestSkipped(
+                'PHP visitor integration not yet fully implemented in ext-php-rs bindings: ' . $e->getMessage()
+            );
         }
     }
 
@@ -451,7 +462,9 @@ HTML;
             self::assertStringContainsString('Normal content', $result);
             self::assertStringContainsString('Keep this paragraph', $result);
         } catch (Throwable $e) {
-            $this->markTestSkipped('PHP visitor integration not yet fully implemented in ext-php-rs bindings: ' . $e->getMessage());
+            $this->markTestSkipped(
+                'PHP visitor integration not yet fully implemented in ext-php-rs bindings: ' . $e->getMessage()
+            );
         }
     }
 }

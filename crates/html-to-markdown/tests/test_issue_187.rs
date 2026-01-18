@@ -14,6 +14,7 @@ use std::rc::Rc;
 
 /// This is what the documentation SHOWS (but doesn't work)
 /// The methods visit_div, visit_script, visit_style DO NOT EXIST
+#[allow(dead_code)]
 #[derive(Debug, Default)]
 struct DocumentedButBrokenVisitor {
     skipped_elements: Vec<(String, String)>,
