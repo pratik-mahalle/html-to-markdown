@@ -30,7 +30,7 @@ mod visitor_support;
 use html_to_markdown_rs::{
     CodeBlockStyle, ConversionError, ConversionOptions, ConversionOptionsUpdate, DEFAULT_INLINE_IMAGE_LIMIT,
     HeadingStyle, HighlightStyle, HtmlExtraction, InlineImage, InlineImageConfig, InlineImageConfigUpdate,
-    InlineImageWarning, ListIndentType, MetadataConfigUpdate, NewlineStyle, PreprocessingOptionsUpdate,
+    InlineImageWarning, ListIndentType, MetadataConfigUpdate, NewlineStyle, OutputFormat, PreprocessingOptionsUpdate,
     PreprocessingPreset, WhitespaceMode,
 };
 use std::path::PathBuf;
@@ -309,6 +309,9 @@ fn parse_conversion_options(table: &ZendHashTable) -> PhpResult<ConversionOption
             "preserve_tags" => {
                 update.preserve_tags = Some(read_string_list(value, &key_str)?);
             }
+            "output_format" => {
+                update.output_format = Some(parse_output_format(value, &key_str)?);
+            }
             _ => {}
         }
     }
@@ -481,6 +484,14 @@ fn parse_preprocessing_preset(value: &Zval, key: &str) -> PhpResult<Preprocessin
         "standard" => Ok(PreprocessingPreset::Standard),
         "aggressive" => Ok(PreprocessingPreset::Aggressive),
         other => Err(PhpException::default(format!("Invalid preprocessing preset '{other}'"))),
+    }
+}
+
+fn parse_output_format(value: &Zval, key: &str) -> PhpResult<OutputFormat> {
+    match read_string(value, key)?.as_str() {
+        "djot" => Ok(OutputFormat::Djot),
+        "markdown" => Ok(OutputFormat::Markdown),
+        other => Err(PhpException::default(format!("Invalid output_format '{other}'"))),
     }
 }
 

@@ -41,7 +41,7 @@ from html_to_markdown.exceptions import (
     InvalidParserError,
     MissingDependencyError,
 )
-from html_to_markdown.options import ConversionOptions, PreprocessingOptions
+from html_to_markdown.options import ConversionOptions, OutputFormat, PreprocessingOptions
 from html_to_markdown.v1_compat import convert_to_markdown, markdownify
 
 __all__ = [
@@ -57,6 +57,7 @@ __all__ = [
     "MetadataConfig",
     "MissingDependencyError",
     "OptionsHandle",
+    "OutputFormat",
     "PreprocessingOptions",
     "convert",
     "convert_to_markdown",
@@ -73,4 +74,4 @@ __all__ = [
     "stop_profiling",
 ]
 
-__version__ = "2.22.6"
+__version__ = "2.23.0"

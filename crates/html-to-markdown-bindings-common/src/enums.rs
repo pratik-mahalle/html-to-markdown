@@ -5,7 +5,8 @@
 //! JSON parsing in bindings.
 
 use html_to_markdown_rs::{
-    CodeBlockStyle, HeadingStyle, HighlightStyle, ListIndentType, NewlineStyle, PreprocessingPreset, WhitespaceMode,
+    CodeBlockStyle, HeadingStyle, HighlightStyle, ListIndentType, NewlineStyle, OutputFormat, PreprocessingPreset,
+    WhitespaceMode,
 };
 use serde::{Deserialize, Serialize};
 
@@ -221,6 +222,34 @@ impl From<PreprocessingPreset> for PreprocessingPresetWrapper {
             PreprocessingPreset::Minimal => Self::Minimal,
             PreprocessingPreset::Standard => Self::Standard,
             PreprocessingPreset::Aggressive => Self::Aggressive,
+        }
+    }
+}
+
+/// Wrapper for `OutputFormat` enum with serde support.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum OutputFormatWrapper {
+    /// Standard Markdown (CommonMark compatible). Default.
+    Markdown,
+    /// Djot lightweight markup language.
+    Djot,
+}
+
+impl From<OutputFormatWrapper> for OutputFormat {
+    fn from(wrapper: OutputFormatWrapper) -> Self {
+        match wrapper {
+            OutputFormatWrapper::Markdown => Self::Markdown,
+            OutputFormatWrapper::Djot => Self::Djot,
+        }
+    }
+}
+
+impl From<OutputFormat> for OutputFormatWrapper {
+    fn from(format: OutputFormat) -> Self {
+        match format {
+            OutputFormat::Markdown => Self::Markdown,
+            OutputFormat::Djot => Self::Djot,
         }
     }
 }

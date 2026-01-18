@@ -3,7 +3,7 @@ use clap::{Parser, ValueEnum};
 use encoding_rs::Encoding;
 use html_to_markdown_rs::{
     CodeBlockStyle, ConversionOptions, HeadingStyle, HighlightStyle, ListIndentType, MetadataConfig, NewlineStyle,
-    PreprocessingOptions, PreprocessingPreset, WhitespaceMode, convert, convert_with_metadata,
+    OutputFormat, PreprocessingOptions, PreprocessingPreset, WhitespaceMode, convert, convert_with_metadata,
     metadata::DEFAULT_MAX_STRUCTURED_DATA_SIZE,
 };
 use reqwest::blocking::Client;
@@ -393,6 +393,15 @@ struct Cli {
     #[arg(long)]
     #[arg(help_heading = "Debugging")]
     debug: bool,
+
+    /// Output format (markdown or djot)
+    ///
+    /// Choose the output format:
+    /// - 'markdown': Standard Markdown (CommonMark compatible, default)
+    /// - 'djot': Djot lightweight markup language
+    #[arg(short = 'f', long = "output-format", value_name = "FORMAT")]
+    #[arg(help_heading = "Output Format")]
+    output_format: Option<CliOutputFormat>,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, ValueEnum)]
@@ -535,6 +544,23 @@ impl From<CliPreprocessingPreset> for PreprocessingPreset {
             CliPreprocessingPreset::Minimal => Self::Minimal,
             CliPreprocessingPreset::Standard => Self::Standard,
             CliPreprocessingPreset::Aggressive => Self::Aggressive,
+        }
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, ValueEnum)]
+enum CliOutputFormat {
+    /// Standard Markdown (CommonMark compatible)
+    Markdown,
+    /// Djot lightweight markup language
+    Djot,
+}
+
+impl From<CliOutputFormat> for OutputFormat {
+    fn from(format: CliOutputFormat) -> Self {
+        match format {
+            CliOutputFormat::Markdown => Self::Markdown,
+            CliOutputFormat::Djot => Self::Djot,
         }
     }
 }
@@ -747,6 +773,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         debug: cli.debug,
         strip_tags: cli.strip_tags.unwrap_or(defaults.strip_tags),
         preserve_tags: Vec::new(),
+        output_format: cli.output_format.map_or(OutputFormat::default(), Into::into),
     };
 
     let output_content = if cli.with_metadata {

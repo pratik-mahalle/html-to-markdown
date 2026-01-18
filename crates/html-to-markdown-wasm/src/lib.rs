@@ -13,7 +13,7 @@ use html_to_markdown_rs::MetadataConfigUpdate;
 use html_to_markdown_rs::safety::guard_panic;
 use html_to_markdown_rs::{
     CodeBlockStyle, ConversionOptions as RustConversionOptions, ConversionOptionsUpdate, HeadingStyle, HighlightStyle,
-    ListIndentType, NewlineStyle, PreprocessingOptionsUpdate, PreprocessingPreset, WhitespaceMode,
+    ListIndentType, NewlineStyle, OutputFormat, PreprocessingOptionsUpdate, PreprocessingPreset, WhitespaceMode,
 };
 use serde::{Deserialize, Serialize};
 
@@ -179,6 +179,25 @@ impl From<WasmPreprocessingPreset> for PreprocessingPreset {
     }
 }
 
+/// Output format for conversion
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum WasmOutputFormat {
+    /// Standard Markdown (CommonMark compatible)
+    Markdown,
+    /// Djot lightweight markup language
+    Djot,
+}
+
+impl From<WasmOutputFormat> for OutputFormat {
+    fn from(val: WasmOutputFormat) -> Self {
+        match val {
+            WasmOutputFormat::Markdown => OutputFormat::Markdown,
+            WasmOutputFormat::Djot => OutputFormat::Djot,
+        }
+    }
+}
+
 /// HTML preprocessing options
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -280,6 +299,8 @@ pub struct WasmConversionOptions {
     pub strip_tags: Option<Vec<String>>,
     /// List of HTML tags to preserve as-is in the output
     pub preserve_tags: Option<Vec<String>>,
+    /// Output format for conversion
+    pub output_format: Option<WasmOutputFormat>,
 }
 
 impl From<WasmConversionOptions> for ConversionOptionsUpdate {
@@ -317,6 +338,7 @@ impl From<WasmConversionOptions> for ConversionOptionsUpdate {
             debug: val.debug,
             strip_tags: val.strip_tags,
             preserve_tags: val.preserve_tags,
+            output_format: val.output_format.map(Into::into),
         }
     }
 }
@@ -867,6 +889,7 @@ mod tests {
             debug: None,
             strip_tags: None,
             preserve_tags: None,
+            output_format: None,
         };
 
         let js_options = serde_wasm_bindgen::to_value(&options).unwrap();

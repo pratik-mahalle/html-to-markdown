@@ -8,7 +8,7 @@
 //! - Visitor callbacks for custom emphasis processing
 //! - Bootstrap caret detection (.caret class)
 
-use crate::options::ConversionOptions;
+use crate::options::{ConversionOptions, OutputFormat};
 #[allow(unused_imports)]
 use std::collections::BTreeMap;
 use tl::{NodeHandle, Parser};
@@ -152,6 +152,11 @@ fn handle_strong(
                 output.push_str(prefix);
                 if ctx.in_strong {
                     output.push_str(trimmed);
+                } else if options.output_format == OutputFormat::Djot {
+                    // Djot uses single asterisk for strong
+                    output.push('*');
+                    output.push_str(trimmed);
+                    output.push('*');
                 } else {
                     output.push(options.strong_em_symbol);
                     output.push(options.strong_em_symbol);
@@ -173,6 +178,11 @@ fn handle_strong(
                 output.push_str(prefix);
                 if ctx.in_strong {
                     output.push_str(trimmed);
+                } else if options.output_format == OutputFormat::Djot {
+                    // Djot uses single asterisk for strong
+                    output.push('*');
+                    output.push_str(trimmed);
+                    output.push('*');
                 } else {
                     output.push(options.strong_em_symbol);
                     output.push(options.strong_em_symbol);
@@ -277,9 +287,16 @@ fn handle_emphasis(
             let (prefix, suffix, trimmed) = chomp_inline(&content);
             if !content.trim().is_empty() {
                 output.push_str(prefix);
-                output.push(options.strong_em_symbol);
-                output.push_str(trimmed);
-                output.push(options.strong_em_symbol);
+                if options.output_format == OutputFormat::Djot {
+                    // Djot uses underscore for emphasis
+                    output.push('_');
+                    output.push_str(trimmed);
+                    output.push('_');
+                } else {
+                    output.push(options.strong_em_symbol);
+                    output.push_str(trimmed);
+                    output.push(options.strong_em_symbol);
+                }
                 append_inline_suffix(output, suffix, !trimmed.is_empty(), node_handle, parser, dom_ctx);
             } else if !content.is_empty() {
                 output.push_str(prefix);
@@ -300,9 +317,16 @@ fn handle_emphasis(
             let (prefix, suffix, trimmed) = chomp_inline(&content);
             if !content.trim().is_empty() {
                 output.push_str(prefix);
-                output.push(options.strong_em_symbol);
-                output.push_str(trimmed);
-                output.push(options.strong_em_symbol);
+                if options.output_format == OutputFormat::Djot {
+                    // Djot uses underscore for emphasis
+                    output.push('_');
+                    output.push_str(trimmed);
+                    output.push('_');
+                } else {
+                    output.push(options.strong_em_symbol);
+                    output.push_str(trimmed);
+                    output.push(options.strong_em_symbol);
+                }
                 append_inline_suffix(output, suffix, !trimmed.is_empty(), node_handle, parser, dom_ctx);
             } else if !content.is_empty() {
                 output.push_str(prefix);

@@ -1,5 +1,9 @@
 from typing import Literal, TypeAlias, TypedDict
 
+class OutputFormat:
+    MARKDOWN: str
+    DJOT: str
+
 class PreprocessingOptions:
     enabled: bool
     preset: Literal["minimal", "standard", "aggressive"]
@@ -48,6 +52,7 @@ class ConversionOptions:
     strip_tags: list[str]
     preserve_tags: list[str]
     skip_images: bool
+    output_format: Literal["markdown", "djot"]
 
     def __init__(
         self,
@@ -84,6 +89,7 @@ class ConversionOptions:
         strip_tags: list[str] = [],
         preserve_tags: list[str] = [],
         skip_images: bool = False,
+        output_format: Literal["markdown", "djot"] = "markdown",
     ) -> None: ...
 
 class InlineImageConfig:

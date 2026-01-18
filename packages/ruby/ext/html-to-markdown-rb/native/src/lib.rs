@@ -2,7 +2,7 @@
 use html_to_markdown_rs::{
     CodeBlockStyle, ConversionOptions, ConversionOptionsUpdate, DEFAULT_INLINE_IMAGE_LIMIT, HeadingStyle,
     HighlightStyle, HtmlExtraction, InlineImage, InlineImageConfig, InlineImageConfigUpdate, InlineImageWarning,
-    ListIndentType, NewlineStyle, PreprocessingOptionsUpdate, PreprocessingPreset, WhitespaceMode,
+    ListIndentType, NewlineStyle, OutputFormat, PreprocessingOptionsUpdate, PreprocessingPreset, WhitespaceMode,
     convert as convert_inner, convert_with_inline_images as convert_with_inline_images_inner, error::ConversionError,
     safety::guard_panic,
 };
@@ -998,6 +998,14 @@ fn parse_code_block_style(value: Value) -> Result<CodeBlockStyle, Error> {
     }
 }
 
+fn parse_output_format(value: Value) -> Result<OutputFormat, Error> {
+    match symbol_to_string(value)?.as_str() {
+        "markdown" => Ok(OutputFormat::Markdown),
+        "djot" => Ok(OutputFormat::Djot),
+        other => Err(arg_error(format!("invalid output_format: {other}"))),
+    }
+}
+
 fn parse_preset(value: Value) -> Result<PreprocessingPreset, Error> {
     match symbol_to_string(value)?.as_str() {
         "minimal" => Ok(PreprocessingPreset::Minimal),
@@ -1157,6 +1165,9 @@ fn build_conversion_options(ruby: &Ruby, options: Option<Value>) -> Result<Conve
             }
             "preserve_tags" => {
                 update.preserve_tags = Some(parse_vec_of_strings(val)?);
+            }
+            "output_format" => {
+                update.output_format = Some(parse_output_format(val)?);
             }
             _ => {}
         }

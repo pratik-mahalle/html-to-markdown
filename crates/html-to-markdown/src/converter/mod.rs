@@ -93,6 +93,7 @@
 pub mod block;
 pub mod context;
 pub mod form;
+pub mod format;
 pub mod inline;
 pub mod list;
 pub mod main;
@@ -146,6 +147,9 @@ pub use semantic::dispatch_semantic_handler;
 
 // Re-export utility submodules for public access to their types
 pub use utility::{attributes, caching, content, preprocessing, serialization, siblings};
+
+// Re-export format renderer types
+pub use format::{DjotRenderer, FormatRenderer, MarkdownRenderer};
 
 // Block and inline handlers are internal - only dispatchers are exposed
 // Individual handlers are pub(crate) and not meant to be part of the public API

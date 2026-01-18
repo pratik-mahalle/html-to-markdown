@@ -25,8 +25,8 @@ use html_to_markdown_rs::visitor::{NodeContext as RustNodeContext, VisitResult a
 use html_to_markdown_rs::{
     CodeBlockStyle, ConversionError, ConversionOptions as RustConversionOptions, ConversionOptionsUpdate,
     DEFAULT_INLINE_IMAGE_LIMIT, HeadingStyle, HighlightStyle, InlineImageConfig as RustInlineImageConfig,
-    InlineImageConfigUpdate, ListIndentType, NewlineStyle, PreprocessingOptions as RustPreprocessingOptions,
-    PreprocessingOptionsUpdate, PreprocessingPreset, WhitespaceMode,
+    InlineImageConfigUpdate, ListIndentType, NewlineStyle, OutputFormat,
+    PreprocessingOptions as RustPreprocessingOptions, PreprocessingOptionsUpdate, PreprocessingPreset, WhitespaceMode,
 };
 use napi::bindgen_prelude::*;
 use napi_derive::napi;
@@ -173,6 +173,24 @@ impl From<JsPreprocessingPreset> for PreprocessingPreset {
     }
 }
 
+/// Output format for conversion
+#[napi(string_enum)]
+pub enum JsOutputFormat {
+    /// Standard Markdown (CommonMark compatible)
+    Markdown,
+    /// Djot lightweight markup language
+    Djot,
+}
+
+impl From<JsOutputFormat> for OutputFormat {
+    fn from(val: JsOutputFormat) -> Self {
+        match val {
+            JsOutputFormat::Markdown => OutputFormat::Markdown,
+            JsOutputFormat::Djot => OutputFormat::Djot,
+        }
+    }
+}
+
 /// HTML preprocessing options
 #[napi(object)]
 pub struct JsPreprocessingOptions {
@@ -273,6 +291,8 @@ pub struct JsConversionOptions {
     pub preserve_tags: Option<Vec<String>>,
     /// Skip image conversion (keep as HTML)
     pub skip_images: Option<bool>,
+    /// Output format for conversion
+    pub output_format: Option<JsOutputFormat>,
 }
 
 impl From<JsConversionOptions> for ConversionOptionsUpdate {
@@ -310,6 +330,7 @@ impl From<JsConversionOptions> for ConversionOptionsUpdate {
             strip_tags: val.strip_tags,
             preserve_tags: val.preserve_tags,
             skip_images: val.skip_images,
+            output_format: val.output_format.map(Into::into),
         }
     }
 }
@@ -3039,6 +3060,7 @@ mod tests {
             strip_tags: None,
             preserve_tags: None,
             skip_images: None,
+            output_format: None,
         };
 
         let rust_opts: RustConversionOptions = opts.into();
