@@ -25,9 +25,9 @@ fallback_files = Dir.chdir(__dir__) do
   )
 end
 
-# Always include vendor directory if it exists (created by vendoring script)
+# Always include vendor and .cargo directories if they exist (created by vendoring script)
 vendor_files = Dir.chdir(__dir__) do
-  Dir.glob('vendor/**/*').select { |f| File.file?(f) }
+  (Dir.glob('vendor/**/*') + Dir.glob('.cargo/**/*')).select { |f| File.file?(f) }
 end
 
 files = git_files.empty? ? fallback_files : git_files
