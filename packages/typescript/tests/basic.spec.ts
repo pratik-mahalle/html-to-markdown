@@ -1,7 +1,7 @@
 import { rm, writeFile } from "node:fs/promises";
 import { Readable } from "node:stream";
 import { describe, expect, it } from "vitest";
-import { convert, convertFile, convertStream, JsHeadingStyle } from "../src/index";
+import { convert, convertFile, convertStream, JsHeadingStyle, JsOutputFormat } from "../src/index";
 
 const FIXTURE_HTML = "<h1>Hello</h1><p>Markdown</p>";
 
@@ -27,5 +27,17 @@ describe("html-to-markdown (TypeScript package)", () => {
 		const stream = Readable.from([FIXTURE_HTML]);
 		const markdown = await convertStream(stream, { headingStyle: JsHeadingStyle.Atx });
 		expect(markdown).toContain("# Hello");
+	});
+
+	it("converts to Markdown output format", () => {
+		const markdown = convert(FIXTURE_HTML, { outputFormat: JsOutputFormat.Markdown });
+		expect(markdown).toContain("# Hello");
+		expect(markdown).toContain("Markdown");
+	});
+
+	it("converts to Djot output format", () => {
+		const djot = convert(FIXTURE_HTML, { outputFormat: JsOutputFormat.Djot });
+		expect(djot).toContain("Hello");
+		expect(djot).toContain("Markdown");
 	});
 });

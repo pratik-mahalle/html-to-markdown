@@ -7,21 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.23.0] - 2026-01-18
+
+### Added
+
+- **Djot output format support**: New `output_format` option in `ConversionOptions` enables conversion to [Djot](https://djot.net/) lightweight markup language as an alternative to Markdown. Djot uses different syntax for emphasis (`_text_`), strong (`*text*`), strikethrough (`{-text-}`), inserted (`{+text+}`), highlighted (`{=text=}`), subscript (`~text~`), and superscript (`^text^`).
+- **CLI**: Added `--output-format` / `-f` flag to specify output format (`markdown` or `djot`)
+- **All language bindings**: OutputFormat enum/option added to Python, TypeScript/Node.js, Ruby, PHP, Elixir, Go, Java, and C# bindings
+- **Documentation**: Added Djot output format section to all package READMEs with syntax comparison table
+
 ### Fixed
 
 - **Python**: Fixed async visitor bridge to properly await coroutines. `PyAsyncVisitorBridge::call_visitor_method_sync()` now detects async methods via `__await__` attribute and uses `PYTHON_TASK_LOCALS` event loop for proper async execution (issue #187)
 - **Ruby**: Fixed visitor parameter being ignored in `convert()` wrapper method. Now correctly passes visitor to native `convert_with_visitor` function when provided (issue #187)
 
-### Added
-
-- **Documentation**: Added comprehensive visitor pattern support matrix showing which bindings support visitors (Rust, Python, TypeScript/Node.js, Ruby, PHP, Elixir, Go, Java, C# all supported)
-- **Documentation**: Documented WASM visitor pattern architectural limitation with four alternative approaches for edge/browser deployments
-- **Examples**: Added PHP visitor examples (`cdn-rewrite.php` for URL transformation, `content-filter.php` for element filtering)
-
 ### Changed
 
 - **Rust**: Updated `async-visitor` feature to include required `tokio` "sync" feature for `Mutex` support
-- **Documentation**: Enhanced visitor pattern guide with language-specific import statements and platform support details
+- **Documentation**: Added comprehensive visitor pattern support matrix showing which bindings support visitors
+- **Documentation**: Documented WASM visitor pattern architectural limitation with four alternative approaches
 
 ## [2.22.6] - 2026-01-16
 

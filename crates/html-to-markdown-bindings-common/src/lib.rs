@@ -25,7 +25,7 @@ pub mod metadata;
 // Re-export commonly used types
 pub use enums::{
     CodeBlockStyleWrapper, HeadingStyleWrapper, HighlightStyleWrapper, ListIndentTypeWrapper, NewlineStyleWrapper,
-    PreprocessingPresetWrapper, WhitespaceModeWrapper,
+    OutputFormatWrapper, PreprocessingPresetWrapper, WhitespaceModeWrapper,
 };
 pub use error::BindingError;
 pub use json::parse_conversion_options;

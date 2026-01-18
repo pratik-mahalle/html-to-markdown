@@ -6,7 +6,29 @@ This module provides dataclass-based configuration for the v2 API.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import Enum
 from typing import Literal
+
+
+class OutputFormat(str, Enum):
+    """Output format for conversion.
+
+    Specifies the target markup language format for the conversion output.
+
+    Attributes:
+        MARKDOWN: Standard Markdown (CommonMark compatible). Default.
+        DJOT: Djot lightweight markup language.
+
+    Example:
+        >>> options = ConversionOptions(output_format=OutputFormat.DJOT)
+        >>> # Or use string literal: output_format="djot"
+    """
+
+    MARKDOWN = "markdown"
+    """Standard Markdown (CommonMark compatible). Default."""
+
+    DJOT = "djot"
+    """Djot lightweight markup language."""
 
 
 @dataclass
@@ -119,6 +141,9 @@ class ConversionOptions:
 
     code_block_style: Literal["indented", "backticks", "tildes"] = "backticks"
     """Style for code blocks: 'backticks' (```, better whitespace preservation), 'indented' (4 spaces), or 'tildes' (~~~). All are CommonMark compliant."""
+
+    output_format: Literal["markdown", "djot"] = "markdown"
+    """Output format: 'markdown' (CommonMark, default) or 'djot' (lightweight markup language)."""
 
     debug: bool = False
     """Enable debug mode with diagnostic warnings about unhandled elements and hOCR processing."""

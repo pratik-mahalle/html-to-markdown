@@ -200,6 +200,19 @@ const (
 	StructuredDataTypeRDFa      StructuredDataType = "rdfa"
 )
 
+// OutputFormat represents the target markup language format for conversion output.
+//
+// Specifies whether the conversion should produce standard Markdown (CommonMark compatible)
+// or Djot lightweight markup language.
+type OutputFormat string
+
+const (
+	// OutputFormatMarkdown produces standard Markdown output (CommonMark compatible). Default.
+	OutputFormatMarkdown OutputFormat = "markdown"
+	// OutputFormatDjot produces Djot lightweight markup language output.
+	OutputFormatDjot OutputFormat = "djot"
+)
+
 // DocumentMetadata contains document-level metadata extracted from head and top-level elements.
 //
 // This includes metadata typically used by search engines, social media platforms,
