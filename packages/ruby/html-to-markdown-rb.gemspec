@@ -25,9 +25,12 @@ fallback_files = Dir.chdir(__dir__) do
   )
 end
 
-# Always include vendor and .cargo directories if they exist (created by vendoring script)
+# Always include rust-vendor and .cargo directories if they exist (created by vendoring script)
+# Exclude native artifacts (.lib, .a, .dll, .so, .dylib) as they shouldn't be in the gem
 vendor_files = Dir.chdir(__dir__) do
-  (Dir.glob('vendor/**/*') + Dir.glob('.cargo/**/*')).select { |f| File.file?(f) }
+  (Dir.glob('rust-vendor/**/*') + Dir.glob('.cargo/**/*'))
+    .select { |f| File.file?(f) }
+    .grep_v(/\.(lib|a|dll|so|dylib)$/i)
 end
 
 files = git_files.empty? ? fallback_files : git_files
