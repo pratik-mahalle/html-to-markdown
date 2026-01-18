@@ -3,8 +3,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Vendor html-to-markdown crate
-ruby "$SCRIPT_DIR/vendor-html-to-markdown.rb"
+# Vendor all dependencies using cargo vendor
+"$SCRIPT_DIR/vendor-dependencies.sh"
 
 pushd packages/ruby >/dev/null
 bundle install
