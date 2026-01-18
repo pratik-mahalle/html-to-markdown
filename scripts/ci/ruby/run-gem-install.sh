@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Vendor html-to-markdown crate for standalone gem build
-ruby scripts/publish/ruby/vendor-html-to-markdown.rb
+# Vendor all dependencies using cargo vendor for standalone gem build
+scripts/publish/ruby/vendor-dependencies.sh
 
 pushd packages/ruby >/dev/null
 bundle exec rake clean
