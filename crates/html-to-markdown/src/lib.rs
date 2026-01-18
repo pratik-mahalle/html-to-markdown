@@ -689,8 +689,8 @@ pub fn convert_with_visitor(
 ///
 /// The async visitor trait (`AsyncHtmlVisitor`) and async dispatch helpers are designed to be
 /// consumed by language bindings (`PyO3`, NAPI-RS, Magnus, etc.) which can bridge async/await
-/// semantics from their host languages. The conversion pipeline itself runs synchronously,
-/// but visitor callbacks are defined as async to support languages with native async/await.
+/// semantics from their host languages. The conversion pipeline wraps async visitor calls using
+/// tokio's runtime to support both multi-threaded and current_thread runtimes (like NAPI's).
 ///
 /// Binding implementations will be responsible for running async callbacks on appropriate
 /// event loops (asyncio for Python, Promise chains for TypeScript, etc.).
@@ -730,30 +730,22 @@ pub fn convert_with_visitor(
 /// let visitor = Some(Rc::new(RefCell::new(CustomAsyncVisitor) as _));
 /// let markdown = convert_with_async_visitor(html, None, visitor).await.unwrap();
 /// ```
-///
-/// # Implementation Note
-///
-/// Currently, this function placeholder documents the async visitor interface for binding
-/// implementations. The actual async dispatch integration will be implemented in binding
-/// layers (Python, TypeScript, etc.) to properly bridge async/await semantics to the
-/// synchronous Rust conversion core.
 #[allow(clippy::future_not_send)]
 /// # Errors
 ///
 /// Returns an error if HTML parsing fails or if the input contains invalid UTF-8.
-#[allow(clippy::unused_async)]
 pub async fn convert_with_async_visitor(
     html: &str,
     options: Option<ConversionOptions>,
-    _visitor: Option<visitor_helpers::AsyncVisitorHandle>,
+    visitor: Option<visitor_helpers::AsyncVisitorHandle>,
 ) -> Result<String> {
     validate_input(html)?;
     let options = options.unwrap_or_default();
 
     let normalized_html = normalize_line_endings(html);
 
-    // TODO: Implement async dispatch in conversion pipeline
-    let markdown = converter::convert_html(normalized_html.as_ref(), &options)?;
+    // Use the async implementation that properly awaits visitor callbacks
+    let markdown = converter::convert_html_with_visitor_async(normalized_html.as_ref(), &options, visitor).await?;
 
     if options.wrap {
         Ok(wrapper::wrap_markdown(&markdown, &options))

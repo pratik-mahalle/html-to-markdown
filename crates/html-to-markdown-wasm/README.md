@@ -488,6 +488,131 @@ Use [@kreuzberg/html-to-markdown-node](https://www.npmjs.com/package/@kreuzberg/
 - ⚡ Maximum performance in Node.js/Bun (~3× faster)
 - 🖥️ Server-side only applications
 
+## Visitor Pattern Support
+
+**The WebAssembly binding does not support the visitor pattern.** The visitor pattern requires callbacks and stateful execution across the WebAssembly/JavaScript boundary, which has fundamental limitations:
+
+### Why WASM Doesn't Support Visitors
+
+1. **Memory safety across FFI boundary**: The WASM/JS boundary cannot safely pass mutable function callbacks that maintain state across multiple invocations
+2. **Single-threaded execution model**: WASM runs on a single thread with no equivalent to Node.js's `ThreadsafeFunction` FFI primitive
+3. **No callback marshaling**: JavaScript callbacks cannot be directly invoked from within WASM without significant overhead and memory leaks
+4. **Serialization overhead**: Converting context objects between WASM and JS for each visitor callback would eliminate performance benefits
+
+### Alternatives for WASM Users
+
+Choose one of these approaches:
+
+#### 1. Use Node.js Binding (Recommended)
+For best performance with visitor support, use the native Node.js binding:
+
+```typescript
+import { convertWithVisitor, type Visitor } from '@kreuzberg/html-to-markdown-node';
+
+const visitor: Visitor = {
+  visitLink(ctx, href, text, title) {
+    // Your visitor logic here
+    return { type: 'continue' };
+  },
+};
+
+const markdown = convertWithVisitor(html, { visitor });
+```
+
+**Performance:** ~3× faster than WASM, full visitor pattern support.
+**Use when:** Running on Node.js or Bun server-side.
+
+#### 2. Use Server-Side Bindings
+For other platforms, use Python, Ruby, or PHP bindings with visitor support:
+
+**Python:**
+```python
+from html_to_markdown import convert_with_visitor
+
+class MyVisitor:
+    def visit_link(self, ctx, href, text, title):
+        # Your visitor logic here
+        return {"type": "continue"}
+
+markdown = convert_with_visitor(html, visitor=MyVisitor())
+```
+
+**Ruby:**
+```ruby
+require 'html_to_markdown'
+
+class MyVisitor
+  def visit_link(ctx, href, text, title)
+    { type: :continue }
+  end
+end
+
+markdown = HtmlToMarkdown.convert_with_visitor(html, visitor: MyVisitor.new)
+```
+
+**PHP:**
+```php
+use HtmlToMarkdown\Converter;
+
+class MyVisitor {
+    public function visitLink(array $ctx, string $href, string $text, ?string $title): array {
+        return ['type' => 'continue'];
+    }
+}
+
+$markdown = Converter::convertWithVisitor($html, new MyVisitor());
+```
+
+#### 3. Preprocess HTML Before Conversion
+For simple transformations, manipulate the HTML before passing to WASM:
+
+```typescript
+import { convert } from '@kreuzberg/html-to-markdown-wasm';
+
+// Rewrite URLs before conversion
+const processedHtml = html.replace(
+  /https:\/\/old-cdn\.com/g,
+  'https://new-cdn.com'
+);
+
+const markdown = convert(processedHtml);
+```
+
+**Use when:** Only simple text replacements are needed.
+
+#### 4. Post-Process Markdown
+Transform the output Markdown after conversion:
+
+```typescript
+import { convert } from '@kreuzberg/html-to-markdown-wasm';
+
+const markdown = convert(html);
+
+// Post-process the markdown
+const transformed = markdown
+  .replace(/\[(.+?)\]\(https:\/\/old-cdn\.com/g, '[$1](https://new-cdn.com')
+  .replace(/!\[(.+?)\]\(https:\/\/old-cdn\.com/g, '![$1](https://new-cdn.com');
+```
+
+**Use when:** Transformations can be applied to final Markdown output.
+
+### Visitor Pattern Support Matrix
+
+| Binding | Visitor Support | Best For |
+|---------|-----------------|----------|
+| **Rust** | ✅ Yes | Core library, performance-critical code |
+| **Python** | ✅ Yes (sync & async) | Server-side, bulk processing |
+| **TypeScript/Node.js** | ✅ Yes (sync & async) | Server-side Node.js/Bun, best performance |
+| **Ruby** | ✅ Yes | Server-side Ruby on Rails, Sinatra |
+| **PHP** | ✅ Yes | Server-side PHP, content management |
+| **Go** | ❌ No | Basic conversion only |
+| **Java** | ❌ No | Basic conversion only |
+| **C#** | ❌ No | Basic conversion only |
+| **Elixir** | ❌ No | Basic conversion only |
+| **WebAssembly** | ❌ No | Browser, Edge, Deno (see alternatives above) |
+
+For comprehensive visitor pattern documentation with examples, see [Visitor Pattern Guide](../../examples/visitor-pattern/).
+
 ## Configuration Options
 
 See the [TypeScript definitions](./dist-node/html_to_markdown_wasm.d.ts) for all available options:

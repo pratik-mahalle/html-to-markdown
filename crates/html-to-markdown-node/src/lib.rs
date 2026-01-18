@@ -614,6 +614,7 @@ fn convert_metadata(metadata: RustExtendedMetadata) -> JsExtendedMetadata {
 #[cfg(feature = "async-visitor")]
 #[napi(object)]
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct JsNodeContext {
     pub node_type: String,
     pub tag_name: String,
@@ -627,8 +628,10 @@ pub struct JsNodeContext {
 #[cfg(feature = "async-visitor")]
 #[napi(object)]
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct JsVisitResult {
     #[napi(js_name = "type")]
+    #[serde(rename = "type")]
     pub result_type: String,
     pub output: Option<String>,
 }
@@ -738,6 +741,7 @@ unsafe impl Sync for JsVisitorBridge {}
 
 #[cfg(feature = "async-visitor")]
 impl JsVisitorBridge {
+    #[allow(dead_code)]
     const fn new() -> Self {
         Self {
             visit_element_start_fn: None,
@@ -859,204 +863,1497 @@ impl JsVisitorBridge {
 #[cfg(feature = "async-visitor")]
 #[async_trait]
 impl AsyncHtmlVisitor for JsVisitorBridge {
-    async fn visit_element_start(&mut self, _ctx: &RustNodeContext) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_element_start(&mut self, ctx: &RustNodeContext) -> RustVisitResult {
+        // Check if callback is registered
+        let Some(ref tsfn) = self.visit_element_start_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        // Convert Rust context to JS format
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        // Serialize to JSON
+        let Ok(json_params) = Self::serialize_params(&js_ctx) else {
+            return RustVisitResult::Continue;
+        };
+
+        // Call the ThreadsafeFunction and get the Promise
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        // Await the Promise to get the result string
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        // Deserialize the result
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        // Convert to RustVisitResult
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_element_end(&mut self, _ctx: &RustNodeContext, _output: &str) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_element_end(&mut self, ctx: &RustNodeContext, output: &str) -> RustVisitResult {
+        // Check if callback is registered
+        let Some(ref tsfn) = self.visit_element_end_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        // Convert Rust context to JS format
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        // Create a combined parameter structure with both context and output
+        #[derive(serde::Serialize)]
+        struct ElementEndParams {
+            context: JsNodeContext,
+            output: String,
+        }
+
+        let params = ElementEndParams {
+            context: js_ctx,
+            output: output.to_string(),
+        };
+
+        // Serialize to JSON
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        // Call the ThreadsafeFunction and get the Promise
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        // Await the Promise to get the result string
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        // Deserialize the result
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        // Convert to RustVisitResult
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_text(&mut self, _ctx: &RustNodeContext, _text: &str) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_text(&mut self, ctx: &RustNodeContext, text: &str) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_text_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct TextParams {
+            context: JsNodeContext,
+            text: String,
+        }
+
+        let params = TextParams {
+            context: js_ctx,
+            text: text.to_string(),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
     async fn visit_link(
         &mut self,
-        _ctx: &RustNodeContext,
-        _href: &str,
-        _text: &str,
-        _title: Option<&str>,
+        ctx: &RustNodeContext,
+        href: &str,
+        text: &str,
+        title: Option<&str>,
     ) -> RustVisitResult {
-        RustVisitResult::Continue
+        let Some(ref tsfn) = self.visit_link_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct LinkParams {
+            context: JsNodeContext,
+            href: String,
+            text: String,
+            title: Option<String>,
+        }
+
+        let params = LinkParams {
+            context: js_ctx,
+            href: href.to_string(),
+            text: text.to_string(),
+            title: title.map(|s| s.to_string()),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
     async fn visit_image(
         &mut self,
-        _ctx: &RustNodeContext,
-        _src: &str,
-        _alt: &str,
-        _title: Option<&str>,
+        ctx: &RustNodeContext,
+        src: &str,
+        alt: &str,
+        title: Option<&str>,
     ) -> RustVisitResult {
-        RustVisitResult::Continue
+        let Some(ref tsfn) = self.visit_image_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct ImageParams {
+            context: JsNodeContext,
+            src: String,
+            alt: String,
+            title: Option<String>,
+        }
+
+        let params = ImageParams {
+            context: js_ctx,
+            src: src.to_string(),
+            alt: alt.to_string(),
+            title: title.map(|s| s.to_string()),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
     async fn visit_heading(
         &mut self,
-        _ctx: &RustNodeContext,
-        _level: u32,
-        _text: &str,
-        _id: Option<&str>,
+        ctx: &RustNodeContext,
+        level: u32,
+        text: &str,
+        id: Option<&str>,
     ) -> RustVisitResult {
-        RustVisitResult::Continue
+        let Some(ref tsfn) = self.visit_heading_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct HeadingParams {
+            context: JsNodeContext,
+            level: u32,
+            text: String,
+            id: Option<String>,
+        }
+
+        let params = HeadingParams {
+            context: js_ctx,
+            level,
+            text: text.to_string(),
+            id: id.map(|s| s.to_string()),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_code_block(&mut self, _ctx: &RustNodeContext, _lang: Option<&str>, _code: &str) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_code_block(&mut self, ctx: &RustNodeContext, lang: Option<&str>, code: &str) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_code_block_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct CodeBlockParams {
+            context: JsNodeContext,
+            lang: Option<String>,
+            code: String,
+        }
+
+        let params = CodeBlockParams {
+            context: js_ctx,
+            lang: lang.map(|s| s.to_string()),
+            code: code.to_string(),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_code_inline(&mut self, _ctx: &RustNodeContext, _code: &str) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_code_inline(&mut self, ctx: &RustNodeContext, code: &str) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_code_inline_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct CodeInlineParams {
+            context: JsNodeContext,
+            code: String,
+        }
+
+        let params = CodeInlineParams {
+            context: js_ctx,
+            code: code.to_string(),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
     async fn visit_list_item(
         &mut self,
-        _ctx: &RustNodeContext,
-        _ordered: bool,
-        _marker: &str,
-        _text: &str,
+        ctx: &RustNodeContext,
+        ordered: bool,
+        marker: &str,
+        text: &str,
     ) -> RustVisitResult {
-        RustVisitResult::Continue
+        let Some(ref tsfn) = self.visit_list_item_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct ListItemParams {
+            context: JsNodeContext,
+            ordered: bool,
+            marker: String,
+            text: String,
+        }
+
+        let params = ListItemParams {
+            context: js_ctx,
+            ordered,
+            marker: marker.to_string(),
+            text: text.to_string(),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_list_start(&mut self, _ctx: &RustNodeContext, _ordered: bool) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_list_start(&mut self, ctx: &RustNodeContext, ordered: bool) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_list_start_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct ListStartParams {
+            context: JsNodeContext,
+            ordered: bool,
+        }
+
+        let params = ListStartParams {
+            context: js_ctx,
+            ordered,
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_list_end(&mut self, _ctx: &RustNodeContext, _ordered: bool, _output: &str) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_list_end(&mut self, ctx: &RustNodeContext, ordered: bool, output: &str) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_list_end_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct ListEndParams {
+            context: JsNodeContext,
+            ordered: bool,
+            output: String,
+        }
+
+        let params = ListEndParams {
+            context: js_ctx,
+            ordered,
+            output: output.to_string(),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_table_start(&mut self, _ctx: &RustNodeContext) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_table_start(&mut self, ctx: &RustNodeContext) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_table_start_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        let Ok(json_params) = Self::serialize_params(&js_ctx) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_table_row(
-        &mut self,
-        _ctx: &RustNodeContext,
-        _cells: &[String],
-        _is_header: bool,
-    ) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_table_row(&mut self, ctx: &RustNodeContext, cells: &[String], is_header: bool) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_table_row_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct TableRowParams {
+            context: JsNodeContext,
+            cells: Vec<String>,
+            is_header: bool,
+        }
+
+        let params = TableRowParams {
+            context: js_ctx,
+            cells: cells.to_vec(),
+            is_header,
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_table_end(&mut self, _ctx: &RustNodeContext, _output: &str) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_table_end(&mut self, ctx: &RustNodeContext, output: &str) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_table_end_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct TableEndParams {
+            context: JsNodeContext,
+            output: String,
+        }
+
+        let params = TableEndParams {
+            context: js_ctx,
+            output: output.to_string(),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_blockquote(&mut self, _ctx: &RustNodeContext, _content: &str, _depth: usize) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_blockquote(&mut self, ctx: &RustNodeContext, content: &str, depth: usize) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_blockquote_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct BlockquoteParams {
+            context: JsNodeContext,
+            content: String,
+            depth: usize,
+        }
+
+        let params = BlockquoteParams {
+            context: js_ctx,
+            content: content.to_string(),
+            depth,
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_strong(&mut self, _ctx: &RustNodeContext, _text: &str) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_strong(&mut self, ctx: &RustNodeContext, text: &str) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_strong_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct StrongParams {
+            context: JsNodeContext,
+            text: String,
+        }
+
+        let params = StrongParams {
+            context: js_ctx,
+            text: text.to_string(),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_emphasis(&mut self, _ctx: &RustNodeContext, _text: &str) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_emphasis(&mut self, ctx: &RustNodeContext, text: &str) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_emphasis_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct EmphasisParams {
+            context: JsNodeContext,
+            text: String,
+        }
+
+        let params = EmphasisParams {
+            context: js_ctx,
+            text: text.to_string(),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_strikethrough(&mut self, _ctx: &RustNodeContext, _text: &str) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_strikethrough(&mut self, ctx: &RustNodeContext, text: &str) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_strikethrough_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct StrikethroughParams {
+            context: JsNodeContext,
+            text: String,
+        }
+
+        let params = StrikethroughParams {
+            context: js_ctx,
+            text: text.to_string(),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_underline(&mut self, _ctx: &RustNodeContext, _text: &str) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_underline(&mut self, ctx: &RustNodeContext, text: &str) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_underline_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct UnderlineParams {
+            context: JsNodeContext,
+            text: String,
+        }
+
+        let params = UnderlineParams {
+            context: js_ctx,
+            text: text.to_string(),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_subscript(&mut self, _ctx: &RustNodeContext, _text: &str) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_subscript(&mut self, ctx: &RustNodeContext, text: &str) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_subscript_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct SubscriptParams {
+            context: JsNodeContext,
+            text: String,
+        }
+
+        let params = SubscriptParams {
+            context: js_ctx,
+            text: text.to_string(),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_superscript(&mut self, _ctx: &RustNodeContext, _text: &str) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_superscript(&mut self, ctx: &RustNodeContext, text: &str) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_superscript_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct SuperscriptParams {
+            context: JsNodeContext,
+            text: String,
+        }
+
+        let params = SuperscriptParams {
+            context: js_ctx,
+            text: text.to_string(),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_mark(&mut self, _ctx: &RustNodeContext, _text: &str) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_mark(&mut self, ctx: &RustNodeContext, text: &str) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_mark_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct MarkParams {
+            context: JsNodeContext,
+            text: String,
+        }
+
+        let params = MarkParams {
+            context: js_ctx,
+            text: text.to_string(),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_line_break(&mut self, _ctx: &RustNodeContext) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_line_break(&mut self, ctx: &RustNodeContext) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_line_break_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        let Ok(json_params) = Self::serialize_params(&js_ctx) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_horizontal_rule(&mut self, _ctx: &RustNodeContext) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_horizontal_rule(&mut self, ctx: &RustNodeContext) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_horizontal_rule_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        let Ok(json_params) = Self::serialize_params(&js_ctx) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_custom_element(&mut self, _ctx: &RustNodeContext, _tag_name: &str, _html: &str) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_custom_element(&mut self, ctx: &RustNodeContext, tag_name: &str, html: &str) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_custom_element_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct CustomElementParams {
+            context: JsNodeContext,
+            tag_name: String,
+            html: String,
+        }
+
+        let params = CustomElementParams {
+            context: js_ctx,
+            tag_name: tag_name.to_string(),
+            html: html.to_string(),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_definition_list_start(&mut self, _ctx: &RustNodeContext) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_definition_list_start(&mut self, ctx: &RustNodeContext) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_definition_list_start_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        let Ok(json_params) = Self::serialize_params(&js_ctx) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_definition_term(&mut self, _ctx: &RustNodeContext, _text: &str) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_definition_term(&mut self, ctx: &RustNodeContext, text: &str) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_definition_term_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct DefinitionTermParams {
+            context: JsNodeContext,
+            text: String,
+        }
+
+        let params = DefinitionTermParams {
+            context: js_ctx,
+            text: text.to_string(),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_definition_description(&mut self, _ctx: &RustNodeContext, _text: &str) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_definition_description(&mut self, ctx: &RustNodeContext, text: &str) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_definition_description_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct DefinitionDescriptionParams {
+            context: JsNodeContext,
+            text: String,
+        }
+
+        let params = DefinitionDescriptionParams {
+            context: js_ctx,
+            text: text.to_string(),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_definition_list_end(&mut self, _ctx: &RustNodeContext, _output: &str) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_definition_list_end(&mut self, ctx: &RustNodeContext, output: &str) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_definition_list_end_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct DefinitionListEndParams {
+            context: JsNodeContext,
+            output: String,
+        }
+
+        let params = DefinitionListEndParams {
+            context: js_ctx,
+            output: output.to_string(),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
     async fn visit_form(
         &mut self,
-        _ctx: &RustNodeContext,
-        _action: Option<&str>,
-        _method: Option<&str>,
+        ctx: &RustNodeContext,
+        action: Option<&str>,
+        method: Option<&str>,
     ) -> RustVisitResult {
-        RustVisitResult::Continue
+        let Some(ref tsfn) = self.visit_form_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct FormParams {
+            context: JsNodeContext,
+            action: Option<String>,
+            method: Option<String>,
+        }
+
+        let params = FormParams {
+            context: js_ctx,
+            action: action.map(|s| s.to_string()),
+            method: method.map(|s| s.to_string()),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
     async fn visit_input(
         &mut self,
-        _ctx: &RustNodeContext,
-        _input_type: &str,
-        _name: Option<&str>,
-        _value: Option<&str>,
+        ctx: &RustNodeContext,
+        input_type: &str,
+        name: Option<&str>,
+        value: Option<&str>,
     ) -> RustVisitResult {
-        RustVisitResult::Continue
+        let Some(ref tsfn) = self.visit_input_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct InputParams {
+            context: JsNodeContext,
+            input_type: String,
+            name: Option<String>,
+            value: Option<String>,
+        }
+
+        let params = InputParams {
+            context: js_ctx,
+            input_type: input_type.to_string(),
+            name: name.map(|s| s.to_string()),
+            value: value.map(|s| s.to_string()),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_button(&mut self, _ctx: &RustNodeContext, _text: &str) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_button(&mut self, ctx: &RustNodeContext, text: &str) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_button_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct ButtonParams {
+            context: JsNodeContext,
+            text: String,
+        }
+
+        let params = ButtonParams {
+            context: js_ctx,
+            text: text.to_string(),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_audio(&mut self, _ctx: &RustNodeContext, _src: Option<&str>) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_audio(&mut self, ctx: &RustNodeContext, src: Option<&str>) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_audio_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct AudioParams {
+            context: JsNodeContext,
+            src: Option<String>,
+        }
+
+        let params = AudioParams {
+            context: js_ctx,
+            src: src.map(|s| s.to_string()),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_video(&mut self, _ctx: &RustNodeContext, _src: Option<&str>) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_video(&mut self, ctx: &RustNodeContext, src: Option<&str>) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_video_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct VideoParams {
+            context: JsNodeContext,
+            src: Option<String>,
+        }
+
+        let params = VideoParams {
+            context: js_ctx,
+            src: src.map(|s| s.to_string()),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_iframe(&mut self, _ctx: &RustNodeContext, _src: Option<&str>) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_iframe(&mut self, ctx: &RustNodeContext, src: Option<&str>) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_iframe_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct IframeParams {
+            context: JsNodeContext,
+            src: Option<String>,
+        }
+
+        let params = IframeParams {
+            context: js_ctx,
+            src: src.map(|s| s.to_string()),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_details(&mut self, _ctx: &RustNodeContext, _open: bool) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_details(&mut self, ctx: &RustNodeContext, open: bool) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_details_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct DetailsParams {
+            context: JsNodeContext,
+            open: bool,
+        }
+
+        let params = DetailsParams { context: js_ctx, open };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_summary(&mut self, _ctx: &RustNodeContext, _text: &str) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_summary(&mut self, ctx: &RustNodeContext, text: &str) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_summary_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct SummaryParams {
+            context: JsNodeContext,
+            text: String,
+        }
+
+        let params = SummaryParams {
+            context: js_ctx,
+            text: text.to_string(),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_figure_start(&mut self, _ctx: &RustNodeContext) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_figure_start(&mut self, ctx: &RustNodeContext) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_figure_start_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        let Ok(json_params) = Self::serialize_params(&js_ctx) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_figcaption(&mut self, _ctx: &RustNodeContext, _text: &str) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_figcaption(&mut self, ctx: &RustNodeContext, text: &str) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_figcaption_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct FigcaptionParams {
+            context: JsNodeContext,
+            text: String,
+        }
+
+        let params = FigcaptionParams {
+            context: js_ctx,
+            text: text.to_string(),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 
-    async fn visit_figure_end(&mut self, _ctx: &RustNodeContext, _output: &str) -> RustVisitResult {
-        RustVisitResult::Continue
+    async fn visit_figure_end(&mut self, ctx: &RustNodeContext, output: &str) -> RustVisitResult {
+        let Some(ref tsfn) = self.visit_figure_end_fn else {
+            return RustVisitResult::Continue;
+        };
+
+        let js_ctx = Self::node_context_to_js(ctx);
+
+        #[derive(serde::Serialize)]
+        struct FigureEndParams {
+            context: JsNodeContext,
+            output: String,
+        }
+
+        let params = FigureEndParams {
+            context: js_ctx,
+            output: output.to_string(),
+        };
+
+        let Ok(json_params) = Self::serialize_params(&params) else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(promise) = tsfn.call_async(json_params).await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(result_json) = promise.await else {
+            return RustVisitResult::Continue;
+        };
+
+        let Ok(js_result) = Self::deserialize_result(&result_json) else {
+            return RustVisitResult::Continue;
+        };
+
+        Self::visit_result_from_js(&js_result)
     }
 }
 
@@ -1147,25 +2444,66 @@ pub fn convert(html: String, options: Option<JsConversionOptions>, visitor: Opti
 ///
 /// @deprecated Use the optional visitor parameter in convert() instead
 #[cfg(feature = "async-visitor")]
-#[napi(js_name = "convertWithVisitor")]
-pub fn convert_with_visitor(
-    _env: Env,
+async fn convert_with_visitor_async_impl(
     html: String,
     options: Option<JsConversionOptions>,
-    visitor: Object,
+    bridge: JsVisitorBridge,
 ) -> napi::Result<String> {
     let rust_options = options.map(Into::into);
 
+    // Wrap the async visitor in an Arc<Mutex<>> for thread-safe async access
+    let async_visitor_handle = std::sync::Arc::new(tokio::sync::Mutex::new(bridge));
+
+    // Create the AsyncToSyncVisitorBridge - this spawns an async task
+    let sync_bridge = html_to_markdown_rs::visitor_helpers::AsyncToSyncVisitorBridge::new(async_visitor_handle.clone());
+
+    // Run the conversion on a blocking thread pool
+    // This allows the async visitor task to process JavaScript callbacks on the async executor
+    // while the conversion runs synchronously on a blocking thread
+    let result = tokio::task::spawn_blocking(move || {
+        // Wrap in Rc<RefCell<>> to create a VisitorHandle
+        let visitor_handle = std::rc::Rc::new(std::cell::RefCell::new(sync_bridge));
+
+        // Run the synchronous conversion
+        html_to_markdown_rs::convert_with_visitor(&html, rust_options, Some(visitor_handle))
+    })
+    .await
+    .map_err(|e| napi::Error::from_reason(format!("Task join error: {}", e)))?
+    .map_err(to_js_error)?;
+
+    Ok(result)
+}
+
+#[cfg(feature = "async-visitor")]
+#[napi(js_name = "convertWithVisitor", ts_return_type = "Promise<string>")]
+pub fn convert_with_visitor<'env>(
+    env: &'env Env,
+    html: String,
+    options: Option<JsConversionOptions>,
+    visitor: Object<'_>,
+) -> napi::Result<PromiseRaw<'env, String>> {
     let mut bridge = JsVisitorBridge::new();
 
+    // Extract visitor functions from the JavaScript object
+    // Each function is optional - we only store it if it exists
+    //
+    // IMPORTANT: ThreadsafeFunctions expect functions with signature:
+    //   (jsonString: string) => Promise<string>
+    // where jsonString is JSON-serialized context and return value is JSON-serialized result.
+    //
+    // For user convenience, a TypeScript wrapper utility is provided to automatically
+    // handle JSON.parse/stringify so users can write:
+    //   (ctx: NodeContext) => Promise<{type: string}>
     macro_rules! extract_fn {
         ($method_name:literal, $field:ident) => {
-            if let Ok(func) = visitor.get_named_property::<Function<String, Promise<String>>>($method_name) {
-                if let Ok(tsfn) = func
-                    .build_threadsafe_function::<String>()
-                    .build_callback(|ctx: napi::threadsafe_function::ThreadsafeCallContext<String>| Ok(ctx.value))
-                {
-                    bridge.$field = Some(Arc::new(tsfn));
+            if let Ok(Some(func)) = visitor.get::<Function<String, Promise<String>>>($method_name) {
+                match func.build_threadsafe_function().build() {
+                    Ok(tsfn) => {
+                        bridge.$field = Some(Arc::new(tsfn));
+                    }
+                    Err(_) => {
+                        // Silently ignore - visitor method is optional
+                    }
                 }
             }
         };
@@ -1212,23 +2550,9 @@ pub fn convert_with_visitor(
     extract_fn!("visitFigcaption", visit_figcaption_fn);
     extract_fn!("visitFigureEnd", visit_figure_end_fn);
 
-    let rt = tokio::runtime::Builder::new_current_thread()
-        .enable_all()
-        .build()
-        .map_err(|e| napi::Error::new(napi::Status::GenericFailure, format!("Failed to create runtime: {e}")))?;
-
-    let result = rt
-        .block_on(async {
-            html_to_markdown_rs::convert_with_async_visitor(
-                &html,
-                rust_options,
-                Some(std::rc::Rc::new(std::cell::RefCell::new(bridge))),
-            )
-            .await
-        })
-        .map_err(to_js_error)?;
-
-    Ok(result)
+    // Spawn the async work and return a Promise
+    // env.spawn_future() spawns the async task and returns a PromiseRaw
+    env.spawn_future(convert_with_visitor_async_impl(html, options, bridge))
 }
 
 #[napi(js_name = "convertJson")]

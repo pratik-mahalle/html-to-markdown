@@ -103,7 +103,26 @@ Extract comprehensive metadata during conversion: title, description, headers, l
 
 Customize HTML→Markdown conversion with callbacks for specific elements. Intercept links, images, headings, lists, and more. Use cases: domain-specific Markdown dialects (Obsidian, Notion), content filtering, URL rewriting, accessibility validation, analytics.
 
+Supported in: Rust, Python (sync & async), TypeScript/Node.js (sync & async), Ruby, and PHP.
+
 **[Visitor Pattern Guide →](./examples/visitor-pattern/)**
+
+### Visitor Support Matrix
+
+| Binding | Visitor Support | Async Support | Best For |
+|---------|-----------------|---------------|----------|
+| **Rust** | ✅ Yes | ✅ Tokio | Core library, performance-critical code |
+| **Python** | ✅ Yes | ✅ asyncio | Server-side, bulk processing |
+| **TypeScript/Node.js** | ✅ Yes | ✅ Promise-based | Server-side Node.js/Bun, best performance |
+| **Ruby** | ✅ Yes | ❌ No | Server-side Ruby on Rails, Sinatra |
+| **PHP** | ✅ Yes | ❌ No | Server-side PHP, content management |
+| **Go** | ❌ No | — | Basic conversion only |
+| **Java** | ❌ No | — | Basic conversion only |
+| **C#** | ❌ No | — | Basic conversion only |
+| **Elixir** | ❌ No | — | Basic conversion only |
+| **WebAssembly** | ❌ No | — | Browser, Edge, Deno (FFI limitations) |
+
+For WASM users needing visitor functionality, see [WASM Visitor Alternatives](./crates/html-to-markdown-wasm/README.md#visitor-pattern-support) for recommended approaches.
 
 </details>
 
