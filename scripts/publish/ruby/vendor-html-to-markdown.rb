@@ -45,7 +45,8 @@ DEPENDENCIES = [
   'base64',
   'encoding_rs',
   'serde',
-  'serde_json'
+  'serde_json',
+  'async-trait'
 ].freeze
 
 # ============================================================================
@@ -201,9 +202,10 @@ def update_vendored_cargo_toml(cargo_path, version)
   File.write(cargo_path, content)
 end
 
-# Update Ruby native Cargo.toml to use vendored path instead of workspace
+# Update Ruby native Cargo.toml to use vendored path and explicit versions
 # @param cargo_path [String] Path to Ruby native Cargo.toml
-def update_ruby_native_cargo_toml(cargo_path)
+# @param version [String] Version to set
+def update_ruby_native_cargo_toml(cargo_path, version)
   content = File.read(cargo_path)
 
   # Replace workspace reference with path to vendored crate
@@ -211,6 +213,23 @@ def update_ruby_native_cargo_toml(cargo_path)
     /html-to-markdown-rs\s*=\s*\{\s*workspace\s*=\s*true,/,
     'html-to-markdown-rs = { path = "../../../vendor/html-to-markdown",'
   )
+
+  # Replace workspace-inherited package fields with explicit values
+  replacements = {
+    /^version\.workspace\s*=\s*true/ => "version = \"#{version}\"",
+    /^edition\.workspace\s*=\s*true/ => 'edition = "2024"',
+    /^rust-version\.workspace\s*=\s*true/ => 'rust-version = "1.85"',
+    /^authors\.workspace\s*=\s*true/ => 'authors = ["Na\'aman Hirschfeld <nhirschfeld@gmail.com>"]',
+    /^license\.workspace\s*=\s*true/ => 'license = "MIT"',
+    /^repository\.workspace\s*=\s*true/ => 'repository = "https://github.com/kreuzberg-dev/html-to-markdown"',
+    /^homepage\.workspace\s*=\s*true/ => 'homepage = "https://github.com/kreuzberg-dev/html-to-markdown"',
+    /^documentation\.workspace\s*=\s*true/ => 'documentation = "https://docs.rs/html-to-markdown-rs"',
+    /^readme\.workspace\s*=\s*true/ => 'readme = "README.md"'
+  }
+
+  replacements.each do |pattern, replacement|
+    content.gsub!(pattern, replacement)
+  end
 
   File.write(cargo_path, content)
 end
@@ -231,6 +250,7 @@ def generate_vendor_workspace_cargo(vendor_path, version, deps)
   encoding_rs_line = "encoding_rs = \"#{deps['encoding_rs']}\""
   serde_line = "serde = { version = \"#{deps['serde']}\", features = [\"derive\"] }"
   serde_json_line = "serde_json = \"#{deps['serde_json']}\""
+  async_trait_line = "async-trait = \"#{deps['async-trait']}\""
 
   workspace_toml = <<~TOML
     [workspace]
@@ -256,6 +276,7 @@ def generate_vendor_workspace_cargo(vendor_path, version, deps)
     #{encoding_rs_line}
     #{serde_line}
     #{serde_json_line}
+    #{async_trait_line}
   TOML
 
   File.write(File.join(vendor_path, 'Cargo.toml'), workspace_toml)
@@ -315,8 +336,8 @@ def main
 
   # Step 6: Update Ruby native Cargo.toml
   puts 'Updating Ruby native Cargo.toml...'
-  update_ruby_native_cargo_toml(RUBY_NATIVE_CARGO)
-  puts '✓ Updated path to vendored crate'
+  update_ruby_native_cargo_toml(RUBY_NATIVE_CARGO, workspace_version)
+  puts '✓ Updated path to vendored crate and replaced workspace inheritance'
   puts
 
   # Step 7: Generate vendor workspace Cargo.toml
