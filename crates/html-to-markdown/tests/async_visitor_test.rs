@@ -5,7 +5,6 @@
 
 use async_trait::async_trait;
 use html_to_markdown_rs::visitor::{AsyncHtmlVisitor, NodeContext, VisitResult};
-use html_to_markdown_rs::{ConversionOptions, convert_with_async_visitor};
 use std::cell::RefCell;
 use std::rc::Rc;
 
