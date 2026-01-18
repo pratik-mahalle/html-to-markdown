@@ -209,7 +209,7 @@ def update_ruby_native_cargo_toml(cargo_path)
   # Replace workspace reference with path to vendored crate
   content.gsub!(
     /html-to-markdown-rs\s*=\s*\{\s*workspace\s*=\s*true,/,
-    'html-to-markdown-rs = { path = "../../vendor/html-to-markdown",'
+    'html-to-markdown-rs = { path = "../../../vendor/html-to-markdown",'
   )
 
   File.write(cargo_path, content)

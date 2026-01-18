@@ -583,12 +583,15 @@ macro_rules! try_async_visitor_element_end {
 /// 4. Sync converter receives result and continues
 ///
 /// This approach avoids deadlock by never blocking on async operations.
+/// The response_rx is wrapped in a Mutex to provide interior mutability,
+/// avoiding the need for external RefCell wrapping that causes borrow conflicts.
 #[cfg(feature = "async-visitor")]
 pub struct AsyncToSyncVisitorBridge {
     async_visitor: AsyncVisitorHandle,
     // Using tokio::sync::mpsc for async communication (request) and std::sync::mpsc for sync (response)
     request_tx: tokio::sync::mpsc::UnboundedSender<VisitorRequest>,
-    response_rx: std::sync::mpsc::Receiver<crate::visitor::VisitResult>,
+    // Wrapped in Mutex for interior mutability - allows recv() without &mut self
+    response_rx: std::sync::Mutex<std::sync::mpsc::Receiver<crate::visitor::VisitResult>>,
 }
 
 #[cfg(feature = "async-visitor")]
@@ -636,6 +639,7 @@ impl AsyncToSyncVisitorBridge {
         // Use tokio::sync::mpsc for async channels (not std::sync::mpsc which blocks)
         let (request_tx, mut request_rx) = tokio::sync::mpsc::unbounded_channel();
         let (response_tx, response_rx) = std::sync::mpsc::channel();
+        let response_rx = std::sync::Mutex::new(response_rx);
 
         // Spawn async task to handle visitor requests
         let visitor_clone = async_visitor.clone();
@@ -763,7 +767,11 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
             return crate::visitor::VisitResult::Continue;
         }
         // Wait for response
-        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+        self.response_rx
+            .lock()
+            .unwrap()
+            .recv()
+            .unwrap_or(crate::visitor::VisitResult::Continue)
     }
 
     fn visit_element_end(&mut self, ctx: &crate::visitor::NodeContext, output: &str) -> crate::visitor::VisitResult {
@@ -776,7 +784,11 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
             return crate::visitor::VisitResult::Continue;
         }
         // Wait for response
-        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+        self.response_rx
+            .lock()
+            .unwrap()
+            .recv()
+            .unwrap_or(crate::visitor::VisitResult::Continue)
     }
 
     fn visit_text(&mut self, ctx: &crate::visitor::NodeContext, text: &str) -> crate::visitor::VisitResult {
@@ -787,7 +799,11 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         {
             return crate::visitor::VisitResult::Continue;
         }
-        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+        self.response_rx
+            .lock()
+            .unwrap()
+            .recv()
+            .unwrap_or(crate::visitor::VisitResult::Continue)
     }
 
     fn visit_link(
@@ -809,7 +825,11 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         {
             return crate::visitor::VisitResult::Continue;
         }
-        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+        self.response_rx
+            .lock()
+            .unwrap()
+            .recv()
+            .unwrap_or(crate::visitor::VisitResult::Continue)
     }
 
     fn visit_image(
@@ -831,7 +851,11 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         {
             return crate::visitor::VisitResult::Continue;
         }
-        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+        self.response_rx
+            .lock()
+            .unwrap()
+            .recv()
+            .unwrap_or(crate::visitor::VisitResult::Continue)
     }
 
     fn visit_heading(
@@ -853,7 +877,11 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         {
             return crate::visitor::VisitResult::Continue;
         }
-        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+        self.response_rx
+            .lock()
+            .unwrap()
+            .recv()
+            .unwrap_or(crate::visitor::VisitResult::Continue)
     }
 
     fn visit_code_block(
@@ -873,7 +901,11 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         {
             return crate::visitor::VisitResult::Continue;
         }
-        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+        self.response_rx
+            .lock()
+            .unwrap()
+            .recv()
+            .unwrap_or(crate::visitor::VisitResult::Continue)
     }
 
     fn visit_code_inline(&mut self, ctx: &crate::visitor::NodeContext, code: &str) -> crate::visitor::VisitResult {
@@ -884,7 +916,11 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         {
             return crate::visitor::VisitResult::Continue;
         }
-        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+        self.response_rx
+            .lock()
+            .unwrap()
+            .recv()
+            .unwrap_or(crate::visitor::VisitResult::Continue)
     }
 
     fn visit_list_item(
@@ -906,7 +942,11 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         {
             return crate::visitor::VisitResult::Continue;
         }
-        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+        self.response_rx
+            .lock()
+            .unwrap()
+            .recv()
+            .unwrap_or(crate::visitor::VisitResult::Continue)
     }
 
     fn visit_list_start(&mut self, ctx: &crate::visitor::NodeContext, ordered: bool) -> crate::visitor::VisitResult {
@@ -917,7 +957,11 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         {
             return crate::visitor::VisitResult::Continue;
         }
-        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+        self.response_rx
+            .lock()
+            .unwrap()
+            .recv()
+            .unwrap_or(crate::visitor::VisitResult::Continue)
     }
 
     fn visit_list_end(
@@ -933,14 +977,22 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         {
             return crate::visitor::VisitResult::Continue;
         }
-        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+        self.response_rx
+            .lock()
+            .unwrap()
+            .recv()
+            .unwrap_or(crate::visitor::VisitResult::Continue)
     }
 
     fn visit_table_start(&mut self, ctx: &crate::visitor::NodeContext) -> crate::visitor::VisitResult {
         if self.request_tx.send(VisitorRequest::TableStart(ctx.clone())).is_err() {
             return crate::visitor::VisitResult::Continue;
         }
-        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+        self.response_rx
+            .lock()
+            .unwrap()
+            .recv()
+            .unwrap_or(crate::visitor::VisitResult::Continue)
     }
 
     fn visit_table_row(
@@ -956,7 +1008,11 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         {
             return crate::visitor::VisitResult::Continue;
         }
-        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+        self.response_rx
+            .lock()
+            .unwrap()
+            .recv()
+            .unwrap_or(crate::visitor::VisitResult::Continue)
     }
 
     fn visit_table_end(&mut self, ctx: &crate::visitor::NodeContext, output: &str) -> crate::visitor::VisitResult {
@@ -967,7 +1023,11 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         {
             return crate::visitor::VisitResult::Continue;
         }
-        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+        self.response_rx
+            .lock()
+            .unwrap()
+            .recv()
+            .unwrap_or(crate::visitor::VisitResult::Continue)
     }
 
     fn visit_blockquote(
@@ -983,7 +1043,11 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         {
             return crate::visitor::VisitResult::Continue;
         }
-        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+        self.response_rx
+            .lock()
+            .unwrap()
+            .recv()
+            .unwrap_or(crate::visitor::VisitResult::Continue)
     }
 
     fn visit_strong(&mut self, ctx: &crate::visitor::NodeContext, text: &str) -> crate::visitor::VisitResult {
@@ -994,7 +1058,11 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         {
             return crate::visitor::VisitResult::Continue;
         }
-        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+        self.response_rx
+            .lock()
+            .unwrap()
+            .recv()
+            .unwrap_or(crate::visitor::VisitResult::Continue)
     }
 
     fn visit_emphasis(&mut self, ctx: &crate::visitor::NodeContext, text: &str) -> crate::visitor::VisitResult {
@@ -1005,7 +1073,11 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         {
             return crate::visitor::VisitResult::Continue;
         }
-        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+        self.response_rx
+            .lock()
+            .unwrap()
+            .recv()
+            .unwrap_or(crate::visitor::VisitResult::Continue)
     }
 
     fn visit_strikethrough(&mut self, ctx: &crate::visitor::NodeContext, text: &str) -> crate::visitor::VisitResult {
@@ -1016,7 +1088,11 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         {
             return crate::visitor::VisitResult::Continue;
         }
-        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+        self.response_rx
+            .lock()
+            .unwrap()
+            .recv()
+            .unwrap_or(crate::visitor::VisitResult::Continue)
     }
 
     fn visit_underline(&mut self, ctx: &crate::visitor::NodeContext, text: &str) -> crate::visitor::VisitResult {
@@ -1027,7 +1103,11 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         {
             return crate::visitor::VisitResult::Continue;
         }
-        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+        self.response_rx
+            .lock()
+            .unwrap()
+            .recv()
+            .unwrap_or(crate::visitor::VisitResult::Continue)
     }
 
     fn visit_subscript(&mut self, ctx: &crate::visitor::NodeContext, text: &str) -> crate::visitor::VisitResult {
@@ -1038,7 +1118,11 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         {
             return crate::visitor::VisitResult::Continue;
         }
-        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+        self.response_rx
+            .lock()
+            .unwrap()
+            .recv()
+            .unwrap_or(crate::visitor::VisitResult::Continue)
     }
 
     fn visit_superscript(&mut self, ctx: &crate::visitor::NodeContext, text: &str) -> crate::visitor::VisitResult {
@@ -1049,14 +1133,22 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         {
             return crate::visitor::VisitResult::Continue;
         }
-        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+        self.response_rx
+            .lock()
+            .unwrap()
+            .recv()
+            .unwrap_or(crate::visitor::VisitResult::Continue)
     }
 
     fn visit_line_break(&mut self, ctx: &crate::visitor::NodeContext) -> crate::visitor::VisitResult {
         if self.request_tx.send(VisitorRequest::LineBreak(ctx.clone())).is_err() {
             return crate::visitor::VisitResult::Continue;
         }
-        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+        self.response_rx
+            .lock()
+            .unwrap()
+            .recv()
+            .unwrap_or(crate::visitor::VisitResult::Continue)
     }
 
     fn visit_mark(&mut self, ctx: &crate::visitor::NodeContext, text: &str) -> crate::visitor::VisitResult {
@@ -1067,7 +1159,11 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         {
             return crate::visitor::VisitResult::Continue;
         }
-        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+        self.response_rx
+            .lock()
+            .unwrap()
+            .recv()
+            .unwrap_or(crate::visitor::VisitResult::Continue)
     }
 
     fn visit_horizontal_rule(&mut self, ctx: &crate::visitor::NodeContext) -> crate::visitor::VisitResult {
@@ -1078,7 +1174,11 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         {
             return crate::visitor::VisitResult::Continue;
         }
-        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+        self.response_rx
+            .lock()
+            .unwrap()
+            .recv()
+            .unwrap_or(crate::visitor::VisitResult::Continue)
     }
 
     fn visit_custom_element(
@@ -1098,7 +1198,11 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         {
             return crate::visitor::VisitResult::Continue;
         }
-        self.response_rx.recv().unwrap_or(crate::visitor::VisitResult::Continue)
+        self.response_rx
+            .lock()
+            .unwrap()
+            .recv()
+            .unwrap_or(crate::visitor::VisitResult::Continue)
     }
 }
 
