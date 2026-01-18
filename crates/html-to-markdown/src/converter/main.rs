@@ -1502,8 +1502,11 @@ pub(crate) fn walk_node(
                                 is_inline: true,
                             };
 
-                            let mut visitor = visitor_handle.borrow_mut();
-                            match visitor.visit_strong(&node_ctx, &text_content) {
+                            let visit_result = {
+                                let mut visitor = visitor_handle.borrow_mut();
+                                visitor.visit_strong(&node_ctx, &text_content)
+                            };
+                            match visit_result {
                                 VisitResult::Continue => None,
                                 VisitResult::Custom(custom) => Some(custom),
                                 VisitResult::Skip => Some(String::new()),
@@ -1620,8 +1623,11 @@ pub(crate) fn walk_node(
                                 is_inline: true,
                             };
 
-                            let mut visitor = visitor_handle.borrow_mut();
-                            match visitor.visit_emphasis(&node_ctx, &text_content) {
+                            let visit_result = {
+                                let mut visitor = visitor_handle.borrow_mut();
+                                visitor.visit_emphasis(&node_ctx, &text_content)
+                            };
+                            match visit_result {
                                 VisitResult::Continue => None,
                                 VisitResult::Custom(custom) => Some(custom),
                                 VisitResult::Skip => Some(String::new()),
@@ -2452,8 +2458,11 @@ pub(crate) fn walk_node(
                                 is_inline: true,
                             };
 
-                            let mut visitor = visitor_handle.borrow_mut();
-                            match visitor.visit_strikethrough(&node_ctx, &text_content) {
+                            let visit_result = {
+                                let mut visitor = visitor_handle.borrow_mut();
+                                visitor.visit_strikethrough(&node_ctx, &text_content)
+                            };
+                            match visit_result {
                                 VisitResult::Continue => None,
                                 VisitResult::Custom(custom) => Some(custom),
                                 VisitResult::Skip => Some(String::new()),
@@ -2550,8 +2559,11 @@ pub(crate) fn walk_node(
                             is_inline: true,
                         };
 
-                        let mut visitor = visitor_handle.borrow_mut();
-                        match visitor.visit_underline(&node_ctx, &text_content) {
+                        let visit_result = {
+                            let mut visitor = visitor_handle.borrow_mut();
+                            visitor.visit_underline(&node_ctx, &text_content)
+                        };
+                        match visit_result {
                             VisitResult::Continue => None,
                             VisitResult::Custom(custom) => Some(custom),
                             VisitResult::Skip => Some(String::new()),
@@ -2633,8 +2645,11 @@ pub(crate) fn walk_node(
                             is_inline: true,
                         };
 
-                        let mut visitor = visitor_handle.borrow_mut();
-                        match visitor.visit_underline(&node_ctx, &text_content) {
+                        let visit_result = {
+                            let mut visitor = visitor_handle.borrow_mut();
+                            visitor.visit_underline(&node_ctx, &text_content)
+                        };
+                        match visit_result {
                             VisitResult::Continue => {
                                 let children = tag.children();
                                 for child_handle in children.top().iter() {
