@@ -13,17 +13,25 @@ fallback_files = Dir.chdir(__dir__) do
   Dir.glob(
     %w[
       README.md
-      ext/html-to-markdown-rb/extconf.rb
+      ext/**/*
       exe/*
       lib/**/*.rb
       lib/bin/*
       src/**/*.rs
       spec/**/*.rb
       sig/**/*.rbs
+      vendor/**/*
     ]
   )
 end
+
+# Always include vendor directory if it exists (created by vendoring script)
+vendor_files = Dir.chdir(__dir__) do
+  Dir.glob('vendor/**/*').select { |f| File.file?(f) }
+end
+
 files = git_files.empty? ? fallback_files : git_files
+files = (files + vendor_files).uniq
 
 Gem::Specification.new do |spec|
   spec.name          = 'html-to-markdown'
