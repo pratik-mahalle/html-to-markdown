@@ -195,6 +195,14 @@ const (
 	archAMD64    = "amd64"
 	archARM64    = "arm64"
 	archiveTarGz = "tar.gz"
+
+	osLinux   = "linux"
+	osDarwin  = "darwin"
+	osWindows = "windows"
+
+	libNameLinux   = "libhtml_to_markdown_ffi.so"
+	libNameDarwin  = "libhtml_to_markdown_ffi.dylib"
+	libNameWindows = "html_to_markdown_ffi.dll"
 )
 
 var (
@@ -276,23 +284,23 @@ func loadFFIFromPath(path string) error {
 
 func resolveFFIPlatform() (platform string, archiveExt string, libraryName string, err error) {
 	switch runtime.GOOS {
-	case "linux":
+	case osLinux:
 		switch runtime.GOARCH {
 		case archAMD64:
-			return "linux-x64", archiveTarGz, "libhtml_to_markdown_ffi.so", nil
+			return "linux-x64", archiveTarGz, libNameLinux, nil
 		case archARM64:
-			return "linux-arm64", archiveTarGz, "libhtml_to_markdown_ffi.so", nil
+			return "linux-arm64", archiveTarGz, libNameLinux, nil
 		}
-	case "darwin":
+	case osDarwin:
 		switch runtime.GOARCH {
 		case archAMD64:
-			return "darwin-x64", archiveTarGz, "libhtml_to_markdown_ffi.dylib", nil
+			return "darwin-x64", archiveTarGz, libNameDarwin, nil
 		case archARM64:
-			return "darwin-arm64", archiveTarGz, "libhtml_to_markdown_ffi.dylib", nil
+			return "darwin-arm64", archiveTarGz, libNameDarwin, nil
 		}
-	case "windows":
+	case osWindows:
 		if runtime.GOARCH == archAMD64 {
-			return "windows-x64", "zip", "html_to_markdown_ffi.dll", nil
+			return "windows-x64", "zip", libNameWindows, nil
 		}
 	}
 	return "", "", "", fmt.Errorf("unsupported platform: %s/%s", runtime.GOOS, runtime.GOARCH)
@@ -320,19 +328,21 @@ func resolveInstalledLibrary() (string, error) {
 	// Map GOOS/GOARCH to directory names used by the install command
 	var goDir string
 	switch runtime.GOOS {
-	case "darwin":
-		if runtime.GOARCH == archARM64 {
+	case osDarwin:
+		switch runtime.GOARCH {
+		case archARM64:
 			goDir = "darwin_arm64"
-		} else if runtime.GOARCH == archAMD64 {
+		case archAMD64:
 			goDir = "darwin_amd64"
 		}
-	case "linux":
-		if runtime.GOARCH == archAMD64 {
+	case osLinux:
+		switch runtime.GOARCH {
+		case archAMD64:
 			goDir = "linux_amd64"
-		} else if runtime.GOARCH == archARM64 {
+		case archARM64:
 			goDir = "linux_arm64"
 		}
-	case "windows":
+	case osWindows:
 		if runtime.GOARCH == archAMD64 {
 			goDir = "windows_amd64"
 		}
@@ -345,12 +355,12 @@ func resolveInstalledLibrary() (string, error) {
 	// Determine library filename based on platform
 	var libName string
 	switch runtime.GOOS {
-	case "darwin":
-		libName = "libhtml_to_markdown_ffi.dylib"
-	case "linux":
-		libName = "libhtml_to_markdown_ffi.so"
-	case "windows":
-		libName = "html_to_markdown_ffi.dll"
+	case osDarwin:
+		libName = libNameDarwin
+	case osLinux:
+		libName = libNameLinux
+	case osWindows:
+		libName = libNameWindows
 	}
 
 	return filepath.Join(home, ".html-to-markdown", "lib", goDir, libName), nil
