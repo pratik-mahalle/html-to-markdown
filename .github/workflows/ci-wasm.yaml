@@ -6,6 +6,7 @@ on:
     paths:
       - crates/html-to-markdown-wasm/**
       - crates/html-to-markdown-wasm-wasi/**
+      - scripts/publish/wasm/**
       - e2e/wasm-wasmtime/**
       - crates/html-to-markdown/**
       - package.json
@@ -19,6 +20,7 @@ on:
     paths:
       - crates/html-to-markdown-wasm/**
       - crates/html-to-markdown-wasm-wasi/**
+      - scripts/publish/wasm/**
       - e2e/wasm-wasmtime/**
       - crates/html-to-markdown/**
       - package.json

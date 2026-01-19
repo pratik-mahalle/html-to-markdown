@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - packages/typescript/**
+      - scripts/publish/node/**
       - crates/html-to-markdown-node/**
       - crates/html-to-markdown/**
       - package.json
@@ -17,6 +18,7 @@ on:
     branches: [main]
     paths:
       - packages/typescript/**
+      - scripts/publish/node/**
       - crates/html-to-markdown-node/**
       - crates/html-to-markdown/**
       - package.json
