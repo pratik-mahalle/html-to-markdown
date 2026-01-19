@@ -12,8 +12,8 @@ echo "=== Vendoring Ruby gem dependencies with cargo vendor ==="
 
 cd "$NATIVE_EXT"
 
-# Clean up any existing vendor directory and restore Cargo.toml
-rm -rf "${RUBY_PKG:?}/${VENDOR_DIR:?}" "${RUBY_PKG:?}/.cargo"
+# Clean up any existing vendor directory and restore native Cargo.toml to original state
+rm -rf "${RUBY_PKG:?}/${VENDOR_DIR:?}" "${RUBY_PKG:?}/.cargo" "$NATIVE_EXT/Cargo.lock"
 git restore "$NATIVE_EXT/Cargo.toml" 2>/dev/null || true
 
 # Step 1: Run cargo vendor to vendor all external dependencies
@@ -80,16 +80,75 @@ PY
 echo "Creating checksum for html-to-markdown-rs..."
 echo '{"files":{}}' >"$RUBY_PKG/$VENDOR_DIR/html-to-markdown-rs/.cargo-checksum.json"
 
-# Step 5: Add path override to .cargo/config.toml for html-to-markdown-rs
-echo "Adding path override for html-to-markdown-rs..."
-cat >>"$RUBY_PKG/.cargo/config.toml" <<EOF
+# Step 5: Expand workspace references in native Cargo.toml
+echo "Expanding workspace references in native Cargo.toml..."
+python3 - "Cargo.toml" "$VENDOR_DIR" <<'PY'
+import re
+import sys
+from pathlib import Path
 
-[patch.crates-io]
-html-to-markdown-rs = { path = "$VENDOR_DIR/html-to-markdown-rs" }
-EOF
+path = Path(sys.argv[1])
+vendor_dir = sys.argv[2]
+text = path.read_text(encoding="utf-8")
+
+replacements = {
+    r"^version\.workspace\s*=\s*true\s*$": 'version = "2.23.0"',
+    r"^edition\.workspace\s*=\s*true\s*$": 'edition = "2024"',
+    r"^authors\.workspace\s*=\s*true\s*$": 'authors = ["Na\'aman Hirschfeld <naaman@kreuzberg.dev>"]',
+    r"^license\.workspace\s*=\s*true\s*$": 'license = "MIT"',
+    r"^repository\.workspace\s*=\s*true\s*$": 'repository = "https://github.com/kreuzberg-dev/html-to-markdown"',
+    r"^homepage\.workspace\s*=\s*true\s*$": 'homepage = "https://github.com/kreuzberg-dev/html-to-markdown"',
+    r"^documentation\.workspace\s*=\s*true\s*$": 'documentation = "https://docs.rs/html-to-markdown-rs"',
+    r"^readme\.workspace\s*=\s*true\s*$": 'readme = "README.md"',
+    r"^rust-version\.workspace\s*=\s*true\s*$": 'rust-version = "1.85"',
+}
+
+for pattern, replacement in replacements.items():
+    text = re.sub(pattern, replacement, text, flags=re.MULTILINE)
+
+# Replace workspace dependency with path to vendored crate
+text = re.sub(
+    r'^html-to-markdown-rs\s*=\s*\{\s*workspace\s*=\s*true,\s*features\s*=\s*\[([^\]]+)\]\s*\}',
+    rf'html-to-markdown-rs = {{ path = "../../../{vendor_dir}/html-to-markdown-rs", features = [\1] }}',
+    text,
+    flags=re.MULTILINE
+)
+
+# Handle lints section separately (multi-line)
+text = re.sub(
+    r"^\[lints\.rust\]\s*\n(?:^.*workspace.*\n)+",
+    '[lints.rust]\nunsafe_code = "forbid"\nmissing_docs = "warn"\nunused_must_use = "deny"\n\n',
+    text,
+    flags=re.MULTILINE
+)
+text = re.sub(
+    r"^\[lints\.clippy\]\s*\n(?:^.*workspace.*\n)+",
+    '[lints.clippy]\nall = { level = "deny", priority = -1 }\ncargo = { level = "deny", priority = -1 }\npedantic = { level = "warn", priority = -1 }\nnursery = { level = "warn", priority = -1 }\nmultiple_crate_versions = "allow"\n',
+    text,
+    flags=re.MULTILINE
+)
+
+path.write_text(text, encoding="utf-8")
+PY
+
+# Step 6: Generate Cargo.lock without source replacements
+# For vendored git dependencies, cargo requires the lock file to be generated
+# BEFORE the source replacement config is present
+# We also need to hide the workspace root to avoid package collision errors
+echo "Temporarily moving source replacement config and workspace root..."
+mv "$RUBY_PKG/.cargo/config.toml" "$RUBY_PKG/.cargo/config.toml.tmp"
+mv "$REPO_ROOT/Cargo.toml" "$REPO_ROOT/Cargo.toml.tmp"
+
+echo "Generating Cargo.lock..."
+cargo generate-lockfile --manifest-path="$NATIVE_EXT/Cargo.toml"
+
+echo "Restoring source replacement config and workspace root..."
+mv "$RUBY_PKG/.cargo/config.toml.tmp" "$RUBY_PKG/.cargo/config.toml"
+mv "$REPO_ROOT/Cargo.toml.tmp" "$REPO_ROOT/Cargo.toml"
 
 echo "✓ Vendored all dependencies to packages/ruby/$VENDOR_DIR/"
 echo "✓ Created .cargo/config.toml with source replacements"
+echo "✓ Generated Cargo.lock"
 
 # Count vendored crates
 crate_count=$(find "$RUBY_PKG/$VENDOR_DIR" -maxdepth 1 -type d 2>/dev/null | wc -l)
