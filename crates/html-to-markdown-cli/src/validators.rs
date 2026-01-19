@@ -1,0 +1,179 @@
+#![allow(clippy::all, clippy::pedantic, clippy::nursery, missing_docs)]
+
+use clap::ValueEnum;
+use html_to_markdown_rs::{
+    CodeBlockStyle, HeadingStyle, HighlightStyle, ListIndentType, NewlineStyle, OutputFormat, PreprocessingPreset,
+    WhitespaceMode,
+};
+
+#[derive(Copy, Clone, PartialEq, Eq, ValueEnum)]
+pub enum CliHeadingStyle {
+    /// ATX style: # for h1, ## for h2 (default)
+    Atx,
+    /// Underlined: === for h1, --- for h2
+    Underlined,
+    /// ATX closed: # Title #
+    AtxClosed,
+}
+
+impl From<CliHeadingStyle> for HeadingStyle {
+    fn from(style: CliHeadingStyle) -> Self {
+        match style {
+            CliHeadingStyle::Atx => Self::Atx,
+            CliHeadingStyle::Underlined => Self::Underlined,
+            CliHeadingStyle::AtxClosed => Self::AtxClosed,
+        }
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, ValueEnum)]
+pub enum CliListIndentType {
+    /// Use spaces for indentation
+    Spaces,
+    /// Use tabs for indentation
+    Tabs,
+}
+
+impl From<CliListIndentType> for ListIndentType {
+    fn from(indent_type: CliListIndentType) -> Self {
+        match indent_type {
+            CliListIndentType::Spaces => Self::Spaces,
+            CliListIndentType::Tabs => Self::Tabs,
+        }
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, ValueEnum)]
+pub enum CliNewlineStyle {
+    /// Two spaces at end of line
+    Spaces,
+    /// Backslash at end of line (default)
+    Backslash,
+}
+
+impl From<CliNewlineStyle> for NewlineStyle {
+    fn from(style: CliNewlineStyle) -> Self {
+        match style {
+            CliNewlineStyle::Spaces => Self::Spaces,
+            CliNewlineStyle::Backslash => Self::Backslash,
+        }
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, ValueEnum)]
+pub enum CliCodeBlockStyle {
+    /// Indented code blocks: 4 spaces (default)
+    Indented,
+    /// Fenced code blocks: ```
+    Backticks,
+    /// Fenced code blocks: ~~~
+    Tildes,
+}
+
+impl From<CliCodeBlockStyle> for CodeBlockStyle {
+    fn from(style: CliCodeBlockStyle) -> Self {
+        match style {
+            CliCodeBlockStyle::Indented => Self::Indented,
+            CliCodeBlockStyle::Backticks => Self::Backticks,
+            CliCodeBlockStyle::Tildes => Self::Tildes,
+        }
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, ValueEnum)]
+pub enum CliHighlightStyle {
+    /// ==text== (default)
+    DoubleEqual,
+    /// <mark>text</mark>
+    Html,
+    /// **text**
+    Bold,
+    /// Plain text
+    None,
+}
+
+impl From<CliHighlightStyle> for HighlightStyle {
+    fn from(style: CliHighlightStyle) -> Self {
+        match style {
+            CliHighlightStyle::DoubleEqual => Self::DoubleEqual,
+            CliHighlightStyle::Html => Self::Html,
+            CliHighlightStyle::Bold => Self::Bold,
+            CliHighlightStyle::None => Self::None,
+        }
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, ValueEnum)]
+pub enum CliWhitespaceMode {
+    /// Normalize whitespace (default)
+    Normalized,
+    /// Preserve whitespace as-is
+    Strict,
+}
+
+impl From<CliWhitespaceMode> for WhitespaceMode {
+    fn from(mode: CliWhitespaceMode) -> Self {
+        match mode {
+            CliWhitespaceMode::Normalized => Self::Normalized,
+            CliWhitespaceMode::Strict => Self::Strict,
+        }
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, ValueEnum)]
+pub enum CliPreprocessingPreset {
+    /// Basic cleanup
+    Minimal,
+    /// Balanced cleaning (default)
+    Standard,
+    /// Maximum cleaning
+    Aggressive,
+}
+
+impl From<CliPreprocessingPreset> for PreprocessingPreset {
+    fn from(preset: CliPreprocessingPreset) -> Self {
+        match preset {
+            CliPreprocessingPreset::Minimal => Self::Minimal,
+            CliPreprocessingPreset::Standard => Self::Standard,
+            CliPreprocessingPreset::Aggressive => Self::Aggressive,
+        }
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, ValueEnum)]
+pub enum CliOutputFormat {
+    /// Standard Markdown (CommonMark compatible)
+    Markdown,
+    /// Djot lightweight markup language
+    Djot,
+}
+
+impl From<CliOutputFormat> for OutputFormat {
+    fn from(format: CliOutputFormat) -> Self {
+        match format {
+            CliOutputFormat::Markdown => Self::Markdown,
+            CliOutputFormat::Djot => Self::Djot,
+        }
+    }
+}
+
+pub fn validate_bullets(s: &str) -> Result<String, String> {
+    if s.is_empty() {
+        return Err("bullets cannot be empty".to_string());
+    }
+    if s.len() > 10 {
+        return Err("bullets string too long (max 10 characters)".to_string());
+    }
+    Ok(s.to_string())
+}
+
+pub fn validate_strong_em_symbol(s: &str) -> Result<char, String> {
+    if s.len() != 1 {
+        return Err("strong_em_symbol must be exactly one character".to_string());
+    }
+    let c = s.chars().next().unwrap();
+    if c != '*' && c != '_' {
+        return Err("strong_em_symbol must be '*' or '_'".to_string());
+    }
+    Ok(c)
+}

@@ -126,8 +126,11 @@ fn handle_strong(
                 is_inline: true,
             };
 
-            let mut visitor = visitor_handle.borrow_mut();
-            match visitor.visit_strong(&node_ctx, &text_content) {
+            let visit_result = {
+                let mut visitor = visitor_handle.borrow_mut();
+                visitor.visit_strong(&node_ctx, &text_content)
+            };
+            match visit_result {
                 VisitResult::Continue => None,
                 VisitResult::Custom(custom) => Some(custom),
                 VisitResult::Skip => Some(String::new()),
@@ -263,8 +266,11 @@ fn handle_emphasis(
                 is_inline: true,
             };
 
-            let mut visitor = visitor_handle.borrow_mut();
-            match visitor.visit_emphasis(&node_ctx, &text_content) {
+            let visit_result = {
+                let mut visitor = visitor_handle.borrow_mut();
+                visitor.visit_emphasis(&node_ctx, &text_content)
+            };
+            match visit_result {
                 VisitResult::Continue => None,
                 VisitResult::Custom(custom) => Some(custom),
                 VisitResult::Skip => Some(String::new()),
