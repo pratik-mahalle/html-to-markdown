@@ -83,8 +83,11 @@ pub(crate) fn handle_ol(
             is_inline: false,
         };
 
-        let mut visitor = visitor_handle.borrow_mut();
-        match visitor.visit_list_start(&node_ctx, true) {
+        let visit_result = {
+            let mut visitor = visitor_handle.borrow_mut();
+            visitor.visit_list_start(&node_ctx, true)
+        };
+        match visit_result {
             VisitResult::Continue => {}
             VisitResult::Custom(custom) => {
                 list_start_custom = Some(custom);
@@ -151,8 +154,11 @@ pub(crate) fn handle_ol(
 
         let list_content = &output[list_output_start..];
 
-        let mut visitor = visitor_handle.borrow_mut();
-        match visitor.visit_list_end(&node_ctx, true, list_content) {
+        let visit_result = {
+            let mut visitor = visitor_handle.borrow_mut();
+            visitor.visit_list_end(&node_ctx, true, list_content)
+        };
+        match visit_result {
             VisitResult::Continue => {
                 if let Some(custom_start) = list_start_custom {
                     output.insert_str(list_output_start, &custom_start);
