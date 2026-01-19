@@ -18,6 +18,7 @@ use html_to_markdown_rs::{
 use napi::bindgen_prelude::*;
 use napi_derive::napi;
 use std::str;
+#[cfg(feature = "async-visitor")]
 use std::sync::Arc;
 
 fn to_js_error(err: ConversionError) -> Error {

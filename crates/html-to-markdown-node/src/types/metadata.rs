@@ -1,9 +1,12 @@
+#[cfg(feature = "metadata")]
 use html_to_markdown_rs::metadata::{
     DocumentMetadata as RustDocumentMetadata, ExtendedMetadata as RustExtendedMetadata,
     HeaderMetadata as RustHeaderMetadata, ImageMetadata as RustImageMetadata, LinkMetadata as RustLinkMetadata,
     MetadataConfig as RustMetadataConfig, StructuredData as RustStructuredData,
 };
+#[cfg(feature = "metadata")]
 use napi_derive::napi;
+#[cfg(feature = "metadata")]
 use std::collections::HashMap;
 
 /// Metadata extraction configuration
