@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.23.1] - 2026-01-19
+
+### Fixed
+
+- **Go module versioning**: Created 14 missing Go module tags (packages/go/v2.16.1, v2.19.1-v2.19.8, v2.20.1, v2.21.1, v2.22.1-v2.22.5) to ensure all versions since v2.15.0 are available via Go proxy. Users can now `go get` any version from v2.15.0 onwards.
+- **TypeScript wrapper publishing**: Added missing `publish-typescript` job to publish workflow to properly publish `@kreuzberg/html-to-markdown` TypeScript wrapper package to npm alongside the native Node.js bindings (`@kreuzberg/html-to-markdown-node`).
+- **Ruby gem vendoring**: Fixed Ruby gem installation failures due to missing `.cargo-checksum.json` files. Updated gemspec to include hidden files with `File::FNM_DOTMATCH` flag, and improved vendoring script to generate checksums correctly with `--locked` flag and proper cleanup.
+- **Elixir package size**: Reduced Hex package size from 134 MB to under 128 MB limit by aggressively removing unnecessary files from vendored dependencies (tests, docs, examples, static libraries, Windows-only crates on Unix builds).
+
+### Added
+
+- **Go automatic FFI library installation**: Implemented `go:generate` pattern following Kreuzberg approach. Added `cmd/install` package that automatically downloads platform-specific FFI libraries from GitHub releases and generates CGO flags. Users can now run `go generate` after installation instead of manually setting `CGO_CFLAGS` and `CGO_LDFLAGS` environment variables. FFI loader updated to check `~/.html-to-markdown/` for installed libraries.
+
 ## [2.23.0] - 2026-01-18
 
 ### Added
