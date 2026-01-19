@@ -42,7 +42,7 @@ echo "Cleaning up vendored dependencies to reduce package size..."
 # Use a while loop with find to reliably remove directories
 while IFS= read -r dir; do
 	rm -rf "$dir"
-done < <(find vendor -type d \( -name "tests" -o -name "benches" -o -name "examples" -o -name "docs" -o -name ".github" \) 2>/dev/null)
+done < <(find vendor -type d \( -name "tests" -o -name "benches" -o -name "examples" -o -name "docs" -o -name ".github" -o -name "ci" \) 2>/dev/null)
 
 # Remove documentation and metadata files
 find vendor -type f \( \
@@ -51,8 +51,25 @@ find vendor -type f \( \
 	-name "CHANGELOG*" -o \
 	-name ".git*" -o \
 	-name ".cargo-ok" -o \
-	-name "*.html" \
+	-name "*.html" -o \
+	-name "*.yml" -o \
+	-name "*.yaml" \
 	\) -delete 2>/dev/null || true
+
+# Remove static libraries (pre-built binaries not needed for source distribution)
+echo "Removing static libraries..."
+find vendor -type f -name "*.a" -delete 2>/dev/null || true
+
+# Remove Windows-only crates if building on non-Windows
+if [[ "$(uname -s)" != "MINGW"* ]] && [[ "$(uname -s)" != "MSYS"* ]] && [[ "$(uname -s)" != "CYGWIN"* ]]; then
+	echo "Removing Windows-only dependencies..."
+	rm -rf vendor/winapi-i686-pc-windows-gnu 2>/dev/null || true
+	rm -rf vendor/winapi-x86_64-pc-windows-gnu 2>/dev/null || true
+	rm -rf vendor/windows-sys 2>/dev/null || true
+	rm -rf vendor/windows-targets 2>/dev/null || true
+	rm -rf vendor/windows_*_gnu 2>/dev/null || true
+	rm -rf vendor/windows_*_msvc 2>/dev/null || true
+fi
 
 # Count vendored crates and check size
 crate_count=$(find vendor -maxdepth 1 -type d 2>/dev/null | wc -l)
