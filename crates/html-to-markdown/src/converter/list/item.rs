@@ -259,8 +259,11 @@ pub(crate) fn handle_li(
                 (bullet_str, last_line[text_start..].trim().to_string())
             };
 
-            let mut visitor = visitor_handle.borrow_mut();
-            match visitor.visit_list_item(&node_ctx, ctx.in_ordered_list, &marker, &text_content) {
+            let visit_result = {
+                let mut visitor = visitor_handle.borrow_mut();
+                visitor.visit_list_item(&node_ctx, ctx.in_ordered_list, &marker, &text_content)
+            };
+            match visit_result {
                 VisitResult::Continue => {}
                 VisitResult::Custom(custom) => {
                     output.truncate(last_line_start);

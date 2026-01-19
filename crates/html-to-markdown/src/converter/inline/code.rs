@@ -140,8 +140,11 @@ fn handle_code(
                     is_inline: true,
                 };
 
-                let mut visitor = visitor_handle.borrow_mut();
-                match visitor.visit_code_inline(&node_ctx, trimmed) {
+                let visit_result = {
+                    let mut visitor = visitor_handle.borrow_mut();
+                    visitor.visit_code_inline(&node_ctx, trimmed)
+                };
+                match visit_result {
                     VisitResult::Continue => None,
                     VisitResult::Custom(custom) => Some(custom),
                     VisitResult::Skip => Some(String::new()),

@@ -143,8 +143,11 @@ pub fn handle_img(
             is_inline: true,
         };
 
-        let mut visitor = visitor_handle.borrow_mut();
-        match visitor.visit_image(&node_ctx, &src, &alt, title.as_deref()) {
+        let visit_result = {
+            let mut visitor = visitor_handle.borrow_mut();
+            visitor.visit_image(&node_ctx, &src, &alt, title.as_deref())
+        };
+        match visit_result {
             VisitResult::Continue => Some(format_image_markdown(&src, &alt, title.as_deref(), should_use_alt_text)),
             VisitResult::Custom(custom) => Some(custom),
             VisitResult::Skip => None,
