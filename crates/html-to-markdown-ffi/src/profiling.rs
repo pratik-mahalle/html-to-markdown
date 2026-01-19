@@ -74,6 +74,14 @@ mod enabled {
         })
     }
 
+    /// Start profiling with the specified output path and sampling frequency.
+    ///
+    /// # Arguments
+    /// * `output_path` - Path where the flamegraph SVG will be written
+    /// * `frequency` - Sampling frequency in Hz
+    ///
+    /// # Errors
+    /// Returns an error if profiling is already active or initialization fails.
     pub fn start(output_path: PathBuf, frequency: i32) -> Result<()> {
         let mut state = state()
             .lock()
@@ -95,6 +103,10 @@ mod enabled {
         Ok(())
     }
 
+    /// Stop profiling and write the flamegraph to the configured output path.
+    ///
+    /// # Errors
+    /// Returns an error if profiling is not active or report generation fails.
     pub fn stop() -> Result<()> {
         let (guard, output) = {
             let mut state = state()
@@ -130,6 +142,18 @@ mod enabled {
         Ok(())
     }
 
+    /// Execute a function with optional profiling based on environment configuration.
+    ///
+    /// If profiling is already active or not configured via environment variables,
+    /// the function is executed directly. Otherwise, profiling is started, the
+    /// function is executed (possibly multiple times based on `HTML_TO_MARKDOWN_PROFILE_REPEAT`),
+    /// and a flamegraph is written to the configured output path.
+    ///
+    /// # Environment Variables
+    /// * `HTML_TO_MARKDOWN_PROFILE_OUTPUT` - Output path for flamegraph (required to enable)
+    /// * `HTML_TO_MARKDOWN_PROFILE_FREQUENCY` - Sampling frequency in Hz (default: 1000)
+    /// * `HTML_TO_MARKDOWN_PROFILE_ONCE` - Only profile once per process (default: true)
+    /// * `HTML_TO_MARKDOWN_PROFILE_REPEAT` - Number of times to run the function (default: 1)
     pub fn maybe_profile<T, F>(mut f: F) -> Result<T>
     where
         F: FnMut() -> Result<T>,
