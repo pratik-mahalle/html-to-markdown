@@ -23,7 +23,7 @@ describe('comprehensive html-to-markdown WASM tests', () => {
 
   beforeAll(async () => {
     try {
-      wasmModule = await import('html-to-markdown-wasm');
+      wasmModule = await import('@kreuzberg/html-to-markdown-wasm');
     } catch (error) {
       console.error('Failed to load WASM module:', error);
       throw error;

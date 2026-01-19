@@ -16,11 +16,14 @@ public class ComprehensiveTest
 {
     private static List<TestCase> LoadFixtures(string filename)
     {
-        // Get the directory of the test_apps folder (parent of csharp folder)
-        var testAppsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..");
-        var fixturesPath = Path.Combine(testAppsDir, "fixtures", filename);
-        var fullPath = Path.GetFullPath(fixturesPath);
-        var json = File.ReadAllText(fullPath);
+        // Get the directory of the test_apps folder
+        // AppDomain.CurrentDomain.BaseDirectory points to bin/Debug/net10.0
+        // We need to go up to csharp, then to test_apps
+        var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+        var csharpDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", ".."));
+        var testAppsDir = Path.GetDirectoryName(csharpDir);
+        var fixturesPath = Path.Combine(testAppsDir!, "fixtures", filename);
+        var json = File.ReadAllText(fixturesPath);
         return JsonConvert.DeserializeObject<List<TestCase>>(json)!;
     }
 
