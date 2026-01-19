@@ -183,8 +183,11 @@ pub fn convert_table_row(
                 is_inline: false,
             };
 
-            let mut visitor = visitor_handle.borrow_mut();
-            match visitor.visit_table_row(&node_ctx, &cell_contents, is_header) {
+            let visit_result = {
+                let mut visitor = visitor_handle.borrow_mut();
+                visitor.visit_table_row(&node_ctx, &cell_contents, is_header)
+            };
+            match visit_result {
                 VisitResult::Continue => {}
                 VisitResult::Skip => return,
                 VisitResult::Custom(custom) => {

@@ -126,8 +126,11 @@ pub fn handle_table(
                 is_inline: false,
             };
 
-            let mut visitor = visitor_handle.borrow_mut();
-            match visitor.visit_table_start(&node_ctx) {
+            let visit_result = {
+                let mut visitor = visitor_handle.borrow_mut();
+                visitor.visit_table_start(&node_ctx)
+            };
+            match visit_result {
                 VisitResult::Continue => {}
                 VisitResult::Skip => return,
                 VisitResult::Custom(custom) => {
@@ -357,8 +360,11 @@ pub fn handle_table(
 
             let table_content = &output[table_output_start..];
 
-            let mut visitor = visitor_handle.borrow_mut();
-            match visitor.visit_table_end(&node_ctx, table_content) {
+            let visit_result = {
+                let mut visitor = visitor_handle.borrow_mut();
+                visitor.visit_table_end(&node_ctx, table_content)
+            };
+            match visit_result {
                 VisitResult::Continue => {
                     if let Some(custom_start) = table_start_custom {
                         output.insert_str(table_output_start, &custom_start);
