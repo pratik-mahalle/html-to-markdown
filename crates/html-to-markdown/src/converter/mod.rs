@@ -92,19 +92,29 @@
 
 pub mod block;
 pub mod context;
+pub mod dom_context;
 pub mod form;
 pub mod format;
+pub mod handlers;
 pub mod inline;
 pub mod list;
 pub mod main;
 mod main_helpers;
 pub mod media;
+mod metadata;
+pub mod preprocessing_helpers;
 pub mod semantic;
 pub mod text;
+mod text_node;
 pub mod utility;
 
+#[cfg(feature = "visitor")]
+pub mod visitor_hooks;
+
 // Import and re-export public types and functions from the main module
-pub use self::main::{Context, DomContext, convert_html};
+pub use self::context::Context;
+pub use self::dom_context::DomContext;
+pub use self::main::convert_html;
 
 #[cfg(feature = "visitor")]
 pub use self::main::convert_html_with_visitor;
@@ -146,7 +156,9 @@ pub use semantic::dispatch_semantic_handler;
 // Media module doesn't have a dispatcher - it exports utility functions
 
 // Re-export utility submodules for public access to their types
-pub use utility::{attributes, caching, content, preprocessing, serialization, siblings};
+// NOTE: utility::preprocessing is deliberately not re-exported to avoid naming conflict
+// with preprocessing_helpers module. Users should access utility::preprocessing directly.
+pub use utility::{attributes, caching, content, serialization, siblings};
 
 // Re-export format renderer types
 pub use format::{DjotRenderer, FormatRenderer, MarkdownRenderer};
@@ -157,6 +169,5 @@ pub use format::{DjotRenderer, FormatRenderer, MarkdownRenderer};
 // Re-export media utilities for internal use (crate-private)
 
 // Re-export list utilities for internal use (crate-private)
-pub(crate) use list::continuation_indent_string;
 
 // Semantic and form handlers are also internal (pub(crate))

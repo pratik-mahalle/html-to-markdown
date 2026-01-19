@@ -1,0 +1,238 @@
+use ext_php_rs::prelude::*;
+use ext_php_rs::types::{ZendHashTable, Zval};
+#[cfg(feature = "metadata")]
+use html_to_markdown_rs::MetadataConfig;
+#[cfg(feature = "metadata")]
+use html_to_markdown_rs::MetadataConfigUpdate;
+use html_to_markdown_rs::{ConversionOptions, ConversionOptionsUpdate, InlineImageConfig, InlineImageConfigUpdate};
+
+use crate::enums::*;
+use crate::types::*;
+
+/// Parse a ConversionOptions table from PHP hash table.
+pub fn parse_conversion_options(table: &ZendHashTable) -> PhpResult<ConversionOptions> {
+    let mut update = ConversionOptionsUpdate::default();
+
+    for (key, value) in table {
+        let key_str = key_to_string(&key)?;
+
+        if value.is_null() {
+            continue;
+        }
+
+        match key_str.as_str() {
+            "heading_style" => {
+                update.heading_style = Some(parse_heading_style(value, &key_str)?);
+            }
+            "list_indent_type" => {
+                update.list_indent_type = Some(parse_list_indent_type(value, &key_str)?);
+            }
+            "list_indent_width" => {
+                update.list_indent_width = Some(read_usize(value, &key_str)?);
+            }
+            "bullets" => {
+                update.bullets = Some(read_string(value, &key_str)?);
+            }
+            "strong_em_symbol" => {
+                update.strong_em_symbol = Some(parse_single_char(value, &key_str)?);
+            }
+            "escape_asterisks" => {
+                update.escape_asterisks = Some(read_bool(value, &key_str)?);
+            }
+            "escape_underscores" => {
+                update.escape_underscores = Some(read_bool(value, &key_str)?);
+            }
+            "escape_misc" => {
+                update.escape_misc = Some(read_bool(value, &key_str)?);
+            }
+            "escape_ascii" => {
+                update.escape_ascii = Some(read_bool(value, &key_str)?);
+            }
+            "code_language" => {
+                update.code_language = Some(read_string(value, &key_str)?);
+            }
+            "autolinks" => {
+                update.autolinks = Some(read_bool(value, &key_str)?);
+            }
+            "default_title" => {
+                update.default_title = Some(read_bool(value, &key_str)?);
+            }
+            "br_in_tables" => {
+                update.br_in_tables = Some(read_bool(value, &key_str)?);
+            }
+            "hocr_spatial_tables" => {
+                update.hocr_spatial_tables = Some(read_bool(value, &key_str)?);
+            }
+            "highlight_style" => {
+                update.highlight_style = Some(parse_highlight_style(value, &key_str)?);
+            }
+            "extract_metadata" => {
+                update.extract_metadata = Some(read_bool(value, &key_str)?);
+            }
+            "whitespace_mode" => {
+                update.whitespace_mode = Some(parse_whitespace_mode(value, &key_str)?);
+            }
+            "strip_newlines" => {
+                update.strip_newlines = Some(read_bool(value, &key_str)?);
+            }
+            "wrap" => {
+                update.wrap = Some(read_bool(value, &key_str)?);
+            }
+            "wrap_width" => {
+                update.wrap_width = Some(read_usize(value, &key_str)?);
+            }
+            "convert_as_inline" => {
+                update.convert_as_inline = Some(read_bool(value, &key_str)?);
+            }
+            "sub_symbol" => {
+                update.sub_symbol = Some(read_string(value, &key_str)?);
+            }
+            "sup_symbol" => {
+                update.sup_symbol = Some(read_string(value, &key_str)?);
+            }
+            "newline_style" => {
+                update.newline_style = Some(parse_newline_style(value, &key_str)?);
+            }
+            "code_block_style" => {
+                update.code_block_style = Some(parse_code_block_style(value, &key_str)?);
+            }
+            "keep_inline_images_in" => {
+                update.keep_inline_images_in = Some(read_string_list(value, &key_str)?);
+            }
+            "preprocessing" => {
+                update.preprocessing = Some(parse_preprocessing_options(value, &key_str)?);
+            }
+            "encoding" => {
+                update.encoding = Some(read_string(value, &key_str)?);
+            }
+            "debug" => {
+                update.debug = Some(read_bool(value, &key_str)?);
+            }
+            "skip_images" => {
+                update.skip_images = Some(read_bool(value, &key_str)?);
+            }
+            "strip_tags" => {
+                update.strip_tags = Some(read_string_list(value, &key_str)?);
+            }
+            "preserve_tags" => {
+                update.preserve_tags = Some(read_string_list(value, &key_str)?);
+            }
+            "output_format" => {
+                update.output_format = Some(parse_output_format(value, &key_str)?);
+            }
+            _ => {}
+        }
+    }
+
+    Ok(ConversionOptions::from(update))
+}
+
+/// Parse an InlineImageConfig table from PHP hash table.
+pub fn parse_inline_image_config(table: &ZendHashTable) -> PhpResult<InlineImageConfig> {
+    let mut update = InlineImageConfigUpdate::default();
+
+    for (key, value) in table {
+        let key_str = key_to_string(&key)?;
+
+        if value.is_null() {
+            continue;
+        }
+
+        match key_str.as_str() {
+            "max_decoded_size_bytes" => {
+                let size = read_u64(value, &key_str)?;
+                if size == 0 {
+                    return Err(PhpException::default(
+                        "max_decoded_size_bytes must be greater than zero".to_string(),
+                    ));
+                }
+                update.max_decoded_size_bytes = Some(size);
+            }
+            "filename_prefix" => {
+                update.filename_prefix = Some(read_string(value, &key_str)?);
+            }
+            "capture_svg" => {
+                update.capture_svg = Some(read_bool(value, &key_str)?);
+            }
+            "infer_dimensions" => {
+                update.infer_dimensions = Some(read_bool(value, &key_str)?);
+            }
+            _ => {}
+        }
+    }
+
+    Ok(InlineImageConfig::from_update(update))
+}
+
+/// Parse preprocessing options from a PHP hash table.
+fn parse_preprocessing_options(value: &Zval, key: &str) -> PhpResult<html_to_markdown_rs::PreprocessingOptionsUpdate> {
+    let table = value
+        .array()
+        .ok_or_else(|| PhpException::default(format!("'{key}' must be an associative array")))?;
+
+    let mut update = html_to_markdown_rs::PreprocessingOptionsUpdate::default();
+
+    for (entry_key, entry_value) in table {
+        let entry_name = key_to_string(&entry_key)?;
+
+        if entry_value.is_null() {
+            continue;
+        }
+
+        match entry_name.as_str() {
+            "enabled" => {
+                update.enabled = Some(read_bool(entry_value, &format!("{key}.enabled"))?);
+            }
+            "preset" => {
+                update.preset = Some(parse_preprocessing_preset(entry_value, &format!("{key}.preset"))?);
+            }
+            "remove_navigation" => {
+                update.remove_navigation = Some(read_bool(entry_value, &format!("{key}.remove_navigation"))?);
+            }
+            "remove_forms" => {
+                update.remove_forms = Some(read_bool(entry_value, &format!("{key}.remove_forms"))?);
+            }
+            _ => {}
+        }
+    }
+
+    Ok(update)
+}
+
+/// Parse a MetadataConfig table from PHP hash table (only available with metadata feature).
+#[cfg(feature = "metadata")]
+pub fn parse_metadata_config(table: &ZendHashTable) -> PhpResult<MetadataConfig> {
+    let mut update = MetadataConfigUpdate::default();
+
+    for (key, value) in table {
+        let key_str = key_to_string(&key)?;
+
+        if value.is_null() {
+            continue;
+        }
+
+        match key_str.as_str() {
+            "extract_document" => {
+                update.extract_document = Some(read_bool(value, &key_str)?);
+            }
+            "extract_headers" => {
+                update.extract_headers = Some(read_bool(value, &key_str)?);
+            }
+            "extract_links" => {
+                update.extract_links = Some(read_bool(value, &key_str)?);
+            }
+            "extract_images" => {
+                update.extract_images = Some(read_bool(value, &key_str)?);
+            }
+            "extract_structured_data" => {
+                update.extract_structured_data = Some(read_bool(value, &key_str)?);
+            }
+            "max_structured_data_size" => {
+                update.max_structured_data_size = Some(read_usize(value, &key_str)?);
+            }
+            _ => {}
+        }
+    }
+
+    Ok(MetadataConfig::from(update))
+}

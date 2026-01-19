@@ -24,6 +24,7 @@
 //! their appropriate handlers and returns a boolean indicating success.
 
 pub mod attributes;
+pub mod definition_list;
 pub mod figure;
 pub mod sectioning;
 pub mod summary;
@@ -34,6 +35,7 @@ pub use super::{Context, DomContext};
 
 // Re-export handler functions for direct use
 pub use attributes::handle as handle_attributes;
+pub use definition_list::handle as handle_definition_list;
 pub use figure::handle as handle_figure;
 pub use sectioning::handle as handle_sectioning;
 pub use summary::handle as handle_summary;
@@ -52,6 +54,7 @@ pub use summary::handle as handle_summary;
 /// - **Sectioning**: article, section, nav, aside, header, footer, main
 /// - **Figure**: figure, figcaption
 /// - **Summary**: details, summary, dialog
+/// - **Definition List**: hgroup, dl, dt, dd, menu
 /// - **Attributes**: cite, q, abbr, dfn, time, data
 ///
 /// # Returns
@@ -92,6 +95,11 @@ pub fn dispatch_semantic_handler(
         // Summary and interactive elements
         "details" | "summary" | "dialog" => {
             handle_summary(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx);
+            true
+        }
+        // Definition list and related elements
+        "hgroup" | "dl" | "dt" | "dd" | "menu" => {
+            handle_definition_list(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx);
             true
         }
         // Semantic inline attributes

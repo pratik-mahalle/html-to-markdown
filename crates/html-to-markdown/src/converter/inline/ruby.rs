@@ -58,13 +58,20 @@ pub(crate) fn handle(
     // Import helper functions from parent converter module
     use crate::converter::{normalized_tag_name, walk_node};
 
+    let Some(node) = node_handle.get(parser) else { return };
+
+    let tag = match node {
+        tl::Node::Tag(tag) => tag,
+        _ => return,
+    };
+
     match tag_name {
         "ruby" => {
             // Clone context for ruby children processing
             let ruby_ctx = ctx.clone();
 
             // Scan child elements to determine rendering mode
-            let tag_sequence: Vec<String> = node_handle
+            let tag_sequence: Vec<String> = tag
                 .children()
                 .top()
                 .iter()
@@ -92,7 +99,7 @@ pub(crate) fn handle(
             if is_interleaved && !has_rtc {
                 // Interleaved rendering: process rb/rt pairs inline
                 let mut current_base = String::new();
-                let children = node_handle.children();
+                let children = tag.children();
                 {
                     for child_handle in children.top().iter() {
                         if let Some(node) = child_handle.get(parser) {
@@ -173,7 +180,7 @@ pub(crate) fn handle(
                 let mut rt_annotations = Vec::new();
                 let mut rtc_content = String::new();
 
-                let children = node_handle.children();
+                let children = tag.children();
                 {
                     for child_handle in children.top().iter() {
                         if let Some(node) = child_handle.get(parser) {
@@ -257,7 +264,7 @@ pub(crate) fn handle(
             // Ruby base text element (typically used within ruby)
             // When standalone, just extract and output the text
             let mut text = String::new();
-            let children = node_handle.children();
+            let children = tag.children();
             {
                 for child_handle in children.top().iter() {
                     walk_node(child_handle, parser, &mut text, options, ctx, depth + 1, dom_ctx);
@@ -270,7 +277,7 @@ pub(crate) fn handle(
             // Ruby text/annotation element
             // When standalone (outside ruby context), wrap annotation in parentheses
             let mut text = String::new();
-            let children = node_handle.children();
+            let children = tag.children();
             {
                 for child_handle in children.top().iter() {
                     walk_node(child_handle, parser, &mut text, options, ctx, depth + 1, dom_ctx);
@@ -293,7 +300,7 @@ pub(crate) fn handle(
             // Ruby parenthesis element (fallback for non-ruby-supporting browsers)
             // In Markdown output, generally skip these as annotations are in parentheses
             let mut content = String::new();
-            let children = node_handle.children();
+            let children = tag.children();
             {
                 for child_handle in children.top().iter() {
                     walk_node(child_handle, parser, &mut content, options, ctx, depth + 1, dom_ctx);
@@ -309,7 +316,7 @@ pub(crate) fn handle(
         "rtc" => {
             // Ruby text container element
             // When standalone, just process children normally
-            let children = node_handle.children();
+            let children = tag.children();
             {
                 for child_handle in children.top().iter() {
                     walk_node(child_handle, parser, output, options, ctx, depth, dom_ctx);
@@ -319,7 +326,7 @@ pub(crate) fn handle(
 
         _ => {
             // Fallback for unknown ruby-related tags: process children normally
-            let children = node_handle.children();
+            let children = tag.children();
             {
                 for child_handle in children.top().iter() {
                     walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);

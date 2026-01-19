@@ -1,3 +1,7 @@
+//! Profiling support for performance analysis.
+//!
+//! This module provides profiling utilities for measuring conversion performance.
+
 use html_to_markdown_rs::{ConversionError, Result};
 use std::path::PathBuf;
 
@@ -194,6 +198,7 @@ pub fn start(_output_path: PathBuf, _frequency: i32) -> Result<()> {
     ))
 }
 
+/// Start profiling (stub when profiling feature is disabled on non-Windows).
 #[cfg(all(not(target_os = "windows"), not(feature = "profiling")))]
 pub fn start(_output_path: PathBuf, _frequency: i32) -> Result<()> {
     Err(ConversionError::Other(
@@ -201,6 +206,7 @@ pub fn start(_output_path: PathBuf, _frequency: i32) -> Result<()> {
     ))
 }
 
+/// Stop profiling (stub on Windows).
 #[cfg(target_os = "windows")]
 pub fn stop() -> Result<()> {
     Err(ConversionError::Other(
@@ -208,6 +214,7 @@ pub fn stop() -> Result<()> {
     ))
 }
 
+/// Stop profiling (stub when profiling feature is disabled on non-Windows).
 #[cfg(all(not(target_os = "windows"), not(feature = "profiling")))]
 pub fn stop() -> Result<()> {
     Err(ConversionError::Other(
@@ -215,6 +222,7 @@ pub fn stop() -> Result<()> {
     ))
 }
 
+/// Execute function with optional profiling (stub when profiling disabled).
 #[cfg(any(target_os = "windows", not(feature = "profiling")))]
 pub fn maybe_profile<T, F>(f: F) -> Result<T>
 where
