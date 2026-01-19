@@ -121,19 +121,11 @@ typedef struct Option_HtmlToMarkdownVisitUnderlineCallback Option_HtmlToMarkdown
 typedef struct Option_HtmlToMarkdownVisitVideoCallback Option_HtmlToMarkdownVisitVideoCallback;
 
 /**
- * Opaque handle to a visitor instance.
- *
- * Returned by `html_to_markdown_visitor_create()` and passed to
- * `html_to_markdown_convert_with_visitor()`. Contains ownership of the
  * underlying `CVisitorWrapper`.
  */
 typedef void *HtmlToMarkdownVisitor;
 
 /**
- * Complete callback table for visitor (C-compatible).
- *
- * Contains all callback function pointers for visitor events.
- * Set unused callbacks to NULL for default behavior.
  *
  * # Example
  *
@@ -358,28 +350,6 @@ typedef struct HtmlToMarkdownVisitResult {
 } HtmlToMarkdownVisitResult;
 
 /**
- * Start Rust-side profiling and write a flamegraph to the specified path.
- *
- * Returns 1 on success, 0 on failure. Use `html_to_markdown_last_error` to inspect failures.
- *
- * # Safety
- *
- * - `output` must be a valid, null-terminated UTF-8 C string for the duration of the call.
- */
-bool html_to_markdown_profile_start(const char *output, int32_t frequency);
-
-/**
- * Stop Rust-side profiling and flush the flamegraph.
- *
- * Returns 1 on success, 0 on failure. Use `html_to_markdown_last_error` to inspect failures.
- *
- * # Safety
- *
- * - This must only be called after a successful `html_to_markdown_profile_start`.
- */
-bool html_to_markdown_profile_stop(void);
-
-/**
  * Convert HTML to Markdown using default options.
  *
  * # Safety
@@ -407,7 +377,7 @@ char *html_to_markdown_convert(const char *html);
  * # Safety
  *
  * - `html` must be a valid null-terminated C string
- * - `len_out` must be a valid pointer to a `size_t`
+ * - `len_out` must be a valid pointer to a size_t
  * - The returned string must be freed with `html_to_markdown_free_string`
  * - Returns NULL on error
  */
@@ -419,7 +389,7 @@ char *html_to_markdown_convert_with_len(const char *html, uintptr_t *len_out);
  * # Safety
  *
  * - `html` must point to `len` bytes of UTF-8 data
- * - `len_out` must be a valid pointer to a `size_t`
+ * - `len_out` must be a valid pointer to a size_t
  * - The returned string must be freed with `html_to_markdown_free_string`
  * - Returns NULL on error
  */
@@ -428,7 +398,7 @@ char *html_to_markdown_convert_bytes_with_len(const uint8_t *html,
                                               uintptr_t *len_out);
 
 /**
- * Free a string returned by `html_to_markdown_convert`.
+ * Free a string returned by html_to_markdown_convert.
  *
  * # Safety
  *
@@ -447,6 +417,17 @@ char *html_to_markdown_convert_bytes_with_len(const uint8_t *html,
 void html_to_markdown_free_string(char *s);
 
 /**
+ * Get the last error message from a failed conversion.
+ *
+ * # Safety
+ *
+ * - Returns a pointer to a thread-local buffer; copy it immediately if needed
+ * - Pointer is invalidated by the next call to any `html_to_markdown_*` function
+ * - May return NULL if no error has occurred in this thread
+ */
+const char *html_to_markdown_last_error(void);
+
+/**
  * Get the library version string.
  *
  * # Safety
@@ -463,7 +444,7 @@ const char *html_to_markdown_version(void);
  * - `html` must be a valid null-terminated C string
  * - `metadata_json_out` must be a valid pointer to a char pointer
  * - The returned markdown string must be freed with `html_to_markdown_free_string`
- * - The metadata JSON string (written to `metadata_json_out`) must be freed with `html_to_markdown_free_string`
+ * - The metadata JSON string (written to metadata_json_out) must be freed with `html_to_markdown_free_string`
  * - Returns NULL on error (check error with `html_to_markdown_last_error`)
  *
  * # Example (C)
@@ -490,9 +471,9 @@ char *html_to_markdown_convert_with_metadata(const char *html,
  *
  * - `html` must be a valid null-terminated C string
  * - `metadata_json_out` must be a valid pointer to a char pointer
- * - `markdown_len_out` and `metadata_len_out` must be valid pointers to `size_t`
+ * - `markdown_len_out` and `metadata_len_out` must be valid pointers to size_t
  * - The returned markdown string must be freed with `html_to_markdown_free_string`
- * - The metadata JSON string (written to `metadata_json_out`) must be freed with `html_to_markdown_free_string`
+ * - The metadata JSON string (written to metadata_json_out) must be freed with `html_to_markdown_free_string`
  * - Returns NULL on error (check error with `html_to_markdown_last_error`)
  */
 char *html_to_markdown_convert_with_metadata_with_len(const char *html,
@@ -507,9 +488,9 @@ char *html_to_markdown_convert_with_metadata_with_len(const char *html,
  *
  * - `html` must point to `len` bytes of UTF-8 data
  * - `metadata_json_out` must be a valid pointer to a char pointer
- * - `markdown_len_out` and `metadata_len_out` must be valid pointers to `size_t`
+ * - `markdown_len_out` and `metadata_len_out` must be valid pointers to size_t
  * - The returned markdown string must be freed with `html_to_markdown_free_string`
- * - The metadata JSON string (written to `metadata_json_out`) must be freed with `html_to_markdown_free_string`
+ * - The metadata JSON string (written to metadata_json_out) must be freed with `html_to_markdown_free_string`
  * - Returns NULL on error (check error with `html_to_markdown_last_error`)
  */
 char *html_to_markdown_convert_with_metadata_bytes_with_len(const uint8_t *html,
@@ -517,17 +498,6 @@ char *html_to_markdown_convert_with_metadata_bytes_with_len(const uint8_t *html,
                                                             char **metadata_json_out,
                                                             uintptr_t *markdown_len_out,
                                                             uintptr_t *metadata_len_out);
-
-/**
- * Get the last error message from a failed conversion.
- *
- * # Safety
- *
- * - Returns a pointer to a thread-local buffer; copy it immediately if needed
- * - Pointer is invalidated by the next call to any `html_to_markdown_*` function
- * - May return NULL if no error has occurred in this thread
- */
-const char *html_to_markdown_last_error(void);
 
 /**
  * Create a new visitor instance from a callback table.
@@ -813,5 +783,27 @@ struct HtmlToMarkdownVisitResult html_to_markdown_visit_result_preserve_html(voi
  * ```
  */
 struct HtmlToMarkdownVisitResult html_to_markdown_visit_result_error(char *message);
+
+/**
+ * Start Rust-side profiling and write a flamegraph to the specified path.
+ *
+ * Returns 1 on success, 0 on failure. Use `html_to_markdown_last_error` to inspect failures.
+ *
+ * # Safety
+ *
+ * - `output` must be a valid, null-terminated UTF-8 C string for the duration of the call.
+ */
+bool html_to_markdown_profile_start(const char *output, int32_t frequency);
+
+/**
+ * Stop Rust-side profiling and flush the flamegraph.
+ *
+ * Returns 1 on success, 0 on failure. Use `html_to_markdown_last_error` to inspect failures.
+ *
+ * # Safety
+ *
+ * - This must only be called after a successful `html_to_markdown_profile_start`.
+ */
+bool html_to_markdown_profile_stop(void);
 
 #endif  /* HTML_TO_MARKDOWN_H */

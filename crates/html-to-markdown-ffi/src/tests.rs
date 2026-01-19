@@ -3,6 +3,7 @@
 //! These tests verify that the entire FFI API works correctly across all modules.
 
 use std::ffi::{CStr, CString};
+#[cfg(feature = "metadata")]
 use std::os::raw::c_char;
 use std::ptr;
 

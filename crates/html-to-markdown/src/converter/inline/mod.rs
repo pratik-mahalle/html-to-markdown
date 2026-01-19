@@ -4,7 +4,7 @@
 //! - Emphasis elements (strong, b, em, i)
 //! - Links (a)
 //! - Code elements (code, kbd, samp)
-//! - Semantic elements (mark, del, s, ins, u, small, sub, sup)
+//! - Semantic elements (mark, del, s, ins, u, small, sub, sup, var, dfn, abbr)
 //! - Ruby annotation elements (ruby, rb, rt, rp, rtc)
 //!
 //! These handlers are designed to be extracted from the main `converter.rs`
@@ -27,12 +27,11 @@
 pub mod code;
 pub mod emphasis;
 pub mod link;
+pub mod ruby;
 pub mod semantic;
 
 // Re-export types from parent module for submodule access
 pub use super::{Context, DomContext};
-// ruby module would go here if implemented
-// pub mod ruby;
 
 // Re-export handler functions for internal use by dispatcher (crate-private)
 // pub(crate) use ruby::handle as handle_ruby;
@@ -53,8 +52,8 @@ pub use super::{Context, DomContext};
 /// | `em`, `i` | emphasis | Italic/emphasis text formatting |
 /// | `a` | link | Hyperlinks and anchors |
 /// | `code`, `kbd`, `samp` | code | Inline code and keyboard input |
-/// | `mark`, `del`, `s`, `ins`, `u`, `small`, `sub`, `sup` | semantic | Semantic formatting |
-/// | `ruby`, `rb`, `rt`, `rp`, `rtc` | ruby | Ruby annotations (future) |
+/// | `mark`, `del`, `s`, `ins`, `u`, `small`, `sub`, `sup`, `var`, `dfn`, `abbr`, `span` | semantic | Semantic formatting |
+/// | `ruby`, `rb`, `rt`, `rp`, `rtc` | ruby | Ruby annotations (East Asian typography) |
 ///
 /// # Return Value
 ///
@@ -130,17 +129,16 @@ pub fn dispatch_inline_handler(
             code::handle(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx);
             true
         }
-        // Semantic elements: mark, del, s, ins, u, small, sub, sup
-        "mark" | "del" | "s" | "ins" | "u" | "small" | "sub" | "sup" => {
+        // Semantic elements: mark, del, s, ins, u, small, sub, sup, var, dfn, abbr, span
+        "mark" | "del" | "s" | "ins" | "u" | "small" | "sub" | "sup" | "var" | "dfn" | "abbr" | "span" => {
             semantic::handle(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx);
             true
         }
         // Ruby annotation elements: ruby, rb, rt, rp, rtc
-        // NOTE: Ruby handler module not yet implemented
-        // "ruby" | "rb" | "rt" | "rp" | "rtc" => {
-        //     ruby::handle(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx);
-        //     true
-        // }
+        "ruby" | "rb" | "rt" | "rp" | "rtc" => {
+            ruby::handle(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx);
+            true
+        }
         // Unknown element - not handled by inline dispatcher
         _ => false,
     }
@@ -177,15 +175,27 @@ mod tests {
     fn test_dispatcher_routes_semantic_tags() {
         assert!(matches!(
             ("mark", "mark"),
-            (tag, _) if matches!(tag, "mark" | "del" | "s" | "ins" | "u" | "small" | "sub" | "sup")
+            (tag, _) if matches!(tag, "mark" | "del" | "s" | "ins" | "u" | "small" | "sub" | "sup" | "var" | "dfn" | "abbr")
         ));
         assert!(matches!(
             ("del", "del"),
-            (tag, _) if matches!(tag, "mark" | "del" | "s" | "ins" | "u" | "small" | "sub" | "sup")
+            (tag, _) if matches!(tag, "mark" | "del" | "s" | "ins" | "u" | "small" | "sub" | "sup" | "var" | "dfn" | "abbr")
         ));
         assert!(matches!(
             ("sub", "sub"),
-            (tag, _) if matches!(tag, "mark" | "del" | "s" | "ins" | "u" | "small" | "sub" | "sup")
+            (tag, _) if matches!(tag, "mark" | "del" | "s" | "ins" | "u" | "small" | "sub" | "sup" | "var" | "dfn" | "abbr")
+        ));
+        assert!(matches!(
+            ("var", "var"),
+            (tag, _) if matches!(tag, "mark" | "del" | "s" | "ins" | "u" | "small" | "sub" | "sup" | "var" | "dfn" | "abbr")
+        ));
+        assert!(matches!(
+            ("dfn", "dfn"),
+            (tag, _) if matches!(tag, "mark" | "del" | "s" | "ins" | "u" | "small" | "sub" | "sup" | "var" | "dfn" | "abbr")
+        ));
+        assert!(matches!(
+            ("abbr", "abbr"),
+            (tag, _) if matches!(tag, "mark" | "del" | "s" | "ins" | "u" | "small" | "sub" | "sup" | "var" | "dfn" | "abbr")
         ));
     }
 
@@ -198,16 +208,29 @@ mod tests {
     }
 
     #[test]
+    fn test_dispatcher_routes_ruby_tags() {
+        assert!(matches!(
+            ("ruby", "ruby"),
+            (tag, _) if matches!(tag, "ruby" | "rb" | "rt" | "rp" | "rtc")
+        ));
+        assert!(matches!(
+            ("rt", "rt"),
+            (tag, _) if matches!(tag, "ruby" | "rb" | "rt" | "rp" | "rtc")
+        ));
+    }
+
+    #[test]
     fn test_unknown_tags_not_routed() {
         // These should fall through to default handling
-        let unknown_tags = vec!["span", "div", "p", "section", "article", "table"];
+        let unknown_tags = vec!["div", "p", "section", "article", "table"];
         for tag in unknown_tags {
             assert!(matches!(
                 (tag, tag),
                 (tag, _) if !matches!(
                     tag,
                     "strong" | "b" | "em" | "i" | "a" | "code" | "kbd" | "samp"
-                    | "mark" | "del" | "s" | "ins" | "u" | "small" | "sub" | "sup"
+                    | "mark" | "del" | "s" | "ins" | "u" | "small" | "sub" | "sup" | "var" | "dfn" | "abbr"
+                    | "ruby" | "rb" | "rt" | "rp" | "rtc" | "span"
                 )
             ));
         }

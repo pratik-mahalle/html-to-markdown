@@ -259,8 +259,11 @@ pub(crate) fn handle(
                 is_inline: true,
             };
 
-            let mut visitor = visitor_handle.borrow_mut();
-            match visitor.visit_link(&node_ctx, &href, &label, title.as_deref()) {
+            let visit_result = {
+                let mut visitor = visitor_handle.borrow_mut();
+                visitor.visit_link(&node_ctx, &href, &label, title.as_deref())
+            };
+            match visit_result {
                 VisitResult::Continue => {
                     let mut buf = String::new();
                     append_markdown_link(
