@@ -3,6 +3,10 @@ $ErrorActionPreference = "Stop"
 $workspace = ridk exec bash -lc "cygpath -au '$env:GITHUB_WORKSPACE'"
 $gemdir = "$workspace/packages/ruby"
 
+# Build CLI binary BEFORE vendoring to avoid package collision
+Write-Host "Building CLI binary before vendoring..."
+ridk exec bash -lc "cd $workspace && export RUSTUP_TOOLCHAIN=stable-gnu && cargo build --release --package html-to-markdown-cli"
+
 # Vendor all dependencies using cargo vendor
 ridk exec bash -lc "cd $workspace && scripts/publish/ruby/vendor-dependencies.sh"
 
