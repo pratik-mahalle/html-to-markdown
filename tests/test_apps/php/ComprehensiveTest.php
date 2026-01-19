@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 
 final class ComprehensiveTest extends TestCase
 {
-    private function loadFixtures(string $filename): array
+    private static function loadFixtures(string $filename): array
     {
         $path = __DIR__ . '/../fixtures/' . $filename;
         return json_decode(file_get_contents($path), true);
@@ -21,9 +21,9 @@ final class ComprehensiveTest extends TestCase
         $this->assertSame(trim($expected), trim($result), $name);
     }
 
-    public function basicHtmlProvider(): array
+    public static function basicHtmlProvider(): array
     {
-        $fixtures = $this->loadFixtures('basic-html.json');
+        $fixtures = self::loadFixtures('basic-html.json');
         $cases = [];
         foreach ($fixtures as $fixture) {
             $cases[$fixture['name']] = [

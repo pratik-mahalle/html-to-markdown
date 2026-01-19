@@ -38,8 +38,10 @@ NODE
 
 node_exists=$(check_pkg "@kreuzberg/html-to-markdown-node")
 wasm_exists=$(check_pkg "@kreuzberg/html-to-markdown-wasm")
+ts_exists=$(check_pkg "@kreuzberg/html-to-markdown")
 
 {
 	echo "node_exists=${node_exists}"
 	echo "wasm_exists=${wasm_exists}"
+	echo "ts_exists=${ts_exists}"
 } >>"${GITHUB_OUTPUT}"

@@ -28,8 +28,9 @@ end
 
 # Always include rust-vendor and .cargo directories if they exist (created by vendoring script)
 # Exclude native artifacts (.lib, .a, .dll, .so, .dylib) as they shouldn't be in the gem
+# Use File::FNM_DOTMATCH to include hidden files like .cargo-checksum.json (required by cargo)
 vendor_files = Dir.chdir(__dir__) do
-  (Dir.glob('rust-vendor/**/*') + Dir.glob('.cargo/**/*'))
+  (Dir.glob('rust-vendor/**/*', File::FNM_DOTMATCH) + Dir.glob('.cargo/**/*', File::FNM_DOTMATCH))
     .select { |f| File.file?(f) }
     .grep_v(/\.(lib|a|dll|so|dylib)$/i)
 end

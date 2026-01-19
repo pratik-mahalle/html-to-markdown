@@ -16,13 +16,18 @@ cd "$NATIVE_EXT"
 rm -rf "${RUBY_PKG:?}/${VENDOR_DIR:?}" "${RUBY_PKG:?}/.cargo" "$NATIVE_EXT/Cargo.lock"
 git restore "$NATIVE_EXT/Cargo.toml" 2>/dev/null || true
 
-# Step 1: Run cargo vendor to vendor all external dependencies
+# Step 1: Update local registry cache to get latest crate versions
+# This ensures the vendored crates will match what cargo generate-lockfile resolves to
+echo "Updating local crate registry..."
+cargo metadata --format-version=1 --manifest-path="$NATIVE_EXT/Cargo.toml" >/dev/null 2>&1 || true
+
+# Step 2: Run cargo vendor to vendor all external dependencies
 # cargo vendor outputs the config.toml content to stdout, progress to stderr
 mkdir -p "$RUBY_PKG/.cargo"
 echo "Running cargo vendor..."
 cargo vendor "$RUBY_PKG/$VENDOR_DIR" | sed "s|directory = \".*|directory = \"$VENDOR_DIR\"|" >"$RUBY_PKG/.cargo/config.toml"
 
-# Step 2: Copy html-to-markdown-rs core crate to vendor directory
+# Step 3: Copy html-to-markdown-rs core crate to vendor directory
 echo "Copying html-to-markdown-rs core crate..."
 
 if command -v rsync >/dev/null 2>&1; then
@@ -32,7 +37,7 @@ else
 	rm -rf "$RUBY_PKG/$VENDOR_DIR/html-to-markdown-rs/target" "$RUBY_PKG/$VENDOR_DIR/html-to-markdown-rs/.git" || true
 fi
 
-# Step 3: Expand workspace references in core crate Cargo.toml
+# Step 4: Expand workspace references in core crate Cargo.toml
 echo "Expanding workspace references in html-to-markdown-rs..."
 python3 - "$RUBY_PKG/$VENDOR_DIR/html-to-markdown-rs/Cargo.toml" <<'PY'
 import re
@@ -76,11 +81,11 @@ text = re.sub(
 path.write_text(text, encoding="utf-8")
 PY
 
-# Step 4: Create .cargo-checksum.json for html-to-markdown-rs
+# Step 5: Create .cargo-checksum.json for html-to-markdown-rs
 echo "Creating checksum for html-to-markdown-rs..."
 echo '{"files":{}}' >"$RUBY_PKG/$VENDOR_DIR/html-to-markdown-rs/.cargo-checksum.json"
 
-# Step 5: Expand workspace references in native Cargo.toml
+# Step 6: Expand workspace references in native Cargo.toml
 echo "Expanding workspace references in native Cargo.toml..."
 python3 - "Cargo.toml" "$VENDOR_DIR" <<'PY'
 import re
@@ -131,7 +136,7 @@ text = re.sub(
 path.write_text(text, encoding="utf-8")
 PY
 
-# Step 6: Generate Cargo.lock without source replacements
+# Step 7: Generate Cargo.lock without source replacements
 # For vendored git dependencies, cargo requires the lock file to be generated
 # BEFORE the source replacement config is present
 # We also need to hide the workspace root to avoid package collision errors
@@ -142,13 +147,51 @@ mv "$REPO_ROOT/Cargo.toml" "$REPO_ROOT/Cargo.toml.tmp"
 echo "Generating Cargo.lock..."
 cargo generate-lockfile --manifest-path="$NATIVE_EXT/Cargo.toml"
 
+# Step 8: Fetch locked versions and re-vendor to ensure version consistency
+# This ensures the vendored crates exactly match the Cargo.lock
+echo "Fetching locked dependency versions..."
+cargo fetch --locked --manifest-path="$NATIVE_EXT/Cargo.toml"
+
+# Re-vendor with locked versions - cargo vendor will overwrite existing crates
+# but skip path dependencies like html-to-markdown-rs
+echo "Re-vendoring with locked versions..."
+cargo vendor --locked "$RUBY_PKG/$VENDOR_DIR" --manifest-path="$NATIVE_EXT/Cargo.toml" >/dev/null
+
 echo "Restoring source replacement config and workspace root..."
 mv "$RUBY_PKG/.cargo/config.toml.tmp" "$RUBY_PKG/.cargo/config.toml"
 mv "$REPO_ROOT/Cargo.toml.tmp" "$REPO_ROOT/Cargo.toml"
 
+# Step 9: Update .cargo-checksum.json files to remove entries for excluded files
+# The gemspec excludes .dll, .so, .dylib, .lib, .a files but the checksum files reference them
+echo "Updating checksum files to remove excluded file entries..."
+python3 - "$RUBY_PKG/$VENDOR_DIR" <<'PY'
+import json
+import re
+import sys
+from pathlib import Path
+
+vendor_dir = Path(sys.argv[1])
+excluded_pattern = re.compile(r'\.(dll|so|dylib|lib|a)$', re.IGNORECASE)
+
+for checksum_file in vendor_dir.rglob('.cargo-checksum.json'):
+    try:
+        data = json.loads(checksum_file.read_text(encoding='utf-8'))
+        if 'files' in data and isinstance(data['files'], dict):
+            # Filter out excluded file entries
+            original_count = len(data['files'])
+            data['files'] = {
+                k: v for k, v in data['files'].items()
+                if not excluded_pattern.search(k)
+            }
+            if len(data['files']) < original_count:
+                checksum_file.write_text(json.dumps(data), encoding='utf-8')
+    except (json.JSONDecodeError, IOError):
+        pass  # Skip files that can't be parsed
+PY
+
 echo "✓ Vendored all dependencies to packages/ruby/$VENDOR_DIR/"
 echo "✓ Created .cargo/config.toml with source replacements"
-echo "✓ Generated Cargo.lock"
+echo "✓ Generated Cargo.lock (matches vendored versions)"
 
 # Count vendored crates
 crate_count=$(find "$RUBY_PKG/$VENDOR_DIR" -maxdepth 1 -type d 2>/dev/null | wc -l)
