@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - packages/python/**
+      - scripts/publish/python/**
       - crates/html-to-markdown-py/**
       - crates/html-to-markdown/**
       - pyproject.toml
@@ -17,6 +18,7 @@ on:
     branches: [main]
     paths:
       - packages/python/**
+      - scripts/publish/python/**
       - crates/html-to-markdown-py/**
       - crates/html-to-markdown/**
       - pyproject.toml
