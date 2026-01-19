@@ -36,6 +36,30 @@ fi
 
 echo "✓ Vendored all dependencies to vendor/"
 
+# Clean up unnecessary files to reduce package size (Hex has 128 MB limit)
+echo "Cleaning up vendored dependencies to reduce package size..."
+find vendor -type f \( \
+	-name "*.md" -o \
+	-name "LICENSE*" -o \
+	-name "CHANGELOG*" -o \
+	-name ".git*" -o \
+	-name ".cargo-ok" -o \
+	-name "*.html" -o \
+	-name "*.txt" -o \
+	-name "*.yml" -o \
+	-name "*.yaml" \
+	\) -delete
+
+# Remove directories that aren't needed
+find vendor -type d \( \
+	-name "tests" -o \
+	-name "benches" -o \
+	-name "examples" -o \
+	-name "docs" -o \
+	-name ".github" -o \
+	-name ".cargo" \
+	\) -exec rm -rf {} + 2>/dev/null || true
+
 # Count vendored crates
 crate_count=$(find vendor -maxdepth 1 -type d 2>/dev/null | wc -l)
 echo "✓ Vendored $((crate_count - 1)) crates"
