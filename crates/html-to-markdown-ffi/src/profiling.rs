@@ -215,6 +215,7 @@ mod enabled {
 #[cfg(all(not(target_os = "windows"), feature = "profiling"))]
 pub use enabled::{maybe_profile, start, stop};
 
+/// Start profiling (stub on Windows - profiling not supported).
 #[cfg(target_os = "windows")]
 pub fn start(_output_path: PathBuf, _frequency: i32) -> Result<()> {
     Err(ConversionError::Other(
