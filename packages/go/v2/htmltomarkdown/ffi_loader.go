@@ -213,6 +213,14 @@ func loadFFI() error {
 	if path := os.Getenv("HTML_TO_MARKDOWN_FFI_PATH"); path != "" {
 		return loadFFIFromPath(path)
 	}
+
+	// Check for library installed via go generate in ~/.html-to-markdown/
+	if libPath, err := resolveInstalledLibrary(); err == nil {
+		if _, statErr := os.Stat(libPath); statErr == nil {
+			return loadFFIFromPath(libPath)
+		}
+	}
+
 	if os.Getenv("HTML_TO_MARKDOWN_FFI_DISABLE_DOWNLOAD") != "" {
 		return errors.New("html-to-markdown FFI download disabled and no library path provided")
 	}
@@ -299,6 +307,53 @@ func resolveCacheDir(version string, platform string) (string, error) {
 		return "", fmt.Errorf("resolve user cache dir: %w", err)
 	}
 	return filepath.Join(baseDir, "html-to-markdown", "ffi", version, platform), nil
+}
+
+// resolveInstalledLibrary checks for a library installed via go generate in ~/.html-to-markdown/
+// This supports the static library installation pattern used by the install command.
+func resolveInstalledLibrary() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+
+	// Map GOOS/GOARCH to directory names used by the install command
+	var goDir string
+	switch runtime.GOOS {
+	case "darwin":
+		if runtime.GOARCH == archARM64 {
+			goDir = "darwin_arm64"
+		} else if runtime.GOARCH == archAMD64 {
+			goDir = "darwin_amd64"
+		}
+	case "linux":
+		if runtime.GOARCH == archAMD64 {
+			goDir = "linux_amd64"
+		} else if runtime.GOARCH == archARM64 {
+			goDir = "linux_arm64"
+		}
+	case "windows":
+		if runtime.GOARCH == archAMD64 {
+			goDir = "windows_amd64"
+		}
+	}
+
+	if goDir == "" {
+		return "", fmt.Errorf("unsupported platform: %s/%s", runtime.GOOS, runtime.GOARCH)
+	}
+
+	// Determine library filename based on platform
+	var libName string
+	switch runtime.GOOS {
+	case "darwin":
+		libName = "libhtml_to_markdown_ffi.dylib"
+	case "linux":
+		libName = "libhtml_to_markdown_ffi.so"
+	case "windows":
+		libName = "html_to_markdown_ffi.dll"
+	}
+
+	return filepath.Join(home, ".html-to-markdown", "lib", goDir, libName), nil
 }
 
 func downloadFile(url string, dest string) error {
