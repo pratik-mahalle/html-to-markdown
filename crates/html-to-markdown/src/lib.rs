@@ -80,9 +80,13 @@ pub use exports::*;
 // Main Public API Functions
 // ============================================================================
 
-pub use convert_api::{
-    conversion_options_from_json, conversion_options_update_from_json, convert, metadata_config_from_json,
-};
+pub use convert_api::convert;
+
+#[cfg(any(feature = "serde", feature = "metadata"))]
+pub use convert_api::{conversion_options_from_json, conversion_options_update_from_json};
+
+#[cfg(feature = "metadata")]
+pub use convert_api::metadata_config_from_json;
 
 #[cfg(feature = "inline-images")]
 pub use convert_api::{convert_with_inline_images, inline_image_config_from_json};

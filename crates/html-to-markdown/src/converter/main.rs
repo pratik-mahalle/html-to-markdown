@@ -204,7 +204,14 @@ pub(crate) fn convert_html_impl(
         }
     }
 
+    #[cfg(all(feature = "metadata", feature = "visitor"))]
     let ctx = Context::new(options, inline_collector, metadata_collector, visitor);
+    #[cfg(all(feature = "metadata", not(feature = "visitor")))]
+    let ctx = Context::new(options, inline_collector, metadata_collector, _visitor);
+    #[cfg(all(not(feature = "metadata"), feature = "visitor"))]
+    let ctx = Context::new(options, inline_collector, _metadata_collector, visitor);
+    #[cfg(all(not(feature = "metadata"), not(feature = "visitor")))]
+    let ctx = Context::new(options, inline_collector, _metadata_collector, _visitor);
 
     for child_handle in dom.children() {
         walk_node(child_handle, parser, &mut output, options, &ctx, 0, &dom_ctx);
