@@ -3,10 +3,12 @@
 //! This module provides specialized handling for various list types:
 //! - **Ordered lists**: `<ol>` with counter management and formatting options
 //! - **Unordered lists**: `<ul>` with bullet cycling based on nesting depth
+//! - **List items**: `<li>` with task list and block-level detection
 //! - **Definition lists**: `<dl>`, `<dt>`, `<dd>` elements
 //! - **List utilities**: Indentation, loose/tight list detection, nesting depth calculation
 
 pub mod definition;
+pub mod item;
 pub mod ordered;
 pub mod unordered;
 pub mod utils;
@@ -15,7 +17,6 @@ pub mod utils;
 pub use super::{Context, DomContext};
 
 // Re-export utility function needed by table builder
-pub(crate) use utils::continuation_indent_string;
 
 /// Dispatches list element handling to the appropriate handler.
 ///
@@ -25,13 +26,14 @@ pub(crate) use utils::continuation_indent_string;
 ///
 /// - `ol`: Ordered list - routed to `ordered::handle`
 /// - `ul`: Unordered list - routed to `unordered::handle`
-/// - `li`: List item - handled contextually by parent list handler
+/// - `li`: List item - routed to `item::handle_li`
 /// - `dl`: Definition list - routed to `definition::handle_dl`
 /// - `dt`: Definition term - routed to `definition::handle_dt`
 /// - `dd`: Definition description - routed to `definition::handle_dd`
 pub fn dispatch_list_handler(
     tag_name: &str,
     node_handle: &tl::NodeHandle,
+    tag: &tl::HTMLTag,
     parser: &tl::Parser,
     output: &mut String,
     options: &crate::options::ConversionOptions,
@@ -46,6 +48,10 @@ pub fn dispatch_list_handler(
         }
         "ul" => {
             unordered::handle(node_handle, parser, output, options, ctx, depth, dom_ctx);
+            true
+        }
+        "li" => {
+            item::handle_li(node_handle, tag, parser, output, options, ctx, depth, dom_ctx);
             true
         }
         "dl" => {

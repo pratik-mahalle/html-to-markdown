@@ -1,71 +1,15 @@
-//! Handler for semantic inline elements (mark, del, s, ins, u, small, sub, sup).
+//! Handlers for mark/highlight and strikethrough/underline elements.
 //!
-//! Converts HTML semantic tags to Markdown formatting with support for:
-//! - Highlight/mark element with configurable styles (==, ::, ^^, <mark>)
+//! Contains:
+//! - Mark (highlight) element with configurable styles
 //! - Strikethrough (del, s tags) with ~~ syntax
-//! - Underline/inserted text (ins, u tags) with == syntax
-//! - Small text (passes through without formatting)
-//! - Subscript and superscript with configurable symbols
-//! - Visitor callbacks for custom processing (feature-gated)
+//! - Inserted/underlined text (ins, u tags) with == syntax
 
 use crate::options::{ConversionOptions, OutputFormat};
 use tl::{NodeHandle, Parser};
 
-// Type aliases for Context and DomContext to avoid circular imports
-// These are imported from converter.rs and should be made accessible
 type Context = crate::converter::Context;
 type DomContext = crate::converter::DomContext;
-
-/// Handler for semantic inline elements: mark, del, s, ins, u, small, sub, sup.
-///
-/// Processes semantic content based on tag and options:
-/// - Mark: configurable highlight style (==, ::, ^^, <mark>, **bold, none)
-/// - Del/S: strikethrough with ~~ and visitor callback support
-/// - Ins: underline with == and visitor callback support
-/// - U: underline with visitor callback support
-/// - Small: pass through without formatting
-/// - Sub/Sup: wrap with configurable symbols
-///
-/// # Note
-/// This function references helper functions and `walk_node` from converter.rs
-/// which must be accessible (pub(crate)) for this module to work correctly.
-pub(crate) fn handle(
-    tag_name: &str,
-    node_handle: &NodeHandle,
-    parser: &Parser,
-    output: &mut String,
-    options: &ConversionOptions,
-    ctx: &Context,
-    depth: usize,
-    dom_ctx: &DomContext,
-) {
-    // Import helper functions from parent converter module
-
-    match tag_name {
-        "mark" => {
-            handle_mark(node_handle, parser, output, options, ctx, depth, dom_ctx);
-        }
-        "del" | "s" => {
-            handle_strikethrough(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx);
-        }
-        "ins" => {
-            handle_inserted(node_handle, parser, output, options, ctx, depth, dom_ctx);
-        }
-        "u" => {
-            handle_underline(node_handle, parser, output, options, ctx, depth, dom_ctx);
-        }
-        "small" => {
-            handle_small(node_handle, parser, output, options, ctx, depth, dom_ctx);
-        }
-        "sub" => {
-            handle_subscript(node_handle, parser, output, options, ctx, depth, dom_ctx);
-        }
-        "sup" => {
-            handle_superscript(node_handle, parser, output, options, ctx, depth, dom_ctx);
-        }
-        _ => {}
-    }
-}
 
 /// Handle mark (highlight) element with configurable styles.
 ///
@@ -74,7 +18,7 @@ pub(crate) fn handle(
 /// - Html: `<mark>highlighted</mark>`
 /// - Bold: `**highlighted**`
 /// - None: just pass through content
-fn handle_mark(
+pub fn handle_mark(
     node_handle: &NodeHandle,
     parser: &Parser,
     output: &mut String,
@@ -153,7 +97,7 @@ fn handle_mark(
 /// Converts to `~~content~~` syntax. Suppresses formatting in code context.
 /// Supports visitor callbacks when the visitor feature is enabled.
 #[allow(unused_variables)]
-fn handle_strikethrough(
+pub fn handle_strikethrough(
     tag_name: &str,
     node_handle: &NodeHandle,
     parser: &Parser,
@@ -285,7 +229,7 @@ fn handle_strikethrough(
 /// Handle inserted/underlined text (ins tag).
 ///
 /// Converts to `==content==` syntax. Supports visitor callbacks when enabled.
-fn handle_inserted(
+pub fn handle_inserted(
     node_handle: &NodeHandle,
     parser: &Parser,
     output: &mut String,
@@ -403,7 +347,7 @@ fn handle_inserted(
 ///
 /// Just passes through content (HTML doesn't have native underline in Markdown).
 /// Supports visitor callbacks when enabled, which can provide custom formatting.
-fn handle_underline(
+pub fn handle_underline(
     node_handle: &NodeHandle,
     parser: &Parser,
     output: &mut String,
@@ -486,127 +430,6 @@ fn handle_underline(
         let children = tag.children();
         for child_handle in children.top().iter() {
             walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
-        }
-    }
-}
-
-/// Handle small element.
-///
-/// Small text has no direct Markdown equivalent, so just pass through content.
-fn handle_small(
-    node_handle: &NodeHandle,
-    parser: &Parser,
-    output: &mut String,
-    options: &ConversionOptions,
-    ctx: &Context,
-    depth: usize,
-    dom_ctx: &DomContext,
-) {
-    use crate::converter::walk_node;
-
-    let Some(node) = node_handle.get(parser) else { return };
-
-    let tag = match node {
-        tl::Node::Tag(tag) => tag,
-        _ => return,
-    };
-
-    let children = tag.children();
-    for child_handle in children.top().iter() {
-        walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
-    }
-}
-
-/// Handle subscript element (sub tag).
-///
-/// Wraps content with configurable subscript symbol from options.
-fn handle_subscript(
-    node_handle: &NodeHandle,
-    parser: &Parser,
-    output: &mut String,
-    options: &ConversionOptions,
-    ctx: &Context,
-    depth: usize,
-    dom_ctx: &DomContext,
-) {
-    use crate::converter::walk_node;
-
-    let Some(node) = node_handle.get(parser) else { return };
-
-    let tag = match node {
-        tl::Node::Tag(tag) => tag,
-        _ => return,
-    };
-
-    if !ctx.in_code {
-        if options.output_format == OutputFormat::Djot {
-            output.push('~');
-        } else if !options.sub_symbol.is_empty() {
-            output.push_str(&options.sub_symbol);
-        }
-    }
-
-    let children = tag.children();
-    for child_handle in children.top().iter() {
-        walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
-    }
-
-    if !ctx.in_code {
-        if options.output_format == OutputFormat::Djot {
-            output.push('~');
-        } else if !options.sub_symbol.is_empty() {
-            if options.sub_symbol.starts_with('<') && !options.sub_symbol.starts_with("</") {
-                output.push_str(&options.sub_symbol.replace('<', "</"));
-            } else {
-                output.push_str(&options.sub_symbol);
-            }
-        }
-    }
-}
-
-/// Handle superscript element (sup tag).
-///
-/// Wraps content with configurable superscript symbol from options.
-fn handle_superscript(
-    node_handle: &NodeHandle,
-    parser: &Parser,
-    output: &mut String,
-    options: &ConversionOptions,
-    ctx: &Context,
-    depth: usize,
-    dom_ctx: &DomContext,
-) {
-    use crate::converter::walk_node;
-
-    let Some(node) = node_handle.get(parser) else { return };
-
-    let tag = match node {
-        tl::Node::Tag(tag) => tag,
-        _ => return,
-    };
-
-    if !ctx.in_code {
-        if options.output_format == OutputFormat::Djot {
-            output.push('^');
-        } else if !options.sup_symbol.is_empty() {
-            output.push_str(&options.sup_symbol);
-        }
-    }
-
-    let children = tag.children();
-    for child_handle in children.top().iter() {
-        walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
-    }
-
-    if !ctx.in_code {
-        if options.output_format == OutputFormat::Djot {
-            output.push('^');
-        } else if !options.sup_symbol.is_empty() {
-            if options.sup_symbol.starts_with('<') && !options.sup_symbol.starts_with("</") {
-                output.push_str(&options.sup_symbol.replace('<', "</"));
-            } else {
-                output.push_str(&options.sup_symbol);
-            }
         }
     }
 }
