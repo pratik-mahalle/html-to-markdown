@@ -9,6 +9,7 @@ git_files =
   `#{git_cmd}`.split("\x0")
               .select { |path| path.start_with?(crate_prefix) }
               .map { |path| path.delete_prefix(crate_prefix) }
+              .reject { |path| path == 'ext/html-to-markdown-rb/native/Cargo.toml' }
 fallback_files = Dir.chdir(__dir__) do
   Dir.glob(
     %w[
@@ -32,6 +33,12 @@ vendor_files = Dir.chdir(__dir__) do
     .select { |f| File.file?(f) }
     .grep_v(/\.(lib|a|dll|so|dylib)$/i)
 end
+
+# Include Cargo.lock and modified Cargo.toml if they exist (created by vendoring script)
+cargo_lock = 'ext/html-to-markdown-rb/native/Cargo.lock'
+cargo_toml = 'ext/html-to-markdown-rb/native/Cargo.toml'
+vendor_files << cargo_lock if File.file?(File.join(__dir__, cargo_lock))
+vendor_files << cargo_toml if File.file?(File.join(__dir__, cargo_toml))
 
 files = git_files.empty? ? fallback_files : git_files
 files = (files + vendor_files).uniq
