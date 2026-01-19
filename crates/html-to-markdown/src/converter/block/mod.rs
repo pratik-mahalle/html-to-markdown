@@ -18,10 +18,15 @@
 //! main walk_node function via the dispatch_block_handler function below.
 
 pub mod blockquote;
+pub mod container;
+pub mod div;
 pub mod heading;
+pub mod horizontal_rule;
+pub mod line_break;
 pub mod paragraph;
 pub mod preformatted;
 pub mod table;
+pub mod unknown;
 
 // Re-export types from parent module for submodule access
 pub use super::{Context, DomContext};
@@ -76,8 +81,36 @@ pub fn dispatch_block_handler(
             preformatted::handle_pre(node_handle, parser, output, options, ctx, depth, dom_ctx);
             true
         }
+        "br" => {
+            line_break::handle(node_handle, parser, output, options, ctx, depth, dom_ctx);
+            true
+        }
+        "hr" => {
+            horizontal_rule::handle(node_handle, parser, output, options, ctx, depth, dom_ctx);
+            true
+        }
+        "div" => {
+            div::handle(node_handle, parser, output, options, ctx, depth, dom_ctx);
+            true
+        }
         "table" => {
             table::handle_table(node_handle, parser, output, options, ctx, dom_ctx, depth);
+            true
+        }
+        "caption" => {
+            table::handle_caption(node_handle, parser, output, options, ctx, depth, dom_ctx);
+            true
+        }
+        "body" | "html" => {
+            container::handle_structural_container(node_handle, parser, output, options, ctx, depth, dom_ctx);
+            true
+        }
+        "time" | "data" => {
+            container::handle_passthrough(node_handle, parser, output, options, ctx, depth, dom_ctx);
+            true
+        }
+        "wbr" | "source" | "thead" | "tbody" | "tfoot" | "tr" | "th" | "td" => {
+            container::handle_noop(node_handle, parser, output, options, ctx, depth, dom_ctx);
             true
         }
         _ => false,
