@@ -5,15 +5,16 @@ require "pathname"
 
 root = Pathname.new(__dir__).parent
 
-puts "Building html-to-markdown CLI binary..."
-cmd = ["cargo", "build", "--release", "--package", "html-to-markdown-cli"]
-unless system(*cmd)
-  abort "Failed to build html-to-markdown CLI"
-end
-
 binary_name = Gem.win_platform? ? "html-to-markdown.exe" : "html-to-markdown"
 source = root.join("target", "release", binary_name)
-abort "CLI binary not found at #{source}" unless source.file?
+
+# CLI binary should already be built before vendoring
+# This avoids package collision with the vendored html-to-markdown-rs crate
+unless source.file?
+  abort "CLI binary not found at #{source}. Please build it first with: cargo build --release --package html-to-markdown-cli"
+end
+
+puts "Using CLI binary at #{source}"
 
 bin_dir = root.join("packages", "ruby", "lib", "bin")
 FileUtils.mkdir_p(bin_dir)
