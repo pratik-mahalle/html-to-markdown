@@ -296,8 +296,11 @@ fn visitor_heading_output(
                     is_inline: false,
                 };
 
-                let mut visitor = visitor_handle.borrow_mut();
-                match visitor.visit_heading(&node_ctx, level as u32, normalized, id_attr.as_deref()) {
+                let visit_result = {
+                    let mut visitor = visitor_handle.borrow_mut();
+                    visitor.visit_heading(&node_ctx, level as u32, normalized, id_attr.as_deref())
+                };
+                match visit_result {
                     VisitResult::Continue => {
                         let mut buf = String::new();
                         push_heading(&mut buf, ctx, options, level, normalized);

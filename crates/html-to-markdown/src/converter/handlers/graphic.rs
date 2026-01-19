@@ -120,8 +120,11 @@ pub fn handle_graphic(
             is_inline: true,
         };
 
-        let mut visitor = visitor_handle.borrow_mut();
-        match visitor.visit_image(&node_ctx, &src, &alt, title.as_deref()) {
+        let visit_result = {
+            let mut visitor = visitor_handle.borrow_mut();
+            visitor.visit_image(&node_ctx, &src, &alt, title.as_deref())
+        };
+        match visit_result {
             VisitResult::Continue => Some(format_graphic_markdown(
                 &src,
                 &alt,

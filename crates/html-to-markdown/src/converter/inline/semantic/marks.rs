@@ -156,8 +156,11 @@ pub fn handle_strikethrough(
                 is_inline: true,
             };
 
-            let mut visitor = visitor_handle.borrow_mut();
-            match visitor.visit_strikethrough(&node_ctx, &text_content) {
+            let visit_result = {
+                let mut visitor = visitor_handle.borrow_mut();
+                visitor.visit_strikethrough(&node_ctx, &text_content)
+            };
+            match visit_result {
                 VisitResult::Continue => None,
                 VisitResult::Custom(custom) => Some(custom),
                 VisitResult::Skip => Some(String::new()),
@@ -280,8 +283,11 @@ pub fn handle_inserted(
             is_inline: true,
         };
 
-        let mut visitor = visitor_handle.borrow_mut();
-        match visitor.visit_underline(&node_ctx, &text_content) {
+        let visit_result = {
+            let mut visitor = visitor_handle.borrow_mut();
+            visitor.visit_underline(&node_ctx, &text_content)
+        };
+        match visit_result {
             VisitResult::Continue => None,
             VisitResult::Custom(custom) => Some(custom),
             VisitResult::Skip => Some(String::new()),
@@ -392,8 +398,11 @@ pub fn handle_underline(
             is_inline: true,
         };
 
-        let mut visitor = visitor_handle.borrow_mut();
-        match visitor.visit_underline(&node_ctx, &text_content) {
+        let visit_result = {
+            let mut visitor = visitor_handle.borrow_mut();
+            visitor.visit_underline(&node_ctx, &text_content)
+        };
+        match visit_result {
             VisitResult::Continue => {
                 let children = tag.children();
                 for child_handle in children.top().iter() {
