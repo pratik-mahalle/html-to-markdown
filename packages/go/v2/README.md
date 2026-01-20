@@ -60,7 +60,15 @@ go get github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown
 
 
 
-Requires Go 1.25+. The FFI library is automatically downloaded from GitHub releases.
+Requires Go 1.25+. After installing the package, run `go generate` to automatically download the platform-specific FFI library:
+
+```bash
+go generate
+```
+
+This downloads the native library from GitHub releases and generates the necessary CGO flags. The library is cached in `~/.html-to-markdown/` for subsequent builds.
+
+Alternatively, you can manually set `CGO_CFLAGS` and `CGO_LDFLAGS` environment variables if you prefer to manage the FFI library yourself.
 
 
 
