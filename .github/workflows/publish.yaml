@@ -1541,47 +1541,13 @@ jobs:
         run: ../../scripts/publish/node/publish-main-package.sh
         shell: bash
 
-  publish-typescript:
-    name: Publish TypeScript wrapper package
-    needs: [prepare, publish-node, check-npm]
-    if: ${{ needs.prepare.result == 'success' && needs.prepare.outputs.tag && needs.prepare.outputs.dry_run != 'true' && needs.prepare.outputs.is_tag == 'true' && needs.check-npm.outputs.ts_exists != 'true' }}
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ needs.prepare.outputs.ref }}
-
-      - name: Setup Node
-        uses: actions/setup-node@v6
-        with:
-          node-version: 20
-          registry-url: https://registry.npmjs.org/
-
-      - name: Update NPM
-        run: npm install -g npm@latest
-        shell: bash
-
-      - name: Enable corepack
-        run: scripts/common/enable-corepack.sh
-        shell: bash
-
-      - name: Wait for Node package propagation on npm
-        run: scripts/publish/typescript/wait-for-npm-package.sh
-        shell: bash
-
-      - name: Install workspace dependencies
-        run: scripts/publish/node/install-node-deps.sh
-        shell: bash
-
       - name: Build TypeScript wrapper package
+        if: ${{ needs.prepare.outputs.dry_run != 'true' && needs.check-npm.outputs.ts_exists != 'true' }}
         run: scripts/publish/typescript/build-package.sh
         shell: bash
 
       - name: Publish TypeScript wrapper package
+        if: ${{ needs.prepare.outputs.dry_run != 'true' && needs.check-npm.outputs.ts_exists != 'true' }}
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: scripts/publish/typescript/publish-package.sh
