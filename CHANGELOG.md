@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.23.2] - 2026-01-20
+
+### Fixed
+
+- **TypeScript wrapper publishing**: Fixed TypeScript wrapper build failures by moving the build and publish steps into the same `publish-node` job. This eliminates npm CDN propagation delays that caused `@kreuzberg/html-to-markdown` to fail building because `@kreuzberg/html-to-markdown-node` wasn't available yet. Added workspace dependency reinstallation step to ensure pnpm correctly resolves the local package after publishing.
+- **Go FFI library installation**: Fixed critical bugs in the `go:generate` install script that prevented automatic FFI library downloads:
+  - Corrected artifact naming from `go-ffi-{platform}.tar.gz` to `html-to-markdown-ffi-{version}-{platform}.tar.gz`
+  - Fixed platform mapping to match GitHub release artifacts (darwin-arm64, linux-x64, etc.)
+  - Added support for all library formats (.dylib for macOS, .so for Linux, .dll for Windows)
+- **Ruby native Cargo.toml**: Fixed workspace dependency configuration to use `workspace = true` instead of vendored path reference, preventing Cargo workspace resolution failures during builds.
+- **CI workflows**: Upgraded all CI workflows from Java 24 to Java 25 to match maven.compiler.release=25 configuration in pom.xml.
+- **Go linting**: Resolved golangci-lint warnings by adding constants for OS names and library names, and converting if-else chains to switch statements.
+
+### Changed
+
+- **Go README**: Updated installation documentation to explain the `go:generate` workflow for automatic FFI library installation, including details about caching in `~/.html-to-markdown/` and alternative manual configuration.
+
 ## [2.23.1] - 2026-01-19
 
 ### Fixed
