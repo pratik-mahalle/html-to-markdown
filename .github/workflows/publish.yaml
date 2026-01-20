@@ -1543,7 +1543,7 @@ jobs:
 
       - name: Reinstall workspace dependencies for TypeScript wrapper
         if: ${{ needs.prepare.outputs.dry_run != 'true' && needs.check-npm.outputs.ts_exists != 'true' }}
-        run: scripts/publish/node/install-node-deps.sh
+        run: pnpm install --filter html-to-markdown-node... --no-frozen-lockfile
         shell: bash
 
       - name: Build TypeScript wrapper package
