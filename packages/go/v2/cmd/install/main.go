@@ -50,10 +50,10 @@ const (
 
 // PlatformMapping maps Go's GOOS/GOARCH to release artifact names
 var PlatformMapping = map[string]string{
-	"darwin/arm64":  "macos-arm64",
-	"linux/amd64":   "linux-x86_64",
-	"linux/arm64":   "linux-aarch64",
-	"windows/amd64": "windows-x86_64",
+	"darwin/arm64":  "darwin-arm64",
+	"linux/amd64":   "linux-x64",
+	"linux/arm64":   "linux-arm64",
+	"windows/amd64": "windows-x64",
 }
 
 // GoDir maps platform to Go-style directory names
@@ -145,9 +145,26 @@ func run() error {
 	}
 
 	libDir := filepath.Join(targetDir, "lib", goDir)
-	libPath := filepath.Join(libDir, "libhtml_to_markdown_ffi.a")
 	headerDir := filepath.Join(targetDir, "include")
 	headerPath := filepath.Join(headerDir, "html_to_markdown.h")
+
+	// Determine library extension based on platform
+	var libExt string
+	switch runtime.GOOS {
+	case "darwin":
+		libExt = ".dylib"
+	case "linux":
+		libExt = ".so"
+	case osWindows:
+		libExt = ".dll"
+	default:
+		libExt = ".a"
+	}
+	libName := "libhtml_to_markdown_ffi" + libExt
+	if runtime.GOOS == osWindows {
+		libName = "html_to_markdown_ffi" + libExt
+	}
+	libPath := filepath.Join(libDir, libName)
 
 	// If --env flag is set, just show the environment variables
 	if *showEnv {
@@ -214,7 +231,7 @@ func downloadAndInstall(version, releaseName, targetDir, goDir, libDir, headerDi
 	platform := fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH)
 
 	// Construct URL using only known-safe base URL and validated version/releaseName
-	url := BaseURL + "/v" + version + "/go-ffi-" + releaseName + ".tar.gz"
+	url := BaseURL + "/v" + version + "/html-to-markdown-ffi-" + version + "-" + releaseName + ".tar.gz"
 	fmt.Printf("Downloading html-to-markdown FFI library v%s for %s...\n", version, platform)
 	fmt.Printf("URL: %s\n", url)
 
@@ -325,8 +342,17 @@ func extractTarGz(r io.Reader, targetDir, goDir string) (returnErr error) {
 
 		switch {
 		case strings.HasSuffix(header.Name, "libhtml_to_markdown_ffi.a"):
-			// Library goes to lib/{platform}/
+			// Static library goes to lib/{platform}/
 			targetPath = filepath.Join(targetDir, "lib", goDir, "libhtml_to_markdown_ffi.a")
+		case strings.HasSuffix(header.Name, "libhtml_to_markdown_ffi.dylib"):
+			// Dynamic library (macOS) goes to lib/{platform}/
+			targetPath = filepath.Join(targetDir, "lib", goDir, "libhtml_to_markdown_ffi.dylib")
+		case strings.HasSuffix(header.Name, "libhtml_to_markdown_ffi.so"):
+			// Dynamic library (Linux) goes to lib/{platform}/
+			targetPath = filepath.Join(targetDir, "lib", goDir, "libhtml_to_markdown_ffi.so")
+		case strings.HasSuffix(header.Name, "html_to_markdown_ffi.dll"):
+			// Dynamic library (Windows) goes to lib/{platform}/
+			targetPath = filepath.Join(targetDir, "lib", goDir, "html_to_markdown_ffi.dll")
 		case strings.HasSuffix(header.Name, "html_to_markdown.h"):
 			// Header goes to include/
 			targetPath = filepath.Join(targetDir, "include", "html_to_markdown.h")
