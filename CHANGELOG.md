@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.23.4] - 2026-01-20
+
+### Fixed
+
+- **TypeScript wrapper publishing**: Fixed TypeScript wrapper dependency resolution by installing dependencies directly from npm registry instead of from workspace after Node packages are published. This ensures `@kreuzberg/html-to-markdown-node` is available from npm when building the TypeScript wrapper, eliminating the workspace resolution issues that caused previous build failures.
+
 ## [2.23.3] - 2026-01-20
 
 ### Fixed
