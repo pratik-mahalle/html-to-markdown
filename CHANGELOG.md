@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.23.3] - 2026-01-20
+
+### Fixed
+
+- **Go FFI packaging**: Fixed missing `html_to_markdown.h` header file in Go FFI archive tarballs, which caused `go:generate` installation to fail with "fatal error: 'html_to_markdown.h' file not found". The header is now included in all platform archives (tar.gz and zip).
+- **TypeScript wrapper publishing**: Fixed pnpm lockfile frozen mode error during TypeScript wrapper dependency reinstallation by adding `--no-frozen-lockfile` flag. The reinstall step after publishing Node packages now correctly updates workspace dependencies despite lockfile version mismatches.
+
 ## [2.23.2] - 2026-01-20
 
 ### Fixed
