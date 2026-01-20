@@ -55,11 +55,19 @@ stage_dir="${work_dir}/stage"
 mkdir -p "${stage_dir}"
 cp -f "${lib_path}" "${stage_dir}/${target_name}"
 
+# Copy header file
+header_path="crates/html-to-markdown-ffi/html_to_markdown.h"
+if [[ -f "${header_path}" ]]; then
+	cp -f "${header_path}" "${stage_dir}/html_to_markdown.h"
+else
+	echo "Warning: Header file not found at ${header_path}" >&2
+fi
+
 if [[ "${archive_ext}" == "zip" ]]; then
 	if command -v zip >/dev/null 2>&1; then
 		(
 			cd "${stage_dir}"
-			zip -9 -q "${out_dir}/${archive_name}" "${target_name}"
+			zip -9 -q "${out_dir}/${archive_name}" "${target_name}" html_to_markdown.h
 		)
 	else
 		# Convert Unix paths to Windows paths for PowerShell
@@ -67,10 +75,10 @@ if [[ "${archive_ext}" == "zip" ]]; then
 		ps_out_path="$(cd "${out_dir}" && pwd -W 2>/dev/null || echo "${out_dir}")"
 
 		powershell.exe -NoProfile -Command \
-			"Compress-Archive -Path \"${ps_stage_path}\\${target_name}\" -DestinationPath \"${ps_out_path}\\${archive_name}\" -Force"
+			"Compress-Archive -Path \"${ps_stage_path}\\${target_name}\",\"${ps_stage_path}\\html_to_markdown.h\" -DestinationPath \"${ps_out_path}\\${archive_name}\" -Force"
 	fi
 else
-	tar -czf "${out_dir}/${archive_name}" -C "${stage_dir}" "${target_name}"
+	tar -czf "${out_dir}/${archive_name}" -C "${stage_dir}" "${target_name}" html_to_markdown.h
 fi
 
 echo "Packaged ${out_dir}/${archive_name}"
