@@ -1168,6 +1168,12 @@ jobs:
         run: scripts/publish/upload-go-ffi-artifacts.sh
         shell: bash
 
+      - name: Create Go module tag
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: scripts/publish/go/create-module-tag.sh "v${VERSION}"
+        shell: bash
+
       - name: Upload Elixir package
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
