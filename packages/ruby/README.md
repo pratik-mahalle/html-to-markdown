@@ -18,7 +18,7 @@
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown?label=Java&color=007ec6" alt="Java">
   </a>
   <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown">
-    <img src="https://img.shields.io/badge/Go-v2.19.0-007ec6" alt="Go">
+    <img src="https://img.shields.io/badge/Go-v2.23.4-007ec6" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/">
     <img src="https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown?label=C%23&color=007ec6" alt="C#">
@@ -169,19 +169,21 @@ The library supports converting HTML to [Djot](https://djot.net/), a lightweight
 
 ### Example Usage
 
-```python
-from html_to_markdown import convert, ConversionOptions
+
+```ruby
+require 'html_to_markdown'
 
 html = "<p>This is <strong>bold</strong> and <em>italic</em> text.</p>"
 
 # Default Markdown output
-markdown = convert(html)
+markdown = HtmlToMarkdown.convert(html)
 # Result: "This is **bold** and *italic* text."
 
 # Djot output
-djot = convert(html, ConversionOptions(output_format="djot"))
+djot = HtmlToMarkdown.convert(html, output_format: 'djot')
 # Result: "This is *bold* and _italic_ text."
 ```
+
 
 Djot's extended syntax allows you to express more semantic meaning in lightweight text, making it useful for documents that require strikethrough, insertion tracking, or mathematical notation.
 

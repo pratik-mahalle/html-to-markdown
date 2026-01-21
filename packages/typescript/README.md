@@ -18,7 +18,7 @@
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown?label=Java&color=007ec6" alt="Java">
   </a>
   <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown">
-    <img src="https://img.shields.io/badge/Go-v2.19.0-007ec6" alt="Go">
+    <img src="https://img.shields.io/badge/Go-v2.23.4-007ec6" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/">
     <img src="https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown?label=C%23&color=007ec6" alt="C#">
@@ -89,87 +89,6 @@ npm install @kreuzberg/html-to-markdown-wasm
 ```
 
 
-
-
-# Migration Guide: TypeScript v2.18.x → v2.19.0
-
-## Breaking Change: Scoped npm Packages
-
-In v2.19.0, npm packages were moved to the `@kreuzberg` scope to align with the Kreuzberg.dev organization.
-
-### Package Installation Update
-
-**Before (v2.18.x):**
-```bash
-npm install html-to-markdown-node
-npm install html-to-markdown-wasm
-```
-
-**After (v2.19.0+):**
-```bash
-npm install @kreuzberg/html-to-markdown-node
-npm install @kreuzberg/html-to-markdown-wasm
-```
-
-### Import Statement Update
-
-**Before:**
-```typescript
-import { convert } from &#39;html-to-markdown-node&#39;;
-import { convert } from &#39;html-to-markdown-wasm&#39;;
-```
-
-**After:**
-```typescript
-import { convert } from &#39;@kreuzberg/html-to-markdown-node&#39;;
-import { convert } from &#39;@kreuzberg/html-to-markdown-wasm&#39;;
-```
-
-### TypeScript Declaration Update
-
-Update your TypeScript configuration if you have imports from the old package name:
-
-**Before (tsconfig.json or import aliases):**
-```json
-{
-  &#34;compilerOptions&#34;: {
-    &#34;paths&#34;: {
-      &#34;html-to-markdown&#34;: [&#34;node_modules/html-to-markdown-node&#34;]
-    }
-  }
-}
-```
-
-**After:**
-```json
-{
-  &#34;compilerOptions&#34;: {
-    &#34;paths&#34;: {
-      &#34;@kreuzberg/html-to-markdown&#34;: [&#34;node_modules/@kreuzberg/html-to-markdown-node&#34;]
-    }
-  }
-}
-```
-
-### Deno Update
-
-**Before:**
-```typescript
-import { convert } from &#34;npm:html-to-markdown-wasm&#34;;
-```
-
-**After:**
-```typescript
-import { convert } from &#34;npm:@kreuzberg/html-to-markdown-wasm&#34;;
-```
-
-## Summary of Changes
-
-- All npm packages now use `@kreuzberg` scope
-- `html-to-markdown-node` → `@kreuzberg/html-to-markdown-node`
-- `html-to-markdown-wasm` → `@kreuzberg/html-to-markdown-wasm`
-- TypeScript types and APIs are identical
-- No functional changes to the library
 
 
 
@@ -285,19 +204,21 @@ The library supports converting HTML to [Djot](https://djot.net/), a lightweight
 
 ### Example Usage
 
-```python
-from html_to_markdown import convert, ConversionOptions
 
-html = "<p>This is <strong>bold</strong> and <em>italic</em> text.</p>"
+```typescript
+import { convert, ConversionOptions } from '@kreuzberg/html-to-markdown';
 
-# Default Markdown output
-markdown = convert(html)
-# Result: "This is **bold** and *italic* text."
+const html = "<p>This is <strong>bold</strong> and <em>italic</em> text.</p>";
 
-# Djot output
-djot = convert(html, ConversionOptions(output_format="djot"))
-# Result: "This is *bold* and _italic_ text."
+// Default Markdown output
+const markdown = convert(html);
+// Result: "This is **bold** and *italic* text."
+
+// Djot output
+const djot = convert(html, { outputFormat: 'djot' });
+// Result: "This is *bold* and _italic_ text."
 ```
+
 
 Djot's extended syntax allows you to express more semantic meaning in lightweight text, making it useful for documents that require strikethrough, insertion tracking, or mathematical notation.
 
@@ -320,7 +241,7 @@ The metadata extraction feature enables comprehensive document analysis during c
 
 
 ```typescript
-import { convertWithMetadata } from 'html-to-markdown';
+import { convertWithMetadata } from '@kreuzberg/html-to-markdown';
 
 const html = '<h1>Article</h1><img src="test.jpg" alt="test">';
 const { markdown, metadata } = convertWithMetadata(html);

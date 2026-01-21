@@ -18,7 +18,7 @@
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown?label=Java&color=007ec6" alt="Java">
   </a>
   <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown">
-    <img src="https://img.shields.io/badge/Go-v2.19.0-007ec6" alt="Go">
+    <img src="https://img.shields.io/badge/Go-v2.23.4-007ec6" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/">
     <img src="https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown?label=C%23&color=007ec6" alt="C#">
@@ -67,134 +67,6 @@ dotnet add package KreuzbergDev.HtmlToMarkdown
 ```
 
 
-
-
-# Migration Guide: C# v2.18.x → v2.19.0
-
-## Breaking Change: Package Owner Update
-
-In v2.19.0, the C#/.NET package owner changed from `Goldziher` to `KreuzbergDev` to reflect the new Kreuzberg.dev organization. The package name on NuGet changed from `Goldziher.HtmlToMarkdown` to `KreuzbergDev.HtmlToMarkdown`.
-
-### NuGet Installation Update
-
-**Before (v2.18.x):**
-```bash
-dotnet add package Goldziher.HtmlToMarkdown
-```
-
-**After (v2.19.0+):**
-```bash
-dotnet add package KreuzbergDev.HtmlToMarkdown
-```
-
-### Project File Update
-
-Update your `.csproj` file:
-
-**Before:**
-```xml
-&lt;PackageReference Include=&#34;Goldziher.HtmlToMarkdown&#34; Version=&#34;2.18.x&#34; /&gt;
-```
-
-**After:**
-```xml
-&lt;PackageReference Include=&#34;KreuzbergDev.HtmlToMarkdown&#34; Version=&#34;2.19.0&#34; /&gt;
-```
-
-### Using Statement
-
-The namespace remains unchanged. No code modifications are required:
-
-**Before and After:**
-```csharp
-using HtmlToMarkdown;
-```
-
-### Code Migration Example
-
-**Before (v2.18.x):**
-```csharp
-using HtmlToMarkdown;
-
-var html = &#34;&lt;h1&gt;Hello World&lt;/h1&gt;&lt;p&gt;This is a paragraph.&lt;/p&gt;&#34;;
-
-try
-{
-    var markdown = HtmlToMarkdownConverter.Convert(html);
-    Console.WriteLine(markdown);
-}
-catch (HtmlToMarkdownException ex)
-{
-    Console.Error.WriteLine($&#34;Conversion failed: {ex.Message}&#34;);
-}
-```
-
-**After (v2.19.0+):**
-```csharp
-using HtmlToMarkdown;
-
-var html = &#34;&lt;h1&gt;Hello World&lt;/h1&gt;&lt;p&gt;This is a paragraph.&lt;/p&gt;&#34;;
-
-try
-{
-    var markdown = HtmlToMarkdownConverter.Convert(html);
-    Console.WriteLine(markdown);
-}
-catch (HtmlToMarkdownException ex)
-{
-    Console.Error.WriteLine($&#34;Conversion failed: {ex.Message}&#34;);
-}
-```
-
-### Metadata Extraction Update
-
-The API and namespace remain the same:
-
-**Before:**
-```csharp
-using HtmlToMarkdown;
-
-var result = HtmlToMarkdownConverter.ConvertWithMetadata(html);
-var doc = result.Metadata.Document;
-```
-
-**After:**
-```csharp
-using HtmlToMarkdown;
-
-var result = HtmlToMarkdownConverter.ConvertWithMetadata(html);
-var doc = result.Metadata.Document;
-```
-
-### Visitor Pattern Update
-
-The visitor API remains unchanged:
-
-**Before:**
-```csharp
-using HtmlToMarkdown;
-using HtmlToMarkdown.Visitor;
-
-var visitor = new MyVisitor();
-var markdown = HtmlToMarkdownConverter.ConvertWithVisitor(html, visitor);
-```
-
-**After:**
-```csharp
-using HtmlToMarkdown;
-using HtmlToMarkdown.Visitor;
-
-var visitor = new MyVisitor();
-var markdown = HtmlToMarkdownConverter.ConvertWithVisitor(html, visitor);
-```
-
-## Summary of Changes
-
-- NuGet package renamed from `Goldziher.HtmlToMarkdown` to `KreuzbergDev.HtmlToMarkdown`
-- Using statements and C# namespaces remain unchanged
-- All APIs are identical
-- No code changes required beyond updating the package reference
-- Full backward compatibility after package update
 
 
 
@@ -360,19 +232,21 @@ The library supports converting HTML to [Djot](https://djot.net/), a lightweight
 
 ### Example Usage
 
-```python
-from html_to_markdown import convert, ConversionOptions
 
-html = "<p>This is <strong>bold</strong> and <em>italic</em> text.</p>"
+```csharp
+using HtmlToMarkdown;
 
-# Default Markdown output
-markdown = convert(html)
-# Result: "This is **bold** and *italic* text."
+var html = "<p>This is <strong>bold</strong> and <em>italic</em> text.</p>";
 
-# Djot output
-djot = convert(html, ConversionOptions(output_format="djot"))
-# Result: "This is *bold* and _italic_ text."
+// Default Markdown output
+var markdown = Converter.Convert(html);
+// Result: "This is **bold** and *italic* text."
+
+// Djot output
+var djot = Converter.Convert(html, new ConversionOptions { OutputFormat = "djot" });
+// Result: "This is *bold* and _italic_ text."
 ```
+
 
 Djot's extended syntax allows you to express more semantic meaning in lightweight text, making it useful for documents that require strikethrough, insertion tracking, or mathematical notation.
 
