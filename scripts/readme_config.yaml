@@ -138,11 +138,13 @@ languages:
     package_manager:
       - composer
       - pie
-    package_name: goldziher/html-to-markdown
-    install_command: "composer require goldziher/html-to-markdown"
+    package_name: kreuzberg-dev/html-to-markdown
+    install_command: "composer require kreuzberg-dev/html-to-markdown"
     description: |
       High-performance HTML to Markdown converter with typed PHP bindings powered by a Rust core.
       Provides a type-safe API with full PHPStan level 9 support, modern PHP 8.2+ features, and comprehensive metadata extraction.
+
+      Note: The package was previously published as `goldziher/html-to-markdown`, which still works for backward compatibility.
     features:
       visitor_pattern: true
       metadata_extraction: true
