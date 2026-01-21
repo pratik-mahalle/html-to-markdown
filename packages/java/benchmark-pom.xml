@@ -5,9 +5,9 @@
                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.github.goldziher</groupId>
+    <groupId>dev.kreuzberg</groupId>
     <artifactId>html-to-markdown-benchmark</artifactId>
-    <version>2.15.0</version>
+    <version>2.23.4</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -23,7 +23,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.github.goldziher</groupId>
+            <groupId>dev.kreuzberg</groupId>
             <artifactId>html-to-markdown</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -86,7 +86,7 @@
                             <finalName>benchmark</finalName>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>io.github.goldziher.benchmark.Benchmark</mainClass>
+                                    <mainClass>dev.kreuzberg.benchmark.Benchmark</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
