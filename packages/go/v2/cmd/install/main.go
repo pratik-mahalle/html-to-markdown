@@ -31,7 +31,7 @@ import (
 
 const (
 	// DefaultVersion is the default version to download if not specified
-	DefaultVersion = "2.23.0"
+	DefaultVersion = "2.23.4"
 	// BaseURL is the base URL for GitHub releases
 	BaseURL = "https://github.com/kreuzberg-dev/html-to-markdown/releases/download"
 	// DefaultInstallDir is the default installation directory
@@ -112,7 +112,7 @@ func main() {
 }
 
 func run() error {
-	version := flag.String("version", DefaultVersion, "Version to download (e.g., 2.23.0)")
+	version := flag.String("version", DefaultVersion, "Version to download (e.g., 2.23.4)")
 	installDir := flag.String("dir", "", "Installation directory (default: ~/.html-to-markdown)")
 	showEnv := flag.Bool("env", false, "Only show environment variables for existing installation")
 	outputDir := flag.String("output", "", "Output directory for generated cgo_flags.go (default: current directory or GOFILE directory)")
@@ -217,7 +217,7 @@ func run() error {
 // validateVersion checks that version follows semantic versioning pattern
 func validateVersion(version string) error {
 	if !versionRegex.MatchString(version) {
-		return fmt.Errorf("invalid version format: %s (expected semver like 2.23.0)", version)
+		return fmt.Errorf("invalid version format: %s (expected semver like 2.23.4)", version)
 	}
 	return nil
 }
