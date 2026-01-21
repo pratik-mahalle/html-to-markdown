@@ -14,7 +14,7 @@
 		"squizlabs/php_codesniffer": "^3.10"
 	},
 	"suggest": {
-		"ext-html_to_markdown": "Provides native conversion. Install via PIE (goldziher/html-to-markdown) or download the release binary."
+		"ext-html_to_markdown": "Provides native conversion. Install via PIE (kreuzberg-dev/html-to-markdown) or download the release binary."
 	},
 	"provide": {
 		"ext-html_to_markdown": "*"

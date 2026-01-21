@@ -35,7 +35,7 @@ runs:
             aid = dep.find("m:artifactId", ns)
             ver = dep.find("m:version", ns)
             if gid is not None and aid is not None and gid.text and aid.text:
-                if gid.text.strip() == "io.github.goldziher" and aid.text.strip() == "html-to-markdown":
+                if gid.text.strip() == "dev.kreuzberg" and aid.text.strip() == "html-to-markdown":
                     version = (ver.text if ver is not None else "").strip()
                     break
 
@@ -49,7 +49,7 @@ runs:
           # Install the JAR to local Maven repository
           mvn install:install-file \
             -Dfile="${{ inputs.jar-path }}" \
-            -DgroupId=io.github.goldziher \
+            -DgroupId=dev.kreuzberg \
             -DartifactId=html-to-markdown \
             -Dversion="$version" \
             -Dpackaging=jar \
@@ -83,6 +83,6 @@ runs:
         fi
 
         # Compile and run the smoke test
-        mvn -f pom.xml compile exec:java -Dexec.mainClass="io.github.goldziher.htmltomarkdown.SmokeTest"
+        mvn -f pom.xml compile exec:java -Dexec.mainClass="dev.kreuzberg.htmltomarkdown.SmokeTest"
         popd >/dev/null
         echo "✓ Java JAR smoke test passed"
