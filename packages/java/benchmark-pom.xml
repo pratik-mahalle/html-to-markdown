@@ -7,7 +7,7 @@
 
     <groupId>dev.kreuzberg</groupId>
     <artifactId>html-to-markdown-benchmark</artifactId>
-    <version>2.23.4</version>
+    <version>2.23.5</version>
     <packaging>jar</packaging>
 
     <properties>

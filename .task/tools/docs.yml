@@ -17,7 +17,7 @@ tasks:
       - packages/csharp/README.md
       - packages/elixir/README.md
     cmds:
-      - python3 scripts/generate_readme.py
+      - uv run python3 scripts/generate_readme.py
 
   generate-readme:check:
     desc: Validate READMEs match templates (CI mode)
@@ -30,7 +30,7 @@ tasks:
       2. Run 'task docs:generate-readme' to regenerate
       3. Commit both template changes and regenerated READMEs
     cmds:
-      - python3 scripts/generate_readme.py --validate
+      - uv run python3 scripts/generate_readme.py --validate
 
   generate-readme:dry-run:
     desc: Preview README generation without writing files
@@ -41,4 +41,4 @@ tasks:
       - Debugging template/config issues
       - Reviewing output before committing
     cmds:
-      - python3 scripts/generate_readme.py --dry-run
+      - uv run python3 scripts/generate_readme.py --dry-run

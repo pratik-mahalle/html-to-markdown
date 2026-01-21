@@ -18,13 +18,13 @@
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown?label=Java&color=007ec6" alt="Java">
   </a>
   <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown">
-    <img src="https://img.shields.io/badge/Go-v2.23.4-007ec6" alt="Go">
+    <img src="https://img.shields.io/badge/Go-v2.23.5-007ec6" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/">
     <img src="https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown?label=C%23&color=007ec6" alt="C#">
   </a>
-  <a href="https://packagist.org/packages/goldziher/html-to-markdown">
-    <img src="https://img.shields.io/packagist/v/goldziher/html-to-markdown?label=PHP&color=007ec6" alt="PHP">
+  <a href="https://packagist.org/packages/kreuzberg-dev/html-to-markdown">
+    <img src="https://img.shields.io/packagist/v/kreuzberg-dev/html-to-markdown?label=PHP&color=007ec6" alt="PHP">
   </a>
   <a href="https://rubygems.org/gems/html-to-markdown">
     <img src="https://img.shields.io/gem/v/html-to-markdown?label=Ruby&color=007ec6" alt="Ruby">
@@ -73,13 +73,13 @@ Requires Java 25+ with Panama FFI support.
 <dependency>
     <groupId>dev.kreuzberg</groupId>
     <artifactId>html-to-markdown</artifactId>
-    <version>2.23.4</version>
+    <version>2.23.5</version>
 </dependency>
 ```
 
 **Gradle (Kotlin DSL):**
 ```kotlin
-implementation("dev.kreuzberg:html-to-markdown:2.23.4")
+implementation("dev.kreuzberg:html-to-markdown:2.23.5")
 ```
 
 
