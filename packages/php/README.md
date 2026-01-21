@@ -23,8 +23,8 @@
   <a href="https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/">
     <img src="https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown?label=C%23&color=007ec6" alt="C#">
   </a>
-  <a href="https://packagist.org/packages/goldziher/html-to-markdown">
-    <img src="https://img.shields.io/packagist/v/goldziher/html-to-markdown?label=PHP&color=007ec6" alt="PHP">
+  <a href="https://packagist.org/packages/kreuzberg-dev/html-to-markdown">
+    <img src="https://img.shields.io/packagist/v/kreuzberg-dev/html-to-markdown?label=PHP&color=007ec6" alt="PHP">
   </a>
   <a href="https://rubygems.org/gems/html-to-markdown">
     <img src="https://img.shields.io/gem/v/html-to-markdown?label=Ruby&color=007ec6" alt="Ruby">
@@ -51,11 +51,13 @@
 High-performance HTML to Markdown converter with typed PHP bindings powered by a Rust core.
 Provides a type-safe API with full PHPStan level 9 support, modern PHP 8.2+ features, and comprehensive metadata extraction.
 
+Note: The package was previously published as `goldziher/html-to-markdown`, which still works for backward compatibility.
+
 
 ## Installation
 
 ```bash
-composer require goldziher/html-to-markdown
+composer require kreuzberg-dev/html-to-markdown
 ```
 
 
@@ -304,7 +306,7 @@ For comprehensive examples including content filtering, link footnotes, accessib
 
 - **GitHub:** [github.com/kreuzberg-dev/html-to-markdown](https://github.com/kreuzberg-dev/html-to-markdown)
 
-- **Packagist:** [packagist.org/packages/goldziher/html-to-markdown](https://packagist.org/packages/goldziher/html-to-markdown)
+- **Packagist:** [packagist.org/packages/kreuzberg-dev/html-to-markdown](https://packagist.org/packages/kreuzberg-dev/html-to-markdown)
 
 - **Kreuzberg Ecosystem:** [kreuzberg.dev](https://kreuzberg.dev)
 - **Discord:** [discord.gg/pXxagNK2zN](https://discord.gg/pXxagNK2zN)
