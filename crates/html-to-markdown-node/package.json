@@ -67,14 +67,14 @@
 		"@emnapi/runtime": "1.7.1"
 	},
 	"optionalDependencies": {
-		"@kreuzberg/html-to-markdown-node-darwin-x64": "2.19.0-rc.1",
-		"@kreuzberg/html-to-markdown-node-darwin-arm64": "2.19.0-rc.1",
-		"@kreuzberg/html-to-markdown-node-win32-x64-msvc": "2.19.0-rc.1",
-		"@kreuzberg/html-to-markdown-node-win32-arm64-msvc": "2.19.0-rc.1",
-		"@kreuzberg/html-to-markdown-node-linux-x64-gnu": "2.19.0-rc.1",
-		"@kreuzberg/html-to-markdown-node-linux-x64-musl": "2.19.0-rc.1",
-		"@kreuzberg/html-to-markdown-node-linux-arm64-gnu": "2.19.0-rc.1",
-		"@kreuzberg/html-to-markdown-node-linux-arm64-musl": "2.19.0-rc.1",
-		"@kreuzberg/html-to-markdown-node-linux-arm-gnueabihf": "2.19.0-rc.1"
+		"@kreuzberg/html-to-markdown-node-darwin-x64": "2.23.4",
+		"@kreuzberg/html-to-markdown-node-darwin-arm64": "2.23.4",
+		"@kreuzberg/html-to-markdown-node-win32-x64-msvc": "2.23.4",
+		"@kreuzberg/html-to-markdown-node-win32-arm64-msvc": "2.23.4",
+		"@kreuzberg/html-to-markdown-node-linux-x64-gnu": "2.23.4",
+		"@kreuzberg/html-to-markdown-node-linux-x64-musl": "2.23.4",
+		"@kreuzberg/html-to-markdown-node-linux-arm64-gnu": "2.23.4",
+		"@kreuzberg/html-to-markdown-node-linux-arm64-musl": "2.23.4",
+		"@kreuzberg/html-to-markdown-node-linux-arm-gnueabihf": "2.23.4"
 	}
 }
