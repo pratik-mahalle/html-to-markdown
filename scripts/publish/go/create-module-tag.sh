@@ -59,8 +59,8 @@ if [[ "$DRY_RUN" == "--dry-run" ]]; then
 	exit 0
 fi
 
-# Create the Go submodule tag
-git tag "${GO_TAG}" "${TARGET_COMMIT}"
+# Create the Go submodule tag (annotated with message)
+git tag -a "${GO_TAG}" "${TARGET_COMMIT}" -m "Go module release ${VERSION}"
 echo "Created tag: ${GO_TAG}"
 
 # Push the tag
