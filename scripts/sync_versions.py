@@ -322,6 +322,23 @@ def update_mix_dependency(mix_path: Path, package_name: str, version: str) -> No
     mix_path.write_text(updated)
 
 
+def update_readme_config_version(readme_config_path: Path, version: str) -> tuple[bool, str, str]:
+    """Update version in scripts/readme_config.yaml."""
+    content = readme_config_path.read_text()
+
+    # Extract current version
+    match = re.search(r'^version:\s*"([^"]+)"', content, re.MULTILINE)
+    old_version = match.group(1) if match else "NOT FOUND"
+
+    if old_version == version:
+        return False, old_version, version
+
+    # Update version (first occurrence only - the global one)
+    new_content = re.sub(r'^version:\s*"[^"]+"', f'version: "{version}"', content, count=1, flags=re.MULTILINE)
+    readme_config_path.write_text(new_content)
+    return True, old_version, version
+
+
 def update_mix_version(file_path: Path, version: str) -> tuple[bool, str, str]:
     """Update @version declarations inside mix.exs files."""
     content = file_path.read_text()
@@ -559,6 +576,14 @@ def sync_composer(repo_root: Path, version: str, report: SyncReport) -> None:
         report.record(composer.relative_to(repo_root), changed, f"{old_ver} → {new_ver}")
 
 
+def sync_readme_config(repo_root: Path, version: str, report: SyncReport) -> None:
+    """Update version in readme_config.yaml (used for README generation)."""
+    readme_config = repo_root / "scripts/readme_config.yaml"
+    if readme_config.exists():
+        changed, old_ver, new_ver = update_readme_config_version(readme_config, version)
+        report.record(readme_config.relative_to(repo_root), changed, f"{old_ver} → {new_ver}")
+
+
 def summarize(version: str, report: SyncReport) -> None:
     print("\n📊 Summary:")
     print(f"   Updated: {len(report.updated)} files")
@@ -593,6 +618,7 @@ def main() -> None:
     sync_uv_lock(repo_root, version, report)
     sync_composer(repo_root, version, report)
     sync_cargo_versions(repo_root, version, report)
+    sync_readme_config(repo_root, version, report)
 
     # Update test_apps manifests
     update_test_apps_versions(repo_root, version)
