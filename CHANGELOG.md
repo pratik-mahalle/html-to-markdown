@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.23.5] - 2026-01-21
+
+### Fixed
+
+- **Maven Central publishing**: Corrected group ID in Maven Central check script from legacy `io.github.goldziher` to `dev.kreuzberg`, enabling successful Java package publishing. This resolves the issue where Java v2.23.4 failed to publish to Maven Central.
+- **Go module publishing**: Added automated Go module tag creation (`packages/go/v{version}`) to publish workflow, ensuring Go packages are immediately available on Go proxy after release.
+- **Go FFI version synchronization**: Updated Go FFI default version constants from outdated versions (2.19.1/2.23.0) to 2.23.5 in both `ffi_loader.go` and `cmd/install/main.go`, ensuring automatic downloads use the correct library version.
+- **Node.js platform dependencies**: Synchronized all platform-specific optional dependencies in `@kreuzberg/html-to-markdown-node` package.json from 2.19.0-rc.1 to match main package version, preventing dependency resolution issues.
+- **Java benchmark packaging**: Updated benchmark-pom.xml to use correct group ID (`dev.kreuzberg`), version (2.23.5), and main class namespace (`dev.kreuzberg.benchmark.Benchmark`). Removed outdated generated `dependency-reduced-pom.xml`.
+- **PHP package references**: Updated all PHP package references from `goldziher/html-to-markdown` to `kreuzberg-dev/html-to-markdown` across composer.json, PIE verification scripts, and smoke test actions to reflect current package organization.
+- **Java smoke tests**: Updated smoke-java GitHub action to use correct group ID (`dev.kreuzberg`) and package namespace (`dev.kreuzberg.htmltomarkdown.SmokeTest`) for JAR installation and test execution.
+- **Build tooling**: Fixed Python script execution in task runner to use `uv run python3` instead of system python3, ensuring consistent dependency resolution. Added PyYAML and Jinja2 to workspace dev dependencies.
+- **Version sync automation**: Enhanced version sync script to automatically update Node.js platform-specific optional dependencies alongside main package version, preventing manual version drift.
+
 ## [2.23.4] - 2026-01-20
 
 ### Fixed

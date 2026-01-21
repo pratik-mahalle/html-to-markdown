@@ -11,27 +11,27 @@ tasks:
   sync:
     desc: "Synchronize version across all package manifests"
     cmds:
-      - python3 {{.SYNC_SCRIPT}}
+      - uv run python3 {{.SYNC_SCRIPT}}
 
   check:
     desc: "Check if versions are synchronized (dry-run)"
     cmds:
-      - python3 {{.SYNC_SCRIPT}} --check
+      - uv run python3 {{.SYNC_SCRIPT}} --check
 
   bump:major:
     desc: "Bump major version (X.0.0) and sync"
     cmds:
-      - python3 {{.SYNC_SCRIPT}} --bump major
+      - uv run python3 {{.SYNC_SCRIPT}} --bump major
 
   bump:minor:
     desc: "Bump minor version (0.X.0) and sync"
     cmds:
-      - python3 {{.SYNC_SCRIPT}} --bump minor
+      - uv run python3 {{.SYNC_SCRIPT}} --bump minor
 
   bump:patch:
     desc: "Bump patch version (0.0.X) and sync"
     cmds:
-      - python3 {{.SYNC_SCRIPT}} --bump patch
+      - uv run python3 {{.SYNC_SCRIPT}} --bump patch
 
   show:
     desc: "Show current version from Cargo.toml"
