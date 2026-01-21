@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.23.6] - 2026-01-21
+
+### Fixed
+
+- **pnpm lockfile synchronization**: Fixed pnpm lockfile to include Node.js platform-specific optional dependency version updates (2.19.0-rc.1 → 2.23.6) that were applied during v2.23.5 version sync. This resolves the `ERR_PNPM_OUTDATED_LOCKFILE` errors that caused the v2.23.5 publish workflow to fail.
+- **CI Java version**: Updated CI Java workflow from Java 24 to Java 25 to match maven.compiler.release=25 configuration, ensuring CI and local builds use the same compiler version.
+
 ## [2.23.5] - 2026-01-21
 
 ### Fixed
