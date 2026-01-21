@@ -144,8 +144,36 @@ def _update_json_dependency(file_path: Path, package_name: str, version_spec: st
 
 
 def update_package_json(file_path: Path, version: str) -> tuple[bool, str, str]:
-    """Update a package.json file."""
-    return _update_json_field(file_path, "version", version)
+    """Update a package.json file and platform-specific optionalDependencies."""
+    data = json.loads(file_path.read_text())
+    old_version = data.get("version", "N/A")
+    changed = False
+
+    # Update main version field
+    if data.get("version") != version:
+        data["version"] = version
+        changed = True
+
+    # Update platform-specific packages in optionalDependencies
+    # (e.g., @kreuzberg/html-to-markdown-node-darwin-x64)
+    if "optionalDependencies" in data:
+        package_name = data.get("name", "")
+        # If this is the main platform package (e.g., @kreuzberg/html-to-markdown-node)
+        # update all platform-specific variants to match
+        if (
+            package_name
+            and "-node" in package_name
+            and not any(platform in package_name for platform in ["-darwin-", "-linux-", "-win32-"])
+        ):
+            for dep_name in list(data["optionalDependencies"].keys()):
+                if dep_name.startswith(package_name + "-") and data["optionalDependencies"][dep_name] != version:
+                    data["optionalDependencies"][dep_name] = version
+                    changed = True
+
+    if changed:
+        file_path.write_text(json.dumps(data, indent=2) + "\n")
+
+    return changed, old_version, version
 
 
 def update_pyproject_toml(file_path: Path, version: str) -> tuple[bool, str, str]:
