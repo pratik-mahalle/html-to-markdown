@@ -87,7 +87,7 @@ Each language binding provides comprehensive documentation with installation ins
 - **[Rust](./crates/html-to-markdown/README.md)** – Core library, flexible feature flags, zero-copy APIs
 
 **Command-Line:**
-- **[CLI](https://crates.io/crates/html-to-markdown-cli)** – Cross-platform binary via `cargo install html-to-markdown-cli` or [Homebrew](https://formulae.brew.sh/formula/html-to-markdown)
+- **[CLI](https://crates.io/crates/html-to-markdown-cli)** – Cross-platform binary via `cargo install html-to-markdown-cli` or Homebrew: `brew install kreuzberg/tap/html-to-markdown`
 
 <details>
 <summary><strong>Metadata Extraction</strong></summary>
