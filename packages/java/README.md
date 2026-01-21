@@ -18,7 +18,7 @@
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown?label=Java&color=007ec6" alt="Java">
   </a>
   <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown">
-    <img src="https://img.shields.io/badge/Go-v2.19.0-007ec6" alt="Go">
+    <img src="https://img.shields.io/badge/Go-v2.23.4-007ec6" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/">
     <img src="https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown?label=C%23&color=007ec6" alt="C#">
@@ -58,7 +58,7 @@ Uses Foreign Function &amp; Memory API for zero-dependency, thread-safe conversi
 &lt;dependency&gt;
     &lt;groupId&gt;dev.kreuzberg&lt;/groupId&gt;
     &lt;artifactId&gt;html-to-markdown&lt;/artifactId&gt;
-    &lt;version&gt;2.19.0&lt;/version&gt;
+    &lt;version&gt;2.23.4&lt;/version&gt;
     &lt;classifier&gt;linux&lt;/classifier&gt; &lt;!-- or macos, windows --&gt;
 &lt;/dependency&gt;
 
@@ -73,150 +73,16 @@ Requires Java 25+ with Panama FFI support.
 <dependency>
     <groupId>dev.kreuzberg</groupId>
     <artifactId>html-to-markdown</artifactId>
-    <version>2.19.0</version>
+    <version>2.23.4</version>
 </dependency>
 ```
 
 **Gradle (Kotlin DSL):**
 ```kotlin
-implementation("dev.kreuzberg:html-to-markdown:2.19.0")
+implementation("dev.kreuzberg:html-to-markdown:2.23.4")
 ```
 
 
-
-
-# Migration Guide: Java v2.18.x → v2.19.0
-
-## Breaking Change: Package Namespace
-
-In v2.19.0, the Java package namespace changed from `io.github.goldziher` to `dev.kreuzberg` to reflect the new Kreuzberg.dev organization.
-
-### Maven Dependency Update
-
-**Before (v2.18.x):**
-```xml
-&lt;dependency&gt;
-    &lt;groupId&gt;io.github.goldziher&lt;/groupId&gt;
-    &lt;artifactId&gt;html-to-markdown&lt;/artifactId&gt;
-    &lt;version&gt;2.18.x&lt;/version&gt;
-&lt;/dependency&gt;
-```
-
-**After (v2.19.0+):**
-```xml
-&lt;dependency&gt;
-    &lt;groupId&gt;dev.kreuzberg&lt;/groupId&gt;
-    &lt;artifactId&gt;html-to-markdown&lt;/artifactId&gt;
-    &lt;version&gt;2.19.0&lt;/version&gt;
-    &lt;classifier&gt;linux&lt;/classifier&gt; &lt;!-- or macos, windows --&gt;
-&lt;/dependency&gt;
-```
-
-### Import Statement Updates
-
-Update all Java import statements to use the new namespace:
-
-**Before:**
-```java
-import io.github.goldziher.htmltomarkdown.HtmlToMarkdown;
-import io.github.goldziher.htmltomarkdown.metadata.*;
-```
-
-**After:**
-```java
-import dev.kreuzberg.htmltomarkdown.HtmlToMarkdown;
-import dev.kreuzberg.htmltomarkdown.metadata.*;
-```
-
-### Gradle Build Updates
-
-**Kotlin DSL - Before:**
-```kotlin
-implementation(&#34;io.github.goldziher:html-to-markdown:2.18.x&#34;)
-```
-
-**Kotlin DSL - After:**
-```kotlin
-implementation(&#34;dev.kreuzberg:html-to-markdown:2.19.0:linux&#34;) // or macos, windows
-```
-
-**Groovy DSL - Before:**
-```groovy
-implementation &#39;io.github.goldziher:html-to-markdown:2.18.x&#39;
-```
-
-**Groovy DSL - After:**
-```groovy
-implementation &#39;dev.kreuzberg:html-to-markdown:2.19.0:linux&#39; // or macos, windows
-```
-
-### Code Migration Example
-
-**Before (v2.18.x):**
-```java
-import io.github.goldziher.htmltomarkdown.HtmlToMarkdown;
-
-public class Example {
-    public static void main(String[] args) {
-        String html = &#34;&lt;h1&gt;Hello World&lt;/h1&gt;&lt;p&gt;This is a &lt;strong&gt;test&lt;/strong&gt;.&lt;/p&gt;&#34;;
-        String markdown = HtmlToMarkdown.convert(html);
-        System.out.println(markdown);
-    }
-}
-```
-
-**After (v2.19.0+):**
-```java
-import dev.kreuzberg.htmltomarkdown.HtmlToMarkdown;
-
-public class Example {
-    public static void main(String[] args) {
-        String html = &#34;&lt;h1&gt;Hello World&lt;/h1&gt;&lt;p&gt;This is a &lt;strong&gt;test&lt;/strong&gt;.&lt;/p&gt;&#34;;
-        String markdown = HtmlToMarkdown.convert(html);
-        System.out.println(markdown);
-    }
-}
-```
-
-### Metadata Extraction Update
-
-If you use metadata extraction, update the imports as well:
-
-**Before:**
-```java
-import io.github.goldziher.htmltomarkdown.HtmlToMarkdown;
-import io.github.goldziher.htmltomarkdown.metadata.MetadataExtraction;
-```
-
-**After:**
-```java
-import dev.kreuzberg.htmltomarkdown.HtmlToMarkdown;
-import dev.kreuzberg.htmltomarkdown.metadata.MetadataExtraction;
-```
-
-### Visitor Pattern Update
-
-**Before:**
-```java
-import io.github.goldziher.htmltomarkdown.HtmlToMarkdown;
-import io.github.goldziher.htmltomarkdown.visitor.Visitor;
-```
-
-**After:**
-```java
-import dev.kreuzberg.htmltomarkdown.HtmlToMarkdown;
-import dev.kreuzberg.htmltomarkdown.visitor.Visitor;
-```
-
-## Summary of Changes
-
-- All public classes moved to `dev.kreuzberg.htmltomarkdown` package
-- All metadata classes moved to `dev.kreuzberg.htmltomarkdown.metadata` package
-- All visitor classes moved to `dev.kreuzberg.htmltomarkdown.visitor` package
-- Maven Central groupId changed from `io.github.goldziher` to `dev.kreuzberg`
-- Platform classifiers (linux, macos, windows) are now required in dependency declarations
-- No functional changes to the API
-- Full backward compatibility after import updates
 
 
 
@@ -376,19 +242,23 @@ The library supports converting HTML to [Djot](https://djot.net/), a lightweight
 
 ### Example Usage
 
-```python
-from html_to_markdown import convert, ConversionOptions
 
-html = "<p>This is <strong>bold</strong> and <em>italic</em> text.</p>"
+```java
+import dev.kreuzberg.HtmlToMarkdown;
+import dev.kreuzberg.ConversionOptions;
 
-# Default Markdown output
-markdown = convert(html)
-# Result: "This is **bold** and *italic* text."
+String html = "<p>This is <strong>bold</strong> and <em>italic</em> text.</p>";
 
-# Djot output
-djot = convert(html, ConversionOptions(output_format="djot"))
-# Result: "This is *bold* and _italic_ text."
+// Default Markdown output
+String markdown = HtmlToMarkdown.convert(html);
+// Result: "This is **bold** and *italic* text."
+
+// Djot output
+String djot = HtmlToMarkdown.convert(html,
+    new ConversionOptions().setOutputFormat("djot"));
+// Result: "This is *bold* and _italic_ text."
 ```
+
 
 Djot's extended syntax allows you to express more semantic meaning in lightweight text, making it useful for documents that require strikethrough, insertion tracking, or mathematical notation.
 

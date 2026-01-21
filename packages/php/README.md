@@ -18,7 +18,7 @@
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown?label=Java&color=007ec6" alt="Java">
   </a>
   <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown">
-    <img src="https://img.shields.io/badge/Go-v2.19.0-007ec6" alt="Go">
+    <img src="https://img.shields.io/badge/Go-v2.23.4-007ec6" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/">
     <img src="https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown?label=C%23&color=007ec6" alt="C#">
@@ -191,19 +191,22 @@ The library supports converting HTML to [Djot](https://djot.net/), a lightweight
 
 ### Example Usage
 
-```python
-from html_to_markdown import convert, ConversionOptions
 
-html = "<p>This is <strong>bold</strong> and <em>italic</em> text.</p>"
+```php
+use HtmlToMarkdown\Converter;
+use HtmlToMarkdown\ConversionOptions;
 
-# Default Markdown output
-markdown = convert(html)
-# Result: "This is **bold** and *italic* text."
+$html = "<p>This is <strong>bold</strong> and <em>italic</em> text.</p>";
 
-# Djot output
-djot = convert(html, ConversionOptions(output_format="djot"))
-# Result: "This is *bold* and _italic_ text."
+// Default Markdown output
+$markdown = Converter::convert($html);
+// Result: "This is **bold** and *italic* text."
+
+// Djot output
+$djot = Converter::convert($html, new ConversionOptions(outputFormat: 'djot'));
+// Result: "This is *bold* and _italic_ text."
 ```
+
 
 Djot's extended syntax allows you to express more semantic meaning in lightweight text, making it useful for documents that require strikethrough, insertion tracking, or mathematical notation.
 
