@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.24.0] - 2026-01-24
+
+### Changed
+
+- **Bindings API**: Removed `_json` conversion entrypoints across bindings; convert functions now pass full option payloads directly.
+
+### Fixed
+
+- **Visitor docs**: Corrected Python visitor documentation and examples (argument order + ctx access).
+- **Python visitor options**: `convert_with_visitor` now respects full conversion options payloads.
+- **skip_images**: Skip flag now suppresses SVG/graphic outputs in addition to `<img>`.
+- **Code block dedent**: Handles Unicode whitespace without panicking on UTF-8 boundaries.
+- **Input validation**: Tolerates small NUL byte artifacts and strips them before conversion.
+
 ## [2.23.6] - 2026-01-21
 
 ### Fixed
