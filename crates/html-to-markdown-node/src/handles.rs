@@ -5,9 +5,7 @@ use crate::types::{JsHtmlExtraction, JsInlineImage, JsInlineImageWarning};
 use crate::types::{JsMetadataConfig, JsMetadataExtraction, convert_metadata};
 #[cfg(feature = "async-visitor")]
 use crate::visitor::JsVisitorBridge;
-#[cfg(feature = "metadata")]
-use html_to_markdown_bindings_common::parse_metadata_config;
-use html_to_markdown_bindings_common::{error::error_message, parse_conversion_options, parse_inline_image_config};
+use html_to_markdown_bindings_common::error::error_message;
 #[cfg(feature = "metadata")]
 use html_to_markdown_rs::metadata::MetadataConfig as RustMetadataConfig;
 use html_to_markdown_rs::safety::guard_panic;
@@ -220,13 +218,6 @@ pub fn convert_with_visitor<'env>(
     env.spawn_future(convert_with_visitor_async_impl(html, options, bridge))
 }
 
-#[napi(js_name = "convertJson")]
-pub fn convert_json(html: String, options_json: Option<String>) -> Result<String> {
-    let rust_options = parse_conversion_options(options_json.as_deref()).map_err(to_js_error)?;
-    guard_panic(|| profiling::maybe_profile(|| html_to_markdown_rs::convert(&html, rust_options.clone())))
-        .map_err(to_js_error)
-}
-
 #[napi]
 pub fn start_profiling(output_path: String, frequency: Option<i32>) -> Result<()> {
     let freq = frequency.unwrap_or(1000);
@@ -247,24 +238,10 @@ pub fn convert_buffer(html: Buffer, options: Option<JsConversionOptions>) -> Res
         .map_err(to_js_error)
 }
 
-#[napi(js_name = "convertBufferJson")]
-pub fn convert_buffer_json(html: Buffer, options_json: Option<String>) -> Result<String> {
-    let html = buffer_to_str(&html)?;
-    let rust_options = parse_conversion_options(options_json.as_deref()).map_err(to_js_error)?;
-    guard_panic(|| profiling::maybe_profile(|| html_to_markdown_rs::convert(html, rust_options.clone())))
-        .map_err(to_js_error)
-}
-
 /// Create a reusable `ConversionOptions` handle.
 #[napi]
 pub fn create_conversion_options_handle(options: Option<JsConversionOptions>) -> External<RustConversionOptions> {
     External::new(options.map(Into::into).unwrap_or_default())
-}
-
-#[napi(js_name = "createConversionOptionsHandleJson")]
-pub fn create_conversion_options_handle_json(options_json: Option<String>) -> Result<External<RustConversionOptions>> {
-    let rust_options = parse_conversion_options(options_json.as_deref()).map_err(to_js_error)?;
-    Ok(External::new(rust_options.unwrap_or_default()))
 }
 
 /// Create a reusable `MetadataConfig` handle.
@@ -272,15 +249,6 @@ pub fn create_conversion_options_handle_json(options_json: Option<String>) -> Re
 #[napi]
 pub fn create_metadata_config_handle(metadata_config: Option<JsMetadataConfig>) -> External<RustMetadataConfig> {
     External::new(metadata_config.map(Into::into).unwrap_or_default())
-}
-
-#[cfg(feature = "metadata")]
-#[napi(js_name = "createMetadataConfigHandleJson")]
-pub fn create_metadata_config_handle_json(
-    metadata_config_json: Option<String>,
-) -> Result<External<RustMetadataConfig>> {
-    let rust_config = parse_metadata_config(metadata_config_json.as_deref()).map_err(to_js_error)?;
-    Ok(External::new(rust_config))
 }
 
 /// Convert HTML using a previously-created `ConversionOptions` handle.
@@ -359,21 +327,6 @@ fn convert_inline_images_with_handle_impl(
     Ok(build_js_extraction(extraction))
 }
 
-fn convert_inline_images_json_impl(
-    html: &str,
-    options_json: Option<String>,
-    image_config_json: Option<String>,
-) -> Result<JsHtmlExtraction> {
-    let rust_options = parse_conversion_options(options_json.as_deref()).map_err(to_js_error)?;
-    let rust_config = parse_inline_image_config(image_config_json.as_deref()).map_err(to_js_error)?;
-
-    let extraction =
-        guard_panic(|| html_to_markdown_rs::convert_with_inline_images(html, rust_options, rust_config, None))
-            .map_err(to_js_error)?;
-
-    Ok(build_js_extraction(extraction))
-}
-
 /// Convert HTML to Markdown while collecting inline images
 ///
 /// # Arguments
@@ -412,15 +365,6 @@ pub fn convert_with_inline_images_handle(
     convert_inline_images_with_handle_impl(&html, options, image_config)
 }
 
-#[napi(js_name = "convertWithInlineImagesJson")]
-pub fn convert_with_inline_images_json(
-    html: String,
-    options_json: Option<String>,
-    image_config_json: Option<String>,
-) -> Result<JsHtmlExtraction> {
-    convert_inline_images_json_impl(&html, options_json, image_config_json)
-}
-
 /// Convert inline images from Buffer/Uint8Array input without an intermediate string allocation.
 #[napi(js_name = "convertInlineImagesBuffer")]
 pub fn convert_inline_images_buffer(
@@ -441,16 +385,6 @@ pub fn convert_inline_images_buffer_with_options_handle(
 ) -> Result<JsHtmlExtraction> {
     let html = buffer_to_str(&html)?;
     convert_inline_images_with_handle_impl(html, options, image_config)
-}
-
-#[napi(js_name = "convertInlineImagesBufferJson")]
-pub fn convert_inline_images_buffer_json(
-    html: Buffer,
-    options_json: Option<String>,
-    image_config_json: Option<String>,
-) -> Result<JsHtmlExtraction> {
-    let html = buffer_to_str(&html)?;
-    convert_inline_images_json_impl(html, options_json, image_config_json)
 }
 
 /// Convert HTML to Markdown with metadata extraction.
@@ -521,16 +455,6 @@ pub fn convert_with_metadata_handle(
         markdown,
         metadata: convert_metadata(metadata),
     })
-}
-
-#[cfg(feature = "metadata")]
-#[napi(js_name = "convertWithMetadataJson")]
-pub fn convert_with_metadata_json(
-    html: String,
-    options_json: Option<String>,
-    metadata_config_json: Option<String>,
-) -> Result<JsMetadataExtraction> {
-    convert_metadata_json_impl(&html, options_json, metadata_config_json)
 }
 
 /// Convert HTML from Buffer/Uint8Array with metadata extraction without intermediate string allocation.
@@ -607,37 +531,6 @@ pub fn convert_with_metadata_buffer_with_options_and_metadata_handle(
     let rust_config = (**metadata_config).clone();
     let (markdown, metadata) =
         guard_panic(|| html_to_markdown_rs::convert_with_metadata(html, Some((**options).clone()), rust_config, None))
-            .map_err(to_js_error)?;
-
-    Ok(JsMetadataExtraction {
-        markdown,
-        metadata: convert_metadata(metadata),
-    })
-}
-
-/// Convert HTML from Buffer/Uint8Array with metadata extraction using JSON config.
-#[cfg(feature = "metadata")]
-#[napi(js_name = "convertWithMetadataBufferJson")]
-pub fn convert_with_metadata_buffer_json(
-    html: Buffer,
-    options_json: Option<String>,
-    metadata_config_json: Option<String>,
-) -> Result<JsMetadataExtraction> {
-    let html = buffer_to_str(&html)?;
-    convert_metadata_json_impl(html, options_json, metadata_config_json)
-}
-
-#[cfg(feature = "metadata")]
-fn convert_metadata_json_impl(
-    html: &str,
-    options_json: Option<String>,
-    metadata_config_json: Option<String>,
-) -> Result<JsMetadataExtraction> {
-    let rust_options = parse_conversion_options(options_json.as_deref()).map_err(to_js_error)?;
-    let rust_config = parse_metadata_config(metadata_config_json.as_deref()).map_err(to_js_error)?;
-
-    let (markdown, metadata) =
-        guard_panic(|| html_to_markdown_rs::convert_with_metadata(html, rust_options, rust_config, None))
             .map_err(to_js_error)?;
 
     Ok(JsMetadataExtraction {
