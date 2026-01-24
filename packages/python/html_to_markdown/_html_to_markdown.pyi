@@ -257,6 +257,11 @@ def convert_with_visitor(
     options: ConversionOptions | None = None,
     visitor: object | None = None,
 ) -> str: ...
+def convert_with_visitor_json(
+    html: str,
+    options_json: str | None = None,
+    visitor: object | None = None,
+) -> str: ...
 def convert_with_async_visitor(
     html: str,
     options: ConversionOptions | None = None,

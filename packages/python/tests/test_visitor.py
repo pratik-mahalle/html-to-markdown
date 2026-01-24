@@ -14,7 +14,7 @@ from typing import Any
 
 import pytest
 
-from html_to_markdown import ConversionOptions, convert_with_visitor
+from html_to_markdown import ConversionOptions, convert, convert_with_visitor
 
 
 class TestBasicVisitorCallbacks:
@@ -431,6 +431,23 @@ class TestErrorHandling:
 
 class TestConversionOptionsIntegration:
     """Test visitor integration with ConversionOptions."""
+
+    def test_visitor_respects_conversion_options(self) -> None:
+        """Ensure convert_with_visitor applies conversion options."""
+
+        class NoopVisitor:
+            def visit_heading(
+                self, ctx: dict[str, Any], level: int, text: str, element_id: str | None
+            ) -> dict[str, str]:
+                return {"type": "continue"}
+
+        html = "<h1>Title</h1>"
+        options = ConversionOptions(heading_style="underlined")
+
+        expected = convert(html, options=options)
+        result = convert_with_visitor(html, options=options, visitor=NoopVisitor())
+
+        assert result == expected
 
     def test_visitor_with_heading_style_option(self) -> None:
         """Test visitor works with heading_style conversion option."""

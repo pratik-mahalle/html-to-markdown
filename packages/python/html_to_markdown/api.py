@@ -277,7 +277,8 @@ def convert_with_visitor(
     if visitor is None:
         return convert(html, options, preprocessing)
 
-    return _rust.convert_with_visitor(html, None, visitor)
+    payload = _options_payload(options, preprocessing)
+    return _rust.convert_with_visitor_json(html, json.dumps(payload), visitor)
 
 
 def convert_with_async_visitor(
