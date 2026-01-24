@@ -332,8 +332,8 @@ pub fn convert_with_metadata(
 ///     fn visit_code_block(
 ///         &mut self,
 ///         _ctx: &NodeContext,
-///         code: &str,
 ///         language: Option<&str>,
+///         code: &str,
 ///     ) -> VisitResult {
 ///         VisitResult::Custom(format!("```{}\n{}\n```", language.unwrap_or(""), code))
 ///     }
@@ -412,8 +412,8 @@ pub fn convert_with_visitor(
 ///     async fn visit_code_block(
 ///         &mut self,
 ///         _ctx: &NodeContext,
-///         code: &str,
 ///         language: Option<&str>,
+///         code: &str,
 ///     ) -> VisitResult {
 ///         // Can perform async operations here (e.g., syntax highlighting via service)
 ///         VisitResult::Custom(format!("```{}\n{}\n```", language.unwrap_or(""), code))

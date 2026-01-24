@@ -164,7 +164,7 @@ The visitor pattern supports 40+ methods for different HTML elements.
 >
 > 1. **Script and Style Tags**: `<script>` and `<style>` elements are **automatically stripped** during HTML sanitization before the visitor pattern runs. You cannot intercept or process these elements with visitor callbacks.
 >
-> 2. **Generic Elements**: For elements without dedicated visitor methods (like `<div>`, `<span>`, `<section>`, etc.), use `visit_element_start` and `visit_element_end` to filter by checking `ctx.tag_name`.
+> 2. **Generic Elements**: For elements without dedicated visitor methods (like `<div>`, `<span>`, `<section>`, etc.), use `visit_element_start` and `visit_element_end` to filter by checking `ctx.tag_name` (Python dict: `ctx["tag_name"]`).
 >
 > 3. **Element-Specific Methods**: When available, prefer using specific methods like `visit_link`, `visit_image`, `visit_heading` over the generic `visit_element_start` for better type safety and clearer code.
 >
@@ -184,10 +184,10 @@ The visitor pattern supports 40+ methods for different HTML elements.
 class ElementFilter:
     def visit_element_start(self, ctx):
         # Filter divs with specific class
-        if ctx.tag_name == "div" and "ad" in ctx.attributes.get("class", ""):
+        if ctx["tag_name"] == "div" and "ad" in ctx["attributes"].get("class", ""):
             return {"type": "skip"}
         # Filter section elements
-        if ctx.tag_name == "section":
+        if ctx["tag_name"] == "section":
             return {"type": "skip"}
         return {"type": "continue"}
 ```
@@ -271,7 +271,7 @@ end
 |--------|------------|-------------|
 | `visit_paragraph` | `(ctx, text)` | Paragraphs `<p>` |
 | `visit_blockquote` | `(ctx, content)` | Blockquotes `<blockquote>` |
-| `visit_code_block` | `(ctx, code, language?)` | Code blocks `<pre><code>` |
+| `visit_code_block` | `(ctx, language?, code)` | Code blocks `<pre><code>` |
 | `visit_horizontal_rule` | `(ctx)` | Horizontal rules `<hr>` |
 
 ### Tables
@@ -503,16 +503,16 @@ class ContentFilter:
     def visit_element_start(self, ctx):
         # Remove divs with class="ad" or class="tracking"
         # Note: Script and style tags are automatically stripped during HTML parsing
-        if ctx.tag_name == "div":
-            classes = ctx.attributes.get("class", "")
+        if ctx["tag_name"] == "div":
+            classes = ctx["attributes"].get("class", "")
             if "ad" in classes or "tracking" in classes:
                 return {"type": "skip"}
         return {"type": "continue"}
 
     def visit_image(self, ctx, src, alt, title):
         # Remove tracking pixels (1x1 images)
-        width = ctx.attributes.get("width")
-        height = ctx.attributes.get("height")
+        width = ctx["attributes"].get("width")
+        height = ctx["attributes"].get("height")
         if width == "1" and height == "1":
             return {"type": "skip"}
         return {"type": "continue"}
