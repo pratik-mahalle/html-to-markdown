@@ -40,10 +40,9 @@ use crate::{HtmlExtraction, InlineImageConfig};
 ///
 /// Returns an error if HTML parsing fails or if the input contains invalid UTF-8.
 pub fn convert(html: &str, options: Option<ConversionOptions>) -> Result<String> {
-    validate_input(html)?;
     let options = options.unwrap_or_default();
 
-    let normalized_html = normalize_line_endings(html);
+    let normalized_html = normalize_input(html)?;
 
     if !options.wrap {
         if let Some(markdown) = fast_text_only(normalized_html.as_ref(), &options) {
@@ -84,10 +83,9 @@ pub fn convert_with_inline_images(
     use std::cell::RefCell;
     use std::rc::Rc;
 
-    validate_input(html)?;
     let options = options.unwrap_or_default();
 
-    let normalized_html = normalize_line_endings(html);
+    let normalized_html = normalize_input(html)?;
 
     let collector = Rc::new(RefCell::new(crate::inline_images::InlineImageCollector::new(
         image_cfg,
@@ -257,10 +255,9 @@ pub fn convert_with_metadata(
     use std::cell::RefCell;
     use std::rc::Rc;
 
-    validate_input(html)?;
     let options = options.unwrap_or_default();
+    let normalized_html = normalize_input(html)?;
     if !metadata_cfg.any_enabled() {
-        let normalized_html = normalize_line_endings(html);
         #[cfg(feature = "visitor")]
         let markdown = crate::converter::convert_html_impl(normalized_html.as_ref(), &options, None, None, visitor)?;
         #[cfg(not(feature = "visitor"))]
@@ -272,8 +269,6 @@ pub fn convert_with_metadata(
         };
         return Ok((markdown, ExtendedMetadata::default()));
     }
-
-    let normalized_html = normalize_line_endings(html);
 
     let metadata_collector = Rc::new(RefCell::new(crate::metadata::MetadataCollector::new(metadata_cfg)));
 
@@ -352,10 +347,9 @@ pub fn convert_with_visitor(
     options: Option<ConversionOptions>,
     visitor: Option<visitor::VisitorHandle>,
 ) -> Result<String> {
-    validate_input(html)?;
     let options = options.unwrap_or_default();
 
-    let normalized_html = normalize_line_endings(html);
+    let normalized_html = normalize_input(html)?;
 
     let markdown = crate::converter::convert_html_with_visitor(normalized_html.as_ref(), &options, visitor)?;
 
@@ -433,10 +427,9 @@ pub async fn convert_with_async_visitor(
     options: Option<ConversionOptions>,
     visitor: Option<visitor_helpers::AsyncVisitorHandle>,
 ) -> Result<String> {
-    validate_input(html)?;
     let options = options.unwrap_or_default();
 
-    let normalized_html = normalize_line_endings(html);
+    let normalized_html = normalize_input(html)?;
 
     // Use the async implementation that properly awaits visitor callbacks
     let markdown =
@@ -446,6 +439,31 @@ pub async fn convert_with_async_visitor(
         Ok(crate::wrapper::wrap_markdown(&markdown, &options))
     } else {
         Ok(markdown)
+    }
+}
+
+/// Validate and normalize HTML input for conversion.
+fn normalize_input(html: &str) -> Result<Cow<'_, str>> {
+    validate_input(html)?;
+    let sanitized = strip_nul_bytes(html);
+    match sanitized {
+        Cow::Borrowed(borrowed) => Ok(normalize_line_endings(borrowed)),
+        Cow::Owned(owned) => {
+            if owned.contains('\r') {
+                Ok(Cow::Owned(owned.replace("\r\n", "\n").replace('\r', "\n")))
+            } else {
+                Ok(Cow::Owned(owned))
+            }
+        }
+    }
+}
+
+/// Strip NUL bytes that can appear in malformed HTML inputs.
+fn strip_nul_bytes(html: &str) -> Cow<'_, str> {
+    if html.contains('\0') {
+        Cow::Owned(html.replace('\0', ""))
+    } else {
+        Cow::Borrowed(html)
     }
 }
 
