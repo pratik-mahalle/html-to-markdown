@@ -3,22 +3,13 @@ import { promises as fs } from "node:fs";
 import { stderr, stdin, stdout } from "node:process";
 
 import {
-	convertJson as convertHtmlJson,
-	convertWithInlineImagesJson,
+	convert as convertHtml,
+	convertWithInlineImages as convertHtmlWithInlineImages,
 	type JsConversionOptions,
 	type JsInlineImageConfig,
 } from "@kreuzberg/html-to-markdown-node";
 
 import { convertStream, convertStreamWithInlineImages } from "./index";
-
-const jsonReplacer = (_key: string, value: unknown): unknown => (typeof value === "bigint" ? Number(value) : value);
-
-const toJson = (value: unknown): string | undefined => {
-	if (value == null) {
-		return undefined;
-	}
-	return JSON.stringify(value, jsonReplacer);
-};
 
 interface CliOptions {
 	input?: string;
@@ -127,7 +118,7 @@ async function writeOutput(content: string, path?: string): Promise<void> {
 
 async function writeInlineImages(
 	extractionPath: string,
-	inlineData: Awaited<ReturnType<typeof convertWithInlineImagesJson>>,
+	inlineData: Awaited<ReturnType<typeof convertHtmlWithInlineImages>>,
 ): Promise<void> {
 	const payload = {
 		markdown: inlineData.markdown,
@@ -136,6 +127,19 @@ async function writeInlineImages(
 	};
 
 	await fs.writeFile(extractionPath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+}
+
+function normalizeInlineImageConfig(config?: JsInlineImageConfig): JsInlineImageConfig | undefined {
+	if (!config) {
+		return config;
+	}
+
+	const maxDecodedSizeBytes = config.maxDecodedSizeBytes;
+	if (typeof maxDecodedSizeBytes === "number") {
+		return { ...config, maxDecodedSizeBytes: BigInt(maxDecodedSizeBytes) };
+	}
+
+	return config;
 }
 
 async function main(): Promise<void> {
@@ -155,12 +159,13 @@ async function main(): Promise<void> {
 
 		const { input, output, options, inlineImages, inlineImageConfig } = parsed;
 		const inputContent = await readInput(input);
+		const normalizedInlineImageConfig = normalizeInlineImageConfig(inlineImageConfig);
 
 		if (inlineImages) {
 			const inlineResult =
 				typeof inputContent === "string"
-					? convertWithInlineImagesJson(inputContent, toJson(options), toJson(inlineImageConfig))
-					: await convertStreamWithInlineImages(inputContent, options, inlineImageConfig);
+					? convertHtmlWithInlineImages(inputContent, options, normalizedInlineImageConfig)
+					: await convertStreamWithInlineImages(inputContent, options, normalizedInlineImageConfig);
 
 			if (output) {
 				await writeOutput(inlineResult.markdown, output);
@@ -177,7 +182,7 @@ async function main(): Promise<void> {
 				);
 			}
 		} else if (typeof inputContent === "string") {
-			const markdown = convertHtmlJson(inputContent, toJson(options));
+			const markdown = convertHtml(inputContent, options);
 			await writeOutput(markdown, output);
 		} else {
 			const markdown = await convertStream(inputContent, options);
