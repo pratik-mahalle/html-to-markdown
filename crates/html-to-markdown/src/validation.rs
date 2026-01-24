@@ -8,6 +8,8 @@ use crate::error::{ConversionError, Result};
 const BINARY_SCAN_LIMIT: usize = 8192;
 const BINARY_CONTROL_RATIO: f64 = 0.3;
 const BINARY_UTF16_NULL_RATIO: f64 = 0.2;
+const BINARY_NUL_RATIO: f64 = 0.01;
+const BINARY_NUL_MAX: usize = 8;
 
 const BINARY_MAGIC_PREFIXES: &[(&[u8], &str)] = &[
     (b"\x1F\x8B", "gzip-compressed data"),
@@ -64,14 +66,21 @@ pub fn validate_input(html: &str) -> Result<()> {
                 "binary data detected ({label}); decode to UTF-8 HTML first"
             )));
         }
-        return Err(ConversionError::InvalidInput("binary data detected".to_string()));
+        let nul_ratio = nul_count as f64 / sample_len as f64;
+        if nul_ratio > BINARY_NUL_RATIO && nul_count > BINARY_NUL_MAX {
+            return Err(ConversionError::InvalidInput(
+                "binary data detected (excess NUL bytes)".to_string(),
+            ));
+        }
     }
 
-    let control_ratio = control_count as f64 / sample_len as f64;
-    if control_ratio > BINARY_CONTROL_RATIO {
-        return Err(ConversionError::InvalidInput(
-            "binary data detected (excess control bytes)".to_string(),
-        ));
+    if sample_len >= 32 {
+        let control_ratio = control_count as f64 / sample_len as f64;
+        if control_ratio > BINARY_CONTROL_RATIO {
+            return Err(ConversionError::InvalidInput(
+                "binary data detected (excess control bytes)".to_string(),
+            ));
+        }
     }
 
     Ok(())
@@ -101,6 +110,10 @@ fn detect_utf16_hint(
         if bytes.starts_with(b"\xFE\xFF") {
             return Some("UTF-16BE BOM");
         }
+    }
+
+    if nul_count < 2 {
+        return None;
     }
 
     #[allow(clippy::cast_precision_loss)]
