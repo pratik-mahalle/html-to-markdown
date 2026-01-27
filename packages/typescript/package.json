@@ -1,6 +1,6 @@
 {
 	"name": "@kreuzberg/html-to-markdown",
-	"version": "2.24.0",
+	"version": "2.24.1",
 	"description": "High-performance HTML to Markdown converter for TypeScript/Node.js with a Rust core.",
 	"keywords": [
 		"html",
@@ -58,7 +58,7 @@
 		"@kreuzberg/html-to-markdown-node": "workspace:*"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.3.12",
+		"@biomejs/biome": "^2.3.13",
 		"@types/node": "^25.0.10",
 		"@vitest/coverage-v8": "^4.0.18",
 		"typescript": "^5.9.3",
