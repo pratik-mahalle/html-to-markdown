@@ -20,6 +20,14 @@ const BINARY_MAGIC_PREFIXES: &[(&[u8], &str)] = &[
     (b"%PDF-", "PDF data"),
 ];
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Utf16Encoding {
+    BomLe,
+    BomBe,
+    NoBomLe,
+    NoBomBe,
+}
+
 /// Validate HTML input and reject binary/corrupted data.
 ///
 /// # Errors
@@ -42,17 +50,10 @@ pub fn validate_input(html: &str) -> Result<()> {
     let sample_len = bytes.len().min(BINARY_SCAN_LIMIT);
     let mut control_count = 0usize;
     let mut nul_count = 0usize;
-    let mut even_nul_count = 0usize;
-    let mut odd_nul_count = 0usize;
 
-    for (idx, &byte) in bytes[..sample_len].iter().enumerate() {
+    for &byte in &bytes[..sample_len] {
         if byte == 0 {
             nul_count += 1;
-            if idx % 2 == 0 {
-                even_nul_count += 1;
-            } else {
-                odd_nul_count += 1;
-            }
         }
         let is_control = (byte < 0x09) || (0x0E..0x20).contains(&byte);
         if is_control {
@@ -61,7 +62,8 @@ pub fn validate_input(html: &str) -> Result<()> {
     }
 
     if nul_count > 0 {
-        if let Some(label) = detect_utf16_hint(bytes, sample_len, nul_count, even_nul_count, odd_nul_count) {
+        if let Some(encoding) = detect_utf16_encoding(bytes) {
+            let label = utf16_label(encoding);
             return Err(ConversionError::InvalidInput(format!(
                 "binary data detected ({label}); decode to UTF-8 HTML first"
             )));
@@ -96,19 +98,33 @@ fn detect_binary_magic(bytes: &[u8]) -> Option<&'static str> {
 }
 
 #[allow(clippy::cast_precision_loss)]
-fn detect_utf16_hint(
-    bytes: &[u8],
-    sample_len: usize,
-    nul_count: usize,
-    even_nul_count: usize,
-    odd_nul_count: usize,
-) -> Option<&'static str> {
+pub fn detect_utf16_encoding(bytes: &[u8]) -> Option<Utf16Encoding> {
     if bytes.len() >= 2 {
         if bytes.starts_with(b"\xFF\xFE") {
-            return Some("UTF-16LE BOM");
+            return Some(Utf16Encoding::BomLe);
         }
         if bytes.starts_with(b"\xFE\xFF") {
-            return Some("UTF-16BE BOM");
+            return Some(Utf16Encoding::BomBe);
+        }
+    }
+
+    let sample_len = bytes.len().min(BINARY_SCAN_LIMIT);
+    if sample_len < 4 {
+        return None;
+    }
+
+    let mut nul_count = 0usize;
+    let mut even_nul_count = 0usize;
+    let mut odd_nul_count = 0usize;
+
+    for (idx, &byte) in bytes[..sample_len].iter().enumerate() {
+        if byte == 0 {
+            nul_count += 1;
+            if idx % 2 == 0 {
+                even_nul_count += 1;
+            } else {
+                odd_nul_count += 1;
+            }
         }
     }
 
@@ -116,17 +132,27 @@ fn detect_utf16_hint(
         return None;
     }
 
-    #[allow(clippy::cast_precision_loss)]
     let nul_ratio = nul_count as f64 / sample_len as f64;
     if nul_ratio < BINARY_UTF16_NULL_RATIO {
         return None;
     }
 
-    #[allow(clippy::cast_precision_loss)]
     let dominant_ratio = (even_nul_count.max(odd_nul_count) as f64) / nul_count as f64;
-    if dominant_ratio >= 0.9 {
-        Some("UTF-16 data without BOM")
+    if dominant_ratio < 0.9 {
+        return None;
+    }
+
+    if odd_nul_count >= even_nul_count {
+        Some(Utf16Encoding::NoBomLe)
     } else {
-        None
+        Some(Utf16Encoding::NoBomBe)
+    }
+}
+
+fn utf16_label(encoding: Utf16Encoding) -> &'static str {
+    match encoding {
+        Utf16Encoding::BomLe => "UTF-16LE BOM",
+        Utf16Encoding::BomBe => "UTF-16BE BOM",
+        Utf16Encoding::NoBomLe | Utf16Encoding::NoBomBe => "UTF-16 data without BOM",
     }
 }

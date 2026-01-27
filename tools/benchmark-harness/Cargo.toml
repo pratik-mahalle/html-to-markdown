@@ -30,7 +30,7 @@ toml = "0.9"
 
 sysinfo = "0.36"
 
-minijinja = { version = "2.14", features = ["json"] }
+minijinja = { version = "2.15", features = ["json"] }
 
 pprof = { version = "0.15", features = ["flamegraph"], optional = true }
 tikv-jemallocator = { version = "0.6", optional = true }

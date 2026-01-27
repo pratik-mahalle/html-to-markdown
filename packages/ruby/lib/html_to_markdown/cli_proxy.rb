@@ -5,8 +5,11 @@ require 'pathname'
 
 module HtmlToMarkdown
   module CLIProxy
-    Error = Class.new(StandardError)
-    MissingBinaryError = Class.new(Error)
+    class Error < StandardError
+    end
+
+    class MissingBinaryError < Error
+    end
 
     class CLIExecutionError < Error
       attr_reader :stderr, :status
