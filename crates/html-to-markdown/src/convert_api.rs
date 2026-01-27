@@ -8,7 +8,7 @@ use std::borrow::Cow;
 use crate::error::Result;
 use crate::options::{ConversionOptions, WhitespaceMode};
 use crate::text;
-use crate::validation::validate_input;
+use crate::validation::{Utf16Encoding, detect_utf16_encoding, validate_input};
 use crate::{ConversionError, ConversionOptionsUpdate};
 
 #[cfg(feature = "visitor")]
@@ -444,18 +444,75 @@ pub async fn convert_with_async_visitor(
 
 /// Validate and normalize HTML input for conversion.
 fn normalize_input(html: &str) -> Result<Cow<'_, str>> {
-    validate_input(html)?;
-    let sanitized = strip_nul_bytes(html);
-    match sanitized {
-        Cow::Borrowed(borrowed) => Ok(normalize_line_endings(borrowed)),
-        Cow::Owned(owned) => {
-            if owned.contains('\r') {
-                Ok(Cow::Owned(owned.replace("\r\n", "\n").replace('\r', "\n")))
-            } else {
-                Ok(Cow::Owned(owned))
+    let decoded = decode_utf16_if_needed(html);
+    match decoded {
+        Cow::Borrowed(borrowed) => {
+            validate_input(borrowed)?;
+            let sanitized = strip_nul_bytes(borrowed);
+            match sanitized {
+                Cow::Borrowed(b) => Ok(normalize_line_endings(b)),
+                Cow::Owned(o) => Ok(Cow::Owned(normalize_line_endings(&o).into_owned())),
             }
         }
+        Cow::Owned(mut owned) => {
+            validate_input(&owned)?;
+            if owned.contains('\0') {
+                owned = owned.replace('\0', "");
+            }
+            if owned.contains('\r') {
+                owned = owned.replace("\r\n", "\n").replace('\r', "\n");
+            }
+            Ok(Cow::Owned(owned))
+        }
     }
+}
+
+/// Attempt to decode UTF-16 HTML that was provided as a lossy UTF-8 string.
+///
+/// Some callers read raw bytes and convert with `from_utf8_lossy`, which preserves
+/// the NUL-byte pattern of UTF-16 input. When we detect that pattern, we can
+/// recover the original HTML instead of rejecting it as binary data.
+fn decode_utf16_if_needed(html: &str) -> Cow<'_, str> {
+    let bytes = html.as_bytes();
+    if !bytes.contains(&0) {
+        return Cow::Borrowed(html);
+    }
+
+    let Some(encoding) = detect_utf16_encoding(bytes) else {
+        return Cow::Borrowed(html);
+    };
+
+    let decoded = decode_utf16_bytes(bytes, encoding);
+    if decoded.is_empty() {
+        Cow::Borrowed(html)
+    } else {
+        Cow::Owned(decoded)
+    }
+}
+
+fn decode_utf16_bytes(bytes: &[u8], encoding: Utf16Encoding) -> String {
+    let (is_little_endian, skip_bom) = match encoding {
+        Utf16Encoding::BomLe => (true, true),
+        Utf16Encoding::BomBe => (false, true),
+        Utf16Encoding::NoBomLe => (true, false),
+        Utf16Encoding::NoBomBe => (false, false),
+    };
+
+    let mut units = Vec::with_capacity(bytes.len() / 2);
+    for chunk in bytes.chunks_exact(2) {
+        let unit = if is_little_endian {
+            u16::from_le_bytes([chunk[0], chunk[1]])
+        } else {
+            u16::from_be_bytes([chunk[0], chunk[1]])
+        };
+        units.push(unit);
+    }
+
+    let mut decoded = String::from_utf16_lossy(&units);
+    if skip_bom {
+        decoded = decoded.trim_start_matches('\u{FEFF}').to_string();
+    }
+    decoded
 }
 
 /// Strip NUL bytes that can appear in malformed HTML inputs.

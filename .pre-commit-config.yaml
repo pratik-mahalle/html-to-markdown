@@ -29,12 +29,12 @@ repos:
     hooks:
       - id: pyproject-fmt
   - repo: https://github.com/biomejs/pre-commit
-    rev: v2.3.12
+    rev: v2.3.13
     hooks:
       - id: biome-format
       - id: biome-lint
   - repo: https://github.com/oxc-project/mirrors-oxlint
-    rev: v1.41.0
+    rev: v1.42.0
     hooks:
       - id: oxlint
         args: ["--fix"]

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.24.1] - 2026-01-27
+
+### Fixed
+
+- **UTF-16 recovery**: Automatically recovers UTF-16 HTML (including data without BOM) that was read via lossy UTF-8 decoding, instead of rejecting it as binary data.
+- **URL sanitization**: Hardened markdown-like URL sanitization to extract the real URL from `...[text](url)` patterns in `href`/`src` attributes, preventing caller-side URL join/parsing errors.
+- **Issue #190 coverage**: Added regression fixtures and tests covering the reported real-world HTML inputs.
+
 ## [2.24.0] - 2026-01-24
 
 ### Changed
