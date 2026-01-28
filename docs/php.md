@@ -1,6 +1,6 @@
 # PHP Extension
 
-[![Packagist](https://img.shields.io/packagist/v/goldziher/html-to-markdown.svg)](https://packagist.org/packages/goldziher/html-to-markdown)
+[![Packagist](https://img.shields.io/packagist/v/kreuzberg-dev/html-to-markdown.svg)](https://packagist.org/packages/kreuzberg-dev/html-to-markdown)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/kreuzberg-dev/html-to-markdown/blob/main/LICENSE)
 
 The PHP binding exposes the native Rust converter through the
@@ -15,8 +15,8 @@ Install the extension and high-level Composer wrapper:
 Install the PHP package and ensure the native extension is available:
 
 ```bash
-pie install goldziher/html-to-markdown
-composer require goldziher/html-to-markdown
+pie install kreuzberg-dev/html-to-markdown
+composer require kreuzberg-dev/html-to-markdown
 ```
 
 > **Note**
@@ -26,7 +26,7 @@ the extension and provides the modern PHP surface area.
 ### Using PIE without a local build
 
 ```bash
-pie install goldziher/html-to-markdown --install-project
+pie install kreuzberg-dev/html-to-markdown --install-project
 ```
 
 The `--install-project` flag tells PIE to copy the extension built during the project installation (our bundled artifact) straight into your PHP install, so you don't need a system Rust toolchain.
@@ -38,7 +38,7 @@ Each release tag uploads a `php_html_to_markdown-<version>-src.tgz` archive to
 the GitHub release, which pie can consume directly:
 
 ```bash
-pie install goldziher/html-to-markdown
+pie install kreuzberg-dev/html-to-markdown
 ```
 
 The install process requires a Rust toolchain (`cargo`) and the PHP development

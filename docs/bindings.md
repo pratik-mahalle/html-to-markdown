@@ -11,11 +11,11 @@ are guaranteed across languages.
 - [WebAssembly / universal JS](#webassembly--universal-js-html-to-markdown-wasm)
 - [Python](#python-html-to-markdown)
 - [Ruby](#ruby-html-to-markdown)
-- [PHP](#php-extension--composer-package-goldziherhtml-to-markdown)
+- [PHP](#php-extension--composer-package-kreuzberg-devhtml-to-markdown)
 - [Elixir](#elixir-html_to_markdown)
-- [Go](#go-githubcomgoldziherhtml-to-markdownpackagesgohtmltomarkdown)
-- [Java](#java-iogithubgoldziherhtml-to-markdown)
-- [.NET](#net-goldziherhtmltomarkdown)
+- [Go](#go-githubcomkreuzberg-devhtml-to-markdownpackagesgohtmltomarkdown)
+- [Java](#java-iogithubkreuzberg-devhtml-to-markdown)
+- [.NET](#net-kreuzbergdevhtmltomarkdown)
 - [Command-line](#command-line-html-to-markdown-cli)
 
 ---
@@ -179,14 +179,14 @@ the Rust engine.
 
 ---
 
-## PHP extension + Composer package (`goldziher/html-to-markdown`)
+## PHP extension + Composer package (`kreuzberg-dev/html-to-markdown`)
 
 The PHP binding ships as a native extension distributed via
 [PIE](https://github.com/php/pie) and a typed Composer package.
 
 ```bash
-pie install goldziher/html-to-markdown --install-project
-composer require goldziher/html-to-markdown
+pie install kreuzberg-dev/html-to-markdown --install-project
+composer require kreuzberg-dev/html-to-markdown
 ```
 
 Once installed, enable the extension in `php.ini` and use the `HtmlToMarkdown`
@@ -246,13 +246,13 @@ func main() {
 
 ---
 
-## Java (`io.github.goldziher:html-to-markdown`)
+## Java (`dev.kreuzberg:html-to-markdown`)
 
 ### Install (Maven)
 
 ```xml
 <dependency>
-  <groupId>io.github.goldziher</groupId>
+  <groupId>dev.kreuzberg</groupId>
   <artifactId>html-to-markdown</artifactId>
   <version>2.11.1</version>
 </dependency>
@@ -261,7 +261,7 @@ func main() {
 ### Usage
 
 ```java
-import io.github.goldziher.htmltomarkdown.HtmlToMarkdown;
+import dev.kreuzberg.htmltomarkdown.HtmlToMarkdown;
 
 public class Demo {
     public static void main(String[] args) {
@@ -273,12 +273,12 @@ public class Demo {
 
 ---
 
-## .NET (`Goldziher.HtmlToMarkdown`)
+## .NET (`KreuzbergDev.HtmlToMarkdown`)
 
 ### Install
 
 ```bash
-dotnet add package Goldziher.HtmlToMarkdown --version 2.11.1
+dotnet add package KreuzbergDev.HtmlToMarkdown --version 2.11.1
 ```
 
 ### Usage
