@@ -14,7 +14,7 @@ import { convertWithVisitor, type Visitor, type NodeContext, type VisitResult } 
 class ContentFilter implements Visitor {
   public skippedElements: Array<[string, string]> = [];
 
-  visitDiv(ctx: NodeContext, content: string): VisitResult {
+  visitDiv(ctx: NodeContext, _content: string): VisitResult {
     const classes = ctx.attributes['class'] ?? '';
     const unwantedClasses = ['ad', 'advertisement', 'tracking', 'analytics'];
 
@@ -25,17 +25,17 @@ class ContentFilter implements Visitor {
     return { type: 'continue' };
   }
 
-  visitScript(ctx: NodeContext): VisitResult {
+  visitScript(_ctx: NodeContext): VisitResult {
     this.skippedElements.push(['script', '']);
     return { type: 'skip' };
   }
 
-  visitStyle(ctx: NodeContext): VisitResult {
+  visitStyle(_ctx: NodeContext): VisitResult {
     this.skippedElements.push(['style', '']);
     return { type: 'skip' };
   }
 
-  visitImage(ctx: NodeContext, src: string, alt?: string, title?: string): VisitResult {
+  visitImage(ctx: NodeContext, src: string, _alt?: string, _title?: string): VisitResult {
     const width = ctx.attributes['width'] ?? '';
     const height = ctx.attributes['height'] ?? '';
 
@@ -55,7 +55,7 @@ class ContentFilter implements Visitor {
     return { type: 'continue' };
   }
 
-  visitLink(ctx: NodeContext, href: string, text: string, title?: string): VisitResult {
+  visitLink(_ctx: NodeContext, href: string, text: string, _title?: string): VisitResult {
     // Remove links with utm_* tracking parameters
     if (href.toLowerCase().includes('utm_')) {
       // Strip tracking params but keep the link

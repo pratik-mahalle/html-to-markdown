@@ -90,7 +90,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 	describe("API contract and type safety", () => {
 		it("should accept convertWithVisitor function with visitor parameter", async () => {
 			const visitor: Visitor = {
-				visitText: async (ctx, text) => {
+				visitText: async (_ctx, _text) => {
 					return { type: "continue" };
 				},
 			};
@@ -104,10 +104,10 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should process HTML correctly with visitor object (continue result)", async () => {
 			const visitor: Visitor = {
-				visitText: async (ctx, text) => {
+				visitText: async (_ctx, _text) => {
 					return { type: "continue" };
 				},
-				visitHeading: async (ctx, level, text, id) => {
+				visitHeading: async (_ctx, _level, _text, _id) => {
 					return { type: "continue" };
 				},
 			};
@@ -130,8 +130,9 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 		});
 
 		it("should work with empty object visitor parameter", async () => {
+			const visitor: Visitor = {};
 			const html = "<p>Test</p>";
-			const result = await convertWithVisitor(html, undefined, {} as any);
+			const result = await convertWithVisitor(html, undefined, visitor);
 
 			expect(typeof result).toBe("string");
 			expect(result).toBeTruthy();
@@ -139,7 +140,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should handle visitor with single callback method", async () => {
 			const visitor: Visitor = {
-				visitLink: async (ctx, href, text, title) => {
+				visitLink: async (_ctx, _href, _text, _title) => {
 					return { type: "continue" };
 				},
 			};
@@ -154,7 +155,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 	describe("VisitResult types", () => {
 		it("should support continue result type", async () => {
 			const visitor: Visitor = {
-				visitText: async (ctx, text) => {
+				visitText: async (_ctx, _text) => {
 					const result: VisitResult = { type: "continue" };
 					return result;
 				},
@@ -169,7 +170,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should support custom result type with output", async () => {
 			const visitor: Visitor = {
-				visitLink: async (ctx, href, text, title) => {
+				visitLink: async (_ctx, href, _text, _title) => {
 					const result: VisitResult = {
 						type: "custom",
 						output: `[CUSTOM](${href})`,
@@ -186,7 +187,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should support skip result type", async () => {
 			const visitor: Visitor = {
-				visitImage: async (ctx, src, alt, title) => {
+				visitImage: async (_ctx, _src, _alt, _title) => {
 					const result: VisitResult = { type: "skip" };
 					return result;
 				},
@@ -200,7 +201,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should support preserve_html result type", async () => {
 			const visitor: Visitor = {
-				visitLink: async (ctx, href, text, title) => {
+				visitLink: async (_ctx, _href, _text, _title) => {
 					const result: VisitResult = { type: "preserve_html" };
 					return result;
 				},
@@ -214,7 +215,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should support error result type", async () => {
 			const visitor: Visitor = {
-				visitText: async (ctx, text) => {
+				visitText: async (_ctx, text) => {
 					if (text.includes("error")) {
 						const result: VisitResult = {
 							type: "error",
@@ -249,16 +250,6 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 			const html = "<div id='test' class='container'>Text</div>";
 			await convertWithVisitor(html, undefined, visitor);
-
-			const expectedProperties = [
-				"nodeType",
-				"tagName",
-				"attributes",
-				"depth",
-				"indexInParent",
-				"parentTag",
-				"isInline",
-			];
 
 			const dummyContext: NodeContext = {
 				nodeType: "Element",
@@ -403,7 +394,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 	describe("specialized visitor callbacks", () => {
 		it("should support visitCodeBlock callback signature", async () => {
 			const visitor: Visitor = {
-				visitCodeBlock: async (ctx, lang, code) => {
+				visitCodeBlock: async (_ctx, _lang, _code) => {
 					return { type: "continue" };
 				},
 			};
@@ -416,7 +407,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should support visitStrong callback signature", async () => {
 			const visitor: Visitor = {
-				visitStrong: async (ctx, text) => {
+				visitStrong: async (_ctx, _text) => {
 					return { type: "continue" };
 				},
 			};
@@ -429,7 +420,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should support visitEmphasis callback signature", async () => {
 			const visitor: Visitor = {
-				visitEmphasis: async (ctx, text) => {
+				visitEmphasis: async (_ctx, _text) => {
 					return { type: "continue" };
 				},
 			};
@@ -442,7 +433,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should support visitHeading callback signature", async () => {
 			const visitor: Visitor = {
-				visitHeading: async (ctx, level, text, id) => {
+				visitHeading: async (_ctx, _level, _text, _id) => {
 					return { type: "continue" };
 				},
 			};
@@ -455,7 +446,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should support visitLink callback signature", async () => {
 			const visitor: Visitor = {
-				visitLink: async (ctx, href, text, title) => {
+				visitLink: async (_ctx, _href, _text, _title) => {
 					return { type: "continue" };
 				},
 			};
@@ -468,7 +459,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should support visitImage callback signature", async () => {
 			const visitor: Visitor = {
-				visitImage: async (ctx, src, alt, title) => {
+				visitImage: async (_ctx, _src, _alt, _title) => {
 					return { type: "continue" };
 				},
 			};
@@ -481,7 +472,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should support visitLineBreak callback", async () => {
 			const visitor: Visitor = {
-				visitLineBreak: async (ctx) => {
+				visitLineBreak: async (_ctx) => {
 					return { type: "continue" };
 				},
 			};
@@ -494,10 +485,10 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should support visitListStart and visitListEnd callbacks", async () => {
 			const visitor: Visitor = {
-				visitListStart: async (ctx) => {
+				visitListStart: async (_ctx) => {
 					return { type: "continue" };
 				},
-				visitListEnd: async (ctx, output) => {
+				visitListEnd: async (_ctx, _output) => {
 					return { type: "continue" };
 				},
 			};
@@ -510,10 +501,10 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should support visitTableStart and visitTableEnd callbacks", async () => {
 			const visitor: Visitor = {
-				visitTableStart: async (ctx) => {
+				visitTableStart: async (_ctx) => {
 					return { type: "continue" };
 				},
-				visitTableEnd: async (ctx, output) => {
+				visitTableEnd: async (_ctx, _output) => {
 					return { type: "continue" };
 				},
 			};
@@ -526,7 +517,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should support visitBlockquote callback", async () => {
 			const visitor: Visitor = {
-				visitBlockquote: async (ctx) => {
+				visitBlockquote: async (_ctx) => {
 					return { type: "continue" };
 				},
 			};
@@ -539,7 +530,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should support visitCodeInline callback", async () => {
 			const visitor: Visitor = {
-				visitCodeInline: async (ctx, code) => {
+				visitCodeInline: async (_ctx, _code) => {
 					return { type: "continue" };
 				},
 			};
@@ -558,7 +549,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const visitor: Visitor = {
-				visitHeading: async (ctx, level, text, id) => {
+				visitHeading: async (_ctx, _level, _text, _id) => {
 					return { type: "continue" };
 				},
 			};
@@ -593,16 +584,16 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 	describe("multiple visitor methods", () => {
 		it("should support multiple visitor callbacks defined simultaneously", async () => {
 			const visitor: Visitor = {
-				visitText: async (ctx, text) => {
+				visitText: async (_ctx, _text) => {
 					return { type: "continue" };
 				},
-				visitLink: async (ctx, href, text, title) => {
+				visitLink: async (_ctx, _href, _text, _title) => {
 					return { type: "continue" };
 				},
-				visitHeading: async (ctx, level, text, id) => {
+				visitHeading: async (_ctx, _level, _text, _id) => {
 					return { type: "continue" };
 				},
-				visitImage: async (ctx, src, alt, title) => {
+				visitImage: async (_ctx, _src, _alt, _title) => {
 					return { type: "continue" };
 				},
 			};
@@ -616,10 +607,10 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should support visitor with ElementStart and ElementEnd callbacks", async () => {
 			const visitor: Visitor = {
-				visitElementStart: async (ctx) => {
+				visitElementStart: async (_ctx) => {
 					return { type: "continue" };
 				},
-				visitElementEnd: async (ctx, output) => {
+				visitElementEnd: async (_ctx, _output) => {
 					return { type: "continue" };
 				},
 			};
@@ -632,13 +623,13 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should support visitor with list callbacks", async () => {
 			const visitor: Visitor = {
-				visitListStart: async (ctx) => {
+				visitListStart: async (_ctx) => {
 					return { type: "continue" };
 				},
-				visitListItem: async (ctx) => {
+				visitListItem: async (_ctx) => {
 					return { type: "continue" };
 				},
-				visitListEnd: async (ctx, output) => {
+				visitListEnd: async (_ctx, _output) => {
 					return { type: "continue" };
 				},
 			};
@@ -651,16 +642,16 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should support visitor with formatting callbacks", async () => {
 			const visitor: Visitor = {
-				visitStrong: async (ctx, text) => {
+				visitStrong: async (_ctx, _text) => {
 					return { type: "continue" };
 				},
-				visitEmphasis: async (ctx, text) => {
+				visitEmphasis: async (_ctx, _text) => {
 					return { type: "continue" };
 				},
-				visitStrikethrough: async (ctx, text) => {
+				visitStrikethrough: async (_ctx, _text) => {
 					return { type: "continue" };
 				},
-				visitUnderline: async (ctx, text) => {
+				visitUnderline: async (_ctx, _text) => {
 					return { type: "continue" };
 				},
 			};
@@ -675,7 +666,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 	describe("async visitor patterns", () => {
 		it("should handle async operations in visitor callbacks", async () => {
 			const visitor: Visitor = {
-				visitLink: async (ctx, href, text, title) => {
+				visitLink: async (_ctx, _href, _text, _title) => {
 					await new Promise((resolve) => setTimeout(resolve, 1));
 					return { type: "continue" };
 				},
@@ -689,7 +680,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should handle conditional logic in visitor callbacks", async () => {
 			const visitor: Visitor = {
-				visitHeading: async (ctx, level, text, id) => {
+				visitHeading: async (_ctx, level, _text, _id) => {
 					if (level >= 3) {
 						return { type: "skip" };
 					}
@@ -705,7 +696,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should handle custom output in visitor callbacks", async () => {
 			const visitor: Visitor = {
-				visitLink: async (ctx, href, text, title) => {
+				visitLink: async (_ctx, href, text, _title) => {
 					return {
 						type: "custom",
 						output: `[${text}](${href})`,
@@ -723,13 +714,13 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 	describe("nested elements handling", () => {
 		it("should handle deeply nested elements with visitor callbacks", async () => {
 			const visitor: Visitor = {
-				visitElementStart: async (ctx) => {
+				visitElementStart: async (_ctx) => {
 					return { type: "continue" };
 				},
-				visitElementEnd: async (ctx, output) => {
+				visitElementEnd: async (_ctx, _output) => {
 					return { type: "continue" };
 				},
-				visitText: async (ctx, text) => {
+				visitText: async (_ctx, _text) => {
 					return { type: "continue" };
 				},
 			};
@@ -743,13 +734,13 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should handle list nesting with visitor callbacks", async () => {
 			const visitor: Visitor = {
-				visitListStart: async (ctx) => {
+				visitListStart: async (_ctx) => {
 					return { type: "continue" };
 				},
-				visitListItem: async (ctx) => {
+				visitListItem: async (_ctx) => {
 					return { type: "continue" };
 				},
-				visitListEnd: async (ctx, output) => {
+				visitListEnd: async (_ctx, _output) => {
 					return { type: "continue" };
 				},
 			};
@@ -762,13 +753,13 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should handle table structure with visitor callbacks", async () => {
 			const visitor: Visitor = {
-				visitTableStart: async (ctx) => {
+				visitTableStart: async (_ctx) => {
 					return { type: "continue" };
 				},
-				visitTableRow: async (ctx) => {
+				visitTableRow: async (_ctx) => {
 					return { type: "continue" };
 				},
-				visitTableEnd: async (ctx, output) => {
+				visitTableEnd: async (_ctx, _output) => {
 					return { type: "continue" };
 				},
 			};
@@ -783,7 +774,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 	describe("error handling and edge cases", () => {
 		it("should handle visitor with null output in custom result", async () => {
 			const visitor: Visitor = {
-				visitLink: async (ctx, href, text, title) => {
+				visitLink: async (_ctx, _href, _text, _title) => {
 					return {
 						type: "custom",
 						output: "",
@@ -799,7 +790,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should handle visitor callback returning different result types", async () => {
 			const visitor: Visitor = {
-				visitImage: async (ctx, src, alt, title) => {
+				visitImage: async (_ctx, src, _alt, _title) => {
 					if (src.includes("skip")) {
 						return { type: "skip" };
 					}
@@ -818,16 +809,16 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should handle definition list callbacks", async () => {
 			const visitor: Visitor = {
-				visitDefinitionListStart: async (ctx) => {
+				visitDefinitionListStart: async (_ctx) => {
 					return { type: "continue" };
 				},
-				visitDefinitionTerm: async (ctx) => {
+				visitDefinitionTerm: async (_ctx) => {
 					return { type: "continue" };
 				},
-				visitDefinitionDescription: async (ctx) => {
+				visitDefinitionDescription: async (_ctx) => {
 					return { type: "continue" };
 				},
-				visitDefinitionListEnd: async (ctx, output) => {
+				visitDefinitionListEnd: async (_ctx, _output) => {
 					return { type: "continue" };
 				},
 			};
@@ -840,13 +831,13 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should handle form element callbacks", async () => {
 			const visitor: Visitor = {
-				visitForm: async (ctx) => {
+				visitForm: async (_ctx) => {
 					return { type: "continue" };
 				},
-				visitInput: async (ctx) => {
+				visitInput: async (_ctx) => {
 					return { type: "continue" };
 				},
-				visitButton: async (ctx, text) => {
+				visitButton: async (_ctx, _text) => {
 					return { type: "continue" };
 				},
 			};
@@ -859,13 +850,13 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should handle media element callbacks", async () => {
 			const visitor: Visitor = {
-				visitAudio: async (ctx, src) => {
+				visitAudio: async (_ctx, _src) => {
 					return { type: "continue" };
 				},
-				visitVideo: async (ctx, src) => {
+				visitVideo: async (_ctx, _src) => {
 					return { type: "continue" };
 				},
-				visitIframe: async (ctx, src) => {
+				visitIframe: async (_ctx, _src) => {
 					return { type: "continue" };
 				},
 			};
@@ -879,10 +870,10 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should handle detail/summary callbacks", async () => {
 			const visitor: Visitor = {
-				visitDetails: async (ctx) => {
+				visitDetails: async (_ctx) => {
 					return { type: "continue" };
 				},
-				visitSummary: async (ctx) => {
+				visitSummary: async (_ctx) => {
 					return { type: "continue" };
 				},
 			};
@@ -895,13 +886,13 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should handle figure element callbacks", async () => {
 			const visitor: Visitor = {
-				visitFigureStart: async (ctx) => {
+				visitFigureStart: async (_ctx) => {
 					return { type: "continue" };
 				},
-				visitFigcaption: async (ctx) => {
+				visitFigcaption: async (_ctx) => {
 					return { type: "continue" };
 				},
-				visitFigureEnd: async (ctx, output) => {
+				visitFigureEnd: async (_ctx, _output) => {
 					return { type: "continue" };
 				},
 			};
@@ -967,7 +958,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should type visitor return values as Promise<VisitResult>", async () => {
 			const visitor: Visitor = {
-				visitLink: async (ctx, href, text, title) => {
+				visitLink: async (_ctx, _href, _text, _title) => {
 					const result: Promise<VisitResult> = Promise.resolve({
 						type: "continue",
 					});
@@ -985,13 +976,13 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 	describe("comprehensive visitor coverage", () => {
 		it("should support all text formatting callbacks", async () => {
 			const visitor: Visitor = {
-				visitStrong: async (ctx, text) => ({ type: "continue" }),
-				visitEmphasis: async (ctx, text) => ({ type: "continue" }),
-				visitStrikethrough: async (ctx, text) => ({ type: "continue" }),
-				visitUnderline: async (ctx, text) => ({ type: "continue" }),
-				visitSubscript: async (ctx, text) => ({ type: "continue" }),
-				visitSuperscript: async (ctx, text) => ({ type: "continue" }),
-				visitMark: async (ctx, text) => ({ type: "continue" }),
+				visitStrong: async (_ctx, _text) => ({ type: "continue" }),
+				visitEmphasis: async (_ctx, _text) => ({ type: "continue" }),
+				visitStrikethrough: async (_ctx, _text) => ({ type: "continue" }),
+				visitUnderline: async (_ctx, _text) => ({ type: "continue" }),
+				visitSubscript: async (_ctx, _text) => ({ type: "continue" }),
+				visitSuperscript: async (_ctx, _text) => ({ type: "continue" }),
+				visitMark: async (_ctx, _text) => ({ type: "continue" }),
 			};
 
 			const html =
@@ -1003,17 +994,17 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should support comprehensive HTML document structure", async () => {
 			const visitor: Visitor = {
-				visitElementStart: async (ctx) => ({ type: "continue" }),
-				visitElementEnd: async (ctx, output) => ({ type: "continue" }),
-				visitHeading: async (ctx, level, text, id) => ({ type: "continue" }),
-				visitLink: async (ctx, href, text, title) => ({ type: "continue" }),
-				visitImage: async (ctx, src, alt, title) => ({ type: "continue" }),
-				visitCodeBlock: async (ctx, lang, code) => ({ type: "continue" }),
-				visitListStart: async (ctx) => ({ type: "continue" }),
-				visitListEnd: async (ctx, output) => ({ type: "continue" }),
-				visitTableStart: async (ctx) => ({ type: "continue" }),
-				visitTableEnd: async (ctx, output) => ({ type: "continue" }),
-				visitBlockquote: async (ctx) => ({ type: "continue" }),
+				visitElementStart: async (_ctx) => ({ type: "continue" }),
+				visitElementEnd: async (_ctx, _output) => ({ type: "continue" }),
+				visitHeading: async (_ctx, _level, _text, _id) => ({ type: "continue" }),
+				visitLink: async (_ctx, _href, _text, _title) => ({ type: "continue" }),
+				visitImage: async (_ctx, _src, _alt, _title) => ({ type: "continue" }),
+				visitCodeBlock: async (_ctx, _lang, _code) => ({ type: "continue" }),
+				visitListStart: async (_ctx) => ({ type: "continue" }),
+				visitListEnd: async (_ctx, _output) => ({ type: "continue" }),
+				visitTableStart: async (_ctx) => ({ type: "continue" }),
+				visitTableEnd: async (_ctx, _output) => ({ type: "continue" }),
+				visitBlockquote: async (_ctx) => ({ type: "continue" }),
 			};
 
 			const html = `
@@ -1034,7 +1025,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 		it("should maintain conversion output consistency with visitor callbacks", async () => {
 			const withoutVisitor = await convertWithVisitor("<h1>Test</h1><p>Content</p>", undefined, {});
 			const withVisitor = await convertWithVisitor("<h1>Test</h1><p>Content</p>", undefined, {
-				visitHeading: async (ctx, level, text, id) => ({ type: "continue" }),
+				visitHeading: async (_ctx, _level, _text, _id) => ({ type: "continue" }),
 			});
 
 			expect(typeof withoutVisitor).toBe("string");

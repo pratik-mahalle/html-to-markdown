@@ -17,7 +17,7 @@ class AsyncUrlValidator implements AsyncVisitor {
     this.timeout = timeout;
   }
 
-  async visitLink(ctx: NodeContext, href: string, text: string, title?: string): Promise<VisitResult> {
+  async visitLink(_ctx: NodeContext, href: string, _text: string, _title?: string): Promise<VisitResult> {
     // Skip anchor links
     if (href.startsWith('#')) {
       return { type: 'continue' };
@@ -44,7 +44,7 @@ class AsyncUrlValidator implements AsyncVisitor {
     return { type: 'continue' };
   }
 
-  async visitImage(ctx: NodeContext, src: string, alt?: string, title?: string): Promise<VisitResult> {
+  async visitImage(_ctx: NodeContext, src: string, _alt?: string, _title?: string): Promise<VisitResult> {
     // Skip data URIs and relative paths
     if (!src.startsWith('http://') && !src.startsWith('https://')) {
       return { type: 'continue' };
@@ -104,7 +104,7 @@ async function testValidUrls(): Promise<boolean> {
 
   const visitor = new AsyncUrlValidator(10000);
   try {
-    const markdown = await convertWithAsyncVisitor(html, { visitor });
+    await convertWithAsyncVisitor(html, { visitor });
     console.log('✓ All URLs are valid');
     console.log();
     console.log('Validated URLs:');
@@ -133,7 +133,7 @@ async function testBrokenLink(): Promise<boolean> {
 
   const visitor = new AsyncUrlValidator(10000);
   try {
-    const markdown = await convertWithAsyncVisitor(html, { visitor });
+    await convertWithAsyncVisitor(html, { visitor });
     console.log('✗ Should have failed on broken link');
     return false;
   } catch (error) {
