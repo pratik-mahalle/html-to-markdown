@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import type { JsConversionOptions } from "@kreuzberg/html-to-markdown-node";
 import { convertWithVisitor, JsHeadingStyle } from "../src/index";
 
@@ -430,6 +430,8 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 			const result = await convertWithVisitor(NESTED_HTML, undefined, visitor);
 
 			expect(result).toBeTruthy();
+			expect(count1).toBeGreaterThan(0);
+			expect(count2).toBeGreaterThan(0);
 		});
 
 		it("should handle visitor with many async callbacks", async () => {

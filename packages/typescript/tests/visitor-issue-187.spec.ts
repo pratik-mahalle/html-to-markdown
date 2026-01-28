@@ -1,16 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { JsConversionOptions } from "@kreuzberg/html-to-markdown-node";
 import { convertWithVisitor } from "@kreuzberg/html-to-markdown-node";
 import { wrapVisitorCallbacks } from "../src/index.js";
-
-/**
- * VisitResult type representing the result of a visitor callback.
- */
-interface VisitResult {
-	type: "continue" | "skip" | "custom" | "preserve_html" | "error";
-	output?: string;
-	message?: string;
-}
 
 /**
  * NodeContext passed to visitor callbacks with element metadata.

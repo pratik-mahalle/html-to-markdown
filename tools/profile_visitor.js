@@ -27,7 +27,7 @@ try {
 } catch {
   try {
     htmlToMarkdown = require("html-to-markdown");
-  } catch (e) {
+  } catch {
     console.error("Error: Could not load html-to-markdown module");
     console.error("Make sure to build with: cd packages/typescript && pnpm install && pnpm build");
     process.exit(1);
@@ -85,7 +85,7 @@ class NoOpVisitor {
     this.invocations = 0;
   }
 
-  visitNode(node) {
+  visitNode(_node) {
     this.invocations++;
   }
 }
@@ -171,8 +171,6 @@ function measureGCPauses(fn, iterations = 1) {
 
   global.gc();
   const gcPauses = [];
-  let lastGc = 0;
-
   const heapBefore = process.memoryUsage().heapUsed;
 
   const start = performance.now();
@@ -203,7 +201,7 @@ function benchmarkWithVisitor(html, visitor, iterations = 10) {
           } else {
             htmlToMarkdown.convert(html);
           }
-        } catch (e) {
+        } catch {
         }
       }
     },
