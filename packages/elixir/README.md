@@ -55,7 +55,7 @@ Ship identical Markdown across every runtime while enjoying native performance w
 ## Installation
 
 ```bash
-Add {:html_to_markdown, &#34;~&gt; 2.23.4&#34;} to mix.exs deps
+Add {:html_to_markdown, &#34;~&gt; 2.24.1&#34;} to mix.exs deps
 ```
 
 
