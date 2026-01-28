@@ -13,7 +13,7 @@ Runs anywhere: Node.js, Deno, Bun, browsers, and edge runtimes.
 [![npm (node)](https://img.shields.io/npm/v/%40kreuzberg%2Fhtml-to-markdown-node.svg?logo=npm)](https://www.npmjs.com/package/@kreuzberg/html-to-markdown-node)
 [![npm (wasm)](https://img.shields.io/npm/v/%40kreuzberg%2Fhtml-to-markdown-wasm.svg?logo=npm)](https://www.npmjs.com/package/@kreuzberg/html-to-markdown-wasm)
 [![PyPI](https://img.shields.io/pypi/v/html-to-markdown.svg?logo=pypi)](https://pypi.org/project/html-to-markdown/)
-[![Packagist](https://img.shields.io/packagist/v/goldziher/html-to-markdown.svg)](https://packagist.org/packages/goldziher/html-to-markdown)
+[![Packagist](https://img.shields.io/packagist/v/kreuzberg-dev/html-to-markdown.svg)](https://packagist.org/packages/kreuzberg-dev/html-to-markdown)
 [![RubyGems](https://badge.fury.io/rb/html-to-markdown.svg)](https://rubygems.org/gems/html-to-markdown)
 [![NuGet](https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown.svg)](https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/)
 [![Maven Central](https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown.svg)](https://central.sonatype.com/artifact/dev.kreuzberg/html-to-markdown)
@@ -731,7 +731,7 @@ The same Rust engine ships as native bindings for other ecosystems:
 - 🖥️ Node.js / Bun: [`html-to-markdown-node`](https://www.npmjs.com/package/html-to-markdown-node)
 - 🐍 Python: [`html-to-markdown`](https://pypi.org/project/html-to-markdown/)
 - 💎 Ruby: [`html-to-markdown`](https://rubygems.org/gems/html-to-markdown)
-- 🐘 PHP: [`goldziher/html-to-markdown`](https://packagist.org/packages/goldziher/html-to-markdown)
+- 🐘 PHP: [`kreuzberg-dev/html-to-markdown`](https://packagist.org/packages/kreuzberg-dev/html-to-markdown)
 - 🦀 Rust crate & CLI: [`html-to-markdown-rs`](https://crates.io/crates/html-to-markdown-rs)
 
 ## Links
@@ -740,7 +740,7 @@ The same Rust engine ships as native bindings for other ecosystems:
 - [Full Documentation](https://github.com/kreuzberg-dev/html-to-markdown/blob/main/README.md)
 - [Native Node Package](https://www.npmjs.com/package/html-to-markdown-node)
 - [Python Package](https://pypi.org/project/html-to-markdown/)
-- [PHP Extension & Helpers](https://packagist.org/packages/goldziher/html-to-markdown)
+- [PHP Extension & Helpers](https://packagist.org/packages/kreuzberg-dev/html-to-markdown)
 - [Rust Crate](https://crates.io/crates/html-to-markdown-rs)
 
 ## License
