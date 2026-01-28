@@ -58,7 +58,7 @@ Uses Foreign Function &amp; Memory API for zero-dependency, thread-safe conversi
 &lt;dependency&gt;
     &lt;groupId&gt;dev.kreuzberg&lt;/groupId&gt;
     &lt;artifactId&gt;html-to-markdown&lt;/artifactId&gt;
-    &lt;version&gt;2.23.4&lt;/version&gt;
+    &lt;version&gt;2.24.1&lt;/version&gt;
     &lt;classifier&gt;linux&lt;/classifier&gt; &lt;!-- or macos, windows --&gt;
 &lt;/dependency&gt;
 

@@ -223,7 +223,7 @@ languages:
       <dependency>
           <groupId>dev.kreuzberg</groupId>
           <artifactId>html-to-markdown</artifactId>
-          <version>2.23.4</version>
+          <version>2.24.1</version>
           <classifier>linux</classifier> <!-- or macos, windows -->
       </dependency>
     description: |
@@ -303,7 +303,7 @@ languages:
     package_manager:
       - mix
     package_name: html_to_markdown
-    install_command: "Add {:html_to_markdown, \"~> 2.23.4\"} to mix.exs deps"
+    install_command: "Add {:html_to_markdown, \"~> 2.24.1\"} to mix.exs deps"
     description: |
       Elixir bindings for the Rust html-to-markdown engine. The package exposes a fast HTML to Markdown converter implemented with Rustler.
       Ship identical Markdown across every runtime while enjoying native performance with Rustler NIF bindings.
