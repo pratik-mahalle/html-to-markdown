@@ -18,7 +18,7 @@ class CdnRewriter implements Visitor {
     this.newCdn = newCdn;
   }
 
-  visitImage(ctx: NodeContext, src: string, alt?: string, title?: string): VisitResult {
+  visitImage(_ctx: NodeContext, src: string, alt?: string, _title?: string): VisitResult {
     if (src.startsWith(this.oldCdn)) {
       src = src.replace(this.oldCdn, this.newCdn);
       this.rewrites++;
@@ -27,7 +27,7 @@ class CdnRewriter implements Visitor {
     return { type: 'continue' };
   }
 
-  visitLink(ctx: NodeContext, href: string, text: string, title?: string): VisitResult {
+  visitLink(_ctx: NodeContext, href: string, text: string, _title?: string): VisitResult {
     if (href.startsWith(this.oldCdn)) {
       href = href.replace(this.oldCdn, this.newCdn);
       this.rewrites++;

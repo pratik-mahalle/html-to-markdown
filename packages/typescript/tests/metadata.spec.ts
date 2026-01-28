@@ -7,7 +7,6 @@ import {
 	convertFileWithMetadata,
 	convertStreamWithMetadata,
 	type JsMetadataConfig,
-	type JsMetadataExtraction,
 } from "../src/index";
 
 const BASIC_HTML = `
