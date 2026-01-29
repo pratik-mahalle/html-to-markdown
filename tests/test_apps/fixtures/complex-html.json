@@ -1,1 +1,32 @@
-[]
+[
+  {
+    "name": "Nested lists",
+    "html": "<ul><li>Item 1<ul><li>Nested 1</li><li>Nested 2</li></ul></li><li>Item 2</li></ul>",
+    "expectedMarkdown": "- Item 1\n  - Nested 1\n  - Nested 2\n- Item 2",
+    "options": {}
+  },
+  {
+    "name": "Mixed content with heading and list",
+    "html": "<h2>Section</h2><p>Introduction</p><ol><li>First</li><li>Second</li></ol><p>Conclusion</p>",
+    "expectedMarkdown": "## Section\n\nIntroduction\n\n1. First\n2. Second\n\n\nConclusion",
+    "options": {}
+  },
+  {
+    "name": "Complex formatting",
+    "html": "<p><strong>Bold</strong> and <em>italic</em> and <code>code</code></p>",
+    "expectedMarkdown": "**Bold** and *italic* and `code`",
+    "options": {}
+  },
+  {
+    "name": "Nested emphasis",
+    "html": "<p><strong><em>Bold italic</em></strong></p>",
+    "expectedMarkdown": "***Bold italic***",
+    "options": {}
+  },
+  {
+    "name": "Multiple paragraphs",
+    "html": "<p>First paragraph</p><p>Second paragraph</p><p>Third paragraph</p>",
+    "expectedMarkdown": "First paragraph\n\nSecond paragraph\n\nThird paragraph",
+    "options": {}
+  }
+]
