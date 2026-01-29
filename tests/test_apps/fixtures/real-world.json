@@ -1,1 +1,32 @@
-[]
+[
+  {
+    "name": "Blog article excerpt",
+    "html": "<article><h1>Article Title</h1><p class=\"author\">By John Doe</p><p>First paragraph with <strong>important</strong> content.</p><p>Second paragraph with a <a href=\"#reference\">reference</a>.</p></article>",
+    "expectedMarkdown": "# Article Title\n\nBy John Doe\n\nFirst paragraph with **important** content.\n\nSecond paragraph with a [reference](#reference).",
+    "options": {}
+  },
+  {
+    "name": "Documentation with code",
+    "html": "<h2>Usage</h2><p>To use the library:</p><code>npm install html-to-markdown</code><p>Then import and use.</p>",
+    "expectedMarkdown": "## Usage\n\nTo use the library:\n\n`npm install html-to-markdown`\n\nThen import and use.",
+    "options": {}
+  },
+  {
+    "name": "FAQ with definitions",
+    "html": "<dl><dt>What is this?</dt><dd>An explanation</dd><dt>How to use?</dt><dd>Instructions here</dd></dl>",
+    "expectedMarkdown": "What is this?\n:   An explanation\n\nHow to use?\n:   Instructions here",
+    "options": {}
+  },
+  {
+    "name": "Social media card content",
+    "html": "<div><h3>Interesting Title</h3><p>Short description about the content</p><footer>Posted on Jan 29, 2025</footer></div>",
+    "expectedMarkdown": "### Interesting Title\n\nShort description about the content\n\nPosted on Jan 29, 2025",
+    "options": {}
+  },
+  {
+    "name": "Product description",
+    "html": "<section><h2>Product Name</h2><p><strong>Price:</strong> $99</p><p><strong>Features:</strong></p><ul><li>Feature 1</li><li>Feature 2</li><li>Feature 3</li></ul></section>",
+    "expectedMarkdown": "## Product Name\n\n**Price:** $99\n\n**Features:**\n\n- Feature 1\n- Feature 2\n- Feature 3",
+    "options": {}
+  }
+]
