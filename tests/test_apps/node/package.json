@@ -6,10 +6,12 @@
   "scripts": {
     "test": "vitest run",
     "test:smoke": "vitest run smoke.spec.ts",
-    "test:comprehensive": "vitest run comprehensive.spec.ts"
+    "test:comprehensive": "vitest run comprehensive.spec.ts",
+    "test:features": "vitest run features.spec.ts",
+    "test:all": "vitest run"
   },
   "dependencies": {
-    "@kreuzberg/html-to-markdown": "2.23.4"
+    "@kreuzberg/html-to-markdown": "2.24.1"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

@@ -1,1 +1,32 @@
-[]
+[
+  {
+    "name": "Document with title",
+    "html": "<html><head><title>Page Title</title></head><body><p>Content</p></body></html>",
+    "expectedMarkdown": "Content",
+    "options": {}
+  },
+  {
+    "name": "Document with meta description",
+    "html": "<html><head><meta name=\"description\" content=\"Page description\"></head><body><p>Content</p></body></html>",
+    "expectedMarkdown": "Content",
+    "options": {}
+  },
+  {
+    "name": "Document with language",
+    "html": "<html lang=\"fr\"><body><p>Contenu</p></body></html>",
+    "expectedMarkdown": "Contenu",
+    "options": {}
+  },
+  {
+    "name": "Multiple headers extraction",
+    "html": "<h1>Main Title</h1><h2>Subtitle</h2><h3>Sub-subtitle</h3>",
+    "expectedMarkdown": "# Main Title\n\n## Subtitle\n\n### Sub-subtitle",
+    "options": {}
+  },
+  {
+    "name": "Multiple links",
+    "html": "<a href=\"/page1\">Link 1</a> and <a href=\"https://example.com\">Link 2</a>",
+    "expectedMarkdown": "[Link 1](/page1) and [Link 2](https://example.com)",
+    "options": {}
+  }
+]

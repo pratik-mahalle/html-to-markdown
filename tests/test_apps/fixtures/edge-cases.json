@@ -1,1 +1,32 @@
-[]
+[
+  {
+    "name": "HTML entities",
+    "html": "<p>&nbsp;&lt;&gt;&amp;</p>",
+    "expectedMarkdown": "<>&",
+    "options": {}
+  },
+  {
+    "name": "Unicode characters",
+    "html": "<p>Hello 世界 مرحبا שלום</p>",
+    "expectedMarkdown": "Hello 世界 مرحبا שלום",
+    "options": {}
+  },
+  {
+    "name": "Special markdown characters",
+    "html": "<p>Test * _ [ ] ( ) # + - . !</p>",
+    "expectedMarkdown": "Test * _ [ ] ( ) # + - . !",
+    "options": {}
+  },
+  {
+    "name": "Empty elements",
+    "html": "<p></p><div></div><span></span>",
+    "expectedMarkdown": "",
+    "options": {}
+  },
+  {
+    "name": "Whitespace preservation",
+    "html": "<p>Text   with   spaces</p>",
+    "expectedMarkdown": "Text with spaces",
+    "options": {}
+  }
+]
