@@ -1426,9 +1426,59 @@ jobs:
           curl -X POST "https://packagist.org/api/update-package?username=kreuzberg-dev&apiToken=${PACKAGIST_TOKEN}" \
             -d "repository=https://github.com/kreuzberg-dev/html-to-markdown"
 
+  java-ffi:
+    name: Build Java native FFI libraries
+    needs: [prepare, check-maven]
+    if: ${{ needs.prepare.outputs.dry_run != 'true' && needs.prepare.outputs.is_tag == 'true' && (needs.check-maven.outputs.exists != 'true' || needs.prepare.outputs.force_republish_java == 'true') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux-x86_64
+          - os: ubuntu-24.04-arm
+            platform: linux-aarch64
+          - os: windows-latest
+            platform: windows-x86_64
+          - os: macos-latest
+            platform: osx-aarch64
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.prepare.outputs.checkout_ref }}
+          fetch-depth: 0
+
+      - name: Ensure target commit
+        if: ${{ needs.prepare.outputs.target_sha != '' }}
+        env:
+          TARGET_SHA: ${{ needs.prepare.outputs.target_sha }}
+        run: scripts/publish/common/ensure-target-commit.sh
+        shell: bash
+
+      - name: Setup Rust
+        uses: ./.github/actions/setup-rust
+
+      - name: Build FFI library
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: scripts/publish/java/build-ffi.sh "${PLATFORM}" dist/java-ffi
+        shell: bash
+
+      - name: Upload FFI artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: java-ffi-${{ matrix.platform }}
+          path: dist/java-ffi
+          retention-days: 14
+
   publish-maven:
     name: Publish Maven package
-    needs: [prepare, upload-release-artifacts, check-maven]
+    needs: [prepare, upload-release-artifacts, check-maven, java-ffi]
     if: ${{ needs.prepare.result == 'success' && needs.prepare.outputs.tag && needs.prepare.outputs.dry_run != 'true' && needs.prepare.outputs.is_tag == 'true' && (needs.check-maven.outputs.exists != 'true' || needs.prepare.outputs.force_republish_java == 'true') }}
     runs-on: ubuntu-latest
     env:
@@ -1439,6 +1489,13 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: ${{ needs.prepare.outputs.ref }}
+
+      - name: Download Java FFI artifacts
+        uses: actions/download-artifact@v7
+        with:
+          pattern: java-ffi-*
+          path: java-ffi-artifacts
+          merge-multiple: true
 
       - name: Verify Central credentials
         shell: bash
