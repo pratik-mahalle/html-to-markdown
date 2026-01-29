@@ -54,13 +54,7 @@ This package wraps native `@kreuzberg/html-to-markdown-node` bindings and provid
 
 ## Installation
 
-```bash
-npm install @kreuzberg/html-to-markdown
-```
-
-
-
-Requires Node.js 18+ or Bun. Native bindings provide superior performance.
+Requires Node.js 18+ or Bun 1.2+. Native bindings provide superior performance.
 
 **npm:**
 ```bash
@@ -87,6 +81,14 @@ Alternatively, use the WebAssembly version for browser/edge environments:
 ```bash
 npm install @kreuzberg/html-to-markdown-wasm
 ```
+
+## Runtime Support
+
+- **Node.js:** 18+ (officially supported)
+- **Bun:** 1.2+ (officially supported via Node-API compatibility)
+- **Deno:** Not officially supported (use Node.js compatibility layer or WASM version)
+
+The package uses native NAPI bindings that work across Node.js and Bun without changes. All features work identically in both runtimes.
 
 
 

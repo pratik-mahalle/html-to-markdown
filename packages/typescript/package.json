@@ -9,7 +9,9 @@
 		"rust",
 		"cli",
 		"napi",
-		"typescript"
+		"typescript",
+		"bun",
+		"node"
 	],
 	"license": "MIT",
 	"author": {
@@ -65,7 +67,8 @@
 		"vitest": "^4.0.18"
 	},
 	"engines": {
-		"node": ">=18"
+		"node": ">=18",
+		"bun": ">=1.2"
 	},
 	"publishConfig": {
 		"registry": "https://registry.npmjs.org/",
