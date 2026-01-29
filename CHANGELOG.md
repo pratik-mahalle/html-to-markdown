@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.24.2] - 2026-01-29
+
+### Fixed
+
+- **Java packaging**: Bundle native FFI libraries in published Maven JAR for all platforms (linux-x86_64, linux-aarch64, osx-aarch64, windows-x86_64). The Java package now works out-of-the-box when installed from Maven Central without requiring local FFI builds or manual java.library.path configuration. Native libraries are automatically extracted to a temp directory on first use with platform detection and fallback support.
+
 ## [2.24.1] - 2026-01-27
 
 ### Fixed
