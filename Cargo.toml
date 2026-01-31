@@ -33,6 +33,8 @@ rust-version = "1.85"
 [workspace.dependencies]
 html-to-markdown-rs = { version = "2.24.3", path = "crates/html-to-markdown" }
 
+ahash = "0.8"
+
 tl = { package = "astral-tl", version = "0.7.11" }
 html5ever = "0.36"
 markup5ever_rcdom = "0.36"
