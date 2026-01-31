@@ -75,6 +75,12 @@ jobs:
         if: matrix.runtime == 'node'
         uses: ./.github/actions/build-node
 
+      - name: Install dependencies (Bun)
+        if: matrix.runtime == 'bun'
+        working-directory: crates/html-to-markdown-node
+        run: bun install
+        shell: bash
+
       - name: Build NAPI-RS Bindings (Bun)
         if: matrix.runtime == 'bun'
         working-directory: crates/html-to-markdown-node
@@ -94,6 +100,12 @@ jobs:
       - name: Build TypeScript package (Node.js)
         if: matrix.runtime == 'node'
         uses: ./.github/actions/build-typescript
+
+      - name: Install TypeScript dependencies (Bun)
+        if: matrix.runtime == 'bun'
+        working-directory: packages/typescript
+        run: bun install
+        shell: bash
 
       - name: Build TypeScript package (Bun)
         if: matrix.runtime == 'bun'
