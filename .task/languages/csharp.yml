@@ -119,12 +119,13 @@ tasks:
         ignore_error: false
 
   update:
-    desc: "Check .NET package updates"
+    desc: "Update .NET package dependencies"
     silent: false
     cmds:
-      - cmd: cd {{.CSHARP_PKG}} && dotnet list HtmlToMarkdown/HtmlToMarkdown.csproj package --outdated
-        ignore_error: false
-      - cmd: cd {{.CSHARP_PKG}} && dotnet list HtmlToMarkdown.Tests/HtmlToMarkdown.Tests.csproj package --outdated
+      - cmd: |
+          python3 scripts/update_dotnet_packages.py \
+            {{.CSHARP_PKG}}/HtmlToMarkdown/HtmlToMarkdown.csproj \
+            {{.CSHARP_PKG}}/HtmlToMarkdown.Tests/HtmlToMarkdown.Tests.csproj
         ignore_error: false
 
   clean:
