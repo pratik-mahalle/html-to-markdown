@@ -2,7 +2,7 @@ module github.com/kreuzberg-dev/html-to-markdown-test-app
 
 go 1.25
 
-require github.com/kreuzberg-dev/html-to-markdown/packages/go/v2 v2.24.2
+require github.com/kreuzberg-dev/html-to-markdown/packages/go/v2 v2.24.3
 
 // NOTE: The replace directive below is for development/testing within the monorepo.
 // For production validation of published packages, this directive should be removed.
