@@ -1,0 +1,10 @@
+[source.crates-io]
+replace-with = "vendored-sources"
+
+[source."git+https://github.com/matsadler/magnus?rev=f6db11769efb517427bf7f121f9c32e18b059b38"]
+git = "https://github.com/matsadler/magnus"
+rev = "f6db11769efb517427bf7f121f9c32e18b059b38"
+replace-with = "vendored-sources"
+
+[source.vendored-sources]
+directory = "rust-vendor"

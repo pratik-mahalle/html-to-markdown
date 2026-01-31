@@ -11,6 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Bun runtime support**: Official support for Bun 1.2+ via Node-API compatibility. The existing NAPI-RS bindings work in Bun without changes. Added Bun to CI test matrix and updated documentation to reflect runtime compatibility.
 
+## [2.24.4] - 2026-01-31
+
+### Performance
+
+- **Reduced allocations in hot conversion paths**: Return `Cow<str>` from escape to avoid allocating on no-op paths, replace `.repeat()` with direct push loops in heading/list/table/div/paragraph formatters, eliminate `collect::<Vec>::join()` in text dedentation, and use `AHashMap` for hOCR property maps.
+
+### Fixed
+
+- **WASM builds**: Updated `getrandom` backend configuration from `"js"` to `"wasm_js"` for compatibility with getrandom 0.3.x.
+- **Elixir/Ruby vendor scripts**: Added missing `ahash` workspace dependency replacement for standalone builds.
+
 ## [2.24.3] - 2026-01-31
 
 ### Fixed
