@@ -18,7 +18,7 @@
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown?label=Java&color=007ec6" alt="Java">
   </a>
   <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown">
-    <img src="https://img.shields.io/badge/Go-v2.24.1-007ec6" alt="Go">
+    <img src="https://img.shields.io/badge/Go-v2.24.4-007ec6" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/">
     <img src="https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown?label=C%23&color=007ec6" alt="C#">
@@ -54,7 +54,13 @@ This package wraps native `@kreuzberg/html-to-markdown-node` bindings and provid
 
 ## Installation
 
-Requires Node.js 18+ or Bun 1.2+. Native bindings provide superior performance.
+```bash
+npm install @kreuzberg/html-to-markdown
+```
+
+
+
+Requires Node.js 18+ or Bun. Native bindings provide superior performance.
 
 **npm:**
 ```bash
@@ -81,14 +87,6 @@ Alternatively, use the WebAssembly version for browser/edge environments:
 ```bash
 npm install @kreuzberg/html-to-markdown-wasm
 ```
-
-## Runtime Support
-
-- **Node.js:** 18+ (officially supported)
-- **Bun:** 1.2+ (officially supported via Node-API compatibility)
-- **Deno:** Not officially supported (use Node.js compatibility layer or WASM version)
-
-The package uses native NAPI bindings that work across Node.js and Bun without changes. All features work identically in both runtimes.
 
 
 
