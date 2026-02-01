@@ -103,7 +103,7 @@ jobs:
       - name: Build TypeScript package (Bun)
         if: matrix.runtime == 'bun'
         working-directory: packages/typescript
-        run: bun run build
+        run: bun x tsc --project tsconfig.json
         shell: bash
 
       - name: Test TypeScript Package (Node.js)
