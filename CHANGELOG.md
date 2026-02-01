@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Bun runtime support**: Official support for Bun 1.2+ via Node-API compatibility. The existing NAPI-RS bindings work in Bun without changes. Added Bun to CI test matrix and updated documentation to reflect runtime compatibility.
 
+## [2.24.5] - 2026-02-01
+
+### Fixed
+
+- **Subscript/superscript whitespace handling**: Subscript and superscript tags now trim inner whitespace and place it outside delimiters, matching the behavior of bold, italic, and strikethrough (issue #202).
+
 ## [2.24.4] - 2026-01-31
 
 ### Performance

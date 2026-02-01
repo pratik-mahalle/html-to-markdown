@@ -1,6 +1,6 @@
 [package]
 name = "html-to-markdown-rb"
-version ="2.24.4"
+version ="2.24.5"
 edition = "2024"
 authors = ["Na'aman Hirschfeld <naaman@kreuzberg.dev>"]
 license = "MIT"
