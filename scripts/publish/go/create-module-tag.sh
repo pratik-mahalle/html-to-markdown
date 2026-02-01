@@ -30,6 +30,9 @@ GO_TAG="packages/go/${VERSION}"
 echo "Creating Go module tag: ${GO_TAG}"
 echo "  For module: github.com/kreuzberg-dev/html-to-markdown/packages/go/v2@${VERSION}"
 
+# Fetch remote tags to ensure we detect tags that exist on origin but not locally
+git fetch origin --tags --force 2>/dev/null || true
+
 # Check if the main release tag exists
 if ! git rev-parse --verify "refs/tags/${VERSION}" >/dev/null 2>&1; then
 	echo "Error: Release tag ${VERSION} does not exist" >&2
