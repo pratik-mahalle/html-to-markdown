@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Bun runtime support**: Official support for Bun 1.2+ via Node-API compatibility. The existing NAPI-RS bindings work in Bun without changes. Added Bun to CI test matrix and updated documentation to reflect runtime compatibility.
 
+## [2.24.6] - 2026-02-14
+
+### Fixed
+
+- **Dependency update stability**: Pinned compatible `html5ever`/`markup5ever_rcdom` versions to prevent trait-mismatch breakages during workspace dependency updates.
+- **Python bindings build**: Added explicit `#[pyclass(from_py_object)]` on Python config wrapper classes to avoid PyO3 deprecation failures under `-D warnings`.
+- **Rust lint consistency**: Aligned crate-level clippy configuration so `multiple_crate_versions` does not fail Node/WASM/FFI crate lint runs.
+- **WASM dependency behavior**: Updated hashing dependency configuration to avoid wasm randomness backend breakage after dependency updates.
+- **PHP PIE publish verification (macOS)**: Hardened PIE verification/build scripts for Darwin linker behavior and shell-safe package spec handling.
+
 ## [2.24.5] - 2026-02-01
 
 ### Fixed
