@@ -50,8 +50,19 @@ repos:
     hooks:
       - id: fmt
       - id: cargo-check
+        args: ["--workspace", "--exclude", "html-to-markdown-rb", "--exclude", "html-to-markdown-php"]
       - id: clippy
-        args: ["--", "-A", "clippy::multiple_crate_versions"]
+        args:
+          [
+            "--workspace",
+            "--exclude",
+            "html-to-markdown-rb",
+            "--exclude",
+            "html-to-markdown-php",
+            "--",
+            "-A",
+            "clippy::multiple_crate_versions",
+          ]
   - repo: https://github.com/koalaman/shellcheck-precommit
     rev: v0.11.0
     hooks:
