@@ -25,6 +25,7 @@ all = { level = "deny", priority = -1 }
 cargo = { level = "deny", priority = -1 }
 pedantic = { level = "deny", priority = -1 }
 nursery = { level = "warn", priority = -1 }
+multiple_crate_versions = { level = "allow", priority = 1 }
 
 [package.metadata.napi]
 package-json-name = "@kreuzberg/html-to-markdown-node"
