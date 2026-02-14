@@ -47,7 +47,22 @@ lines = [
 cargo_path.write_text("\n".join(lines) + "\n")
 PY
 
-rsync -a --exclude 'target' --exclude 'debug' "$ROOT/crates" "$WORKSPACE_DIR/"
+rsync -a \
+	--exclude 'target' \
+	--exclude 'debug' \
+	--exclude 'node_modules' \
+	--exclude '.venv' \
+	--exclude 'dist' \
+	--exclude 'dist-*' \
+	--exclude 'pkg' \
+	--exclude '*.node' \
+	--exclude '*.abi3.so' \
+	"$ROOT/crates" "$WORKSPACE_DIR/"
+
+if [[ -f "$ROOT/.cargo/config.toml" ]]; then
+	mkdir -p "$WORKSPACE_DIR/.cargo"
+	cp "$ROOT/.cargo/config.toml" "$WORKSPACE_DIR/.cargo/config.toml"
+fi
 
 if [[ -d "$ROOT/tools" ]]; then
 	mkdir -p "$WORKSPACE_DIR/tools"
@@ -55,7 +70,11 @@ if [[ -d "$ROOT/tools" ]]; then
 fi
 
 mkdir -p "$WORKSPACE_DIR/packages/ruby"
-rsync -a --exclude 'target' --exclude 'native/target' "$ROOT/packages/ruby/" "$WORKSPACE_DIR/packages/ruby/"
+rsync -a \
+	--exclude 'target' \
+	--exclude 'native/target' \
+	--exclude 'vendor' \
+	"$ROOT/packages/ruby/" "$WORKSPACE_DIR/packages/ruby/"
 
 mkdir -p "$WORKSPACE_DIR/packages/elixir"
 rsync -a --exclude '_build' --exclude 'deps' --exclude 'native/html_to_markdown_elixir/target' \
