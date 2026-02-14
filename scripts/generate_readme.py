@@ -85,8 +85,8 @@ class ReadmeGenerator:
         # Register all custom filters using the centralized registry
         FilterRegistry.register_all(
             self.jinja_env,
-            include_snippet_handler=lambda path, lang: self.include_snippet_filter(path, lang),
-            has_migration_handler=lambda lang, ver: self.has_migration_guide(lang, ver),
+            include_snippet_handler=self.include_snippet_filter,
+            has_migration_handler=self.has_migration_guide,
         )
 
         logger.debug("Jinja2 environment configured")
