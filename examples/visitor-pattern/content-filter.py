@@ -59,7 +59,7 @@ class ContentFilter:
         if "utm_" in href.lower():
             # Strip tracking params but keep the link
             if "?" in href:
-                href = href.split("?")[0]
+                href = href.split("?", maxsplit=1)[0]
             return {"type": "custom", "output": f"[{text}]({href})"}
 
         return {"type": "continue"}
