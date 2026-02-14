@@ -1,6 +1,6 @@
 {
   "name": "html-to-markdown-wasm-test-app",
-  "version": "2.24.5",
+  "version": "2.24.6",
   "description": "Test app for html-to-markdown WASM package (validates published npm package)",
   "type": "module",
   "scripts": {
