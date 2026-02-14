@@ -7,7 +7,6 @@ name = "html-to-markdown-workspace"
 version = "0.0.0"
 description = "Workspace-only metadata for tooling."
 requires-python = ">=3.10"
-
 classifiers = [
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.10",
@@ -37,10 +36,12 @@ dev = [
 ]
 
 [tool.setuptools]
-packages = [  ]
+packages = []
 
 [tool.uv]
 default-groups = [ "dev" ]
+sources.uv-bump = { git = "https://github.com/Goldziher/uv-bump" }
+workspace.members = [ "packages/python" ]
 cache-keys = [
   { file = "pyproject.toml" },
   { file = "Cargo.toml" },
@@ -49,12 +50,6 @@ cache-keys = [
   { file = "crates/**/Cargo.toml" },
   { file = "crates/**/*.rs" },
 ]
-
-[tool.uv.workspace]
-members = [ "packages/python" ]
-
-[tool.uv.sources]
-uv-bump = { git = "https://github.com/Goldziher/uv-bump" }
 
 [tool.ruff]
 target-version = "py310"
@@ -112,25 +107,23 @@ lint.per-file-ignores."scripts/*.py" = [ "INP001", "S607", "T201" ]
 lint.isort.known-first-party = [ "html_to_markdown", "tests" ]
 lint.pydocstyle.convention = "pep257"
 
-[tool.pytest.ini_options]
-asyncio_mode = "auto"
-asyncio_default_fixture_loop_scope = "function"
-testpaths = [ "packages/python/tests" ]
-filterwarnings = [
+[tool.pytest]
+ini_options.asyncio_mode = "auto"
+ini_options.asyncio_default_fixture_loop_scope = "function"
+ini_options.testpaths = [ "packages/python/tests" ]
+ini_options.filterwarnings = [
   "error",
   "ignore::pytest.PytestConfigWarning",
   "ignore::pytest.PytestUnraisableExceptionWarning",
   "ignore::ResourceWarning",
 ]
 
-[tool.coverage.run]
-source = [ "packages/python/html_to_markdown" ]
-omit = [ "packages/python/tests/*" ]
-
-[tool.coverage.report]
-exclude_lines = [ "if TYPE_CHECKING:" ]
-fail_under = 0
-show_missing = true
+[tool.coverage]
+run.omit = [ "packages/python/tests/*" ]
+run.source = [ "packages/python/html_to_markdown" ]
+report.exclude_lines = [ "if TYPE_CHECKING:" ]
+report.fail_under = 0
+report.show_missing = true
 
 [tool.mypy]
 python_version = "3.10"
@@ -139,7 +132,7 @@ implicit_reexport = false
 show_error_codes = true
 warn_return_any = true
 warn_unused_configs = true
-disable_error_code = [ 'import-untyped', 'import-not-found' ]
+disable_error_code = [ "import-untyped", "import-not-found" ]
 namespace_packages = true
 files = [ "packages/python" ]
 explicit_package_bases = true

@@ -45,7 +45,7 @@ classifiers = [
   "Topic :: Text Processing :: Markup :: Markdown",
   "Typing :: Typed",
 ]
-dependencies = [  ]
+dependencies = []
 urls.Changelog = "https://github.com/kreuzberg-dev/html-to-markdown/releases"
 urls.Homepage = "https://github.com/kreuzberg-dev/html-to-markdown"
 urls.Issues = "https://github.com/kreuzberg-dev/html-to-markdown/issues"

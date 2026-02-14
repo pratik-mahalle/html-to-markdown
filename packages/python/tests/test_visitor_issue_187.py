@@ -9,7 +9,7 @@ tag name in the context dictionary passed to visitor callbacks. Specifically:
 3. Filtering by tag name works correctly
 4. Attribute access works with proper tag identification
 
-Related Issue: #187 (https://github.com/kreuzberg/html-to-markdown/issues/187)
+Related Issue: #187 (https://github.com/kreuzberg-dev/html-to-markdown/issues/187)
 """
 
 from __future__ import annotations

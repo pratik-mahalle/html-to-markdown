@@ -2,7 +2,7 @@
   "name": "kreuzberg-dev/html-to-markdown-test-app",
   "description": "Test app for html-to-markdown PHP package - validates published Packagist package",
   "require": {
-    "php": ">=8.2",
+    "php": ">=8.4",
     "kreuzberg-dev/html-to-markdown": ">=2.24.5"
   },
   "require-dev": {
@@ -11,7 +11,7 @@
   },
   "config": {
     "platform": {
-      "php": "8.2.0"
+      "php": "8.4.0"
     }
   },
   "autoload-dev": {
