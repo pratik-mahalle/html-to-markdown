@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Rust lint consistency**: Aligned crate-level clippy configuration so `multiple_crate_versions` does not fail Node/WASM/FFI crate lint runs.
 - **WASM dependency behavior**: Updated hashing dependency configuration to avoid wasm randomness backend breakage after dependency updates.
 - **PHP PIE publish verification (macOS)**: Hardened PIE verification/build scripts for Darwin linker behavior and shell-safe package spec handling.
+- **CI reliability**: Updated validation and Python CI tasks to reduce flakiness (PHP 8.4 setup in validate; avoid redundant Rust CLI release builds in Python test runs).
 
 ## [2.24.5] - 2026-02-01
 
