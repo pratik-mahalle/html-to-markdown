@@ -108,6 +108,13 @@ jobs:
         run: task go:install
         shell: bash
 
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          tools: composer:2.9.1
+          coverage: none
+
       - name: Install PHP Dependencies
         run: task php:install
         shell: bash
