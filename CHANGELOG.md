@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.25.0] - 2026-02-15
+
 ### Added
 
 - **Bun runtime support**: Official support for Bun 1.2+ via Node-API compatibility. The existing NAPI-RS bindings work in Bun without changes. Added Bun to CI test matrix and updated documentation to reflect runtime compatibility.
+
+### Changed
+
+- **Vendored `markup5ever_rcdom`**: Brought the `markup5ever_rcdom` code (MIT/Apache-2.0) into the core crate as an internal `rcdom` module. This removes the external dependency on the "+unofficial" crate, eliminates the unused `xml5ever` transitive dependency, and removes the pinned `html5ever`/`markup5ever_rcdom` version constraints. See `ATTRIBUTIONS.md` for license details.
+- **Upgraded `html5ever`** from 0.36.1 to 0.38.0 (now unpinned).
+- **Upgraded `pyo3`** from 0.28.0 to 0.28.1.
 
 ## [2.24.6] - 2026-02-14
 
