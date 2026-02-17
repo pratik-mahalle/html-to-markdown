@@ -1,22 +1,6 @@
 name: Profiling Harness
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - crates/**
-      - packages/**
-      - tools/benchmark-harness/**
-      - test_documents/**
-      - .github/workflows/profiling.yaml
-  pull_request:
-    branches: [main]
-    paths:
-      - crates/**
-      - packages/**
-      - tools/benchmark-harness/**
-      - test_documents/**
-      - .github/workflows/profiling.yaml
   schedule:
     - cron: '0 2 * * 1'
   workflow_dispatch:
