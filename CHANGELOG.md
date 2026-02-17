@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.25.1] - 2026-02-17
+
+### Fixed
+
+- **hOCR heading detection**: Improved hierarchy logic to use font size (`x_fsize`) and bbox height as a proxy when detecting headings. Large-font paragraphs now support longer text (up to 80 chars) and single-word headings. Added comprehensive test coverage for heading detection edge cases.
+
 ## [2.25.0] - 2026-02-15
 
 ### Added
