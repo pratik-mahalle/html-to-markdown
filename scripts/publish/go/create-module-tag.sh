@@ -8,14 +8,7 @@
 
 set -euo pipefail
 
-VERSION="${1:-}"
-DRY_RUN="${2:-}"
-
-if [[ -z "$VERSION" ]]; then
-	echo "Error: VERSION argument required" >&2
-	echo "Usage: $0 <version> [--dry-run]" >&2
-	exit 1
-fi
+VERSION="${1:?Version argument required (e.g. v2.25.1)}"
 
 # Ensure version starts with 'v'
 if [[ ! "$VERSION" =~ ^v ]]; then
@@ -30,45 +23,27 @@ GO_TAG="packages/go/${VERSION}"
 echo "Creating Go module tag: ${GO_TAG}"
 echo "  For module: github.com/kreuzberg-dev/html-to-markdown/packages/go/v2@${VERSION}"
 
-# Fetch remote tags to ensure we detect tags that exist on origin but not locally
-git fetch origin --tags --force 2>/dev/null || true
-
-# Check if the main release tag exists
-if ! git rev-parse --verify "refs/tags/${VERSION}" >/dev/null 2>&1; then
-	echo "Error: Release tag ${VERSION} does not exist" >&2
-	exit 1
-fi
-
-# Get the commit that the release tag points to
-TARGET_COMMIT=$(git rev-parse --verify "refs/tags/${VERSION}^{commit}")
-echo "  Target commit: ${TARGET_COMMIT}"
-
-# Check if Go tag already exists
-if git rev-parse --verify "refs/tags/${GO_TAG}" >/dev/null 2>&1; then
-	EXISTING_COMMIT=$(git rev-parse --verify "refs/tags/${GO_TAG}^{commit}")
-	if [[ "$EXISTING_COMMIT" == "$TARGET_COMMIT" ]]; then
-		echo "Go module tag ${GO_TAG} already exists and points to correct commit"
-		exit 0
-	else
-		echo "Warning: Go module tag ${GO_TAG} exists but points to different commit"
-		echo "  Existing: ${EXISTING_COMMIT}"
-		echo "  Expected: ${TARGET_COMMIT}"
-		exit 1
-	fi
-fi
-
-if [[ "$DRY_RUN" == "--dry-run" ]]; then
-	echo "[DRY RUN] Would create tag: ${GO_TAG} -> ${TARGET_COMMIT}"
+# Check if Go tag already exists locally
+if git rev-parse "$GO_TAG" >/dev/null 2>&1; then
+	echo "::notice::Go module tag $GO_TAG already exists locally; skipping."
 	exit 0
 fi
 
-# Create the Go submodule tag (annotated with message)
-git tag -a "${GO_TAG}" "${TARGET_COMMIT}" -m "Go module release ${VERSION}"
-echo "Created tag: ${GO_TAG}"
+# Check if tag exists on remote
+if git ls-remote --tags origin | grep -q "refs/tags/${GO_TAG}$"; then
+	echo "::notice::Go module tag $GO_TAG already exists on remote; skipping."
+	exit 0
+fi
 
-# Push the tag
-git push origin "${GO_TAG}"
-echo "Pushed tag: ${GO_TAG}"
+if [[ "${2:-}" == "--dry-run" ]]; then
+	echo "[DRY RUN] Would create tag: ${GO_TAG} -> ${VERSION}"
+	exit 0
+fi
+
+git tag "$GO_TAG" "$VERSION"
+git push origin "$GO_TAG"
+
+echo "Go module tag created and pushed: ${GO_TAG}"
 
 # Trigger Go proxy to fetch the module (optional but speeds up availability)
 echo "Triggering Go proxy fetch..."

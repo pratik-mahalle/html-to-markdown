@@ -1118,7 +1118,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ needs.prepare.outputs.ref }}
+          ref: ${{ needs.prepare.outputs.tag }}
+          fetch-depth: 0
 
       - name: Download PHP PIE artifact
         uses: actions/download-artifact@v7
@@ -1166,12 +1167,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ needs.prepare.outputs.tag }}
         run: scripts/publish/upload-go-ffi-artifacts.sh
-        shell: bash
-
-      - name: Configure git identity for Go module tag
-        run: |
-          git config --global user.name "html-to-markdown-bot"
-          git config --global user.email "bot@kreuzberg.dev"
         shell: bash
 
       - name: Create Go module tag
