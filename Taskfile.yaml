@@ -53,6 +53,8 @@ includes:
     taskfile: ./.task/languages/csharp.yml
   elixir:
     taskfile: ./.task/languages/elixir.yml
+  r:
+    taskfile: ./.task/languages/r.yml
 
   # Workflow aggregators (internal, used by root-level tasks)
   _build:
@@ -102,6 +104,7 @@ tasks:
       - task: java:install
       - task: csharp:install
       - task: elixir:install
+      - task: r:install
       - task: pre-commit:install
 
   # Build tasks: compile all languages
@@ -195,6 +198,7 @@ tasks:
       - task: java:update
       - task: csharp:update
       - task: elixir:update
+      - task: r:update
       - uv tool update prek
       - prek autoupdate
 
@@ -258,6 +262,7 @@ tasks:
       - task: e2e:smoke:java
       - task: e2e:smoke:csharp
       - task: e2e:smoke:elixir
+      - task: e2e:smoke:r
 
   e2e:smoke:python:
     desc: "Smoke test Python package from PyPI"
@@ -315,6 +320,12 @@ tasks:
       - mix deps.get
       - mix test test/smoke_test.exs
 
+  e2e:smoke:r:
+    desc: "Smoke test R package"
+    dir: tests/test_apps/r
+    cmds:
+      - Rscript smoke_test.R
+
   # Comprehensive e2e tests (post-release validation)
   e2e:test:all:
     desc: "Run comprehensive tests for all published packages"
@@ -327,6 +338,7 @@ tasks:
       - task: e2e:test:java
       - task: e2e:test:csharp
       - task: e2e:test:elixir
+      - task: e2e:test:r
 
   e2e:test:python:
     desc: "Comprehensive tests for Python package"
@@ -381,6 +393,12 @@ tasks:
     cmds:
       - mix test test/comprehensive_test.exs
 
+  e2e:test:r:
+    desc: "Comprehensive tests for R package"
+    dir: packages/r
+    cmds:
+      - Rscript -e 'devtools::test()'
+
   # Demo tasks
   build:demo:
     desc: "Build the GitHub Pages demo"
@@ -415,6 +433,7 @@ tasks:
       - task: java:clean
       - task: csharp:clean
       - task: elixir:clean
+      - task: r:clean
 
   # Default task: show available tasks
   default:

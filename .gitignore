@@ -59,6 +59,15 @@ packages/php-ext/workspace/
 !packages/elixir/lib/**/*.ex
 erl_crash.dump
 
+# R package build artifacts
+!packages/r/R/
+!packages/r/R/**/*.R
+packages/r/src/*.o
+packages/r/src/*.so
+packages/r/src/*.dll
+packages/r/src/*.dylib
+packages/r/*.tar.gz
+
 # Elixir test application dependencies and builds
 tests/test_apps/elixir/deps/
 tests/test_apps/elixir/_build/

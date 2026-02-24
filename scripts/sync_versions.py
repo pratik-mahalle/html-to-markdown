@@ -350,6 +350,20 @@ def update_mix_dependency(mix_path: Path, package_name: str, version: str) -> No
     mix_path.write_text(updated)
 
 
+def update_r_description(file_path: Path, version: str) -> tuple[bool, str, str]:
+    """Update Version field in R DESCRIPTION file."""
+    content = file_path.read_text()
+    match = re.search(r"^Version:\s*(.+)$", content, re.MULTILINE)
+    old_version = match.group(1).strip() if match else "NOT FOUND"
+
+    if old_version == version:
+        return False, old_version, version
+
+    new_content = re.sub(r"^Version:\s*.+$", f"Version: {version}", content, count=1, flags=re.MULTILINE)
+    file_path.write_text(new_content)
+    return True, old_version, version
+
+
 def update_readme_config_version(readme_config_path: Path, version: str) -> tuple[bool, str, str]:
     """Update version in scripts/readme_config.yaml."""
     content = readme_config_path.read_text()
@@ -604,6 +618,13 @@ def sync_composer(repo_root: Path, version: str, report: SyncReport) -> None:
         report.record(composer.relative_to(repo_root), changed, f"{old_ver} → {new_ver}")
 
 
+def sync_r(repo_root: Path, version: str, report: SyncReport) -> None:
+    r_description = repo_root / "packages/r/DESCRIPTION"
+    if r_description.exists():
+        changed, old_ver, new_ver = update_r_description(r_description, version)
+        report.record(r_description.relative_to(repo_root), changed, f"{old_ver} → {new_ver}")
+
+
 def sync_readme_config(repo_root: Path, version: str, report: SyncReport) -> None:
     """Update version in readme_config.yaml (used for README generation)."""
     readme_config = repo_root / "scripts/readme_config.yaml"
@@ -640,6 +661,7 @@ def main() -> None:
     sync_ruby(repo_root, version, report)
     sync_python_version_file(repo_root, version, report)
     sync_mix(repo_root, version, report)
+    sync_r(repo_root, version, report)
     sync_node_binding(repo_root, version, report)
     sync_csproj(repo_root, version, report)
     sync_poms(repo_root, version, report)

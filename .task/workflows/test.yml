@@ -14,6 +14,7 @@ includes:
   java: ../languages/java.yml
   csharp: ../languages/csharp.yml
   elixir: ../languages/elixir.yml
+  r: ../languages/r.yml
 
 tasks:
   all:
@@ -30,6 +31,7 @@ tasks:
       - task: java:test
       - task: csharp:test
       - task: elixir:test
+      - task: r:test
 
   all:ci:
     desc: "Run tests for all languages with coverage (CI mode)"
@@ -45,6 +47,7 @@ tasks:
       - task: java:test:ci
       - task: csharp:test:ci
       - task: elixir:test:ci
+      - task: r:test:ci
 
   core:
     desc: "Run Rust core tests only"
@@ -64,6 +67,7 @@ tasks:
       - task: java:test
       - task: csharp:test
       - task: elixir:test
+      - task: r:test
 
   wasm:node:
     desc: "Run WASM tests in Node.js"

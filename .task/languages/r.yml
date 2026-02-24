@@ -1,0 +1,105 @@
+# R extendr bindings tasks
+# Compatible with macOS and Linux
+
+version: "3"
+internal: true
+
+includes:
+  platforms: ../config/platforms.yml
+  _cfg: ../config/vars.yml
+
+vars:
+  R_PKG: "packages/r"
+
+tasks:
+  install:
+    desc: "Install R dependencies"
+    silent: false
+    cmds:
+      - cmd: Rscript -e 'for (pkg in c("devtools", "testthat", "rextendr", "lintr", "styler", "covr", "remotes")) { if (!requireNamespace(pkg, quietly = TRUE)) install.packages(pkg, repos = "https://cran.r-project.org") }'
+        ignore_error: false
+
+  build:
+    desc: "Build R package with extendr (release)"
+    silent: false
+    cmds:
+      - cmd: cd {{.R_PKG}} && bash ../../scripts/publish/r/stage-rust-core.sh && R CMD INSTALL .
+        ignore_error: false
+
+  build:dev:
+    desc: "Build R package in dev mode"
+    silent: false
+    cmds:
+      - task: build
+
+  build:release:
+    desc: "Build R package in release mode"
+    silent: false
+    cmds:
+      - task: build
+
+  build:ci:
+    desc: "Build R package for CI"
+    silent: false
+    cmds:
+      - task: build
+
+  test:
+    desc: "Run testthat tests for R bindings"
+    silent: false
+    cmds:
+      - cmd: cd {{.R_PKG}} && Rscript -e 'devtools::test()'
+        ignore_error: false
+
+  test:ci:
+    desc: "Run testthat tests with coverage for CI"
+    silent: false
+    cmds:
+      - cmd: cd {{.R_PKG}} && Rscript -e 'devtools::test()'
+        ignore_error: false
+
+  lint:
+    desc: "Lint R code WITH auto-fix (styler + lintr)"
+    silent: false
+    cmds:
+      - cmd: cd {{.R_PKG}} && Rscript -e 'styler::style_pkg()'
+        ignore_error: false
+      - cmd: cd {{.R_PKG}} && Rscript -e 'lints <- lintr::lint_package(); if (length(lints) > 0) { print(lints); quit(status = 1) }'
+        ignore_error: false
+
+  lint:check:
+    desc: "Lint R code WITHOUT auto-fix (check-only)"
+    silent: false
+    cmds:
+      - cmd: cd {{.R_PKG}} && Rscript -e 'out <- styler::style_pkg(dry = "on"); if (!all(out$changed == FALSE)) quit(status = 1)'
+        ignore_error: false
+      - cmd: cd {{.R_PKG}} && Rscript -e 'lints <- lintr::lint_package(); if (length(lints) > 0) { print(lints); quit(status = 1) }'
+        ignore_error: false
+
+  format:
+    desc: "Format R code with styler"
+    silent: false
+    cmds:
+      - cmd: cd {{.R_PKG}} && Rscript -e 'styler::style_pkg()'
+        ignore_error: false
+
+  format:check:
+    desc: "Check R code formatting without modifications"
+    silent: false
+    cmds:
+      - cmd: cd {{.R_PKG}} && Rscript -e 'out <- styler::style_pkg(dry = "on"); if (!all(out$changed == FALSE)) quit(status = 1)'
+        ignore_error: false
+
+  update:
+    desc: "Update R dependencies"
+    silent: false
+    cmds:
+      - cmd: Rscript -e 'update.packages(repos = "https://cran.r-project.org", ask = FALSE)'
+        ignore_error: true
+
+  clean:
+    desc: "Clean R build artifacts"
+    silent: false
+    cmds:
+      - cmd: rm -rf {{.R_PKG}}/src/rust/target {{.R_PKG}}/src/rust/vendor {{.R_PKG}}/src/*.o {{.R_PKG}}/src/*.so {{.R_PKG}}/src/*.dll
+        ignore_error: true

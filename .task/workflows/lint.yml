@@ -14,6 +14,7 @@ includes:
   java: ../languages/java.yml
   csharp: ../languages/csharp.yml
   elixir: ../languages/elixir.yml
+  r: ../languages/r.yml
 
 tasks:
   all:
@@ -31,6 +32,7 @@ tasks:
       - task: java:lint
       - task: csharp:lint
       - task: elixir:lint
+      - task: r:lint
 
   check:
     desc: "Lint all languages WITHOUT auto-fix (check-only mode)"
@@ -47,6 +49,7 @@ tasks:
       - task: java:lint:check
       - task: csharp:lint:check
       - task: elixir:lint:check
+      - task: r:lint:check
 
   format:
     desc: "Format all code WITH modifications"
@@ -63,6 +66,7 @@ tasks:
       - task: java:format
       - task: csharp:format
       - task: elixir:format
+      - task: r:format
 
   format:check:
     desc: "Check formatting WITHOUT modifications"
@@ -79,6 +83,7 @@ tasks:
       - task: java:format:check
       - task: csharp:format:check
       - task: elixir:format:check
+      - task: r:format:check
 
   typecheck:
     desc: "Run type checking for all languages"

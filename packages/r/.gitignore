@@ -1,0 +1,7 @@
+*.o
+*.so
+*.dll
+*.dylib
+*.tar.gz
+src/rust/target/
+src/rust/vendor/
