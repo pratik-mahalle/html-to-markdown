@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **R language bindings**: Full-parity R bindings via extendr framework with support for `convert()`, `convert_with_options()`, `convert_with_options_handle()`, `convert_with_metadata()`, `convert_with_inline_images()`, `convert_with_visitor()`, and profiling. Includes `conversion_options()` helper, testthat test suite, CI workflow, lintr/styler pre-commit hooks, and task automation.
+- **R CRAN publishing infrastructure**: Added `publish-cran` job to publish workflow, `cran-comments.md`, and `NEWS.md` for CRAN submission compliance.
 
 ### Changed
 
