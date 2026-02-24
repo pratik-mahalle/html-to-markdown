@@ -1,0 +1,5 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^src/rust/target
+^src/rust/vendor
+^\.lintr$

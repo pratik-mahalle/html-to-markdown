@@ -14,6 +14,7 @@ includes:
   java: ../languages/java.yml
   csharp: ../languages/csharp.yml
   elixir: ../languages/elixir.yml
+  r: ../languages/r.yml
 
 tasks:
   all:
@@ -30,6 +31,7 @@ tasks:
       - task: java:build
       - task: csharp:build
       - task: elixir:build
+      - task: r:build
 
   all:dev:
     desc: "Build all language bindings in debug mode"
@@ -45,6 +47,7 @@ tasks:
       - task: java:build:dev
       - task: csharp:build:dev
       - task: elixir:build:dev
+      - task: r:build:dev
 
   all:release:
     desc: "Build all language bindings in release mode"
@@ -60,6 +63,7 @@ tasks:
       - task: java:build:release
       - task: csharp:build:release
       - task: elixir:build:release
+      - task: r:build:release
 
   all:ci:
     desc: "Build all language bindings in CI mode"
@@ -75,6 +79,7 @@ tasks:
       - task: java:build:ci
       - task: csharp:build:ci
       - task: elixir:build:ci
+      - task: r:build:ci
 
   core:
     desc: "Build Rust core library only"
@@ -94,6 +99,7 @@ tasks:
       - task: java:build
       - task: csharp:build
       - task: elixir:build
+      - task: r:build
 
   bindings:dev:
     desc: "Build all language bindings in debug mode (skip Rust core)"
@@ -108,6 +114,7 @@ tasks:
       - task: java:build:dev
       - task: csharp:build:dev
       - task: elixir:build:dev
+      - task: r:build:dev
 
   bindings:release:
     desc: "Build all language bindings in release mode (skip Rust core)"
@@ -122,3 +129,4 @@ tasks:
       - task: java:build:release
       - task: csharp:build:release
       - task: elixir:build:release
+      - task: r:build:release

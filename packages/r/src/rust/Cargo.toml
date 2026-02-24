@@ -1,20 +1,20 @@
 [workspace]
 
 [package]
-name = "html_to_markdown_elixir"
+name = "html_to_markdown_r"
 version ="2.25.1"
 edition = "2024"
 license = "MIT"
-description = "Rustler bindings for html-to-markdown"
+description = "extendr bindings for html-to-markdown"
 repository = "https://github.com/kreuzberg-dev/html-to-markdown"
 
 [lib]
-name = "html_to_markdown_elixir"
-crate-type = ["cdylib"]
+name = "html_to_markdown_r"
+crate-type = ["staticlib"]
 
 [dependencies]
 html-to-markdown-rs = { path = "vendor/html-to-markdown-rs", features = ["inline-images", "metadata"] }
-rustler = { version = "0.37" }
+extendr-api = "0.8"
 pprof = { version = "0.15", features = ["flamegraph"], optional = true }
 
 [features]

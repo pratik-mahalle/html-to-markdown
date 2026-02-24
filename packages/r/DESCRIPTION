@@ -1,0 +1,17 @@
+Package: htmltomarkdown
+Title: High-Performance HTML to Markdown Converter
+Version: 2.25.1
+Authors@R: person("Na'aman", "Hirschfeld", email = "nhirschfeld@gmail.com", role = c("aut", "cre"))
+Description: High-performance HTML to Markdown converter powered by a Rust core
+    engine via extendr. Supports full conversion options, metadata extraction,
+    inline image extraction, and visitor-based conversion.
+License: MIT + file LICENSE
+URL: https://github.com/kreuzberg-dev/html-to-markdown
+BugReports: https://github.com/kreuzberg-dev/html-to-markdown/issues
+SystemRequirements: Cargo (Rust's package manager), rustc (>= 1.85)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Suggests:
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3

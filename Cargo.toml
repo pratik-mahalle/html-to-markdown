@@ -8,13 +8,14 @@ members = [
     "crates/html-to-markdown-node",
     "crates/html-to-markdown-wasm",
     "crates/html-to-markdown-py",
-    "packages/ruby/ext/html-to-markdown-rb/native",
     "crates/html-to-markdown-php",
     "tools/benchmark-harness",
     "e2e/wasm-wasmtime",
 ]
 exclude = [
     "packages/elixir/native/html_to_markdown_elixir",
+    "packages/r/src/rust",
+    "packages/ruby/ext/html-to-markdown-rb/native",
     "tests/test_apps/elixir/deps",
     "packages/ruby/rust-vendor"
 ]
@@ -50,9 +51,9 @@ clap = { version = "4.5", features = ["derive"] }
 clap_complete = "4.5"
 clap_mangen = "0.2"
 
-pyo3 = { version = "0.28.1", features = ["abi3-py310"] }
+pyo3 = { version = "0.28.2", features = ["abi3-py310"] }
 
-ext-php-rs = "0.15.4"
+ext-php-rs = "0.15.6"
 
 async-trait = "0.1"
 
