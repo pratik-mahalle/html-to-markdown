@@ -21,7 +21,7 @@ except ImportError:
     sys.exit(1)
 
 try:
-    from jinja2 import Environment, FileSystemLoader, TemplateNotFound
+    from jinja2 import Environment, FileSystemLoader, TemplateNotFound, select_autoescape
 except ImportError:
     print("Error: Jinja2 is required. Install with: pip install pyyaml jinja2")
     sys.exit(1)
@@ -79,7 +79,7 @@ class ReadmeGenerator:
         self.jinja_env = Environment(
             loader=FileSystemLoader(str(self.templates_dir)),
             keep_trailing_newline=True,
-            autoescape=True,
+            autoescape=select_autoescape(default=False, default_for_string=False),
         )
 
         # Register all custom filters using the centralized registry

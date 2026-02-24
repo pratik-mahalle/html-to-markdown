@@ -32,6 +32,9 @@
   <a href="https://hex.pm/packages/html_to_markdown">
     <img src="https://img.shields.io/hexpm/v/html_to_markdown?label=Elixir&color=007ec6" alt="Elixir">
   </a>
+  <a href="https://cran.r-project.org/package=htmltomarkdown">
+    <img src="https://img.shields.io/cran/v/htmltomarkdown?label=R&color=007ec6" alt="R">
+  </a>
 
   <!-- Project Info -->
   <a href="https://github.com/kreuzberg-dev/html-to-markdown/blob/main/LICENSE">
@@ -97,14 +100,14 @@ Basic conversion:
 package main
 
 import (
-    &#34;fmt&#34;
-    &#34;log&#34;
+    "fmt"
+    "log"
 
-    &#34;github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown&#34;
+    "github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown"
 )
 
 func main() {
-    html := &#34;&lt;h1&gt;Hello World&lt;/h1&gt;&lt;p&gt;This is a paragraph.&lt;/p&gt;&#34;
+    html := "<h1>Hello World</h1><p>This is a paragraph.</p>"
 
     markdown, err := htmltomarkdown.Convert(html)
     if err != nil {
@@ -123,30 +126,30 @@ With conversion options:
 package main
 
 import (
-    &#34;fmt&#34;
-    &#34;log&#34;
+    "fmt"
+    "log"
 
-    &#34;github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown&#34;
+    "github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown"
 )
 
 func main() {
     // Check library version
     version := htmltomarkdown.Version()
-    fmt.Printf(&#34;html-to-markdown version: %s\n&#34;, version)
+    fmt.Printf("html-to-markdown version: %s\n", version)
 
-    html := &#34;&lt;h1&gt;Hello&lt;/h1&gt;&lt;p&gt;Welcome&lt;/p&gt;&#34;
+    html := "<h1>Hello</h1><p>Welcome</p>"
 
     // Convert with error handling
     markdown, err := htmltomarkdown.Convert(html)
     if err != nil {
-        log.Fatalf(&#34;Conversion failed: %v&#34;, err)
+        log.Fatalf("Conversion failed: %v", err)
     }
 
     fmt.Println(markdown)
 
     // Alternative: Use MustConvert for panicking on error
-    // Useful when you&#39;re certain conversion won&#39;t fail
-    anotherMarkdown := htmltomarkdown.MustConvert(&#34;&lt;p&gt;Safe HTML&lt;/p&gt;&#34;)
+    // Useful when you're certain conversion won't fail
+    anotherMarkdown := htmltomarkdown.MustConvert("<p>Safe HTML</p>")
     fmt.Println(anotherMarkdown)
 }
 ```

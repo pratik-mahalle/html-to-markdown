@@ -95,4 +95,17 @@ def deps do
   ]
 end
 ```
+{% elif language == 'r' %}
+
+Requires R 4.3+ and a Rust toolchain (cargo, rustc).
+
+```r
+install.packages("htmltomarkdown")
+```
+
+Or install the development version from GitHub:
+
+```r
+devtools::install_github("kreuzberg-dev/html-to-markdown", subdir = "packages/r")
+```
 {% endif %}

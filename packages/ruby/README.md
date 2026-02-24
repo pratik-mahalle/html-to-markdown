@@ -32,6 +32,9 @@
   <a href="https://hex.pm/packages/html_to_markdown">
     <img src="https://img.shields.io/hexpm/v/html_to_markdown?label=Elixir&color=007ec6" alt="Elixir">
   </a>
+  <a href="https://cran.r-project.org/package=htmltomarkdown">
+    <img src="https://img.shields.io/cran/v/htmltomarkdown?label=R&color=007ec6" alt="R">
+  </a>
 
   <!-- Project Info -->
   <a href="https://github.com/kreuzberg-dev/html-to-markdown/blob/main/LICENSE">
@@ -86,9 +89,9 @@ See [Performance Guide](../../examples/performance/) for detailed benchmarks.
 Basic conversion:
 
 ```ruby
-require &#39;html_to_markdown&#39;
+require 'html_to_markdown'
 
-html = &#34;&lt;h1&gt;Hello&lt;/h1&gt;&lt;p&gt;This is &lt;strong&gt;fast&lt;/strong&gt;!&lt;/p&gt;&#34;
+html = "<h1>Hello</h1><p>This is <strong>fast</strong>!</p>"
 markdown = HtmlToMarkdown.convert(html)
 ```
 
@@ -97,9 +100,9 @@ markdown = HtmlToMarkdown.convert(html)
 With conversion options:
 
 ```ruby
-require &#39;html_to_markdown&#39;
+require 'html_to_markdown'
 
-html = &#34;&lt;h1&gt;Hello&lt;/h1&gt;&lt;p&gt;This is &lt;strong&gt;fast&lt;/strong&gt;!&lt;/p&gt;&#34;
+html = "<h1>Hello</h1><p>This is <strong>fast</strong>!</p>"
 markdown = HtmlToMarkdown.convert(html, heading_style: :atx, code_block_style: :fenced)
 ```
 
