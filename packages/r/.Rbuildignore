@@ -1,5 +1,14 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^src/rust/target
-^src/rust/vendor
 ^\.lintr$
+^\.github$
+^README\.Rmd$
+^LICENSE\.md$
+^cran-comments\.md$
+^CRAN-SUBMISSION$
+^src/\.cargo$
+^src/rust/\.cargo$
+^src/rust/vendor$
+^src/rust/target$
+^src/Makevars$
+^src/Makevars\.win$
