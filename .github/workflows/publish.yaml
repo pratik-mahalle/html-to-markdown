@@ -1443,6 +1443,61 @@ jobs:
         run: scripts/publish/elixir/already-published-summary.sh
         shell: bash
 
+  publish-cran:
+    name: Publish CRAN package
+    needs: [prepare, r-cran-package, upload-release-artifacts, check-cran]
+    if: ${{ needs.prepare.result == 'success' && needs.prepare.outputs.tag && needs.prepare.outputs.is_tag == 'true' && (needs.prepare.outputs.dry_run == 'true' || needs.check-cran.outputs.exists != 'true') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.prepare.outputs.ref }}
+
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: "4.4"
+          use-public-rspm: true
+
+      - name: Download CRAN tarball
+        uses: actions/download-artifact@v7
+        with:
+          name: r-cran-package
+          path: dist/r
+
+      - name: Final R CMD check
+        if: ${{ needs.prepare.outputs.dry_run != 'true' && needs.check-cran.outputs.exists != 'true' }}
+        run: |
+          tarball=$(find dist/r -name 'htmltomarkdown_*.tar.gz' -print -quit)
+          R CMD check --as-cran --no-manual "$tarball"
+        shell: bash
+
+      - name: CRAN submission instructions
+        if: ${{ needs.prepare.outputs.dry_run != 'true' && needs.check-cran.outputs.exists != 'true' }}
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          tarball=$(find dist/r -name 'htmltomarkdown_*.tar.gz' -print -quit)
+          {
+            echo "## R / CRAN"
+            echo ""
+            echo "CRAN source package built and checked: \`$(basename "$tarball")\`"
+            echo ""
+            echo "### Manual submission required"
+            echo "1. Download the tarball from the release artifacts"
+            echo "2. Submit at <https://cran.r-project.org/submit.html>"
+            echo "3. Ensure \`cran-comments.md\` is up to date before submitting"
+          } >> "$GITHUB_STEP_SUMMARY"
+        shell: bash
+
+      - name: CRAN package already published
+        if: ${{ needs.check-cran.outputs.exists == 'true' && needs.prepare.outputs.dry_run != 'true' }}
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: scripts/publish/r/already-published-summary.sh
+        shell: bash
+
   publish-nuget:
     name: Publish NuGet package
     needs: [prepare, csharp-package, check-nuget]
