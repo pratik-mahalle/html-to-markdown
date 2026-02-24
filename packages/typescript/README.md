@@ -32,6 +32,9 @@
   <a href="https://hex.pm/packages/html_to_markdown">
     <img src="https://img.shields.io/hexpm/v/html_to_markdown?label=Elixir&color=007ec6" alt="Elixir">
   </a>
+  <a href="https://cran.r-project.org/package=htmltomarkdown">
+    <img src="https://img.shields.io/cran/v/htmltomarkdown?label=R&color=007ec6" alt="R">
+  </a>
 
   <!-- Project Info -->
   <a href="https://github.com/kreuzberg-dev/html-to-markdown/blob/main/LICENSE">
@@ -112,9 +115,9 @@ See [Performance Guide](../../examples/performance/) for detailed benchmarks.
 Basic conversion:
 
 ```typescript
-import { convert } from &#39;@kreuzberg/html-to-markdown&#39;;
+import { convert } from '@kreuzberg/html-to-markdown';
 
-const markdown: string = convert(&#39;&lt;h1&gt;Hello World&lt;/h1&gt;&#39;);
+const markdown: string = convert('<h1>Hello World</h1>');
 console.log(markdown); // # Hello World
 ```
 
@@ -123,15 +126,15 @@ console.log(markdown); // # Hello World
 With conversion options:
 
 ```typescript
-import { convert, ConversionOptions } from &#39;@kreuzberg/html-to-markdown&#39;;
+import { convert, ConversionOptions } from '@kreuzberg/html-to-markdown';
 
 const options: ConversionOptions = {
-  headingStyle: &#39;atx&#39;,
+  headingStyle: 'atx',
   listIndentWidth: 2,
   wrap: true,
 };
 
-const markdown = convert(&#39;&lt;h1&gt;Title&lt;/h1&gt;&lt;p&gt;Content&lt;/p&gt;&#39;, options);
+const markdown = convert('<h1>Title</h1><p>Content</p>', options);
 ```
 
 

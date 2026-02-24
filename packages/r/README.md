@@ -51,30 +51,28 @@
 </div>
 
 
-High-performance HTML to Markdown converter with typed PHP bindings powered by a Rust core.
-Provides a type-safe API with full PHPStan level 9 support, modern PHP 8.2+ features, and comprehensive metadata extraction.
-
-Note: The package was previously published as `goldziher/html-to-markdown`, which still works for backward compatibility.
+High-performance HTML to Markdown converter with R bindings powered by a Rust core via extendr.
+Ship identical Markdown across every runtime while enjoying native performance with extendr bindings.
 
 
 ## Installation
 
 ```bash
-composer require kreuzberg-dev/html-to-markdown
+install.packages("htmltomarkdown")
 ```
 
 
 
-Requires PHP 8.2+. Install the native extension via PIE:
+Requires R 4.3+ and a Rust toolchain (cargo, rustc).
 
-```bash
-pie install kreuzberg-dev/html-to-markdown
+```r
+install.packages("htmltomarkdown")
 ```
 
-Or use Composer (requires ext-html_to_markdown):
+Or install the development version from GitHub:
 
-```bash
-composer require goldziher/html-to-markdown
+```r
+devtools::install_github("kreuzberg-dev/html-to-markdown", subdir = "packages/r")
 ```
 
 
@@ -84,13 +82,13 @@ composer require goldziher/html-to-markdown
 
 ## Performance Snapshot
 
-Apple M4 • Real Wikipedia documents • `convert()` (PHP)
+Apple M4 • Real Wikipedia documents • `convert()` (R)
 
-| Document | Size | Ops/sec |
-| -------- | ---- | ------- |
-| Lists (Timeline) | 129KB | 3,346 |
-| Tables (Countries) | 360KB | 973 |
-| Medium (Python) | 657KB | 485 |
+| Document | Size | Latency | Throughput |
+| -------- | ---- | ------- | ---------- |
+| Lists (Timeline) | 129KB | 0.68ms | 190 MB/s |
+| Tables (Countries) | 360KB | 2.10ms | 171 MB/s |
+| Mixed (Python wiki) | 656KB | 4.75ms | 138 MB/s |
 
 
 See [Performance Guide](../../examples/performance/) for detailed benchmarks.
@@ -100,34 +98,29 @@ See [Performance Guide](../../examples/performance/) for detailed benchmarks.
 
 Basic conversion:
 
-```php
-use HtmlToMarkdown\Service\Converter;
-use function HtmlToMarkdown\convert;
+```r
+library(htmltomarkdown)
 
-// Object-oriented usage
-$converter = Converter::create();
-$markdown = $converter->convert('<h1>Hello</h1><p>This is <strong>fast</strong>!</p>');
-
-// Procedural helper
-$markdown = convert('<h1>Hello</h1>');
+markdown <- convert("<h1>Hello</h1>")
+cat(markdown)
+#> # Hello
 ```
 
 
 
 With conversion options:
 
-```php
-use HtmlToMarkdown\Config\ConversionOptions;
-use HtmlToMarkdown\Service\Converter;
+```r
+library(htmltomarkdown)
 
-$converter = Converter::create();
+opts <- conversion_options(
+  heading_style = "atx",
+  wrap = TRUE,
+  wrap_width = 80L
+)
 
-$options = new ConversionOptions(
-    headingStyle: 'Atx',
-    listIndentWidth: 2,
-);
-
-$markdown = $converter->convert('<h1>Hello</h1>', $options);
+markdown <- convert_with_options("<h1>Hello</h1><p>World</p>", opts)
+cat(markdown)
 ```
 
 
@@ -140,22 +133,7 @@ $markdown = $converter->convert('<h1>Hello</h1>', $options);
 ### Core Functions
 
 
-**`Converter::convert(string $html, ?ConversionOptions $options = null): string`**
-
-Basic HTML-to-Markdown conversion. Fast and simple.
-
-**`Converter::convertWithMetadata(string $html, ?ConversionOptions $options = null, ?MetadataConfig $config = null): [string, array]`**
-
-Extract Markdown plus metadata (headers, links, images, structured data) in a single pass. See [Metadata Extraction Guide](../../examples/metadata-extraction/).
-
-**`Converter::convertWithVisitor(string $html, VisitorInterface $visitor, ?ConversionOptions $options = null): string`**
-
-Customize conversion with visitor callbacks for element interception. See [Visitor Pattern Guide](../../examples/visitor-pattern/).
-
-**`Converter::convertWithInlineImages(string $html, ?InlineImageConfig $config = null): [string, array, array]`**
-
-Extract base64-encoded inline images with metadata.
-
+See the [Visitor Pattern Guide](../../examples/visitor-pattern/) and [Metadata Extraction Guide](../../examples/metadata-extraction/) for comprehensive API documentation and examples.
 
 
 ### Options
@@ -197,21 +175,6 @@ The library supports converting HTML to [Djot](https://djot.net/), a lightweight
 ### Example Usage
 
 
-```php
-use HtmlToMarkdown\Converter;
-use HtmlToMarkdown\ConversionOptions;
-
-$html = "<p>This is <strong>bold</strong> and <em>italic</em> text.</p>";
-
-// Default Markdown output
-$markdown = Converter::convert($html);
-// Result: "This is **bold** and *italic* text."
-
-// Djot output
-$djot = Converter::convert($html, new ConversionOptions(outputFormat: 'djot'));
-// Result: "This is *bold* and _italic_ text."
-```
-
 
 Djot's extended syntax allows you to express more semantic meaning in lightweight text, making it useful for documents that require strikethrough, insertion tracking, or mathematical notation.
 
@@ -231,21 +194,6 @@ The metadata extraction feature enables comprehensive document analysis during c
 **Zero Overhead When Disabled:** Metadata extraction adds negligible overhead and happens during the HTML parsing pass. Disable unused metadata types in `MetadataConfig` to optimize further.
 
 ### Example: Quick Start
-
-
-```php
-<?php
-use HtmlToMarkdown\Converter;
-
-$html = '<h1>Article</h1><img src="test.jpg" alt="test">';
-[$markdown, $metadata] = Converter::convertWithMetadata($html);
-
-echo $metadata['document']['title'];       // Document title
-print_r($metadata['headers']);             // All h1-h6 elements
-print_r($metadata['links']);               // All hyperlinks
-print_r($metadata['images']);              // All images with alt text
-print_r($metadata['structured_data']);     // JSON-LD, Microdata, RDFa
-```
 
 
 
@@ -270,30 +218,6 @@ The visitor pattern enables custom HTML→Markdown conversion logic by providing
 ### Example: Quick Start
 
 
-```php
-<?php
-use HtmlToMarkdown\Converter;
-
-readonly class MyVisitor {
-    public function visitLink(array $ctx, string $href, string $text, ?string $title): array {
-        // Rewrite CDN URLs
-        if (str_starts_with($href, 'https://old-cdn.com')) {
-            $href = str_replace('https://old-cdn.com', 'https://new-cdn.com', $href);
-        }
-        return ['type' => 'custom', 'output' => "[{$text}]({$href})"];
-    }
-
-    public function visitImage(array $ctx, string $src, ?string $alt, ?string $title): array {
-        // Skip tracking pixels
-        return str_contains($src, 'tracking') ? ['type' => 'skip'] : ['type' => 'continue'];
-    }
-}
-
-$html = '<a href="https://old-cdn.com/file.pdf">Download</a>';
-$markdown = Converter::convertWithVisitor($html, new MyVisitor());
-```
-
-
 
 For comprehensive examples including content filtering, link footnotes, accessibility validation, and asynchronous URL validation, see the [Visitor Pattern Guide](../../examples/visitor-pattern/).
 
@@ -308,8 +232,6 @@ For comprehensive examples including content filtering, link footnotes, accessib
 ## Links
 
 - **GitHub:** [github.com/kreuzberg-dev/html-to-markdown](https://github.com/kreuzberg-dev/html-to-markdown)
-
-- **Packagist:** [packagist.org/packages/kreuzberg-dev/html-to-markdown](https://packagist.org/packages/kreuzberg-dev/html-to-markdown)
 
 - **Kreuzberg Ecosystem:** [kreuzberg.dev](https://kreuzberg.dev)
 - **Discord:** [discord.gg/pXxagNK2zN](https://discord.gg/pXxagNK2zN)
