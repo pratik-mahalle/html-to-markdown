@@ -32,6 +32,9 @@
   <a href="https://hex.pm/packages/html_to_markdown">
     <img src="https://img.shields.io/hexpm/v/html_to_markdown?label=Elixir&color=007ec6" alt="Elixir">
   </a>
+  <a href="https://cran.r-project.org/package=htmltomarkdown">
+    <img src="https://img.shields.io/cran/v/htmltomarkdown?label=R&color=007ec6" alt="R">
+  </a>
 
   <!-- Project Info -->
   <a href="https://github.com/kreuzberg-dev/html-to-markdown/blob/main/LICENSE">
@@ -88,7 +91,7 @@ Basic conversion:
 ```python
 from html_to_markdown import convert
 
-html = &#34;&lt;h1&gt;Hello&lt;/h1&gt;&lt;p&gt;This is &lt;strong&gt;fast&lt;/strong&gt;!&lt;/p&gt;&#34;
+html = "<h1>Hello</h1><p>This is <strong>fast</strong>!</p>"
 markdown = convert(html)
 ```
 
@@ -100,7 +103,7 @@ With conversion options:
 from html_to_markdown import ConversionOptions, convert
 
 options = ConversionOptions(
-    heading_style=&#34;atx&#34;,
+    heading_style="atx",
     list_indent_width=2,
 )
 markdown = convert(html, options)
@@ -118,7 +121,7 @@ from html_to_markdown import convert_with_async_visitor
 class AsyncVisitor:
     async def visit_link(self, ctx, href, text, title):
         # Validate URLs asynchronously
-        return {&#34;type&#34;: &#34;continue&#34;}
+        return {"type": "continue"}
 
 markdown = convert_with_async_visitor(html, visitor=AsyncVisitor())
 ```

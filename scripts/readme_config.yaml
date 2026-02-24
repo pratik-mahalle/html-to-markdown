@@ -356,3 +356,44 @@ languages:
       metadata_extraction: "metadata/basic_extraction.md"
       visitor_basic: "visitor/basic_visitor.md"
     migration_version: null
+
+  r:
+    name: R
+    template: language_package.md.jinja
+    output_path: "packages/r/README.md"
+    package_manager:
+      - install.packages
+    package_name: htmltomarkdown
+    install_command: 'install.packages("htmltomarkdown")'
+    description: |
+      High-performance HTML to Markdown converter with R bindings powered by a Rust core via extendr.
+      Ship identical Markdown across every runtime while enjoying native performance with extendr bindings.
+    features:
+      visitor_pattern: true
+      metadata_extraction: true
+      inline_images: true
+      async_support: false
+      cli_proxy: false
+    performance:
+      platform: "Apple M4"
+      function: "convert()"
+      note: "Real Wikipedia documents"
+      benchmarks:
+        - name: "Lists (Timeline)"
+          size: "129KB"
+          latency: "0.68ms"
+          throughput: "190 MB/s"
+        - name: "Tables (Countries)"
+          size: "360KB"
+          latency: "2.10ms"
+          throughput: "171 MB/s"
+        - name: "Mixed (Python wiki)"
+          size: "656KB"
+          latency: "4.75ms"
+          throughput: "138 MB/s"
+    snippets:
+      basic_usage: "getting-started/basic_usage.md"
+      with_options: "getting-started/with_options.md"
+      metadata_extraction: "metadata/basic_extraction.md"
+      visitor_basic: "visitor/basic_visitor.md"
+    migration_version: null

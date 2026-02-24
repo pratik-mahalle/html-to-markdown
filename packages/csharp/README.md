@@ -32,6 +32,9 @@
   <a href="https://hex.pm/packages/html_to_markdown">
     <img src="https://img.shields.io/hexpm/v/html_to_markdown?label=Elixir&color=007ec6" alt="Elixir">
   </a>
+  <a href="https://cran.r-project.org/package=htmltomarkdown">
+    <img src="https://img.shields.io/cran/v/htmltomarkdown?label=R&color=007ec6" alt="R">
+  </a>
 
   <!-- Project Info -->
   <a href="https://github.com/kreuzberg-dev/html-to-markdown/blob/main/LICENSE">
@@ -92,7 +95,7 @@ Basic conversion:
 ```csharp
 using HtmlToMarkdown;
 
-var html = &#34;&lt;h1&gt;Hello World&lt;/h1&gt;&lt;p&gt;This is a paragraph.&lt;/p&gt;&#34;;
+var html = "<h1>Hello World</h1><p>This is a paragraph.</p>";
 
 try
 {
@@ -101,7 +104,7 @@ try
 }
 catch (HtmlToMarkdownException ex)
 {
-    Console.Error.WriteLine($&#34;Conversion failed: {ex.Message}&#34;);
+    Console.Error.WriteLine($"Conversion failed: {ex.Message}");
 }
 ```
 
@@ -114,21 +117,21 @@ using HtmlToMarkdown;
 
 try
 {
-    string html = &#34;&#34;&#34;
-        &lt;html&gt;
-        &lt;head&gt;
-            &lt;title&gt;My Article&lt;/title&gt;
-            &lt;meta name=&#34;description&#34; content=&#34;An interesting read&#34;&gt;
-            &lt;meta name=&#34;author&#34; content=&#34;Jane Doe&#34;&gt;
-            &lt;meta property=&#34;og:image&#34; content=&#34;image.jpg&#34;&gt;
-        &lt;/head&gt;
-        &lt;body&gt;
-            &lt;h1&gt;Welcome&lt;/h1&gt;
-            &lt;a href=&#34;https://example.com&#34;&gt;Link&lt;/a&gt;
-            &lt;img src=&#34;image.jpg&#34; alt=&#34;Featured image&#34;&gt;
-        &lt;/body&gt;
-        &lt;/html&gt;
-        &#34;&#34;&#34;;
+    string html = """
+        <html>
+        <head>
+            <title>My Article</title>
+            <meta name="description" content="An interesting read">
+            <meta name="author" content="Jane Doe">
+            <meta property="og:image" content="image.jpg">
+        </head>
+        <body>
+            <h1>Welcome</h1>
+            <a href="https://example.com">Link</a>
+            <img src="image.jpg" alt="Featured image">
+        </body>
+        </html>
+        """;
 
     var result = HtmlToMarkdownConverter.ConvertWithMetadata(html);
 
@@ -136,11 +139,11 @@ try
     var doc = result.Metadata.Document;
     if (doc.Title != null)
     {
-        Console.WriteLine($&#34;Title: {doc.Title}&#34;);
+        Console.WriteLine($"Title: {doc.Title}");
     }
     if (doc.Author != null)
     {
-        Console.WriteLine($&#34;Author: {doc.Author}&#34;);
+        Console.WriteLine($"Author: {doc.Author}");
     }
 
     // Access Open Graph metadata
@@ -148,25 +151,25 @@ try
     {
         foreach (var (key, value) in doc.OpenGraph)
         {
-            Console.WriteLine($&#34;OG {key}: {value}&#34;);
+            Console.WriteLine($"OG {key}: {value}");
         }
     }
 
     // Count extracted elements
-    Console.WriteLine($&#34;Headers: {result.Metadata.Headers.Count}&#34;);
-    Console.WriteLine($&#34;Links: {result.Metadata.Links.Count}&#34;);
-    Console.WriteLine($&#34;Images: {result.Metadata.Images.Count}&#34;);
+    Console.WriteLine($"Headers: {result.Metadata.Headers.Count}");
+    Console.WriteLine($"Links: {result.Metadata.Links.Count}");
+    Console.WriteLine($"Images: {result.Metadata.Images.Count}");
 
     // Print markdown output
-    Console.WriteLine($&#34;\nMarkdown:\n{result.Markdown}&#34;);
+    Console.WriteLine($"\nMarkdown:\n{result.Markdown}");
 }
 catch (HtmlToMarkdownException ex)
 {
-    Console.Error.WriteLine($&#34;Conversion failed: {ex.Message}&#34;);
+    Console.Error.WriteLine($"Conversion failed: {ex.Message}");
 }
 catch (JsonException ex)
 {
-    Console.Error.WriteLine($&#34;Metadata parsing failed: {ex.Message}&#34;);
+    Console.Error.WriteLine($"Metadata parsing failed: {ex.Message}");
 }
 ```
 
