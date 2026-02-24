@@ -82,6 +82,9 @@ jobs:
         run: task elixir:install
         shell: bash
 
+      - name: Setup R
+        uses: ./.github/actions/setup-r
+
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:

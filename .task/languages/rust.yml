@@ -28,7 +28,7 @@ tasks:
     silent: false
     cmds:
       - cmd: |
-          RB_SYS_RUBY={{.RUBY_FULL_PATH}} RUBY={{.RUBY_FULL_PATH}} cargo build --workspace --exclude html-to-markdown-rb --profile {{.BUILD_PROFILE}} -j {{.NUM_CPUS}}
+          cargo build --workspace --profile {{.BUILD_PROFILE}} -j {{.NUM_CPUS}}
         ignore_error: false
 
   build:dev:
@@ -36,7 +36,7 @@ tasks:
     silent: false
     cmds:
       - cmd: |
-          RB_SYS_RUBY={{.RUBY_FULL_PATH}} RUBY={{.RUBY_FULL_PATH}} cargo build --workspace --exclude html-to-markdown-rb -j {{.NUM_CPUS}}
+          cargo build --workspace -j {{.NUM_CPUS}}
         ignore_error: false
 
   build:release:
@@ -44,7 +44,7 @@ tasks:
     silent: false
     cmds:
       - cmd: |
-          RB_SYS_RUBY={{.RUBY_FULL_PATH}} RUBY={{.RUBY_FULL_PATH}} cargo build --workspace --exclude html-to-markdown-rb --release -j {{.NUM_CPUS}}
+          cargo build --workspace --release -j {{.NUM_CPUS}}
         ignore_error: false
 
   build:ci:
@@ -52,7 +52,7 @@ tasks:
     silent: false
     cmds:
       - cmd: |
-          RB_SYS_RUBY={{.RUBY_FULL_PATH}} RUBY={{.RUBY_FULL_PATH}} CARGO_PROFILE_RELEASE_DEBUG=2 CARGO_PROFILE_RELEASE_STRIP=none cargo build --workspace --exclude html-to-markdown-rb --exclude html-to-markdown-php --release -j {{.NUM_CPUS}}
+          CARGO_PROFILE_RELEASE_DEBUG=2 CARGO_PROFILE_RELEASE_STRIP=none cargo build --workspace --exclude html-to-markdown-php --release -j {{.NUM_CPUS}}
         ignore_error: false
 
   test:
@@ -60,7 +60,7 @@ tasks:
     silent: false
     cmds:
       - cmd: |
-          RB_SYS_RUBY={{.RUBY_FULL_PATH}} RUBY={{.RUBY_FULL_PATH}} RUST_LOG={{.RUST_LOG}} RUST_BACKTRACE={{.RUST_BACKTRACE}} cargo test --release --no-default-features --workspace --exclude html-to-markdown-py --exclude html-to-markdown-rb --exclude html-to-markdown-php -j {{.NUM_CPUS}}
+          RUST_LOG={{.RUST_LOG}} RUST_BACKTRACE={{.RUST_BACKTRACE}} cargo test --release --no-default-features --workspace --exclude html-to-markdown-py --exclude html-to-markdown-php -j {{.NUM_CPUS}}
         ignore_error: false
 
   test:ci:
@@ -69,16 +69,16 @@ tasks:
     cmds:
       - cmd: |
           {{if eq OS "windows"}}
-          RB_SYS_RUBY={{.RUBY_FULL_PATH}} RUBY={{.RUBY_FULL_PATH}} RUST_LOG={{.RUST_LOG}} RUST_BACKTRACE={{.RUST_BACKTRACE}} cargo llvm-cov --features metadata,visitor,async-visitor,inline-images --workspace --exclude html-to-markdown-py --exclude html-to-markdown-rb --exclude html-to-markdown-php --exclude benchmark-harness --lcov --output-path rust-coverage.lcov -j {{.NUM_CPUS}}
+          RUST_LOG={{.RUST_LOG}} RUST_BACKTRACE={{.RUST_BACKTRACE}} cargo llvm-cov --features metadata,visitor,async-visitor,inline-images --workspace --exclude html-to-markdown-py --exclude html-to-markdown-php --exclude benchmark-harness --lcov --output-path rust-coverage.lcov -j {{.NUM_CPUS}}
           {{else}}
-          RB_SYS_RUBY={{.RUBY_FULL_PATH}} RUBY={{.RUBY_FULL_PATH}} RUST_LOG={{.RUST_LOG}} RUST_BACKTRACE={{.RUST_BACKTRACE}} cargo llvm-cov --all-features --workspace --exclude html-to-markdown-py --exclude html-to-markdown-rb --exclude html-to-markdown-php --exclude benchmark-harness --lcov --output-path rust-coverage.lcov -j {{.NUM_CPUS}}
+          RUST_LOG={{.RUST_LOG}} RUST_BACKTRACE={{.RUST_BACKTRACE}} cargo llvm-cov --all-features --workspace --exclude html-to-markdown-py --exclude html-to-markdown-php --exclude benchmark-harness --lcov --output-path rust-coverage.lcov -j {{.NUM_CPUS}}
           {{end}}
         ignore_error: false
       - cmd: |
           {{if eq OS "windows"}}
-          RB_SYS_RUBY={{.RUBY_FULL_PATH}} RUBY={{.RUBY_FULL_PATH}} cargo llvm-cov --features metadata,visitor,async-visitor,inline-images --workspace --exclude html-to-markdown-py --exclude html-to-markdown-rb --exclude html-to-markdown-php --exclude benchmark-harness --summary-only
+          cargo llvm-cov --features metadata,visitor,async-visitor,inline-images --workspace --exclude html-to-markdown-py --exclude html-to-markdown-php --exclude benchmark-harness --summary-only
           {{else}}
-          RB_SYS_RUBY={{.RUBY_FULL_PATH}} RUBY={{.RUBY_FULL_PATH}} cargo llvm-cov --all-features --workspace --exclude html-to-markdown-py --exclude html-to-markdown-rb --exclude html-to-markdown-php --exclude benchmark-harness --summary-only
+          cargo llvm-cov --all-features --workspace --exclude html-to-markdown-py --exclude html-to-markdown-php --exclude benchmark-harness --summary-only
           {{end}}
         ignore_error: false
 
@@ -87,7 +87,7 @@ tasks:
     silent: false
     cmds:
       - cmd: |
-          RB_SYS_RUBY={{.RUBY_FULL_PATH}} RUBY={{.RUBY_FULL_PATH}} RUST_LOG={{.RUST_LOG}} cargo llvm-cov --all-features --workspace --exclude html-to-markdown-py --exclude html-to-markdown-rb --exclude html-to-markdown-php --exclude benchmark-harness --exclude html-to-markdown-wasm-wasmtime-tests --lcov --output-path rust-coverage.lcov -j {{.NUM_CPUS}}
+          RUST_LOG={{.RUST_LOG}} cargo llvm-cov --all-features --workspace --exclude html-to-markdown-py --exclude html-to-markdown-php --exclude benchmark-harness --exclude html-to-markdown-wasm-wasmtime-tests --lcov --output-path rust-coverage.lcov -j {{.NUM_CPUS}}
         ignore_error: false
 
   lint:
@@ -97,7 +97,7 @@ tasks:
       - cmd: cargo fmt --all
         ignore_error: false
       - cmd: |
-          RB_SYS_RUBY={{.RUBY_FULL_PATH}} RUBY={{.RUBY_FULL_PATH}} cargo clippy --workspace --exclude html-to-markdown-rb --fix --allow-dirty --allow-staged -j {{.NUM_CPUS}}
+          cargo clippy --workspace --fix --allow-dirty --allow-staged -j {{.NUM_CPUS}}
         ignore_error: false
 
   lint:check:
@@ -107,7 +107,7 @@ tasks:
       - cmd: cargo fmt --all --check
         ignore_error: false
       - cmd: |
-          RB_SYS_RUBY={{.RUBY_FULL_PATH}} RUBY={{.RUBY_FULL_PATH}} cargo clippy -j {{.NUM_CPUS}} --workspace --exclude html-to-markdown-rb -- -D warnings
+          cargo clippy -j {{.NUM_CPUS}} --workspace -- -D warnings
         ignore_error: false
 
   format:
@@ -132,6 +132,18 @@ tasks:
         ignore_error: false
       - cmd: cargo update
         ignore_error: false
+      - cmd: cargo upgrade --incompatible --manifest-path packages/ruby/ext/html-to-markdown-rb/native/Cargo.toml
+        ignore_error: false
+      - cmd: cargo update --manifest-path packages/ruby/ext/html-to-markdown-rb/native/Cargo.toml
+        ignore_error: false
+      - cmd: cargo upgrade --incompatible --manifest-path packages/elixir/native/html_to_markdown_elixir/Cargo.toml
+        ignore_error: false
+      - cmd: cargo update --manifest-path packages/elixir/native/html_to_markdown_elixir/Cargo.toml
+        ignore_error: false
+      - cmd: cargo upgrade --incompatible --manifest-path packages/r/src/rust/Cargo.toml
+        ignore_error: false
+      - cmd: cargo update --manifest-path packages/r/src/rust/Cargo.toml
+        ignore_error: false
 
   clean:
     desc: "Clean Rust build artifacts"
@@ -145,7 +157,7 @@ tasks:
     silent: false
     cmds:
       - cmd: |
-          RB_SYS_RUBY={{.RUBY_FULL_PATH}} RUBY={{.RUBY_FULL_PATH}} cargo doc --workspace --exclude html-to-markdown-rb --all-features --no-deps --open
+          cargo doc --workspace --all-features --no-deps --open
         ignore_error: false
 
   bench:
@@ -153,5 +165,5 @@ tasks:
     silent: false
     cmds:
       - cmd: |
-          RB_SYS_RUBY={{.RUBY_FULL_PATH}} RUBY={{.RUBY_FULL_PATH}} cargo bench --workspace --exclude html-to-markdown-rb -j {{.NUM_CPUS}}
+          cargo bench --workspace -j {{.NUM_CPUS}}
         ignore_error: false
