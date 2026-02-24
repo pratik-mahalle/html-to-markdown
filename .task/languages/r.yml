@@ -97,9 +97,30 @@ tasks:
       - cmd: Rscript -e 'update.packages(repos = "https://cran.r-project.org", ask = FALSE)'
         ignore_error: true
 
+  vendor:
+    desc: "Vendor R package Rust dependencies (creates vendor.tar.xz)"
+    silent: false
+    cmds:
+      - cmd: scripts/publish/r/vendor-dependencies.sh
+        ignore_error: false
+
+  package:
+    desc: "Build CRAN source package (vendor + R CMD build)"
+    silent: false
+    cmds:
+      - cmd: scripts/publish/r/build-cran-package.sh
+        ignore_error: false
+
+  check:
+    desc: "Run R CMD check --as-cran on built package"
+    silent: false
+    cmds:
+      - cmd: cd {{.R_PKG}} && R CMD check --as-cran --no-manual htmltomarkdown_*.tar.gz
+        ignore_error: false
+
   clean:
     desc: "Clean R build artifacts"
     silent: false
     cmds:
-      - cmd: rm -rf {{.R_PKG}}/src/rust/target {{.R_PKG}}/src/rust/vendor {{.R_PKG}}/src/*.o {{.R_PKG}}/src/*.so {{.R_PKG}}/src/*.dll
+      - cmd: rm -rf {{.R_PKG}}/src/rust/target {{.R_PKG}}/src/rust/vendor {{.R_PKG}}/src/rust/vendor.tar.xz {{.R_PKG}}/src/*.o {{.R_PKG}}/src/*.so {{.R_PKG}}/src/*.dll {{.R_PKG}}/htmltomarkdown_*.tar.gz
         ignore_error: true
