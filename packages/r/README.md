@@ -33,7 +33,7 @@
     <img src="https://img.shields.io/hexpm/v/html_to_markdown?label=Elixir&color=007ec6" alt="Elixir">
   </a>
   <a href="https://kreuzberg-dev.r-universe.dev/htmltomarkdown">
-    <img src="https://kreuzberg-dev.r-universe.dev/badges/htmltomarkdown" alt="R">
+    <img src="https://img.shields.io/badge/R-htmltomarkdown-007ec6" alt="R">
   </a>
 
   <!-- Project Info -->
