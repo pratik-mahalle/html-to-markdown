@@ -179,26 +179,6 @@ jobs:
           VERSION: ${{ needs.prepare.outputs.version }}
         run: scripts/publish/elixir/check-hex-version.sh
 
-  check-cran:
-    name: Check CRAN for existing version
-    needs: prepare
-    if: ${{ needs.prepare.outputs.is_tag == 'true' }}
-    runs-on: ubuntu-latest
-    outputs:
-      exists: ${{ steps.check.outputs.exists }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ needs.prepare.outputs.checkout_ref }}
-          fetch-depth: 0
-
-      - name: Check CRAN version
-        id: check
-        env:
-          VERSION: ${{ needs.prepare.outputs.version }}
-        run: scripts/publish/r/check-cran-version.sh
-
   check-maven:
     name: Check Maven Central for existing version
     needs: prepare
@@ -930,56 +910,6 @@ jobs:
           path: packages/elixir/html_to_markdown-*.tar
           retention-days: 14
 
-  r-cran-package:
-    name: Build R CRAN package
-    needs: prepare
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ needs.prepare.outputs.checkout_ref }}
-          fetch-depth: 0
-
-      - name: Ensure target commit
-        if: ${{ needs.prepare.outputs.target_sha != '' }}
-        env:
-          TARGET_SHA: ${{ needs.prepare.outputs.target_sha }}
-        run: scripts/publish/common/ensure-target-commit.sh
-        shell: bash
-
-      - name: Setup R
-        uses: r-lib/actions/setup-r@v2
-        with:
-          r-version: "4.4"
-          use-public-rspm: true
-
-      - name: Setup Rust
-        uses: ./.github/actions/setup-rust
-
-      - name: Install R dependencies
-        run: Rscript -e 'install.packages(c("devtools", "testthat", "roxygen2"), repos = "https://cran.r-project.org")'
-        shell: bash
-
-      - name: Build CRAN package
-        run: scripts/publish/r/build-cran-package.sh
-        shell: bash
-
-      - name: Run R CMD check
-        working-directory: packages/r
-        run: |
-          tarball=$(find . -maxdepth 1 -name 'htmltomarkdown_*.tar.gz' -print -quit)
-          R CMD check --as-cran --no-manual "$tarball"
-        shell: bash
-
-      - name: Upload CRAN artifact
-        uses: actions/upload-artifact@v6
-        with:
-          name: r-cran-package
-          path: packages/r/htmltomarkdown_*.tar.gz
-          retention-days: 14
-
   csharp-package:
     name: Build C# NuGet package
     needs: [prepare, check-nuget, csharp-ffi]
@@ -1178,7 +1108,6 @@ jobs:
         ruby-gem,
         go-ffi,
         elixir-package,
-        r-cran-package,
         cargo-packages,
       ]
     if: ${{ needs.prepare.outputs.dry_run != 'true' && needs.prepare.outputs.is_tag == 'true' }}
@@ -1251,19 +1180,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ needs.prepare.outputs.tag }}
         run: scripts/publish/upload-elixir-package.sh
-        shell: bash
-
-      - name: Download R CRAN package
-        uses: actions/download-artifact@v7
-        with:
-          name: r-cran-package
-          path: dist/r
-
-      - name: Upload R CRAN package
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ needs.prepare.outputs.tag }}
-        run: scripts/publish/upload-r-cran-package.sh
         shell: bash
 
   publish-crates:
@@ -1441,61 +1357,6 @@ jobs:
         env:
           VERSION: ${{ needs.prepare.outputs.version }}
         run: scripts/publish/elixir/already-published-summary.sh
-        shell: bash
-
-  publish-cran:
-    name: Publish CRAN package
-    needs: [prepare, r-cran-package, upload-release-artifacts, check-cran]
-    if: ${{ needs.prepare.result == 'success' && needs.prepare.outputs.tag && needs.prepare.outputs.is_tag == 'true' && (needs.prepare.outputs.dry_run == 'true' || needs.check-cran.outputs.exists != 'true') }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ needs.prepare.outputs.ref }}
-
-      - name: Setup R
-        uses: r-lib/actions/setup-r@v2
-        with:
-          r-version: "4.4"
-          use-public-rspm: true
-
-      - name: Download CRAN tarball
-        uses: actions/download-artifact@v7
-        with:
-          name: r-cran-package
-          path: dist/r
-
-      - name: Final R CMD check
-        if: ${{ needs.prepare.outputs.dry_run != 'true' && needs.check-cran.outputs.exists != 'true' }}
-        run: |
-          tarball=$(find dist/r -name 'htmltomarkdown_*.tar.gz' -print -quit)
-          R CMD check --as-cran --no-manual "$tarball"
-        shell: bash
-
-      - name: CRAN submission instructions
-        if: ${{ needs.prepare.outputs.dry_run != 'true' && needs.check-cran.outputs.exists != 'true' }}
-        env:
-          VERSION: ${{ needs.prepare.outputs.version }}
-        run: |
-          tarball=$(find dist/r -name 'htmltomarkdown_*.tar.gz' -print -quit)
-          {
-            echo "## R / CRAN"
-            echo ""
-            echo "CRAN source package built and checked: \`$(basename "$tarball")\`"
-            echo ""
-            echo "### Manual submission required"
-            echo "1. Download the tarball from the release artifacts"
-            echo "2. Submit at <https://cran.r-project.org/submit.html>"
-            echo "3. Ensure \`cran-comments.md\` is up to date before submitting"
-          } >> "$GITHUB_STEP_SUMMARY"
-        shell: bash
-
-      - name: CRAN package already published
-        if: ${{ needs.check-cran.outputs.exists == 'true' && needs.prepare.outputs.dry_run != 'true' }}
-        env:
-          VERSION: ${{ needs.prepare.outputs.version }}
-        run: scripts/publish/r/already-published-summary.sh
         shell: bash
 
   publish-nuget:

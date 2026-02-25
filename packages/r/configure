@@ -1,3 +1,18 @@
 #!/usr/bin/env sh
+
+# Vendor html-to-markdown-rs core crate if vendor directory is not populated
+if [ ! -f "src/rust/vendor/html-to-markdown-rs/Cargo.toml" ]; then
+	# Detect monorepo root (two levels up from packages/r)
+	REPO_ROOT="$(cd ../.. 2>/dev/null && pwd)"
+	VENDOR_SCRIPT="${REPO_ROOT}/scripts/ci/r/vendor-core-crate.py"
+
+	if [ -f "${VENDOR_SCRIPT}" ] && [ -d "${REPO_ROOT}/crates/html-to-markdown" ]; then
+		echo "Vendoring html-to-markdown-rs core crate from monorepo..."
+		REPO_ROOT="${REPO_ROOT}" python3 "${VENDOR_SCRIPT}" || {
+			echo "WARNING: Vendoring failed. Build may fail if vendor directory is empty."
+		}
+	fi
+fi
+
 : "${R_HOME=$(R RHOME)}"
 "${R_HOME}/bin/Rscript" tools/config.R
