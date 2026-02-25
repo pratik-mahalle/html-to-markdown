@@ -6,7 +6,7 @@
 use std::ffi::CStr;
 use std::os::raw::c_char;
 
-use crate::error::set_last_error;
+use crate::error::{HtmlToMarkdownErrorCode, set_last_error, set_last_error_code};
 use crate::profiling;
 
 /// Start Rust-side profiling and write a flamegraph to the specified path.
@@ -27,6 +27,7 @@ pub unsafe extern "C" fn html_to_markdown_profile_start(output: *const c_char, f
         Ok(s) => s,
         Err(_) => {
             set_last_error(Some("output path must be valid UTF-8".to_string()));
+            set_last_error_code(HtmlToMarkdownErrorCode::InvalidUtf8);
             return false;
         }
     };

@@ -1054,6 +1054,53 @@ jobs:
           path: dist/go-ffi
           retention-days: 14
 
+  c-ffi-libraries:
+    name: Build C FFI distribution packages (${{ matrix.platform }})
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux-x64
+          - os: ubuntu-24.04-arm
+            platform: linux-arm64
+          - os: windows-latest
+            platform: windows-x64
+          - os: macos-latest
+            platform: darwin-arm64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.prepare.outputs.checkout_ref }}
+          fetch-depth: 0
+
+      - name: Ensure target commit
+        if: ${{ needs.prepare.outputs.target_sha != '' }}
+        env:
+          TARGET_SHA: ${{ needs.prepare.outputs.target_sha }}
+        run: scripts/publish/common/ensure-target-commit.sh
+        shell: bash
+
+      - name: Setup Rust
+        uses: ./.github/actions/setup-rust
+
+      - name: Package C FFI distribution
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: scripts/publish/c-ffi/package-c-ffi.sh "${PLATFORM}" "${VERSION}" dist/c-ffi
+        shell: bash
+
+      - name: Upload C FFI artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: c-ffi-${{ matrix.platform }}
+          path: dist/c-ffi
+          retention-days: 14
+
   cargo-packages:
     name: Package Rust crates
     needs: prepare
@@ -1107,6 +1154,7 @@ jobs:
         cli-binaries,
         ruby-gem,
         go-ffi,
+        c-ffi-libraries,
         elixir-package,
         cargo-packages,
       ]
@@ -1141,6 +1189,13 @@ jobs:
           path: dist/go-ffi
           merge-multiple: false
 
+      - name: Download C FFI artifacts
+        uses: actions/download-artifact@v7
+        with:
+          pattern: c-ffi-*
+          path: dist/c-ffi
+          merge-multiple: false
+
       - name: Download Elixir package
         uses: actions/download-artifact@v7
         with:
@@ -1167,6 +1222,13 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ needs.prepare.outputs.tag }}
         run: scripts/publish/upload-go-ffi-artifacts.sh
+        shell: bash
+
+      - name: Upload C FFI artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+        run: scripts/publish/upload-c-ffi-artifacts.sh
         shell: bash
 
       - name: Create Go module tag
