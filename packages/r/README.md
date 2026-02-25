@@ -32,7 +32,7 @@
   <a href="https://hex.pm/packages/html_to_markdown">
     <img src="https://img.shields.io/hexpm/v/html_to_markdown?label=Elixir&color=007ec6" alt="Elixir">
   </a>
-  <a href="https://cran.r-project.org/package=htmltomarkdown">
+  <a href="https://kreuzberg-dev.r-universe.dev/htmltomarkdown">
     <img src="https://img.shields.io/cran/v/htmltomarkdown?label=R&color=007ec6" alt="R">
   </a>
 
@@ -57,23 +57,18 @@ Ship identical Markdown across every runtime while enjoying native performance w
 
 ## Installation
 
-```bash
-install.packages("htmltomarkdown")
-```
-
-
-
-Requires R 4.3+ and a Rust toolchain (cargo, rustc).
-
 ```r
+# Install from r-universe (recommended)
+install.packages("htmltomarkdown", repos = "https://kreuzberg-dev.r-universe.dev")
+
+# Or install from CRAN
 install.packages("htmltomarkdown")
+
+# Or install the development version from GitHub
+# devtools::install_github("kreuzberg-dev/html-to-markdown", subdir = "packages/r")
 ```
 
-Or install the development version from GitHub:
-
-```r
-devtools::install_github("kreuzberg-dev/html-to-markdown", subdir = "packages/r")
-```
+Requires R 4.3+ and a Rust toolchain (cargo, rustc) when building from source.
 
 
 
