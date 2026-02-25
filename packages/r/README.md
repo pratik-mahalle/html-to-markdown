@@ -33,7 +33,7 @@
     <img src="https://img.shields.io/hexpm/v/html_to_markdown?label=Elixir&color=007ec6" alt="Elixir">
   </a>
   <a href="https://kreuzberg-dev.r-universe.dev/htmltomarkdown">
-    <img src="https://img.shields.io/cran/v/htmltomarkdown?label=R&color=007ec6" alt="R">
+    <img src="https://kreuzberg-dev.r-universe.dev/badges/htmltomarkdown" alt="R">
   </a>
 
   <!-- Project Info -->
@@ -60,9 +60,6 @@ Ship identical Markdown across every runtime while enjoying native performance w
 ```r
 # Install from r-universe (recommended)
 install.packages("htmltomarkdown", repos = "https://kreuzberg-dev.r-universe.dev")
-
-# Or install from CRAN
-install.packages("htmltomarkdown")
 
 # Or install the development version from GitHub
 # devtools::install_github("kreuzberg-dev/html-to-markdown", subdir = "packages/r")
