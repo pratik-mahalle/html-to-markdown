@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.25.2] - 2026-02-25
+
+### Fixed
+
+- **Visitor panic with metadata extraction**: Fixed an out-of-bounds slice panic when using visitors (e.g. image visitors returning `Custom`) combined with metadata extraction on minified HTML. The issue occurred because parent element output offsets became stale after child visitor truncations. (PR #204, thanks @gmalette)
+
 ### Added
 
 - **R language bindings**: Full-parity R bindings via extendr framework with support for `convert()`, `convert_with_options()`, `convert_with_options_handle()`, `convert_with_metadata()`, `convert_with_inline_images()`, `convert_with_visitor()`, and profiling. Includes `conversion_options()` helper, testthat test suite, CI workflow, lintr/styler pre-commit hooks, and task automation.
@@ -16,8 +22,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Workspace restructuring**: Moved Ruby native crate out of the root Cargo workspace into a standalone workspace (matching Elixir/R pattern), resolving `clang-sys` link conflict with `ext-php-rs` 0.15.6.
 - **Rust update task**: Now updates dependencies in all separate workspaces (Ruby, Elixir, R) via `--manifest-path` entries.
+- **Upgraded `wasmtime`** from 41 to 42.
 - **Upgraded `ext-php-rs`** from 0.15.4 to 0.15.6.
 - **Upgraded `pyo3`** from 0.28.1 to 0.28.2.
+- **Upgraded `wasm-bindgen`** from 0.2.112 to 0.2.113.
+- **Upgraded `rustls`** from 0.23.36 to 0.23.37.
 
 ## [2.25.1] - 2026-02-17
 
