@@ -130,6 +130,11 @@ jobs:
         run: task format:check
         shell: bash
 
+      - name: Install C/C++ tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends cppcheck clang-format
+
       - name: Load Cached Prek Dependencies
         id: cached-prek-dependencies
         uses: actions/cache@v5

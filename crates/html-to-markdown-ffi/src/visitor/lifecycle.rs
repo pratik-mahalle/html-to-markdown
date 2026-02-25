@@ -12,7 +12,7 @@ use std::rc::Rc;
 use html_to_markdown_rs::convert_with_visitor;
 use html_to_markdown_rs::visitor::HtmlVisitor;
 
-use crate::error::{capture_error, set_last_error};
+use crate::error::{HtmlToMarkdownErrorCode, capture_error, set_last_error, set_last_error_code};
 use crate::strings::string_to_c_string;
 
 use super::registry::HtmlToMarkdownVisitorCallbacks;
@@ -171,6 +171,7 @@ pub unsafe extern "C" fn html_to_markdown_convert_with_visitor(
         s
     } else {
         set_last_error(Some("html must be valid UTF-8".to_string()));
+        set_last_error_code(HtmlToMarkdownErrorCode::InvalidUtf8);
         return ptr::null_mut();
     };
 
@@ -263,6 +264,7 @@ pub unsafe extern "C" fn html_to_markdown_convert_bytes_with_visitor(
         s
     } else {
         set_last_error(Some("html must be valid UTF-8".to_string()));
+        set_last_error_code(HtmlToMarkdownErrorCode::InvalidUtf8);
         return ptr::null_mut();
     };
 

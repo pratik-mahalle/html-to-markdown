@@ -11,7 +11,7 @@ use std::slice;
 use html_to_markdown_rs::convert;
 use html_to_markdown_rs::safety::guard_panic;
 
-use crate::error::{capture_error, set_last_error};
+use crate::error::{HtmlToMarkdownErrorCode, capture_error, set_last_error, set_last_error_code};
 use crate::profiling;
 use crate::strings::string_to_c_string;
 
@@ -37,6 +37,7 @@ use crate::strings::string_to_c_string;
 pub unsafe extern "C" fn html_to_markdown_convert(html: *const c_char) -> *mut c_char {
     if html.is_null() {
         set_last_error(Some("html pointer was null".to_string()));
+        set_last_error_code(HtmlToMarkdownErrorCode::Internal);
         return ptr::null_mut();
     }
 
@@ -44,6 +45,7 @@ pub unsafe extern "C" fn html_to_markdown_convert(html: *const c_char) -> *mut c
         Ok(s) => s,
         Err(_) => {
             set_last_error(Some("html must be valid UTF-8".to_string()));
+            set_last_error_code(HtmlToMarkdownErrorCode::InvalidUtf8);
             return ptr::null_mut();
         }
     };
@@ -51,10 +53,12 @@ pub unsafe extern "C" fn html_to_markdown_convert(html: *const c_char) -> *mut c
     match guard_panic(|| profiling::maybe_profile(|| convert(html_str, None))) {
         Ok(markdown) => {
             set_last_error(None);
+            set_last_error_code(HtmlToMarkdownErrorCode::Ok);
             match string_to_c_string(markdown, "markdown result") {
                 Ok(c_string) => c_string.into_raw(),
                 Err(err) => {
                     set_last_error(Some(format!("failed to build CString for markdown result: {err}")));
+                    set_last_error_code(HtmlToMarkdownErrorCode::Internal);
                     ptr::null_mut()
                 }
             }
@@ -78,11 +82,13 @@ pub unsafe extern "C" fn html_to_markdown_convert(html: *const c_char) -> *mut c
 pub unsafe extern "C" fn html_to_markdown_convert_with_len(html: *const c_char, len_out: *mut usize) -> *mut c_char {
     if html.is_null() {
         set_last_error(Some("html pointer was null".to_string()));
+        set_last_error_code(HtmlToMarkdownErrorCode::Internal);
         return ptr::null_mut();
     }
 
     if len_out.is_null() {
         set_last_error(Some("len_out pointer was null".to_string()));
+        set_last_error_code(HtmlToMarkdownErrorCode::Internal);
         return ptr::null_mut();
     }
 
@@ -90,6 +96,7 @@ pub unsafe extern "C" fn html_to_markdown_convert_with_len(html: *const c_char, 
         Ok(s) => s,
         Err(_) => {
             set_last_error(Some("html must be valid UTF-8".to_string()));
+            set_last_error_code(HtmlToMarkdownErrorCode::InvalidUtf8);
             return ptr::null_mut();
         }
     };
@@ -97,6 +104,7 @@ pub unsafe extern "C" fn html_to_markdown_convert_with_len(html: *const c_char, 
     match guard_panic(|| profiling::maybe_profile(|| convert(html_str, None))) {
         Ok(markdown) => {
             set_last_error(None);
+            set_last_error_code(HtmlToMarkdownErrorCode::Ok);
             match string_to_c_string(markdown, "markdown result") {
                 Ok(c_string) => {
                     unsafe {
@@ -106,6 +114,7 @@ pub unsafe extern "C" fn html_to_markdown_convert_with_len(html: *const c_char, 
                 }
                 Err(err) => {
                     set_last_error(Some(format!("failed to build CString for markdown result: {err}")));
+                    set_last_error_code(HtmlToMarkdownErrorCode::Internal);
                     ptr::null_mut()
                 }
             }
@@ -133,11 +142,13 @@ pub unsafe extern "C" fn html_to_markdown_convert_bytes_with_len(
 ) -> *mut c_char {
     if html.is_null() {
         set_last_error(Some("html pointer was null".to_string()));
+        set_last_error_code(HtmlToMarkdownErrorCode::Internal);
         return ptr::null_mut();
     }
 
     if len_out.is_null() {
         set_last_error(Some("len_out pointer was null".to_string()));
+        set_last_error_code(HtmlToMarkdownErrorCode::Internal);
         return ptr::null_mut();
     }
 
@@ -146,6 +157,7 @@ pub unsafe extern "C" fn html_to_markdown_convert_bytes_with_len(
         Ok(s) => s,
         Err(_) => {
             set_last_error(Some("html must be valid UTF-8".to_string()));
+            set_last_error_code(HtmlToMarkdownErrorCode::InvalidUtf8);
             return ptr::null_mut();
         }
     };
@@ -153,6 +165,7 @@ pub unsafe extern "C" fn html_to_markdown_convert_bytes_with_len(
     match guard_panic(|| profiling::maybe_profile(|| convert(html_str, None))) {
         Ok(markdown) => {
             set_last_error(None);
+            set_last_error_code(HtmlToMarkdownErrorCode::Ok);
             match string_to_c_string(markdown, "markdown result") {
                 Ok(c_string) => {
                     unsafe {
@@ -162,6 +175,7 @@ pub unsafe extern "C" fn html_to_markdown_convert_bytes_with_len(
                 }
                 Err(err) => {
                     set_last_error(Some(format!("failed to build CString for markdown result: {err}")));
+                    set_last_error_code(HtmlToMarkdownErrorCode::Internal);
                     ptr::null_mut()
                 }
             }
@@ -175,10 +189,11 @@ pub unsafe extern "C" fn html_to_markdown_convert_bytes_with_len(
 
 /// Free a string returned by html_to_markdown_convert.
 ///
+/// Passing NULL is a safe no-op (similar to `free(NULL)` in C).
+///
 /// # Safety
 ///
-/// - `s` must be a string previously returned by `html_to_markdown_convert`
-/// - `s` must not be NULL
+/// - `s` must be a string previously returned by `html_to_markdown_convert`, or NULL
 /// - `s` must not be used after this call
 ///
 /// # Example (C)
