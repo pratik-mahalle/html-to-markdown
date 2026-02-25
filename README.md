@@ -32,6 +32,9 @@
   <a href="https://hex.pm/packages/html_to_markdown">
     <img src="https://img.shields.io/hexpm/v/html_to_markdown?label=Elixir&color=007ec6" alt="Elixir">
   </a>
+  <a href="https://kreuzberg-dev.r-universe.dev/htmltomarkdown">
+    <img src="https://img.shields.io/cran/v/htmltomarkdown?label=R&color=007ec6" alt="R">
+  </a>
 
   <!-- Project Info -->
   <a href="https://github.com/kreuzberg-dev/html-to-markdown/blob/main/LICENSE">
@@ -74,6 +77,7 @@ Each language binding provides comprehensive documentation with installation ins
 - **[Ruby](./packages/ruby/README.md)** – RubyGems package, RBS type definitions, Steep checking
 - **[PHP](./packages/php/README.md)** – Composer package + PIE extension, PHP 8.4+, PHPStan level 9
 - **[Elixir](./packages/elixir/README.md)** – Hex package, Rustler NIF bindings, Elixir 1.19+
+- **[R](./packages/r/README.md)** – r-universe / CRAN package, extendr bindings, R 4.3+
 
 **JavaScript/TypeScript:**
 - **[Node.js / TypeScript](./packages/typescript/README.md)** – Native NAPI-RS bindings for Node.js/Bun, fastest performance, WebAssembly for browsers/Deno
