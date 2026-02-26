@@ -53,18 +53,14 @@
   </a>
 </div>
 
-
 High-performance HTML to Markdown converter with Go bindings to the Rust core library.
 Supports automatic downloading of prebuilt FFI libraries for Linux, macOS, and Windows with customizable caching.
-
 
 ## Installation
 
 ```bash
 go get github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown
 ```
-
-
 
 Requires Go 1.25+. After installing the package, run `go generate` to automatically download the platform-specific FFI library:
 
@@ -75,25 +71,6 @@ go generate
 This downloads the native library from GitHub releases and generates the necessary CGO flags. The library is cached in `~/.html-to-markdown/` for subsequent builds.
 
 Alternatively, you can manually set `CGO_CFLAGS` and `CGO_LDFLAGS` environment variables if you prefer to manage the FFI library yourself.
-
-
-
-
-
-
-## Performance Snapshot
-
-Apple M4 • Real Wikipedia documents • `Convert()` (Go)
-
-| Document | Size | Latency | Throughput |
-| -------- | ---- | ------- | ---------- |
-| Lists (Timeline) | 129KB | 0.46ms | 277.5 MB/s |
-| Tables (Countries) | 360KB | 1.37ms | 262.1 MB/s |
-| Mixed (Python wiki) | 656KB | 2.75ms | 237.9 MB/s |
-
-
-See [Performance Guide](../../examples/performance/) for detailed benchmarks.
-
 
 ## Quick Start
 
@@ -121,9 +98,76 @@ func main() {
 }
 ```
 
+With `MustConvert` (panics on error, useful when input is known-safe):
 
+```go
+package main
 
-With conversion options:
+import (
+    "fmt"
+
+    "github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown"
+)
+
+func main() {
+    markdown := htmltomarkdown.MustConvert("<p>Safe HTML</p>")
+    fmt.Println(markdown)
+
+    version := htmltomarkdown.Version()
+    fmt.Printf("html-to-markdown version: %s\n", version)
+}
+```
+
+## API Reference
+
+### Core Functions
+
+**`Convert(html string) (string, error)`**
+
+Basic HTML-to-Markdown conversion. Returns the converted Markdown string or an error if conversion fails. Handles memory management automatically.
+
+**`MustConvert(html string) string`**
+
+Like `Convert` but panics on error. Useful when conversion errors are unexpected.
+
+**`ConvertWithMetadata(html string) (MetadataExtraction, error)`**
+
+Convert HTML to Markdown and extract comprehensive metadata (document info, headers, links, images, structured data) in a single pass.
+
+**`MustConvertWithMetadata(html string) MetadataExtraction`**
+
+Like `ConvertWithMetadata` but panics on error.
+
+**`ConvertWithVisitor(html string, visitor Visitor, options *ConversionOptions) (string, error)`**
+
+Customize conversion with visitor callbacks for element interception. Supports 40+ callbacks for text, inline elements, links, images, headings, lists, blocks, and tables.
+
+**`Version() string`**
+
+Returns the version string of the underlying html-to-markdown library.
+
+### Options
+
+**`ConversionOptions`** -- Key configuration fields:
+- `heading_style`: Heading format (`"underlined"` | `"atx"` | `"atx_closed"`) -- default: `"underlined"`
+- `list_indent_width`: Spaces per indent level -- default: `2`
+- `bullets`: Bullet characters cycle -- default: `"*+-"`
+- `wrap`: Enable text wrapping -- default: `false`
+- `wrap_width`: Wrap at column -- default: `80`
+- `code_language`: Default fenced code block language -- default: none
+- `extract_metadata`: Embed metadata as YAML frontmatter -- default: `false`
+- `output_format`: Output markup format (`"markdown"` | `"djot"`) -- default: `"markdown"`
+
+**`MetadataConfig`** -- Selective metadata extraction:
+- `extract_headers`: h1-h6 elements -- default: `true`
+- `extract_links`: Hyperlinks -- default: `true`
+- `extract_images`: Image elements -- default: `true`
+- `extract_structured_data`: JSON-LD, Microdata, RDFa -- default: `true`
+- `max_structured_data_size`: Size limit in bytes -- default: `100KB`
+
+## Metadata Extraction
+
+The metadata extraction feature enables comprehensive document analysis during conversion. Extract document properties, headers, links, images, and structured data in a single pass.
 
 ```go
 package main
@@ -136,122 +180,71 @@ import (
 )
 
 func main() {
-    // Check library version
-    version := htmltomarkdown.Version()
-    fmt.Printf("html-to-markdown version: %s\n", version)
+    html := `<html>
+      <head>
+        <title>My Article</title>
+        <meta name="description" content="A great article">
+      </head>
+      <body>
+        <h1>Main Title</h1>
+        <p>Content with <a href="https://example.com">a link</a></p>
+        <img src="image.jpg" alt="An image">
+      </body>
+    </html>`
 
-    html := "<h1>Hello</h1><p>Welcome</p>"
-
-    // Convert with error handling
-    markdown, err := htmltomarkdown.Convert(html)
+    result, err := htmltomarkdown.ConvertWithMetadata(html)
     if err != nil {
-        log.Fatalf("Conversion failed: %v", err)
+        log.Fatal(err)
     }
 
-    fmt.Println(markdown)
-
-    // Alternative: Use MustConvert for panicking on error
-    // Useful when you're certain conversion won't fail
-    anotherMarkdown := htmltomarkdown.MustConvert("<p>Safe HTML</p>")
-    fmt.Println(anotherMarkdown)
+    fmt.Println(result.Markdown)
+    fmt.Printf("Title: %s\n", *result.Metadata.Document.Title)
+    fmt.Printf("Headers: %d\n", len(result.Metadata.Headers))
+    fmt.Printf("Links: %d\n", len(result.Metadata.Links))
+    fmt.Printf("Images: %d\n", len(result.Metadata.Images))
 }
 ```
 
+## Visitor Pattern
 
-
-
-
-
-## API Reference
-
-### Core Functions
-
-
-**`Convert(html string) (string, error)`**
-
-Basic HTML-to-Markdown conversion. Fast and simple.
-
-**`ConvertWithMetadata(html string, options *ConversionOptions, config *MetadataConfig) (string, Metadata, error)`**
-
-Extract Markdown plus metadata in a single pass. See [Metadata Extraction Guide](../../examples/metadata-extraction/).
-
-**`ConvertWithInlineImages(html string, config *InlineImageConfig) (string, []ImageData, []string, error)`**
-
-Extract base64-encoded inline images with metadata.
-
-
-
-### Options
-
-**`ConversionOptions`** – Key configuration fields:
-- `heading_style`: Heading format (`"underlined"` | `"atx"` | `"atx_closed"`) — default: `"underlined"`
-- `list_indent_width`: Spaces per indent level — default: `2`
-- `bullets`: Bullet characters cycle — default: `"*+-"`
-- `wrap`: Enable text wrapping — default: `false`
-- `wrap_width`: Wrap at column — default: `80`
-- `code_language`: Default fenced code block language — default: none
-- `extract_metadata`: Embed metadata as YAML frontmatter — default: `false`
-- `output_format`: Output markup format (`"markdown"` | `"djot"`) — default: `"markdown"`
-
-**`MetadataConfig`** – Selective metadata extraction:
-- `extract_headers`: h1-h6 elements — default: `true`
-- `extract_links`: Hyperlinks — default: `true`
-- `extract_images`: Image elements — default: `true`
-- `extract_structured_data`: JSON-LD, Microdata, RDFa — default: `true`
-- `max_structured_data_size`: Size limit in bytes — default: `100KB`
-
-
-## Djot Output Format
-
-The library supports converting HTML to [Djot](https://djot.net/), a lightweight markup language similar to Markdown but with a different syntax for some elements. Set `output_format` to `"djot"` to use this format.
-
-### Syntax Differences
-
-| Element | Markdown | Djot |
-|---------|----------|------|
-| Strong | `**text**` | `*text*` |
-| Emphasis | `*text*` | `_text_` |
-| Strikethrough | `~~text~~` | `{-text-}` |
-| Inserted/Added | N/A | `{+text+}` |
-| Highlighted | N/A | `{=text=}` |
-| Subscript | N/A | `~text~` |
-| Superscript | N/A | `^text^` |
-
-### Example Usage
-
+The visitor pattern enables custom HTML-to-Markdown conversion logic by providing callbacks for specific HTML elements during traversal. Use visitors to transform content, filter elements, validate structure, or collect analytics.
 
 ```go
-import "github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown"
+package main
 
-html := "<p>This is <strong>bold</strong> and <em>italic</em> text.</p>"
+import (
+    "fmt"
+    "log"
+    "strings"
 
-// Default Markdown output
-markdown, _ := htmltomarkdown.Convert(html)
-// Result: "This is **bold** and *italic* text."
+    "github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown"
+)
 
-// Note: Djot output format configuration is not yet supported in Go bindings
+func main() {
+    visitor := &htmltomarkdown.BaseVisitor{}
+    visitor.OnVisitLink = func(ctx htmltomarkdown.NodeContext, href, text, title string) htmltomarkdown.VisitResult {
+        // Rewrite CDN URLs
+        if strings.HasPrefix(href, "https://old-cdn.com") {
+            href = strings.Replace(href, "https://old-cdn.com", "https://new-cdn.com", 1)
+            return htmltomarkdown.VisitResult{Type: htmltomarkdown.VisitCustom, Output: fmt.Sprintf("[%s](%s)", text, href)}
+        }
+        return htmltomarkdown.VisitResult{Type: htmltomarkdown.VisitContinue}
+    }
+
+    html := `<a href="https://old-cdn.com/file.pdf">Download</a>`
+    markdown, err := htmltomarkdown.ConvertWithVisitor(html, visitor, nil)
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println(markdown)
+}
 ```
-
-
-Djot's extended syntax allows you to express more semantic meaning in lightweight text, making it useful for documents that require strikethrough, insertion tracking, or mathematical notation.
-
-
-
-
-
-
-## Examples
-
-- [Visitor Pattern Guide](../../examples/visitor-pattern/)
-- [Metadata Extraction Guide](../../examples/metadata-extraction/)
-- [Performance Guide](../../examples/performance/)
 
 ## Links
 
+- **Documentation:** [docs.html-to-markdown.kreuzberg.dev](https://docs.html-to-markdown.kreuzberg.dev)
 - **GitHub:** [github.com/kreuzberg-dev/html-to-markdown](https://github.com/kreuzberg-dev/html-to-markdown)
-
 - **Go Packages:** [pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2](https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2)
-
 - **Kreuzberg Ecosystem:** [kreuzberg.dev](https://kreuzberg.dev)
 - **Discord:** [discord.gg/pXxagNK2zN](https://discord.gg/pXxagNK2zN)
 
@@ -272,14 +265,4 @@ All contributions must follow our code quality standards (enforced via pre-commi
 
 ## License
 
-MIT License – see [LICENSE](https://github.com/kreuzberg-dev/html-to-markdown/blob/main/LICENSE).
-
-## Support
-
-If you find this library useful, consider [sponsoring the project](https://github.com/sponsors/kreuzberg-dev).
-
-Have questions or run into issues? We're here to help:
-
-- **GitHub Issues:** [github.com/kreuzberg-dev/html-to-markdown/issues](https://github.com/kreuzberg-dev/html-to-markdown/issues)
-- **Discussions:** [github.com/kreuzberg-dev/html-to-markdown/discussions](https://github.com/kreuzberg-dev/html-to-markdown/discussions)
-- **Discord Community:** [discord.gg/pXxagNK2zN](https://discord.gg/pXxagNK2zN)
+MIT License -- see [LICENSE](https://github.com/kreuzberg-dev/html-to-markdown/blob/main/LICENSE).
