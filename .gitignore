@@ -122,6 +122,12 @@ obj/
 !packages/go/v2/bin/
 !packages/go/v2/bin/benchmark.go
 
+# C FFI test binaries and build artifacts
+crates/html-to-markdown-ffi/tests/c/test_*
+!crates/html-to-markdown-ffi/tests/c/test_*.c
+crates/html-to-markdown-ffi/tests/c/*.o
+crates/html-to-markdown-ffi/tests/c/*.dSYM/
+
 # AI Rules generated files
 .claude/agents/
 .mcp.json
