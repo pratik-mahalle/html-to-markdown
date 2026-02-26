@@ -195,7 +195,7 @@ See [Tag Preservation](../concepts/tag-preservation.md) for details.
 
 ## Image Handling
 
-### Skip Images
+### Skip Images <span class="version-badge">v2.21.0</span>
 
 Omit all `<img>` elements from output:
 
@@ -241,7 +241,7 @@ options = ConversionOptions(default_title=True)
 
 ## Tables
 
-### BR in Tables
+### BR in Tables <span class="version-badge">v2.22.4</span>
 
 Preserve line breaks inside table cells using `<br>` tags:
 
@@ -332,7 +332,7 @@ This differs from `preserve_tags` (which keeps the HTML) and from the default be
 
 ---
 
-## Output Format
+## Output Format <span class="version-badge new">v2.23.0</span>
 
 Convert to Markdown (default) or Djot:
 

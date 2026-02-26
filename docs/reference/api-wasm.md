@@ -3,7 +3,7 @@ title: WASM API Reference
 description: API reference for the @kreuzberg/html-to-markdown-wasm npm package
 ---
 
-# WASM API Reference
+# WASM API Reference <span class="version-badge">v2.3.0</span>
 
 **Package:** [`@kreuzberg/html-to-markdown-wasm`](https://www.npmjs.com/package/@kreuzberg/html-to-markdown-wasm) | **Version:** 2.26.0
 

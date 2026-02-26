@@ -145,10 +145,6 @@ extra:
     - icon: fontawesome/brands/rust
       link: https://crates.io/crates/html-to-markdown-rs
       name: View on crates.io
-  version:
-    provider: mike
-    default: latest
-    alias: true
   status:
     new: Recently added
     deprecated: Deprecated

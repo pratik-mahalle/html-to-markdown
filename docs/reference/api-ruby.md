@@ -3,7 +3,7 @@ title: Ruby API Reference
 description: API reference for the html-to-markdown Ruby gem
 ---
 
-# Ruby API Reference
+# Ruby API Reference <span class="version-badge">v2.5.1</span>
 
 **Gem:** [`html-to-markdown`](https://rubygems.org/gems/html-to-markdown) | **Version:** 2.26.0 | **Ruby:** 3.2+
 

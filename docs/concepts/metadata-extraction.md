@@ -1,4 +1,4 @@
-# Metadata Extraction
+# Metadata Extraction <span class="version-badge">v2.13.0</span>
 
 html-to-markdown can extract structured metadata from HTML documents during conversion, all in a single pass over the DOM tree. This is useful for SEO analysis, content indexing, table-of-contents generation, link validation, and content migration workflows.
 

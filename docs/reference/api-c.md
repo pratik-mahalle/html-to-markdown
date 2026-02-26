@@ -3,7 +3,7 @@ title: C FFI API Reference
 description: API reference for the html_to_markdown C FFI header
 ---
 
-# C FFI API Reference
+# C FFI API Reference <span class="version-badge new">v2.26.0</span>
 
 **Header:** `html_to_markdown.h` | **Library:** `libhtml_to_markdown_ffi` | **Version:** 2.26.0
 

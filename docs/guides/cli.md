@@ -170,7 +170,7 @@ html-to-markdown input.html --whitespace-mode strict
 html-to-markdown input.html --strip-newlines
 ```
 
-### Metadata Extraction
+### Metadata Extraction <span class="version-badge">v2.13.0</span>
 
 Extract metadata alongside conversion. When `--with-metadata` is used, the output is JSON with `markdown` and `metadata` fields:
 
@@ -243,7 +243,7 @@ html-to-markdown input.html --highlight-style html
 html-to-markdown input.html --highlight-style bold
 ```
 
-### Output Format
+### Output Format <span class="version-badge new">v2.23.0</span>
 
 ```bash
 # Markdown (default)
