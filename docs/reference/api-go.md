@@ -3,7 +3,7 @@ title: Go API Reference
 description: API reference for the htmltomarkdown Go package
 ---
 
-# Go API Reference
+# Go API Reference <span class="version-badge">v2.8.0</span>
 
 **Package:** [`htmltomarkdown`](https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown) | **Version:** 2.26.0 | **Go:** 1.21+
 

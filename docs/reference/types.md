@@ -66,7 +66,7 @@ The primary configuration type for HTML to Markdown conversion. See the [Configu
 
 ---
 
-## MetadataConfig
+## MetadataConfig <span class="version-badge">v2.13.0</span>
 
 Configuration controlling which metadata types are extracted during conversion.
 
@@ -132,7 +132,7 @@ Configuration controlling which metadata types are extracted during conversion.
 
 ---
 
-## ExtendedMetadata
+## ExtendedMetadata <span class="version-badge">v2.13.0</span>
 
 The result type containing all extracted metadata from an HTML document.
 
@@ -146,7 +146,7 @@ The result type containing all extracted metadata from an HTML document.
 
 ---
 
-## DocumentMetadata
+## DocumentMetadata <span class="version-badge">v2.13.0</span>
 
 Document-level metadata extracted from `<head>` and top-level elements.
 
@@ -166,7 +166,7 @@ Document-level metadata extracted from `<head>` and top-level elements.
 
 ---
 
-## HeaderMetadata
+## HeaderMetadata <span class="version-badge">v2.13.0</span>
 
 Heading element (h1-h6) metadata.
 
@@ -180,7 +180,7 @@ Heading element (h1-h6) metadata.
 
 ---
 
-## LinkMetadata
+## LinkMetadata <span class="version-badge">v2.13.0</span>
 
 Hyperlink (`<a>`) element metadata.
 
@@ -206,7 +206,7 @@ Hyperlink (`<a>`) element metadata.
 
 ---
 
-## ImageMetadata
+## ImageMetadata <span class="version-badge">v2.13.0</span>
 
 Image element metadata.
 
@@ -230,7 +230,7 @@ Image element metadata.
 
 ---
 
-## StructuredData
+## StructuredData <span class="version-badge">v2.13.0</span>
 
 Machine-readable structured data block.
 
@@ -260,7 +260,7 @@ Machine-readable structured data block.
 
 ---
 
-## Visitor Types
+## Visitor Types <span class="version-badge new">v2.23.0</span>
 
 ### NodeContext
 

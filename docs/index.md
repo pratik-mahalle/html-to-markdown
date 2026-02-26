@@ -18,8 +18,8 @@ Convert HTML to clean, readable Markdown at 150--280 MB/s. A single Rust core wi
 | :material-lightning-bolt: | **Blazing Fast** | 150--280 MB/s throughput, 10--80x faster than pure Python alternatives |
 | :material-translate: | **Polyglot** | 12 native bindings -- Rust, Python, TypeScript, Ruby, PHP, Go, Java, C#, Elixir, R, C, WASM |
 | :material-file-document-check: | **Smart Conversion** | Nested tables, code blocks, task lists, hOCR, and complex HTML structures |
-| :material-tag-text: | **Metadata Extraction** | Title, description, headers, links, images, Open Graph, JSON-LD, Microdata |
-| :material-eye: | **Visitor Pattern** | Custom callbacks for content filtering, URL rewriting, and domain-specific dialects |
+| :material-tag-text: | **Metadata Extraction** <span class="version-badge">v2.13.0</span> | Title, description, headers, links, images, Open Graph, JSON-LD, Microdata |
+| :material-eye: | **Visitor Pattern** <span class="version-badge new">v2.23.0</span> | Custom callbacks for content filtering, URL rewriting, and domain-specific dialects |
 | :material-shield-check: | **Secure by Default** | Built-in HTML sanitization powered by ammonia prevents malicious content |
 
 ---

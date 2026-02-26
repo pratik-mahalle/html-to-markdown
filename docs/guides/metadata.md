@@ -1,4 +1,4 @@
-# Metadata Extraction Guide
+# Metadata Extraction Guide <span class="version-badge">v2.13.0</span>
 
 This guide shows how to extract structured metadata from HTML documents during conversion using the `convert_with_metadata()` API.
 

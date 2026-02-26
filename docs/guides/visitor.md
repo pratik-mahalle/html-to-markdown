@@ -1,4 +1,4 @@
-# Visitor Pattern Guide
+# Visitor Pattern Guide <span class="version-badge new">v2.23.0</span>
 
 This guide shows how to create custom visitors that modify HTML-to-Markdown conversion behavior. Visitors let you intercept specific HTML elements and control their output without modifying the library.
 

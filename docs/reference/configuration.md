@@ -69,7 +69,7 @@ Controls how `<mark>` elements are rendered.
 | `"bold"` | `**text**` | Render as bold |
 | `"none"` | `text` | Strip formatting, plain text |
 
-### `output_format`
+### `output_format` <span class="version-badge new">v2.23.0</span>
 
 Target markup format for conversion.
 
@@ -181,7 +181,7 @@ Controls how soft line breaks (from `<br>`) are rendered in Markdown.
 
 ## Content Filtering Options
 
-### `preserve_tags`
+### `preserve_tags` <span class="version-badge">v2.5.0</span>
 
 HTML tags to preserve as-is in the output (keep original HTML, no Markdown conversion).
 
@@ -195,7 +195,7 @@ HTML tags to strip (extract inner text content only, no Markdown conversion for 
 
 **Type:** `string[]` | **Default:** `[]`
 
-### `skip_images`
+### `skip_images` <span class="version-badge">v2.21.0</span>
 
 Skip all `<img>` elements during conversion, omitting them entirely from output.
 
@@ -227,7 +227,7 @@ Add a default title element to the HTML if none exists before conversion.
 
 ## Table Options
 
-### `br_in_tables`
+### `br_in_tables` <span class="version-badge">v2.22.4</span>
 
 Use HTML `<br>` elements in tables instead of spaces for line breaks.
 
