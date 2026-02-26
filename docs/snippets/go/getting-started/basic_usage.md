@@ -1,9 +1,3 @@
-# Basic HTML to Markdown Conversion
-
-Convert simple HTML to Markdown with the `Convert` function.
-
-## Example
-
 ```go
 package main
 
@@ -25,17 +19,3 @@ func main() {
     fmt.Println(markdown)
 }
 ```
-
-## Output
-
-```
-# Hello World
-
-This is a paragraph.
-```
-
-## Notes
-
-- The `Convert` function takes a string of HTML and returns the converted Markdown as a string, or an error.
-- Use `Convert` for error handling with the standard Go error interface.
-- For panicking on error (when you're certain conversion won't fail), use `MustConvert(html)` instead.

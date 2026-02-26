@@ -169,7 +169,22 @@ The library supports converting HTML to [Djot](https://djot.net/), a lightweight
 
 ### Example Usage
 
+```r
+library(htmltomarkdown)
 
+html <- "<p>This is <strong>bold</strong> and <em>italic</em> text.</p>"
+
+# Default Markdown output
+markdown <- convert(html)
+cat(markdown)
+#> This is **bold** and *italic* text.
+
+# Djot output
+opts <- conversion_options(output_format = "djot")
+djot <- convert_with_options(html, opts)
+cat(djot)
+#> This is *bold* and _italic_ text.
+```
 
 Djot's extended syntax allows you to express more semantic meaning in lightweight text, making it useful for documents that require strikethrough, insertion tracking, or mathematical notation.
 
