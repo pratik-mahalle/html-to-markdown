@@ -85,6 +85,9 @@ vendor/
 *.swo
 *~
 
+# MkDocs
+site/
+
 # OS
 .DS_Store
 Thumbs.db
