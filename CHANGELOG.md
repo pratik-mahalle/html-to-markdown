@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.26.0] - 2026-02-26
+
+### Added
+
+- **C FFI distribution infrastructure**: Distribution-grade C FFI library with CMake/pkg-config integration, installation scripts, and packaging for system-level consumption.
+- **C FFI test coverage**: Comprehensive C test suite covering conversion, metadata extraction, error handling, visitor pattern, profiling, and version queries.
+- **C documentation and examples**: C API reference, getting-started snippets, and example programs for basic conversion, metadata extraction, and visitor pattern usage.
+
+### Fixed
+
+- **R package r-universe build**: Configure scripts now download the source archive from GitHub when the monorepo is unavailable, enabling r-universe and standalone source installs to vendor crates automatically.
+
 ## [2.25.2] - 2026-02-25
 
 ### Fixed
