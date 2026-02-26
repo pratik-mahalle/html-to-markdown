@@ -3,7 +3,7 @@ title: Java API Reference
 description: API reference for the dev.kreuzberg html-to-markdown Java package
 ---
 
-# Java API Reference
+# Java API Reference <span class="version-badge new">v2.24.2</span>
 
 **Package:** [`dev.kreuzberg:html-to-markdown`](https://central.sonatype.com/artifact/dev.kreuzberg/html-to-markdown) | **Version:** 2.26.0 | **Java:** 22+ (Panama FFI)
 

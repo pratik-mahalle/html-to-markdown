@@ -3,7 +3,7 @@ title: C# API Reference
 description: API reference for the KreuzbergDev.HtmlToMarkdown NuGet package
 ---
 
-# C# API Reference
+# C# API Reference <span class="version-badge">v2.8.0</span>
 
 **Package:** [`KreuzbergDev.HtmlToMarkdown`](https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown) | **Version:** 2.26.0 | **.NET:** 8.0+
 

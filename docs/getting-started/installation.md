@@ -13,6 +13,8 @@ html-to-markdown provides native bindings for 12 language ecosystems, plus a sta
 
 === "Python"
 
+    <span class="version-badge">v2.0.0</span>
+
     ```bash
     pip install html-to-markdown
     ```
@@ -31,6 +33,8 @@ html-to-markdown provides native bindings for 12 language ecosystems, plus a sta
         The Python binding is the same one used internally by [kreuzberg](https://docs.kreuzberg.dev) for its HTML conversion pipeline. If you are already using kreuzberg for document processing, html-to-markdown is included as a dependency.
 
 === "TypeScript / Node.js"
+
+    <span class="version-badge">v2.3.0</span>
 
     For **Node.js** and **Bun** (native NAPI-RS bindings, best performance):
 
@@ -56,6 +60,8 @@ html-to-markdown provides native bindings for 12 language ecosystems, plus a sta
 
 === "Rust"
 
+    <span class="version-badge">v2.0.0</span>
+
     ```bash
     cargo add html-to-markdown-rs
     ```
@@ -73,6 +79,8 @@ html-to-markdown provides native bindings for 12 language ecosystems, plus a sta
 
 === "Ruby"
 
+    <span class="version-badge">v2.5.1</span>
+
     ```bash
     gem install html-to-markdown
     ```
@@ -89,6 +97,8 @@ html-to-markdown provides native bindings for 12 language ecosystems, plus a sta
 
 === "PHP"
 
+    <span class="version-badge">v2.5.6</span>
+
     ```bash
     composer require kreuzberg-dev/html-to-markdown
     ```
@@ -99,6 +109,8 @@ html-to-markdown provides native bindings for 12 language ecosystems, plus a sta
 
 === "Go"
 
+    <span class="version-badge">v2.8.0</span>
+
     ```bash
     go get github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown
     ```
@@ -108,6 +120,8 @@ html-to-markdown provides native bindings for 12 language ecosystems, plus a sta
     The Go binding uses FFI to call the Rust core. The shared library is automatically downloaded and cached on first use. Set `HTML_TO_MARKDOWN_FFI_PATH` to provide a custom library path, or `HTML_TO_MARKDOWN_FFI_CACHE_DIR` to control the cache directory.
 
 === "Java"
+
+    <span class="version-badge new">v2.24.2</span>
 
     Add to your `pom.xml`:
 
@@ -131,6 +145,8 @@ html-to-markdown provides native bindings for 12 language ecosystems, plus a sta
 
 === "C#"
 
+    <span class="version-badge">v2.8.0</span>
+
     ```bash
     dotnet add package KreuzbergDev.HtmlToMarkdown
     ```
@@ -146,6 +162,8 @@ html-to-markdown provides native bindings for 12 language ecosystems, plus a sta
     The C# binding uses P/Invoke for FFI to the Rust core.
 
 === "Elixir"
+
+    <span class="version-badge">v2.8.2</span>
 
     Add to your `mix.exs` dependencies:
 
@@ -169,6 +187,8 @@ html-to-markdown provides native bindings for 12 language ecosystems, plus a sta
 
 === "R"
 
+    <span class="version-badge new">v2.25.2</span>
+
     Install from r-universe:
 
     ```r
@@ -183,6 +203,8 @@ html-to-markdown provides native bindings for 12 language ecosystems, plus a sta
 
 === "C (FFI)"
 
+    <span class="version-badge new">v2.26.0</span>
+
     Download the pre-built shared library from the [GitHub Releases](https://github.com/kreuzberg-dev/html-to-markdown/releases) page, or build from source:
 
     ```bash
@@ -194,6 +216,8 @@ html-to-markdown provides native bindings for 12 language ecosystems, plus a sta
     **Requirements:** Any C compiler with C11 support
 
 === "WASM (Browser)"
+
+    <span class="version-badge">v2.3.0</span>
 
     Install the npm package:
 

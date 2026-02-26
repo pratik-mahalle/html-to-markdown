@@ -29,20 +29,20 @@ Key performance characteristics:
 
 Every binding wraps the same Rust core, producing **identical Markdown output** regardless of which language you use. No logic is duplicated in binding code -- all conversion logic lives in Rust.
 
-| Binding | Mechanism | Package |
-|---|---|---|
-| **Rust** | Native | [`html-to-markdown-rs`](https://crates.io/crates/html-to-markdown-rs) |
-| **Python** | PyO3 | [`html-to-markdown`](https://pypi.org/project/html-to-markdown/) |
-| **TypeScript / Node.js** | NAPI-RS | [`@kreuzberg/html-to-markdown-node`](https://www.npmjs.com/package/@kreuzberg/html-to-markdown-node) |
-| **WASM (Browser)** | wasm-bindgen | [`@kreuzberg/html-to-markdown-wasm`](https://www.npmjs.com/package/@kreuzberg/html-to-markdown-wasm) |
-| **Ruby** | Magnus | [`html-to-markdown`](https://rubygems.org/gems/html-to-markdown) |
-| **PHP** | ext-php-rs | [`kreuzberg-dev/html-to-markdown`](https://packagist.org/packages/kreuzberg-dev/html-to-markdown) |
-| **Go** | CGO / FFI | [`htmltomarkdown`](https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown) |
-| **Java** | Panama FFM API | [`dev.kreuzberg:html-to-markdown`](https://central.sonatype.com/artifact/dev.kreuzberg/html-to-markdown) |
-| **C#** | P/Invoke | [`KreuzbergDev.HtmlToMarkdown`](https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/) |
-| **Elixir** | Rustler NIF | [`html_to_markdown`](https://hex.pm/packages/html_to_markdown) |
-| **R** | extendr | [`htmltomarkdown`](https://kreuzberg-dev.r-universe.dev/htmltomarkdown) |
-| **C** | FFI | [Releases](https://github.com/kreuzberg-dev/html-to-markdown/releases) |
+| Binding | Mechanism | Package | Since |
+|---|---|---|---|
+| **Rust** | Native | [`html-to-markdown-rs`](https://crates.io/crates/html-to-markdown-rs) | <span class="version-badge">v2.0.0</span> |
+| **Python** | PyO3 | [`html-to-markdown`](https://pypi.org/project/html-to-markdown/) | <span class="version-badge">v2.0.0</span> |
+| **TypeScript / Node.js** | NAPI-RS | [`@kreuzberg/html-to-markdown-node`](https://www.npmjs.com/package/@kreuzberg/html-to-markdown-node) | <span class="version-badge">v2.3.0</span> |
+| **WASM (Browser)** | wasm-bindgen | [`@kreuzberg/html-to-markdown-wasm`](https://www.npmjs.com/package/@kreuzberg/html-to-markdown-wasm) | <span class="version-badge">v2.3.0</span> |
+| **Ruby** | Magnus | [`html-to-markdown`](https://rubygems.org/gems/html-to-markdown) | <span class="version-badge">v2.5.1</span> |
+| **PHP** | ext-php-rs | [`kreuzberg-dev/html-to-markdown`](https://packagist.org/packages/kreuzberg-dev/html-to-markdown) | <span class="version-badge">v2.5.6</span> |
+| **Go** | CGO / FFI | [`htmltomarkdown`](https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown) | <span class="version-badge">v2.8.0</span> |
+| **Java** | Panama FFM API | [`dev.kreuzberg:html-to-markdown`](https://central.sonatype.com/artifact/dev.kreuzberg/html-to-markdown) | <span class="version-badge new">v2.24.2</span> |
+| **C#** | P/Invoke | [`KreuzbergDev.HtmlToMarkdown`](https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/) | <span class="version-badge">v2.8.0</span> |
+| **Elixir** | Rustler NIF | [`html_to_markdown`](https://hex.pm/packages/html_to_markdown) | <span class="version-badge">v2.8.2</span> |
+| **R** | extendr | [`htmltomarkdown`](https://kreuzberg-dev.r-universe.dev/htmltomarkdown) | <span class="version-badge new">v2.25.2</span> |
+| **C** | FFI | [Releases](https://github.com/kreuzberg-dev/html-to-markdown/releases) | <span class="version-badge new">v2.26.0</span> |
 
 ---
 
@@ -61,7 +61,7 @@ html-to-markdown handles complex HTML structures that trip up simpler converters
 
 ---
 
-## Metadata Extraction
+## Metadata Extraction <span class="version-badge">v2.13.0</span>
 
 Extract comprehensive document metadata alongside the Markdown conversion in a single pass. No need for a separate parsing step.
 
@@ -79,7 +79,7 @@ Available in: Rust, Python, TypeScript/Node.js, Ruby, PHP, Go, Java, C#, Elixir,
 
 ---
 
-## Visitor Pattern
+## Visitor Pattern <span class="version-badge new">v2.23.0</span>
 
 The visitor pattern lets you intercept and customize the conversion of specific HTML elements. Register callbacks for headings, links, images, lists, code blocks, and more.
 
@@ -148,7 +148,7 @@ Control every aspect of the Markdown output through `ConversionOptions`:
 
 ---
 
-## Tag Preservation
+## Tag Preservation <span class="version-badge">v2.5.0</span>
 
 When Markdown is not expressive enough, preserve specific HTML tags unconverted in the output. Useful for:
 
@@ -197,7 +197,7 @@ html-to-markdown --heading-style atx --wrap --wrap-width 80 input.html
 
 ---
 
-## WASM Support
+## WASM Support <span class="version-badge">v2.3.0</span>
 
 Run html-to-markdown in the browser, Deno, or Cloudflare Workers via WebAssembly. The WASM build provides the same conversion quality as the native bindings with no server round-trips.
 

@@ -1,4 +1,4 @@
-# Visitor Pattern
+# Visitor Pattern <span class="version-badge new">v2.23.0</span>
 
 The visitor pattern allows you to customize how specific HTML elements are converted to Markdown. Instead of modifying the library itself, you provide callback functions that intercept elements during conversion and return custom output.
 

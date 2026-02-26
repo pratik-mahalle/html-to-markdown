@@ -1,4 +1,4 @@
-# Tag Preservation
+# Tag Preservation <span class="version-badge">v2.5.0</span>
 
 Tag preservation allows you to keep specific HTML elements as raw HTML in the Markdown output instead of converting them to Markdown syntax. This is useful when Markdown cannot represent the full richness of certain HTML structures.
 
