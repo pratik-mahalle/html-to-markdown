@@ -35,6 +35,9 @@
   <a href="https://cran.r-project.org/package=htmltomarkdown">
     <img src="https://img.shields.io/cran/v/htmltomarkdown?label=R&color=007ec6" alt="R">
   </a>
+  <a href="https://github.com/kreuzberg-dev/html-to-markdown/releases">
+    <img src="https://img.shields.io/badge/C-FFI-007ec6" alt="C">
+  </a>
 
   <!-- Project Info -->
   <a href="https://github.com/kreuzberg-dev/html-to-markdown/blob/main/LICENSE">
