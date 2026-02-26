@@ -16,6 +16,7 @@ are guaranteed across languages.
 - [Go](#go-githubcomkreuzberg-devhtml-to-markdownpackagesgohtmltomarkdown)
 - [Java](#java-iogithubkreuzberg-devhtml-to-markdown)
 - [.NET](#net-kreuzbergdevhtmltomarkdown)
+- [C / FFI](#c--ffi-html-to-markdown-ffi)
 - [Command-line](#command-line-html-to-markdown-cli)
 
 ---
@@ -289,6 +290,54 @@ using HtmlToMarkdown;
 var md = Converter.Convert("<h1>Hello</h1><p>.NET binding</p>");
 Console.WriteLine(md);
 ```
+
+---
+
+## C / FFI (`html-to-markdown-ffi`)
+
+### Install
+
+Build the FFI library from source:
+
+```bash
+cargo build --release -p html-to-markdown-ffi
+```
+
+The build produces a static library (`libhtml_to_markdown_ffi.a`) and a C header
+(`crates/html-to-markdown-ffi/html_to_markdown.h`). Link against the static
+library in your project.
+
+### Usage
+
+```c
+#include "html_to_markdown.h"
+#include <stdio.h>
+
+int main(void) {
+    const char *html = "<h1>Hello</h1><p>C binding</p>";
+    char *md = html_to_markdown_convert(html);
+    if (md) {
+        printf("%s\n", md);
+        html_to_markdown_free_string(md);
+    }
+    return 0;
+}
+```
+
+Compile:
+
+```bash
+cc -I crates/html-to-markdown-ffi -o demo demo.c \
+    -L target/release -lhtml_to_markdown_ffi -lpthread -ldl -lm
+```
+
+### Features
+
+- Thread-safe, all functions are reentrant
+- Visitor pattern support for custom element handling
+- Metadata extraction via JSON output
+- Error codes via `html_to_markdown_last_error_code()`
+- Version query via `html_to_markdown_version()`
 
 ---
 
