@@ -69,7 +69,7 @@ replacements = {
     r"^thiserror\.workspace\s*=\s*true\s*$": 'thiserror = "2.0"',
     r"^base64\.workspace\s*=\s*true\s*$": 'base64 = "0.22"',
     r"^ahash\.workspace\s*=\s*true\s*$": 'ahash = "0.8"',
-    r"^html5ever\.workspace\s*=\s*true\s*$": 'html5ever = "0.36"',
+    r"^html5ever\.workspace\s*=\s*true\s*$": 'html5ever = "0.38.0"',
     r"^async-trait\s*=\s*{\s*workspace\s*=\s*true,\s*optional\s*=\s*true\s*}\s*$": 'async-trait = { version = "0.1", optional = true }',
 }
 

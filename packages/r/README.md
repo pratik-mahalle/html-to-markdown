@@ -18,7 +18,7 @@
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown?label=Java&color=007ec6" alt="Java">
   </a>
   <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown">
-    <img src="https://img.shields.io/badge/Go-v2.25.1-007ec6" alt="Go">
+    <img src="https://img.shields.io/badge/Go-v2.26.1-007ec6" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/">
     <img src="https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown?label=C%23&color=007ec6" alt="C#">
@@ -33,10 +33,7 @@
     <img src="https://img.shields.io/hexpm/v/html_to_markdown?label=Elixir&color=007ec6" alt="Elixir">
   </a>
   <a href="https://kreuzberg-dev.r-universe.dev/htmltomarkdown">
-    <img src="https://img.shields.io/badge/R-htmltomarkdown-007ec6" alt="R">
-  </a>
-  <a href="https://github.com/kreuzberg-dev/html-to-markdown/releases">
-    <img src="https://img.shields.io/badge/C-FFI-007ec6" alt="C">
+    <img src="https://img.shields.io/cran/v/htmltomarkdown?label=R&color=007ec6" alt="R">
   </a>
 
   <!-- Project Info -->
@@ -60,15 +57,23 @@ Ship identical Markdown across every runtime while enjoying native performance w
 
 ## Installation
 
-```r
-# Install from r-universe (recommended)
-install.packages("htmltomarkdown", repos = "https://kreuzberg-dev.r-universe.dev")
-
-# Or install the development version from GitHub
-# devtools::install_github("kreuzberg-dev/html-to-markdown", subdir = "packages/r")
+```bash
+install.packages("htmltomarkdown")
 ```
 
-Requires R 4.3+ and a Rust toolchain (cargo, rustc) when building from source.
+
+
+Requires R 4.3+ and a Rust toolchain (cargo, rustc).
+
+```r
+install.packages("htmltomarkdown")
+```
+
+Or install the development version from GitHub:
+
+```r
+devtools::install_github("kreuzberg-dev/html-to-markdown", subdir = "packages/r")
+```
 
 
 
@@ -96,9 +101,9 @@ Basic conversion:
 ```r
 library(htmltomarkdown)
 
-markdown <- convert("<h1>Hello</h1>")
+html <- "<h1>Hello</h1><p>This is <strong>fast</strong>!</p>"
+markdown <- convert(html)
 cat(markdown)
-#> # Hello
 ```
 
 
@@ -169,22 +174,7 @@ The library supports converting HTML to [Djot](https://djot.net/), a lightweight
 
 ### Example Usage
 
-```r
-library(htmltomarkdown)
 
-html <- "<p>This is <strong>bold</strong> and <em>italic</em> text.</p>"
-
-# Default Markdown output
-markdown <- convert(html)
-cat(markdown)
-#> This is **bold** and *italic* text.
-
-# Djot output
-opts <- conversion_options(output_format = "djot")
-djot <- convert_with_options(html, opts)
-cat(djot)
-#> This is *bold* and _italic_ text.
-```
 
 Djot's extended syntax allows you to express more semantic meaning in lightweight text, making it useful for documents that require strikethrough, insertion tracking, or mathematical notation.
 

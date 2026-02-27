@@ -58,7 +58,7 @@ runs:
     - name: Configure sccache environment
       shell: bash
       run: |
-        if [ "${{ inputs.use-sccache }}" = "true" ]; then
+        if [ "${{ inputs.use-sccache }}" = "true" ] && command -v sccache &>/dev/null; then
           echo "SCCACHE_GHA_ENABLED=true" >> "$GITHUB_ENV"
           echo "RUSTC_WRAPPER=sccache" >> "$GITHUB_ENV"
         else
