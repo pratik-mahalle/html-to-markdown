@@ -18,7 +18,7 @@
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown?label=Java&color=007ec6" alt="Java">
   </a>
   <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown">
-    <img src="https://img.shields.io/badge/Go-v2.25.1-007ec6" alt="Go">
+    <img src="https://img.shields.io/badge/Go-v2.26.1-007ec6" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/">
     <img src="https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown?label=C%23&color=007ec6" alt="C#">
@@ -32,11 +32,8 @@
   <a href="https://hex.pm/packages/html_to_markdown">
     <img src="https://img.shields.io/hexpm/v/html_to_markdown?label=Elixir&color=007ec6" alt="Elixir">
   </a>
-  <a href="https://cran.r-project.org/package=htmltomarkdown">
+  <a href="https://kreuzberg-dev.r-universe.dev/htmltomarkdown">
     <img src="https://img.shields.io/cran/v/htmltomarkdown?label=R&color=007ec6" alt="R">
-  </a>
-  <a href="https://github.com/kreuzberg-dev/html-to-markdown/releases">
-    <img src="https://img.shields.io/badge/C-FFI-007ec6" alt="C">
   </a>
 
   <!-- Project Info -->
@@ -79,13 +76,13 @@ Requires Java 25+ with Panama FFI support.
 <dependency>
     <groupId>dev.kreuzberg</groupId>
     <artifactId>html-to-markdown</artifactId>
-    <version>2.25.1</version>
+    <version>2.26.1</version>
 </dependency>
 ```
 
 **Gradle (Kotlin DSL):**
 ```kotlin
-implementation("dev.kreuzberg:html-to-markdown:2.25.1")
+implementation("dev.kreuzberg:html-to-markdown:2.26.1")
 ```
 
 
@@ -119,10 +116,6 @@ public class Example {
         String html = "<h1>Hello World</h1><p>This is a <strong>test</strong>.</p>";
         String markdown = HtmlToMarkdown.convert(html);
         System.out.println(markdown);
-        // Output:
-        // # Hello World
-        //
-        // This is a **test**.
     }
 }
 ```
@@ -137,49 +130,15 @@ import dev.kreuzberg.htmltomarkdown.metadata.MetadataExtraction;
 
 public class MetadataExample {
     public static void main(String[] args) {
-        String html = """
-            <html>
-            <head>
-                <title>My Article</title>
-                <meta name="description" content="An interesting read">
-                <meta name="author" content="Jane Doe">
-                <meta property="og:image" content="image.jpg">
-            </head>
-            <body>
-                <h1>Welcome</h1>
-                <a href="https://example.com">Link</a>
-                <img src="image.jpg" alt="Featured image">
-            </body>
-            </html>
-            """;
+        String html = "<html><head><title>My Page</title></head>"
+            + "<body><h1>Welcome</h1><a href=\"https://example.com\">Link</a></body></html>";
 
-        try {
-            MetadataExtraction result = HtmlToMarkdown.convertWithMetadata(html);
+        MetadataExtraction result = HtmlToMarkdown.convertWithMetadata(html);
 
-            // Access document metadata
-            var doc = result.metadata().document();
-            if (doc.title() != null) {
-                System.out.println("Title: " + doc.title());
-            }
-            if (doc.author() != null) {
-                System.out.println("Author: " + doc.author());
-            }
-
-            // Access Open Graph metadata
-            doc.openGraph().forEach((key, value) ->
-                System.out.println("OG " + key + ": " + value)
-            );
-
-            // Count extracted elements
-            System.out.println("Headers: " + result.metadata().headers().size());
-            System.out.println("Links: " + result.metadata().links().size());
-            System.out.println("Images: " + result.metadata().images().size());
-
-            // Print markdown output
-            System.out.println("\nMarkdown:\n" + result.markdown());
-        } catch (HtmlToMarkdown.ConversionException e) {
-            System.err.println("Conversion failed: " + e.getMessage());
-        }
+        System.out.println("Markdown: " + result.markdown());
+        System.out.println("Title: " + result.metadata().document().title());
+        System.out.println("Headers: " + result.metadata().headers().size());
+        System.out.println("Links: " + result.metadata().links().size());
     }
 }
 ```
