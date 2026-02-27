@@ -38,4 +38,4 @@ runs:
     - name: Install R dependencies
       if: inputs.install-deps == 'true'
       shell: bash
-      run: scripts/ci/r/install-deps.sh
+      run: ${{ github.workspace }}/scripts/ci/r/install-deps.sh

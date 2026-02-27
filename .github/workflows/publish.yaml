@@ -1155,7 +1155,6 @@ jobs:
         ruby-gem,
         go-ffi,
         c-ffi-libraries,
-        elixir-package,
         cargo-packages,
       ]
     if: ${{ needs.prepare.outputs.dry_run != 'true' && needs.prepare.outputs.is_tag == 'true' }}
@@ -1196,12 +1195,6 @@ jobs:
           path: dist/c-ffi
           merge-multiple: false
 
-      - name: Download Elixir package
-        uses: actions/download-artifact@v7
-        with:
-          name: elixir-hex-package
-          path: dist/elixir
-
       - name: Upload PHP PIE source bundle
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -1235,13 +1228,6 @@ jobs:
         env:
           VERSION: ${{ needs.prepare.outputs.version }}
         run: scripts/publish/go/create-module-tag.sh "v${VERSION}"
-        shell: bash
-
-      - name: Upload Elixir package
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ needs.prepare.outputs.tag }}
-        run: scripts/publish/upload-elixir-package.sh
         shell: bash
 
   publish-crates:
@@ -1374,14 +1360,29 @@ jobs:
 
   publish-hex:
     name: Publish Hex package
-    needs: [prepare, elixir-package, upload-release-artifacts, check-hex]
+    needs: [prepare, elixir-package, check-hex]
     if: ${{ needs.prepare.result == 'success' && needs.prepare.outputs.tag && needs.prepare.outputs.dry_run != 'true' && needs.prepare.outputs.is_tag == 'true' && needs.check-hex.outputs.exists != 'true' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
           ref: ${{ needs.prepare.outputs.ref }}
+
+      - name: Download Hex artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: elixir-hex-package
+          path: dist/elixir
+
+      - name: Upload Elixir package to GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+        run: scripts/publish/upload-elixir-package.sh
+        shell: bash
 
       - name: Setup Elixir
         uses: erlef/setup-beam@v1
