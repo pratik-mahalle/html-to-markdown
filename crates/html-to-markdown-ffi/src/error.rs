@@ -61,7 +61,9 @@ pub fn classify_conversion_error(err: &ConversionError) -> HtmlToMarkdownErrorCo
         ConversionError::ConfigError(_) => HtmlToMarkdownErrorCode::Internal,
         ConversionError::IoError(_) => HtmlToMarkdownErrorCode::Internal,
         ConversionError::Panic(_) | ConversionError::Other(_) => HtmlToMarkdownErrorCode::Internal,
-        #[cfg(feature = "visitor")]
+        // The dependency on html-to-markdown-rs unconditionally enables the visitor
+        // feature, so ConversionError::Visitor always exists regardless of this
+        // crate's own feature flags.
         ConversionError::Visitor(_) => HtmlToMarkdownErrorCode::Visitor,
     }
 }

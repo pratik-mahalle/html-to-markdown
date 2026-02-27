@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 
-use anyhow::{Context, Result};
+use anyhow::Result;
 use html_to_markdown_rs::{ConversionOptions, HeadingStyle};
 use std::{
     env, fs,
@@ -129,7 +129,7 @@ fn build_wasm_module() -> Result<Option<PathBuf>> {
     let status = command
         .current_dir(workspace_root())
         .status()
-        .context("unable to spawn cargo build for wasm artefact")?;
+        .map_err(|e| anyhow::anyhow!("unable to spawn cargo build for wasm artefact: {e}"))?;
     if !status.success() {
         anyhow::bail!("building html-to-markdown-wasm failed");
     }
@@ -162,22 +162,22 @@ impl WasmHarness {
         let instance = Instance::new(&mut store, &module, &[])?;
         let memory = instance
             .get_memory(&mut store, "memory")
-            .context("wasm memory export missing")?;
+            .ok_or_else(|| anyhow::anyhow!("wasm memory export missing"))?;
         let alloc = instance
             .get_typed_func::<u32, u32>(&mut store, "htmd_alloc")
-            .context("htmd_alloc export missing")?;
+            .map_err(|e| anyhow::anyhow!("htmd_alloc export missing: {e}"))?;
         let dealloc = instance
             .get_typed_func::<(u32, u32), ()>(&mut store, "htmd_dealloc")
-            .context("htmd_dealloc export missing")?;
+            .map_err(|e| anyhow::anyhow!("htmd_dealloc export missing: {e}"))?;
         let convert = instance
             .get_typed_func::<(u32, u32), u32>(&mut store, "htmd_convert")
-            .context("htmd_convert export missing")?;
+            .map_err(|e| anyhow::anyhow!("htmd_convert export missing: {e}"))?;
         let convert_underlined = instance
             .get_typed_func::<(u32, u32), u32>(&mut store, "htmd_convert_underlined")
-            .context("htmd_convert_underlined export missing")?;
+            .map_err(|e| anyhow::anyhow!("htmd_convert_underlined export missing: {e}"))?;
         let result_ptr = instance
             .get_typed_func::<(), u32>(&mut store, "htmd_result_ptr")
-            .context("htmd_result_ptr export missing")?;
+            .map_err(|e| anyhow::anyhow!("htmd_result_ptr export missing: {e}"))?;
 
         Ok(Some(Self {
             store,
@@ -191,28 +191,31 @@ impl WasmHarness {
     }
 
     fn write_buffer(&mut self, bytes: &[u8]) -> Result<(u32, u32)> {
-        let ptr = self.alloc.call(&mut self.store, bytes.len() as u32)?;
+        let ptr = self
+            .alloc
+            .call(&mut self.store, bytes.len() as u32)
+            .map_err(|e| anyhow::anyhow!("htmd_alloc trap: {e}"))?;
         self.memory
             .write(&mut self.store, ptr as usize, bytes)
-            .context("failed to write into wasm memory")?;
+            .map_err(|e| anyhow::anyhow!("failed to write into wasm memory: {e}"))?;
         Ok((ptr, bytes.len() as u32))
     }
 
     fn free_buffer(&mut self, ptr: u32, len: u32) -> Result<()> {
         self.dealloc
             .call(&mut self.store, (ptr, len))
-            .context("failed to free wasm memory")
+            .map_err(|e| anyhow::anyhow!("failed to free wasm memory: {e}"))
     }
 
     fn read_result(&mut self, len: u32) -> Result<String> {
         let ptr = self
             .result_ptr
             .call(&mut self.store, ())
-            .context("failed to fetch result pointer")?;
+            .map_err(|e| anyhow::anyhow!("failed to fetch result pointer: {e}"))?;
         let mut buffer = vec![0u8; len as usize];
         self.memory
             .read(&mut self.store, ptr as usize, &mut buffer)
-            .context("unable to read result bytes from wasm memory")?;
+            .map_err(|e| anyhow::anyhow!("unable to read result bytes from wasm memory: {e}"))?;
         Ok(String::from_utf8(buffer)?)
     }
 
@@ -229,7 +232,7 @@ impl WasmHarness {
         let out_len = self
             .convert
             .call(&mut self.store, (ptr, len))
-            .context("htmd_convert trap")?;
+            .map_err(|e| anyhow::anyhow!("htmd_convert trap: {e}"))?;
         self.free_buffer(ptr, len)?;
         self.read_markdown(out_len)
     }
@@ -239,7 +242,7 @@ impl WasmHarness {
         let out_len = self
             .convert_underlined
             .call(&mut self.store, (ptr, len))
-            .context("htmd_convert_underlined trap")?;
+            .map_err(|e| anyhow::anyhow!("htmd_convert_underlined trap: {e}"))?;
         self.free_buffer(ptr, len)?;
         self.read_markdown(out_len)
     }
