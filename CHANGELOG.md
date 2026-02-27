@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.26.1] - 2026-02-27
+
+### Fixed
+
+- **YAML frontmatter in `convert_with_metadata` output**: `convert_with_metadata` no longer prepends YAML frontmatter to the markdown string. Since metadata is returned as a structured `ExtendedMetadata` object, embedding it in the content string was redundant and polluted the output.
+
 ## [2.26.0] - 2026-02-26
 
 ### Added

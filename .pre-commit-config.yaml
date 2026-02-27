@@ -75,7 +75,7 @@ repos:
         args: [--style=file]
         files: ^crates/html-to-markdown-ffi/tests/c/
       - id: cppcheck
-        args: ["--std=c11", "--enable=warning,style,performance", "--suppress=missingIncludeSystem"]
+        args: ["--std=c11", "--enable=warning,style,performance", "--suppress=missingIncludeSystem", "--suppress=unusedStructMember"]
         files: ^crates/html-to-markdown-ffi/tests/c/
 
   - repo: https://github.com/gherynos/pre-commit-java
