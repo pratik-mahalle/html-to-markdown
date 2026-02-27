@@ -36,7 +36,15 @@ defmodule HtmlToMarkdown.MixProject do
     [
       licenses: ["MIT"],
       links: %{GitHub: @source_url},
-      files: ~w(lib native mix.exs README.md .formatter.exs)
+      files:
+        ~w(lib mix.exs README.md .formatter.exs) ++
+          [
+            "native/html_to_markdown_elixir/src",
+            "native/html_to_markdown_elixir/vendor",
+            "native/html_to_markdown_elixir/.cargo",
+            "native/html_to_markdown_elixir/Cargo.toml",
+            "native/html_to_markdown_elixir/Cargo.lock"
+          ]
     ]
   end
 
