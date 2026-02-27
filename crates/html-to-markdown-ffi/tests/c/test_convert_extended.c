@@ -27,7 +27,7 @@ int main(void) {
     /* Test convert_with_len with NULL input */
     {
         uintptr_t len = 0;
-        char *result = html_to_markdown_convert_with_len(NULL, &len);
+        const char *result = html_to_markdown_convert_with_len(NULL, &len);
         assert(result == NULL);
     }
 
@@ -35,8 +35,8 @@ int main(void) {
     {
         const char *html = "<p>World</p>";
         uintptr_t len_out = 0;
-        char *result = html_to_markdown_convert_bytes_with_len(
-            (const uint8_t *)html, strlen(html), &len_out);
+        char *result =
+            html_to_markdown_convert_bytes_with_len((const uint8_t *)html, strlen(html), &len_out);
         assert(result != NULL);
         assert(len_out > 0);
         assert(len_out == strlen(result));
@@ -47,8 +47,8 @@ int main(void) {
     /* Test convert_bytes_with_len with zero length */
     {
         uintptr_t len_out = 0;
-        char *result = html_to_markdown_convert_bytes_with_len(
-            (const uint8_t *)"ignored", 0, &len_out);
+        char *result =
+            html_to_markdown_convert_bytes_with_len((const uint8_t *)"ignored", 0, &len_out);
         assert(result != NULL);
         assert(len_out == strlen(result));
         html_to_markdown_free_string(result);
