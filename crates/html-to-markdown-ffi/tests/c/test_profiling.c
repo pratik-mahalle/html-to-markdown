@@ -24,7 +24,8 @@ int main(void) {
         if (started) {
             /* Do some work to profile */
             char *md = html_to_markdown_convert("<h1>Profile test</h1>");
-            if (md) html_to_markdown_free_string(md);
+            if (md)
+                html_to_markdown_free_string(md);
 
             bool stopped = html_to_markdown_profile_stop();
             assert(stopped);

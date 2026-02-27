@@ -6,7 +6,8 @@
 int main(void) {
     /* Test convert_with_metadata - basic */
     {
-        const char *html = "<html><head><title>Test Page</title></head><body><h1>Hello</h1></body></html>";
+        const char *html =
+            "<html><head><title>Test Page</title></head><body><h1>Hello</h1></body></html>";
         char *metadata_json = NULL;
         char *markdown = html_to_markdown_convert_with_metadata(html, &metadata_json);
         assert(markdown != NULL);
@@ -21,17 +22,18 @@ int main(void) {
     /* Test convert_with_metadata - NULL input */
     {
         char *metadata_json = NULL;
-        char *markdown = html_to_markdown_convert_with_metadata(NULL, &metadata_json);
+        const char *markdown = html_to_markdown_convert_with_metadata(NULL, &metadata_json);
         assert(markdown == NULL);
     }
 
     /* Test convert_with_metadata_with_len */
     {
-        const char *html = "<html><head><title>Len Test</title></head><body><p>Content</p></body></html>";
+        const char *html =
+            "<html><head><title>Len Test</title></head><body><p>Content</p></body></html>";
         char *metadata_json = NULL;
         uintptr_t md_len = 0, meta_len = 0;
-        char *markdown = html_to_markdown_convert_with_metadata_with_len(
-            html, &metadata_json, &md_len, &meta_len);
+        char *markdown = html_to_markdown_convert_with_metadata_with_len(html, &metadata_json,
+                                                                         &md_len, &meta_len);
         assert(markdown != NULL);
         assert(md_len > 0);
         assert(md_len == strlen(markdown));

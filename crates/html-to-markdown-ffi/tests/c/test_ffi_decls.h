@@ -12,8 +12,8 @@
 #ifndef TEST_FFI_DECLS_H
 #define TEST_FFI_DECLS_H
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 /* Core conversion functions */
 extern const char *html_to_markdown_version(void);
@@ -51,7 +51,7 @@ typedef void *HtmlToMarkdownVisitor;
  */
 typedef struct {
     void *user_data;
-    char _opaque_callbacks[sizeof(void*) * 80]; /* Oversized to accommodate all callback fields */
+    char _opaque_callbacks[sizeof(void *) * 80]; /* Oversized to accommodate all callback fields */
 } HtmlToMarkdownVisitorCallbacksCompat;
 
 /* ------------------------------------------------------------------ */
@@ -59,15 +59,23 @@ typedef struct {
 /* ------------------------------------------------------------------ */
 
 extern char *html_to_markdown_convert_with_len(const char *html, uintptr_t *len_out);
-extern char *html_to_markdown_convert_bytes_with_len(const uint8_t *html, uintptr_t len, uintptr_t *len_out);
+extern char *html_to_markdown_convert_bytes_with_len(const uint8_t *html, uintptr_t len,
+                                                     uintptr_t *len_out);
 
 /* ------------------------------------------------------------------ */
 /* Metadata conversion                                                */
 /* ------------------------------------------------------------------ */
 
 extern char *html_to_markdown_convert_with_metadata(const char *html, char **metadata_json_out);
-extern char *html_to_markdown_convert_with_metadata_with_len(const char *html, char **metadata_json_out, uintptr_t *markdown_len_out, uintptr_t *metadata_len_out);
-extern char *html_to_markdown_convert_with_metadata_bytes_with_len(const uint8_t *html, uintptr_t len, char **metadata_json_out, uintptr_t *markdown_len_out, uintptr_t *metadata_len_out);
+extern char *html_to_markdown_convert_with_metadata_with_len(const char *html,
+                                                             char **metadata_json_out,
+                                                             uintptr_t *markdown_len_out,
+                                                             uintptr_t *metadata_len_out);
+extern char *html_to_markdown_convert_with_metadata_bytes_with_len(const uint8_t *html,
+                                                                   uintptr_t len,
+                                                                   char **metadata_json_out,
+                                                                   uintptr_t *markdown_len_out,
+                                                                   uintptr_t *metadata_len_out);
 
 /* ------------------------------------------------------------------ */
 /* Visitor API                                                        */
@@ -75,8 +83,11 @@ extern char *html_to_markdown_convert_with_metadata_bytes_with_len(const uint8_t
 
 extern HtmlToMarkdownVisitor html_to_markdown_visitor_create(const void *callbacks);
 extern void html_to_markdown_visitor_free(HtmlToMarkdownVisitor visitor);
-extern char *html_to_markdown_convert_with_visitor(const char *html, HtmlToMarkdownVisitor visitor, uintptr_t *len_out);
-extern char *html_to_markdown_convert_bytes_with_visitor(const uint8_t *html, uintptr_t len, HtmlToMarkdownVisitor visitor, uintptr_t *len_out);
+extern char *html_to_markdown_convert_with_visitor(const char *html, HtmlToMarkdownVisitor visitor,
+                                                   uintptr_t *len_out);
+extern char *html_to_markdown_convert_bytes_with_visitor(const uint8_t *html, uintptr_t len,
+                                                         HtmlToMarkdownVisitor visitor,
+                                                         uintptr_t *len_out);
 
 /* ------------------------------------------------------------------ */
 /* Visit result constructors                                          */

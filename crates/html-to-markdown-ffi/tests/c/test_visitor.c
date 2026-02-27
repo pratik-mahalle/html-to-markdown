@@ -50,8 +50,8 @@ int main(void) {
 
         /* Test convert_with_visitor using default callbacks */
         uintptr_t len_out = 0;
-        char *md = html_to_markdown_convert_with_visitor(
-            "<h1>Visitor Test</h1><p>Content</p>", visitor, &len_out);
+        char *md = html_to_markdown_convert_with_visitor("<h1>Visitor Test</h1><p>Content</p>",
+                                                         visitor, &len_out);
         assert(md != NULL);
         assert(len_out > 0);
         assert(strstr(md, "Visitor Test") != NULL);
@@ -72,8 +72,8 @@ int main(void) {
 
         const char *html = "<p>Bytes visitor test</p>";
         uintptr_t len_out = 0;
-        char *md = html_to_markdown_convert_bytes_with_visitor(
-            (const uint8_t *)html, strlen(html), visitor, &len_out);
+        char *md = html_to_markdown_convert_bytes_with_visitor((const uint8_t *)html, strlen(html),
+                                                               visitor, &len_out);
         assert(md != NULL);
         assert(len_out > 0);
         assert(strstr(md, "Bytes visitor test") != NULL);
@@ -89,8 +89,7 @@ int main(void) {
         HtmlToMarkdownVisitor visitor = html_to_markdown_visitor_create(&callbacks);
         assert(visitor != NULL);
 
-        char *md = html_to_markdown_convert_with_visitor(
-            "<p>No len</p>", visitor, NULL);
+        char *md = html_to_markdown_convert_with_visitor("<p>No len</p>", visitor, NULL);
         assert(md != NULL);
         assert(strstr(md, "No len") != NULL);
         html_to_markdown_free_string(md);
