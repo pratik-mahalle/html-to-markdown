@@ -18,7 +18,7 @@
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown?label=Java&color=007ec6" alt="Java">
   </a>
   <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown">
-    <img src="https://img.shields.io/badge/Go-v2.25.1-007ec6" alt="Go">
+    <img src="https://img.shields.io/badge/Go-v2.26.1-007ec6" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/">
     <img src="https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown?label=C%23&color=007ec6" alt="C#">
@@ -32,11 +32,8 @@
   <a href="https://hex.pm/packages/html_to_markdown">
     <img src="https://img.shields.io/hexpm/v/html_to_markdown?label=Elixir&color=007ec6" alt="Elixir">
   </a>
-  <a href="https://cran.r-project.org/package=htmltomarkdown">
+  <a href="https://kreuzberg-dev.r-universe.dev/htmltomarkdown">
     <img src="https://img.shields.io/cran/v/htmltomarkdown?label=R&color=007ec6" alt="R">
-  </a>
-  <a href="https://github.com/kreuzberg-dev/html-to-markdown/releases">
-    <img src="https://img.shields.io/badge/C-FFI-007ec6" alt="C">
   </a>
 
   <!-- Project Info -->
@@ -99,16 +96,8 @@ Basic conversion:
 using HtmlToMarkdown;
 
 var html = "<h1>Hello World</h1><p>This is a paragraph.</p>";
-
-try
-{
-    var markdown = HtmlToMarkdownConverter.Convert(html);
-    Console.WriteLine(markdown);
-}
-catch (HtmlToMarkdownException ex)
-{
-    Console.Error.WriteLine($"Conversion failed: {ex.Message}");
-}
+var markdown = HtmlToMarkdownConverter.Convert(html);
+Console.WriteLine(markdown);
 ```
 
 
@@ -118,62 +107,17 @@ With conversion options:
 ```csharp
 using HtmlToMarkdown;
 
-try
+var options = new ConversionOptions
 {
-    string html = """
-        <html>
-        <head>
-            <title>My Article</title>
-            <meta name="description" content="An interesting read">
-            <meta name="author" content="Jane Doe">
-            <meta property="og:image" content="image.jpg">
-        </head>
-        <body>
-            <h1>Welcome</h1>
-            <a href="https://example.com">Link</a>
-            <img src="image.jpg" alt="Featured image">
-        </body>
-        </html>
-        """;
+    HeadingStyle = "atx",
+    Wrap = true,
+    WrapWidth = 80,
+    ListIndentWidth = 4,
+};
 
-    var result = HtmlToMarkdownConverter.ConvertWithMetadata(html);
-
-    // Access document metadata
-    var doc = result.Metadata.Document;
-    if (doc.Title != null)
-    {
-        Console.WriteLine($"Title: {doc.Title}");
-    }
-    if (doc.Author != null)
-    {
-        Console.WriteLine($"Author: {doc.Author}");
-    }
-
-    // Access Open Graph metadata
-    if (doc.OpenGraph != null)
-    {
-        foreach (var (key, value) in doc.OpenGraph)
-        {
-            Console.WriteLine($"OG {key}: {value}");
-        }
-    }
-
-    // Count extracted elements
-    Console.WriteLine($"Headers: {result.Metadata.Headers.Count}");
-    Console.WriteLine($"Links: {result.Metadata.Links.Count}");
-    Console.WriteLine($"Images: {result.Metadata.Images.Count}");
-
-    // Print markdown output
-    Console.WriteLine($"\nMarkdown:\n{result.Markdown}");
-}
-catch (HtmlToMarkdownException ex)
-{
-    Console.Error.WriteLine($"Conversion failed: {ex.Message}");
-}
-catch (JsonException ex)
-{
-    Console.Error.WriteLine($"Metadata parsing failed: {ex.Message}");
-}
+var html = "<h1>Hello</h1><p>This is <strong>formatted</strong> content.</p>";
+var markdown = HtmlToMarkdownConverter.Convert(html);
+Console.WriteLine(markdown);
 ```
 
 

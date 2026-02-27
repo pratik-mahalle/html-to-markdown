@@ -37,18 +37,44 @@ else
 	rm -rf "$RUBY_PKG/$VENDOR_DIR/html-to-markdown-rs/target" "$RUBY_PKG/$VENDOR_DIR/html-to-markdown-rs/.git" || true
 fi
 
-# Step 4: Expand workspace references in core crate Cargo.toml
+# Step 4: Read workspace version dynamically
+WORKSPACE_VERSION="$(
+	python3 - "$REPO_ROOT/Cargo.toml" <<'PY'
+import re
+from pathlib import Path
+import sys
+
+text = Path(sys.argv[1]).read_text(encoding="utf-8")
+in_workspace_pkg = False
+for line in text.splitlines():
+    if line.strip() == "[workspace.package]":
+        in_workspace_pkg = True
+        continue
+    if in_workspace_pkg and line.startswith("[") and line.strip().startswith("[") and line.strip() != "[workspace.package]":
+        in_workspace_pkg = False
+    if in_workspace_pkg:
+        m = re.match(r'version\s*=\s*"([^"]+)"\s*$', line.strip())
+        if m:
+            print(m.group(1))
+            raise SystemExit(0)
+raise SystemExit("Failed to find [workspace.package] version in Cargo.toml")
+PY
+)"
+echo "Workspace version: $WORKSPACE_VERSION"
+
+# Step 5: Expand workspace references in core crate Cargo.toml
 echo "Expanding workspace references in html-to-markdown-rs..."
-python3 - "$RUBY_PKG/$VENDOR_DIR/html-to-markdown-rs/Cargo.toml" <<'PY'
+python3 - "$RUBY_PKG/$VENDOR_DIR/html-to-markdown-rs/Cargo.toml" "$WORKSPACE_VERSION" <<'PY'
 import re
 import sys
 from pathlib import Path
 
 path = Path(sys.argv[1])
+version = sys.argv[2]
 text = path.read_text(encoding="utf-8")
 
 replacements = {
-    r"^version\.workspace\s*=\s*true\s*$": 'version = "2.23.0"',
+    r"^version\.workspace\s*=\s*true\s*$": f'version = "{version}"',
     r"^edition\.workspace\s*=\s*true\s*$": 'edition = "2024"',
     r"^authors\.workspace\s*=\s*true\s*$": 'authors = ["Na\'aman Hirschfeld <naaman@kreuzberg.dev>"]',
     r"^license\.workspace\s*=\s*true\s*$": 'license = "MIT"',
@@ -63,7 +89,7 @@ replacements = {
     r"^thiserror\.workspace\s*=\s*true\s*$": 'thiserror = "2.0"',
     r"^base64\.workspace\s*=\s*true\s*$": 'base64 = "0.22"',
     r"^ahash\.workspace\s*=\s*true\s*$": 'ahash = "0.8"',
-    r"^html5ever\.workspace\s*=\s*true\s*$": 'html5ever = "0.36"',
+    r"^html5ever\.workspace\s*=\s*true\s*$": 'html5ever = "0.38.0"',
     r"^async-trait\s*=\s*\{\s*workspace\s*=\s*true,\s*optional\s*=\s*true\s*\}\s*$": 'async-trait = { version = "0.1", optional = true }',
 }
 
@@ -81,23 +107,24 @@ text = re.sub(
 path.write_text(text, encoding="utf-8")
 PY
 
-# Step 5: Create .cargo-checksum.json for html-to-markdown-rs
+# Step 6: Create .cargo-checksum.json for html-to-markdown-rs
 echo "Creating checksum for html-to-markdown-rs..."
 echo '{"files":{}}' >"$RUBY_PKG/$VENDOR_DIR/html-to-markdown-rs/.cargo-checksum.json"
 
-# Step 6: Expand workspace references in native Cargo.toml
+# Step 7: Expand workspace references in native Cargo.toml
 echo "Expanding workspace references in native Cargo.toml..."
-python3 - "Cargo.toml" "$VENDOR_DIR" <<'PY'
+python3 - "Cargo.toml" "$VENDOR_DIR" "$WORKSPACE_VERSION" <<'PY'
 import re
 import sys
 from pathlib import Path
 
 path = Path(sys.argv[1])
 vendor_dir = sys.argv[2]
+version = sys.argv[3]
 text = path.read_text(encoding="utf-8")
 
 replacements = {
-    r"^version\.workspace\s*=\s*true\s*$": 'version = "2.23.0"',
+    r"^version\.workspace\s*=\s*true\s*$": f'version = "{version}"',
     r"^edition\.workspace\s*=\s*true\s*$": 'edition = "2024"',
     r"^authors\.workspace\s*=\s*true\s*$": 'authors = ["Na\'aman Hirschfeld <naaman@kreuzberg.dev>"]',
     r"^license\.workspace\s*=\s*true\s*$": 'license = "MIT"',
@@ -114,6 +141,14 @@ for pattern, replacement in replacements.items():
 # Replace workspace dependency with path to vendored crate
 text = re.sub(
     r'^html-to-markdown-rs\s*=\s*\{\s*workspace\s*=\s*true,\s*features\s*=\s*\[([^\]]+)\]\s*\}',
+    rf'html-to-markdown-rs = {{ path = "../../../{vendor_dir}/html-to-markdown-rs", features = [\1] }}',
+    text,
+    flags=re.MULTILINE
+)
+
+# Also replace path-based dependency (when not using workspace = true)
+text = re.sub(
+    r'^html-to-markdown-rs\s*=\s*\{\s*path\s*=\s*"[^"]*"\s*,\s*features\s*=\s*\[([^\]]+)\]\s*\}',
     rf'html-to-markdown-rs = {{ path = "../../../{vendor_dir}/html-to-markdown-rs", features = [\1] }}',
     text,
     flags=re.MULTILINE
@@ -136,7 +171,7 @@ text = re.sub(
 path.write_text(text, encoding="utf-8")
 PY
 
-# Step 7: Generate Cargo.lock without source replacements
+# Step 8: Generate Cargo.lock without source replacements
 # For vendored git dependencies, cargo requires the lock file to be generated
 # BEFORE the source replacement config is present
 # We also need to hide the workspace root to avoid package collision errors
@@ -147,7 +182,7 @@ mv "$REPO_ROOT/Cargo.toml" "$REPO_ROOT/Cargo.toml.tmp"
 echo "Generating Cargo.lock..."
 cargo generate-lockfile --manifest-path="$NATIVE_EXT/Cargo.toml"
 
-# Step 8: Fetch locked versions and re-vendor to ensure version consistency
+# Step 9: Fetch locked versions and re-vendor to ensure version consistency
 # This ensures the vendored crates exactly match the Cargo.lock
 echo "Fetching locked dependency versions..."
 cargo fetch --locked --manifest-path="$NATIVE_EXT/Cargo.toml"
@@ -161,7 +196,7 @@ echo "Restoring source replacement config and workspace root..."
 mv "$RUBY_PKG/.cargo/config.toml.tmp" "$RUBY_PKG/.cargo/config.toml"
 mv "$REPO_ROOT/Cargo.toml.tmp" "$REPO_ROOT/Cargo.toml"
 
-# Step 9: Update .cargo-checksum.json files to remove entries for excluded files
+# Step 10: Update .cargo-checksum.json files to remove entries for excluded files
 # The gemspec excludes .dll, .so, .dylib, .lib, .a files but the checksum files reference them
 echo "Updating checksum files to remove excluded file entries..."
 python3 - "$RUBY_PKG/$VENDOR_DIR" <<'PY'
