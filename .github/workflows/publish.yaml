@@ -938,7 +938,7 @@ jobs:
           dotnet-version: "8.0.x"
 
       - name: Download C# native FFI libraries
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: csharp-ffi-*
           path: dist/csharp-ffi
@@ -1169,27 +1169,27 @@ jobs:
           fetch-depth: 0
 
       - name: Download PHP PIE artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: php-pie-src
           path: dist/php-pie
 
       - name: Download CLI artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: cli-*
           path: dist/cli
           merge-multiple: false
 
       - name: Download Go FFI artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: go-ffi-*
           path: dist/go-ffi
           merge-multiple: false
 
       - name: Download C FFI artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: c-ffi-*
           path: dist/c-ffi
@@ -1285,14 +1285,14 @@ jobs:
           ref: ${{ needs.prepare.outputs.ref }}
 
       - name: Download wheel artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: python-wheels-*
           path: dist
           merge-multiple: true
 
       - name: Download sdist artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: python-sdist
           path: dist
@@ -1323,7 +1323,7 @@ jobs:
           ref: ${{ needs.prepare.outputs.ref }}
 
       - name: Download Ruby gem artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: rubygems-*
           path: dist
@@ -1372,7 +1372,7 @@ jobs:
           ref: ${{ needs.prepare.outputs.ref }}
 
       - name: Download Hex artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: elixir-hex-package
           path: dist/elixir
@@ -1446,7 +1446,7 @@ jobs:
         shell: bash
 
       - name: Download NuGet artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: csharp-nuget
           path: dist
@@ -1549,7 +1549,7 @@ jobs:
           ref: ${{ needs.prepare.outputs.ref }}
 
       - name: Download Java FFI artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: java-ffi-*
           path: java-ffi-artifacts
@@ -1610,14 +1610,14 @@ jobs:
           ref: ${{ needs.prepare.outputs.ref }}
 
       - name: Download Node artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: node-bindings-*
           path: node-artifacts
           merge-multiple: true
 
       - name: Download TypeScript definitions
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: node-typescript-defs
           path: typescript-defs
@@ -1701,7 +1701,7 @@ jobs:
           ref: ${{ needs.prepare.outputs.ref }}
 
       - name: Download WASM artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: wasm-bundles
           path: wasm-artifacts
@@ -1872,7 +1872,7 @@ jobs:
         run: scripts/publish/ensure-github-release-exists.sh "${{ needs.prepare.outputs.tag }}"
 
       - name: Download bottle artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: homebrew-bottle-*
           path: dist/homebrew
@@ -1917,7 +1917,7 @@ jobs:
         run: scripts/publish/homebrew/extract-release-info.sh
 
       - name: Download bottle artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: homebrew-bottle-*
           path: dist/homebrew
