@@ -35,7 +35,7 @@ RSpec.describe HtmlToMarkdown do
         visit_definition_list_end visit_form visit_input visit_button visit_audio visit_video
         visit_iframe visit_details visit_summary visit_figure_start visit_figcaption
         visit_figure_end
-      ].each_with_object({}) { |name, hash| hash[name.to_sym] = { type: :continue } }
+      ].to_h { |name| [name.to_sym, { type: :continue }] }
     end
 
     def create_visitor(**overrides)
