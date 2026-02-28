@@ -21,8 +21,8 @@ describe('html-to-markdown WASM smoke tests', () => {
       expect(typeof wasmModule.convert).toBe('function');
     });
 
-    it('should have version information', () => {
-      expect(wasmModule.version || wasmModule.VERSION).toBeDefined();
+    it('should expose init function', () => {
+      expect(typeof wasmModule.init).toBe('function');
     });
   });
 

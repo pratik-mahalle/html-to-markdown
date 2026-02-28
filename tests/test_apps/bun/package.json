@@ -1,6 +1,6 @@
 {
   "name": "html-to-markdown-bun-test-app",
-  "version": "2.26.2",
+  "version": "2.26.1",
   "description": "Bun runtime smoke tests for html-to-markdown",
   "type": "module",
   "scripts": {
@@ -8,7 +8,7 @@
     "test:smoke": "bun test smoke.test.ts"
   },
   "dependencies": {
-    "@kreuzberg/html-to-markdown": "2.24.1"
+    "@kreuzberg/html-to-markdown": "2.26.1"
   },
   "devDependencies": {
     "@types/bun": "latest"
