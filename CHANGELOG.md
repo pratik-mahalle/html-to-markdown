@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.26.2] - 2026-02-28
+
+### Fixed
+
+- **Inconsistent whitespace before inline elements across paragraphs**: Fixed a stateful bug where `\n` before `<a>`, `<strong>`, `<em>`, and other inline elements inside `<p>` tags was handled differently depending on the paragraph's position in the document. The second and subsequent paragraphs would drop the space before inline elements, producing `text[link](url)` instead of `text [link](url)`. (Issue #212, thanks @haroldparis)
+
 ## [2.26.1] - 2026-02-27
 
 ### Fixed
