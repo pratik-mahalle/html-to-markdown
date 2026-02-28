@@ -199,7 +199,7 @@ jobs:
             --format both --output tools/benchmark-harness/results
 
       - name: Upload results
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: benchmark-harness-results-${{ matrix.framework }}
           path: tools/benchmark-harness/results
@@ -329,7 +329,7 @@ jobs:
             --thresholds '{"baseline": 10, "callbacks": 30, "custom": 40, "complex": 60}'
 
       - name: Upload visitor benchmark results
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: visitor-benchmark-results-${{ matrix.framework }}
