@@ -40,7 +40,7 @@ repos:
         args: ["--fix"]
         exclude: ^docs/html_to_markdown_wasm\.js$
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.2
+    rev: v0.15.4
     hooks:
       - id: ruff
         args: ["--fix", "--unsafe-fixes"]
