@@ -82,6 +82,12 @@ pub fn process_text_node(
             if !output.ends_with("\n\n") {
                 if let Some(next_tag) = get_next_sibling_tag(node_handle, parser, dom_ctx) {
                     if is_inline_element(next_tag) {
+                        // Newlines between inline elements collapse to a single space
+                        // in HTML rendering (per CSS white-space: normal). Preserve
+                        // this word boundary so adjacent inline content doesn't merge.
+                        if !output.ends_with(' ') && !output.ends_with('\n') {
+                            output.push(' ');
+                        }
                         return;
                     }
                 }
