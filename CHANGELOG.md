@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.26.3] - 2026-02-28
+
+### Fixed
+
+- **Subscript/superscript content silently dropped**: When `sub_symbol` or `sup_symbol` was empty (the default), text inside `<sub>` and `<sup>` tags was discarded entirely — e.g. `H<sub>2</sub>O` produced `HO` instead of `H2O`.
+- **Missing whitespace between newline-separated inline elements**: Whitespace-only text nodes containing newlines between adjacent inline elements (e.g. `<a>…</a>\n<a>…</a>`) were dropped, causing links and other inline markup to merge without a word boundary. Now collapses to a single space per HTML white-space normalization rules.
+
 ## [2.26.2] - 2026-02-28
 
 ### Fixed
