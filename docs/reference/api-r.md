@@ -198,7 +198,7 @@ options <- list(
   preserve_tags = c(),
   strip_tags = c(),
   skip_images = FALSE,
-  output_format = "markdown"       # "markdown", "djot"
+  output_format = "markdown"       # "markdown", "djot", "plain"
 )
 ```
 

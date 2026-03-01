@@ -155,7 +155,7 @@ ConversionOptions options = ConversionOptions.builder()
     .wrapWidth(80)
     .preserveTags(List.of("table", "div"))
     .skipImages(false)
-    .outputFormat("markdown")     // "markdown", "djot"
+    .outputFormat("markdown")     // "markdown", "djot", "plain"
     .build();
 ```
 

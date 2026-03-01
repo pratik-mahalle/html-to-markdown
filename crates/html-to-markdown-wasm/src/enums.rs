@@ -152,6 +152,8 @@ pub enum WasmOutputFormat {
     Markdown,
     /// Djot lightweight markup language
     Djot,
+    /// Plain text (no markup)
+    Plain,
 }
 
 impl From<WasmOutputFormat> for OutputFormat {
@@ -159,6 +161,7 @@ impl From<WasmOutputFormat> for OutputFormat {
         match val {
             WasmOutputFormat::Markdown => OutputFormat::Markdown,
             WasmOutputFormat::Djot => OutputFormat::Djot,
+            WasmOutputFormat::Plain => OutputFormat::Plain,
         }
     }
 }

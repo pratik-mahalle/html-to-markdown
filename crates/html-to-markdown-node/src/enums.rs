@@ -145,6 +145,8 @@ pub enum JsOutputFormat {
     Markdown,
     /// Djot lightweight markup language
     Djot,
+    /// Plain text (no markup)
+    Plain,
 }
 
 impl From<JsOutputFormat> for OutputFormat {
@@ -152,6 +154,7 @@ impl From<JsOutputFormat> for OutputFormat {
         match val {
             JsOutputFormat::Markdown => OutputFormat::Markdown,
             JsOutputFormat::Djot => OutputFormat::Djot,
+            JsOutputFormat::Plain => OutputFormat::Plain,
         }
     }
 }

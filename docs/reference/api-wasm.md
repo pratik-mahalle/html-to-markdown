@@ -227,7 +227,7 @@ interface ConversionOptions {
   preserveTags?: string[];
   stripTags?: string[];
   skipImages?: boolean;
-  outputFormat?: "markdown" | "djot";
+  outputFormat?: "markdown" | "djot" | "plain";
   // ... see Configuration Reference for full list
 }
 ```

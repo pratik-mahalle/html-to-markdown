@@ -334,11 +334,13 @@ This differs from `preserve_tags` (which keeps the HTML) and from the default be
 
 ## Output Format <span class="version-badge new">v2.23.0</span>
 
-Convert to Markdown (default) or Djot:
+Convert to Markdown (default), Djot, or plain text:
 
 ```python
-options = ConversionOptions(output_format="markdown")  # or "djot"
+options = ConversionOptions(output_format="markdown")  # or "djot", "plain"
 ```
+
+Plain text mode strips all markup and returns only visible text content — useful for search indexing, text extraction, or feeding content to LLMs.
 
 ---
 

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.27.0] - 2026-03-01
+
+### Added
+
+- **Plain text output format**: New `OutputFormat::Plain` option that strips all markup and returns only visible text content. Set `output_format` to `"plain"` (also accepts `"plaintext"` or `"text"`). This fast-path bypasses the full Markdown/Djot conversion pipeline — after DOM parsing, a lightweight text extractor walks the tree collecting only visible text with structural whitespace. Useful for search indexing, text extraction, and feeding content to LLMs.
+
 ## [2.26.3] - 2026-02-28
 
 ### Fixed
