@@ -179,7 +179,7 @@ Extract base64-encoded inline images with metadata.
 - `wrap_width`: Wrap at column — default: `80`
 - `code_language`: Default fenced code block language — default: none
 - `extract_metadata`: Embed metadata as YAML frontmatter — default: `false`
-- `output_format`: Output markup format (`"markdown"` | `"djot"`) — default: `"markdown"`
+- `output_format`: Output markup format (`"markdown"` | `"djot"` | `"plain"`) — default: `"markdown"`
 
 **`MetadataConfig`** – Selective metadata extraction:
 - `extract_headers`: h1-h6 elements — default: `true`
@@ -226,6 +226,24 @@ String djot = HtmlToMarkdown.convert(html,
 
 
 Djot's extended syntax allows you to express more semantic meaning in lightweight text, making it useful for documents that require strikethrough, insertion tracking, or mathematical notation.
+
+
+## Plain Text Output
+
+Set `output_format` to `"plain"` to strip all markup and return only visible text. This bypasses the Markdown conversion pipeline entirely for maximum speed.
+
+```java
+import dev.kreuzberg.HtmlToMarkdown;
+import dev.kreuzberg.ConversionOptions;
+
+String html = "<h1>Title</h1><p>This is <strong>bold</strong> and <em>italic</em> text.</p>";
+
+String plain = HtmlToMarkdown.convert(html,
+    new ConversionOptions().setOutputFormat("plain"));
+// Result: "Title\n\nThis is bold and italic text."
+```
+
+Plain text mode is useful for search indexing, text extraction, and feeding content to LLMs.
 
 
 

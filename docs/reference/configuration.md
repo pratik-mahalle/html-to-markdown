@@ -77,6 +77,7 @@ Target markup format for conversion.
 |-------|-------------|
 | `"markdown"` | Standard CommonMark Markdown -- **default** |
 | `"djot"` | Djot lightweight markup language |
+| `"plain"` | Plain text (no markup, visible text only) |
 
 ---
 

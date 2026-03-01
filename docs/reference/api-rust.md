@@ -296,6 +296,7 @@ pub struct ExtendedMetadata {
 |---------|-------------|
 | `Markdown` | Standard CommonMark Markdown -- **default** |
 | `Djot` | Djot lightweight markup |
+| `Plain` | Plain text (no markup, visible text only) |
 
 ### `ConversionError`
 

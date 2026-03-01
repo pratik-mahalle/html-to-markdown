@@ -239,7 +239,7 @@ class ConversionOptions:
         preserve_tags: list[str] | None = None,
         strip_tags: list[str] | None = None,
         skip_images: bool = False,
-        output_format: str = "markdown",          # "markdown", "djot"
+        output_format: str = "markdown",          # "markdown", "djot", "plain"
         preprocessing: PreprocessingOptions | None = None,
         encoding: str = "utf-8",
         debug: bool = False,

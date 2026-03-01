@@ -65,6 +65,7 @@ pub fn parse_output_format(value: Value) -> Result<OutputFormat, Error> {
     match symbol_to_string(value)?.as_str() {
         "markdown" => Ok(OutputFormat::Markdown),
         "djot" => Ok(OutputFormat::Djot),
+        "plain" => Ok(OutputFormat::Plain),
         other => Err(arg_error(format!("invalid output_format: {other}"))),
     }
 }

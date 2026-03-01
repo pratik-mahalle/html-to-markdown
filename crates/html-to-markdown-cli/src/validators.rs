@@ -146,6 +146,8 @@ pub enum CliOutputFormat {
     Markdown,
     /// Djot lightweight markup language
     Djot,
+    /// Plain text (no markup)
+    Plain,
 }
 
 impl From<CliOutputFormat> for OutputFormat {
@@ -153,6 +155,7 @@ impl From<CliOutputFormat> for OutputFormat {
         match format {
             CliOutputFormat::Markdown => Self::Markdown,
             CliOutputFormat::Djot => Self::Djot,
+            CliOutputFormat::Plain => Self::Plain,
         }
     }
 }
