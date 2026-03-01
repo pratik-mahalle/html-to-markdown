@@ -18,7 +18,7 @@
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown?label=Java&color=007ec6" alt="Java">
   </a>
   <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown">
-    <img src="https://img.shields.io/badge/Go-v2.26.1-007ec6" alt="Go">
+    <img src="https://img.shields.io/badge/Go-v2.27.0-007ec6" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/">
     <img src="https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown?label=C%23&color=007ec6" alt="C#">
@@ -203,7 +203,8 @@ Djot's extended syntax allows you to express more semantic meaning in lightweigh
 
 ## Plain Text Output
 
-Set `OutputFormat` to `"plain"` to strip all markup and return only visible text. This bypasses the Markdown conversion pipeline entirely for maximum speed.
+Set `output_format` to `"plain"` to strip all markup and return only visible text. This bypasses the Markdown conversion pipeline entirely for maximum speed.
+
 
 ```csharp
 using HtmlToMarkdown;
@@ -213,6 +214,7 @@ var html = "<h1>Title</h1><p>This is <strong>bold</strong> and <em>italic</em> t
 var plain = Converter.Convert(html, new ConversionOptions { OutputFormat = "plain" });
 // Result: "Title\n\nThis is bold and italic text."
 ```
+
 
 Plain text mode is useful for search indexing, text extraction, and feeding content to LLMs.
 
