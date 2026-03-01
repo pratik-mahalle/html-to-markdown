@@ -78,6 +78,7 @@ pub fn parse_output_format(value: &Zval, key: &str) -> PhpResult<OutputFormat> {
     match read_string(value, key)?.as_str() {
         "djot" => Ok(OutputFormat::Djot),
         "markdown" => Ok(OutputFormat::Markdown),
+        "plain" => Ok(OutputFormat::Plain),
         other => Err(PhpException::default(format!("Invalid output_format '{other}'"))),
     }
 }

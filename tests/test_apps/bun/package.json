@@ -1,6 +1,6 @@
 {
   "name": "html-to-markdown-bun-test-app",
-  "version": "2.26.3",
+  "version": "2.27.0",
   "description": "Bun runtime smoke tests for html-to-markdown",
   "type": "module",
   "scripts": {

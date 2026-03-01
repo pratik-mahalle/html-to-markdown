@@ -146,7 +146,7 @@ See the [Visitor Pattern Guide](../../examples/visitor-pattern/) and [Metadata E
 - `wrap_width`: Wrap at column — default: `80`
 - `code_language`: Default fenced code block language — default: none
 - `extract_metadata`: Embed metadata as YAML frontmatter — default: `false`
-- `output_format`: Output markup format (`"markdown"` | `"djot"`) — default: `"markdown"`
+- `output_format`: Output markup format (`"markdown"` | `"djot"` | `"plain"`) — default: `"markdown"`
 
 **`MetadataConfig`** – Selective metadata extraction:
 - `extract_headers`: h1-h6 elements — default: `true`
@@ -178,6 +178,19 @@ The library supports converting HTML to [Djot](https://djot.net/), a lightweight
 
 Djot's extended syntax allows you to express more semantic meaning in lightweight text, making it useful for documents that require strikethrough, insertion tracking, or mathematical notation.
 
+
+## Plain Text Output
+
+Set `output_format` to `"plain"` to strip all markup and return only visible text. This bypasses the Markdown conversion pipeline entirely for maximum speed.
+
+```r
+html <- "<h1>Title</h1><p>This is <strong>bold</strong> and <em>italic</em> text.</p>"
+
+plain <- html_to_markdown(html, output_format = "plain")
+# Result: "Title\n\nThis is bold and italic text."
+```
+
+Plain text mode is useful for search indexing, text extraction, and feeding content to LLMs.
 
 
 ## Metadata Extraction

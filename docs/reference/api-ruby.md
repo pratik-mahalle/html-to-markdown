@@ -187,7 +187,7 @@ options = {
   preserve_tags: [],
   strip_tags: [],
   skip_images: false,
-  output_format: "markdown",      # "markdown", "djot"
+  output_format: "markdown",      # "markdown", "djot", "plain"
 }
 ```
 

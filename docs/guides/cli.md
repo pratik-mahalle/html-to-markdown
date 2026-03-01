@@ -251,6 +251,9 @@ html-to-markdown input.html --output-format markdown
 
 # Djot
 html-to-markdown input.html --output-format djot
+
+# Plain text (no markup)
+html-to-markdown input.html --output-format plain
 ```
 
 ### Encoding
