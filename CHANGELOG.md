@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.27.1] - 2026-03-01
+
+### Fixed
+
+- **Colon introduced into definition list text**: `<dd>` elements inside `<dl>` were incorrectly prefixed with `:   ` (Pandoc definition list syntax), introducing spurious colons into converted text. Standard Markdown and GFM do not support definition list syntax, so `<dd>` content is now output as plain blocks. (Issue #214, thanks @smoyerx)
+- **Go test app go.sum out of sync**: Updated `tests/test_apps/go/go.sum` to match the v2.27.0 module version, fixing the CI Go lint job.
+
 ## [2.27.0] - 2026-03-01
 
 ### Added

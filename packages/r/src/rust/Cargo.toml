@@ -2,7 +2,7 @@
 
 [package]
 name = "html_to_markdown_r"
-version ="2.27.0"
+version ="2.27.1"
 edition = "2024"
 license = "MIT"
 description = "extendr bindings for html-to-markdown"
