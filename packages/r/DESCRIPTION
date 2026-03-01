@@ -1,6 +1,6 @@
 Package: htmltomarkdown
 Title: High-Performance HTML to Markdown Converter
-Version: 2.27.0
+Version: 2.27.1
 Authors@R: c(
     person("Na'aman", "Hirschfeld", email = "nhirschfeld@gmail.com", role = c("aut", "cre")),
     person("The authors of the dependency Rust crates", role = "ctb",
@@ -18,6 +18,8 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Suggests:
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    devtools,
+    lintr
 Config/testthat/edition: 3
 Config/htmltomarkdown/MSRV: 1.85.0
