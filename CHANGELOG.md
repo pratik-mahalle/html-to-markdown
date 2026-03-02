@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.27.2] - 2026-03-02
+
+### Fixed
+
+- **Plain text list items missing markers**: `<ul>` and `<ol>` list items in `OutputFormat::Plain` were output without any bullet or number prefix. Now emits `- ` for unordered lists and sequential `N. ` for ordered lists, respecting the `start` attribute on `<ol>`.
+
 ## [2.27.1] - 2026-03-01
 
 ### Fixed
