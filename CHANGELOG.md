@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.27.3] - 2026-03-05
+
+### Fixed
+
+- **Panic on block_content_start out of bounds**: Fixed a crash (`byte index N is out of bounds`) in text node processing when inline handlers (e.g. `<strong>`, `<em>`) collected children into a fresh buffer while inheriting a parent paragraph context. The `block_content_start` index pointed into the wrong buffer, causing a panic on certain HTML structures — notably `<details>` containing `<p>` with inline formatting. (Issues #216, #217)
+
 ## [2.27.2] - 2026-03-02
 
 ### Fixed
