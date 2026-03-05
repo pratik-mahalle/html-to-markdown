@@ -18,7 +18,11 @@ mod types;
 mod visitor_support;
 
 // Import conversion helper functions
-use build::{build_html_extraction, build_metadata_extraction};
+use build::build_html_extraction;
+#[cfg(feature = "metadata")]
+use build::build_metadata_extraction;
+#[cfg(feature = "visitor")]
+use build::build_tables_extraction;
 #[cfg(feature = "metadata")]
 use options::parse_metadata_config;
 use options::{parse_conversion_options, parse_inline_image_config};
@@ -128,6 +132,46 @@ pub fn convert_html_with_visitor(
     .map_err(to_php_exception)
 }
 
+/// Convert HTML to Markdown with structured table extraction (requires visitor feature).
+#[cfg(feature = "visitor")]
+#[php_function]
+#[php(name = "html_to_markdown_convert_with_tables")]
+pub fn convert_html_with_tables(
+    html: String,
+    options: Option<&ZendHashTable>,
+    metadata_config: Option<&ZendHashTable>,
+) -> PhpResult<ZBox<ZendHashTable>> {
+    let rust_options = match options {
+        Some(table) => Some(parse_conversion_options(table)?),
+        None => None,
+    };
+
+    #[cfg(feature = "metadata")]
+    let config = match metadata_config {
+        Some(table) => Some(parse_metadata_config(table)?),
+        None => None,
+    };
+
+    #[cfg(not(feature = "metadata"))]
+    let _ = metadata_config;
+
+    let result = guard_panic(|| {
+        profiling::maybe_profile(|| {
+            html_to_markdown_rs::convert_with_tables(
+                &html,
+                rust_options.clone(),
+                #[cfg(feature = "metadata")]
+                config.clone(),
+                #[cfg(not(feature = "metadata"))]
+                None,
+            )
+        })
+    })
+    .map_err(to_php_exception)?;
+
+    build_tables_extraction(result)
+}
+
 /// Profiling function: start profiling to a file.
 #[php_function]
 #[php(name = "html_to_markdown_profile_start")]
@@ -163,7 +207,9 @@ pub fn module(module: ModuleBuilder) -> ModuleBuilder {
 
     #[cfg(feature = "visitor")]
     {
-        builder = builder.function(wrap_function!(convert_html_with_visitor));
+        builder = builder
+            .function(wrap_function!(convert_html_with_visitor))
+            .function(wrap_function!(convert_html_with_tables));
     }
 
     builder

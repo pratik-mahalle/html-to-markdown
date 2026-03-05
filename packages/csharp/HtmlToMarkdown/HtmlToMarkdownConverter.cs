@@ -266,6 +266,69 @@ public static class HtmlToMarkdownConverter
     }
 
     /// <summary>
+    /// Convert HTML to Markdown and extract tables as structured data.
+    /// </summary>
+    /// <param name="html">The HTML string to convert.</param>
+    /// <returns>A TableExtractionResult with content, optional metadata, and extracted tables.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when html is null</exception>
+    /// <exception cref="HtmlToMarkdownException">Thrown when conversion or JSON parsing fails.</exception>
+    public static Metadata.TableExtractionResult ConvertWithTables(string html)
+    {
+        if (html == null)
+        {
+            throw new ArgumentNullException(nameof(html));
+        }
+
+        if (string.IsNullOrEmpty(html))
+        {
+            return new Metadata.TableExtractionResult();
+        }
+
+        IntPtr htmlPtr = IntPtr.Zero;
+        IntPtr resultPtr = IntPtr.Zero;
+
+        try
+        {
+            htmlPtr = StringToUtf8Ptr(html);
+
+            resultPtr = NativeMethods.html_to_markdown_convert_with_tables(
+                htmlPtr, IntPtr.Zero, IntPtr.Zero);
+
+            if (resultPtr == IntPtr.Zero)
+            {
+                IntPtr errorPtr = NativeMethods.html_to_markdown_last_error();
+                string? errorMsg = errorPtr != IntPtr.Zero
+                    ? PtrToStringUtf8(errorPtr)
+                    : null;
+
+                throw new HtmlToMarkdownException(
+                    errorMsg ?? "HTML to Markdown conversion with tables failed");
+            }
+
+            string jsonStr = PtrToStringUtf8(resultPtr) ?? "{}";
+            return JsonSerializer.Deserialize(jsonStr, MetadataJsonContext.Default.TableExtractionResult)
+                ?? new Metadata.TableExtractionResult();
+        }
+        catch (JsonException ex)
+        {
+            throw new HtmlToMarkdownException(
+                $"Failed to deserialize table extraction JSON: {ex.Message}", ex);
+        }
+        finally
+        {
+            if (htmlPtr != IntPtr.Zero)
+            {
+                Marshal.FreeCoTaskMem(htmlPtr);
+            }
+
+            if (resultPtr != IntPtr.Zero)
+            {
+                NativeMethods.html_to_markdown_free_string(resultPtr);
+            }
+        }
+    }
+
+    /// <summary>
     /// Converts UTF-8 HTML bytes to Markdown and extracts comprehensive metadata.
     /// </summary>
     /// <param name="html">UTF-8 encoded HTML bytes</param>

@@ -64,6 +64,7 @@ High-performance HTML to Markdown conversion powered by Rust. Ships as native bi
 - **12 language bindings** with consistent output across all runtimes
 - **Metadata extraction** — title, headers, links, images, structured data (JSON-LD, Microdata, RDFa)
 - **Visitor pattern** — custom callbacks for content filtering, URL rewriting, domain-specific dialects
+- **Table extraction** — extract structured table data (cells, headers, rendered markdown) during conversion
 - **Secure by default** — built-in HTML sanitization via ammonia
 
 ## Quick Start

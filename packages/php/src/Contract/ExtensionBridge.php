@@ -50,4 +50,16 @@ interface ExtensionBridge
         ?array $options = null,
         ?HtmlVisitor $visitor = null,
     ): string;
+
+    /**
+     * @param ConversionOptionsInput|null $options
+     * @param array<string, mixed>|null $metadataConfig
+     *
+     * @return array<string, mixed>
+     */
+    public function convertWithTables(
+        string $html,
+        ?array $options = null,
+        ?array $metadataConfig = null,
+    ): array;
 }

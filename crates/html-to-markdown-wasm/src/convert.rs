@@ -266,6 +266,57 @@ pub fn convert_with_metadata(
     Ok(result.into())
 }
 
+/// Convert HTML to Markdown with structured table extraction
+///
+/// # Arguments
+///
+/// * `html` - The HTML string to convert
+/// * `options` - Optional conversion options (as a JavaScript object)
+/// * `metadata_config` - Optional metadata extraction configuration
+///
+/// # Returns
+///
+/// JavaScript object with `content` (string), `tables` (array), and `metadata` (object|null) fields
+///
+/// # Example
+///
+/// ```javascript
+/// import { convertWithTables } from 'html-to-markdown-wasm';
+///
+/// const html = '<table><tr><th>Name</th></tr><tr><td>Alice</td></tr></table>';
+/// const result = convertWithTables(html, null, null);
+/// console.log(result.content);
+/// console.log(result.tables[0].cells);
+/// ```
+#[cfg(all(feature = "js-bindings", feature = "visitor"))]
+#[wasm_bindgen(js_name = convertWithTables)]
+pub fn convert_with_tables(
+    html: String,
+    options: JsValue,
+    metadata_config: Option<crate::options::WasmMetadataConfig>,
+) -> Result<JsValue, JsValue> {
+    let rust_options = parse_wasm_options(options)?;
+
+    #[cfg(feature = "metadata")]
+    let rust_metadata_config = metadata_config.map(Into::into);
+    #[cfg(not(feature = "metadata"))]
+    let _ = metadata_config;
+
+    let result = html_to_markdown_rs::safety::guard_panic(|| {
+        html_to_markdown_rs::convert_with_tables(
+            &html,
+            rust_options,
+            #[cfg(feature = "metadata")]
+            rust_metadata_config,
+            #[cfg(not(feature = "metadata"))]
+            None,
+        )
+    })
+    .map_err(to_js_error)?;
+
+    serde_wasm_bindgen::to_value(&result).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
 /// Convert HTML bytes to Markdown with metadata extraction
 ///
 /// # Arguments

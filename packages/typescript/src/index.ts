@@ -6,11 +6,13 @@ import {
 	convertWithInlineImages as convertHtmlWithInlineImages,
 	convertWithMetadata as convertHtmlWithMetadata,
 	convertWithMetadataBuffer as convertHtmlWithMetadataBuffer,
+	convertWithTables as convertHtmlWithTables,
 	type JsConversionOptions,
 	type JsHtmlExtraction,
 	type JsInlineImageConfig,
 	type JsMetadataConfig,
 	type JsMetadataExtraction,
+	type JsTableExtraction,
 } from "@kreuzberg/html-to-markdown-node";
 
 export * from "@kreuzberg/html-to-markdown-node";
@@ -191,6 +193,70 @@ export async function convertStreamWithMetadata(
 	}
 
 	return convertWithMetadata(html, options ?? undefined, metadataConfig ?? undefined);
+}
+
+/**
+ * Convert HTML to Markdown with structured table extraction.
+ *
+ * Returns converted content alongside all tables found in the HTML,
+ * with each table's cell data and rendered markdown.
+ *
+ * @param html HTML content to convert
+ * @param options Optional conversion configuration
+ * @param metadataConfig Optional metadata extraction configuration
+ * @returns Object with converted content, extracted tables, and optional metadata
+ *
+ * @example
+ * ```ts
+ * import { convertWithTables } from 'html-to-markdown';
+ *
+ * const html = `
+ *   <table>
+ *     <tr><th>Name</th><th>Age</th></tr>
+ *     <tr><td>Alice</td><td>30</td></tr>
+ *   </table>
+ * `;
+ *
+ * const { content, tables } = convertWithTables(html);
+ * console.log(tables[0].cells);       // [["Name", "Age"], ["Alice", "30"]]
+ * console.log(tables[0].isHeaderRow); // [true, false]
+ * ```
+ */
+export function convertWithTables(
+	html: string,
+	options?: JsConversionOptions | null | undefined,
+	metadataConfig?: JsMetadataConfig | null | undefined,
+): JsTableExtraction {
+	return convertHtmlWithTables(html, options ?? undefined, metadataConfig ?? undefined);
+}
+
+/**
+ * Convert the contents of an HTML file to Markdown with table extraction.
+ */
+export async function convertFileWithTables(
+	filePath: string,
+	options?: JsConversionOptions | null | undefined,
+	metadataConfig?: JsMetadataConfig | null | undefined,
+): Promise<JsTableExtraction> {
+	const html = await readFile(filePath, "utf8");
+	return convertWithTables(html, options ?? undefined, metadataConfig ?? undefined);
+}
+
+/**
+ * Convert HTML streamed from stdin or another readable stream with table extraction.
+ */
+export async function convertStreamWithTables(
+	stream: Readable | AsyncIterable<string | Buffer>,
+	options?: JsConversionOptions | null | undefined,
+	metadataConfig?: JsMetadataConfig | null | undefined,
+): Promise<JsTableExtraction> {
+	let html = "";
+
+	for await (const chunk of stream as AsyncIterable<string | Buffer>) {
+		html += typeof chunk === "string" ? chunk : chunk.toString("utf8");
+	}
+
+	return convertWithTables(html, options ?? undefined, metadataConfig ?? undefined);
 }
 
 /**

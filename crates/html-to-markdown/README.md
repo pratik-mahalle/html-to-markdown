@@ -148,6 +148,35 @@ for (i, img) in extraction.inline_images.iter().enumerate() {
 }
 ```
 
+## Table Extraction
+
+Extract structured table data alongside the Markdown conversion. Each table found in the HTML is returned with its cell contents, header row flags, and rendered Markdown output.
+
+Requires the `visitor` feature.
+
+```rust
+use html_to_markdown_rs::convert_with_tables;
+
+let html = r#"
+<table>
+    <tr><th>Name</th><th>Age</th></tr>
+    <tr><td>Alice</td><td>30</td></tr>
+    <tr><td>Bob</td><td>25</td></tr>
+</table>
+"#;
+
+let result = convert_with_tables(html, None, None)?;
+
+println!("{}", result.content);
+for table in &result.tables {
+    println!("Table with {} rows:", table.cells.len());
+    for (i, row) in table.cells.iter().enumerate() {
+        let prefix = if table.is_header_row[i] { "Header" } else { "Row" };
+        println!("  {}: {:?}", prefix, row);
+    }
+}
+```
+
 ## Other Language Bindings
 
 This is the core Rust library. For other languages:

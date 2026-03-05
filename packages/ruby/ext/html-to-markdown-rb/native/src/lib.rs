@@ -8,6 +8,9 @@ use html_to_markdown_rs::{
 #[cfg(feature = "visitor")]
 use html_to_markdown_rs::convert_with_visitor as convert_with_visitor_inner;
 
+#[cfg(feature = "visitor")]
+use html_to_markdown_rs::convert_with_tables as convert_with_tables_inner;
+
 #[cfg(feature = "metadata")]
 use html_to_markdown_rs::convert_with_metadata as convert_with_metadata_inner;
 
@@ -25,6 +28,9 @@ use types::{arg_error, runtime_error};
 
 #[cfg(feature = "metadata")]
 use conversion::{build_metadata_config, extended_metadata_to_ruby};
+
+#[cfg(feature = "visitor")]
+use conversion::tables_result_to_ruby;
 
 #[cfg(feature = "visitor")]
 use visitor::RubyVisitorWrapper;
@@ -139,6 +145,23 @@ fn convert_with_metadata_handle_fn(ruby: &Ruby, args: &[Value]) -> Result<Value,
 }
 
 #[cfg(feature = "visitor")]
+fn convert_with_tables_fn(ruby: &Ruby, args: &[Value]) -> Result<Value, Error> {
+    let parsed = scan_args::<(String,), (Option<Value>, Option<Value>), (), (), (), ()>(args)?;
+    let html = parsed.required.0;
+    let options = build_conversion_options(ruby, parsed.optional.0)?;
+
+    #[cfg(feature = "metadata")]
+    let metadata_config = Some(build_metadata_config(ruby, parsed.optional.1)?);
+    #[cfg(not(feature = "metadata"))]
+    let metadata_config: Option<()> = None;
+
+    let result =
+        guard_panic(|| convert_with_tables_inner(&html, Some(options), metadata_config)).map_err(conversion_error)?;
+
+    tables_result_to_ruby(ruby, result)
+}
+
+#[cfg(feature = "visitor")]
 fn convert_with_visitor_fn(ruby: &Ruby, args: &[Value]) -> Result<String, Error> {
     let parsed = scan_args::<(String,), (Option<Value>, Option<Value>), (), (), (), ()>(args)?;
     let html = parsed.required.0;
@@ -227,7 +250,10 @@ fn init(ruby: &Ruby) -> Result<(), Error> {
     }
 
     #[cfg(feature = "visitor")]
-    module.define_singleton_method("convert_with_visitor", function!(convert_with_visitor_fn, -1))?;
+    {
+        module.define_singleton_method("convert_with_visitor", function!(convert_with_visitor_fn, -1))?;
+        module.define_singleton_method("convert_with_tables", function!(convert_with_tables_fn, -1))?;
+    }
 
     #[cfg(feature = "profiling")]
     {

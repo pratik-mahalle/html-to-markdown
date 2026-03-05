@@ -578,3 +578,78 @@ func ExampleMustConvertWithMetadata() {
 	result := MustConvertWithMetadata("<h1>Title</h1>")
 	println("Markdown:", result.Markdown)
 }
+
+func TestConvertWithTables(t *testing.T) {
+	html := `<table><thead><tr><th>Name</th><th>Age</th></tr></thead><tbody><tr><td>Alice</td><td>30</td></tr></tbody></table>`
+	result, err := ConvertWithTables(html)
+	if err != nil {
+		t.Fatalf("ConvertWithTables failed: %v", err)
+	}
+	if result.Content == "" {
+		t.Error("expected non-empty content")
+	}
+	if len(result.Tables) != 1 {
+		t.Fatalf("expected 1 table, got %d", len(result.Tables))
+	}
+	table := result.Tables[0]
+	if len(table.Cells) < 2 {
+		t.Fatalf("expected at least 2 rows, got %d", len(table.Cells))
+	}
+	if table.Cells[0][0] != "Name" || table.Cells[0][1] != "Age" {
+		t.Errorf("unexpected header cells: %v", table.Cells[0])
+	}
+	if table.Cells[1][0] != "Alice" || table.Cells[1][1] != "30" {
+		t.Errorf("unexpected data cells: %v", table.Cells[1])
+	}
+	if table.Markdown == "" {
+		t.Error("expected non-empty table markdown")
+	}
+	if len(table.IsHeaderRow) == 0 {
+		t.Error("expected non-empty is_header_row")
+	}
+	if !table.IsHeaderRow[0] {
+		t.Error("expected first row to be header")
+	}
+}
+
+func TestConvertWithTablesEmpty(t *testing.T) {
+	result, err := ConvertWithTables("")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(result.Tables) != 0 {
+		t.Errorf("expected 0 tables for empty input, got %d", len(result.Tables))
+	}
+}
+
+func TestConvertWithTablesNoTables(t *testing.T) {
+	result, err := ConvertWithTables("<p>Hello world</p>")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(result.Tables) != 0 {
+		t.Errorf("expected 0 tables, got %d", len(result.Tables))
+	}
+	if result.Content == "" {
+		t.Error("expected non-empty content")
+	}
+}
+
+func TestConvertWithTablesMultiple(t *testing.T) {
+	html := `<table><tr><th>A</th></tr><tr><td>1</td></tr></table><p>text</p><table><tr><th>B</th></tr><tr><td>2</td></tr></table>`
+	result, err := ConvertWithTables(html)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(result.Tables) != 2 {
+		t.Fatalf("expected 2 tables, got %d", len(result.Tables))
+	}
+}
+
+func TestMustConvertWithTables(t *testing.T) {
+	html := `<table><tr><th>X</th></tr><tr><td>Y</td></tr></table>`
+	result := MustConvertWithTables(html)
+	if len(result.Tables) != 1 {
+		t.Fatalf("expected 1 table, got %d", len(result.Tables))
+	}
+}

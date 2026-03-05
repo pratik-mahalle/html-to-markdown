@@ -9,6 +9,7 @@ use HtmlToMarkdown\Config\InlineImageConfig;
 use HtmlToMarkdown\Service\Converter as ConverterService;
 use HtmlToMarkdown\Value\ExtendedMetadata;
 use HtmlToMarkdown\Value\InlineImageExtraction;
+use HtmlToMarkdown\Value\TableExtractionResult;
 use HtmlToMarkdown\Visitor\HtmlVisitor;
 
 /**
@@ -67,5 +68,20 @@ final class HtmlToMarkdown
         ?HtmlVisitor $visitor = null,
     ): string {
         return ConverterService::create()->convertWithVisitor($html, $options, $visitor);
+    }
+
+    /**
+     * Convert HTML to Markdown and extract tables as structured data.
+     *
+     * @param ConversionOptions|ConversionOptionsInput|null $options
+     * @param array<string, mixed>|null $metadataConfig
+     * @phpstan-param ConversionOptions|array<string, mixed>|null $options
+     */
+    public static function convertWithTables(
+        string $html,
+        ConversionOptions|array|null $options = null,
+        ?array $metadataConfig = null,
+    ): TableExtractionResult {
+        return ConverterService::create()->convertWithTables($html, $options, $metadataConfig);
     }
 }

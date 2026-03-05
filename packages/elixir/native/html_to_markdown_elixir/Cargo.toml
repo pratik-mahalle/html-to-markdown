@@ -2,7 +2,7 @@
 
 [package]
 name = "html_to_markdown_elixir"
-version ="2.27.3"
+version ="2.28.0"
 edition = "2024"
 license = "MIT"
 description = "Rustler bindings for html-to-markdown"
@@ -13,7 +13,7 @@ name = "html_to_markdown_elixir"
 crate-type = ["cdylib"]
 
 [dependencies]
-html-to-markdown-rs = { path = "vendor/html-to-markdown-rs", features = ["inline-images", "metadata"] }
+html-to-markdown-rs = { path = "vendor/html-to-markdown-rs", features = ["inline-images", "metadata", "visitor"] }
 rustler = { version = "0.37" }
 pprof = { version = "0.15", features = ["flamegraph"], optional = true }
 
