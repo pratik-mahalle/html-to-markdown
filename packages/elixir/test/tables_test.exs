@@ -65,7 +65,7 @@ defmodule HtmlToMarkdown.TablesTest do
       assert {:ok, _content, tables, _metadata} = HtmlToMarkdown.convert_with_tables(html)
       assert length(tables) == 1
       [table] = tables
-      assert hd(table.cells) == ["a | b", "c & d"]
+      assert hd(table.cells) == ["a \\| b", "c & d"]
     end
 
     test "accepts options" do

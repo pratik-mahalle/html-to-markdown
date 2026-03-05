@@ -1,6 +1,7 @@
 package dev.kreuzberg.htmltomarkdown.metadata;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Map;
 
 /**
@@ -24,17 +25,17 @@ import java.util.Map;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record DocumentMetadata(
-    String title,
-    String description,
-    java.util.List<String> keywords,
-    String author,
-    String canonicalUrl,
-    String baseHref,
-    String language,
-    TextDirection textDirection,
-    Map<String, String> openGraph,
-    Map<String, String> twitterCard,
-    Map<String, String> metaTags) {
+    @JsonProperty("title") String title,
+    @JsonProperty("description") String description,
+    @JsonProperty("keywords") java.util.List<String> keywords,
+    @JsonProperty("author") String author,
+    @JsonProperty("canonical_url") String canonicalUrl,
+    @JsonProperty("base_href") String baseHref,
+    @JsonProperty("language") String language,
+    @JsonProperty("text_direction") TextDirection textDirection,
+    @JsonProperty("open_graph") Map<String, String> openGraph,
+    @JsonProperty("twitter_card") Map<String, String> twitterCard,
+    @JsonProperty("meta_tags") Map<String, String> metaTags) {
 
   /**
    * Construct a DocumentMetadata record with all fields.

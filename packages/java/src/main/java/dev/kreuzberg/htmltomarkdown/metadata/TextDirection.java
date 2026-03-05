@@ -28,6 +28,7 @@ public enum TextDirection {
    *
    * @return the direction string ("ltr", "rtl", or "auto")
    */
+  @com.fasterxml.jackson.annotation.JsonValue
   public String getValue() {
     return value;
   }
@@ -41,6 +42,7 @@ public enum TextDirection {
    *     <p>For example, {@code TextDirection.parse("ltr")} returns {@code
    *     TextDirection.LEFT_TO_RIGHT}.
    */
+  @com.fasterxml.jackson.annotation.JsonCreator
   public static TextDirection parse(String s) {
     if (s == null) {
       throw new IllegalArgumentException("TextDirection string cannot be null");

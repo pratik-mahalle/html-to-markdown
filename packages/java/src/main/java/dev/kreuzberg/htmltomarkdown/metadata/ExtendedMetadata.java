@@ -3,7 +3,6 @@ package dev.kreuzberg.htmltomarkdown.metadata;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Comprehensive metadata extraction result from HTML document.
@@ -36,11 +35,13 @@ public record ExtendedMetadata(
    * @param structuredData the structured data list
    */
   public ExtendedMetadata {
-    Objects.requireNonNull(document, "document cannot be null");
-    Objects.requireNonNull(headers, "headers cannot be null");
-    Objects.requireNonNull(links, "links cannot be null");
-    Objects.requireNonNull(images, "images cannot be null");
-    Objects.requireNonNull(structuredData, "structuredData cannot be null");
+    if (document == null) {
+      document = DocumentMetadata.of(null, null);
+    }
+    headers = headers != null ? headers : Collections.emptyList();
+    links = links != null ? links : Collections.emptyList();
+    images = images != null ? images : Collections.emptyList();
+    structuredData = structuredData != null ? structuredData : Collections.emptyList();
   }
 
   /**
