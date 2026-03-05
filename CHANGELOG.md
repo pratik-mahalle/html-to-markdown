@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.28.0] - 2026-03-05
+
+### Added
+
+- **Table extraction API**: New `convert_with_tables` function that extracts structured table data during HTML-to-Markdown conversion. Returns `TableData` structs containing cell contents as `Vec<Vec<String>>`, rendered markdown output, and per-row header flags. Uses the visitor pattern internally with a built-in `TableCollector` to capture table structure in a single pass. Available across all language bindings:
+  - **Rust**: `convert_with_tables(html, options, metadata_config)` returning `ConversionWithTables`
+  - **Python**: `convert_with_tables(html, options, preprocessing, metadata_config)` returning `TableExtractionResult`
+  - **TypeScript/Node.js**: `convertWithTables(html, options?, metadataConfig?)` returning `TableExtraction`
+  - **Ruby**: `HtmlToMarkdown.convert_with_tables(html, options, metadata_config)` returning a Hash
+  - **PHP**: `HtmlToMarkdown::convertWithTables($html, $options, $metadataConfig)` returning `TableExtractionResult`
+  - **Go**: `ConvertWithTables(html)` returning `TableExtractionResult`
+  - **Java**: `HtmlToMarkdown.convertWithTables(html)` returning `TableExtractionResult`
+  - **C#**: `HtmlToMarkdownConverter.ConvertWithTables(html)` returning `TableExtractionResult`
+  - **Elixir**: `HtmlToMarkdown.convert_with_tables(html, options, metadata_config)` returning `{:ok, content, tables, metadata}`
+  - **R**: `convert_with_tables(html, options, metadata_config)` returning a list
+  - **C (FFI)**: `html_to_markdown_convert_with_tables(html, options_json, metadata_json)` returning JSON
+  - **WASM**: `convertWithTables(html, options?, metadataConfig?)` returning a JS object
+
+### Fixed
+
+- **Plain text fast path skipping visitor callbacks**: When `OutputFormat::Plain` was used with `convert_with_tables`, the plain text fast path returned before the visitor could extract table data, resulting in empty tables. The conversion pipeline now runs the full visitor walk before returning plain text content.
+
 ## [2.27.3] - 2026-03-05
 
 ### Fixed

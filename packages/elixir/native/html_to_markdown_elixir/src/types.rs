@@ -80,3 +80,17 @@ pub struct ExtendedMetadataTerm {
     pub images: Vec<ImageMetadataTerm>,
     pub structured_data: Vec<StructuredDataTerm>,
 }
+
+#[derive(NifMap)]
+pub struct TableDataTerm {
+    pub cells: Vec<Vec<String>>,
+    pub markdown: String,
+    pub is_header_row: Vec<bool>,
+}
+
+#[derive(NifMap)]
+pub struct TableExtractionTerm {
+    pub content: String,
+    pub metadata: Option<ExtendedMetadataTerm>,
+    pub tables: Vec<TableDataTerm>,
+}

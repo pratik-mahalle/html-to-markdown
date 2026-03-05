@@ -28,6 +28,7 @@ package htmltomarkdown
 // char* html_to_markdown_convert_with_metadata_proxy(const char* html, char** metadata_json);
 // bool html_to_markdown_profile_start_proxy(const char* output, int32_t frequency);
 // bool html_to_markdown_profile_stop_proxy(void);
+// char* html_to_markdown_convert_with_tables_proxy(const char* html, const char* options_json, const char* metadata_config_json);
 import "C"
 import (
 	"encoding/json"
@@ -424,6 +425,76 @@ func ConvertWithMetadata(html string) (MetadataExtraction, error) {
 //	fmt.Println(result.Markdown)
 func MustConvertWithMetadata(html string) MetadataExtraction {
 	result, err := ConvertWithMetadata(html)
+	if err != nil {
+		panic(err)
+	}
+	return result
+}
+
+// TableData contains a single table extracted during conversion.
+type TableData struct {
+	Cells       [][]string `json:"cells"`
+	Markdown    string     `json:"markdown"`
+	IsHeaderRow []bool     `json:"is_header_row"`
+}
+
+// TableExtractionResult contains the conversion result with table extraction.
+type TableExtractionResult struct {
+	Content  string            `json:"content"`
+	Metadata *ExtendedMetadata `json:"metadata,omitempty"`
+	Tables   []TableData       `json:"tables"`
+}
+
+// ConvertWithTables converts HTML to Markdown and extracts tables as structured data.
+//
+// Returns a TableExtractionResult containing the markdown content, optional metadata,
+// and a list of extracted tables with cell data and header row indicators.
+//
+// Example:
+//
+//	html := `<table><tr><th>Name</th><th>Age</th></tr><tr><td>Alice</td><td>30</td></tr></table>`
+//	result, err := htmltomarkdown.ConvertWithTables(html)
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//	fmt.Println(result.Content)
+//	for _, table := range result.Tables {
+//	    fmt.Printf("Table with %d rows\n", len(table.Cells))
+//	}
+func ConvertWithTables(html string) (TableExtractionResult, error) {
+	if html == "" {
+		return TableExtractionResult{}, nil
+	}
+	if err := ensureFFILoaded(); err != nil {
+		return TableExtractionResult{}, err
+	}
+
+	cHTML := C.CString(html)
+	defer C.free(unsafe.Pointer(cHTML))
+
+	result := C.html_to_markdown_convert_with_tables_proxy(cHTML, nil, nil)
+	if result == nil {
+		errMsg := C.html_to_markdown_last_error_proxy()
+		if errMsg != nil {
+			return TableExtractionResult{}, errors.New(C.GoString(errMsg))
+		}
+		return TableExtractionResult{}, errors.New("html to markdown table extraction failed")
+	}
+	defer C.html_to_markdown_free_string_proxy(result)
+
+	jsonStr := C.GoString(result)
+
+	var extraction TableExtractionResult
+	if err := json.Unmarshal([]byte(jsonStr), &extraction); err != nil {
+		return TableExtractionResult{}, errors.New("failed to parse table extraction JSON: " + err.Error())
+	}
+
+	return extraction, nil
+}
+
+// MustConvertWithTables is like ConvertWithTables but panics if an error occurs.
+func MustConvertWithTables(html string) TableExtractionResult {
+	result, err := ConvertWithTables(html)
 	if err != nil {
 		panic(err)
 	}

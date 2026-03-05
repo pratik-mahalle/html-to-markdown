@@ -17,6 +17,7 @@ defmodule HtmlToMarkdown.Native do
   def create_options_handle(_options), do: :erlang.nif_error(:nif_not_loaded)
   def convert_with_inline_images(_html, _options, _config), do: :erlang.nif_error(:nif_not_loaded)
   def convert_with_metadata(_html, _options, _config), do: :erlang.nif_error(:nif_not_loaded)
+  def convert_with_tables(_html, _options, _config), do: :erlang.nif_error(:nif_not_loaded)
   def start_profiling(_output, _frequency), do: :erlang.nif_error(:nif_not_loaded)
   def stop_profiling, do: :erlang.nif_error(:nif_not_loaded)
   def convert_with_visitor(_html, _options, _visitor_pid), do: :erlang.nif_error(:nif_not_loaded)

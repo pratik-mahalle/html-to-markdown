@@ -3,6 +3,8 @@ use crate::profiling;
 use crate::types::{JsHtmlExtraction, JsInlineImage, JsInlineImageWarning};
 #[cfg(feature = "metadata")]
 use crate::types::{JsMetadataConfig, JsMetadataExtraction, convert_metadata};
+#[cfg(feature = "visitor")]
+use crate::types::{JsTableExtraction, tables::convert_tables};
 #[cfg(feature = "async-visitor")]
 use crate::visitor::JsVisitorBridge;
 use html_to_markdown_bindings_common::error::error_message;
@@ -536,5 +538,59 @@ pub fn convert_with_metadata_buffer_with_options_and_metadata_handle(
     Ok(JsMetadataExtraction {
         markdown,
         metadata: convert_metadata(metadata),
+    })
+}
+
+/// Convert HTML to Markdown with structured table extraction.
+///
+/// Returns converted content alongside all tables found in the HTML.
+/// When the metadata feature is enabled, metadata extraction is also performed.
+///
+/// # Arguments
+///
+/// * `html` - The HTML string to convert
+/// * `options` - Optional conversion options
+/// * `metadata_config` - Optional metadata extraction configuration (when metadata feature is enabled)
+///
+/// # Example
+///
+/// ```javascript
+/// const { convertWithTables } = require('html-to-markdown');
+///
+/// const html = '<table><tr><th>Name</th></tr><tr><td>Alice</td></tr></table>';
+/// const result = convertWithTables(html);
+/// console.log(result.tables[0].cells);
+/// ```
+#[cfg(all(feature = "visitor", feature = "metadata"))]
+#[napi(js_name = "convertWithTables")]
+pub fn convert_with_tables(
+    html: String,
+    options: Option<JsConversionOptions>,
+    metadata_config: Option<JsMetadataConfig>,
+) -> Result<JsTableExtraction> {
+    let rust_options = options.map(Into::into);
+    let rust_metadata_cfg = metadata_config.map(Into::into);
+
+    let result = guard_panic(|| html_to_markdown_rs::convert_with_tables(&html, rust_options, rust_metadata_cfg))
+        .map_err(to_js_error)?;
+
+    Ok(JsTableExtraction {
+        content: result.content,
+        metadata: result.metadata.map(convert_metadata),
+        tables: convert_tables(result.tables),
+    })
+}
+
+#[cfg(all(feature = "visitor", not(feature = "metadata")))]
+#[napi(js_name = "convertWithTables")]
+pub fn convert_with_tables(html: String, options: Option<JsConversionOptions>) -> Result<JsTableExtraction> {
+    let rust_options = options.map(Into::into);
+
+    let result =
+        guard_panic(|| html_to_markdown_rs::convert_with_tables(&html, rust_options, None)).map_err(to_js_error)?;
+
+    Ok(JsTableExtraction {
+        content: result.content,
+        tables: convert_tables(result.tables),
     })
 }

@@ -81,6 +81,9 @@ final class HtmlToMarkdownFFI {
   /** Method handle for html_to_markdown_profile_stop. */
   static final MethodHandle html_to_markdown_profile_stop;
 
+  /** Method handle for html_to_markdown_convert_with_tables. */
+  static final MethodHandle html_to_markdown_convert_with_tables;
+
   /** Method handle for html_to_markdown_visitor_create. */
   static final MethodHandle html_to_markdown_visitor_create;
 
@@ -89,6 +92,11 @@ final class HtmlToMarkdownFFI {
 
   /** Method handle for html_to_markdown_convert_with_visitor. */
   static final MethodHandle html_to_markdown_convert_with_visitor;
+
+  /** Function descriptor for convert with tables. */
+  private static final FunctionDescriptor CONVERT_WITH_TABLES_DESC =
+      FunctionDescriptor.of(
+          ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS);
 
   /** Function descriptor for visitor create. */
   private static final FunctionDescriptor VISITOR_CREATE_DESC =
@@ -227,6 +235,10 @@ final class HtmlToMarkdownFFI {
 
     html_to_markdown_profile_stop =
         LINKER.downcallHandle(findSymbol("html_to_markdown_profile_stop"), PROFILE_STOP_DESC);
+
+    html_to_markdown_convert_with_tables =
+        LINKER.downcallHandle(
+            findSymbol("html_to_markdown_convert_with_tables"), CONVERT_WITH_TABLES_DESC);
 
     html_to_markdown_visitor_create =
         LINKER.downcallHandle(findSymbol("html_to_markdown_visitor_create"), VISITOR_CREATE_DESC);

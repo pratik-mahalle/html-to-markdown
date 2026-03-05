@@ -109,6 +109,20 @@ Visitor support varies by binding:
 
 ---
 
+## Table Extraction <span class="version-badge new">v2.27.3</span>
+
+Extract structured table data alongside the Markdown conversion in a single pass. Each `<table>` element found in the HTML is returned with its cell contents (already converted to the target format), header row flags, and the fully rendered table output.
+
+Use cases:
+
+- **Data extraction** -- Pull structured tabular data from HTML pages for processing or storage
+- **Spreadsheet import** -- Convert HTML tables to structured data suitable for CSV or spreadsheet formats
+- **Content analysis** -- Analyze table structures, count rows/columns, and inspect header patterns during conversion
+
+Table extraction is available in all language bindings: Rust, Python, TypeScript/Node.js, Ruby, PHP, Go, Java, C#, Elixir, R, C (FFI), and WASM.
+
+---
+
 ## Configuration
 
 Control every aspect of the Markdown output through `ConversionOptions`:

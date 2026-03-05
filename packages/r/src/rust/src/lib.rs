@@ -2,6 +2,7 @@
 
 use extendr_api::prelude::*;
 use html_to_markdown_rs::convert_with_metadata as convert_with_metadata_inner;
+use html_to_markdown_rs::convert_with_tables as convert_with_tables_inner;
 use html_to_markdown_rs::{
     ConversionOptions, convert as convert_inner, convert_with_inline_images as convert_with_inline_images_inner,
 };
@@ -13,7 +14,7 @@ mod types;
 mod visitor;
 
 use options::{decode_inline_image_config, decode_metadata_config, decode_options};
-use types::{inline_image_to_robj, inline_image_warning_to_robj, metadata_to_robj};
+use types::{inline_image_to_robj, inline_image_warning_to_robj, metadata_to_robj, table_extraction_to_robj};
 
 struct OptionsHandle(ConversionOptions);
 
@@ -107,6 +108,24 @@ fn convert_with_metadata(html: &str, options: Robj, config: Robj) -> Result<Robj
     Ok(list!(markdown = markdown, metadata = metadata_to_robj(metadata)).into())
 }
 
+/// Convert HTML to Markdown and extract tables as structured data.
+/// @param html A character string of HTML content.
+/// @param options A named list of conversion options, or NULL for defaults.
+/// @param config A named list of metadata config, or NULL for defaults.
+/// @return A named list with content, metadata, and tables.
+/// @export
+#[extendr]
+fn convert_with_tables(html: &str, options: Robj, config: Robj) -> Result<Robj> {
+    let opts = decode_options(options).map_err(|e| Error::Other(e))?;
+    let meta_config = decode_metadata_config(config).map_err(|e| Error::Other(e))?;
+
+    let result =
+        profiling::maybe_profile(|| convert_with_tables_inner(html, Some(opts.clone()), Some(meta_config.clone())))
+            .map_err(|e| Error::Other(e.to_string()))?;
+
+    Ok(table_extraction_to_robj(result))
+}
+
 /// Convert HTML to Markdown with a visitor (simplified: standard conversion).
 /// @param html A character string of HTML content.
 /// @param visitor A visitor object (currently unused, reserved for future use).
@@ -159,6 +178,7 @@ extendr_module! {
     fn create_options_handle;
     fn convert_with_inline_images;
     fn convert_with_metadata;
+    fn convert_with_tables;
     fn convert_with_visitor;
     fn start_profiling;
     fn stop_profiling;

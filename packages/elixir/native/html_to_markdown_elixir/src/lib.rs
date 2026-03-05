@@ -3,6 +3,7 @@
 use std::collections::HashMap;
 
 use html_to_markdown_rs::convert_with_metadata as convert_with_metadata_inner;
+use html_to_markdown_rs::convert_with_tables as convert_with_tables_inner;
 use html_to_markdown_rs::metadata::{
     DocumentMetadata, ExtendedMetadata, HeaderMetadata, ImageMetadata, LinkMetadata, StructuredData,
 };
@@ -22,7 +23,7 @@ use options::{
 };
 use types::{
     DocumentMetadataTerm, ExtendedMetadataTerm, HeaderMetadataTerm, ImageMetadataTerm, InlineImageTerm,
-    InlineImageWarningTerm, LinkMetadataTerm, StructuredDataTerm,
+    InlineImageWarningTerm, LinkMetadataTerm, StructuredDataTerm, TableDataTerm, TableExtractionTerm,
 };
 
 use rustler::types::binary::{Binary, OwnedBinary};
@@ -42,7 +43,8 @@ rustler::init!(
         convert_with_metadata,
         start_profiling,
         stop_profiling,
-        convert_with_visitor
+        convert_with_visitor,
+        convert_with_tables
     ],
     load = on_load
 );
@@ -226,6 +228,48 @@ fn convert_with_metadata<'a>(
     let config = config.clone();
     match profiling::maybe_profile(|| convert_with_metadata_inner(&html, Some(options.clone()), config.clone(), None)) {
         Ok((markdown, metadata)) => Ok((atoms::ok(), (markdown, build_metadata(metadata))).encode(env)),
+        Err(err) => Ok((atoms::error(), err.to_string()).encode(env)),
+    }
+}
+
+#[rustler::nif(schedule = "DirtyCpu")]
+fn convert_with_tables<'a>(
+    env: Env<'a>,
+    html: String,
+    options_term: Term<'a>,
+    config_term: Term<'a>,
+) -> NifResult<Term<'a>> {
+    let options = match decode_options_term(options_term) {
+        Ok(options) => options,
+        Err(err) => return handle_invalid_option_error(env, err),
+    };
+    let config = match decode_metadata_config(config_term) {
+        Ok(config) => config,
+        Err(err) => return handle_invalid_option_error(env, err),
+    };
+
+    match profiling::maybe_profile(|| convert_with_tables_inner(&html, Some(options), Some(config))) {
+        Ok(result) => {
+            let tables: Vec<TableDataTerm> = result
+                .tables
+                .into_iter()
+                .map(|t| TableDataTerm {
+                    cells: t.cells,
+                    markdown: t.markdown,
+                    is_header_row: t.is_header_row,
+                })
+                .collect();
+
+            let metadata = result.metadata.map(build_metadata);
+
+            let extraction = TableExtractionTerm {
+                content: result.content,
+                metadata,
+                tables,
+            };
+
+            Ok((atoms::ok(), extraction).encode(env))
+        }
         Err(err) => Ok((atoms::error(), err.to_string()).encode(env)),
     }
 }

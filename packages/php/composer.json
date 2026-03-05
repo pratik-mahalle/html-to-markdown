@@ -57,5 +57,5 @@
 	},
 	"minimum-stability": "stable",
 	"prefer-stable": true,
-	"version": "2.27.3"
+	"version": "2.28.0"
 }

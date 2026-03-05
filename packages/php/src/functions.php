@@ -8,6 +8,7 @@ use HtmlToMarkdown\Config\ConversionOptions;
 use HtmlToMarkdown\Config\InlineImageConfig;
 use HtmlToMarkdown\Value\ExtendedMetadata;
 use HtmlToMarkdown\Value\InlineImageExtraction;
+use HtmlToMarkdown\Value\TableExtractionResult;
 
 /**
  * @phpstan-import-type ConversionOptionsInput from \HtmlToMarkdown\Config\ConversionOptions
@@ -192,4 +193,19 @@ function convert_with_metadata(
     ?array $metadataConfig = null,
 ): array {
     return HtmlToMarkdown::convertWithMetadata($html, $options, $metadataConfig);
+}
+
+/**
+ * Convert HTML to Markdown and extract tables as structured data.
+ *
+ * @param ConversionOptions|array<string, mixed>|null $options
+ * @param array<string, mixed>|null $metadataConfig
+ * @phpstan-param ConversionOptions|array<string, mixed>|null $options
+ */
+function convert_with_tables(
+    string $html,
+    ConversionOptions|array|null $options = null,
+    ?array $metadataConfig = null,
+): TableExtractionResult {
+    return HtmlToMarkdown::convertWithTables($html, $options, $metadataConfig);
 }

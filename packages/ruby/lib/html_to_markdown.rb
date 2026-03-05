@@ -18,6 +18,7 @@ module HtmlToMarkdown
     alias native_convert_with_metadata convert_with_metadata
     alias native_convert_with_metadata_handle convert_with_metadata_handle
     alias native_convert_with_visitor convert_with_visitor
+    alias native_convert_with_tables convert_with_tables
   end
 
   module_function
@@ -178,5 +179,33 @@ module HtmlToMarkdown
 
   def convert_with_metadata_handle(html, options_handle, metadata_config = nil)
     native_convert_with_metadata_handle(html.to_s, options_handle, metadata_config)
+  end
+
+  # Convert HTML to Markdown with table extraction.
+  #
+  # Performs HTML-to-Markdown conversion while extracting structured table data
+  # (cells, markdown representation, header row flags) in a single pass.
+  #
+  # @param html [String] HTML string to convert.
+  # @param options [Hash, nil] Optional conversion configuration.
+  # @param metadata_config [Hash, nil] Optional metadata extraction configuration.
+  #
+  # @return [Hash] A hash with keys:
+  #   - :content [String] The converted Markdown output
+  #   - :metadata [Hash, nil] Extended metadata (if metadata extraction was configured)
+  #   - :tables [Array<Hash>] Extracted tables, each with:
+  #     - :cells [Array<Array<String>>] Table cells organized as rows x columns
+  #     - :markdown [String] Complete rendered table in Markdown format
+  #     - :is_header_row [Array<Boolean>] Per-row flag indicating header rows
+  #
+  # @raise [StandardError] If conversion fails or invalid configuration
+  #
+  # @example Basic usage
+  #   html = '<table><thead><tr><th>Name</th></tr></thead><tbody><tr><td>Alice</td></tr></tbody></table>'
+  #   result = HtmlToMarkdown.convert_with_tables(html)
+  #   puts result[:tables].length    # => 1
+  #   puts result[:tables][0][:cells] # => [["Name"], ["Alice"]]
+  def convert_with_tables(html, options = nil, metadata_config = nil)
+    native_convert_with_tables(html.to_s, options, metadata_config)
   end
 end

@@ -185,6 +185,18 @@ module HtmlToMarkdown
     structured_data: Array[structured_data]
   }
 
+  type table_data = {
+    cells: Array[Array[String]],
+    markdown: String,
+    is_header_row: Array[bool]
+  }
+
+  type table_extraction_result = {
+    content: String,
+    metadata: extended_metadata?,
+    tables: Array[table_data]
+  }
+
   # Native methods (implemented in Rust via Magnus/rb-sys)
   # These are aliased from the Rust extension and available as both module and instance methods
   private
@@ -217,6 +229,11 @@ module HtmlToMarkdown
     conversion_options? options,
     visitor? visitor
   ) -> String
+  def self.native_convert_with_tables: (
+    String html,
+    conversion_options? options,
+    metadata_config? metadata_config
+  ) -> table_extraction_result
 
   def native_convert: (String html, conversion_options? options) -> String
   def native_options: (conversion_options? options_hash) -> Options
@@ -246,6 +263,11 @@ module HtmlToMarkdown
     conversion_options? options,
     visitor? visitor
   ) -> String
+  def native_convert_with_tables: (
+    String html,
+    conversion_options? options,
+    metadata_config? metadata_config
+  ) -> table_extraction_result
 
   # Visitor interface for customizing conversion behavior
   type visitor = Object
@@ -422,6 +444,25 @@ module HtmlToMarkdown
     ?metadata_config metadata_config
   ) -> [String, extended_metadata]
 
+  # Convert HTML and extract tables as structured data
+  #
+  # Args:
+  #   html: HTML string to convert
+  #   options: Optional conversion configuration
+  #   metadata_config: Optional metadata extraction configuration
+  #
+  # Returns:
+  #   table_extraction_result: Hash containing content, metadata, and tables array
+  #
+  # Example:
+  #   result = HtmlToMarkdown.convert_with_tables(html)
+  #   puts result[:tables].length
+  def self.convert_with_tables: (
+    String html,
+    ?conversion_options options,
+    ?metadata_config metadata_config
+  ) -> table_extraction_result
+
   # Instance method versions (created by module_function)
   def convert: (String html, ?conversion_options options, ?visitor visitor) -> String
   def options: (?conversion_options options_hash) -> Options
@@ -449,4 +490,9 @@ module HtmlToMarkdown
     Options options_handle,
     ?metadata_config metadata_config
   ) -> [String, extended_metadata]
+  def convert_with_tables: (
+    String html,
+    ?conversion_options options,
+    ?metadata_config metadata_config
+  ) -> table_extraction_result
 end
