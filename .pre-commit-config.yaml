@@ -29,12 +29,12 @@ repos:
     hooks:
       - id: pyproject-fmt
   - repo: https://github.com/biomejs/pre-commit
-    rev: v2.4.4
+    rev: v2.4.5
     hooks:
       - id: biome-format
       - id: biome-lint
   - repo: https://github.com/oxc-project/mirrors-oxlint
-    rev: v1.50.0
+    rev: v1.51.0
     hooks:
       - id: oxlint
         args: ["--fix"]
@@ -79,7 +79,7 @@ repos:
         files: ^crates/html-to-markdown-ffi/tests/c/
 
   - repo: https://github.com/gherynos/pre-commit-java
-    rev: v0.6.35
+    rev: v0.6.36
     hooks:
       - id: cpd
         exclude: ^\.mvn/wrapper/
