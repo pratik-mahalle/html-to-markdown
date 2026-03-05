@@ -54,5 +54,5 @@ napi-build = "2.2"
 default = ["metadata", "async-visitor"]
 metadata = ["html-to-markdown-rs/metadata"]
 visitor = ["html-to-markdown-rs/visitor"]
-async-visitor = ["html-to-markdown-rs/async-visitor"]
+async-visitor = ["visitor", "html-to-markdown-rs/async-visitor"]
 profiling = ["dep:pprof"]
