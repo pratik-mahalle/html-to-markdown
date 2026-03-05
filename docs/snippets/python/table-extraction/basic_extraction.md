@@ -11,8 +11,8 @@ html = """
 
 result = convert_with_tables(html)
 
-for table in result.tables:
-    for i, row in enumerate(table.cells):
-        prefix = "Header" if table.is_header_row[i] else "Row"
+for table in result["tables"]:
+    for i, row in enumerate(table["cells"]):
+        prefix = "Header" if table["is_header_row"][i] else "Row"
         print(f"  {prefix}: {row}")
 ```

@@ -11,9 +11,9 @@ HTML
 
 result = HtmlToMarkdown.convert_with_tables(html)
 
-result.tables.each do |table|
-  table.cells.each_with_index do |row, i|
-    prefix = table.is_header_row[i] ? "Header" : "Row"
+result[:tables].each do |table|
+  table[:cells].each_with_index do |row, i|
+    prefix = table[:is_header_row][i] ? "Header" : "Row"
     puts "  #{prefix}: #{row.join(', ')}"
   end
 end

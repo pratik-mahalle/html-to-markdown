@@ -9,11 +9,11 @@ html = """
 
 {:ok, content, tables, _metadata} = HtmlToMarkdown.convert_with_tables(html)
 
-for table <- tables do
-  table.cells
+for %{cells: cells, is_header_row: is_header_row} <- tables do
+  cells
   |> Enum.with_index()
   |> Enum.each(fn {row, i} ->
-    prefix = if Enum.at(table.is_header_row, i), do: "Header", else: "Row"
+    prefix = if Enum.at(is_header_row, i), do: "Header", else: "Row"
     IO.puts("  #{prefix}: #{Enum.join(row, ", ")}")
   end)
 end

@@ -248,7 +248,7 @@ fn convert_with_tables<'a>(
         Err(err) => return handle_invalid_option_error(env, err),
     };
 
-    match profiling::maybe_profile(|| convert_with_tables_inner(&html, Some(options), Some(config))) {
+    match profiling::maybe_profile(|| convert_with_tables_inner(&html, Some(options.clone()), Some(config.clone()))) {
         Ok(result) => {
             let tables: Vec<TableDataTerm> = result
                 .tables
