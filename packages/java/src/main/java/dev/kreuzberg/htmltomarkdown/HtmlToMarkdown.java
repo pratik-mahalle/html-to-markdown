@@ -54,8 +54,13 @@ public final class HtmlToMarkdown {
   /** Default profiling frequency in Hz. */
   private static final int DEFAULT_PROFILING_FREQUENCY = 1000;
 
-  /** Shared ObjectMapper for JSON deserialization. */
-  private static final ObjectMapper MAPPER = new ObjectMapper();
+  /** Shared ObjectMapper for JSON deserialization with snake_case support. */
+  private static final ObjectMapper MAPPER = new ObjectMapper()
+      .setPropertyNamingStrategy(
+          com.fasterxml.jackson.databind.PropertyNamingStrategies.SNAKE_CASE)
+      .configure(
+          com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+          false);
 
   /**
    * Convert HTML to Markdown using default options.
