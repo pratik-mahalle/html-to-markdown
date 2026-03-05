@@ -2,7 +2,6 @@ package dev.kreuzberg.htmltomarkdown.metadata;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Document-level metadata extracted from {@code <head>} and top-level elements.
@@ -53,10 +52,10 @@ public record DocumentMetadata(
    * @param metaTags additional meta tags
    */
   public DocumentMetadata {
-    Objects.requireNonNull(keywords, "keywords cannot be null");
-    Objects.requireNonNull(openGraph, "openGraph cannot be null");
-    Objects.requireNonNull(twitterCard, "twitterCard cannot be null");
-    Objects.requireNonNull(metaTags, "metaTags cannot be null");
+    keywords = keywords != null ? keywords : java.util.Collections.emptyList();
+    openGraph = openGraph != null ? openGraph : java.util.Collections.emptyMap();
+    twitterCard = twitterCard != null ? twitterCard : java.util.Collections.emptyMap();
+    metaTags = metaTags != null ? metaTags : java.util.Collections.emptyMap();
   }
 
   /**
