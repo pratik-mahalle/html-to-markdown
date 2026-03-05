@@ -197,6 +197,65 @@ pub fn convert_with_inline_images(
 
 ---
 
+### `convert_with_tables`
+
+Convert HTML to Markdown with structured table extraction. Requires the `visitor` feature.
+
+```rust
+pub fn convert_with_tables(
+    html: &str,
+    options: Option<ConversionOptions>,
+    metadata_cfg: Option<MetadataConfig>,  // only with "metadata" feature
+) -> Result<ConversionWithTables>
+```
+
+**Arguments:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `html` | `&str` | The HTML string to convert |
+| `options` | `Option<ConversionOptions>` | Optional conversion configuration |
+| `metadata_cfg` | `Option<MetadataConfig>` | Optional metadata extraction configuration (requires `metadata` feature) |
+
+**Returns:** `Result<ConversionWithTables>` -- a struct containing the converted content, extracted tables, and optional metadata.
+
+#### `ConversionWithTables`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `content` | `String` | Converted markdown/djot/plain text content |
+| `metadata` | `Option<ExtendedMetadata>` | Extended metadata, if metadata extraction was requested (requires `metadata` feature) |
+| `tables` | `Vec<TableData>` | All tables found in the HTML, in document order |
+
+#### `TableData`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `cells` | `Vec<Vec<String>>` | Table cells organized as rows x columns, with contents converted to the target output format |
+| `markdown` | `String` | Complete rendered table in the target output format |
+| `is_header_row` | `Vec<bool>` | Per-row flag indicating whether the row was inside `<thead>` |
+
+**Example:**
+
+```rust
+use html_to_markdown_rs::convert_with_tables;
+
+let html = r#"<table>
+    <tr><th>Name</th><th>Age</th></tr>
+    <tr><td>Alice</td><td>30</td></tr>
+</table>"#;
+
+let result = convert_with_tables(html, None, None).unwrap();
+
+assert_eq!(result.tables.len(), 1);
+assert_eq!(result.tables[0].cells[0], vec!["Name", "Age"]);
+assert_eq!(result.tables[0].cells[1], vec!["Alice", "30"]);
+assert!(result.tables[0].is_header_row[0]);  // first row is a header
+assert!(!result.tables[0].is_header_row[1]); // second row is data
+```
+
+---
+
 ## Structs
 
 ### `ConversionOptions`

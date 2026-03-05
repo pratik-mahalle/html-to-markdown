@@ -21,6 +21,7 @@ final class ExtensionBridge implements ExtensionBridgeContract
     private const CONVERT_INLINE_FUNCTION = 'html_to_markdown_convert_with_inline_images';
     private const CONVERT_METADATA_FUNCTION = 'html_to_markdown_convert_with_metadata';
     private const CONVERT_VISITOR_FUNCTION = 'html_to_markdown_convert_with_visitor';
+    private const CONVERT_TABLES_FUNCTION = 'html_to_markdown_convert_with_tables';
 
     /**
      * @param ConversionOptionsInput|null $options
@@ -133,5 +134,39 @@ final class ExtensionBridge implements ExtensionBridgeContract
         }
 
         return $result;
+    }
+
+    /**
+     * @param ConversionOptionsInput|null $options
+     * @param array<string, mixed>|null $metadataConfig
+     *
+     * @return array<string, mixed>
+     */
+    public function convertWithTables(
+        string $html,
+        ?array $options = null,
+        ?array $metadataConfig = null,
+    ): array {
+        /** @var callable-string $callable */
+        $callable = self::CONVERT_TABLES_FUNCTION;
+        if (!\function_exists($callable)) {
+            throw ExtensionNotLoaded::create();
+        }
+
+        try {
+            /** @var array<string, mixed> $payload */
+            $payload = $callable($html, $options, $metadataConfig);
+        } catch (\Throwable $exception) {
+            throw ConversionFailed::withMessage($exception->getMessage());
+        }
+
+        if (!\is_array($payload)) {
+            throw InvalidOption::because(
+                'convert_with_tables',
+                'extension returned unexpected payload',
+            );
+        }
+
+        return $payload;
     }
 }

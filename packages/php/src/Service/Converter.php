@@ -11,6 +11,7 @@ use HtmlToMarkdown\Contract\ExtensionBridge as ExtensionBridgeContract;
 use HtmlToMarkdown\Internal\TypeAssertions;
 use HtmlToMarkdown\Value\ExtendedMetadata;
 use HtmlToMarkdown\Value\InlineImageExtraction;
+use HtmlToMarkdown\Value\TableExtractionResult;
 use HtmlToMarkdown\Visitor\HtmlVisitor;
 
 /**
@@ -104,6 +105,27 @@ final class Converter
             $this->normalizeOptions($options),
             $visitor,
         );
+    }
+
+    /**
+     * Convert HTML to Markdown and extract tables as structured data.
+     *
+     * @param ConversionOptions|array<string, mixed>|null $options
+     * @param array<string, mixed>|null $metadataConfig
+     * @phpstan-param ConversionOptions|array<string, mixed>|null $options
+     */
+    public function convertWithTables(
+        string $html,
+        ConversionOptions|array|null $options = null,
+        ?array $metadataConfig = null,
+    ): TableExtractionResult {
+        $payload = $this->bridge->convertWithTables(
+            $html,
+            $this->normalizeOptions($options),
+            $metadataConfig,
+        );
+
+        return TableExtractionResult::fromExtensionPayload($payload);
     }
 
     /**

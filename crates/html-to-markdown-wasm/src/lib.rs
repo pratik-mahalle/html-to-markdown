@@ -42,6 +42,9 @@ pub use convert::{
 #[cfg(all(feature = "js-bindings", feature = "metadata"))]
 pub use convert::{convert_bytes_with_metadata, convert_with_metadata};
 
+#[cfg(all(feature = "js-bindings", feature = "visitor"))]
+pub use convert::convert_with_tables;
+
 /// Initialize panic hook for better error messages in the browser
 #[cfg(feature = "js-bindings")]
 #[wasm_bindgen::prelude::wasm_bindgen(start)]

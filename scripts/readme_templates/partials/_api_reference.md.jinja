@@ -21,6 +21,10 @@ Async version of visitor pattern with asyncio integration.
 
 Extract base64-encoded inline images with metadata.
 
+**`convert_with_tables(html: str, options?: ConversionOptions, metadata_config?: MetadataConfig) -> ConversionWithTables`**
+
+Extract structured table data (cells, headers, rendered markdown) alongside conversion.
+
 {% elif language == 'typescript' %}
 **`convert(html: string, options?: ConversionOptions): string`**
 
@@ -42,6 +46,10 @@ Async version of visitor pattern for I/O operations.
 
 Extract base64-encoded inline images with metadata.
 
+**`convertWithTables(html: string, options?: ConversionOptions, config?: MetadataConfig): { content: string; tables: TableData[]; metadata?: Metadata }`**
+
+Extract structured table data (cells, headers, rendered markdown) alongside conversion.
+
 {% elif language == 'ruby' %}
 **`convert(html, options: nil) -> String`**
 
@@ -59,6 +67,10 @@ Customize conversion with visitor callbacks for element interception. See [Visit
 
 Extract base64-encoded inline images with metadata.
 
+**`convert_with_tables(html, options: nil, config: nil) -> ConversionWithTables`**
+
+Extract structured table data (cells, headers, rendered markdown) alongside conversion.
+
 {% elif language == 'php' %}
 **`Converter::convert(string $html, ?ConversionOptions $options = null): string`**
 
@@ -75,6 +87,10 @@ Customize conversion with visitor callbacks for element interception. See [Visit
 **`Converter::convertWithInlineImages(string $html, ?InlineImageConfig $config = null): [string, array, array]`**
 
 Extract base64-encoded inline images with metadata.
+
+**`Converter::convertWithTables(string $html, ?ConversionOptions $options = null, ?MetadataConfig $config = null): ConversionWithTables`**
+
+Extract structured table data (cells, headers, rendered markdown) alongside conversion.
 
 {% elif language == 'go' %}
 **`Convert(html string) (string, error)`**
@@ -129,6 +145,31 @@ Extract Markdown plus metadata in a single pass. See [Metadata Extraction Guide]
 **`HtmlToMarkdown.convert_with_inline_images(html, config \\ nil) :: {String.t(), list(map()), list(String.t())}`**
 
 Extract base64-encoded inline images with metadata.
+
+**`HtmlToMarkdown.convert_with_tables(html, options \\ nil, config \\ nil) :: %ConversionWithTables{}`**
+
+Extract structured table data (cells, headers, rendered markdown) alongside conversion.
+
+{% elif language == 'r' %}
+**`convert(html, options = NULL)`**
+
+Basic HTML-to-Markdown conversion. Fast and simple.
+
+**`convert_with_metadata(html, options = NULL, config = NULL)`**
+
+Extract Markdown plus metadata in a single pass. See [Metadata Extraction Guide](../../examples/metadata-extraction/).
+
+**`convert_with_visitor(html, visitor, options = NULL)`**
+
+Customize conversion with visitor callbacks for element interception. See [Visitor Pattern Guide](../../examples/visitor-pattern/).
+
+**`convert_with_inline_images(html, config = NULL)`**
+
+Extract base64-encoded inline images with metadata.
+
+**`convert_with_tables(html, options = NULL, config = NULL)`**
+
+Extract structured table data (cells, headers, rendered markdown) alongside conversion.
 
 {% else %}
 See the [Visitor Pattern Guide](../../examples/visitor-pattern/) and [Metadata Extraction Guide](../../examples/metadata-extraction/) for comprehensive API documentation and examples.

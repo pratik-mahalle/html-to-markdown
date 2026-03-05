@@ -9,6 +9,88 @@ use std::ptr;
 
 use super::*;
 
+#[cfg(feature = "visitor")]
+#[test]
+fn test_convert_with_tables_basic() {
+    unsafe {
+        let html = CString::new("<table><tr><th>Name</th><th>Age</th></tr><tr><td>Alice</td><td>30</td></tr></table>")
+            .unwrap();
+        let result = html_to_markdown_convert_with_tables(html.as_ptr(), ptr::null(), ptr::null());
+        assert!(!result.is_null(), "Result should not be null");
+
+        let json_str = CStr::from_ptr(result).to_str().unwrap();
+        assert!(json_str.contains("\"content\""), "Should have content field");
+        assert!(json_str.contains("\"tables\""), "Should have tables field");
+        assert!(json_str.contains("\"cells\""), "Should have cells in table data");
+        assert!(json_str.contains("\"markdown\""), "Should have markdown in table data");
+        assert!(
+            json_str.contains("\"is_header_row\""),
+            "Should have is_header_row in table data"
+        );
+        assert!(json_str.contains("Name"), "Should contain table header text");
+        assert!(json_str.contains("Alice"), "Should contain table cell text");
+
+        html_to_markdown_free_string(result);
+    }
+}
+
+#[cfg(feature = "visitor")]
+#[test]
+fn test_convert_with_tables_null_html() {
+    unsafe {
+        let result = html_to_markdown_convert_with_tables(ptr::null(), ptr::null(), ptr::null());
+        assert!(result.is_null());
+        let err = html_to_markdown_last_error();
+        assert!(!err.is_null());
+        let msg = CStr::from_ptr(err).to_str().unwrap();
+        assert_eq!(msg, "html pointer was null");
+    }
+}
+
+#[cfg(feature = "visitor")]
+#[test]
+fn test_convert_with_tables_no_tables() {
+    unsafe {
+        let html = CString::new("<p>No tables here</p>").unwrap();
+        let result = html_to_markdown_convert_with_tables(html.as_ptr(), ptr::null(), ptr::null());
+        assert!(!result.is_null(), "Result should not be null");
+
+        let json_str = CStr::from_ptr(result).to_str().unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(json_str).unwrap();
+        assert!(
+            parsed["tables"].as_array().unwrap().is_empty(),
+            "Should have empty tables array"
+        );
+        assert!(!parsed["content"].as_str().unwrap().is_empty(), "Should have content");
+
+        html_to_markdown_free_string(result);
+    }
+}
+
+#[cfg(all(feature = "visitor", feature = "metadata"))]
+#[test]
+fn test_convert_with_tables_with_metadata() {
+    unsafe {
+        let html = CString::new(
+            "<html><head><title>Table Page</title></head><body><table><tr><td>Cell</td></tr></table></body></html>",
+        )
+        .unwrap();
+        let metadata_cfg = CString::new(r#"{"extract_document": true}"#).unwrap();
+        let result = html_to_markdown_convert_with_tables(html.as_ptr(), ptr::null(), metadata_cfg.as_ptr());
+        assert!(!result.is_null(), "Result should not be null");
+
+        let json_str = CStr::from_ptr(result).to_str().unwrap();
+        let parsed: serde_json::Value = serde_json::from_str(json_str).unwrap();
+        assert!(
+            parsed["metadata"].is_object(),
+            "Should have metadata when config provided"
+        );
+        assert!(!parsed["tables"].as_array().unwrap().is_empty(), "Should have tables");
+
+        html_to_markdown_free_string(result);
+    }
+}
+
 #[test]
 fn test_basic_conversion() {
     unsafe {

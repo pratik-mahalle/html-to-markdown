@@ -54,6 +54,9 @@ public final class HtmlToMarkdown {
   /** Default profiling frequency in Hz. */
   private static final int DEFAULT_PROFILING_FREQUENCY = 1000;
 
+  /** Shared ObjectMapper for JSON deserialization. */
+  private static final ObjectMapper MAPPER = new ObjectMapper();
+
   /**
    * Convert HTML to Markdown using default options.
    *
@@ -314,6 +317,72 @@ public final class HtmlToMarkdown {
       throw e;
     } catch (Throwable e) {
       throw new ConversionException("Failed to convert HTML to Markdown with metadata", e);
+    }
+  }
+
+  /**
+   * Convert HTML to Markdown and extract tables as structured data.
+   *
+   * <p>This method converts HTML to Markdown while extracting any tables found in the HTML as
+   * structured data, including cell contents, rendered Markdown, and header row indicators.
+   *
+   * <p><b>Example usage:</b>
+   *
+   * <pre>{@code
+   * String html = "<table><thead><tr><th>Name</th><th>Age</th></tr></thead>"
+   *     + "<tbody><tr><td>Alice</td><td>30</td></tr></tbody></table>";
+   * TableExtractionResult result = HtmlToMarkdown.convertWithTables(html);
+   * System.out.println("Markdown: " + result.content());
+   * System.out.println("Tables: " + result.tables().size());
+   * }</pre>
+   *
+   * @param html the HTML string to convert
+   * @return a {@code TableExtractionResult} with content, optional metadata, and extracted tables
+   * @throws ConversionException if conversion fails or JSON parsing fails
+   * @since 2.27.3
+   */
+  public static TableExtractionResult convertWithTables(final String html) {
+    if (html == null || html.isEmpty()) {
+      return new TableExtractionResult("", null, List.of());
+    }
+
+    try (Arena arena = Arena.ofConfined()) {
+      MemorySegment htmlSegment = HtmlToMarkdownFFI.toCString(arena, html);
+
+      MemorySegment resultSegment;
+      try {
+        resultSegment =
+            (MemorySegment)
+                HtmlToMarkdownFFI.html_to_markdown_convert_with_tables.invoke(
+                    htmlSegment, MemorySegment.NULL, MemorySegment.NULL);
+      } catch (Throwable e) {
+        throw new ConversionException("FFI call failed: " + e.getMessage(), e);
+      }
+
+      if (resultSegment == null || resultSegment.address() == 0) {
+        String errorMsg = getLastError();
+        throw new ConversionException(
+            errorMsg != null ? errorMsg : "table extraction failed");
+      }
+
+      try {
+        String jsonStr = HtmlToMarkdownFFI.fromCString(resultSegment);
+        return MAPPER.readValue(jsonStr, TableExtractionResult.class);
+      } catch (ConversionException e) {
+        throw e;
+      } catch (Exception e) {
+        throw new ConversionException(
+            "failed to parse table extraction JSON: " + e.getMessage(), e);
+      } finally {
+        try {
+          HtmlToMarkdownFFI.html_to_markdown_free_string.invoke(resultSegment);
+        } catch (Throwable ignored) {
+        }
+      }
+    } catch (ConversionException e) {
+      throw e;
+    } catch (Throwable e) {
+      throw new ConversionException("Failed to convert HTML to Markdown with tables", e);
     }
   }
 

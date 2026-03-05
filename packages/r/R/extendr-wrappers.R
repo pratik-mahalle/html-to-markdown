@@ -57,6 +57,16 @@ convert_with_metadata <- function(html, options = NULL, config = NULL) {
   .Call(wrap__convert_with_metadata, html, options, config)
 }
 
+#' Convert HTML to Markdown and extract tables as structured data.
+#' @param html A character string of HTML content.
+#' @param options A named list of conversion options, or NULL for defaults.
+#' @param config A named list of metadata config, or NULL for defaults.
+#' @return A named list with content, metadata, and tables.
+#' @export
+convert_with_tables <- function(html, options = NULL, config = NULL) {
+  .Call(wrap__convert_with_tables, html, options, config)
+}
+
 #' Convert HTML to Markdown with a visitor (simplified: standard conversion).
 #' @param html A character string of HTML content.
 #' @param visitor A visitor object (currently unused, reserved for future use).

@@ -129,6 +129,59 @@ defmodule HtmlToMarkdown do
   end
 
   @doc """
+  Convert HTML to Markdown and extract tables as structured data.
+
+  Returns `{:ok, content, tables, metadata}` where each table is a map with:
+  - `:cells` - 2D list of cell strings
+  - `:markdown` - rendered markdown for the table
+  - `:is_header_row` - boolean list indicating header rows
+
+  Optionally includes metadata if configured.
+  """
+  @spec convert_with_tables(String.t(), options_input(), metadata_config_input()) ::
+          {:ok, String.t(), list(map()), map() | nil}
+          | {:error, term()}
+  def convert_with_tables(html, options \\ nil, metadata_config \\ nil) when is_binary(html) do
+    options_map = normalize_options(options) || %{}
+
+    with {:ok, metadata_map} <- MetadataConfig.to_map_result(metadata_config),
+         {:ok, result} <-
+           Native.convert_with_tables(html, options_map, metadata_map) do
+      tables =
+        (result.tables || [])
+        |> Enum.map(fn t ->
+          %{
+            cells: t.cells || [],
+            markdown: t.markdown || "",
+            is_header_row: t.is_header_row || []
+          }
+        end)
+
+      metadata =
+        case result.metadata do
+          nil -> nil
+          meta -> normalize_metadata(meta)
+        end
+
+      {:ok, result.content, tables, metadata}
+    else
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  @doc """
+  Bang variant of `convert_with_tables/3`.
+  """
+  @spec convert_with_tables!(String.t(), options_input(), metadata_config_input()) ::
+          {String.t(), list(map()), map() | nil}
+  def convert_with_tables!(html, options \\ nil, metadata_config \\ nil) do
+    case convert_with_tables(html, options, metadata_config) do
+      {:ok, content, tables, metadata} -> {content, tables, metadata}
+      {:error, reason} -> raise Error, message: inspect(reason)
+    end
+  end
+
+  @doc """
   Create a reusable options handle (opaque reference).
 
   The handle can be passed to `convert_with_options/2`.

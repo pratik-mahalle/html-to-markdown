@@ -1,10 +1,10 @@
 //! R list type conversions for binding results.
 
 use extendr_api::prelude::*;
-use html_to_markdown_rs::InlineImage;
 use html_to_markdown_rs::metadata::{
     DocumentMetadata, ExtendedMetadata, HeaderMetadata, ImageMetadata, LinkMetadata, StructuredData,
 };
+use html_to_markdown_rs::{ConversionWithTables, InlineImage, TableData};
 use std::collections::HashMap;
 
 /// Convert ExtendedMetadata into an R list.
@@ -118,4 +118,33 @@ fn hashmap_to_robj(map: HashMap<String, String>) -> Robj {
     let mut list = List::from_values(values);
     let _ = list.set_names(names);
     list.into()
+}
+
+/// Convert a TableData into an R list.
+pub fn table_data_to_robj(table: TableData) -> Robj {
+    let cells: Vec<Robj> = table.cells.into_iter().map(|row| Robj::from(row)).collect();
+
+    list!(
+        cells = List::from_values(cells),
+        markdown = table.markdown,
+        is_header_row = table.is_header_row
+    )
+    .into()
+}
+
+/// Convert a ConversionWithTables into an R list.
+pub fn table_extraction_to_robj(result: ConversionWithTables) -> Robj {
+    let tables: Vec<Robj> = result.tables.into_iter().map(table_data_to_robj).collect();
+
+    let metadata_robj = match result.metadata {
+        Some(meta) => metadata_to_robj(meta),
+        None => ().into(),
+    };
+
+    list!(
+        content = result.content,
+        metadata = metadata_robj,
+        tables = List::from_values(tables)
+    )
+    .into()
 }

@@ -32,6 +32,9 @@ pub use conversion::{
     html_to_markdown_convert, html_to_markdown_convert_bytes_with_len, html_to_markdown_convert_with_len,
     html_to_markdown_free_string,
 };
+
+#[cfg(feature = "visitor")]
+pub use conversion::html_to_markdown_convert_with_tables;
 pub use error::{html_to_markdown_error_code_name, html_to_markdown_last_error, html_to_markdown_last_error_code};
 pub use profiling_ffi::{html_to_markdown_profile_start, html_to_markdown_profile_stop};
 pub use version::html_to_markdown_version;
