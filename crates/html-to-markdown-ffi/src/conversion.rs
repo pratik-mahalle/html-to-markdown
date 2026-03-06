@@ -285,7 +285,9 @@ pub unsafe extern "C" fn html_to_markdown_convert_with_tables(
     let metadata_cfg: Option<()> = None;
 
     match guard_panic(|| {
-        profiling::maybe_profile(|| html_to_markdown_rs::convert_with_tables(html_str, options, metadata_cfg))
+        profiling::maybe_profile(|| {
+            html_to_markdown_rs::convert_with_tables(html_str, options.clone(), metadata_cfg.clone())
+        })
     }) {
         Ok(result) => {
             set_last_error(None);

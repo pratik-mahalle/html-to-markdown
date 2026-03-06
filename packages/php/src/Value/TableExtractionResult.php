@@ -44,7 +44,8 @@ final readonly class TableExtractionResult
     }
 
     /**
-     * @return array{content: string, metadata: array<string, mixed>|null, tables: list<array{cells: list<list<string>>, markdown: string, is_header_row: list<bool>}>}
+     * @return array{content: string, metadata: array<string, mixed>|null,
+     *               tables: list<array{cells: list<list<string>>, markdown: string, is_header_row: list<bool>}>}
      */
     public function toArray(): array
     {

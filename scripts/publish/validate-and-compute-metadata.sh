@@ -60,6 +60,9 @@ if [[ "${ref}" =~ ^[0-9a-f]{40}$ ]]; then
 elif [[ "${ref}" =~ ^refs/ ]]; then
 	checkout_ref="${ref}"
 	target_sha=""
+elif [[ -n "${tag}" && "${ref}" == "${tag}" ]]; then
+	checkout_ref="refs/tags/${ref}"
+	target_sha=""
 else
 	checkout_ref="refs/heads/${ref}"
 	target_sha=""
