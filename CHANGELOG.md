@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.28.1] - 2026-03-06
+
+### Fixed
+
+- **Panic with multi-byte UTF-8 and visitor** ([#218](https://github.com/kreuzberg-dev/html-to-markdown/issues/218)): Fixed a panic ("byte index N is not a char boundary") when converting HTML containing multi-byte UTF-8 characters (Cyrillic, CJK, emoji, etc.) with tabs between block elements and any visitor. The stale byte position captured before whitespace trimming could land inside a multi-byte character when new content was appended.
+- **Java formatting**: Fixed spotless formatting violations in `HtmlToMarkdown.java`, `TableData.java`, and `TableExtractionResult.java`.
+
 ## [2.28.0] - 2026-03-05
 
 ### Added
