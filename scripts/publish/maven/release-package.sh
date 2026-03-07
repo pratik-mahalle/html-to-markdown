@@ -9,4 +9,6 @@ else
 	echo "Warning: java-ffi-artifacts directory not found, native libraries will not be bundled"
 fi
 
-mvn -f packages/java/pom.xml -Ppublish -DskipTests --batch-mode --no-transfer-progress clean deploy
+VERSION=$(grep -m1 '<version>' packages/java/pom.xml | sed 's/.*<version>\(.*\)<\/version>.*/\1/')
+scripts/publish/maven/deploy-or-skip.sh --version "$VERSION" -- \
+	mvn -f packages/java/pom.xml -Ppublish -DskipTests --batch-mode --no-transfer-progress clean deploy
