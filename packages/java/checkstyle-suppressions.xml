@@ -30,4 +30,8 @@
 
     <!-- Allow magic numbers in VisitorCallbackFactory (C struct field indices) -->
     <suppress checks="MagicNumber" files="VisitorCallbackFactory\.java"/>
+
+    <!-- Suppress WhitespaceAround for record files (spotless formats empty bodies as {}) -->
+    <suppress checks="WhitespaceAround" files="TableData\.java"/>
+    <suppress checks="WhitespaceAround" files="TableExtractionResult\.java"/>
 </suppressions>

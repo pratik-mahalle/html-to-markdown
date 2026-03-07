@@ -14,4 +14,4 @@ import java.util.List;
 public record TableExtractionResult(
     @JsonProperty("content") String content,
     @JsonProperty("metadata") ExtendedMetadata metadata,
-    @JsonProperty("tables") List<TableData> tables) { }
+    @JsonProperty("tables") List<TableData> tables) {}
