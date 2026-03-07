@@ -62,7 +62,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.ref || inputs.tag || github.ref }}
+          ref: ${{ (inputs.republish == true && (inputs.ref || github.event.repository.default_branch)) || inputs.ref || inputs.tag || github.ref }}
           fetch-depth: 0
 
       - name: Retag for republish
