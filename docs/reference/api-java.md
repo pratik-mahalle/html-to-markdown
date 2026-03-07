@@ -3,9 +3,9 @@ title: Java API Reference
 description: API reference for the dev.kreuzberg html-to-markdown Java package
 ---
 
-# Java API Reference <span class="version-badge new">v2.24.2</span>
+# Java API Reference <span class="version-badge new">v2.28.1</span>
 
-**Package:** [`dev.kreuzberg:html-to-markdown`](https://central.sonatype.com/artifact/dev.kreuzberg/html-to-markdown) | **Version:** 2.26.0 | **Java:** 22+ (Panama FFI)
+**Package:** [`dev.kreuzberg:html-to-markdown`](https://central.sonatype.com/artifact/dev.kreuzberg/html-to-markdown) | **Version:** 2.28.1 | **Java:** 25+ (Panama FFI)
 
 ---
 
@@ -17,14 +17,14 @@ description: API reference for the dev.kreuzberg html-to-markdown Java package
     <dependency>
       <groupId>dev.kreuzberg</groupId>
       <artifactId>html-to-markdown</artifactId>
-      <version>2.26.0</version>
+      <version>2.28.1</version>
     </dependency>
     ```
 
 === "Gradle"
 
     ```kotlin
-    implementation("dev.kreuzberg:html-to-markdown:2.26.0")
+    implementation("dev.kreuzberg:html-to-markdown:2.28.1")
     ```
 
 The package uses Java's Foreign Function & Memory API (Panama) to call the native Rust library. No JNI code required.
@@ -65,12 +65,10 @@ String html = "<h1>Hello</h1><p>World</p>";
 String markdown = HtmlToMarkdown.convert(html);
 
 // With options
-ConversionOptions options = ConversionOptions.builder()
-    .headingStyle("atx")
-    .codeBlockStyle("backticks")
-    .wrap(true)
-    .wrapWidth(80)
-    .build();
+ConversionOptions options = new ConversionOptions()
+    .setHeadingStyle("atx")
+    .setWrap(true)
+    .setWrapWidth(80);
 String markdown = HtmlToMarkdown.convert(html, options);
 ```
 
@@ -145,18 +143,16 @@ public static String version()
 Built using the builder pattern.
 
 ```java
-ConversionOptions options = ConversionOptions.builder()
-    .headingStyle("atx")          // "underlined", "atx", "atxClosed"
-    .listIndentType("spaces")     // "spaces", "tabs"
-    .listIndentWidth(2)
-    .bullets("-")
-    .codeBlockStyle("backticks")  // "indented", "backticks", "tildes"
-    .wrap(true)
-    .wrapWidth(80)
-    .preserveTags(List.of("table", "div"))
-    .skipImages(false)
-    .outputFormat("markdown")     // "markdown", "djot", "plain"
-    .build();
+ConversionOptions options = new ConversionOptions()
+    .setHeadingStyle("atx")          // "underlined", "atx", "atxClosed"
+    .setListIndentType("spaces")     // "spaces", "tabs"
+    .setListIndentWidth(2)
+    .setBullets("-")
+    .setWrap(true)
+    .setWrapWidth(80)
+    .setPreserveTags(List.of("table", "div"))
+    .setSkipImages(false)
+    .setOutputFormat(OutputFormat.MARKDOWN);  // MARKDOWN, DJOT, PLAIN
 ```
 
 See the [Configuration Reference](configuration.md) for all fields.
@@ -200,7 +196,7 @@ public class VisitResult {
 
 ## Panama FFI Details
 
-The Java binding uses the Foreign Function & Memory API (Project Panama) introduced in Java 22. Key implementation details:
+The Java binding uses the Foreign Function & Memory API (Project Panama) introduced in Java 25. Key implementation details:
 
 - Native library loaded via `SymbolLookup` and `Linker.nativeLinker()`
 - Memory managed through `Arena` scopes for automatic cleanup

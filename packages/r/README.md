@@ -18,7 +18,7 @@
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown?label=Java&color=007ec6" alt="Java">
   </a>
   <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown">
-    <img src="https://img.shields.io/badge/Go-v2.27.1-007ec6" alt="Go">
+    <img src="https://img.shields.io/badge/Go-v2.28.1-007ec6" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/">
     <img src="https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown?label=C%23&color=007ec6" alt="C#">
@@ -133,7 +133,26 @@ cat(markdown)
 ### Core Functions
 
 
-See the [Visitor Pattern Guide](../../examples/visitor-pattern/) and [Metadata Extraction Guide](../../examples/metadata-extraction/) for comprehensive API documentation and examples.
+**`convert(html, options = NULL)`**
+
+Basic HTML-to-Markdown conversion. Fast and simple.
+
+**`convert_with_metadata(html, options = NULL, config = NULL)`**
+
+Extract Markdown plus metadata in a single pass. See [Metadata Extraction Guide](../../examples/metadata-extraction/).
+
+**`convert_with_visitor(html, visitor, options = NULL)`**
+
+Customize conversion with visitor callbacks for element interception. See [Visitor Pattern Guide](../../examples/visitor-pattern/).
+
+**`convert_with_inline_images(html, config = NULL)`**
+
+Extract base64-encoded inline images with metadata.
+
+**`convert_with_tables(html, options = NULL, config = NULL)`**
+
+Extract structured table data (cells, headers, rendered markdown) alongside conversion.
+
 
 
 ### Options

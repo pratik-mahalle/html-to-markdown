@@ -5,7 +5,7 @@ description: API reference for the kreuzberg-dev/html-to-markdown PHP package
 
 # PHP API Reference <span class="version-badge">v2.5.6</span>
 
-**Package:** [`kreuzberg-dev/html-to-markdown`](https://packagist.org/packages/kreuzberg-dev/html-to-markdown) | **Version:** 2.26.0 | **PHP:** 8.2+
+**Package:** [`kreuzberg-dev/html-to-markdown`](https://packagist.org/packages/kreuzberg-dev/html-to-markdown) | **Version:** 2.28.1 | **PHP:** 8.2+
 
 ---
 

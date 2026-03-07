@@ -5,7 +5,7 @@ description: API reference for the html-to-markdown-rs Rust crate
 
 # Rust API Reference
 
-**Crate:** [`html-to-markdown-rs`](https://crates.io/crates/html-to-markdown-rs) | **Docs.rs:** [`html_to_markdown_rs`](https://docs.rs/html-to-markdown-rs) | **Version:** 2.26.0 | **MSRV:** 1.85
+**Crate:** [`html-to-markdown-rs`](https://crates.io/crates/html-to-markdown-rs) | **Docs.rs:** [`html_to_markdown_rs`](https://docs.rs/html-to-markdown-rs) | **Version:** 2.28.1 | **MSRV:** 1.85
 
 ---
 
@@ -13,14 +13,14 @@ description: API reference for the html-to-markdown-rs Rust crate
 
 ```toml
 [dependencies]
-html-to-markdown-rs = "2.26.0"
+html-to-markdown-rs = "2.28.1"
 ```
 
 To enable optional features:
 
 ```toml
 [dependencies]
-html-to-markdown-rs = { version = "2.26.0", features = ["metadata", "visitor"] }
+html-to-markdown-rs = { version = "2.28.1", features = ["metadata", "visitor"] }
 ```
 
 ---

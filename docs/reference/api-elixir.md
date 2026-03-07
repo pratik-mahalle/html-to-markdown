@@ -5,7 +5,7 @@ description: API reference for the html_to_markdown Elixir package
 
 # Elixir API Reference <span class="version-badge">v2.8.2</span>
 
-**Package:** [`html_to_markdown`](https://hex.pm/packages/html_to_markdown) | **Version:** 2.26.0 | **Elixir:** 1.14+ | **OTP:** 25+
+**Package:** [`html_to_markdown`](https://hex.pm/packages/html_to_markdown) | **Version:** 2.28.1 | **Elixir:** 1.14+ | **OTP:** 25+
 
 ---
 

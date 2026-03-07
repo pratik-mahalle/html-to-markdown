@@ -5,7 +5,7 @@ description: API reference for the htmltomarkdown R package
 
 # R API Reference <span class="version-badge new">v2.25.2</span>
 
-**Package:** [`htmltomarkdown`](https://kreuzberg-dev.r-universe.dev/htmltomarkdown) | **Version:** 2.26.0 | **R:** 4.3+
+**Package:** [`htmltomarkdown`](https://kreuzberg-dev.r-universe.dev/htmltomarkdown) | **Version:** 2.28.1 | **R:** 4.3+
 
 ---
 
