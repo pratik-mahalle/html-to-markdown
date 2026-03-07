@@ -1620,7 +1620,7 @@ jobs:
       - name: Setup Java
         env:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPP_PASSPHRASE }}
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "25"
@@ -1630,6 +1630,14 @@ jobs:
           server-password: MAVEN_PASSWORD
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
+
+      - name: Configure GPG agent for loopback pinentry
+        shell: bash
+        run: |
+          mkdir -p ~/.gnupg
+          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+          gpgconf --kill gpg-agent || true
+          gpg-connect-agent reloadagent /bye || true
 
       - name: Setup Rust
         uses: ./.github/actions/setup-rust
@@ -1641,7 +1649,6 @@ jobs:
       - name: Release Maven package
         env:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPP_PASSPHRASE }}
-          GPG: /usr/bin/gpg2
         run: scripts/publish/maven/release-package.sh
         shell: bash
 
