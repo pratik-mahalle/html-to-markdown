@@ -1,5 +1,6 @@
 ---
 name: quick-start
+description: "Instructions for quick start."
 ---
 
 ______________________________________________________________________

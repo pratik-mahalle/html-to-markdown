@@ -1,5 +1,6 @@
 ---
 name: performance-and-benchmarking-standards
+description: "Instructions for performance and benchmarking standards."
 ---
 
 ______________________________________________________________________
