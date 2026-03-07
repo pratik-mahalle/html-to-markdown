@@ -1618,6 +1618,8 @@ jobs:
         shell: bash
 
       - name: Setup Java
+        env:
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPP_PASSPHRASE }}
         uses: actions/setup-java@v5
         with:
           distribution: temurin
