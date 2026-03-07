@@ -13,4 +13,4 @@ import java.util.List;
 public record TableData(
     @JsonProperty("cells") List<List<String>> cells,
     @JsonProperty("markdown") String markdown,
-    @JsonProperty("is_header_row") List<Boolean> isHeaderRow) { }
+    @JsonProperty("is_header_row") List<Boolean> isHeaderRow) {}
