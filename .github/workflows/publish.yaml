@@ -69,17 +69,23 @@ jobs:
         if: ${{ inputs.republish == true || github.event.client_payload.republish == true }}
         env:
           TAG: ${{ inputs.tag || github.event.client_payload.tag }}
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [[ -z "${TAG}" ]]; then
             echo "::error::republish requires a tag input"
             exit 1
           fi
-          echo "::notice::Republish requested — deleting and re-creating tag ${TAG} on HEAD ($(git rev-parse --short HEAD))"
+          sha="$(git rev-parse HEAD)"
+          echo "::notice::Republish requested — deleting and re-creating tag ${TAG} on ${sha:0:8}"
+          # Delete via API (avoids workflows permission issue with git push)
+          gh api "repos/${GITHUB_REPOSITORY}/git/refs/tags/${TAG}" -X DELETE 2>/dev/null || true
+          # Create via API
+          gh api "repos/${GITHUB_REPOSITORY}/git/refs" \
+            -f "ref=refs/tags/${TAG}" \
+            -f "sha=${sha}" --silent
+          # Update local state
           git tag -d "${TAG}" 2>/dev/null || true
-          git push origin ":refs/tags/${TAG}" 2>/dev/null || true
-          git tag "${TAG}"
-          git push origin "${TAG}"
+          git tag "${TAG}" "${sha}"
 
       - name: Validate tag and compute version
         id: meta
