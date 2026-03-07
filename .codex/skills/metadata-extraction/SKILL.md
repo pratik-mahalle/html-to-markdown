@@ -1,5 +1,6 @@
 ---
 name: metadata-extraction
+description: "Instructions for metadata extraction."
 ---
 
 # Metadata Extraction for html-to-markdown

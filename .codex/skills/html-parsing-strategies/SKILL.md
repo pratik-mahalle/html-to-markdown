@@ -1,5 +1,6 @@
 ---
 name: html-parsing-strategies
+description: "Instructions for html parsing strategies."
 ---
 
 # HTML Parsing Strategies for html-to-markdown

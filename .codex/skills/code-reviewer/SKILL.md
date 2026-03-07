@@ -1,5 +1,6 @@
 ---
 name: code-reviewer
+description: "Instructions for code reviewer."
 ---
 
 ______________________________________________________________________
