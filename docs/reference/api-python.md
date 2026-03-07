@@ -5,7 +5,7 @@ description: API reference for the html-to-markdown Python package
 
 # Python API Reference
 
-**Package:** [`html-to-markdown`](https://pypi.org/project/html-to-markdown/) | **Version:** 2.26.0 | **Python:** 3.10+
+**Package:** [`html-to-markdown`](https://pypi.org/project/html-to-markdown/) | **Version:** 2.28.1 | **Python:** 3.10+
 
 ---
 

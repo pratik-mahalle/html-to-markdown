@@ -365,7 +365,12 @@ def update_r_description(file_path: Path, version: str) -> tuple[bool, str, str]
 
 
 def update_readme_config_version(readme_config_path: Path, version: str) -> tuple[bool, str, str]:
-    """Update version in scripts/readme_config.yaml."""
+    """Update version in scripts/readme_config.yaml.
+
+    Updates:
+    - The top-level version field
+    - Hardcoded version strings inside install_command fields (e.g. Java classifier block, Elixir mix dep)
+    """
     content = readme_config_path.read_text()
 
     # Extract current version
@@ -375,10 +380,26 @@ def update_readme_config_version(readme_config_path: Path, version: str) -> tupl
     if old_version == version:
         return False, old_version, version
 
-    # Update version (first occurrence only - the global one)
+    # Update top-level version field
     new_content = re.sub(r'^version:\s*"[^"]+"', f'version: "{version}"', content, count=1, flags=re.MULTILINE)
-    readme_config_path.write_text(new_content)
-    return True, old_version, version
+
+    # Update hardcoded versions inside install_command fields
+    # Matches semver patterns (X.Y.Z) that are not the new version
+    new_content = re.sub(
+        rf"<version>{re.escape(old_version)}</version>",
+        f"<version>{version}</version>",
+        new_content,
+    )
+    new_content = re.sub(
+        rf'"~>\s*{re.escape(old_version)}"',
+        f'"~> {version}"',
+        new_content,
+    )
+
+    changed = new_content != content
+    if changed:
+        readme_config_path.write_text(new_content)
+    return changed, old_version, version
 
 
 def update_mix_version(file_path: Path, version: str) -> tuple[bool, str, str]:

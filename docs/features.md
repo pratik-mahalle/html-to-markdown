@@ -38,11 +38,11 @@ Every binding wraps the same Rust core, producing **identical Markdown output** 
 | **Ruby** | Magnus | [`html-to-markdown`](https://rubygems.org/gems/html-to-markdown) | <span class="version-badge">v2.5.1</span> |
 | **PHP** | ext-php-rs | [`kreuzberg-dev/html-to-markdown`](https://packagist.org/packages/kreuzberg-dev/html-to-markdown) | <span class="version-badge">v2.5.6</span> |
 | **Go** | CGO / FFI | [`htmltomarkdown`](https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown) | <span class="version-badge">v2.8.0</span> |
-| **Java** | Panama FFM API | [`dev.kreuzberg:html-to-markdown`](https://central.sonatype.com/artifact/dev.kreuzberg/html-to-markdown) | <span class="version-badge new">v2.24.2</span> |
+| **Java** | Panama FFM API | [`dev.kreuzberg:html-to-markdown`](https://central.sonatype.com/artifact/dev.kreuzberg/html-to-markdown) | <span class="version-badge">v2.24.2</span> |
 | **C#** | P/Invoke | [`KreuzbergDev.HtmlToMarkdown`](https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/) | <span class="version-badge">v2.8.0</span> |
 | **Elixir** | Rustler NIF | [`html_to_markdown`](https://hex.pm/packages/html_to_markdown) | <span class="version-badge">v2.8.2</span> |
 | **R** | extendr | [`htmltomarkdown`](https://kreuzberg-dev.r-universe.dev/htmltomarkdown) | <span class="version-badge new">v2.25.2</span> |
-| **C** | FFI | [Releases](https://github.com/kreuzberg-dev/html-to-markdown/releases) | <span class="version-badge new">v2.26.0</span> |
+| **C** | FFI | [Releases](https://github.com/kreuzberg-dev/html-to-markdown/releases) | <span class="version-badge new">v2.28.1</span> |
 
 ---
 

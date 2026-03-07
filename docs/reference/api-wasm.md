@@ -5,7 +5,7 @@ description: API reference for the @kreuzberg/html-to-markdown-wasm npm package
 
 # WASM API Reference <span class="version-badge">v2.3.0</span>
 
-**Package:** [`@kreuzberg/html-to-markdown-wasm`](https://www.npmjs.com/package/@kreuzberg/html-to-markdown-wasm) | **Version:** 2.26.0
+**Package:** [`@kreuzberg/html-to-markdown-wasm`](https://www.npmjs.com/package/@kreuzberg/html-to-markdown-wasm) | **Version:** 2.28.1
 
 The WASM binding runs in browsers, Node.js, Deno, and edge runtimes (Cloudflare Workers, Vercel Edge). No native compilation required.
 

@@ -129,14 +129,14 @@ html-to-markdown provides native bindings for 12 language ecosystems, plus a sta
     <dependency>
         <groupId>dev.kreuzberg</groupId>
         <artifactId>html-to-markdown</artifactId>
-        <version>2.26.0</version>
+        <version>2.28.1</version>
     </dependency>
     ```
 
     Or with Gradle:
 
     ```kotlin
-    implementation("dev.kreuzberg:html-to-markdown:2.26.0")
+    implementation("dev.kreuzberg:html-to-markdown:2.28.1")
     ```
 
     **Requirements:** Java 24+ (Panama Foreign Function & Memory API)
@@ -203,7 +203,7 @@ html-to-markdown provides native bindings for 12 language ecosystems, plus a sta
 
 === "C (FFI)"
 
-    <span class="version-badge new">v2.26.0</span>
+    <span class="version-badge new">v2.28.1</span>
 
     Download the pre-built shared library from the [GitHub Releases](https://github.com/kreuzberg-dev/html-to-markdown/releases) page, or build from source:
 
