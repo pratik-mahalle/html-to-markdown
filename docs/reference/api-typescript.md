@@ -5,7 +5,7 @@ description: API reference for the @kreuzberg/html-to-markdown-node npm package
 
 # TypeScript API Reference <span class="version-badge">v2.3.0</span>
 
-**Package:** [`@kreuzberg/html-to-markdown-node`](https://www.npmjs.com/package/@kreuzberg/html-to-markdown-node) | **Version:** 2.26.0 | **Node.js:** 18+
+**Package:** [`@kreuzberg/html-to-markdown-node`](https://www.npmjs.com/package/@kreuzberg/html-to-markdown-node) | **Version:** 2.28.1 | **Node.js:** 18+
 
 ---
 

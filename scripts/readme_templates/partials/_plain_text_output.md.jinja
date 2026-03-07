@@ -50,13 +50,14 @@ plain, _ := htmltomarkdown.Convert(html, htmltomarkdown.WithOutputFormat("plain"
 ```
 {% elif language == 'java' %}
 ```java
-import dev.kreuzberg.HtmlToMarkdown;
-import dev.kreuzberg.ConversionOptions;
+import dev.kreuzberg.htmltomarkdown.HtmlToMarkdown;
+import dev.kreuzberg.htmltomarkdown.ConversionOptions;
+import dev.kreuzberg.htmltomarkdown.OutputFormat;
 
 String html = "<h1>Title</h1><p>This is <strong>bold</strong> and <em>italic</em> text.</p>";
 
 String plain = HtmlToMarkdown.convert(html,
-    new ConversionOptions().setOutputFormat("plain"));
+    new ConversionOptions().setOutputFormat(OutputFormat.PLAIN));
 // Result: "Title\n\nThis is bold and italic text."
 ```
 {% elif language == 'csharp' %}

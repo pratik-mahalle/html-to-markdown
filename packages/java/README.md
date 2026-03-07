@@ -18,7 +18,7 @@
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown?label=Java&color=007ec6" alt="Java">
   </a>
   <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown">
-    <img src="https://img.shields.io/badge/Go-v2.27.1-007ec6" alt="Go">
+    <img src="https://img.shields.io/badge/Go-v2.28.1-007ec6" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/">
     <img src="https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown?label=C%23&color=007ec6" alt="C#">
@@ -61,7 +61,7 @@ Uses Foreign Function & Memory API for zero-dependency, thread-safe conversion w
 <dependency>
     <groupId>dev.kreuzberg</groupId>
     <artifactId>html-to-markdown</artifactId>
-    <version>2.24.1</version>
+    <version>2.28.1</version>
     <classifier>linux</classifier> <!-- or macos, windows -->
 </dependency>
 
@@ -76,13 +76,13 @@ Requires Java 25+ with Panama FFI support.
 <dependency>
     <groupId>dev.kreuzberg</groupId>
     <artifactId>html-to-markdown</artifactId>
-    <version>2.27.1</version>
+    <version>2.28.1</version>
 </dependency>
 ```
 
 **Gradle (Kotlin DSL):**
 ```kotlin
-implementation("dev.kreuzberg:html-to-markdown:2.27.1")
+implementation("dev.kreuzberg:html-to-markdown:2.28.1")
 ```
 
 
@@ -209,8 +209,9 @@ The library supports converting HTML to [Djot](https://djot.net/), a lightweight
 
 
 ```java
-import dev.kreuzberg.HtmlToMarkdown;
-import dev.kreuzberg.ConversionOptions;
+import dev.kreuzberg.htmltomarkdown.HtmlToMarkdown;
+import dev.kreuzberg.htmltomarkdown.ConversionOptions;
+import dev.kreuzberg.htmltomarkdown.OutputFormat;
 
 String html = "<p>This is <strong>bold</strong> and <em>italic</em> text.</p>";
 
@@ -220,7 +221,7 @@ String markdown = HtmlToMarkdown.convert(html);
 
 // Djot output
 String djot = HtmlToMarkdown.convert(html,
-    new ConversionOptions().setOutputFormat("djot"));
+    new ConversionOptions().setOutputFormat(OutputFormat.DJOT));
 // Result: "This is *bold* and _italic_ text."
 ```
 
@@ -234,13 +235,14 @@ Set `output_format` to `"plain"` to strip all markup and return only visible tex
 
 
 ```java
-import dev.kreuzberg.HtmlToMarkdown;
-import dev.kreuzberg.ConversionOptions;
+import dev.kreuzberg.htmltomarkdown.HtmlToMarkdown;
+import dev.kreuzberg.htmltomarkdown.ConversionOptions;
+import dev.kreuzberg.htmltomarkdown.OutputFormat;
 
 String html = "<h1>Title</h1><p>This is <strong>bold</strong> and <em>italic</em> text.</p>";
 
 String plain = HtmlToMarkdown.convert(html,
-    new ConversionOptions().setOutputFormat("plain"));
+    new ConversionOptions().setOutputFormat(OutputFormat.PLAIN));
 // Result: "Title\n\nThis is bold and italic text."
 ```
 

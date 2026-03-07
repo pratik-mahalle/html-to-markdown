@@ -9,9 +9,10 @@ vars:
 
 tasks:
   sync:
-    desc: "Synchronize version across all package manifests"
+    desc: "Synchronize version across all package manifests and regenerate READMEs"
     cmds:
       - uv run python3 {{.SYNC_SCRIPT}}
+      - uv run python3 {{.ROOT}}/scripts/generate_readme.py
 
   check:
     desc: "Check if versions are synchronized (dry-run)"

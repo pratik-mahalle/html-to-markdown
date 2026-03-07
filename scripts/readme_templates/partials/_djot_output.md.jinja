@@ -87,8 +87,9 @@ markdown, _ := htmltomarkdown.Convert(html)
 ```
 {% elif language == 'java' %}
 ```java
-import dev.kreuzberg.HtmlToMarkdown;
-import dev.kreuzberg.ConversionOptions;
+import dev.kreuzberg.htmltomarkdown.HtmlToMarkdown;
+import dev.kreuzberg.htmltomarkdown.ConversionOptions;
+import dev.kreuzberg.htmltomarkdown.OutputFormat;
 
 String html = "<p>This is <strong>bold</strong> and <em>italic</em> text.</p>";
 
@@ -98,7 +99,7 @@ String markdown = HtmlToMarkdown.convert(html);
 
 // Djot output
 String djot = HtmlToMarkdown.convert(html,
-    new ConversionOptions().setOutputFormat("djot"));
+    new ConversionOptions().setOutputFormat(OutputFormat.DJOT));
 // Result: "This is *bold* and _italic_ text."
 ```
 {% elif language == 'csharp' %}

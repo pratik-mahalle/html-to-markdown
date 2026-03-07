@@ -3,9 +3,9 @@ title: C FFI API Reference
 description: API reference for the html_to_markdown C FFI header
 ---
 
-# C FFI API Reference <span class="version-badge new">v2.26.0</span>
+# C FFI API Reference <span class="version-badge new">v2.28.1</span>
 
-**Header:** `html_to_markdown.h` | **Library:** `libhtml_to_markdown_ffi` | **Version:** 2.26.0
+**Header:** `html_to_markdown.h` | **Library:** `libhtml_to_markdown_ffi` | **Version:** 2.28.1
 
 The C FFI provides the foundation that Go, Java, C#, and other language bindings use. You can also call it directly from C or C++ programs.
 
@@ -52,7 +52,7 @@ cargo build --release -p html-to-markdown-ffi
 #define HTML_TO_MARKDOWN_VERSION_MAJOR 2
 #define HTML_TO_MARKDOWN_VERSION_MINOR 26
 #define HTML_TO_MARKDOWN_VERSION_PATCH 0
-#define HTML_TO_MARKDOWN_VERSION "2.26.0"
+#define HTML_TO_MARKDOWN_VERSION "2.28.1"
 ```
 
 ---
