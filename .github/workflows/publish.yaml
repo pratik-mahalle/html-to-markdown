@@ -1633,22 +1633,32 @@ jobs:
 
       - name: Configure GPG for non-interactive signing
         shell: bash
+        env:
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPP_PASSPHRASE }}
         run: |
           mkdir -p ~/.gnupg
           chmod 700 ~/.gnupg
-          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
           echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
-          echo "pinentry-program /usr/bin/pinentry-tty" >> ~/.gnupg/gpg-agent.conf
           gpgconf --kill gpg-agent || true
-          gpg-connect-agent reloadagent /bye || true
+
           echo "::group::GPG debug info"
           gpg --version
           gpg --list-secret-keys
-          echo "gpg.conf:"
-          cat ~/.gnupg/gpg.conf
+          echo "Available pinentry programs:"
+          ls -la /usr/bin/pinentry* 2>/dev/null || echo "No pinentry in /usr/bin"
+          which pinentry 2>/dev/null || echo "pinentry not on PATH"
+          echo "Passphrase env var set: $([ -n "$MAVEN_GPG_PASSPHRASE" ] && echo 'YES' || echo 'NO')"
           echo "gpg-agent.conf:"
           cat ~/.gnupg/gpg-agent.conf
+          echo "gpg.conf (if exists):"
+          cat ~/.gnupg/gpg.conf 2>/dev/null || echo "(none)"
           echo "::endgroup::"
+
+          echo "Testing GPG sign with loopback..."
+          echo "test" > /tmp/gpg-test.txt
+          echo "$MAVEN_GPG_PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 --armor --detach-sign /tmp/gpg-test.txt
+          echo "GPG test sign succeeded!"
+          rm -f /tmp/gpg-test.txt /tmp/gpg-test.txt.asc
 
       - name: Setup Rust
         uses: ./.github/actions/setup-rust
