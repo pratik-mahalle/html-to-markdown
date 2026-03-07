@@ -1,5 +1,6 @@
 ---
 name: conversion-mapping-rules
+description: "Instructions for conversion mapping rules."
 ---
 
 # Conversion Mapping Rules: HTML Elements to Markdown

@@ -1,5 +1,6 @@
 ---
 name: visitor-pattern-usage
+description: "Instructions for visitor pattern usage."
 ---
 
 # Visitor Pattern Usage for html-to-markdown

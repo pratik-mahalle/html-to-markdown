@@ -1,5 +1,6 @@
 ---
 name: build-profiles
+description: "Instructions for build profiles."
 ---
 
 ______________________________________________________________________

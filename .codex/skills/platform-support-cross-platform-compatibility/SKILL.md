@@ -1,5 +1,6 @@
 ---
 name: platform-support-cross-platform-compatibility
+description: "Instructions for platform support cross platform compatibility."
 ---
 
 ______________________________________________________________________
