@@ -1631,13 +1631,24 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
-      - name: Configure GPG agent for loopback pinentry
+      - name: Configure GPG for non-interactive signing
         shell: bash
         run: |
           mkdir -p ~/.gnupg
+          chmod 700 ~/.gnupg
+          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
           echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+          echo "pinentry-program /usr/bin/pinentry-tty" >> ~/.gnupg/gpg-agent.conf
           gpgconf --kill gpg-agent || true
           gpg-connect-agent reloadagent /bye || true
+          echo "::group::GPG debug info"
+          gpg --version
+          gpg --list-secret-keys
+          echo "gpg.conf:"
+          cat ~/.gnupg/gpg.conf
+          echo "gpg-agent.conf:"
+          cat ~/.gnupg/gpg-agent.conf
+          echo "::endgroup::"
 
       - name: Setup Rust
         uses: ./.github/actions/setup-rust
