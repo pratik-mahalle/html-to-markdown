@@ -49,8 +49,8 @@
         <exec-maven-plugin.version>3.6.3</exec-maven-plugin.version>
         <spotless-maven-plugin.version>3.1.0</spotless-maven-plugin.version>
         <skip.rust.ffi>false</skip.rust.ffi>
-        <gpg.skip>${env.CI}</gpg.skip>
-        <gpg.executable>gpg</gpg.executable>
+        <!-- Skip GPG signing by default, only enable for publish profile -->
+        <gpg.skip>true</gpg.skip>
     </properties>
 
     <dependencies>
@@ -213,9 +213,8 @@
                             <goal>sign</goal>
                         </goals>
                         <configuration>
-                            <skip>${gpg.skip}</skip>
-                            <executable>${gpg.executable}</executable>
-                            <useAgent>false</useAgent>
+                            <!-- Use environment variable for passphrase (recommended best practice) -->
+                            <passphraseEnvName>MAVEN_GPG_PASSPHRASE</passphraseEnvName>
                             <gpgArguments>
                                 <arg>--batch</arg>
                                 <arg>--yes</arg>
@@ -279,6 +278,10 @@
     <profiles>
         <profile>
             <id>publish</id>
+            <properties>
+                <!-- Enable GPG signing for publish profile -->
+                <gpg.skip>false</gpg.skip>
+            </properties>
             <build>
                 <plugins>
                     <!-- Skip maven-deploy-plugin when using central-publishing-maven-plugin -->
