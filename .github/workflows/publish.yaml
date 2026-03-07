@@ -1584,7 +1584,7 @@ jobs:
 
   publish-maven:
     name: Publish Maven package
-    needs: [prepare, upload-release-artifacts, check-maven, java-ffi]
+    needs: [prepare, check-maven, java-ffi]
     if: ${{ needs.prepare.result == 'success' && needs.prepare.outputs.tag && needs.prepare.outputs.dry_run != 'true' && needs.prepare.outputs.is_tag == 'true' && (needs.check-maven.outputs.exists != 'true' || needs.prepare.outputs.force_republish_java == 'true') }}
     runs-on: ubuntu-latest
     env:
