@@ -9,4 +9,4 @@ else
 	echo "Warning: java-ffi-artifacts directory not found, native libraries will not be bundled"
 fi
 
-mvn -f packages/java/pom.xml -Ppublish -DskipTests --batch-mode --no-transfer-progress -Dgpg.executable=/usr/bin/gpg2 clean deploy
+mvn -f packages/java/pom.xml -Ppublish -DskipTests --batch-mode --no-transfer-progress clean deploy
