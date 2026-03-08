@@ -79,7 +79,7 @@ repos:
         files: ^crates/html-to-markdown-ffi/tests/c/
 
   - repo: https://github.com/Goldziher/ai-rulez
-    rev: v3.7.3
+    rev: v3.8.1
     hooks:
       - id: ai-rulez-generate
   - repo: https://github.com/gherynos/pre-commit-java
