@@ -56,7 +56,7 @@
 
 High-performance HTML to Markdown conversion powered by Rust. Ships as native bindings for **Rust, Python, TypeScript/Node.js, Ruby, PHP, Go, Java, C#, Elixir, R, C (FFI), and WebAssembly** with identical rendering across all runtimes.
 
-**[Documentation](https://docs.html-to-markdown.kreuzberg.dev)** | **[Live Demo](https://kreuzberg-dev.github.io/html-to-markdown/)** | **[API Reference](https://docs.html-to-markdown.kreuzberg.dev/reference/api-rust/)**
+**[Documentation](https://docs.html-to-markdown.kreuzberg.dev)** | **[Live Demo](https://docs.html-to-markdown.kreuzberg.dev/demo/)** | **[API Reference](https://docs.html-to-markdown.kreuzberg.dev/reference/api-rust/)**
 
 ## Highlights
 
