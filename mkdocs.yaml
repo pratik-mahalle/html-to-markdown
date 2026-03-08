@@ -193,6 +193,6 @@ nav:
       - C# v2.19.0: migration/csharp-2.19.0.md
       - Java v2.19.0: migration/java-2.19.0.md
       - TypeScript v2.19.0: migration/typescript-2.19.0.md
-  - Live Demo: https://kreuzberg-dev.github.io/html-to-markdown/
+  - Live Demo: https://docs.html-to-markdown.kreuzberg.dev/demo/
   - Changelog: https://github.com/kreuzberg-dev/html-to-markdown/blob/main/CHANGELOG.md
   - Contributing: contributing.md
