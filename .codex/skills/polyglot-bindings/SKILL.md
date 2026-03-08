@@ -1,40 +1,53 @@
 ---
 name: polyglot-bindings
+description: "Instructions for polyglot bindings."
 ---
 
 ______________________________________________________________________
 
-## priority: medium
+## priority: critical
 
-# Polyglot Binding Architecture
+# Polyglot Bindings
 
-## Language Binding Pattern
+Patterns for creating and maintaining language bindings around a Rust core library.
 
-Each binding crate (Python, TypeScript, Ruby, PHP, Go, Java, C#) follows:
+## Binding Layer Responsibilities
 
-1. **Minimal wrapper layer**: Call Rust functions directly, no business logic
-1. **Type translation**: Convert host language types ↔ Rust types
-1. **Error mapping**: Rust errors → language-native exceptions
-1. **Documentation**: Link bindings to Rust docs, add language-specific examples
-1. **Testing**: Language-native test suite validating binding + integration
+- Type mapping (Rust \<-> Host language)
+- Error conversion (Rust Result -> Host exceptions)
+- Memory management (reference counting, GC integration)
+- Concurrency adaptation (Tokio -> language runtimes)
+- Language-idiomatic API surface
 
-## Binding Crates (crates/)
+## Framework Quick Reference
 
-- **html-to-markdown-py**: PyO3 bindings → packages/python distribution
-- **html-to-markdown-node**: NAPI-RS bindings → packages/typescript npm package
-- **html-to-markdown-rb**: Magnus bindings → packages/ruby gem (Ruby 3.2+)
-- **html-to-markdown-php**: ext-php-rs extension → packages/php Composer package
-- **html-to-markdown-wasm**: wasm-bindgen → browser + Wasmtime targets
-- **html-to-markdown-ffi**: C-compatible FFI library → Go, Java, C# consumers
-- **html-to-markdown-cli**: Standalone CLI using core library
+| Language | Framework | Key Macros |
+|----------|-----------|------------|
+| Python | PyO3 | `#[pyclass]`, `#[pymethods]`, `#[new]` |
+| TypeScript | NAPI-RS | `#[napi]`, `#[napi(constructor)]` |
+| Ruby | Magnus | `#[magnus::wrap]`, `define_method` |
+| PHP | ext-php-rs | `#[php_class]`, `#[php_impl]` |
+| WASM | wasm-bindgen | `#[wasm_bindgen]`, `#[wasm_bindgen(constructor)]` |
+| C FFI | cbindgen | `#[no_mangle] extern "C"` |
 
-## Distribution Packages (packages/)
+## Async Handling
 
-- **python/**: PyPI package with Python wrappers + tests
-- **typescript/**: npm package with TypeScript wrappers + CLI + tests
-- **ruby/**: Ruby gem (RBS types in sig/, specs in spec/)
-- **php/**: Composer package with PHP wrappers + PHPUnit tests
-- **php-ext/**: PIE metadata for ext-php-rs distribution
-- **go/**: Go module wrapping FFI library
-- **java/**: Maven project wrapping FFI library with JNI
-- **csharp/**: .NET project wrapping FFI library with P/Invoke
+- **Python**: `pyo3_asyncio::tokio::future_into_py` for async, blocking wrapper for sync
+- **TypeScript**: NAPI-RS native async support
+- **Ruby**: Fiber or Concurrent-ruby integration
+- **Go/Java/C#**: Block on Tokio runtime via FFI layer
+
+## Testing Requirements
+
+- Each binding has its own language-native test suite
+- Tests must cover: type conversion, error handling, async behavior, memory safety
+- Coverage target: 80%+ per binding
+- Integration tests verify cross-language consistency
+
+## Anti-Patterns
+
+- Duplicating core logic in binding code
+- Exposing Rust internals to users
+- Blocking in async contexts
+- Missing error conversion at boundaries
+- Skipping language-native tests
