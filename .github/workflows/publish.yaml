@@ -1619,7 +1619,7 @@ jobs:
 
       - name: Setup Java
         env:
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPP_PASSPHRASE }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -1634,7 +1634,7 @@ jobs:
       - name: Configure GPG for non-interactive signing
         shell: bash
         env:
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPP_PASSPHRASE }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           mkdir -p ~/.gnupg
           chmod 700 ~/.gnupg
@@ -1669,7 +1669,7 @@ jobs:
 
       - name: Release Maven package
         env:
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPP_PASSPHRASE }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: scripts/publish/maven/release-package.sh
         shell: bash
 
