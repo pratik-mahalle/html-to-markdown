@@ -4,7 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Clean up any vendored files and build artifacts from previous runs
-rm -rf packages/ruby/.cargo packages/ruby/rust-vendor packages/ruby/ext/html-to-markdown-rb/native/Cargo.lock packages/ruby/pkg
+rm -rf packages/ruby/.cargo packages/ruby/rust-vendor packages/ruby/ext/html-to-markdown-rb/native/Cargo.lock packages/ruby/Cargo.lock packages/ruby/pkg
 git restore packages/ruby/ext/html-to-markdown-rb/native/Cargo.toml 2>/dev/null || true
 
 # Build CLI binary BEFORE vendoring to avoid package collision

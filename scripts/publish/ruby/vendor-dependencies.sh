@@ -13,7 +13,7 @@ echo "=== Vendoring Ruby gem dependencies with cargo vendor ==="
 cd "$NATIVE_EXT"
 
 # Clean up any existing vendor directory and restore native Cargo.toml to original state
-rm -rf "${RUBY_PKG:?}/${VENDOR_DIR:?}" "${RUBY_PKG:?}/.cargo" "$NATIVE_EXT/Cargo.lock"
+rm -rf "${RUBY_PKG:?}/${VENDOR_DIR:?}" "${RUBY_PKG:?}/.cargo" "$NATIVE_EXT/Cargo.lock" "$RUBY_PKG/Cargo.lock"
 git restore "$NATIVE_EXT/Cargo.toml" 2>/dev/null || true
 
 # Step 1: Update local registry cache to get latest crate versions
@@ -181,6 +181,13 @@ mv "$REPO_ROOT/Cargo.toml" "$REPO_ROOT/Cargo.toml.tmp"
 
 echo "Generating Cargo.lock..."
 cargo generate-lockfile --manifest-path="$NATIVE_EXT/Cargo.toml"
+
+# Cargo.lock is generated at the workspace root (packages/ruby/Cargo.lock)
+# because packages/ruby/Cargo.toml is a virtual workspace. Copy it to the
+# native ext directory where the gemspec and build scripts expect it.
+if [ -f "$RUBY_PKG/Cargo.lock" ] && [ ! -f "$NATIVE_EXT/Cargo.lock" ]; then
+	cp "$RUBY_PKG/Cargo.lock" "$NATIVE_EXT/Cargo.lock"
+fi
 
 # Step 9: Fetch locked versions and re-vendor to ensure version consistency
 # This ensures the vendored crates exactly match the Cargo.lock
