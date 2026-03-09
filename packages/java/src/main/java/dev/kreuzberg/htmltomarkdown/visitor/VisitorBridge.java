@@ -33,17 +33,11 @@ final class VisitorBridge {
   /** Result type: continue with default behavior. */
   private static final int RESULT_TYPE_CONTINUE = 0;
 
-  /** Result type: custom output. */
-  private static final int RESULT_TYPE_CUSTOM = 1;
-
   /** Result type: skip element and children. */
   private static final int RESULT_TYPE_SKIP = 2;
 
   /** Result type: preserve HTML. */
   private static final int RESULT_TYPE_PRESERVE_HTML = 3;
-
-  /** Result type: error occurred. */
-  private static final int RESULT_TYPE_ERROR = 4;
 
   /** Padding after node_type to align pointer fields on 64-bit. */
   private static final long NODE_CONTEXT_PADDING_AFTER_NODE_TYPE = 4;
@@ -78,11 +72,11 @@ final class VisitorBridge {
               MemoryLayout.paddingLayout(NODE_CONTEXT_PADDING_AFTER_IS_INLINE))
           .withName("html_to_markdown_node_context_t");
 
-  /** Bit shift for encoding type in long value. */
-  private static final int TYPE_SHIFT = 32;
+  /** Result type constant for Custom result. */
+  private static final int RESULT_TYPE_CUSTOM = 1;
 
-  /** Mask for lower 32 bits (address part). */
-  private static final long ADDRESS_MASK = 0xFFFFFFFFL;
+  /** Result type constant for Error result. */
+  private static final int RESULT_TYPE_ERROR = 4;
 
   /** The visitor implementation. */
   private final Visitor visitor;
@@ -103,29 +97,50 @@ final class VisitorBridge {
   }
 
   /**
-   * Convert a VisitResult to C-compatible format.
+   * Convert a VisitResult to a C-compatible HtmlToMarkdownVisitResult struct.
    *
-   * <p>For Custom and Error results, returns a struct with the allocated string pointer and type.
-   * For other results, type field indicates the action.
+   * <p>Allocates and populates a struct with result_type, custom_output, and error_message fields
+   * matching the C layout.
    *
    * @param result the Java VisitResult
-   * @return encoded result containing both type and pointer (without bit loss)
+   * @return memory segment containing the populated C struct
    */
-  long encodeResult(final VisitResult result) {
+  MemorySegment encodeResult(final VisitResult result) {
+    StructLayout layout = VisitorCallbackFactory.VISIT_RESULT_LAYOUT;
+    MemorySegment struct = arena.allocate(layout);
+
+    int resultType = RESULT_TYPE_CONTINUE;
+    MemorySegment customOutput = MemorySegment.NULL;
+    MemorySegment errorMessage = MemorySegment.NULL;
+
     if (result instanceof VisitResult.Continue) {
-      return RESULT_TYPE_CONTINUE;
+      resultType = RESULT_TYPE_CONTINUE;
     } else if (result instanceof VisitResult.Skip) {
-      return RESULT_TYPE_SKIP;
+      resultType = RESULT_TYPE_SKIP;
     } else if (result instanceof VisitResult.PreserveHtml) {
-      return RESULT_TYPE_PRESERVE_HTML;
+      resultType = RESULT_TYPE_PRESERVE_HTML;
     } else if (result instanceof VisitResult.Custom custom) {
-      MemorySegment str = allocateString(custom.customOutput());
-      return str.address();
+      resultType = RESULT_TYPE_CUSTOM;
+      customOutput = allocateString(custom.customOutput());
     } else if (result instanceof VisitResult.Error error) {
-      MemorySegment str = allocateString(error.errorMessage());
-      return str.address();
+      resultType = RESULT_TYPE_ERROR;
+      errorMessage = allocateString(error.errorMessage());
     }
-    return RESULT_TYPE_CONTINUE;
+
+    struct.set(
+        ValueLayout.JAVA_INT,
+        layout.byteOffset(MemoryLayout.PathElement.groupElement("result_type")),
+        resultType);
+    struct.set(
+        ValueLayout.ADDRESS,
+        layout.byteOffset(MemoryLayout.PathElement.groupElement("custom_output")),
+        customOutput);
+    struct.set(
+        ValueLayout.ADDRESS,
+        layout.byteOffset(MemoryLayout.PathElement.groupElement("error_message")),
+        errorMessage);
+
+    return struct;
   }
 
   /**

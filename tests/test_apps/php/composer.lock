@@ -4,15 +4,15 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2e10ced178d84f5141cc76fb488a09f6",
+    "content-hash": "ddb4d11b86e7c0a3c6167332e6c4a3f7",
     "packages": [
         {
             "name": "kreuzberg-dev/html-to-markdown",
-            "version": "2.28.1",
+            "version": "2.28.2",
             "dist": {
                 "type": "path",
                 "url": "/Users/naamanhirschfeld/workspace/kreuzberg-dev/html-to-markdown/packages/php",
-                "reference": "1ac090a34315ada1fb2b603431df6ca71fa40234"
+                "reference": "8115708fe34bfcd2890aa98e4ee100ddc307c553"
             },
             "require": {
                 "php": "^8.4"

@@ -14,7 +14,7 @@
   {
     "name": "FAQ with definitions",
     "html": "<dl><dt>What is this?</dt><dd>An explanation</dd><dt>How to use?</dt><dd>Instructions here</dd></dl>",
-    "expectedMarkdown": "What is this?\n:   An explanation\n\nHow to use?\n:   Instructions here",
+    "expectedMarkdown": "What is this?\nAn explanation\n\nHow to use?\nInstructions here",
     "options": {}
   },
   {
