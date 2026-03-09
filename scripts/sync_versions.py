@@ -451,6 +451,80 @@ def update_pom_version(file_path: Path, version: str) -> tuple[bool, str, str]:
     return True, old_version, version
 
 
+def update_go_ffi_version(file_path: Path, version: str) -> tuple[bool, str, str]:
+    """Update defaultFFIVersion in Go FFI loader."""
+    content = file_path.read_text()
+    match = re.search(r'defaultFFIVersion\s*=\s*"([^"]+)"', content)
+    old_version = match.group(1) if match else "NOT FOUND"
+
+    if old_version == version:
+        return False, old_version, version
+
+    new_content = re.sub(
+        r'(defaultFFIVersion\s*=\s*)"[^"]+"',
+        rf'\1"{version}"',
+        content,
+        count=1,
+    )
+    file_path.write_text(new_content)
+    return True, old_version, version
+
+
+def _get_test_app_targets(test_apps_dir: Path, version: str) -> list[tuple[str, Path, callable, list]]:
+    """Return list of (label, path, update_fn, args) for all test app targets."""
+    return [
+        (
+            "Python pyproject.toml",
+            test_apps_dir / "python" / "pyproject.toml",
+            update_toml_dependency,
+            ["html-to-markdown", f">={version}"],
+        ),
+        (
+            "Node package.json",
+            test_apps_dir / "node" / "package.json",
+            _update_json_dependency,
+            ["@kreuzberg/html-to-markdown", version],
+        ),
+        (
+            "WASM package.json",
+            test_apps_dir / "wasm" / "package.json",
+            _update_json_dependency,
+            ["@kreuzberg/html-to-markdown-wasm", version],
+        ),
+        (
+            "Bun package.json",
+            test_apps_dir / "bun" / "package.json",
+            _update_json_dependency,
+            ["@kreuzberg/html-to-markdown", version],
+        ),
+        (
+            "Ruby Gemfile",
+            test_apps_dir / "ruby" / "Gemfile",
+            update_gemfile_dependency,
+            ["html-to-markdown", f">= {version}"],
+        ),
+        (
+            "PHP composer.json",
+            test_apps_dir / "php" / "composer.json",
+            _update_json_dependency,
+            ["kreuzberg-dev/html-to-markdown", f">={version}"],
+        ),
+        (
+            "Java pom.xml",
+            test_apps_dir / "java" / "pom.xml",
+            update_pom_dependency,
+            ["dev.kreuzberg", "html-to-markdown", version],
+        ),
+        (
+            "C# TestApp.csproj",
+            test_apps_dir / "csharp" / "TestApp.csproj",
+            update_csproj_dependency,
+            ["KreuzbergDev.HtmlToMarkdown", version],
+        ),
+        ("Elixir mix.exs", test_apps_dir / "elixir" / "mix.exs", update_mix_dependency, ["html_to_markdown", version]),
+    ]
+
+
 def update_test_apps_versions(repo_root: Path, version: str) -> None:
     """Update test_apps package manifests with new version."""
     test_apps_dir = repo_root / "tests" / "test_apps"
@@ -461,53 +535,18 @@ def update_test_apps_versions(repo_root: Path, version: str) -> None:
 
     print("\n📦 Updating test_apps manifests...")
 
-    # Update Python pyproject.toml
-    python_toml = test_apps_dir / "python" / "pyproject.toml"
-    if python_toml.exists():
-        update_toml_dependency(python_toml, "html-to-markdown", f">={version}")
-        print(f"  ✓ Python pyproject.toml → html-to-markdown>={version}")
+    targets = _get_test_app_targets(test_apps_dir, version)
 
-    # Update Node package.json
-    node_pkg = test_apps_dir / "node" / "package.json"
-    if node_pkg.exists():
-        update_json_dependency(node_pkg, "html-to-markdown", f">={version}")
-        print(f"  ✓ Node package.json → html-to-markdown>={version}")
+    for label, path, update_fn, args in targets:
+        if path.exists():
+            update_fn(path, *args)
+            print(f"  ✓ {label} → {version}")
 
-    # Update Ruby Gemfile
-    ruby_gemfile = test_apps_dir / "ruby" / "Gemfile"
-    if ruby_gemfile.exists():
-        update_gemfile_dependency(ruby_gemfile, "html-to-markdown", f">= {version}")
-        print(f"  ✓ Ruby Gemfile → html-to-markdown>={version}")
-
-    # Update PHP composer.json
-    php_composer = test_apps_dir / "php" / "composer.json"
-    if php_composer.exists():
-        update_json_dependency(php_composer, "kreuzberg-dev/html-to-markdown", f">={version}")
-        print(f"  ✓ PHP composer.json → kreuzberg-dev/html-to-markdown>={version}")
-
-    # Update Go go.mod
+    # Update Go go.mod (different signature)
     go_mod = test_apps_dir / "go" / "go.mod"
     if go_mod.exists():
         update_go_mod(go_mod, "github.com/kreuzberg-dev/html-to-markdown/packages/go/v2", version)
         print(f"  ✓ Go go.mod → v{version}")
-
-    # Update Java pom.xml
-    java_pom = test_apps_dir / "java" / "pom.xml"
-    if java_pom.exists():
-        update_pom_dependency(java_pom, "dev.kreuzberg", "html-to-markdown", version)
-        print(f"  ✓ Java pom.xml → {version}")
-
-    # Update C# TestApp.csproj
-    csharp_csproj = test_apps_dir / "csharp" / "TestApp.csproj"
-    if csharp_csproj.exists():
-        update_csproj_dependency(csharp_csproj, "HtmlToMarkdown", version)
-        print(f"  ✓ C# TestApp.csproj → {version}")
-
-    # Update Elixir mix.exs
-    elixir_mix = test_apps_dir / "elixir" / "mix.exs"
-    if elixir_mix.exists():
-        update_mix_dependency(elixir_mix, "html_to_markdown", version)
-        print(f"  ✓ Elixir mix.exs → ~> {version}")
 
 
 @dataclass
@@ -646,6 +685,14 @@ def sync_r(repo_root: Path, version: str, report: SyncReport) -> None:
         report.record(r_description.relative_to(repo_root), changed, f"{old_ver} → {new_ver}")
 
 
+def sync_go_ffi_version(repo_root: Path, version: str, report: SyncReport) -> None:
+    """Update defaultFFIVersion in Go FFI loader."""
+    ffi_loader = repo_root / "packages/go/v2/htmltomarkdown/ffi_loader.go"
+    if ffi_loader.exists():
+        changed, old_ver, new_ver = update_go_ffi_version(ffi_loader, version)
+        report.record(ffi_loader.relative_to(repo_root), changed, f"{old_ver} → {new_ver}")
+
+
 def sync_readme_config(repo_root: Path, version: str, report: SyncReport) -> None:
     """Update version in readme_config.yaml (used for README generation)."""
     readme_config = repo_root / "scripts/readme_config.yaml"
@@ -689,6 +736,7 @@ def main() -> None:
     sync_uv_lock(repo_root, version, report)
     sync_composer(repo_root, version, report)
     sync_cargo_versions(repo_root, version, report)
+    sync_go_ffi_version(repo_root, version, report)
     sync_readme_config(repo_root, version, report)
 
     # Update test_apps manifests
