@@ -267,7 +267,7 @@ HTML;
         $metadata = $result['metadata'];
 
         $this->assertNotNull($metadata->document);
-        $this->assertNotEmpty($metadata->document->open_graph);
+        $this->assertNotEmpty($metadata->document->openGraph);
     }
 
     public function testMultipleHeadingLevels(): void
