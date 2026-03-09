@@ -8,16 +8,18 @@
 
     <!-- Package metadata -->
     <PackageId>KreuzbergDev.HtmlToMarkdown</PackageId>
-    <Version>2.28.1</Version>
-    <Authors>Na'aman Hirschfeld</Authors>
-    <Company>Kreuzberg.dev</Company>
-    <Description>High-performance HTML to Markdown converter with C# bindings to Rust core</Description>
+    <Version>2.28.2</Version>
+    <LangVersion>latest</LangVersion>
+    <Authors>kreuzberg.dev</Authors>
+    <Company>kreuzberg.dev</Company>
+    <Description>High-performance HTML to Markdown converter with C# bindings to Rust core. Features metadata extraction, visitor pattern, table extraction, and inline image support. 10-80x faster than alternatives.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/kreuzberg-dev/html-to-markdown</PackageProjectUrl>
+    <PackageProjectUrl>https://docs.html-to-markdown.kreuzberg.dev</PackageProjectUrl>
     <RepositoryUrl>https://github.com/kreuzberg-dev/html-to-markdown</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>html;markdown;converter;rust;ffi</PackageTags>
+    <PackageTags>html;markdown;converter;rust;ffi;html-to-markdown;kreuzberg;dotnet;netcore</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
