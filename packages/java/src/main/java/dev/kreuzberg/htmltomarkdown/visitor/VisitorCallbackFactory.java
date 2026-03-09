@@ -4,7 +4,9 @@ import dev.kreuzberg.htmltomarkdown.util.StringUtils;
 import java.lang.foreign.Arena;
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.Linker;
+import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
+import java.lang.foreign.StructLayout;
 import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -32,10 +34,24 @@ public final class VisitorCallbackFactory {
   /** Lookup for method handles. */
   private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
 
+  /**
+   * C struct layout for HtmlToMarkdownVisitResult.
+   *
+   * <p>Layout: result_type (i32) + 4-byte padding + custom_output (ptr) + error_message (ptr) = 24
+   * bytes on 64-bit.
+   */
+  static final StructLayout VISIT_RESULT_LAYOUT =
+      MemoryLayout.structLayout(
+              ValueLayout.JAVA_INT.withName("result_type"),
+              MemoryLayout.paddingLayout(4),
+              ValueLayout.ADDRESS.withName("custom_output"),
+              ValueLayout.ADDRESS.withName("error_message"))
+          .withName("HtmlToMarkdownVisitResult");
+
   /** Function descriptor for callbacks with just context: fn(user_data, ctx) -> result. */
   private static final FunctionDescriptor CTX_ONLY_DESC =
       FunctionDescriptor.of(
-          ValueLayout.JAVA_LONG, // result (encoded)
+          VISIT_RESULT_LAYOUT, // result struct
           ValueLayout.ADDRESS, // user_data
           ValueLayout.ADDRESS // ctx
           );
@@ -43,12 +59,12 @@ public final class VisitorCallbackFactory {
   /** Function descriptor for callbacks with context + 1 string. */
   private static final FunctionDescriptor CTX_STR_DESC =
       FunctionDescriptor.of(
-          ValueLayout.JAVA_LONG, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS);
+          VISIT_RESULT_LAYOUT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS);
 
   /** Function descriptor for callbacks with context + 2 strings. */
   private static final FunctionDescriptor CTX_2STR_DESC =
       FunctionDescriptor.of(
-          ValueLayout.JAVA_LONG,
+          VISIT_RESULT_LAYOUT,
           ValueLayout.ADDRESS,
           ValueLayout.ADDRESS,
           ValueLayout.ADDRESS,
@@ -57,7 +73,7 @@ public final class VisitorCallbackFactory {
   /** Function descriptor for callbacks with context + 3 strings. */
   private static final FunctionDescriptor CTX_3STR_DESC =
       FunctionDescriptor.of(
-          ValueLayout.JAVA_LONG,
+          VISIT_RESULT_LAYOUT,
           ValueLayout.ADDRESS,
           ValueLayout.ADDRESS,
           ValueLayout.ADDRESS,
@@ -67,7 +83,7 @@ public final class VisitorCallbackFactory {
   /** Function descriptor for callbacks with context + 4 strings. */
   private static final FunctionDescriptor CTX_4STR_DESC =
       FunctionDescriptor.of(
-          ValueLayout.JAVA_LONG,
+          VISIT_RESULT_LAYOUT,
           ValueLayout.ADDRESS,
           ValueLayout.ADDRESS,
           ValueLayout.ADDRESS,
@@ -78,7 +94,7 @@ public final class VisitorCallbackFactory {
   /** Function descriptor for heading callback: ctx, level (u32), text, id. */
   private static final FunctionDescriptor HEADING_DESC =
       FunctionDescriptor.of(
-          ValueLayout.JAVA_LONG,
+          VISIT_RESULT_LAYOUT,
           ValueLayout.ADDRESS,
           ValueLayout.ADDRESS,
           ValueLayout.JAVA_INT,
@@ -88,7 +104,7 @@ public final class VisitorCallbackFactory {
   /** Function descriptor for list item: ctx, ordered (bool), marker, text. */
   private static final FunctionDescriptor LIST_ITEM_DESC =
       FunctionDescriptor.of(
-          ValueLayout.JAVA_LONG,
+          VISIT_RESULT_LAYOUT,
           ValueLayout.ADDRESS,
           ValueLayout.ADDRESS,
           ValueLayout.JAVA_BOOLEAN,
@@ -98,7 +114,7 @@ public final class VisitorCallbackFactory {
   /** Function descriptor for list start/end with bool: ctx, ordered. */
   private static final FunctionDescriptor LIST_BOOL_DESC =
       FunctionDescriptor.of(
-          ValueLayout.JAVA_LONG,
+          VISIT_RESULT_LAYOUT,
           ValueLayout.ADDRESS,
           ValueLayout.ADDRESS,
           ValueLayout.JAVA_BOOLEAN);
@@ -106,7 +122,7 @@ public final class VisitorCallbackFactory {
   /** Function descriptor for list end: ctx, ordered, output. */
   private static final FunctionDescriptor LIST_END_DESC =
       FunctionDescriptor.of(
-          ValueLayout.JAVA_LONG,
+          VISIT_RESULT_LAYOUT,
           ValueLayout.ADDRESS,
           ValueLayout.ADDRESS,
           ValueLayout.JAVA_BOOLEAN,
@@ -115,7 +131,7 @@ public final class VisitorCallbackFactory {
   /** Function descriptor for table row: ctx, cells, cell_count, is_header. */
   private static final FunctionDescriptor TABLE_ROW_DESC =
       FunctionDescriptor.of(
-          ValueLayout.JAVA_LONG,
+          VISIT_RESULT_LAYOUT,
           ValueLayout.ADDRESS,
           ValueLayout.ADDRESS,
           ValueLayout.ADDRESS,
@@ -125,7 +141,7 @@ public final class VisitorCallbackFactory {
   /** Function descriptor for blockquote: ctx, content, depth. */
   private static final FunctionDescriptor BLOCKQUOTE_DESC =
       FunctionDescriptor.of(
-          ValueLayout.JAVA_LONG,
+          VISIT_RESULT_LAYOUT,
           ValueLayout.ADDRESS,
           ValueLayout.ADDRESS,
           ValueLayout.ADDRESS,
@@ -134,7 +150,7 @@ public final class VisitorCallbackFactory {
   /** Function descriptor for details: ctx, open (bool). */
   private static final FunctionDescriptor DETAILS_DESC =
       FunctionDescriptor.of(
-          ValueLayout.JAVA_LONG,
+          VISIT_RESULT_LAYOUT,
           ValueLayout.ADDRESS,
           ValueLayout.ADDRESS,
           ValueLayout.JAVA_BOOLEAN);
@@ -261,20 +277,21 @@ public final class VisitorCallbackFactory {
 
   // Callback implementations that delegate to Java visitor
 
-  private long visitText(MemorySegment userData, MemorySegment ctx, MemorySegment text) {
+  private MemorySegment visitText(MemorySegment userData, MemorySegment ctx, MemorySegment text) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String textStr = StringUtils.fromCString(text);
     VisitResult result = bridge.getVisitor().visitText(nodeCtx, textStr != null ? textStr : "");
     return bridge.encodeResult(result);
   }
 
-  private long visitElementStart(MemorySegment userData, MemorySegment ctx) {
+  private MemorySegment visitElementStart(MemorySegment userData, MemorySegment ctx) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     VisitResult result = bridge.getVisitor().visitElementStart(nodeCtx);
     return bridge.encodeResult(result);
   }
 
-  private long visitElementEnd(MemorySegment userData, MemorySegment ctx, MemorySegment output) {
+  private MemorySegment visitElementEnd(
+      MemorySegment userData, MemorySegment ctx, MemorySegment output) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String outputStr = StringUtils.fromCString(output);
     VisitResult result =
@@ -282,7 +299,7 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private long visitLink(
+  private MemorySegment visitLink(
       MemorySegment userData,
       MemorySegment ctx,
       MemorySegment href,
@@ -300,7 +317,7 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private long visitImage(
+  private MemorySegment visitImage(
       MemorySegment userData,
       MemorySegment ctx,
       MemorySegment src,
@@ -318,7 +335,7 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private long visitHeading(
+  private MemorySegment visitHeading(
       MemorySegment userData, MemorySegment ctx, int level, MemorySegment text, MemorySegment id) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String textStr = StringUtils.fromCString(text);
@@ -328,7 +345,7 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private long visitCodeBlock(
+  private MemorySegment visitCodeBlock(
       MemorySegment userData, MemorySegment ctx, MemorySegment lang, MemorySegment code) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String langStr = StringUtils.fromCString(lang);
@@ -338,7 +355,8 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private long visitCodeInline(MemorySegment userData, MemorySegment ctx, MemorySegment code) {
+  private MemorySegment visitCodeInline(
+      MemorySegment userData, MemorySegment ctx, MemorySegment code) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String codeStr = StringUtils.fromCString(code);
     VisitResult result =
@@ -346,7 +364,7 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private long visitListItem(
+  private MemorySegment visitListItem(
       MemorySegment userData,
       MemorySegment ctx,
       boolean ordered,
@@ -366,13 +384,14 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private long visitListStart(MemorySegment userData, MemorySegment ctx, boolean ordered) {
+  private MemorySegment visitListStart(
+      MemorySegment userData, MemorySegment ctx, boolean ordered) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     VisitResult result = bridge.getVisitor().visitListStart(nodeCtx, ordered);
     return bridge.encodeResult(result);
   }
 
-  private long visitListEnd(
+  private MemorySegment visitListEnd(
       MemorySegment userData, MemorySegment ctx, boolean ordered, MemorySegment output) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String outputStr = StringUtils.fromCString(output);
@@ -381,13 +400,13 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private long visitTableStart(MemorySegment userData, MemorySegment ctx) {
+  private MemorySegment visitTableStart(MemorySegment userData, MemorySegment ctx) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     VisitResult result = bridge.getVisitor().visitTableStart(nodeCtx);
     return bridge.encodeResult(result);
   }
 
-  private long visitTableRow(
+  private MemorySegment visitTableRow(
       MemorySegment userData,
       MemorySegment ctx,
       MemorySegment cells,
@@ -399,7 +418,8 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private long visitTableEnd(MemorySegment userData, MemorySegment ctx, MemorySegment output) {
+  private MemorySegment visitTableEnd(
+      MemorySegment userData, MemorySegment ctx, MemorySegment output) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String outputStr = StringUtils.fromCString(output);
     VisitResult result =
@@ -407,7 +427,7 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private long visitBlockquote(
+  private MemorySegment visitBlockquote(
       MemorySegment userData, MemorySegment ctx, MemorySegment content, long depth) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String contentStr = StringUtils.fromCString(content);
@@ -416,21 +436,24 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private long visitStrong(MemorySegment userData, MemorySegment ctx, MemorySegment text) {
+  private MemorySegment visitStrong(
+      MemorySegment userData, MemorySegment ctx, MemorySegment text) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String textStr = StringUtils.fromCString(text);
     VisitResult result = bridge.getVisitor().visitStrong(nodeCtx, textStr != null ? textStr : "");
     return bridge.encodeResult(result);
   }
 
-  private long visitEmphasis(MemorySegment userData, MemorySegment ctx, MemorySegment text) {
+  private MemorySegment visitEmphasis(
+      MemorySegment userData, MemorySegment ctx, MemorySegment text) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String textStr = StringUtils.fromCString(text);
     VisitResult result = bridge.getVisitor().visitEmphasis(nodeCtx, textStr != null ? textStr : "");
     return bridge.encodeResult(result);
   }
 
-  private long visitStrikethrough(MemorySegment userData, MemorySegment ctx, MemorySegment text) {
+  private MemorySegment visitStrikethrough(
+      MemorySegment userData, MemorySegment ctx, MemorySegment text) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String textStr = StringUtils.fromCString(text);
     VisitResult result =
@@ -438,7 +461,8 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private long visitUnderline(MemorySegment userData, MemorySegment ctx, MemorySegment text) {
+  private MemorySegment visitUnderline(
+      MemorySegment userData, MemorySegment ctx, MemorySegment text) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String textStr = StringUtils.fromCString(text);
     VisitResult result =
@@ -446,7 +470,8 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private long visitSubscript(MemorySegment userData, MemorySegment ctx, MemorySegment text) {
+  private MemorySegment visitSubscript(
+      MemorySegment userData, MemorySegment ctx, MemorySegment text) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String textStr = StringUtils.fromCString(text);
     VisitResult result =
@@ -454,7 +479,8 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private long visitSuperscript(MemorySegment userData, MemorySegment ctx, MemorySegment text) {
+  private MemorySegment visitSuperscript(
+      MemorySegment userData, MemorySegment ctx, MemorySegment text) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String textStr = StringUtils.fromCString(text);
     VisitResult result =
@@ -462,26 +488,26 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private long visitMark(MemorySegment userData, MemorySegment ctx, MemorySegment text) {
+  private MemorySegment visitMark(MemorySegment userData, MemorySegment ctx, MemorySegment text) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String textStr = StringUtils.fromCString(text);
     VisitResult result = bridge.getVisitor().visitMark(nodeCtx, textStr != null ? textStr : "");
     return bridge.encodeResult(result);
   }
 
-  private long visitLineBreak(MemorySegment userData, MemorySegment ctx) {
+  private MemorySegment visitLineBreak(MemorySegment userData, MemorySegment ctx) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     VisitResult result = bridge.getVisitor().visitLineBreak(nodeCtx);
     return bridge.encodeResult(result);
   }
 
-  private long visitHorizontalRule(MemorySegment userData, MemorySegment ctx) {
+  private MemorySegment visitHorizontalRule(MemorySegment userData, MemorySegment ctx) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     VisitResult result = bridge.getVisitor().visitHorizontalRule(nodeCtx);
     return bridge.encodeResult(result);
   }
 
-  private long visitCustomElement(
+  private MemorySegment visitCustomElement(
       MemorySegment userData, MemorySegment ctx, MemorySegment tagName, MemorySegment html) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String tagNameStr = StringUtils.fromCString(tagName);
@@ -494,13 +520,14 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private long visitDefinitionListStart(MemorySegment userData, MemorySegment ctx) {
+  private MemorySegment visitDefinitionListStart(MemorySegment userData, MemorySegment ctx) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     VisitResult result = bridge.getVisitor().visitDefinitionListStart(nodeCtx);
     return bridge.encodeResult(result);
   }
 
-  private long visitDefinitionTerm(MemorySegment userData, MemorySegment ctx, MemorySegment text) {
+  private MemorySegment visitDefinitionTerm(
+      MemorySegment userData, MemorySegment ctx, MemorySegment text) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String textStr = StringUtils.fromCString(text);
     VisitResult result =
@@ -508,7 +535,7 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private long visitDefinitionDescription(
+  private MemorySegment visitDefinitionDescription(
       MemorySegment userData, MemorySegment ctx, MemorySegment text) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String textStr = StringUtils.fromCString(text);
@@ -517,7 +544,7 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private long visitDefinitionListEnd(
+  private MemorySegment visitDefinitionListEnd(
       MemorySegment userData, MemorySegment ctx, MemorySegment output) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String outputStr = StringUtils.fromCString(output);
@@ -526,7 +553,7 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private long visitForm(
+  private MemorySegment visitForm(
       MemorySegment userData, MemorySegment ctx, MemorySegment action, MemorySegment method) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String actionStr = StringUtils.fromCString(action);
@@ -535,7 +562,7 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private long visitInput(
+  private MemorySegment visitInput(
       MemorySegment userData,
       MemorySegment ctx,
       MemorySegment inputType,
@@ -552,48 +579,50 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private long visitButton(MemorySegment userData, MemorySegment ctx, MemorySegment text) {
+  private MemorySegment visitButton(
+      MemorySegment userData, MemorySegment ctx, MemorySegment text) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String textStr = StringUtils.fromCString(text);
     VisitResult result = bridge.getVisitor().visitButton(nodeCtx, textStr != null ? textStr : "");
     return bridge.encodeResult(result);
   }
 
-  private long visitAudio(MemorySegment userData, MemorySegment ctx, MemorySegment src) {
+  private MemorySegment visitAudio(MemorySegment userData, MemorySegment ctx, MemorySegment src) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String srcStr = StringUtils.fromCString(src);
     VisitResult result = bridge.getVisitor().visitAudio(nodeCtx, srcStr);
     return bridge.encodeResult(result);
   }
 
-  private long visitVideo(MemorySegment userData, MemorySegment ctx, MemorySegment src) {
+  private MemorySegment visitVideo(MemorySegment userData, MemorySegment ctx, MemorySegment src) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String srcStr = StringUtils.fromCString(src);
     VisitResult result = bridge.getVisitor().visitVideo(nodeCtx, srcStr);
     return bridge.encodeResult(result);
   }
 
-  private long visitIframe(MemorySegment userData, MemorySegment ctx, MemorySegment src) {
+  private MemorySegment visitIframe(MemorySegment userData, MemorySegment ctx, MemorySegment src) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String srcStr = StringUtils.fromCString(src);
     VisitResult result = bridge.getVisitor().visitIframe(nodeCtx, srcStr);
     return bridge.encodeResult(result);
   }
 
-  private long visitDetails(MemorySegment userData, MemorySegment ctx, boolean open) {
+  private MemorySegment visitDetails(MemorySegment userData, MemorySegment ctx, boolean open) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     VisitResult result = bridge.getVisitor().visitDetails(nodeCtx, open);
     return bridge.encodeResult(result);
   }
 
-  private long visitSummary(MemorySegment userData, MemorySegment ctx, MemorySegment text) {
+  private MemorySegment visitSummary(
+      MemorySegment userData, MemorySegment ctx, MemorySegment text) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String textStr = StringUtils.fromCString(text);
     VisitResult result = bridge.getVisitor().visitSummary(nodeCtx, textStr != null ? textStr : "");
     return bridge.encodeResult(result);
   }
 
-  private long visitFigureStart(MemorySegment userData, MemorySegment ctx) {
+  private MemorySegment visitFigureStart(MemorySegment userData, MemorySegment ctx) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     VisitResult result = bridge.getVisitor().visitFigureStart(nodeCtx);
     return bridge.encodeResult(result);
@@ -607,7 +636,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitText",
             MethodType.methodType(
-                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -616,7 +645,7 @@ public final class VisitorCallbackFactory {
         LOOKUP.bind(
             this,
             "visitElementStart",
-            MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class));
+            MethodType.methodType(MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_ONLY_DESC, arena);
   }
 
@@ -626,7 +655,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitElementEnd",
             MethodType.methodType(
-                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -636,7 +665,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitLink",
             MethodType.methodType(
-                long.class,
+                MemorySegment.class,
                 MemorySegment.class,
                 MemorySegment.class,
                 MemorySegment.class,
@@ -651,7 +680,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitImage",
             MethodType.methodType(
-                long.class,
+                MemorySegment.class,
                 MemorySegment.class,
                 MemorySegment.class,
                 MemorySegment.class,
@@ -666,7 +695,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitHeading",
             MethodType.methodType(
-                long.class,
+                MemorySegment.class,
                 MemorySegment.class,
                 MemorySegment.class,
                 int.class,
@@ -681,7 +710,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitCodeBlock",
             MethodType.methodType(
-                long.class,
+                MemorySegment.class,
                 MemorySegment.class,
                 MemorySegment.class,
                 MemorySegment.class,
@@ -695,7 +724,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitCodeInline",
             MethodType.methodType(
-                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -705,7 +734,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitListItem",
             MethodType.methodType(
-                long.class,
+                MemorySegment.class,
                 MemorySegment.class,
                 MemorySegment.class,
                 boolean.class,
@@ -720,7 +749,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitListStart",
             MethodType.methodType(
-                long.class, MemorySegment.class, MemorySegment.class, boolean.class));
+                MemorySegment.class, MemorySegment.class, MemorySegment.class, boolean.class));
     return LINKER.upcallStub(mh, LIST_BOOL_DESC, arena);
   }
 
@@ -730,7 +759,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitListEnd",
             MethodType.methodType(
-                long.class,
+                MemorySegment.class,
                 MemorySegment.class,
                 MemorySegment.class,
                 boolean.class,
@@ -743,7 +772,7 @@ public final class VisitorCallbackFactory {
         LOOKUP.bind(
             this,
             "visitTableStart",
-            MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class));
+            MethodType.methodType(MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_ONLY_DESC, arena);
   }
 
@@ -753,7 +782,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitTableRow",
             MethodType.methodType(
-                long.class,
+                MemorySegment.class,
                 MemorySegment.class,
                 MemorySegment.class,
                 MemorySegment.class,
@@ -768,7 +797,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitTableEnd",
             MethodType.methodType(
-                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -778,7 +807,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitBlockquote",
             MethodType.methodType(
-                long.class,
+                MemorySegment.class,
                 MemorySegment.class,
                 MemorySegment.class,
                 MemorySegment.class,
@@ -792,7 +821,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitStrong",
             MethodType.methodType(
-                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -802,7 +831,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitEmphasis",
             MethodType.methodType(
-                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -812,7 +841,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitStrikethrough",
             MethodType.methodType(
-                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -822,7 +851,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitUnderline",
             MethodType.methodType(
-                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -832,7 +861,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitSubscript",
             MethodType.methodType(
-                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -842,7 +871,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitSuperscript",
             MethodType.methodType(
-                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -852,7 +881,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitMark",
             MethodType.methodType(
-                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -861,7 +890,7 @@ public final class VisitorCallbackFactory {
         LOOKUP.bind(
             this,
             "visitLineBreak",
-            MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class));
+            MethodType.methodType(MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_ONLY_DESC, arena);
   }
 
@@ -870,7 +899,7 @@ public final class VisitorCallbackFactory {
         LOOKUP.bind(
             this,
             "visitHorizontalRule",
-            MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class));
+            MethodType.methodType(MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_ONLY_DESC, arena);
   }
 
@@ -880,7 +909,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitCustomElement",
             MethodType.methodType(
-                long.class,
+                MemorySegment.class,
                 MemorySegment.class,
                 MemorySegment.class,
                 MemorySegment.class,
@@ -893,7 +922,7 @@ public final class VisitorCallbackFactory {
         LOOKUP.bind(
             this,
             "visitDefinitionListStart",
-            MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class));
+            MethodType.methodType(MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_ONLY_DESC, arena);
   }
 
@@ -903,7 +932,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitDefinitionTerm",
             MethodType.methodType(
-                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -913,7 +942,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitDefinitionDescription",
             MethodType.methodType(
-                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -923,7 +952,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitDefinitionListEnd",
             MethodType.methodType(
-                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -933,7 +962,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitForm",
             MethodType.methodType(
-                long.class,
+                MemorySegment.class,
                 MemorySegment.class,
                 MemorySegment.class,
                 MemorySegment.class,
@@ -947,7 +976,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitInput",
             MethodType.methodType(
-                long.class,
+                MemorySegment.class,
                 MemorySegment.class,
                 MemorySegment.class,
                 MemorySegment.class,
@@ -962,7 +991,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitButton",
             MethodType.methodType(
-                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -972,7 +1001,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitAudio",
             MethodType.methodType(
-                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -982,7 +1011,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitVideo",
             MethodType.methodType(
-                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -992,7 +1021,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitIframe",
             MethodType.methodType(
-                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -1002,7 +1031,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitDetails",
             MethodType.methodType(
-                long.class, MemorySegment.class, MemorySegment.class, boolean.class));
+                MemorySegment.class, MemorySegment.class, MemorySegment.class, boolean.class));
     return LINKER.upcallStub(mh, DETAILS_DESC, arena);
   }
 
@@ -1012,7 +1041,7 @@ public final class VisitorCallbackFactory {
             this,
             "visitSummary",
             MethodType.methodType(
-                long.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -1021,7 +1050,7 @@ public final class VisitorCallbackFactory {
         LOOKUP.bind(
             this,
             "visitFigureStart",
-            MethodType.methodType(long.class, MemorySegment.class, MemorySegment.class));
+            MethodType.methodType(MemorySegment.class, MemorySegment.class, MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_ONLY_DESC, arena);
   }
 }
