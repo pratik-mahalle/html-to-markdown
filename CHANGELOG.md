@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.28.3] - 2026-03-10
+
+### Fixed
+
+- **Java visitor FFI struct return type**: Fixed `IllegalArgumentException: Wrong method handle type` when using visitors in Java. The Panama FFI callback descriptors incorrectly used `JAVA_LONG` (8 bytes) as the return type instead of the actual `HtmlToMarkdownVisitResult` C struct (24 bytes: enum + 2 pointers). All 14 callback descriptors now use a proper `StructLayout` matching the C ABI.
+- **Homebrew bottle tarball structure**: Fixed bottle tarballs missing the required `html-to-markdown/{version}/` prefix directory. Homebrew expects this prefix for proper cellar installation.
+- **Ruby gem publishing**: Added native platform gem builds (`rake native gem`) alongside source gems so precompiled extensions are available for Linux, macOS, and Windows.
+
+## [2.28.2] - 2026-03-08
+
+### Fixed
+
+- **Publish workflow republish flag**: Fixed republish mode skipping all publish jobs because `INPUT_REF` resolved to a branch name instead of the tag ref.
+- **Definition list fixture**: Aligned real-world test fixture for `<dl>`/`<dt>`/`<dd>` with actual converter output (plain text, no Pandoc-style `:` prefix).
+
 ## [2.28.1] - 2026-03-06
 
 ### Fixed
