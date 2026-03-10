@@ -1888,17 +1888,18 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
           TAG: ${{ needs.prepare.outputs.tag }}
         run: |
-          # Prepare bottle directory structure
-          bottle_dir="/tmp/html-to-markdown-bottle"
+          # Homebrew bottles require {formula}/{version}/ prefix in the tarball
+          bottle_root="/tmp/html-to-markdown-bottle"
+          bottle_dir="${bottle_root}/html-to-markdown/${VERSION}"
           mkdir -p "${bottle_dir}/bin"
 
           # Copy the built binary
           cp target/release/html-to-markdown "${bottle_dir}/bin/"
 
-          # Create bottle tarball
-          cd "${bottle_dir}"
+          # Create bottle tarball with correct prefix
+          cd "${bottle_root}"
           bottle_filename="html-to-markdown-${VERSION}.${{ matrix.bottle_tag }}.bottle.tar.gz"
-          tar -czf "${bottle_filename}" bin/
+          tar -czf "${bottle_filename}" html-to-markdown/
 
           # Calculate SHA256
           sha256=$(shasum -a 256 "${bottle_filename}" | cut -d' ' -f1)

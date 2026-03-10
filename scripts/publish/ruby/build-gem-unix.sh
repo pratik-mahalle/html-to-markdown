@@ -28,4 +28,6 @@ bundle install
 # Note: Skipping 'rake clean' because it deletes the CLI binary we just built
 ruby ../../scripts/prepare_ruby_gem.rb
 bundle exec rake build
+# Also build a native platform gem with precompiled extension
+bundle exec rake native gem || echo "WARNING: native gem build failed, source gem still available"
 popd >/dev/null
