@@ -369,7 +369,7 @@ jobs:
         shell: bash
 
       - name: Setup Rust
-        uses: ./.github/actions/setup-rust
+        uses: kreuzberg-dev/actions/setup-rust@v1
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -418,7 +418,7 @@ jobs:
         shell: bash
 
       - name: Setup Rust
-        uses: ./.github/actions/setup-rust
+        uses: kreuzberg-dev/actions/setup-rust@v1
         with:
           toolchain: stable
 
@@ -475,7 +475,7 @@ jobs:
         shell: bash
 
       - name: Setup Rust
-        uses: ./.github/actions/setup-rust
+        uses: kreuzberg-dev/actions/setup-rust@v1
 
       - name: Setup Node
         uses: actions/setup-node@v6
@@ -665,7 +665,7 @@ jobs:
         shell: bash
 
       - name: Setup Rust
-        uses: ./.github/actions/setup-rust
+        uses: kreuzberg-dev/actions/setup-rust@v1
 
       - name: Add wasm32 target
         run: scripts/common/ensure-wasm-target.sh
@@ -742,7 +742,7 @@ jobs:
         shell: bash
 
       - name: Setup Rust
-        uses: ./.github/actions/setup-rust
+        uses: kreuzberg-dev/actions/setup-rust@v1
 
       - name: Add compilation target
         env:
@@ -930,7 +930,7 @@ jobs:
           otp-version: "28.1"
 
       - name: Setup Rust
-        uses: ./.github/actions/setup-rust
+        uses: kreuzberg-dev/actions/setup-rust@v1
 
       - name: Install Hex and Rebar
         run: scripts/publish/elixir/install-hex-rebar.sh
@@ -1039,7 +1039,7 @@ jobs:
         shell: bash
 
       - name: Setup Rust
-        uses: ./.github/actions/setup-rust
+        uses: kreuzberg-dev/actions/setup-rust@v1
 
       - name: Build FFI library
         env:
@@ -1085,7 +1085,7 @@ jobs:
         shell: bash
 
       - name: Setup Rust
-        uses: ./.github/actions/setup-rust
+        uses: kreuzberg-dev/actions/setup-rust@v1
 
       - name: Package Go FFI library
         env:
@@ -1132,7 +1132,7 @@ jobs:
         shell: bash
 
       - name: Setup Rust
-        uses: ./.github/actions/setup-rust
+        uses: kreuzberg-dev/actions/setup-rust@v1
 
       - name: Package C FFI distribution
         env:
@@ -1167,7 +1167,7 @@ jobs:
         shell: bash
 
       - name: Setup Rust
-        uses: ./.github/actions/setup-rust
+        uses: kreuzberg-dev/actions/setup-rust@v1
 
       - name: Add Windows Rust target
         if: runner.os == 'Windows'
@@ -1438,7 +1438,7 @@ jobs:
           otp-version: "28.1"
 
       - name: Setup Rust
-        uses: ./.github/actions/setup-rust
+        uses: kreuzberg-dev/actions/setup-rust@v1
 
       - name: Install Hex/Rebar
         run: scripts/publish/elixir/install-hex-rebar.sh
@@ -1567,7 +1567,7 @@ jobs:
         shell: bash
 
       - name: Setup Rust
-        uses: ./.github/actions/setup-rust
+        uses: kreuzberg-dev/actions/setup-rust@v1
 
       - name: Build FFI library
         env:
@@ -1661,7 +1661,7 @@ jobs:
           rm -f /tmp/gpg-test.txt /tmp/gpg-test.txt.asc
 
       - name: Setup Rust
-        uses: ./.github/actions/setup-rust
+        uses: kreuzberg-dev/actions/setup-rust@v1
 
       - name: Prefer gpg2 binary
         run: scripts/publish/maven/prefer-gpg2.sh

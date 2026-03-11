@@ -48,7 +48,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Setup Rust
-        uses: ./.github/actions/setup-rust
+        uses: kreuzberg-dev/actions/setup-rust@v1
         with:
           cache-key-prefix: c-ffi
           use-sccache: false
@@ -120,7 +120,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Setup Rust
-        uses: ./.github/actions/setup-rust
+        uses: kreuzberg-dev/actions/setup-rust@v1
         with:
           cache-key-prefix: c-ffi-windows
           use-sccache: false
