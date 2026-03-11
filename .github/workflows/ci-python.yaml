@@ -64,7 +64,7 @@ jobs:
           python-version: ${{ matrix.python }}
 
       - name: Setup Rust
-        uses: ./.github/actions/setup-rust
+        uses: kreuzberg-dev/actions/setup-rust@v1
         with:
           components: rustfmt, clippy, llvm-tools-preview
 
