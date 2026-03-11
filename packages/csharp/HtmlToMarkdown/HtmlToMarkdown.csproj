@@ -14,7 +14,7 @@
     <Company>kreuzberg.dev</Company>
     <Description>High-performance HTML to Markdown converter with C# bindings to Rust core. Features metadata extraction, visitor pattern, table extraction, and inline image support. 10-80x faster than alternatives.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://docs.html-to-markdown.kreuzberg.dev</PackageProjectUrl>
+    <PackageProjectUrl>https://kreuzberg.dev</PackageProjectUrl>
     <RepositoryUrl>https://github.com/kreuzberg-dev/html-to-markdown</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>html;markdown;converter;rust;ffi;html-to-markdown;kreuzberg;dotnet;netcore</PackageTags>
