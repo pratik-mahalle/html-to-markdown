@@ -51,7 +51,7 @@ jobs:
           coverage: none
 
       - name: Setup Rust
-        uses: ./.github/actions/setup-rust
+        uses: kreuzberg-dev/actions/setup-rust@v1
 
       - name: Capture php-config path
         run: scripts/ci/php/set-php-config.sh
