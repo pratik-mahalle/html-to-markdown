@@ -74,9 +74,10 @@ jobs:
 
       - name: Build PHP extension
         id: build-php-extension
-        uses: ./.github/actions/build-php-linux
+        uses: kreuzberg-dev/actions/build-php-extension@v1
         with:
-          php-config: ${{ env.PHP_CONFIG }}
+          crate-name: html-to-markdown-php
+          lib-name: html_to_markdown_php
 
       - name: Run PHP static analysis
         run: scripts/ci/php/run-phpstan.sh
