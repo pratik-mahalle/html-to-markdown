@@ -1416,15 +1416,7 @@ jobs:
         run: scripts/publish/elixir/install-deps.sh
         shell: bash
 
-      - name: Check Hex version
-        id: hex_check
-        env:
-          VERSION: ${{ needs.prepare.outputs.version }}
-        run: scripts/publish/elixir/check-hex-version.sh
-        shell: bash
-
       - name: Stage Rust core and generate lockfile
-        if: ${{ steps.hex_check.outputs.exists != 'true' }}
         shell: bash
         run: |
           scripts/publish/elixir/stage-rust-core.sh
@@ -1433,20 +1425,12 @@ jobs:
           popd >/dev/null
 
       - name: Publish to Hex.pm
-        if: ${{ steps.hex_check.outputs.exists != 'true' }}
         uses: kreuzberg-dev/actions/publish-hex@v1
         with:
           package-dir: packages/elixir
           dry-run: ${{ needs.prepare.outputs.dry_run }}
         env:
           HEX_API_KEY: ${{ secrets.HEX_TOKEN }}
-
-      - name: Hex package already published
-        if: ${{ steps.hex_check.outputs.exists == 'true' }}
-        env:
-          VERSION: ${{ needs.prepare.outputs.version }}
-        run: scripts/publish/elixir/already-published-summary.sh
-        shell: bash
 
   publish-nuget:
     name: Publish NuGet package
