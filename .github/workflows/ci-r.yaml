@@ -36,7 +36,9 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Setup R
-        uses: ./.github/actions/setup-r
+        uses: kreuzberg-dev/actions/setup-r@v1
+        with:
+          install-deps-script: scripts/ci/r/install-deps.sh
 
       - name: Setup Rust
         uses: kreuzberg-dev/actions/setup-rust@v1
