@@ -76,8 +76,7 @@ jobs:
           package-name: html-to-markdown-cli
           binary-name: html-to-markdown
 
-      - name: Build Ruby extension (Unix)
-        if: runner.os != 'Windows'
+      - name: Build Ruby extension
         uses: kreuzberg-dev/actions/build-ruby-gem@v1
 
       - name: Run Rubocop (Unix)
@@ -95,10 +94,6 @@ jobs:
         working-directory: packages/ruby
         run: ../../scripts/ci/ruby/run-steep.sh
         shell: bash
-
-      - name: Build Ruby extension (Windows)
-        if: runner.os == 'Windows'
-        uses: kreuzberg-dev/actions/build-ruby-gem@v1
 
       - name: Run Ruby specs (Unix)
         if: runner.os != 'Windows'
