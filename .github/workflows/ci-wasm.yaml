@@ -63,7 +63,9 @@ jobs:
         uses: kreuzberg-dev/actions/setup-node-workspace@v1
 
       - name: Build WASM (all targets)
-        uses: ./.github/actions/build-wasm
+        uses: kreuzberg-dev/actions/build-wasm-package@v1
+        with:
+          crate-dir: crates/html-to-markdown-wasm
 
       - name: Test WASM
         working-directory: crates/html-to-markdown-wasm

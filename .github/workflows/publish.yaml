@@ -311,9 +311,24 @@ jobs:
         shell: bash
 
       - name: Build wheels
-        uses: ./.github/actions/build-wheels
+        uses: kreuzberg-dev/actions/build-python-wheels@v1
         with:
           python-version: "3.13"
+          package-dir: packages/python
+          cibw-before-build-linux: >
+            yum install -y openssl-devel &&
+            pip install maturin uv &&
+            source ~/.cargo/env &&
+            python scripts/prepare_wheel.py
+          cibw-before-build-macos: >
+            pip install maturin uv &&
+            source ~/.cargo/env &&
+            python scripts/prepare_wheel.py
+          cibw-before-build-windows: >
+            pip install maturin uv &&
+            set PATH=%USERPROFILE%\.cargo\bin;%PATH% &&
+            python scripts\prepare_wheel.py
+          upload-artifact: "false"
 
       - name: Upload wheels
         uses: actions/upload-artifact@v7

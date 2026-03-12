@@ -71,11 +71,14 @@ jobs:
           windows-toolchain: UCRT64
 
       - name: Build CLI binary
-        uses: ./.github/actions/build-cli
+        uses: kreuzberg-dev/actions/build-rust-cli@v1
+        with:
+          package-name: html-to-markdown-cli
+          binary-name: html-to-markdown
 
       - name: Build Ruby extension (Unix)
         if: runner.os != 'Windows'
-        uses: ./.github/actions/build-ruby-unix
+        uses: kreuzberg-dev/actions/build-ruby-gem@v1
 
       - name: Run Rubocop (Unix)
         if: runner.os != 'Windows' && matrix.os == 'ubuntu-latest' && matrix.ruby == '3.3'
@@ -95,7 +98,7 @@ jobs:
 
       - name: Build Ruby extension (Windows)
         if: runner.os == 'Windows'
-        uses: ./.github/actions/build-ruby-windows
+        uses: kreuzberg-dev/actions/build-ruby-gem@v1
 
       - name: Run Ruby specs (Unix)
         if: runner.os != 'Windows'
