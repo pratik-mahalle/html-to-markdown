@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.28.4] - 2026-03-13
+
+### Fixed
+
+- **Panic with cid image followed by italic paragraph** ([#222](https://github.com/kreuzberg-dev/html-to-markdown/issues/222)): Confirmed fix for panic ("byte index 53 is out of bounds of ``") when converting HTML containing `cid:` image paragraphs followed by italicized text. This was resolved in v2.28.0 via the block_content_start bounds fix (#216, #217) and multi-byte UTF-8 character boundary fix (#218).
+- **Ruby gem installation on macOS** ([#219](https://github.com/kreuzberg-dev/html-to-markdown/issues/219)): Confirmed fix for `Cargo.lock` missing from published gem causing `magnus` dependency load failure. Resolved in v2.28.3 with native platform gem builds.
+
 ## [2.28.3] - 2026-03-10
 
 ### Fixed
