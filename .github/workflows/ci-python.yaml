@@ -85,7 +85,7 @@ jobs:
       - name: Build Python Bindings
         run: |
           uv pip install maturin
-          cd packages/python && maturin develop --release
+          cd packages/python && uv run maturin develop --release
         shell: bash
 
       - name: Run Python Tests
