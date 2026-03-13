@@ -83,7 +83,7 @@ jobs:
           shell: bash
 
       - name: Build Python Bindings
-        run: task python:build:ci
+        run: cd packages/python && uv run maturin develop --release
         shell: bash
 
       - name: Run Python Tests
