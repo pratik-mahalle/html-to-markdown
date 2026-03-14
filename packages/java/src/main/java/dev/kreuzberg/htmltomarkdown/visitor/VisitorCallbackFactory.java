@@ -114,10 +114,7 @@ public final class VisitorCallbackFactory {
   /** Function descriptor for list start/end with bool: ctx, ordered. */
   private static final FunctionDescriptor LIST_BOOL_DESC =
       FunctionDescriptor.of(
-          VISIT_RESULT_LAYOUT,
-          ValueLayout.ADDRESS,
-          ValueLayout.ADDRESS,
-          ValueLayout.JAVA_BOOLEAN);
+          VISIT_RESULT_LAYOUT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.JAVA_BOOLEAN);
 
   /** Function descriptor for list end: ctx, ordered, output. */
   private static final FunctionDescriptor LIST_END_DESC =
@@ -150,10 +147,7 @@ public final class VisitorCallbackFactory {
   /** Function descriptor for details: ctx, open (bool). */
   private static final FunctionDescriptor DETAILS_DESC =
       FunctionDescriptor.of(
-          VISIT_RESULT_LAYOUT,
-          ValueLayout.ADDRESS,
-          ValueLayout.ADDRESS,
-          ValueLayout.JAVA_BOOLEAN);
+          VISIT_RESULT_LAYOUT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.JAVA_BOOLEAN);
 
   /** The visitor bridge instance. */
   private final VisitorBridge bridge;
@@ -384,8 +378,7 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private MemorySegment visitListStart(
-      MemorySegment userData, MemorySegment ctx, boolean ordered) {
+  private MemorySegment visitListStart(MemorySegment userData, MemorySegment ctx, boolean ordered) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     VisitResult result = bridge.getVisitor().visitListStart(nodeCtx, ordered);
     return bridge.encodeResult(result);
@@ -436,8 +429,7 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private MemorySegment visitStrong(
-      MemorySegment userData, MemorySegment ctx, MemorySegment text) {
+  private MemorySegment visitStrong(MemorySegment userData, MemorySegment ctx, MemorySegment text) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String textStr = StringUtils.fromCString(text);
     VisitResult result = bridge.getVisitor().visitStrong(nodeCtx, textStr != null ? textStr : "");
@@ -579,8 +571,7 @@ public final class VisitorCallbackFactory {
     return bridge.encodeResult(result);
   }
 
-  private MemorySegment visitButton(
-      MemorySegment userData, MemorySegment ctx, MemorySegment text) {
+  private MemorySegment visitButton(MemorySegment userData, MemorySegment ctx, MemorySegment text) {
     NodeContext nodeCtx = bridge.parseNodeContext(ctx);
     String textStr = StringUtils.fromCString(text);
     VisitResult result = bridge.getVisitor().visitButton(nodeCtx, textStr != null ? textStr : "");
@@ -636,7 +627,10 @@ public final class VisitorCallbackFactory {
             this,
             "visitText",
             MethodType.methodType(
-                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -655,7 +649,10 @@ public final class VisitorCallbackFactory {
             this,
             "visitElementEnd",
             MethodType.methodType(
-                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -724,7 +721,10 @@ public final class VisitorCallbackFactory {
             this,
             "visitCodeInline",
             MethodType.methodType(
-                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -797,7 +797,10 @@ public final class VisitorCallbackFactory {
             this,
             "visitTableEnd",
             MethodType.methodType(
-                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -821,7 +824,10 @@ public final class VisitorCallbackFactory {
             this,
             "visitStrong",
             MethodType.methodType(
-                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -831,7 +837,10 @@ public final class VisitorCallbackFactory {
             this,
             "visitEmphasis",
             MethodType.methodType(
-                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -841,7 +850,10 @@ public final class VisitorCallbackFactory {
             this,
             "visitStrikethrough",
             MethodType.methodType(
-                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -851,7 +863,10 @@ public final class VisitorCallbackFactory {
             this,
             "visitUnderline",
             MethodType.methodType(
-                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -861,7 +876,10 @@ public final class VisitorCallbackFactory {
             this,
             "visitSubscript",
             MethodType.methodType(
-                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -871,7 +889,10 @@ public final class VisitorCallbackFactory {
             this,
             "visitSuperscript",
             MethodType.methodType(
-                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -881,7 +902,10 @@ public final class VisitorCallbackFactory {
             this,
             "visitMark",
             MethodType.methodType(
-                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -932,7 +956,10 @@ public final class VisitorCallbackFactory {
             this,
             "visitDefinitionTerm",
             MethodType.methodType(
-                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -942,7 +969,10 @@ public final class VisitorCallbackFactory {
             this,
             "visitDefinitionDescription",
             MethodType.methodType(
-                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -952,7 +982,10 @@ public final class VisitorCallbackFactory {
             this,
             "visitDefinitionListEnd",
             MethodType.methodType(
-                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -991,7 +1024,10 @@ public final class VisitorCallbackFactory {
             this,
             "visitButton",
             MethodType.methodType(
-                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -1001,7 +1037,10 @@ public final class VisitorCallbackFactory {
             this,
             "visitAudio",
             MethodType.methodType(
-                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -1011,7 +1050,10 @@ public final class VisitorCallbackFactory {
             this,
             "visitVideo",
             MethodType.methodType(
-                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -1021,7 +1063,10 @@ public final class VisitorCallbackFactory {
             this,
             "visitIframe",
             MethodType.methodType(
-                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
@@ -1041,7 +1086,10 @@ public final class VisitorCallbackFactory {
             this,
             "visitSummary",
             MethodType.methodType(
-                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class));
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class,
+                MemorySegment.class));
     return LINKER.upcallStub(mh, CTX_STR_DESC, arena);
   }
 
