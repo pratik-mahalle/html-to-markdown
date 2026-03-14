@@ -34,15 +34,15 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Install Task
-        uses: go-task/setup-task@v1
+        uses: go-task/setup-task@0ab1b2a65bc55236a3bc64cde78f80e20e8885c2 # v1.0.0
         with:
           version: 3.46.4
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@e06108dd0aef18192324c70427afc47652e63a82 # v7.5.0
         with:
           enable-cache: true
 
@@ -51,29 +51,29 @@ jobs:
         shell: bash
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: "3.13"
 
       - name: Setup Rust
-        uses: kreuzberg-dev/actions/setup-rust@v1
+        uses: kreuzberg-dev/actions/setup-rust@v1.0.0 # v1.0.0
         with:
           components: rustfmt, clippy, llvm-tools-preview
 
       - name: Setup Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
           go-version: ${{ env.GO_VERSION }}
           check-latest: true
 
       - name: Setup Java
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
           distribution: temurin
           java-version: "25"
 
       - name: Setup Elixir
-        uses: erlef/setup-beam@v1
+        uses: erlef/setup-beam@9d5b75ddfda22fb979d2270283237aef8aa68d6b # v1.22.0
         with:
           elixir-version: "1.19"
           otp-version: "28.1"
@@ -83,12 +83,12 @@ jobs:
         shell: bash
 
       - name: Setup R
-        uses: kreuzberg-dev/actions/setup-r@v1
+        uses: kreuzberg-dev/actions/setup-r@v1.0.0 # v1.0.0
         with:
           install-deps-script: scripts/ci/r/install-deps.sh
 
       - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@4eb9f110bac952a8b68ecf92e3b5c7a987594ba6 # v1.292.0
         with:
           ruby-version: "3.3"
           bundler-cache: false
@@ -98,10 +98,10 @@ jobs:
         shell: bash
 
       - name: Setup Node Workspace
-        uses: kreuzberg-dev/actions/setup-node-workspace@v1
+        uses: kreuzberg-dev/actions/setup-node-workspace@v1.0.0 # v1.0.0
 
       - name: Install Dependencies
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3.0.2
         with:
           timeout_minutes: 5
           max_attempts: 3
@@ -114,7 +114,7 @@ jobs:
         shell: bash
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # 2.36.0
         with:
           php-version: "8.4"
           tools: composer:2.9.1
@@ -139,7 +139,7 @@ jobs:
 
       - name: Load Cached Prek Dependencies
         id: cached-prek-dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: ~/.cache/prek/
           key: prek|${{ env.pythonLocation }}|${{ hashFiles('.prek-config.yaml') }}
