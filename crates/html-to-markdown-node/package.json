@@ -5,7 +5,7 @@
 	"main": "index.js",
 	"types": "index.d.ts",
 	"repository": "https://github.com/kreuzberg-dev/html-to-markdown",
-	"homepage": "https://github.com/kreuzberg-dev/html-to-markdown",
+	"homepage": "https://kreuzberg.dev",
 	"license": "MIT",
 	"author": "Na'aman Hirschfeld <nhirschfeld@gmail.com>",
 	"bugs": "https://github.com/kreuzberg-dev/html-to-markdown/issues",
