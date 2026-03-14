@@ -11,7 +11,7 @@
 
     <name>html-to-markdown</name>
     <description>High-performance HTML to Markdown converter with Rust core and Java Panama FFI bindings</description>
-    <url>https://github.com/kreuzberg-dev/html-to-markdown</url>
+    <url>https://kreuzberg.dev</url>
 
     <licenses>
         <license>
@@ -23,7 +23,7 @@
     <developers>
         <developer>
             <name>Na'aman Hirschfeld</name>
-            <email>goldziher@gmail.com</email>
+            <email>nhirschfeld@gmail.com</email>
             <url>https://github.com/Goldziher</url>
         </developer>
     </developers>
