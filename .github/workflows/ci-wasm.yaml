@@ -43,10 +43,10 @@ jobs:
     timeout-minutes: 120
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Setup Rust
-        uses: ./.github/actions/setup-rust
+        uses: kreuzberg-dev/actions/setup-rust@v1.0.0 # v1.0.0
         with:
           target: wasm32-unknown-unknown
           use-sccache: false
@@ -60,10 +60,12 @@ jobs:
         shell: bash
 
       - name: Setup workspace
-        uses: ./.github/actions/setup-node-workspace
+        uses: kreuzberg-dev/actions/setup-node-workspace@v1.0.0 # v1.0.0
 
       - name: Build WASM (all targets)
-        uses: ./.github/actions/build-wasm
+        uses: kreuzberg-dev/actions/build-wasm-package@v1.0.0 # v1.0.0
+        with:
+          crate-dir: crates/html-to-markdown-wasm
 
       - name: Test WASM
         working-directory: crates/html-to-markdown-wasm
@@ -89,10 +91,10 @@ jobs:
           - windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Setup Rust
-        uses: ./.github/actions/setup-rust
+        uses: kreuzberg-dev/actions/setup-rust@v1.0.0 # v1.0.0
         with:
           toolchain: stable
           target: wasm32-unknown-unknown
