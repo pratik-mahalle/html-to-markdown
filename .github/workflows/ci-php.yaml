@@ -41,31 +41,31 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # 2.36.0
         with:
           php-version: "8.4"
           tools: composer:2.9.1
           coverage: none
 
       - name: Setup Rust
-        uses: kreuzberg-dev/actions/setup-rust@v1
+        uses: kreuzberg-dev/actions/setup-rust@v1.0.0 # v1.0.0
 
       - name: Capture php-config path
         run: scripts/ci/php/set-php-config.sh
         shell: bash
 
       - name: Install root Composer dependencies
-        uses: ramsey/composer-install@v3
+        uses: ramsey/composer-install@a35c6ebd3d08125aaf8852dff361e686a1a67947 # 3.2.0
         with:
           dependency-versions: locked
         env:
           COMPOSER_AUTH: '{"github-oauth":{"github.com":"${{ secrets.GITHUB_TOKEN }}"}}'
 
       - name: Install PHP package Composer dependencies
-        uses: ramsey/composer-install@v3
+        uses: ramsey/composer-install@a35c6ebd3d08125aaf8852dff361e686a1a67947 # 3.2.0
         with:
           dependency-versions: locked
           working-directory: packages/php
@@ -74,7 +74,7 @@ jobs:
 
       - name: Build PHP extension
         id: build-php-extension
-        uses: kreuzberg-dev/actions/build-php-extension@v1
+        uses: kreuzberg-dev/actions/build-php-extension@v1.0.0 # v1.0.0
         with:
           crate-name: html-to-markdown-php
           lib-name: html_to_markdown_php
