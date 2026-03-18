@@ -40,13 +40,13 @@ jobs:
         java: ["25"]
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@v6 # v6
 
       - name: Setup Rust
-        uses: kreuzberg-dev/actions/setup-rust@f43a03ba22ebb2cab85676d36968ac0f96c34215 # v1.0.0
+        uses: kreuzberg-dev/actions/setup-rust@v1 # v1
 
       - name: Test Java Panama FFI bindings
-        uses: kreuzberg-dev/actions/test-java-ffi@f43a03ba22ebb2cab85676d36968ac0f96c34215 # v1.0.0
+        uses: kreuzberg-dev/actions/test-java-ffi@v1 # v1
         with:
           ffi-crate-name: html-to-markdown-ffi
           ffi-lib-name: html_to_markdown_ffi

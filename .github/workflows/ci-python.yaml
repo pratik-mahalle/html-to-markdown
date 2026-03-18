@@ -46,30 +46,30 @@ jobs:
         python: ["3.10", "3.12", "3.14"]
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@v6 # v6
 
       - name: Install Task
-        uses: go-task/setup-task@0ab1b2a65bc55236a3bc64cde78f80e20e8885c2 # v1.0.0
+        uses: go-task/setup-task@v1 # v1
         with:
           version: 3.46.4
 
       - name: Install uv
-        uses: astral-sh/setup-uv@e06108dd0aef18192324c70427afc47652e63a82 # v7.5.0
+        uses: astral-sh/setup-uv@v7 # v7
         with:
           enable-cache: true
 
       - name: Set up Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        uses: actions/setup-python@v6 # v6
         with:
           python-version: ${{ matrix.python }}
 
       - name: Setup Rust
-        uses: kreuzberg-dev/actions/setup-rust@f43a03ba22ebb2cab85676d36968ac0f96c34215 # v1.0.0
+        uses: kreuzberg-dev/actions/setup-rust@v1 # v1
         with:
           components: rustfmt, clippy, llvm-tools-preview
 
       - name: Install Dependencies
-        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3.0.2
+        uses: nick-fields/retry@v3 # v3
         with:
           timeout_minutes: 5
           max_attempts: 3
