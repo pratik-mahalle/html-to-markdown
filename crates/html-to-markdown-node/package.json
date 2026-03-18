@@ -7,7 +7,7 @@
 	"repository": "https://github.com/kreuzberg-dev/html-to-markdown",
 	"homepage": "https://kreuzberg.dev",
 	"license": "MIT",
-	"author": "Na'aman Hirschfeld <nhirschfeld@gmail.com>",
+	"author": "Na'aman Hirschfeld <naaman@kreuzberg.dev>",
 	"bugs": "https://github.com/kreuzberg-dev/html-to-markdown/issues",
 	"keywords": [
 		"html",
