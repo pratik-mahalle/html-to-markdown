@@ -46,14 +46,14 @@ jobs:
         ruby: ["3.2", "3.3"]
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@v6 # v6
 
       - name: Setup Rust
-        uses: kreuzberg-dev/actions/setup-rust@f43a03ba22ebb2cab85676d36968ac0f96c34215 # v1.0.0
+        uses: kreuzberg-dev/actions/setup-rust@v1 # v1
 
       - name: Setup Ruby (Unix)
         if: runner.os != 'Windows'
-        uses: ruby/setup-ruby@c984c1a20bb35a1cbda04477c816cea024418be9 # v1.294.0
+        uses: ruby/setup-ruby@v1 # v1
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler: "2.7.2"
@@ -62,7 +62,7 @@ jobs:
 
       - name: Setup Ruby (Windows)
         if: runner.os == 'Windows'
-        uses: ruby/setup-ruby@c984c1a20bb35a1cbda04477c816cea024418be9 # v1.294.0
+        uses: ruby/setup-ruby@v1 # v1
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler: "2.7.2"
@@ -71,13 +71,13 @@ jobs:
           windows-toolchain: UCRT64
 
       - name: Build CLI binary
-        uses: kreuzberg-dev/actions/build-rust-cli@f43a03ba22ebb2cab85676d36968ac0f96c34215 # v1.0.0
+        uses: kreuzberg-dev/actions/build-rust-cli@v1 # v1
         with:
           package-name: html-to-markdown-cli
           binary-name: html-to-markdown
 
       - name: Build Ruby extension
-        uses: kreuzberg-dev/actions/build-ruby-gem@f43a03ba22ebb2cab85676d36968ac0f96c34215 # v1.0.0
+        uses: kreuzberg-dev/actions/build-ruby-gem@v1 # v1
 
       - name: Run Rubocop (Unix)
         if: runner.os != 'Windows' && matrix.os == 'ubuntu-latest' && matrix.ruby == '3.3'
