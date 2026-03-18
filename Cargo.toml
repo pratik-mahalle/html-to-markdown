@@ -23,7 +23,7 @@ exclude = [
 [workspace.package]
 version = "2.28.4"
 edition = "2024"
-authors = ["Na'aman Hirschfeld <nhirschfeld@gmail.com>"]
+authors = ["Na'aman Hirschfeld <naaman@kreuzberg.dev>"]
 license = "MIT"
 repository = "https://github.com/kreuzberg-dev/html-to-markdown"
 homepage = "https://kreuzberg.dev"
