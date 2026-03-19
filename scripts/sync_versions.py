@@ -105,7 +105,7 @@ def _update_single_regex_field(
 
     # Build replacement pattern that captures the field and replaces the quoted version
     replacement_pattern = f"({field_pattern})" + rf"\s*{quote_esc}[^{quote_esc}]+{quote_esc}"
-    replacement_text = rf"\1{quote_char}{version}{quote_char}"
+    replacement_text = rf"\1 {quote_char}{version}{quote_char}"
     new_content = re.sub(replacement_pattern, replacement_text, content, count=count, flags=re.MULTILINE)
 
     if new_content != content:

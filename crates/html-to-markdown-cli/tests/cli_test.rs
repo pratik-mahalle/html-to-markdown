@@ -960,5 +960,5 @@ fn serve_once_bytes(
         }
     });
 
-    (format!("http://{}", addr), handle, rx)
+    (format!("http://{addr}"), handle, rx)
 }

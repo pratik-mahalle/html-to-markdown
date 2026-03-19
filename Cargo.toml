@@ -1,27 +1,27 @@
 [workspace]
 resolver = "2"
 members = [
-    "crates/html-to-markdown",
-    "crates/html-to-markdown-bindings-common",
-    "crates/html-to-markdown-cli",
-    "crates/html-to-markdown-ffi",
-    "crates/html-to-markdown-node",
-    "crates/html-to-markdown-wasm",
-    "crates/html-to-markdown-py",
-    "crates/html-to-markdown-php",
-    "tools/benchmark-harness",
-    "e2e/wasm-wasmtime",
+  "crates/html-to-markdown",
+  "crates/html-to-markdown-bindings-common",
+  "crates/html-to-markdown-cli",
+  "crates/html-to-markdown-ffi",
+  "crates/html-to-markdown-node",
+  "crates/html-to-markdown-wasm",
+  "crates/html-to-markdown-py",
+  "crates/html-to-markdown-php",
+  "tools/benchmark-harness",
+  "e2e/wasm-wasmtime",
 ]
 exclude = [
-    "packages/elixir/native/html_to_markdown_elixir",
-    "packages/r/src/rust",
-    "packages/ruby/ext/html-to-markdown-rb/native",
-    "tests/test_apps/elixir/deps",
-    "packages/ruby/rust-vendor"
+  "packages/elixir/native/html_to_markdown_elixir",
+  "packages/r/src/rust",
+  "packages/ruby/ext/html-to-markdown-rb/native",
+  "tests/test_apps/elixir/deps",
+  "packages/ruby/rust-vendor",
 ]
 
 [workspace.package]
-version = "2.28.4"
+version = "2.28.5"
 edition = "2024"
 authors = ["Na'aman Hirschfeld <naaman@kreuzberg.dev>"]
 license = "MIT"
@@ -32,9 +32,12 @@ readme = "README.md"
 rust-version = "1.85"
 
 [workspace.dependencies]
-html-to-markdown-rs = { version = "2.28.4", path = "crates/html-to-markdown" }
+html-to-markdown-rs = { version = "2.28.5", path = "crates/html-to-markdown" }
 
-ahash = { version = "0.8", default-features = false, features = ["std", "compile-time-rng"] }
+ahash = { version = "0.8", default-features = false, features = [
+  "std",
+  "compile-time-rng",
+] }
 
 tl = { package = "astral-tl", version = "0.7.11" }
 html5ever = "0.39.0"
@@ -67,7 +70,7 @@ all = { level = "deny", priority = -1 }
 cargo = { level = "warn", priority = -1 }
 pedantic = { level = "warn", priority = -1 }
 nursery = { level = "warn", priority = -1 }
-multiple_crate_versions = { level = "allow", priority = 1 }  # Allow multiple dependency versions (common in large workspaces)
+multiple_crate_versions = { level = "allow", priority = 1 } # Allow multiple dependency versions (common in large workspaces)
 
 [profile.release]
 lto = "thin"
