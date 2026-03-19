@@ -29,7 +29,15 @@ after_includes = """
 prefix = "HTM_EXPORT"
 
 [export]
-include = ["html_to_markdown_convert", "html_to_markdown_free_string", "html_to_markdown_version", "html_to_markdown_last_error", "html_to_markdown_last_error_code", "html_to_markdown_error_code_name", "HtmlToMarkdownErrorCode"]
+include = [
+  "html_to_markdown_convert",
+  "html_to_markdown_free_string",
+  "html_to_markdown_version",
+  "html_to_markdown_last_error",
+  "html_to_markdown_last_error_code",
+  "html_to_markdown_error_code_name",
+  "HtmlToMarkdownErrorCode",
+]
 
 [parse]
 parse_deps = false
