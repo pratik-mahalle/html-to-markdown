@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.28.5] - 2026-03-19
+
+### Fixed
+
+- **Table colspan parsing** ([#233](https://github.com/kreuzberg-dev/html-to-markdown/issues/233)): Fixed column count calculation to accurately use colspan values instead of incrementing by 1, and refined layout table heuristics to exempt simple data tables with colspans while correctly catching layout tables.
+- **Ruby version.rb formatting**: Fixed missing space around `=` operator in `version.rb` that caused Rubocop lint failures in CI.
+- **CI tooling alignment**: Aligned tooling and documentation with kreuzberg standards, fixing CI failures.
+
 ## [2.28.4] - 2026-03-13
 
 ### Fixed
