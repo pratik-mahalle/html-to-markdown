@@ -9,6 +9,6 @@ ls -la "${tmp_dir}"
 php build/pie.phar repository:add path "${tmp_dir}"
 CARGO_BIN="$(command -v cargo)"
 if [[ "$(uname -s)" == "Darwin" ]]; then
-	export RUSTFLAGS="${RUSTFLAGS:-} -C link-arg=-Wl,-undefined,dynamic_lookup"
+  export RUSTFLAGS="${RUSTFLAGS:-} -C link-arg=-Wl,-undefined,dynamic_lookup"
 fi
 php build/pie.phar build 'kreuzberg-dev/html-to-markdown:*@dev' --working-dir "${tmp_dir}" --with-cargo-bin="${CARGO_BIN}"
