@@ -31,15 +31,15 @@ cargo vendor "$RUBY_PKG/$VENDOR_DIR" | sed "s|directory = \".*|directory = \"$VE
 echo "Copying html-to-markdown-rs core crate..."
 
 if command -v rsync >/dev/null 2>&1; then
-	rsync -a --exclude target --exclude .git "$CORE_CRATE/" "$RUBY_PKG/$VENDOR_DIR/html-to-markdown-rs/"
+  rsync -a --exclude target --exclude .git "$CORE_CRATE/" "$RUBY_PKG/$VENDOR_DIR/html-to-markdown-rs/"
 else
-	cp -R "$CORE_CRATE" "$RUBY_PKG/$VENDOR_DIR/html-to-markdown-rs"
-	rm -rf "$RUBY_PKG/$VENDOR_DIR/html-to-markdown-rs/target" "$RUBY_PKG/$VENDOR_DIR/html-to-markdown-rs/.git" || true
+  cp -R "$CORE_CRATE" "$RUBY_PKG/$VENDOR_DIR/html-to-markdown-rs"
+  rm -rf "$RUBY_PKG/$VENDOR_DIR/html-to-markdown-rs/target" "$RUBY_PKG/$VENDOR_DIR/html-to-markdown-rs/.git" || true
 fi
 
 # Step 4: Read workspace version dynamically
 WORKSPACE_VERSION="$(
-	python3 - "$REPO_ROOT/Cargo.toml" <<'PY'
+  python3 - "$REPO_ROOT/Cargo.toml" <<'PY'
 import re
 from pathlib import Path
 import sys
@@ -186,7 +186,7 @@ cargo generate-lockfile --manifest-path="$NATIVE_EXT/Cargo.toml"
 # because packages/ruby/Cargo.toml is a virtual workspace. Copy it to the
 # native ext directory where the gemspec and build scripts expect it.
 if [ -f "$RUBY_PKG/Cargo.lock" ] && [ ! -f "$NATIVE_EXT/Cargo.lock" ]; then
-	cp "$RUBY_PKG/Cargo.lock" "$NATIVE_EXT/Cargo.lock"
+  cp "$RUBY_PKG/Cargo.lock" "$NATIVE_EXT/Cargo.lock"
 fi
 
 # Step 9: Fetch locked versions and re-vendor to ensure version consistency

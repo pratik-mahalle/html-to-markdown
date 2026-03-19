@@ -12,7 +12,7 @@ VERSION="${1:?Version argument required (e.g. v2.25.1)}"
 
 # Ensure version starts with 'v'
 if [[ ! "$VERSION" =~ ^v ]]; then
-	VERSION="v${VERSION}"
+  VERSION="v${VERSION}"
 fi
 
 # The Go submodule tag format for modules in subdirectories
@@ -25,19 +25,19 @@ echo "  For module: github.com/kreuzberg-dev/html-to-markdown/packages/go/v2@${V
 
 # Check if Go tag already exists locally
 if git rev-parse "$GO_TAG" >/dev/null 2>&1; then
-	echo "::notice::Go module tag $GO_TAG already exists locally; skipping."
-	exit 0
+  echo "::notice::Go module tag $GO_TAG already exists locally; skipping."
+  exit 0
 fi
 
 # Check if tag exists on remote
 if git ls-remote --tags origin | grep -q "refs/tags/${GO_TAG}$"; then
-	echo "::notice::Go module tag $GO_TAG already exists on remote; skipping."
-	exit 0
+  echo "::notice::Go module tag $GO_TAG already exists on remote; skipping."
+  exit 0
 fi
 
 if [[ "${2:-}" == "--dry-run" ]]; then
-	echo "[DRY RUN] Would create tag: ${GO_TAG} -> ${VERSION}"
-	exit 0
+  echo "[DRY RUN] Would create tag: ${GO_TAG} -> ${VERSION}"
+  exit 0
 fi
 
 git tag "$GO_TAG" "$VERSION"
@@ -49,9 +49,9 @@ echo "Go module tag created and pushed: ${GO_TAG}"
 echo "Triggering Go proxy fetch..."
 GOPROXY_URL="https://proxy.golang.org/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/@v/${VERSION}.info"
 if curl -sf "${GOPROXY_URL}" >/dev/null 2>&1; then
-	echo "Go proxy successfully fetched module version"
+  echo "Go proxy successfully fetched module version"
 else
-	echo "Note: Go proxy may take a few minutes to index the new version"
+  echo "Note: Go proxy may take a few minutes to index the new version"
 fi
 
 echo ""

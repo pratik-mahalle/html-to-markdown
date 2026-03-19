@@ -39,20 +39,20 @@ echo "Step 5: Cleaning up vendored dependencies..."
 
 # Remove test/bench/doc directories
 while IFS= read -r dir; do
-	rm -rf "$dir"
+  rm -rf "$dir"
 done < <(find vendor -type d \( -name "tests" -o -name "benches" -o -name "examples" -o -name "docs" -o -name ".github" -o -name "ci" \) 2>/dev/null)
 
 # Remove documentation and metadata files
 find vendor -type f \( \
-	-name "*.md" -o \
-	-name "LICENSE*" -o \
-	-name "CHANGELOG*" -o \
-	-name ".git*" -o \
-	-name ".cargo-ok" -o \
-	-name "*.html" -o \
-	-name "*.yml" -o \
-	-name "*.yaml" \
-	\) -delete 2>/dev/null || true
+  -name "*.md" -o \
+  -name "LICENSE*" -o \
+  -name "CHANGELOG*" -o \
+  -name ".git*" -o \
+  -name ".cargo-ok" -o \
+  -name "*.html" -o \
+  -name "*.yml" -o \
+  -name "*.yaml" \
+  \) -delete 2>/dev/null || true
 
 # Remove static libraries (pre-built binaries not needed for source distribution)
 find vendor -type f -name "*.a" -delete 2>/dev/null || true

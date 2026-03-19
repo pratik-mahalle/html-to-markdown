@@ -10,25 +10,25 @@ cargo build --release -p html-to-markdown-ffi
 
 case "${rid}" in
 win-*)
-	lib_path="$(find target/release -maxdepth 1 -type f -name '*html_to_markdown_ffi*.dll' -print -quit)"
-	;;
+  lib_path="$(find target/release -maxdepth 1 -type f -name '*html_to_markdown_ffi*.dll' -print -quit)"
+  ;;
 osx-*)
-	lib_path="$(find target/release -maxdepth 1 -type f -name 'libhtml_to_markdown_ffi*.dylib' -print -quit)"
-	;;
+  lib_path="$(find target/release -maxdepth 1 -type f -name 'libhtml_to_markdown_ffi*.dylib' -print -quit)"
+  ;;
 linux-*)
-	lib_path="$(find target/release -maxdepth 1 -type f -name 'libhtml_to_markdown_ffi*.so' -print -quit)"
-	;;
+  lib_path="$(find target/release -maxdepth 1 -type f -name 'libhtml_to_markdown_ffi*.so' -print -quit)"
+  ;;
 *)
-	echo "Unsupported RID: ${rid}" >&2
-	exit 1
-	;;
+  echo "Unsupported RID: ${rid}" >&2
+  exit 1
+  ;;
 esac
 
 if [[ -z "${lib_path:-}" || ! -f "${lib_path}" ]]; then
-	echo "Failed to locate built html_to_markdown_ffi library for ${rid}" >&2
-	echo "Contents of target/release:" >&2
-	ls -la target/release/*.{dll,dylib,so} 2>/dev/null || ls -la target/release/ || true
-	exit 1
+  echo "Failed to locate built html_to_markdown_ffi library for ${rid}" >&2
+  echo "Contents of target/release:" >&2
+  ls -la target/release/*.{dll,dylib,so} 2>/dev/null || ls -la target/release/ || true
+  exit 1
 fi
 
 cp -f "${lib_path}" "${out_dir}/${rid}/native/"

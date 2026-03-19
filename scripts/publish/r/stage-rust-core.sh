@@ -7,7 +7,7 @@ SRC_DIR="${ROOT_DIR}/crates/html-to-markdown"
 DEST_DIR="${ROOT_DIR}/packages/r/src/rust/vendor/html-to-markdown-rs"
 
 VERSION="$(
-	python3 - "${ROOT_DIR}/Cargo.toml" <<'PY'
+  python3 - "${ROOT_DIR}/Cargo.toml" <<'PY'
 import re
 from pathlib import Path
 import sys
@@ -30,18 +30,18 @@ PY
 )"
 
 if [[ ! -d "${SRC_DIR}" ]]; then
-	echo "Missing Rust core crate at ${SRC_DIR}" >&2
-	exit 1
+  echo "Missing Rust core crate at ${SRC_DIR}" >&2
+  exit 1
 fi
 
 rm -rf "${DEST_DIR}"
 mkdir -p "$(dirname "${DEST_DIR}")"
 
 if command -v rsync >/dev/null 2>&1; then
-	rsync -a --delete --exclude target --exclude .git "${SRC_DIR}/" "${DEST_DIR}/"
+  rsync -a --delete --exclude target --exclude .git "${SRC_DIR}/" "${DEST_DIR}/"
 else
-	cp -R "${SRC_DIR}" "${DEST_DIR}"
-	rm -rf "${DEST_DIR}/target" "${DEST_DIR}/.git" || true
+  cp -R "${SRC_DIR}" "${DEST_DIR}"
+  rm -rf "${DEST_DIR}/target" "${DEST_DIR}/.git" || true
 fi
 
 python3 - "${DEST_DIR}/Cargo.toml" "${VERSION}" <<'PY'
@@ -82,10 +82,10 @@ PY
 # Add #![allow(unused)] to all converter module files as inner attribute
 # since visitor feature gates many imports that are unused when visitor is disabled
 find "${DEST_DIR}/src/converter" -type f -name "*.rs" -print0 | while IFS= read -r -d '' file; do
-	# Check if file already has #![allow(unused)]
-	if ! grep -q "^\s*#!\[allow(unused)" "$file"; then
-		# Add #![allow(unused)] at the very beginning of the file (before doc comments)
-		python3 - "$file" <<'PYFIX'
+  # Check if file already has #![allow(unused)]
+  if ! grep -q "^\s*#!\[allow(unused)" "$file"; then
+    # Add #![allow(unused)] at the very beginning of the file (before doc comments)
+    python3 - "$file" <<'PYFIX'
 import sys
 from pathlib import Path
 
@@ -97,5 +97,5 @@ text = '#![allow(unused)]\n' + text
 
 path.write_text(text, encoding="utf-8")
 PYFIX
-	fi
+  fi
 done

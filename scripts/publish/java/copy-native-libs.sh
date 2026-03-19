@@ -13,20 +13,20 @@ mkdir -p "${resources_dir}"
 
 # Remove any existing native libraries
 if [[ -d "${resources_dir:?}" ]]; then
-	rm -rf "${resources_dir:?}"/*
+  rm -rf "${resources_dir:?}"/*
 fi
 
 # Copy all platform-specific native libraries
 for platform_dir in "${artifacts_dir}"/*; do
-	if [[ -d "${platform_dir}" ]]; then
-		platform_name="$(basename "${platform_dir}")"
-		echo "  Copying ${platform_name}..."
-		cp -r "${platform_dir}/native" "${resources_dir}/${platform_name}/"
-	fi
+  if [[ -d "${platform_dir}" ]]; then
+    platform_name="$(basename "${platform_dir}")"
+    echo "  Copying ${platform_name}..."
+    cp -r "${platform_dir}/native" "${resources_dir}/${platform_name}/"
+  fi
 done
 
 echo "Native libraries copied successfully:"
 find "${resources_dir}" -type f -name "*.so" -o -name "*.dylib" -o -name "*.dll" | while read -r lib; do
-	echo "  - ${lib}"
-	ls -lh "${lib}"
+  echo "  - ${lib}"
+  ls -lh "${lib}"
 done
