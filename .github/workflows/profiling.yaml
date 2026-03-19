@@ -131,7 +131,7 @@ jobs:
 
       - name: Setup PHP
         if: env.FRAMEWORKS == 'php'
-        uses: shivammathur/setup-php@2 # 2
+        uses: shivammathur/setup-php@2.37.0 # 2
         with:
           php-version: "8.4"
           tools: composer:2.9.1
@@ -144,7 +144,7 @@ jobs:
 
       - name: Install PHP deps
         if: env.FRAMEWORKS == 'php'
-        uses: ramsey/composer-install@3 # 3
+        uses: ramsey/composer-install@4.0.0 # 3
         with:
           working-directory: packages/php
           dependency-versions: locked
@@ -265,7 +265,7 @@ jobs:
 
       - name: Setup PHP
         if: env.FRAMEWORKS == 'php'
-        uses: shivammathur/setup-php@2 # 2
+        uses: shivammathur/setup-php@2.37.0 # 2
         with:
           php-version: "8.4"
           tools: composer:2.9.1
@@ -278,7 +278,7 @@ jobs:
 
       - name: Install PHP deps
         if: env.FRAMEWORKS == 'php'
-        uses: ramsey/composer-install@3 # 3
+        uses: ramsey/composer-install@4.0.0 # 3
         with:
           working-directory: packages/php
           dependency-versions: locked

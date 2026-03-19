@@ -1,0 +1,58 @@
+# html-to-markdown
+
+> High-performance HTML to Markdown converter built in Rust with bindings for Python, TypeScript, Ruby, Go, Java, C#, PHP, Elixir, R, WebAssembly, and C. Part of the kreuzberg.dev ecosystem.
+
+html-to-markdown converts HTML to clean Markdown with configurable output styles, metadata extraction, visitor pattern callbacks, and table extraction. It achieves 150-280 MB/s throughput, making it 10-80x faster than pure-Python alternatives.
+
+## Getting Started
+
+- [Installation](https://docs.html-to-markdown.kreuzberg.dev/getting-started/installation/): Install html-to-markdown for any supported language
+- [Quick Start](https://docs.html-to-markdown.kreuzberg.dev/getting-started/quickstart/): Get started with HTML to Markdown conversion
+
+## Concepts
+
+- [Architecture](https://docs.html-to-markdown.kreuzberg.dev/concepts/architecture/): Rust core with polyglot bindings architecture
+- [Conversion Pipeline](https://docs.html-to-markdown.kreuzberg.dev/concepts/conversion-pipeline/): How the HTML to Markdown conversion works
+- [Visitor Pattern](https://docs.html-to-markdown.kreuzberg.dev/concepts/visitor-pattern/): Custom callbacks for content filtering and URL rewriting
+- [Metadata Extraction](https://docs.html-to-markdown.kreuzberg.dev/concepts/metadata-extraction/): Extract title, headers, links, images, and structured data
+- [Tag Preservation](https://docs.html-to-markdown.kreuzberg.dev/concepts/tag-preservation/): Preserve specific HTML tags during conversion
+- [Performance](https://docs.html-to-markdown.kreuzberg.dev/concepts/performance/): Performance characteristics and benchmarks
+
+## Guides
+
+- [Basic Conversion](https://docs.html-to-markdown.kreuzberg.dev/guides/basic-conversion/): Core conversion functionality
+- [Configuration Options](https://docs.html-to-markdown.kreuzberg.dev/guides/configuration/): Customize heading style, list indent, code blocks, and more
+- [Metadata Extraction](https://docs.html-to-markdown.kreuzberg.dev/guides/metadata/): Extract structured metadata from HTML
+- [Visitor Pattern](https://docs.html-to-markdown.kreuzberg.dev/guides/visitor/): Build custom conversion dialects with visitor callbacks
+- [CLI Usage](https://docs.html-to-markdown.kreuzberg.dev/guides/cli/): Command-line interface reference
+- [Security](https://docs.html-to-markdown.kreuzberg.dev/guides/security/): Security considerations and HTML sanitization
+
+## API Reference
+
+- [Rust API](https://docs.html-to-markdown.kreuzberg.dev/reference/api-rust/): Rust core library reference
+- [Python API](https://docs.html-to-markdown.kreuzberg.dev/reference/api-python/): Python binding reference
+- [TypeScript API](https://docs.html-to-markdown.kreuzberg.dev/reference/api-typescript/): TypeScript/Node.js binding reference
+- [Ruby API](https://docs.html-to-markdown.kreuzberg.dev/reference/api-ruby/): Ruby binding reference
+- [PHP API](https://docs.html-to-markdown.kreuzberg.dev/reference/api-php/): PHP binding reference
+- [Go API](https://docs.html-to-markdown.kreuzberg.dev/reference/api-go/): Go binding reference
+- [Java API](https://docs.html-to-markdown.kreuzberg.dev/reference/api-java/): Java binding reference
+- [C# API](https://docs.html-to-markdown.kreuzberg.dev/reference/api-csharp/): C# binding reference
+- [Elixir API](https://docs.html-to-markdown.kreuzberg.dev/reference/api-elixir/): Elixir binding reference
+- [R API](https://docs.html-to-markdown.kreuzberg.dev/reference/api-r/): R binding reference
+- [C API](https://docs.html-to-markdown.kreuzberg.dev/reference/api-c/): C FFI binding reference
+- [WASM API](https://docs.html-to-markdown.kreuzberg.dev/reference/api-wasm/): WebAssembly binding reference
+- [Configuration Reference](https://docs.html-to-markdown.kreuzberg.dev/reference/configuration/): Full configuration options
+- [Types](https://docs.html-to-markdown.kreuzberg.dev/reference/types/): Type definitions
+
+## Migration Guides
+
+- [C# v2.19.0](https://docs.html-to-markdown.kreuzberg.dev/migration/csharp-2.19.0/): C# binding migration guide
+- [Java v2.19.0](https://docs.html-to-markdown.kreuzberg.dev/migration/java-2.19.0/): Java binding migration guide
+- [TypeScript v2.19.0](https://docs.html-to-markdown.kreuzberg.dev/migration/typescript-2.19.0/): TypeScript binding migration guide
+
+## Optional
+
+- [Features](https://docs.html-to-markdown.kreuzberg.dev/features/): Complete feature list
+- [Live Demo](https://docs.html-to-markdown.kreuzberg.dev/demo/): Try html-to-markdown in the browser
+- [Changelog](https://github.com/kreuzberg-dev/html-to-markdown/blob/main/CHANGELOG.md): Release history
+- [Contributing](https://docs.html-to-markdown.kreuzberg.dev/contributing/): Contribution guidelines
