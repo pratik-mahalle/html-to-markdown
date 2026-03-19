@@ -15,7 +15,7 @@ categories = ["parsing", "text-processing", "api-bindings"]
 
 
 [lints.rust]
-unsafe_code = "allow"  # FFI requires unsafe code
+unsafe_code = "allow"    # FFI requires unsafe code
 missing_docs = "warn"
 unused_must_use = "deny"
 
@@ -30,7 +30,11 @@ multiple_crate_versions = { level = "allow", priority = 1 }
 crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
-html-to-markdown-rs = { workspace = true, features = ["inline-images", "metadata", "visitor"] }
+html-to-markdown-rs = { workspace = true, features = [
+  "inline-images",
+  "metadata",
+  "visitor",
+] }
 serde_json = "1.0"
 libc = "0.2"
 pprof = { version = "0.15", features = ["flamegraph"], optional = true }
