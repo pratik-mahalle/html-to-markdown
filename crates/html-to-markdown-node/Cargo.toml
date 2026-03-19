@@ -16,7 +16,7 @@ categories = ["parsing", "text-processing", "api-bindings"]
 # Publishing metadata for npm scoped package
 
 [lints.rust]
-unsafe_code = "allow"  # NAPI-RS requires unsafe code
+unsafe_code = "allow"    # NAPI-RS requires unsafe code
 missing_docs = "warn"
 unused_must_use = "deny"
 
@@ -34,9 +34,20 @@ package-json-name = "@kreuzberg/html-to-markdown-node"
 crate-type = ["cdylib"]
 
 [dependencies]
-html-to-markdown-rs = { workspace = true, features = ["inline-images", "metadata", "serde", "async-visitor"] }
-html-to-markdown-bindings-common = { path = "../html-to-markdown-bindings-common", version = "2.28.4", features = ["metadata", "inline-images"] }
-napi = { version = "3.4", default-features = false, features = ["napi8", "tokio_rt"] }
+html-to-markdown-rs = { workspace = true, features = [
+  "inline-images",
+  "metadata",
+  "serde",
+  "async-visitor",
+] }
+html-to-markdown-bindings-common = { path = "../html-to-markdown-bindings-common", version = "2.28.5", features = [
+  "metadata",
+  "inline-images",
+] }
+napi = { version = "3.4", default-features = false, features = [
+  "napi8",
+  "tokio_rt",
+] }
 napi-derive = "3.3"
 async-trait = "0.1"
 tokio = { version = "1", features = ["rt", "sync"] }

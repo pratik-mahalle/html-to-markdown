@@ -24,8 +24,7 @@ fn rustup_available() -> bool {
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .status()
-        .map(|status| status.success())
-        .unwrap_or(false)
+        .is_ok_and(|status| status.success())
 }
 
 fn rustup_rustc() -> Option<PathBuf> {
@@ -93,15 +92,11 @@ fn wasm_target_installed() -> bool {
         return false;
     }
 
-    fs::read_dir(libdir_path)
-        .map(|entries| {
-            entries.into_iter().any(|entry| {
-                entry
-                    .map(|entry| entry.file_name().to_string_lossy().starts_with("libstd"))
-                    .unwrap_or(false)
-            })
-        })
-        .unwrap_or(false)
+    fs::read_dir(libdir_path).is_ok_and(|entries| {
+        entries
+            .into_iter()
+            .any(|entry| entry.is_ok_and(|entry| entry.file_name().to_string_lossy().starts_with("libstd")))
+    })
 }
 
 fn build_wasm_module() -> Result<Option<PathBuf>> {
@@ -222,7 +217,7 @@ impl WasmHarness {
     fn read_markdown(&mut self, len: u32) -> Result<String> {
         let contents = self.read_result(len)?;
         if let Some(rest) = contents.strip_prefix("ERROR:") {
-            anyhow::bail!("conversion failed inside wasm: {}", rest);
+            anyhow::bail!("conversion failed inside wasm: {rest}");
         }
         Ok(contents)
     }
@@ -272,7 +267,7 @@ fn respects_conversion_options() -> Result<()> {
         wrap_width: 12,
         ..Default::default()
     };
-    let expected = html_to_markdown_rs::convert(html, Some(options.clone()))?;
+    let expected = html_to_markdown_rs::convert(html, Some(options))?;
 
     let output = harness.convert_underlined(html)?;
     assert_eq!(output.trim(), expected.trim());

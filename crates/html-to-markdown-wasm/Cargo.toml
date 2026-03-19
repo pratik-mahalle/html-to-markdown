@@ -16,7 +16,7 @@ categories = ["parsing", "text-processing", "wasm"]
 # Publishing metadata for npm scoped package
 
 [lints.rust]
-unsafe_code = "allow"  # WASM bindings require unsafe code
+unsafe_code = "allow"    # WASM bindings require unsafe code
 missing_docs = "warn"
 unused_must_use = "deny"
 
@@ -35,14 +35,26 @@ crate-type = ["cdylib", "rlib"]
 
 [features]
 default = ["js-bindings", "metadata", "visitor"]
-js-bindings = ["wasm-bindgen", "serde-wasm-bindgen", "console_error_panic_hook", "js-sys"]
+js-bindings = [
+  "wasm-bindgen",
+  "serde-wasm-bindgen",
+  "console_error_panic_hook",
+  "js-sys",
+]
 metadata = ["html-to-markdown-rs/metadata"]
 visitor = ["html-to-markdown-rs/visitor"]
 wasmtime-testing = []
 
 [dependencies]
-html-to-markdown-rs = { workspace = true, features = ["inline-images", "metadata", "visitor"] }
-html-to-markdown-bindings-common = { path = "../html-to-markdown-bindings-common", version = "2.28.4", features = ["metadata", "inline-images"] }
+html-to-markdown-rs = { workspace = true, features = [
+  "inline-images",
+  "metadata",
+  "visitor",
+] }
+html-to-markdown-bindings-common = { path = "../html-to-markdown-bindings-common", version = "2.28.5", features = [
+  "metadata",
+  "inline-images",
+] }
 wasm-bindgen = { version = "0.2", optional = true }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
@@ -50,6 +62,9 @@ serde-wasm-bindgen = { version = "0.6", optional = true }
 console_error_panic_hook = { version = "0.1", optional = true }
 js-sys = { version = "0.3", optional = true }
 getrandom = { version = "0.4", features = ["wasm_js"] }
+
+[package.metadata.cargo-machete]
+ignored = ["getrandom", "serde_json"]
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3"

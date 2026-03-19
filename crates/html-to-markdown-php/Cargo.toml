@@ -21,8 +21,15 @@ workspace = true
 crate-type = ["cdylib"]
 
 [dependencies]
-html-to-markdown-rs = { workspace = true, features = ["inline-images", "metadata", "visitor"] }
-html-to-markdown-bindings-common = { path = "../html-to-markdown-bindings-common", version = "2.28.4", features = ["metadata", "inline-images"] }
+html-to-markdown-rs = { workspace = true, features = [
+  "inline-images",
+  "metadata",
+  "visitor",
+] }
+html-to-markdown-bindings-common = { path = "../html-to-markdown-bindings-common", version = "2.28.5", features = [
+  "metadata",
+  "inline-images",
+] }
 ext-php-rs = { workspace = true }
 pprof = { version = "0.15", features = ["flamegraph"], optional = true }
 

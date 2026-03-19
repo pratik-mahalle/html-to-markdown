@@ -203,7 +203,7 @@ import (
 )
 
 const (
-	defaultFFIVersion = "2.28.4"
+	defaultFFIVersion = "2.28.5"
 	githubRepo        = "kreuzberg-dev/html-to-markdown"
 
 	archAMD64    = "amd64"
