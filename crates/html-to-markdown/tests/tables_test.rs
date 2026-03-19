@@ -734,3 +734,19 @@ fn test_br_in_table_with_mixed_content() {
         result
     );
 }
+
+#[test]
+fn test_table_colspan_no_header_issue_233() {
+    let html = r#"<table>
+      <tr>
+        <td colspan="2">Cell spanning 2 columns</td>
+      </tr>
+      <tr>
+        <td>Cell 1</td>
+        <td>Cell 2</td>
+      </tr>
+    </table>"#;
+    let result = html_to_markdown_rs::convert(html, None).unwrap();
+    assert!(result.contains("| Cell spanning 2 columns | |"));
+    assert!(result.contains("| Cell 1 | Cell 2 |"));
+}
