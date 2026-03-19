@@ -126,6 +126,7 @@ repos:
     hooks:
       - id: shfmt
         args: ["-w", "-i", "2"]
+        exclude: '(\.cache/|node_modules/|rust-vendor/|vendor/|\.venv/)'
 
   - repo: https://github.com/koalaman/shellcheck-precommit
     rev: v0.11.0
