@@ -2,8 +2,8 @@
 set -euo pipefail
 
 if [[ $# -lt 2 ]]; then
-	echo "Usage: $0 <version> <output-dir>" >&2
-	exit 1
+  echo "Usage: $0 <version> <output-dir>" >&2
+  exit 1
 fi
 
 VERSION="$1"
@@ -12,7 +12,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 STAGING="$(mktemp -d "${ROOT}/.pie-src.XXXXXX")"
 
 cleanup() {
-	rm -rf "$STAGING"
+  rm -rf "$STAGING"
 }
 trap cleanup EXIT
 
@@ -29,7 +29,7 @@ mkdir -p "$WORKSPACE_DIR"
 
 cp "$ROOT/Cargo.toml" "$WORKSPACE_DIR/"
 if [[ -f "$ROOT/Cargo.lock" ]]; then
-	cp "$ROOT/Cargo.lock" "$WORKSPACE_DIR/"
+  cp "$ROOT/Cargo.lock" "$WORKSPACE_DIR/"
 fi
 cp "$ROOT/LICENSE" "$STAGING/"
 cp "$ROOT/README.md" "$STAGING/PROJECT-README.md"
@@ -48,37 +48,37 @@ cargo_path.write_text("\n".join(lines) + "\n")
 PY
 
 rsync -a \
-	--exclude 'target' \
-	--exclude 'debug' \
-	--exclude 'node_modules' \
-	--exclude '.venv' \
-	--exclude 'dist' \
-	--exclude 'dist-*' \
-	--exclude 'pkg' \
-	--exclude '*.node' \
-	--exclude '*.abi3.so' \
-	"$ROOT/crates" "$WORKSPACE_DIR/"
+  --exclude 'target' \
+  --exclude 'debug' \
+  --exclude 'node_modules' \
+  --exclude '.venv' \
+  --exclude 'dist' \
+  --exclude 'dist-*' \
+  --exclude 'pkg' \
+  --exclude '*.node' \
+  --exclude '*.abi3.so' \
+  "$ROOT/crates" "$WORKSPACE_DIR/"
 
 if [[ -f "$ROOT/.cargo/config.toml" ]]; then
-	mkdir -p "$WORKSPACE_DIR/.cargo"
-	cp "$ROOT/.cargo/config.toml" "$WORKSPACE_DIR/.cargo/config.toml"
+  mkdir -p "$WORKSPACE_DIR/.cargo"
+  cp "$ROOT/.cargo/config.toml" "$WORKSPACE_DIR/.cargo/config.toml"
 fi
 
 if [[ -d "$ROOT/tools" ]]; then
-	mkdir -p "$WORKSPACE_DIR/tools"
-	rsync -a --exclude 'target' --exclude 'debug' "$ROOT/tools/" "$WORKSPACE_DIR/tools/"
+  mkdir -p "$WORKSPACE_DIR/tools"
+  rsync -a --exclude 'target' --exclude 'debug' "$ROOT/tools/" "$WORKSPACE_DIR/tools/"
 fi
 
 mkdir -p "$WORKSPACE_DIR/packages/ruby"
 rsync -a \
-	--exclude 'target' \
-	--exclude 'native/target' \
-	--exclude 'vendor' \
-	"$ROOT/packages/ruby/" "$WORKSPACE_DIR/packages/ruby/"
+  --exclude 'target' \
+  --exclude 'native/target' \
+  --exclude 'vendor' \
+  "$ROOT/packages/ruby/" "$WORKSPACE_DIR/packages/ruby/"
 
 mkdir -p "$WORKSPACE_DIR/packages/elixir"
 rsync -a --exclude '_build' --exclude 'deps' --exclude 'native/html_to_markdown_elixir/target' \
-	"$ROOT/packages/elixir/" "$WORKSPACE_DIR/packages/elixir/"
+  "$ROOT/packages/elixir/" "$WORKSPACE_DIR/packages/elixir/"
 
 WORKSPACE_ALT_DIR="$STAGING/packages/php-ext/workspace"
 mkdir -p "$WORKSPACE_ALT_DIR"

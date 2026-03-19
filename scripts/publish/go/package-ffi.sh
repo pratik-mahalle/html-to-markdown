@@ -7,34 +7,34 @@ out_dir="${3:?out_dir is required}"
 
 case "${platform}" in
 linux-x64)
-	rid="linux-x64"
-	archive_ext="tar.gz"
-	target_name="libhtml_to_markdown_ffi.so"
-	;;
+  rid="linux-x64"
+  archive_ext="tar.gz"
+  target_name="libhtml_to_markdown_ffi.so"
+  ;;
 linux-arm64)
-	rid="linux-arm64"
-	archive_ext="tar.gz"
-	target_name="libhtml_to_markdown_ffi.so"
-	;;
+  rid="linux-arm64"
+  archive_ext="tar.gz"
+  target_name="libhtml_to_markdown_ffi.so"
+  ;;
 darwin-x64)
-	rid="osx-x64"
-	archive_ext="tar.gz"
-	target_name="libhtml_to_markdown_ffi.dylib"
-	;;
+  rid="osx-x64"
+  archive_ext="tar.gz"
+  target_name="libhtml_to_markdown_ffi.dylib"
+  ;;
 darwin-arm64)
-	rid="osx-arm64"
-	archive_ext="tar.gz"
-	target_name="libhtml_to_markdown_ffi.dylib"
-	;;
+  rid="osx-arm64"
+  archive_ext="tar.gz"
+  target_name="libhtml_to_markdown_ffi.dylib"
+  ;;
 windows-x64)
-	rid="win-x64"
-	archive_ext="zip"
-	target_name="html_to_markdown_ffi.dll"
-	;;
+  rid="win-x64"
+  archive_ext="zip"
+  target_name="html_to_markdown_ffi.dll"
+  ;;
 *)
-	echo "Unsupported platform: ${platform}" >&2
-	exit 1
-	;;
+  echo "Unsupported platform: ${platform}" >&2
+  exit 1
+  ;;
 esac
 
 work_dir="$(mktemp -d)"
@@ -44,8 +44,8 @@ scripts/publish/csharp/build-ffi.sh "${rid}" "${work_dir}"
 
 lib_path="$(find "${work_dir}/${rid}/native" -maxdepth 1 -type f -name '*html_to_markdown_ffi*' -print -quit)"
 if [[ -z "${lib_path}" ]]; then
-	echo "Failed to locate html_to_markdown_ffi library for ${platform}" >&2
-	exit 1
+  echo "Failed to locate html_to_markdown_ffi library for ${platform}" >&2
+  exit 1
 fi
 
 mkdir -p "${out_dir}"
@@ -58,27 +58,27 @@ cp -f "${lib_path}" "${stage_dir}/${target_name}"
 # Copy header file
 header_path="crates/html-to-markdown-ffi/html_to_markdown.h"
 if [[ -f "${header_path}" ]]; then
-	cp -f "${header_path}" "${stage_dir}/html_to_markdown.h"
+  cp -f "${header_path}" "${stage_dir}/html_to_markdown.h"
 else
-	echo "Warning: Header file not found at ${header_path}" >&2
+  echo "Warning: Header file not found at ${header_path}" >&2
 fi
 
 if [[ "${archive_ext}" == "zip" ]]; then
-	if command -v zip >/dev/null 2>&1; then
-		(
-			cd "${stage_dir}"
-			zip -9 -q "${out_dir}/${archive_name}" "${target_name}" html_to_markdown.h
-		)
-	else
-		# Convert Unix paths to Windows paths for PowerShell
-		ps_stage_path="$(cd "${stage_dir}" && pwd -W 2>/dev/null || echo "${stage_dir}")"
-		ps_out_path="$(cd "${out_dir}" && pwd -W 2>/dev/null || echo "${out_dir}")"
+  if command -v zip >/dev/null 2>&1; then
+    (
+      cd "${stage_dir}"
+      zip -9 -q "${out_dir}/${archive_name}" "${target_name}" html_to_markdown.h
+    )
+  else
+    # Convert Unix paths to Windows paths for PowerShell
+    ps_stage_path="$(cd "${stage_dir}" && pwd -W 2>/dev/null || echo "${stage_dir}")"
+    ps_out_path="$(cd "${out_dir}" && pwd -W 2>/dev/null || echo "${out_dir}")"
 
-		powershell.exe -NoProfile -Command \
-			"Compress-Archive -Path \"${ps_stage_path}\\${target_name}\",\"${ps_stage_path}\\html_to_markdown.h\" -DestinationPath \"${ps_out_path}\\${archive_name}\" -Force"
-	fi
+    powershell.exe -NoProfile -Command \
+      "Compress-Archive -Path \"${ps_stage_path}\\${target_name}\",\"${ps_stage_path}\\html_to_markdown.h\" -DestinationPath \"${ps_out_path}\\${archive_name}\" -Force"
+  fi
 else
-	tar -czf "${out_dir}/${archive_name}" -C "${stage_dir}" "${target_name}" html_to_markdown.h
+  tar -czf "${out_dir}/${archive_name}" -C "${stage_dir}" "${target_name}" html_to_markdown.h
 fi
 
 echo "Packaged ${out_dir}/${archive_name}"
