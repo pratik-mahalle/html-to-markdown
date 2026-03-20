@@ -1,6 +1,6 @@
 {
 	"name": "@kreuzberg/html-to-markdown-node-darwin-arm64",
-	"version": "2.28.5",
+	"version": "2.28.6",
 	"cpu": [
 		"arm64"
 	],
