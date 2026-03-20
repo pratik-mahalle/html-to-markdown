@@ -70,7 +70,7 @@ jobs:
         uses: actions/setup-java@v5 # v5
         with:
           distribution: temurin
-          java-version: "25"
+          java-version: "25.0.2"
 
       - name: Setup Elixir
         uses: erlef/setup-beam@v1 # v1
