@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'bundler/gem_tasks'
-require 'rb_sys/extensiontask'
+require 'rake/extensiontask'
 require 'rspec/core/rake_task'
 
 GEMSPEC = Gem::Specification.load(File.expand_path('html-to-markdown-rb.gemspec', __dir__))
@@ -13,7 +13,7 @@ task :vendor do
   sh "python3 #{vendor_script}"
 end
 
-RbSys::ExtensionTask.new('html-to-markdown-rb', GEMSPEC) do |ext|
+Rake::ExtensionTask.new('html-to-markdown-rb', GEMSPEC) do |ext|
   ext.lib_dir = 'lib'
   ext.ext_dir = 'ext/html-to-markdown-rb'
   ext.cross_compile = true

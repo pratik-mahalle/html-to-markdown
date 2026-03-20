@@ -1,4 +1,0 @@
-[workspace]
-resolver = "2"
-members = []
-exclude = ["ext/html-to-markdown-rb/native"]
