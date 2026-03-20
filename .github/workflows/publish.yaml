@@ -1327,11 +1327,17 @@ jobs:
           name: python-sdist
           path: dist
 
+      - name: List packages to publish
+        run: |
+          echo "Packages in dist:"
+          ls -lh dist/ 2>/dev/null || echo "No packages found"
+        shell: bash
+
       - name: Publish to PyPI
-        uses: kreuzberg-dev/actions/publish-pypi@v1 # v1
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist
-          dry-run: ${{ needs.prepare.outputs.dry_run }}
+          skip-existing: true
 
   publish-rubygems:
     name: Publish Ruby gems
@@ -1368,7 +1374,7 @@ jobs:
 
       - name: Configure trusted publishing credentials
         if: ${{ needs.prepare.outputs.dry_run != 'true' && needs.check-rubygems.outputs.exists != 'true' }}
-        uses: rubygems/configure-rubygems-credentials@v1 # v1
+        uses: rubygems/configure-rubygems-credentials@v1.0.0 # v1.0.0
 
       - name: Publish gems
         if: ${{ needs.prepare.outputs.dry_run != 'true' && needs.check-rubygems.outputs.exists != 'true' }}

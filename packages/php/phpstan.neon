@@ -5,4 +5,3 @@ parameters:
         - tests
     tmpDir: var/cache/phpstan
     checkMissingIterableValueType: true
-    checkGenericClassInNonGenericObjectType: true
