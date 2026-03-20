@@ -135,10 +135,14 @@ tasks:
 
   update:
     desc: "Update Maven dependencies to latest versions"
-    silent: false
+    dir: "{{.JAVA_PKG}}"
     cmds:
-      - cmd: cd {{.JAVA_PKG}} && "{{.MAVEN_CMD}}" versions:use-latest-versions
-        ignore_error: false
+      - echo "Updating Maven dependencies to latest versions..."
+      - "{{.MAVEN_CMD}} versions:use-latest-versions"
+      - echo "Updating Maven plugin versions..."
+      - "{{.MAVEN_CMD}} versions:use-latest-versions -DgenerateBackupPoms=false"
+      - echo "Checking for remaining outdated dependencies..."
+      - "{{.MAVEN_CMD}} versions:display-dependency-updates || true"
 
   clean:
     desc: "Clean Maven build artifacts and target directory"

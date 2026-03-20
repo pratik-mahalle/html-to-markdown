@@ -5,11 +5,11 @@ require_relative 'lib/html_to_markdown/version'
 repo_root = File.expand_path('../..', __dir__)
 crate_prefix = 'packages/ruby/'
 git_cmd = %(git -C "#{repo_root}" ls-files -z #{crate_prefix})
-git_files =
+ruby_files =
   `#{git_cmd}`.split("\x0")
               .select { |path| path.start_with?(crate_prefix) }
               .map { |path| path.delete_prefix(crate_prefix) }
-              .reject { |path| path == 'ext/html-to-markdown-rb/native/Cargo.toml' }
+
 fallback_files = Dir.chdir(__dir__) do
   Dir.glob(
     %w[
@@ -21,28 +21,48 @@ fallback_files = Dir.chdir(__dir__) do
       src/**/*.rs
       spec/**/*.rb
       sig/**/*.rbs
-      vendor/**/*
     ]
   )
 end
 
-# Always include rust-vendor and .cargo directories if they exist (created by vendoring script)
-# Exclude native artifacts (.lib, .a, .dll, .so, .dylib) as they shouldn't be in the gem
-# Use File::FNM_DOTMATCH to include hidden files like .cargo-checksum.json (required by cargo)
+# Vendor files: include vendored crates and workspace Cargo.toml
 vendor_files = Dir.chdir(__dir__) do
-  (Dir.glob('rust-vendor/**/*', File::FNM_DOTMATCH) + Dir.glob('.cargo/**/*', File::FNM_DOTMATCH))
-    .select { |f| File.file?(f) }
-    .grep_v(/\.(lib|a|dll|so|dylib)$/i)
+  Dir.glob('vendor/html-to-markdown-rs/**/*', File::FNM_DOTMATCH)
+     .select { |f| File.file?(f) }
+     .grep_v(%r{/target/})
+     .grep_v(/\.(swp|bak|tmp)$/)
 end
 
-# Include Cargo.lock and modified Cargo.toml if they exist (created by vendoring script)
-cargo_lock = 'ext/html-to-markdown-rb/native/Cargo.lock'
-cargo_toml = 'ext/html-to-markdown-rb/native/Cargo.toml'
-vendor_files << cargo_lock if File.file?(File.join(__dir__, cargo_lock))
-vendor_files << cargo_toml if File.file?(File.join(__dir__, cargo_toml))
+# Include vendor/Cargo.toml (workspace definition) if it exists
+workspace_toml = if File.exist?(File.join(__dir__, 'vendor/Cargo.toml'))
+                   ['vendor/Cargo.toml']
+                 else
+                   []
+                 end
 
-files = git_files.empty? ? fallback_files : git_files
-files = (files + vendor_files).uniq
+# When vendor exists, use ext/ files from filesystem (modified by vendor script)
+# instead of git (which has the unmodified Cargo.toml with workspace paths)
+ext_files_from_fs = Dir.chdir(__dir__) do
+  Dir.glob('ext/**/*', File::FNM_DOTMATCH)
+     .reject { |f| File.directory?(f) }
+     .reject { |f| f.include?('/target/') }
+end
+
+# Include native artifacts (.so, .bundle, .dylib) if present (for platform gems)
+native_files = Dir.chdir(__dir__) do
+  Dir.glob('lib/**/*.{so,bundle,dylib}')
+end
+
+files = if vendor_files.any?
+          # Vendor exists: use ext/ from filesystem (has modified Cargo.toml)
+          non_ext_ruby_files = (ruby_files.empty? ? fallback_files : ruby_files)
+                               .reject { |f| f.start_with?('ext/') }
+          non_ext_ruby_files + ext_files_from_fs + vendor_files + workspace_toml + native_files
+        else
+          ruby_files.empty? ? fallback_files : ruby_files
+        end
+
+files = files.uniq
 
 Gem::Specification.new do |spec|
   spec.name          = 'html-to-markdown'

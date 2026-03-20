@@ -107,11 +107,13 @@ tasks:
         ignore_error: false
 
   update:
-    desc: "Update Python dependencies with uv"
-    silent: false
+    desc: "Update Python dependencies to latest versions (including major versions)"
+    dir: "{{.PYTHON_PKG}}"
     cmds:
-      - cmd: cd {{.PYTHON_PKG}} && uv sync --upgrade
-        ignore_error: false
+      - echo "Updating Python dependencies to latest versions..."
+      - uv sync --all-packages --all-extras --upgrade --no-install-workspace --no-install-project
+      - echo "Checking remaining outdated dependencies..."
+      - uv pip list --outdated || true
 
   clean:
     desc: "Clean Python build artifacts"

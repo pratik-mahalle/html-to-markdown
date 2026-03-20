@@ -120,13 +120,14 @@ tasks:
 
   update:
     desc: "Update .NET package dependencies"
-    silent: false
+    dir: "{{.CSHARP_PKG}}"
     cmds:
-      - cmd: |
-          python3 scripts/update_dotnet_packages.py \
-            {{.CSHARP_PKG}}/HtmlToMarkdown/HtmlToMarkdown.csproj \
-            {{.CSHARP_PKG}}/HtmlToMarkdown.Tests/HtmlToMarkdown.Tests.csproj
-        ignore_error: false
+      - echo "Updating C# dependencies to latest versions..."
+      - dotnet tool install --global dotnet-outdated-tool || dotnet tool update --global dotnet-outdated-tool
+      - dotnet outdated HtmlToMarkdown/HtmlToMarkdown.csproj --upgrade
+      - dotnet outdated HtmlToMarkdown.Tests/HtmlToMarkdown.Tests.csproj --upgrade
+      - echo "Checking remaining outdated packages..."
+      - dotnet list HtmlToMarkdown/HtmlToMarkdown.csproj package --outdated || true
 
   clean:
     desc: "Clean C# build artifacts (cross-platform cleanup)"

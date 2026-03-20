@@ -93,10 +93,11 @@ tasks:
 
   update:
     desc: "Update Node.js dependencies with pnpm"
-    silent: false
     cmds:
-      - cmd: cd {{.NODE_PKG}} && pnpm update
-        ignore_error: false
+      - echo "Updating Node/TypeScript dependencies across workspace..."
+      - corepack up
+      - pnpm up --latest -r
+      - pnpm up --latest -w
 
   clean:
     desc: "Clean Node.js build artifacts (cross-platform)"
