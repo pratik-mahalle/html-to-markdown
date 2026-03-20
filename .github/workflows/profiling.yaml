@@ -163,7 +163,7 @@ jobs:
         uses: actions/setup-java@v5 # v5
         with:
           distribution: temurin
-          java-version: "25"
+          java-version: "25.0.2"
 
       - name: Setup .NET
         if: env.FRAMEWORKS == 'csharp'
@@ -297,7 +297,7 @@ jobs:
         uses: actions/setup-java@v5 # v5
         with:
           distribution: temurin
-          java-version: "25"
+          java-version: "25.0.2"
 
       - name: Setup .NET
         if: env.FRAMEWORKS == 'csharp'
