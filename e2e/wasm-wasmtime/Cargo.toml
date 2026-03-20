@@ -10,5 +10,5 @@ workspace = true
 
 [dev-dependencies]
 anyhow = "1.0"
-wasmtime = "42"
+wasmtime = "43"
 html-to-markdown-rs = { path = "../../crates/html-to-markdown" }

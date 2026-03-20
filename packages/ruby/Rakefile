@@ -6,6 +6,13 @@ require 'rspec/core/rake_task'
 
 GEMSPEC = Gem::Specification.load(File.expand_path('html-to-markdown-rb.gemspec', __dir__))
 
+# Vendor html-to-markdown-rs core crate before compilation
+task :vendor do
+  vendor_script = File.expand_path('../../scripts/ci/ruby/vendor-core-crate.py', __dir__)
+  puts 'Vendoring html-to-markdown-rs core crate...'
+  sh "python3 #{vendor_script}"
+end
+
 RbSys::ExtensionTask.new('html-to-markdown-rb', GEMSPEC) do |ext|
   ext.lib_dir = 'lib'
   ext.ext_dir = 'ext/html-to-markdown-rb'
@@ -20,5 +27,6 @@ end
 
 RSpec::Core::RakeTask.new(:spec)
 
+task compile: :vendor
 task spec: :compile
 task default: :spec

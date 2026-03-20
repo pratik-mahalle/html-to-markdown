@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.28.6] - 2026-03-20
+
+### Changed
+
+- **Ruby gem vendoring**: Replaced bash+embedded-Python vendoring script with a standalone Python vendoring script adapted from kreuzberg, using `vendor/` directory instead of `rust-vendor/` for core crate vendoring.
+- **Ruby gem build**: Added `build-native-gem.rb` for platform-specific pre-compiled gem builds, following kreuzberg patterns.
+- **Pre-commit hooks**: Switched Ruby hooks (rubocop, rbs-validate, steep-check) from inline bash commands to task-based delegation matching kreuzberg.
+- **Dependabot config**: Expanded from GitHub Actions only to full multi-ecosystem coverage (Cargo, pip, npm, bundler, composer, gomod, maven, nuget, mix).
+- **Task update commands**: Aligned all language update tasks with kreuzberg's comprehensive approach (outdated checks, aggressive updates).
+- **C# update**: Switched from slow `dotnet list --outdated` Python script to `dotnet-outdated-tool` for faster dependency updates.
+
+### Fixed
+
+- **CI Validate shfmt failure**: Fixed `packages/r/configure.win` tab indentation to match shfmt 2-space requirement.
+- **Java linting**: Added PMD plugin (3.28.0), JaCoCo coverage (0.8.14), and pinned checkstyle runtime (13.3.0). Bumped maven-compiler-plugin to 3.15.0, maven-surefire-plugin to 3.5.5, spotless to 3.4.0, central-publishing to 0.10.0.
+
+### Updated
+
+- **GitHub Actions**: Bumped `go-task/setup-task` from v1 to v2, `nick-fields/retry` from v3 to v4.
+- **Dependencies**: Updated all language dependencies via `task update`.
+
 ## [2.28.5] - 2026-03-19
 
 ### Fixed

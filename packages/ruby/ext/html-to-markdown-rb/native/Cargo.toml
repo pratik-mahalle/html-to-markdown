@@ -1,6 +1,6 @@
 [package]
 name = "html-to-markdown-rb"
-version = "2.28.5"
+version = "2.28.6"
 edition = "2024"
 authors = ["Na'aman Hirschfeld <naaman@kreuzberg.dev>"]
 license = "MIT"
@@ -18,7 +18,7 @@ name = "html_to_markdown_rb"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-html-to-markdown-rs = { path = "../../../../../crates/html-to-markdown", features = [
+html-to-markdown-rs = { path = "../../../vendor/html-to-markdown-rs", features = [
   "inline-images",
   "visitor",
   "metadata",

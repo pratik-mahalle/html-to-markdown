@@ -95,17 +95,24 @@ tasks:
 
   typecheck:
     desc: "Run Steep type checking (bundle exec steep check)"
-    silent: false
+    dir: "{{.RUBY_PKG}}"
     cmds:
-      - cmd: cd {{.RUBY_PKG}} && bundle exec steep check
-        ignore_error: false
+      - bundle exec steep check
+
+  rbs-validate:
+    desc: "Validate RBS type signatures"
+    dir: "{{.RUBY_PKG}}"
+    cmds:
+      - bundle exec rbs validate
 
   update:
     desc: "Update Ruby gem dependencies (bundle update)"
-    silent: false
+    dir: "{{.RUBY_PKG}}"
     cmds:
-      - cmd: cd {{.RUBY_PKG}} && bundle update
-        ignore_error: false
+      - echo "Updating Ruby dependencies to latest versions..."
+      - bundle update --all --conservative=false
+      - echo "Checking for remaining outdated dependencies..."
+      - bundle outdated || true
 
   clean:
     desc: "Clean Ruby build artifacts (cross-platform cleanup)"
