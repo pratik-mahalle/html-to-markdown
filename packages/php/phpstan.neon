@@ -4,4 +4,3 @@ parameters:
         - src
         - tests
     tmpDir: var/cache/phpstan
-    checkMissingIterableValueType: true

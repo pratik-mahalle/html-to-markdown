@@ -13,7 +13,7 @@ task :vendor do
   sh "python3 #{vendor_script}"
 end
 
-Rake::ExtensionTask.new('html-to-markdown-rb', GEMSPEC) do |ext|
+Rake::ExtensionTask.new('html_to_markdown_rb', GEMSPEC) do |ext|
   ext.lib_dir = 'lib'
   ext.ext_dir = 'ext/html-to-markdown-rb'
   ext.cross_compile = true
