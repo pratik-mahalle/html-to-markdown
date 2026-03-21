@@ -1280,20 +1280,30 @@ jobs:
         run: scripts/publish/crates/verify-cargo-version.sh
         shell: bash
 
+      - name: Re-check crates.io before publish
+        id: recheck
+        uses: kreuzberg-dev/actions/check-registry@v1 # v1
+        with:
+          registry: cratesio
+          package: html-to-markdown-rs
+          version: ${{ needs.prepare.outputs.version }}
+          extra-packages: |
+            cli_exists=html-to-markdown-cli
+
       - name: Publish html-to-markdown-rs
-        if: ${{ needs.check-cratesio.outputs.rs_exists != 'true' }}
+        if: ${{ steps.recheck.outputs.exists != 'true' }}
         env:
           CARGO_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
         run: scripts/publish/crates/publish-rs.sh
         shell: bash
 
       - name: Wait for indexing
-        if: ${{ needs.check-cratesio.outputs.rs_exists != 'true' }}
+        if: ${{ steps.recheck.outputs.exists != 'true' }}
         run: scripts/publish/crates/wait-for-indexing.sh
         shell: bash
 
       - name: Publish html-to-markdown-cli
-        if: ${{ needs.check-cratesio.outputs.cli_exists != 'true' }}
+        if: ${{ steps.recheck.outputs.cli_exists != 'true' }}
         env:
           CARGO_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
         run: scripts/publish/crates/publish-cli.sh
@@ -1333,7 +1343,16 @@ jobs:
           ls -lh dist/ 2>/dev/null || echo "No packages found"
         shell: bash
 
+      - name: Re-check PyPI before publish
+        id: recheck
+        uses: kreuzberg-dev/actions/check-registry@v1 # v1
+        with:
+          registry: pypi
+          package: html-to-markdown
+          version: ${{ needs.prepare.outputs.version }}
+
       - name: Publish to PyPI
+        if: ${{ steps.recheck.outputs.exists != 'true' }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist
@@ -1360,34 +1379,40 @@ jobs:
           path: dist
           merge-multiple: false
 
+      - name: Re-check RubyGems before publish
+        id: recheck
+        uses: kreuzberg-dev/actions/check-registry@v1 # v1
+        with:
+          registry: rubygems
+          package: html-to-markdown
+          version: ${{ needs.prepare.outputs.version }}
+
       - name: Setup Ruby
-        if: ${{ needs.prepare.outputs.dry_run != 'true' && needs.check-rubygems.outputs.exists != 'true' }}
+        if: ${{ needs.prepare.outputs.dry_run != 'true' && steps.recheck.outputs.exists != 'true' }}
         uses: ruby/setup-ruby@v1 # v1
         with:
           ruby-version: "3.3"
           bundler-cache: false
 
       - name: Update RubyGems
-        if: ${{ needs.prepare.outputs.dry_run != 'true' && needs.check-rubygems.outputs.exists != 'true' }}
+        if: ${{ needs.prepare.outputs.dry_run != 'true' && steps.recheck.outputs.exists != 'true' }}
         run: gem update --system
         shell: bash
 
       - name: Configure trusted publishing credentials
-        if: ${{ needs.prepare.outputs.dry_run != 'true' && needs.check-rubygems.outputs.exists != 'true' }}
+        if: ${{ needs.prepare.outputs.dry_run != 'true' && steps.recheck.outputs.exists != 'true' }}
         uses: rubygems/configure-rubygems-credentials@v1.0.0 # v1.0.0
 
       - name: Publish gems
-        if: ${{ needs.prepare.outputs.dry_run != 'true' && needs.check-rubygems.outputs.exists != 'true' }}
+        if: ${{ needs.prepare.outputs.dry_run != 'true' && steps.recheck.outputs.exists != 'true' }}
         uses: kreuzberg-dev/actions/publish-rubygems@v1 # v1
         with:
           gems-dir: dist
           dry-run: ${{ needs.prepare.outputs.dry_run }}
 
-      - name: Ruby gem already published
-        if: ${{ needs.check-rubygems.outputs.exists == 'true' && needs.prepare.outputs.dry_run != 'true' }}
-        env:
-          VERSION: ${{ needs.prepare.outputs.version }}
-        run: scripts/publish/ruby/already-published-summary.sh
+      - name: RubyGems already published summary
+        if: ${{ steps.recheck.outputs.exists == 'true' }}
+        run: echo "Gem html-to-markdown@${{ needs.prepare.outputs.version }} already published on RubyGems — skipped." >> "$GITHUB_STEP_SUMMARY"
         shell: bash
 
   publish-hex:
@@ -1441,13 +1466,27 @@ jobs:
           cargo generate-lockfile
           popd >/dev/null
 
+      - name: Re-check Hex.pm before publish
+        id: recheck
+        uses: kreuzberg-dev/actions/check-registry@v1 # v1
+        with:
+          registry: hex
+          package: html_to_markdown
+          version: ${{ needs.prepare.outputs.version }}
+
       - name: Publish to Hex.pm
+        if: ${{ needs.prepare.outputs.dry_run != 'true' && steps.recheck.outputs.exists != 'true' }}
         uses: kreuzberg-dev/actions/publish-hex@v1 # v1
         with:
           package-dir: packages/elixir
           dry-run: ${{ needs.prepare.outputs.dry_run }}
         env:
           HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
+
+      - name: Hex.pm already published summary
+        if: ${{ steps.recheck.outputs.exists == 'true' }}
+        run: echo "Package html_to_markdown@${{ needs.prepare.outputs.version }} already published on Hex.pm — skipped." >> "$GITHUB_STEP_SUMMARY"
+        shell: bash
 
   publish-nuget:
     name: Publish NuGet package
@@ -1469,7 +1508,16 @@ jobs:
           name: csharp-nuget
           path: dist
 
+      - name: Re-check NuGet before publish
+        id: recheck
+        uses: kreuzberg-dev/actions/check-registry@v1 # v1
+        with:
+          registry: nuget
+          package: KreuzbergDev.HtmlToMarkdown
+          version: ${{ needs.prepare.outputs.version }}
+
       - name: Publish to NuGet
+        if: ${{ steps.recheck.outputs.exists != 'true' }}
         uses: kreuzberg-dev/actions/publish-nuget@v1 # v1
         with:
           packages-dir: dist
@@ -1492,7 +1540,16 @@ jobs:
         with:
           ref: ${{ needs.prepare.outputs.ref }}
 
+      - name: Re-check Packagist before publish
+        id: recheck
+        uses: kreuzberg-dev/actions/check-registry@v1 # v1
+        with:
+          registry: packagist
+          package: kreuzberg-dev/html-to-markdown
+          version: ${{ needs.prepare.outputs.version }}
+
       - name: Trigger Packagist Update
+        if: ${{ steps.recheck.outputs.exists != 'true' }}
         uses: kreuzberg-dev/actions/publish-packagist@v1 # v1
         with:
           packagist-username: kreuzberg-dev
@@ -1648,7 +1705,16 @@ jobs:
             echo "Warning: java-ffi-artifacts directory not found"
           fi
 
+      - name: Re-check Maven Central before publish
+        id: recheck
+        uses: kreuzberg-dev/actions/check-registry@v1 # v1
+        with:
+          registry: maven
+          package: "dev.kreuzberg:html-to-markdown"
+          version: ${{ needs.prepare.outputs.version }}
+
       - name: Release Maven package
+        if: ${{ steps.recheck.outputs.exists != 'true' }}
         uses: kreuzberg-dev/actions/publish-maven@v1 # v1
         with:
           pom-file: packages/java/pom.xml
@@ -1714,8 +1780,18 @@ jobs:
         run: scripts/publish/node/pack-platform-packages.sh
         shell: bash
 
+      - name: Re-check npm before publish
+        id: recheck
+        uses: kreuzberg-dev/actions/check-registry@v1 # v1
+        with:
+          registry: npm
+          package: "@kreuzberg/html-to-markdown-node"
+          version: ${{ needs.prepare.outputs.version }}
+          extra-packages: |
+            ts_exists=@kreuzberg/html-to-markdown
+
       - name: Publish native binary packages
-        if: ${{ needs.prepare.outputs.dry_run != 'true' }}
+        if: ${{ needs.prepare.outputs.dry_run != 'true' && steps.recheck.outputs.exists != 'true' }}
         uses: kreuzberg-dev/actions/publish-npm@v1 # v1
         with:
           packages-dir: crates/html-to-markdown-node/npm
@@ -1724,7 +1800,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Wait for npm indexing (x64)
-        if: ${{ needs.prepare.outputs.dry_run != 'true' }}
+        if: ${{ needs.prepare.outputs.dry_run != 'true' && steps.recheck.outputs.exists != 'true' }}
         uses: kreuzberg-dev/actions/wait-for-package@v1 # v1
         with:
           registry: npm
@@ -1733,7 +1809,7 @@ jobs:
           max-attempts: "25"
 
       - name: Wait for npm indexing (arm64)
-        if: ${{ needs.prepare.outputs.dry_run != 'true' }}
+        if: ${{ needs.prepare.outputs.dry_run != 'true' && steps.recheck.outputs.exists != 'true' }}
         uses: kreuzberg-dev/actions/wait-for-package@v1 # v1
         with:
           registry: npm
@@ -1742,7 +1818,7 @@ jobs:
           max-attempts: "25"
 
       - name: Publish main Node package
-        if: ${{ needs.prepare.outputs.dry_run != 'true' }}
+        if: ${{ needs.prepare.outputs.dry_run != 'true' && steps.recheck.outputs.exists != 'true' }}
         uses: kreuzberg-dev/actions/publish-npm@v1 # v1
         with:
           package-dir: crates/html-to-markdown-node
@@ -1751,7 +1827,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Wait for main Node package indexing
-        if: ${{ needs.prepare.outputs.dry_run != 'true' && needs.check-npm.outputs.ts_exists != 'true' }}
+        if: ${{ needs.prepare.outputs.dry_run != 'true' && steps.recheck.outputs.exists != 'true' && steps.recheck.outputs.ts_exists != 'true' }}
         uses: kreuzberg-dev/actions/wait-for-package@v1 # v1
         with:
           registry: npm
@@ -1760,18 +1836,18 @@ jobs:
           max-attempts: "25"
 
       - name: Install TypeScript wrapper dependencies from npm
-        if: ${{ needs.prepare.outputs.dry_run != 'true' && needs.check-npm.outputs.ts_exists != 'true' }}
+        if: ${{ needs.prepare.outputs.dry_run != 'true' && steps.recheck.outputs.ts_exists != 'true' }}
         working-directory: packages/typescript
         run: pnpm install --no-frozen-lockfile
         shell: bash
 
       - name: Build TypeScript wrapper package
-        if: ${{ needs.prepare.outputs.dry_run != 'true' && needs.check-npm.outputs.ts_exists != 'true' }}
+        if: ${{ needs.prepare.outputs.dry_run != 'true' && steps.recheck.outputs.ts_exists != 'true' }}
         run: scripts/publish/typescript/build-package.sh
         shell: bash
 
       - name: Publish TypeScript wrapper package
-        if: ${{ needs.prepare.outputs.dry_run != 'true' && needs.check-npm.outputs.ts_exists != 'true' }}
+        if: ${{ needs.prepare.outputs.dry_run != 'true' && steps.recheck.outputs.ts_exists != 'true' }}
         uses: kreuzberg-dev/actions/publish-npm@v1 # v1
         with:
           package-dir: packages/typescript
@@ -1820,7 +1896,16 @@ jobs:
         run: npm install -g npm@latest
         shell: bash
 
+      - name: Re-check npm before publish
+        id: recheck
+        uses: kreuzberg-dev/actions/check-registry@v1 # v1
+        with:
+          registry: npm
+          package: "@kreuzberg/html-to-markdown-wasm"
+          version: ${{ needs.prepare.outputs.version }}
+
       - name: Publish WASM package
+        if: ${{ steps.recheck.outputs.exists != 'true' }}
         uses: kreuzberg-dev/actions/publish-npm@v1 # v1
         with:
           package-dir: crates/html-to-markdown-wasm
