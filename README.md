@@ -42,7 +42,13 @@
     <img src="https://img.shields.io/badge/Docs-kreuzberg.dev-007ec6" alt="Documentation">
   </a>
   <a href="https://github.com/kreuzberg-dev/html-to-markdown/blob/main/LICENSE">
-    <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License">
+    <img src="https://img.shields.io/badge/License-MIT-007ec6" alt="License">
+  </a>
+  <a href="https://docs.html-to-markdown.kreuzberg.dev/demo/">
+    <img src="https://img.shields.io/badge/%E2%96%B6%EF%B8%8F_Live_Demo-007ec6" alt="Live Demo">
+  </a>
+  <a href="https://huggingface.co/Kreuzberg">
+    <img src="https://img.shields.io/badge/%F0%9F%A4%97_Hugging_Face-007ec6" alt="Hugging Face">
   </a>
 </div>
 
