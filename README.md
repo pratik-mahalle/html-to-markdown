@@ -47,9 +47,6 @@
   <a href="https://docs.html-to-markdown.kreuzberg.dev/demo/">
     <img src="https://img.shields.io/badge/%E2%96%B6%EF%B8%8F_Live_Demo-007ec6" alt="Live Demo">
   </a>
-  <a href="https://huggingface.co/Kreuzberg">
-    <img src="https://img.shields.io/badge/%F0%9F%A4%97_Hugging_Face-007ec6" alt="Hugging Face">
-  </a>
 </div>
 
 <img width="3384" height="573" alt="Banner" src="https://github.com/user-attachments/assets/478a83da-237b-446b-b3a8-e564c13e00a8" />
