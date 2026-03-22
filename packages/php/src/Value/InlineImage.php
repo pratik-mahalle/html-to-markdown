@@ -30,13 +30,6 @@ final readonly class InlineImage
     {
         self::assertPayload($payload);
 
-        /** @var string $data */
-        $data = $payload['data'];
-        /** @var string $format */
-        $format = $payload['format'];
-        /** @var string $source */
-        $source = $payload['source'];
-
         $normalized = self::normalizePayload($payload);
 
         return new self(
@@ -152,9 +145,17 @@ final readonly class InlineImage
                 throw InvalidOption::because('inline_image.dimensions', 'expected [width, height]');
             }
 
+            $w = $dimensionsRaw[0];
+            $h = $dimensionsRaw[1];
+            if (!\is_int($w) && !\is_float($w) && !\is_string($w)) {
+                throw InvalidOption::because('inline_image.dimensions', 'width must be numeric');
+            }
+            if (!\is_int($h) && !\is_float($h) && !\is_string($h)) {
+                throw InvalidOption::because('inline_image.dimensions', 'height must be numeric');
+            }
             $dimensions = [
-                (int) $dimensionsRaw[0],
-                (int) $dimensionsRaw[1],
+                (int) $w,
+                (int) $h,
             ];
         }
 

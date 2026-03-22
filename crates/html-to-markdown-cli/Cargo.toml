@@ -13,31 +13,30 @@ description = "Command-line interface for html-to-markdown - high-performance HT
 keywords = ["html", "markdown", "cli", "converter", "html5ever"]
 categories = ["command-line-utilities", "text-processing"]
 
-
-[lints]
-workspace = true
-
 [[bin]]
 name = "html-to-markdown"
 path = "src/main.rs"
 
 [dependencies]
-html-to-markdown-rs = { workspace = true, features = ["metadata"] }
 clap.workspace = true
 clap_complete.workspace = true
 clap_mangen.workspace = true
 encoding_rs.workspace = true
-serde_json = "1.0"
+html-to-markdown-rs = { workspace = true, features = ["metadata"] }
 reqwest = { version = "0.13.2", default-features = false, features = [
-  "blocking",
-  "rustls",
-  "gzip",
-  "brotli",
-  "deflate",
-  "charset",
+    "blocking",
+    "rustls",
+    "gzip",
+    "brotli",
+    "deflate",
+    "charset",
 ] }
+serde_json = "1.0"
 
 [dev-dependencies]
 assert_cmd = "2.2"
 predicates = "3.1"
 tempfile = "3.27"
+
+[lints]
+workspace = true

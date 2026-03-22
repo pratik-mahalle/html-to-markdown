@@ -13,6 +13,48 @@ description = "Node.js/NAPI bindings for html-to-markdown-rs"
 keywords = ["html", "markdown", "nodejs", "napi"]
 categories = ["parsing", "text-processing", "api-bindings"]
 
+[package.metadata.napi]
+package-json-name = "@kreuzberg/html-to-markdown-node"
+
+[lib]
+crate-type = ["cdylib"]
+
+[features]
+default = ["full"]
+full = ["metadata", "visitor", "async-visitor"]
+metadata = ["html-to-markdown-rs/metadata"]
+visitor = ["html-to-markdown-rs/visitor"]
+async-visitor = ["visitor", "html-to-markdown-rs/async-visitor"]
+profiling = ["dep:pprof"]
+
+[dependencies]
+async-trait = "0.1"
+html-to-markdown-bindings-common = { path = "../html-to-markdown-bindings-common", version = "2.29.0", features = [
+    "metadata",
+    "inline-images",
+] }
+html-to-markdown-rs = { workspace = true, features = [
+    "inline-images",
+    "metadata",
+    "serde",
+    "async-visitor",
+] }
+napi = { version = "3.4", default-features = false, features = [
+    "napi8",
+    "tokio_rt",
+] }
+napi-derive = "3.3"
+pprof = { version = "0.15", features = ["flamegraph"], optional = true }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1", features = ["rt", "sync"] }
+
+[target.'cfg(all(any(windows, unix), target_arch = "x86_64", not(target_env = "musl")))'.dependencies]
+mimalloc-rust = "0.2"
+
+[build-dependencies]
+napi-build = "2.2"
+
 # Publishing metadata for npm scoped package
 
 [lints.rust]
@@ -26,44 +68,3 @@ cargo = { level = "deny", priority = -1 }
 pedantic = { level = "deny", priority = -1 }
 nursery = { level = "warn", priority = -1 }
 multiple_crate_versions = { level = "allow", priority = 1 }
-
-[package.metadata.napi]
-package-json-name = "@kreuzberg/html-to-markdown-node"
-
-[lib]
-crate-type = ["cdylib"]
-
-[dependencies]
-html-to-markdown-rs = { workspace = true, features = [
-  "inline-images",
-  "metadata",
-  "serde",
-  "async-visitor",
-] }
-html-to-markdown-bindings-common = { path = "../html-to-markdown-bindings-common", version = "2.28.6", features = [
-  "metadata",
-  "inline-images",
-] }
-napi = { version = "3.4", default-features = false, features = [
-  "napi8",
-  "tokio_rt",
-] }
-napi-derive = "3.3"
-async-trait = "0.1"
-tokio = { version = "1", features = ["rt", "sync"] }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-pprof = { version = "0.15", features = ["flamegraph"], optional = true }
-
-[target.'cfg(all(any(windows, unix), target_arch = "x86_64", not(target_env = "musl")))'.dependencies]
-mimalloc-rust = "0.2"
-
-[build-dependencies]
-napi-build = "2.2"
-
-[features]
-default = ["metadata", "async-visitor"]
-metadata = ["html-to-markdown-rs/metadata"]
-visitor = ["html-to-markdown-rs/visitor"]
-async-visitor = ["visitor", "html-to-markdown-rs/async-visitor"]
-profiling = ["dep:pprof"]

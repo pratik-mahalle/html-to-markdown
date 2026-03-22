@@ -23,17 +23,20 @@ final readonly class TableData
     public static function fromExtensionPayload(array $payload): self
     {
         $cells = [];
-        $rawCells = \is_array($payload['cells'] ?? null) ? $payload['cells'] : [];
+        $rawCellsValue = $payload['cells'] ?? null;
+        $rawCells = \is_array($rawCellsValue) ? $rawCellsValue : [];
         foreach ($rawCells as $row) {
             if (\is_array($row)) {
-                $cells[] = \array_map('\strval', $row);
+                $cells[] = \array_values(\array_map('\strval', $row));
             }
         }
 
-        $markdown = \is_string($payload['markdown'] ?? null) ? $payload['markdown'] : '';
+        $markdownValue = $payload['markdown'] ?? null;
+        $markdown = \is_string($markdownValue) ? $markdownValue : '';
 
         $isHeaderRow = [];
-        $rawHeaderRow = \is_array($payload['is_header_row'] ?? null) ? $payload['is_header_row'] : [];
+        $rawHeaderRowValue = $payload['is_header_row'] ?? null;
+        $rawHeaderRow = \is_array($rawHeaderRowValue) ? $rawHeaderRowValue : [];
         foreach ($rawHeaderRow as $flag) {
             $isHeaderRow[] = (bool) $flag;
         }

@@ -54,9 +54,12 @@ final class NodeContext
             $tagName = $data['tag_name'];
         }
 
+        /** @var array<string, string> $attributes */
         $attributes = [];
         if (isset($data['attributes']) && \is_array($data['attributes'])) {
-            $attributes = $data['attributes'];
+            /** @var array<string, string> $attributesValue */
+            $attributesValue = $data['attributes'];
+            $attributes = $attributesValue;
         }
 
         $depth = 0;

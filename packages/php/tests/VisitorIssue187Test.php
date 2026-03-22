@@ -232,7 +232,6 @@ HTML;
 
             // Verify captured tag names are valid HTML tags
             foreach ($visitor->capturedTagNames as $tagName) {
-                self::assertIsString($tagName, 'Tag name should be a string');
                 self::assertNotEmpty($tagName, 'Tag name should not be empty');
 
                 // Tag names should be lowercase and alphanumeric

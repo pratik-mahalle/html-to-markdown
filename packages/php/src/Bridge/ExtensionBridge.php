@@ -28,7 +28,6 @@ final class ExtensionBridge implements ExtensionBridgeContract
      */
     public function convert(string $html, ?array $options = null): string
     {
-        /** @var callable-string $callable */
         $callable = self::CONVERT_FUNCTION;
         if (!\function_exists($callable)) {
             throw ExtensionNotLoaded::create();
@@ -55,7 +54,6 @@ final class ExtensionBridge implements ExtensionBridgeContract
         ?array $options = null,
         ?array $config = null,
     ): array {
-        /** @var callable-string $callable */
         $callable = self::CONVERT_INLINE_FUNCTION;
         if (!\function_exists($callable)) {
             throw ExtensionNotLoaded::create();
@@ -89,7 +87,6 @@ final class ExtensionBridge implements ExtensionBridgeContract
         ?array $options = null,
         ?array $metadataConfig = null,
     ): array {
-        /** @var callable-string $callable */
         $callable = self::CONVERT_METADATA_FUNCTION;
         if (!\function_exists($callable)) {
             throw ExtensionNotLoaded::create();
@@ -120,7 +117,6 @@ final class ExtensionBridge implements ExtensionBridgeContract
         ?array $options = null,
         ?HtmlVisitor $visitor = null,
     ): string {
-        /** @var callable-string $callable */
         $callable = self::CONVERT_VISITOR_FUNCTION;
         if (!\function_exists($callable)) {
             throw ExtensionNotLoaded::create();
@@ -147,7 +143,6 @@ final class ExtensionBridge implements ExtensionBridgeContract
         ?array $options = null,
         ?array $metadataConfig = null,
     ): array {
-        /** @var callable-string $callable */
         $callable = self::CONVERT_TABLES_FUNCTION;
         if (!\function_exists($callable)) {
             throw ExtensionNotLoaded::create();

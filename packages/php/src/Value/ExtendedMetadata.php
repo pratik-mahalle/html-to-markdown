@@ -26,9 +26,12 @@ final readonly class ExtendedMetadata
      */
     public static function fromExtensionPayload(array $payload): self
     {
-        $documentPayload = \is_array($payload['document'] ?? null) ? $payload['document'] : [];
+        $documentRaw = $payload['document'] ?? null;
+        /** @var array<string, mixed> $documentPayload */
+        $documentPayload = \is_array($documentRaw) ? $documentRaw : [];
 
-        $headersPayload = \is_array($payload['headers'] ?? null) ? $payload['headers'] : [];
+        $headersRaw = $payload['headers'] ?? null;
+        $headersPayload = \is_array($headersRaw) ? $headersRaw : [];
 
         $headers = [];
         foreach ($headersPayload as $header) {
@@ -39,10 +42,12 @@ final readonly class ExtendedMetadata
                 );
             }
 
+            /** @var array<string, mixed> $header */
             $headers[] = HeaderMetadata::fromExtensionPayload($header);
         }
 
-        $linksPayload = \is_array($payload['links'] ?? null) ? $payload['links'] : [];
+        $linksRaw = $payload['links'] ?? null;
+        $linksPayload = \is_array($linksRaw) ? $linksRaw : [];
 
         $links = [];
         foreach ($linksPayload as $link) {
@@ -53,10 +58,12 @@ final readonly class ExtendedMetadata
                 );
             }
 
+            /** @var array<string, mixed> $link */
             $links[] = LinkMetadata::fromExtensionPayload($link);
         }
 
-        $imagesPayload = \is_array($payload['images'] ?? null) ? $payload['images'] : [];
+        $imagesRaw = $payload['images'] ?? null;
+        $imagesPayload = \is_array($imagesRaw) ? $imagesRaw : [];
 
         $images = [];
         foreach ($imagesPayload as $image) {
@@ -67,10 +74,12 @@ final readonly class ExtendedMetadata
                 );
             }
 
+            /** @var array<string, mixed> $image */
             $images[] = ImageMetadata::fromExtensionPayload($image);
         }
 
-        $structuredDataPayload = \is_array($payload['structured_data'] ?? null) ? $payload['structured_data'] : [];
+        $structuredDataRaw = $payload['structured_data'] ?? null;
+        $structuredDataPayload = \is_array($structuredDataRaw) ? $structuredDataRaw : [];
 
         $structuredData = [];
         foreach ($structuredDataPayload as $data) {
@@ -81,6 +90,7 @@ final readonly class ExtendedMetadata
                 );
             }
 
+            /** @var array<string, mixed> $data */
             $structuredData[] = StructuredData::fromExtensionPayload($data);
         }
 

@@ -352,6 +352,7 @@ final readonly class ConversionOptions
 
     private static function defaults(): self
     {
+        /** @var self|null $defaults */
         static $defaults = null;
         $defaults ??= new self();
 
