@@ -16,10 +16,8 @@ final class MetadataExtractionTest extends TestCase
         $html = '<html><head><title>Test Page</title></head><body><p>Content</p></body></html>';
         $result = convert_with_metadata($html);
 
-        self::assertIsArray($result);
         self::assertArrayHasKey('markdown', $result);
         self::assertArrayHasKey('metadata', $result);
-        self::assertIsString($result['markdown']);
         self::assertInstanceOf(ExtendedMetadata::class, $result['metadata']);
     }
 
@@ -46,7 +44,7 @@ final class MetadataExtractionTest extends TestCase
             . '<body><p>Content</p></body></html>';
         $result = convert_with_metadata($html);
 
-        self::assertIsArray($result['metadata']->document->keywords);
+        self::assertNotEmpty($result['metadata']->document->keywords);
     }
 
     public function testMetadataExtractionWithAuthor(): void
@@ -98,7 +96,7 @@ final class MetadataExtractionTest extends TestCase
         </head><body><p>Content</p></body></html>';
         $result = convert_with_metadata($html);
 
-        self::assertIsArray($result['metadata']->document->openGraph);
+        self::assertNotEmpty($result['metadata']->document->openGraph);
     }
 
     public function testMetadataExtractionWithHeaders(): void
@@ -106,7 +104,6 @@ final class MetadataExtractionTest extends TestCase
         $html = '<html><body><h1>Header 1</h1><h2>Header 2</h2></body></html>';
         $result = convert_with_metadata($html);
 
-        self::assertIsArray($result['metadata']->headers);
         self::assertGreaterThanOrEqual(2, \count($result['metadata']->headers));
     }
 
@@ -116,7 +113,7 @@ final class MetadataExtractionTest extends TestCase
             . '<a href="https://example2.com">Link 2</a></body></html>';
         $result = convert_with_metadata($html);
 
-        self::assertIsArray($result['metadata']->links);
+        self::assertNotEmpty($result['metadata']->links);
     }
 
     public function testMetadataExtractionWithImages(): void
@@ -124,7 +121,7 @@ final class MetadataExtractionTest extends TestCase
         $html = '<html><body><img src="https://example.com/image.jpg" alt="Test Image"></body></html>';
         $result = convert_with_metadata($html);
 
-        self::assertIsArray($result['metadata']->images);
+        self::assertNotEmpty($result['metadata']->images);
     }
 
     public function testMetadataExtractionWithOptions(): void
@@ -146,9 +143,9 @@ final class MetadataExtractionTest extends TestCase
         ];
         $result = convert_with_metadata($html, null, $config);
 
-        self::assertIsArray($result['metadata']->headers);
-        self::assertIsArray($result['metadata']->links);
-        self::assertIsArray($result['metadata']->images);
+        self::assertNotNull($result['metadata']->headers);
+        self::assertNotNull($result['metadata']->links);
+        self::assertNotNull($result['metadata']->images);
     }
 
     public function testMetadataExtractionViaFacade(): void
@@ -156,7 +153,6 @@ final class MetadataExtractionTest extends TestCase
         $html = '<html><head><title>Test</title></head><body><p>Content</p></body></html>';
         $result = HtmlToMarkdown::convertWithMetadata($html);
 
-        self::assertIsArray($result);
         self::assertArrayHasKey('markdown', $result);
         self::assertArrayHasKey('metadata', $result);
         self::assertInstanceOf(ExtendedMetadata::class, $result['metadata']);
@@ -169,10 +165,10 @@ final class MetadataExtractionTest extends TestCase
 
         if (\count($result['metadata']->headers) > 0) {
             $header = $result['metadata']->headers[0];
-            self::assertIsInt($header->level);
-            self::assertIsString($header->text);
-            self::assertIsInt($header->depth);
-            self::assertIsInt($header->htmlOffset);
+            self::assertGreaterThanOrEqual(1, $header->level);
+            self::assertNotEmpty($header->text);
+            self::assertGreaterThanOrEqual(0, $header->depth);
+            self::assertGreaterThanOrEqual(0, $header->htmlOffset);
         }
     }
 
@@ -183,14 +179,12 @@ final class MetadataExtractionTest extends TestCase
 
         if (\count($result['metadata']->links) > 0) {
             $link = $result['metadata']->links[0];
-            self::assertIsString($link->href);
-            self::assertIsString($link->text);
-            self::assertIsString($link->linkType);
-            self::assertIsArray($link->rel);
+            self::assertNotEmpty($link->href);
+            self::assertNotEmpty($link->text);
+            self::assertNotEmpty($link->linkType);
             if (\count($link->rel) > 0) {
-                self::assertIsString($link->rel[0]);
+                self::assertNotEmpty($link->rel[0]);
             }
-            self::assertIsArray($link->attributes);
         }
     }
 
@@ -201,9 +195,8 @@ final class MetadataExtractionTest extends TestCase
 
         if (\count($result['metadata']->images) > 0) {
             $image = $result['metadata']->images[0];
-            self::assertIsString($image->src);
-            self::assertIsString($image->imageType);
-            self::assertIsArray($image->attributes);
+            self::assertNotEmpty($image->src);
+            self::assertNotEmpty($image->imageType);
         }
     }
 
@@ -229,7 +222,6 @@ final class MetadataExtractionTest extends TestCase
         $result = convert_with_metadata($html);
 
         $array = $result['metadata']->toArray();
-        self::assertIsArray($array);
         self::assertArrayHasKey('document', $array);
         self::assertArrayHasKey('headers', $array);
         self::assertArrayHasKey('links', $array);

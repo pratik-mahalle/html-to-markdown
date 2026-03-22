@@ -78,7 +78,7 @@ final class TypeAssertions
             $result[] = $entry;
         }
 
-        return \array_values($result);
+        return $result;
     }
 
     /**

@@ -33,7 +33,7 @@ endif
 
 TESTS = test_version test_error test_convert test_convert_extended test_metadata test_visitor test_profiling
 
-.PHONY: all clean
+.PHONY: all test clean
 
 all: $(TESTS)
 
@@ -57,6 +57,9 @@ test_visitor: test_visitor.c test_ffi_decls.h
 
 test_profiling: test_profiling.c test_ffi_decls.h
 	$(CC) $(CFLAGS) $(VERSION_DEFS) -o $@ $< $(LDFLAGS) $(RPATH)
+
+test: all
+	@for t in $(TESTS); do echo "Running $$t..."; ./$$t || exit 1; done
 
 clean:
 	rm -f $(TESTS)

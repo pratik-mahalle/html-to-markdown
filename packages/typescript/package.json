@@ -1,6 +1,6 @@
 {
 	"name": "@kreuzberg/html-to-markdown",
-	"version": "2.28.6",
+	"version": "2.29.0",
 	"description": "High-performance HTML to Markdown converter for TypeScript/Node.js with a Rust core.",
 	"keywords": [
 		"html",
@@ -50,7 +50,8 @@
 		"format:check": "biome check src",
 		"test": "pnpm --filter @kreuzberg/html-to-markdown-node run build && vitest run",
 		"test:coverage": "pnpm --filter @kreuzberg/html-to-markdown-node run build && vitest run --coverage",
-		"test:watch": "vitest"
+		"test:watch": "vitest",
+		"typecheck": "tsc --noEmit --project tsconfig.json"
 	},
 	"files": [
 		"dist",

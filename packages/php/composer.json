@@ -33,13 +33,13 @@
 	"scripts": {
 		"post-install-cmd": ["@php bin/install-extension.php"],
 		"post-update-cmd": ["@php bin/install-extension.php"],
-		"phpstan": "php -d detect_unicode=0 vendor/bin/phpstan --configuration=phpstan.neon",
+		"phpstan": "php -d detect_unicode=0 vendor/bin/phpstan --configuration=phpstan.neon --memory-limit=512M",
 		"csfixer": "PHP_CS_FIXER_IGNORE_ENV=1 php vendor/bin/php-cs-fixer fix --config php-cs-fixer.php src tests",
 		"format": "PHP_CS_FIXER_IGNORE_ENV=1 php vendor/bin/php-cs-fixer fix --config php-cs-fixer.php src tests",
 		"format:check": "PHP_CS_FIXER_IGNORE_ENV=1 php vendor/bin/php-cs-fixer fix --config php-cs-fixer.php --dry-run src tests",
 		"test": "php bin/run-tests.php",
 		"lint": "@phpstan",
-		"lint:fix": "PHP_CS_FIXER_IGNORE_ENV=1 php vendor/bin/php-cs-fixer fix --config php-cs-fixer.php src tests && php -d detect_unicode=0 vendor/bin/phpstan --configuration=phpstan.neon"
+		"lint:fix": "PHP_CS_FIXER_IGNORE_ENV=1 php vendor/bin/php-cs-fixer fix --config php-cs-fixer.php src tests && php -d detect_unicode=0 vendor/bin/phpstan --configuration=phpstan.neon --memory-limit=512M"
 	},
 	"config": {
 		"sort-packages": true,
@@ -57,5 +57,5 @@
 	},
 	"minimum-stability": "stable",
 	"prefer-stable": true,
-	"version": "2.28.6"
+	"version": "2.29.0"
 }

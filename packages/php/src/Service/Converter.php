@@ -78,7 +78,9 @@ final class Converter
         );
 
         $markdown = TypeAssertions::string($payload['markdown'] ?? '', 'convert_with_metadata.markdown');
-        $metadataPayload = \is_array($payload['metadata'] ?? null) ? $payload['metadata'] : [];
+        $metadataRaw = $payload['metadata'] ?? null;
+        /** @var array<string, mixed> $metadataPayload */
+        $metadataPayload = \is_array($metadataRaw) ? $metadataRaw : [];
 
         return [
             'markdown' => $markdown,

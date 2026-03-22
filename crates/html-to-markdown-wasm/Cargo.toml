@@ -13,6 +13,50 @@ description = "HTML to Markdown conversion for WebAssembly targets"
 keywords = ["html", "markdown", "wasm", "webassembly"]
 categories = ["parsing", "text-processing", "wasm"]
 
+[package.metadata.wasm-pack.publish]
+registry = "https://registry.npmjs.org/"
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = ["-O3", "--enable-bulk-memory", "--enable-nontrapping-float-to-int"]
+
+[package.metadata.wasm-pack.profile.dev]
+wasm-opt = false
+
+[package.metadata.cargo-machete]
+ignored = ["getrandom", "serde_json"]
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = ["full", "js-bindings"]
+full = ["metadata", "visitor"]
+js-bindings = ["wasm-bindgen", "serde-wasm-bindgen", "console_error_panic_hook", "js-sys"]
+metadata = ["html-to-markdown-rs/metadata"]
+visitor = ["html-to-markdown-rs/visitor"]
+wasmtime-testing = []
+
+[dependencies]
+console_error_panic_hook = { version = "0.1", optional = true }
+getrandom = { version = "0.4", features = ["wasm_js"] }
+html-to-markdown-bindings-common = { path = "../html-to-markdown-bindings-common", version = "2.29.0", features = [
+    "metadata",
+    "inline-images",
+] }
+html-to-markdown-rs = { workspace = true, features = [
+    "inline-images",
+    "metadata",
+    "visitor",
+] }
+js-sys = { version = "0.3", optional = true }
+serde = { version = "1.0", features = ["derive"] }
+serde-wasm-bindgen = { version = "0.6", optional = true }
+serde_json = "1.0"
+wasm-bindgen = { version = "0.2", optional = true }
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3"
+
 # Publishing metadata for npm scoped package
 
 [lints.rust]
@@ -26,51 +70,3 @@ cargo = { level = "deny", priority = -1 }
 pedantic = { level = "deny", priority = -1 }
 nursery = { level = "warn", priority = -1 }
 multiple_crate_versions = { level = "allow", priority = 1 }
-
-[package.metadata.wasm-pack.publish]
-registry = "https://registry.npmjs.org/"
-
-[lib]
-crate-type = ["cdylib", "rlib"]
-
-[features]
-default = ["js-bindings", "metadata", "visitor"]
-js-bindings = [
-  "wasm-bindgen",
-  "serde-wasm-bindgen",
-  "console_error_panic_hook",
-  "js-sys",
-]
-metadata = ["html-to-markdown-rs/metadata"]
-visitor = ["html-to-markdown-rs/visitor"]
-wasmtime-testing = []
-
-[dependencies]
-html-to-markdown-rs = { workspace = true, features = [
-  "inline-images",
-  "metadata",
-  "visitor",
-] }
-html-to-markdown-bindings-common = { path = "../html-to-markdown-bindings-common", version = "2.28.6", features = [
-  "metadata",
-  "inline-images",
-] }
-wasm-bindgen = { version = "0.2", optional = true }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-serde-wasm-bindgen = { version = "0.6", optional = true }
-console_error_panic_hook = { version = "0.1", optional = true }
-js-sys = { version = "0.3", optional = true }
-getrandom = { version = "0.4", features = ["wasm_js"] }
-
-[package.metadata.cargo-machete]
-ignored = ["getrandom", "serde_json"]
-
-[dev-dependencies]
-wasm-bindgen-test = "0.3"
-
-[package.metadata.wasm-pack.profile.release]
-wasm-opt = ["-O3", "--enable-bulk-memory", "--enable-nontrapping-float-to-int"]
-
-[package.metadata.wasm-pack.profile.dev]
-wasm-opt = false

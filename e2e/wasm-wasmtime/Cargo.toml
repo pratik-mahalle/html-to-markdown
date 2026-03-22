@@ -4,11 +4,10 @@ version.workspace = true
 edition.workspace = true
 publish = false
 
+[dev-dependencies]
+anyhow = "1.0"
+html-to-markdown-rs = { path = "../../crates/html-to-markdown" }
+wasmtime = "43"
 
 [lints]
 workspace = true
-
-[dev-dependencies]
-anyhow = "1.0"
-wasmtime = "43"
-html-to-markdown-rs = { path = "../../crates/html-to-markdown" }

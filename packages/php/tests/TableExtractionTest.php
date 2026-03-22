@@ -19,7 +19,6 @@ final class TableExtractionTest extends TestCase
         $result = convert_with_tables($html);
 
         self::assertInstanceOf(TableExtractionResult::class, $result);
-        self::assertIsString($result->content);
         self::assertNotEmpty($result->content);
         self::assertCount(1, $result->tables);
 
@@ -106,7 +105,6 @@ final class TableExtractionTest extends TestCase
         $result = convert_with_tables($html);
 
         $array = $result->toArray();
-        self::assertIsArray($array);
         self::assertArrayHasKey('content', $array);
         self::assertArrayHasKey('tables', $array);
         self::assertArrayHasKey('metadata', $array);
