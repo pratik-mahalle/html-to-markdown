@@ -13,6 +13,28 @@ description = "C FFI bindings for html-to-markdown-rs"
 keywords = ["html", "markdown", "ffi", "c-bindings"]
 categories = ["parsing", "text-processing", "api-bindings"]
 
+[lib]
+crate-type = ["cdylib", "staticlib"]
+
+[features]
+default = ["full"]
+full = ["metadata", "visitor"]
+metadata = ["html-to-markdown-rs/metadata"]
+profiling = ["dep:pprof"]
+visitor = ["html-to-markdown-rs/visitor"]
+
+[dependencies]
+html-to-markdown-rs = { workspace = true, features = [
+    "inline-images",
+    "metadata",
+    "visitor",
+] }
+libc = "0.2"
+pprof = { version = "0.15", features = ["flamegraph"], optional = true }
+serde_json = "1.0"
+
+[build-dependencies]
+cbindgen = "0.29"
 
 [lints.rust]
 unsafe_code = "allow"    # FFI requires unsafe code
@@ -25,25 +47,3 @@ cargo = { level = "deny", priority = -1 }
 pedantic = { level = "deny", priority = -1 }
 nursery = { level = "warn", priority = -1 }
 multiple_crate_versions = { level = "allow", priority = 1 }
-
-[lib]
-crate-type = ["cdylib", "staticlib"]
-
-[dependencies]
-html-to-markdown-rs = { workspace = true, features = [
-  "inline-images",
-  "metadata",
-  "visitor",
-] }
-serde_json = "1.0"
-libc = "0.2"
-pprof = { version = "0.15", features = ["flamegraph"], optional = true }
-
-[features]
-default = ["metadata", "visitor"]
-metadata = ["html-to-markdown-rs/metadata"]
-profiling = ["dep:pprof"]
-visitor = ["html-to-markdown-rs/visitor"]
-
-[build-dependencies]
-cbindgen = "0.29"

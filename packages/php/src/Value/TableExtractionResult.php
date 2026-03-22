@@ -21,17 +21,22 @@ final readonly class TableExtractionResult
      */
     public static function fromExtensionPayload(array $payload): self
     {
-        $content = \is_string($payload['content'] ?? null) ? $payload['content'] : '';
+        $contentValue = $payload['content'] ?? null;
+        $content = \is_string($contentValue) ? $contentValue : '';
 
         $metadata = null;
-        if (\is_array($payload['metadata'] ?? null)) {
-            $metadata = ExtendedMetadata::fromExtensionPayload($payload['metadata']);
+        $metadataPayload = $payload['metadata'] ?? null;
+        if (\is_array($metadataPayload)) {
+            /** @var array<string, mixed> $metadataPayload */
+            $metadata = ExtendedMetadata::fromExtensionPayload($metadataPayload);
         }
 
         $tables = [];
-        $rawTables = \is_array($payload['tables'] ?? null) ? $payload['tables'] : [];
+        $rawTablesValue = $payload['tables'] ?? null;
+        $rawTables = \is_array($rawTablesValue) ? $rawTablesValue : [];
         foreach ($rawTables as $table) {
             if (\is_array($table)) {
+                /** @var array<string, mixed> $table */
                 $tables[] = TableData::fromExtensionPayload($table);
             }
         }

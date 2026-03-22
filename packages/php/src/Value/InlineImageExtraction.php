@@ -46,6 +46,7 @@ final readonly class InlineImageExtraction
                 );
             }
 
+            /** @var array<string, mixed> $image */
             $inlineImages[] = InlineImage::fromExtensionPayload($image);
         }
 
@@ -70,7 +71,21 @@ final readonly class InlineImageExtraction
                 );
             }
 
-            $warnings[] = new InlineImageWarning((int) $warning['index'], (string) $warning['message']);
+            $warningIndex = $warning['index'];
+            $warningMessage = $warning['message'];
+            if (!\is_int($warningIndex) && !\is_float($warningIndex) && !\is_string($warningIndex)) {
+                throw \HtmlToMarkdown\Exception\InvalidOption::because(
+                    'inline_image_extraction.warnings[].index',
+                    'expected numeric value',
+                );
+            }
+            if (!\is_string($warningMessage) && !\is_int($warningMessage) && !\is_float($warningMessage)) {
+                throw \HtmlToMarkdown\Exception\InvalidOption::because(
+                    'inline_image_extraction.warnings[].message',
+                    'expected string value',
+                );
+            }
+            $warnings[] = new InlineImageWarning((int) $warningIndex, (string) $warningMessage);
         }
 
         return new self(

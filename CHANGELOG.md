@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.29.0] - 2026-03-22
+
+### Added
+
+- **`full` feature group**: Added a `full` feature to core crate and all binding crates (PHP, Python, Node, WASM, FFI, Elixir, bindings-common) that enables all available features. All bindings now default to `full`.
+- **Dublin Core metadata extraction**: `DC.*` and `DCTERMS.*` meta tags now map to dedicated `DocumentMetadata` fields (title, description, author, keywords). Other DC/DCTERMS fields stored in `meta_tags` with `dc_`/`dcterms_` prefix.
+- **Extended keyword variants**: Keywords now extracted from `news_keywords`, `citation_keywords`, `DC.subject`, `DC.keywords`, `DCTERMS.subject`, `subject`, `topic`, `category`, and `classification` meta tags.
+- **`cargo-sort` pre-commit hook**: Added for consistent Cargo.toml key ordering.
+- **`checkmake` pre-commit hook**: Added for Makefile linting.
+- **`typescript-typecheck` pre-commit hook**: Added TypeScript type checking via `tsc --noEmit`.
+- **`typecheck` npm script**: Added to `packages/typescript/package.json`.
+
+### Fixed
+
+- **Case-insensitive meta tag matching** ([#251](https://github.com/kreuzberg-dev/html-to-markdown/issues/251)): All meta tag name matching is now case-insensitive per the HTML spec. `<meta name="Keywords">` and `<meta name="DC.keywords">` are now correctly captured.
+- **PHP `convertWithTables()` not found** ([#250](https://github.com/kreuzberg-dev/html-to-markdown/issues/250)): The `visitor` feature was not enabled by default in the PHP binding crate, causing `html_to_markdown_convert_with_tables` to be missing from the extension.
+- **PHP binding defaults**: PHP crate now defaults to `["full"]` (was `["metadata"]`), enabling visitor support.
+- **Python binding defaults**: Python crate now defaults to `["full"]` (was `[]`), enabling metadata, visitor, async-visitor, and inline-images.
+- **PHPStan 2.x compatibility**: Fixed 40+ PHPStan errors from the 1.x→2.x upgrade (type narrowing, property access on mixed, redundant assertions). Added `--memory-limit=512M` to prevent OOM.
+- **Makefile `test` target**: Added missing `.PHONY: test` target to FFI test Makefile.
+
+### Changed
+
+- **Pre-commit config aligned with kreuzberg**: Added `cargo-sort`, `checkmake`, `typescript-typecheck`. Updated `taplo-format` to exclude `Cargo.toml`. Excluded `Makefile.frag` from checkmake.
+- **Cargo.toml formatting**: All workspace Cargo.toml files sorted via `cargo-sort`.
+- **pyproject.toml formatting**: All pyproject.toml files formatted via `pyproject-fmt`.
+
 ## [2.28.6] - 2026-03-20
 
 ### Changed

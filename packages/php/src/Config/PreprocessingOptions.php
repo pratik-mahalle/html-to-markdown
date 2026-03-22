@@ -75,6 +75,7 @@ final readonly class PreprocessingOptions
 
     public function isDefault(): bool
     {
+        /** @var self|null $defaults */
         static $defaults = null;
         $defaults ??= new self();
 

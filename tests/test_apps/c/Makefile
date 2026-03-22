@@ -56,13 +56,7 @@ clean:
 	rm -f $(BINARY)
 
 help:
-	@echo "html-to-markdown C FFI Test App"
-	@echo ""
 	@echo "Targets: build (default), test, clean, help"
 	@echo "Variables: HTM_ROOT (default: ../../..), CC (default: cc), BUILD_MODE (default: release)"
-	@echo ""
-	@echo "Prerequisites:"
-	@echo "  cargo build --release -p html-to-markdown-ffi"
-	@echo ""
-	@echo "Example:"
-	@echo "  cargo build --release -p html-to-markdown-ffi && make test"
+	@echo "Prerequisite: cargo build --release -p html-to-markdown-ffi"
+	@echo "Example: cargo build --release -p html-to-markdown-ffi && make test"
