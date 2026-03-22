@@ -1377,7 +1377,7 @@ jobs:
         with:
           pattern: rubygems-*
           path: dist
-          merge-multiple: false
+          merge-multiple: true
 
       - name: Re-check RubyGems before publish
         id: recheck
