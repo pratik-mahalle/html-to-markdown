@@ -8,7 +8,7 @@ status=${PIPESTATUS[0]}
 set -e
 
 if [[ "${status}" -ne 0 ]]; then
-  if grep -q "already uploaded" "${publish_log}" || grep -q "is already published" "${publish_log}"; then
+  if grep -q "already uploaded" "${publish_log}" || grep -q "is already published" "${publish_log}" || grep -q "already exists" "${publish_log}"; then
     echo "::notice::html-to-markdown-rs already published; skipping."
   else
     exit "${status}"
