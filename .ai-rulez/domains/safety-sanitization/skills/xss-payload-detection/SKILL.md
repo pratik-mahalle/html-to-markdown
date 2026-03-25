@@ -1,4 +1,5 @@
 ---
+description: "Xss Payload Detection"
 name: xss-payload-detection
 ---
 Detect and prevent XSS attack patterns

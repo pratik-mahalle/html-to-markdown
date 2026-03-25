@@ -1,4 +1,5 @@
 ---
+description: "Whitespace Normalization"
 name: whitespace-normalization
 ---
 Normalize whitespace per configuration

@@ -1,4 +1,5 @@
 ---
+description: "Svg Security Hardening"
 name: svg-security-hardening
 ---
 Safely handle SVG elements

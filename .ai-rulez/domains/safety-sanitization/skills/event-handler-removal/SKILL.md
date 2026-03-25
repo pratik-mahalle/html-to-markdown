@@ -1,4 +1,5 @@
 ---
+description: "Event Handler Removal"
 name: event-handler-removal
 ---
 Remove JavaScript event handlers from HTML

@@ -1,3 +1,6 @@
+---
+description: "HTML Parsing Strategies for html-to-markdown"
+---
 # HTML Parsing Strategies for html-to-markdown
 
 ## Overview

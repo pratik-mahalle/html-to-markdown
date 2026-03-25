@@ -1,4 +1,5 @@
 ---
+description: "Xss Test Implementation"
 name: xss-test-implementation
 ---
 Create comprehensive XSS test suite

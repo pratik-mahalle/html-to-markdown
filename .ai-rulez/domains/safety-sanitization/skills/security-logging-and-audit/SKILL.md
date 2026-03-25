@@ -1,4 +1,5 @@
 ---
+description: "Security Logging And Audit"
 name: security-logging-and-audit
 ---
 Log security events for audit trail

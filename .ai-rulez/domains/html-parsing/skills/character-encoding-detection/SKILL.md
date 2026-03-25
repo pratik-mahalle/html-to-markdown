@@ -1,4 +1,5 @@
 ---
+description: "Character Encoding Detection"
 name: character-encoding-detection
 ---
 Detect and convert character encodings to UTF-8

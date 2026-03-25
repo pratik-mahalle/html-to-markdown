@@ -1,4 +1,5 @@
 ---
+description: "Whitespace Mode Configuration"
 name: whitespace-mode-configuration
 ---
 Apply configurable whitespace handling strategy

@@ -1,4 +1,5 @@
 ---
+description: "Ammonia Sanitization"
 name: ammonia-sanitization
 ---
 Use ammonia crate for HTML sanitization

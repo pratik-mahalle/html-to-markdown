@@ -1,4 +1,5 @@
 ---
+description: "Input Binary Detection"
 name: input-binary-detection
 ---
 Detect binary and non-UTF-8 input before parsing
