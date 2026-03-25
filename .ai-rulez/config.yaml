@@ -20,12 +20,16 @@ builtins:
   - pyo3
   - typescript
   - napi-rs
+  - go
+  - java
   - ruby
   - magnus
   - php
   - ext-php-rs
+  - csharp
   - elixir
   - rustler
+  - r
   - wasm
   - security
   - git-workflow
@@ -35,7 +39,9 @@ builtins:
   - default-commands
 
 presets:
-    - claude
-    - gemini
-    - codex
+  - claude
+  - gemini
+  - codex
+compression:
+  level: moderate
 version: "3.0"
