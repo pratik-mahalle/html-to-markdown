@@ -1,4 +1,5 @@
 ---
+description: "Parser Error Handling"
 name: parser-error-handling
 ---
 Handle parser errors gracefully with recovery

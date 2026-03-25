@@ -1,4 +1,5 @@
 ---
+description: "Task List Detection And Conversion"
 name: task-list-detection-and-conversion
 ---
 Detect and convert checkbox task lists

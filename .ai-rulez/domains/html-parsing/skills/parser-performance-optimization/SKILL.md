@@ -1,4 +1,5 @@
 ---
+description: "Parser Performance Optimization"
 name: parser-performance-optimization
 ---
 Optimize parser speed and memory usage

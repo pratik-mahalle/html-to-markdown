@@ -1,4 +1,5 @@
 ---
+description: "Attribute Access And Validation"
 name: attribute-access-and-validation
 ---
 Safely access and retrieve element attributes

@@ -1,4 +1,5 @@
 ---
+description: "Emphasis And Formatting Conversion"
 name: emphasis-and-formatting-conversion
 ---
 Convert text emphasis tags to Markdown

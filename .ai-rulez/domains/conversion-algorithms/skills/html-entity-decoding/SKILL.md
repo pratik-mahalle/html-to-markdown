@@ -1,4 +1,5 @@
 ---
+description: "Html Entity Decoding"
 name: html-entity-decoding
 ---
 Decode HTML entities in text

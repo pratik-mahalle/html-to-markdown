@@ -1,4 +1,5 @@
 ---
+description: "Metadata Handling"
 name: metadata-handling
 ---
 Safely handle metadata and structured data
