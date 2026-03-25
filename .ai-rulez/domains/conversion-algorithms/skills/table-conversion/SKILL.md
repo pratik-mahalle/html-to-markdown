@@ -1,4 +1,5 @@
 ---
+description: "Table Conversion"
 name: table-conversion
 ---
 Convert HTML tables to Markdown GFM pipe tables

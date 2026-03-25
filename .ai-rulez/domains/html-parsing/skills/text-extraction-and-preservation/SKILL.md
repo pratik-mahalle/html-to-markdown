@@ -1,4 +1,5 @@
 ---
+description: "Text Extraction And Preservation"
 name: text-extraction-and-preservation
 ---
 Extract text content preserving original whitespace

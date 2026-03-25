@@ -1,4 +1,5 @@
 ---
+description: "Style Attribute Sanitization"
 name: style-attribute-sanitization
 ---
 Sanitize or remove CSS in style attributes

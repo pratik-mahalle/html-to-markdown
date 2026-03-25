@@ -1,4 +1,5 @@
 ---
+description: "Security Configuration Design"
 name: security-configuration-design
 ---
 Design SafetyConfig for different use cases

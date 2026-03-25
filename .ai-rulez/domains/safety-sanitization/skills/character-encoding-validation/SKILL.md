@@ -1,4 +1,5 @@
 ---
+description: "Character Encoding Validation"
 name: character-encoding-validation
 ---
 Detect and convert character encodings safely

@@ -1,4 +1,5 @@
 ---
+description: "Binary Data Detection"
 name: binary-data-detection
 ---
 Detect and reject binary input before parsing

@@ -1,4 +1,5 @@
 ---
+description: "Url Sanitization"
 name: url-sanitization
 ---
 Validate and sanitize URLs in links/images

@@ -1,4 +1,5 @@
 ---
+description: "Safe Dom Traversal"
 name: safe-dom-traversal
 ---
 Navigate DOM tree safely without panics or crashes

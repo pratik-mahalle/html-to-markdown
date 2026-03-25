@@ -1,4 +1,5 @@
 ---
+description: "Markdown Text Escaping"
 name: markdown-text-escaping
 ---
 Escape Markdown metacharacters in text

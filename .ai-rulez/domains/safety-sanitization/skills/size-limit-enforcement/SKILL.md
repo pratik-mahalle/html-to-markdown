@@ -1,4 +1,5 @@
 ---
+description: "Size Limit Enforcement"
 name: size-limit-enforcement
 ---
 Enforce memory and size limits
