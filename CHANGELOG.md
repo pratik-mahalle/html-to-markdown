@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0-rc.1] - 2026-03-27
+
+### Added
+
+- **`extract()` API**: New primary entry point returning `ConversionResult` with structured content, document tree, metadata, tables, images, and warnings. Available in all 12 language bindings.
+- **`ConversionResult` type**: Rich result struct with `content` (optional markdown/djot/plain), `document` (optional `DocumentStructure`), `metadata` (`HtmlMetadata`), `tables`, `images`, and `warnings`.
+- **`DocumentStructure`**: Structured document tree aligned with kreuzberg's model. Flat node array with index-based parent/child references, `NodeContent` enum (Heading, Paragraph, List, Table, Image, Code, Quote, etc.), and `TextAnnotation` for inline formatting with byte offsets.
+- **`ConversionOptionsBuilder`**: Fluent builder pattern for constructing options (`ConversionOptions::builder().wrap(true).build()`).
+- **New options**: `include_document_structure`, `extract_images`, `max_image_size`, `capture_svg`, `infer_dimensions`.
+- **`OutputFormat::None`**: Skip text rendering, extract structure/metadata only.
+
+### Changed
+
+- **`convert()` returns `ConversionResult`** instead of `String`. Use `convert_to_string()` for v2 backward compatibility.
+- **`ExtendedMetadata` renamed to `HtmlMetadata`** across all crates and bindings for kreuzberg alignment.
+
+### Removed
+
+- **hOCR support**: Entire `hocr` module deleted (17 source files). The `hocr_spatial_tables` option removed from all bindings.
+- **Python v1 compatibility layer**: `convert_to_markdown()` and `markdownify()` functions removed.
+- **Standalone `convert_with_visitor()`**: Removed from Node.js, Python, Ruby. Use visitor parameter on `convert()` instead.
+
 ## [2.30.0] - 2026-03-27
 
 ### Deprecated
