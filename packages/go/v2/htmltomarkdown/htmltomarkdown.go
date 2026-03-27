@@ -305,11 +305,11 @@ type StructuredData struct {
 	SchemaType *string `json:"schema_type,omitempty"`
 }
 
-// ExtendedMetadata is the comprehensive metadata extraction result from an HTML document.
+// HTMLMetadata is the comprehensive metadata extraction result from an HTML document.
 //
 // Contains all extracted metadata types in a single structure,
 // suitable for serialization and transmission across language boundaries.
-type ExtendedMetadata struct {
+type HTMLMetadata struct {
 	Document DocumentMetadata `json:"document"`
 
 	Headers []HeaderMetadata `json:"headers,omitempty"`
@@ -327,7 +327,7 @@ type ExtendedMetadata struct {
 type MetadataExtraction struct {
 	Markdown string
 
-	Metadata ExtendedMetadata
+	Metadata HTMLMetadata
 }
 
 // ConvertWithMetadata converts HTML to Markdown and extracts comprehensive metadata.
@@ -369,7 +369,7 @@ func ConvertWithMetadata(html string) (MetadataExtraction, error) {
 	if html == "" {
 		return MetadataExtraction{
 			Markdown: "",
-			Metadata: ExtendedMetadata{},
+			Metadata: HTMLMetadata{},
 		}, nil
 	}
 	if err := ensureFFILoaded(); err != nil {
@@ -400,7 +400,7 @@ func ConvertWithMetadata(html string) (MetadataExtraction, error) {
 	markdown := C.GoString(result)
 
 	// Parse metadata JSON if available
-	var metadata ExtendedMetadata
+	var metadata HTMLMetadata
 	if metadataPtr != nil {
 		metadataJSON := C.GoString(metadataPtr)
 		if err := json.Unmarshal([]byte(metadataJSON), &metadata); err != nil {
@@ -441,7 +441,7 @@ type TableData struct {
 // TableExtractionResult contains the conversion result with table extraction.
 type TableExtractionResult struct {
 	Content  string            `json:"content"`
-	Metadata *ExtendedMetadata `json:"metadata,omitempty"`
+	Metadata *HTMLMetadata `json:"metadata,omitempty"`
 	Tables   []TableData       `json:"tables"`
 }
 

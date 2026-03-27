@@ -182,7 +182,7 @@ class StructuredData(TypedDict):
     raw_json: str
     schema_type: str | None
 
-class ExtendedMetadata(TypedDict):
+class HtmlMetadata(TypedDict):
     document: DocumentMetadata
     headers: list[HeaderMetadata]
     links: list[LinkMetadata]
@@ -196,7 +196,7 @@ class TableData(TypedDict):
 
 class TableExtractionResult(TypedDict):
     content: str
-    metadata: ExtendedMetadata | None
+    metadata: HtmlMetadata | None
     tables: list[TableData]
 
 def convert(html: str, options: ConversionOptions | None = None) -> str: ...
@@ -214,12 +214,12 @@ def convert_with_metadata(
     html: str,
     options: ConversionOptions | None = None,
     metadata_config: MetadataConfig | None = None,
-) -> tuple[str, ExtendedMetadata]: ...
+) -> tuple[str, HtmlMetadata]: ...
 def convert_with_metadata_handle(
     html: str,
     handle: ConversionOptionsHandle,
     metadata_config: MetadataConfig | None = None,
-) -> tuple[str, ExtendedMetadata]: ...
+) -> tuple[str, HtmlMetadata]: ...
 def convert_with_tables(
     html: str,
     options: ConversionOptions | None = None,

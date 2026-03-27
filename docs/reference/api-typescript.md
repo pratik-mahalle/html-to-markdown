@@ -253,10 +253,10 @@ interface MetadataConfig {
 ```typescript
 interface MetadataExtraction {
   markdown: string;
-  metadata: ExtendedMetadata;
+  metadata: HtmlMetadata;
 }
 
-interface ExtendedMetadata {
+interface HtmlMetadata {
   document: DocumentMetadata;
   headers: HeaderMetadata[];
   links: LinkMetadata[];

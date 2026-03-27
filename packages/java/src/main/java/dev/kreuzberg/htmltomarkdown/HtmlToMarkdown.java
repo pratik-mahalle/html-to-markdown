@@ -3,7 +3,7 @@ package dev.kreuzberg.htmltomarkdown;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.kreuzberg.htmltomarkdown.metadata.DocumentMetadata;
-import dev.kreuzberg.htmltomarkdown.metadata.ExtendedMetadata;
+import dev.kreuzberg.htmltomarkdown.metadata.HtmlMetadata;
 import dev.kreuzberg.htmltomarkdown.metadata.HeaderMetadata;
 import dev.kreuzberg.htmltomarkdown.metadata.ImageMetadata;
 import dev.kreuzberg.htmltomarkdown.metadata.ImageType;
@@ -306,13 +306,13 @@ public final class HtmlToMarkdown {
         MemorySegment metadataJsonSegment =
             metadataJsonOut.getAtIndex(java.lang.foreign.ValueLayout.ADDRESS, 0);
 
-        ExtendedMetadata metadata;
+        HtmlMetadata metadata;
         if (metadataJsonSegment != null && metadataJsonSegment.address() != 0) {
           String metadataJson = HtmlToMarkdownFFI.fromCString(metadataJsonSegment);
           metadata = parseMetadata(metadataJson);
           HtmlToMarkdownFFI.html_to_markdown_free_string.invoke(metadataJsonSegment);
         } else {
-          metadata = ExtendedMetadata.empty();
+          metadata = HtmlMetadata.empty();
         }
 
         return new MetadataExtraction(markdown, metadata);
@@ -392,13 +392,13 @@ public final class HtmlToMarkdown {
   }
 
   /**
-   * Parse JSON metadata string into ExtendedMetadata.
+   * Parse JSON metadata string into HtmlMetadata.
    *
    * @param jsonStr the JSON metadata string
-   * @return parsed {@code ExtendedMetadata}
+   * @return parsed {@code HtmlMetadata}
    * @throws ConversionException if JSON parsing fails
    */
-  private static ExtendedMetadata parseMetadata(final String jsonStr) {
+  private static HtmlMetadata parseMetadata(final String jsonStr) {
     try {
       ObjectMapper mapper = new ObjectMapper();
       JsonNode root = mapper.readTree(jsonStr);
@@ -413,7 +413,7 @@ public final class HtmlToMarkdown {
 
       List<StructuredData> structuredData = parseStructuredData(root.get("structured_data"));
 
-      return new ExtendedMetadata(document, headers, links, images, structuredData);
+      return new HtmlMetadata(document, headers, links, images, structuredData);
     } catch (Exception e) {
       throw new ConversionException("Failed to parse metadata JSON: " + e.getMessage(), e);
     }

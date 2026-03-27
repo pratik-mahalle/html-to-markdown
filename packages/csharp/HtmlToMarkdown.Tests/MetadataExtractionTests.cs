@@ -289,7 +289,7 @@ public class MetadataExtractionTests
     }
 
     [Fact]
-    public void ConvertWithMetadata_ReturnsValidExtendedMetadata()
+    public void ConvertWithMetadata_ReturnsValidHtmlMetadata()
     {
         var html = "<html><body><h1>Title</h1><p>Content</p></body></html>";
         var result = HtmlToMarkdownConverter.ConvertWithMetadata(html);

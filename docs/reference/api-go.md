@@ -76,7 +76,7 @@ fmt.Println(markdown)
 Convert HTML to Markdown with metadata extraction.
 
 ```go
-func ConvertWithMetadata(html string) (string, *ExtendedMetadata, error)
+func ConvertWithMetadata(html string) (string, *HtmlMetadata, error)
 ```
 
 **Parameters:**
@@ -85,7 +85,7 @@ func ConvertWithMetadata(html string) (string, *ExtendedMetadata, error)
 |-----------|------|-------------|
 | `html` | `string` | The HTML string to convert |
 
-**Returns:** `(string, *ExtendedMetadata, error)` -- Markdown string, metadata, and any error.
+**Returns:** `(string, *HtmlMetadata, error)` -- Markdown string, metadata, and any error.
 
 **Example:**
 
@@ -125,10 +125,10 @@ func StopProfiling() error
 
 ## Types
 
-### `ExtendedMetadata`
+### `HtmlMetadata`
 
 ```go
-type ExtendedMetadata struct {
+type HtmlMetadata struct {
     Document       DocumentMetadata   `json:"document"`
     Headers        []HeaderMetadata   `json:"headers"`
     Links          []LinkMetadata     `json:"links"`

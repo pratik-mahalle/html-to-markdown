@@ -25,7 +25,7 @@ pub use types::{JsHtmlExtraction, JsInlineImage, JsInlineImageWarning};
 
 #[cfg(feature = "metadata")]
 pub use types::{
-    JsDocumentMetadata, JsExtendedMetadata, JsHeaderMetadata, JsImageMetadata, JsLinkMetadata, JsMetadataConfig,
+    JsDocumentMetadata, JsHeaderMetadata, JsHtmlMetadata, JsImageMetadata, JsLinkMetadata, JsMetadataConfig,
     JsMetadataExtraction, JsStructuredData,
 };
 

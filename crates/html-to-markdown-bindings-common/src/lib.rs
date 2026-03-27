@@ -36,7 +36,7 @@ pub use json::parse_metadata_config;
 
 #[cfg(feature = "metadata")]
 pub use metadata::{
-    DocumentMetadataIntermediate, ExtendedMetadataIntermediate, HeaderMetadataIntermediate, ImageMetadataIntermediate,
+    DocumentMetadataIntermediate, HeaderMetadataIntermediate, HtmlMetadataIntermediate, ImageMetadataIntermediate,
     LinkMetadataIntermediate, StructuredDataIntermediate,
 };
 

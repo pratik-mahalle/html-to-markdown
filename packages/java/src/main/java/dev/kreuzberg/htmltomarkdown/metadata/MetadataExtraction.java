@@ -14,7 +14,7 @@ import java.util.Objects;
  * @since 2.13.0
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record MetadataExtraction(String markdown, ExtendedMetadata metadata) {
+public record MetadataExtraction(String markdown, HtmlMetadata metadata) {
 
   /**
    * Construct a MetadataExtraction record.
@@ -41,7 +41,7 @@ public record MetadataExtraction(String markdown, ExtendedMetadata metadata) {
    *
    * @return the metadata object
    */
-  public ExtendedMetadata getMetadata() {
+  public HtmlMetadata getMetadata() {
     return metadata;
   }
 

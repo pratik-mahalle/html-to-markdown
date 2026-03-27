@@ -400,5 +400,5 @@ Enable debug mode with diagnostic warnings on conversion issues.
 
 ## See Also
 
-- [Types Reference](types.md) -- `MetadataConfig`, `ExtendedMetadata`, and other types
+- [Types Reference](types.md) -- `MetadataConfig`, `HtmlMetadata`, and other types
 - [Basic Conversion Guide](../guides/basic-conversion.md) -- getting started

@@ -91,7 +91,7 @@ public static ConversionResult convertWithMetadata(String html, ConversionOption
 ConversionResult result = HtmlToMarkdown.convertWithMetadata(html);
 System.out.println(result.getMarkdown());
 
-ExtendedMetadata metadata = result.getMetadata();
+HtmlMetadata metadata = result.getMetadata();
 System.out.println(metadata.getDocument().getTitle());
 System.out.println(metadata.getHeaders().size());
 System.out.println(metadata.getLinks().size());

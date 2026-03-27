@@ -18,7 +18,7 @@ import java.util.List;
  * @since 2.13.0
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record ExtendedMetadata(
+public record HtmlMetadata(
     DocumentMetadata document,
     List<HeaderMetadata> headers,
     List<LinkMetadata> links,
@@ -26,7 +26,7 @@ public record ExtendedMetadata(
     List<StructuredData> structuredData) {
 
   /**
-   * Construct an ExtendedMetadata record.
+   * Construct an HtmlMetadata record.
    *
    * @param document the document metadata
    * @param headers the header metadata list
@@ -34,7 +34,7 @@ public record ExtendedMetadata(
    * @param images the image metadata list
    * @param structuredData the structured data list
    */
-  public ExtendedMetadata {
+  public HtmlMetadata {
     if (document == null) {
       document = DocumentMetadata.of(null, null);
     }
@@ -179,12 +179,12 @@ public record ExtendedMetadata(
   }
 
   /**
-   * Create an empty ExtendedMetadata.
+   * Create an empty HtmlMetadata.
    *
-   * @return a new ExtendedMetadata with all empty lists
+   * @return a new HtmlMetadata with all empty lists
    */
-  public static ExtendedMetadata empty() {
-    return new ExtendedMetadata(
+  public static HtmlMetadata empty() {
+    return new HtmlMetadata(
         new DocumentMetadata(
             null,
             null,

@@ -251,7 +251,7 @@ import {
   type JsLinkMetadata,
   type JsImageMetadata,
   type JsStructuredData,
-  type JsExtendedMetadata,
+  type JsHtmlMetadata,
   type JsMetadataConfig,
 } from 'html-to-markdown';
 

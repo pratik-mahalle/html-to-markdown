@@ -206,7 +206,7 @@ public static class HtmlToMarkdownConverter
             return new MetadataExtraction
             {
                 Markdown = string.Empty,
-                Metadata = new ExtendedMetadata()
+                Metadata = new HtmlMetadata()
             };
         }
 
@@ -238,7 +238,7 @@ public static class HtmlToMarkdownConverter
             }
 
             string markdown = PtrToStringUtf8(resultPtr, resultLen) ?? string.Empty;
-            ExtendedMetadata metadata = DeserializeMetadata(metadataPtr, metadataLen);
+            HtmlMetadata metadata = DeserializeMetadata(metadataPtr, metadataLen);
 
             return new MetadataExtraction
             {
@@ -342,7 +342,7 @@ public static class HtmlToMarkdownConverter
             return new MetadataExtraction
             {
                 Markdown = string.Empty,
-                Metadata = new ExtendedMetadata()
+                Metadata = new HtmlMetadata()
             };
         }
 
@@ -375,7 +375,7 @@ public static class HtmlToMarkdownConverter
         try
         {
             string markdown = PtrToStringUtf8(resultPtr, resultLen) ?? string.Empty;
-            ExtendedMetadata metadata = DeserializeMetadata(metadataPtr, metadataLen);
+            HtmlMetadata metadata = DeserializeMetadata(metadataPtr, metadataLen);
 
             return new MetadataExtraction
             {
@@ -674,16 +674,16 @@ public static class HtmlToMarkdownConverter
         }
     }
 
-    private static ExtendedMetadata DeserializeMetadata(IntPtr metadataPtr, nuint metadataLen)
+    private static HtmlMetadata DeserializeMetadata(IntPtr metadataPtr, nuint metadataLen)
     {
         if (metadataPtr == IntPtr.Zero || metadataLen == 0)
         {
-            return new ExtendedMetadata();
+            return new HtmlMetadata();
         }
 
         try
         {
-            return DeserializeMetadataUtf8(metadataPtr, metadataLen) ?? new ExtendedMetadata();
+            return DeserializeMetadataUtf8(metadataPtr, metadataLen) ?? new HtmlMetadata();
         }
         catch (JsonException ex)
         {
@@ -718,7 +718,7 @@ public static class HtmlToMarkdownConverter
         return Marshal.StringToCoTaskMemUTF8(value);
     }
 
-    private static unsafe ExtendedMetadata? DeserializeMetadataUtf8(IntPtr metadataPtr, nuint metadataLen)
+    private static unsafe HtmlMetadata? DeserializeMetadataUtf8(IntPtr metadataPtr, nuint metadataLen)
     {
         byte* data = (byte*)metadataPtr;
         if (data == null)
@@ -732,7 +732,7 @@ public static class HtmlToMarkdownConverter
             return null;
         }
         ReadOnlySpan<byte> json = new ReadOnlySpan<byte>(data, length);
-        return JsonSerializer.Deserialize(json, MetadataJsonContext.Default.ExtendedMetadata);
+        return JsonSerializer.Deserialize(json, MetadataJsonContext.Default.HtmlMetadata);
     }
 
     private static unsafe int NormalizeLength(IntPtr ptr, nuint length, string overflowMessage)
