@@ -33,7 +33,6 @@ defmodule HtmlToMarkdown.Options do
     :default_title,
     :keep_inline_images_in,
     :br_in_tables,
-    :hocr_spatial_tables,
     :highlight_style,
     :extract_metadata,
     :whitespace_mode,
@@ -68,8 +67,6 @@ defmodule HtmlToMarkdown.Options do
             default_title: false,
             keep_inline_images_in: MapSet.new(),
             br_in_tables: false,
-            # Deprecated since 2.30.0: hOCR support will be removed in v3.
-            hocr_spatial_tables: true,
             highlight_style: :double_equal,
             extract_metadata: true,
             whitespace_mode: :normalized,
@@ -112,8 +109,6 @@ defmodule HtmlToMarkdown.Options do
           default_title: boolean(),
           keep_inline_images_in: MapSet.t(),
           br_in_tables: boolean(),
-          # Deprecated since 2.30.0: hOCR support will be removed in v3.
-          hocr_spatial_tables: boolean(),
           highlight_style: highlight_style(),
           extract_metadata: boolean(),
           whitespace_mode: whitespace_mode(),
@@ -274,7 +269,6 @@ defmodule HtmlToMarkdown.Options do
       "default_title" => opts.default_title,
       "keep_inline_images_in" => mapset_to_list(opts.keep_inline_images_in),
       "br_in_tables" => opts.br_in_tables,
-      "hocr_spatial_tables" => opts.hocr_spatial_tables,
       "highlight_style" => Atom.to_string(opts.highlight_style),
       "extract_metadata" => opts.extract_metadata,
       "whitespace_mode" => Atom.to_string(opts.whitespace_mode),

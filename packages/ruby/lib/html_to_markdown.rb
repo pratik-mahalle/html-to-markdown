@@ -17,18 +17,15 @@ module HtmlToMarkdown
     alias native_convert_with_options convert_with_options
     alias native_convert_with_metadata convert_with_metadata
     alias native_convert_with_metadata_handle convert_with_metadata_handle
-    alias native_convert_with_visitor convert_with_visitor
     alias native_convert_with_tables convert_with_tables
   end
 
   module_function
 
-  def convert(html, options = nil, visitor = nil)
-    if visitor
-      native_convert_with_visitor(html.to_s, options, visitor)
-    else
-      native_convert(html.to_s, options)
-    end
+  def convert(html, options = nil, _visitor = nil)
+    # NOTE: visitor parameter is accepted for API compatibility but not used in standard convert mode
+    # The native binding currently does not support visitor pattern
+    native_convert(html.to_s, options)
   end
 
   def convert_with_options(html, options_handle)

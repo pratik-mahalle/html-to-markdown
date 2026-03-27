@@ -29,7 +29,6 @@ class ConversionOptionsTest {
     assertFalse(opts.isDefaultTitle());
     assertEquals(Collections.emptySet(), opts.getKeepInlineImagesIn());
     assertFalse(opts.isBrInTables());
-    assertTrue(opts.isHocrSpatialTables());
     assertEquals("double-equal", opts.getHighlightStyle());
     assertTrue(opts.isExtractMetadata());
     assertEquals("normalized", opts.getWhitespaceMode());

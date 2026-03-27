@@ -5,8 +5,6 @@ use crate::types::{JsHtmlExtraction, JsInlineImage, JsInlineImageWarning};
 use crate::types::{JsMetadataConfig, JsMetadataExtraction, convert_metadata};
 #[cfg(feature = "visitor")]
 use crate::types::{JsTableExtraction, tables::convert_tables};
-#[cfg(feature = "async-visitor")]
-use crate::visitor::JsVisitorBridge;
 use html_to_markdown_bindings_common::error::error_message;
 #[cfg(feature = "metadata")]
 use html_to_markdown_rs::metadata::MetadataConfig as RustMetadataConfig;
@@ -18,8 +16,6 @@ use html_to_markdown_rs::{
 use napi::bindgen_prelude::*;
 use napi_derive::napi;
 use std::str;
-#[cfg(feature = "async-visitor")]
-use std::sync::Arc;
 
 fn to_js_error(err: ConversionError) -> Error {
     Error::new(Status::GenericFailure, error_message(&err))
@@ -52,172 +48,6 @@ pub fn convert(html: String, options: Option<JsConversionOptions>, visitor: Opti
 
     guard_panic(|| profiling::maybe_profile(|| html_to_markdown_rs::convert(&html, rust_options.clone())))
         .map_err(to_js_error)
-}
-
-/// Convert HTML to Markdown with an async visitor object.
-///
-/// # Async Visitor Support
-///
-/// This function enables full async visitor pattern support for Node.js:
-/// - JavaScript visitor callbacks are invoked asynchronously via NAPI `ThreadsafeFunction`
-/// - All 30+ visitor methods are supported (links, images, headings, code, lists, tables, etc.)
-/// - Callback errors gracefully default to `VisitResult::Continue`
-/// - Powered by tokio async runtime for seamless JS-Rust cooperation
-///
-/// # Visitor Methods
-///
-/// Implement any combination of these optional async methods in your visitor:
-/// - `visitText(ctx, text) -> { type: string, output?: string }`
-/// - `visitLink(ctx, href, text, title) -> VisitResult`
-/// - `visitImage(ctx, src, alt, title) -> VisitResult`
-/// - `visitHeading(ctx, level, text, id) -> VisitResult`
-/// - `visitCodeBlock(ctx, lang, code) -> VisitResult`
-/// - `visitCodeInline(ctx, code) -> VisitResult`
-/// - `visitListItem(ctx, ordered, marker, text) -> VisitResult`
-/// - `visitTableRow(ctx, cells, isHeader) -> VisitResult`
-/// - `visitBlockquote(ctx, content, depth) -> VisitResult`
-/// - And 20+ more semantic and inline element callbacks
-///
-/// # `VisitResult` Types
-///
-/// Each callback should return an object with:
-/// - `type: 'continue' | 'skip' | 'custom' | 'preservehtml' | 'error'`
-/// - `output?: string` (required for 'custom' and 'error' types)
-///
-/// # Arguments
-///
-/// * `html` - The HTML string to convert
-/// * `options` - Optional conversion options
-/// * `visitor` - Visitor object with optional async callback methods
-///
-/// # Example
-///
-/// ```javascript
-/// const { convertWithVisitor } = require('@kreuzberg/html-to-markdown-node');
-///
-/// const html = '<a href="https://example.com">Click me</a>';
-/// const visitor = {
-///   visitLink: async (ctx, href, text, title) => {
-///     console.log(`Found link: ${href}`);
-///     return { type: 'continue' };  // Use default markdown conversion
-///   }
-/// };
-///
-/// const markdown = await convertWithVisitor(html, undefined, visitor);
-/// console.log(markdown); // [Click me](https://example.com)
-/// ```
-///
-/// @deprecated Use the optional visitor parameter in convert() instead
-#[cfg(feature = "async-visitor")]
-async fn convert_with_visitor_async_impl(
-    html: String,
-    options: Option<JsConversionOptions>,
-    bridge: JsVisitorBridge,
-) -> napi::Result<String> {
-    let rust_options = options.map(Into::into);
-
-    // Wrap the async visitor in an Arc<Mutex<>> for thread-safe async access
-    let async_visitor_handle = std::sync::Arc::new(tokio::sync::Mutex::new(bridge));
-
-    // Create the AsyncToSyncVisitorBridge - this spawns an async task
-    let sync_bridge = html_to_markdown_rs::visitor_helpers::AsyncToSyncVisitorBridge::new(async_visitor_handle.clone());
-
-    // Run the conversion on a blocking thread pool
-    // This allows the async visitor task to process JavaScript callbacks on the async executor
-    // while the conversion runs synchronously on a blocking thread
-    let result = tokio::task::spawn_blocking(move || {
-        // Wrap in Rc<RefCell<>> to create a VisitorHandle
-        let visitor_handle = std::rc::Rc::new(std::cell::RefCell::new(sync_bridge));
-
-        // Run the synchronous conversion
-        html_to_markdown_rs::convert_with_visitor(&html, rust_options, Some(visitor_handle))
-    })
-    .await
-    .map_err(|e| napi::Error::from_reason(format!("Task join error: {}", e)))?
-    .map_err(to_js_error)?;
-
-    Ok(result)
-}
-
-#[cfg(feature = "async-visitor")]
-#[napi(js_name = "convertWithVisitor", ts_return_type = "Promise<string>")]
-pub fn convert_with_visitor<'env>(
-    env: &'env Env,
-    html: String,
-    options: Option<JsConversionOptions>,
-    visitor: Object<'_>,
-) -> napi::Result<PromiseRaw<'env, String>> {
-    let mut bridge = JsVisitorBridge::new();
-
-    // Extract visitor functions from the JavaScript object
-    // Each function is optional - we only store it if it exists
-    //
-    // IMPORTANT: ThreadsafeFunctions expect functions with signature:
-    //   (jsonString: string) => Promise<string>
-    // where jsonString is JSON-serialized context and return value is JSON-serialized result.
-    //
-    // For user convenience, a TypeScript wrapper utility is provided to automatically
-    // handle JSON.parse/stringify so users can write:
-    //   (ctx: NodeContext) => Promise<{type: string}>
-    macro_rules! extract_fn {
-        ($method_name:literal, $field:ident) => {
-            if let Ok(Some(func)) = visitor.get::<Function<String, Promise<String>>>($method_name) {
-                match func.build_threadsafe_function().build() {
-                    Ok(tsfn) => {
-                        bridge.$field = Some(Arc::new(tsfn));
-                    }
-                    Err(_) => {
-                        // Silently ignore - visitor method is optional
-                    }
-                }
-            }
-        };
-    }
-
-    extract_fn!("visitElementStart", visit_element_start_fn);
-    extract_fn!("visitElementEnd", visit_element_end_fn);
-    extract_fn!("visitText", visit_text_fn);
-    extract_fn!("visitLink", visit_link_fn);
-    extract_fn!("visitImage", visit_image_fn);
-    extract_fn!("visitHeading", visit_heading_fn);
-    extract_fn!("visitCodeBlock", visit_code_block_fn);
-    extract_fn!("visitCodeInline", visit_code_inline_fn);
-    extract_fn!("visitListItem", visit_list_item_fn);
-    extract_fn!("visitListStart", visit_list_start_fn);
-    extract_fn!("visitListEnd", visit_list_end_fn);
-    extract_fn!("visitTableStart", visit_table_start_fn);
-    extract_fn!("visitTableRow", visit_table_row_fn);
-    extract_fn!("visitTableEnd", visit_table_end_fn);
-    extract_fn!("visitBlockquote", visit_blockquote_fn);
-    extract_fn!("visitStrong", visit_strong_fn);
-    extract_fn!("visitEmphasis", visit_emphasis_fn);
-    extract_fn!("visitStrikethrough", visit_strikethrough_fn);
-    extract_fn!("visitUnderline", visit_underline_fn);
-    extract_fn!("visitSubscript", visit_subscript_fn);
-    extract_fn!("visitSuperscript", visit_superscript_fn);
-    extract_fn!("visitMark", visit_mark_fn);
-    extract_fn!("visitLineBreak", visit_line_break_fn);
-    extract_fn!("visitHorizontalRule", visit_horizontal_rule_fn);
-    extract_fn!("visitCustomElement", visit_custom_element_fn);
-    extract_fn!("visitDefinitionListStart", visit_definition_list_start_fn);
-    extract_fn!("visitDefinitionTerm", visit_definition_term_fn);
-    extract_fn!("visitDefinitionDescription", visit_definition_description_fn);
-    extract_fn!("visitDefinitionListEnd", visit_definition_list_end_fn);
-    extract_fn!("visitForm", visit_form_fn);
-    extract_fn!("visitInput", visit_input_fn);
-    extract_fn!("visitButton", visit_button_fn);
-    extract_fn!("visitAudio", visit_audio_fn);
-    extract_fn!("visitVideo", visit_video_fn);
-    extract_fn!("visitIframe", visit_iframe_fn);
-    extract_fn!("visitDetails", visit_details_fn);
-    extract_fn!("visitSummary", visit_summary_fn);
-    extract_fn!("visitFigureStart", visit_figure_start_fn);
-    extract_fn!("visitFigcaption", visit_figcaption_fn);
-    extract_fn!("visitFigureEnd", visit_figure_end_fn);
-
-    // Spawn the async work and return a Promise
-    // env.spawn_future() spawns the async task and returns a PromiseRaw
-    env.spawn_future(convert_with_visitor_async_impl(html, options, bridge))
 }
 
 #[napi]

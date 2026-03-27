@@ -3,16 +3,11 @@
 This package provides high-performance HTML to Markdown conversion
 powered by Rust with a clean Python API.
 
-V2 API (current):
+API:
     from html_to_markdown import convert, ConversionOptions, ConversionOptionsHandle
 
     options = ConversionOptionsHandle()  # or use ConversionOptions dataclass
     markdown = convert(html, options)
-
-V1 API (backward compatibility):
-    from html_to_markdown import convert_to_markdown
-
-    markdown = convert_to_markdown(html, heading_style="atx")
 """
 
 from html_to_markdown._html_to_markdown import ConversionOptionsHandle
@@ -32,7 +27,6 @@ from html_to_markdown.api import (
     convert_with_metadata,
     convert_with_metadata_handle,
     convert_with_tables,
-    convert_with_visitor,
     create_options_handle,
     start_profiling,
     stop_profiling,
@@ -45,7 +39,6 @@ from html_to_markdown.exceptions import (
     MissingDependencyError,
 )
 from html_to_markdown.options import ConversionOptions, OutputFormat, PreprocessingOptions
-from html_to_markdown.v1_compat import convert_to_markdown, markdownify
 
 __all__ = [
     "ConflictingOptionsError",
@@ -65,7 +58,6 @@ __all__ = [
     "TableData",
     "TableExtractionResult",
     "convert",
-    "convert_to_markdown",
     "convert_with_async_visitor",
     "convert_with_handle",
     "convert_with_inline_images",
@@ -73,9 +65,7 @@ __all__ = [
     "convert_with_metadata",
     "convert_with_metadata_handle",
     "convert_with_tables",
-    "convert_with_visitor",
     "create_options_handle",
-    "markdownify",
     "start_profiling",
     "stop_profiling",
 ]

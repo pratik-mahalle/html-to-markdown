@@ -219,11 +219,6 @@ pub struct Cli {
     #[arg(help_heading = "Tables")]
     pub br_in_tables: bool,
 
-    /// [DEPRECATED] Disable spatial table reconstruction for hOCR documents. hOCR will be removed in v3.
-    #[arg(long = "no-hocr-spatial-tables")]
-    #[arg(help_heading = "Tables")]
-    pub no_hocr_spatial_tables: bool,
-
     /// Style for <mark> elements
     ///
     /// How to represent highlighted text:

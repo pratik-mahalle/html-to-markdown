@@ -125,16 +125,6 @@ public class ConversionOptions
     public bool BrInTables { get; set; } = false;
 
     /// <summary>
-    /// Enable spatial table reconstruction in hOCR documents.
-    ///
-    /// Reconstructs tables via spatial positioning analysis.
-    /// Default: true
-    /// </summary>
-    [JsonPropertyName("hocrSpatialTables")]
-    [Obsolete("hOCR support is deprecated since 2.30.0 and will be removed in v3.")]
-    public bool HocrSpatialTables { get; set; } = true;
-
-    /// <summary>
     /// Highlight style for &lt;mark&gt; elements.
     ///
     /// Controls how highlighted text is rendered. Valid values: "double_equal", "html", "bold", "none".

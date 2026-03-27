@@ -28,12 +28,8 @@ impl NativeAdapter {
         String::from_utf8(data).map_err(|_| Error::Benchmark(format!("Fixture {} is not valid UTF-8", path.display())))
     }
 
-    fn build_options(format: FixtureFormat) -> ConversionOptions {
-        let mut options = ConversionOptions::default();
-        if matches!(format, FixtureFormat::Hocr) {
-            options.hocr_spatial_tables = false;
-        }
-        options
+    fn build_options(_format: FixtureFormat) -> ConversionOptions {
+        ConversionOptions::default()
     }
 
     fn run_scenario(html: &str, scenario: BenchmarkScenario, options: Option<ConversionOptions>) -> Result<()> {

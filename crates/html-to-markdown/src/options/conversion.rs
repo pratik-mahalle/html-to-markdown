@@ -62,11 +62,6 @@ pub struct ConversionOptions {
     /// Use HTML <br> elements in tables instead of spaces for line breaks
     pub br_in_tables: bool,
 
-    /// Enable spatial table reconstruction in hOCR documents (via spatial positioning analysis).
-    ///
-    /// **Deprecated since 2.30.0**: hOCR support will be removed in v3.
-    pub hocr_spatial_tables: bool,
-
     /// Highlight style for <mark> elements (`DoubleEqual`, Html, Bold, None)
     pub highlight_style: HighlightStyle,
 
@@ -178,11 +173,6 @@ pub struct ConversionOptionsUpdate {
     /// Optional HTML <br> usage in tables override
     pub br_in_tables: Option<bool>,
 
-    /// Optional spatial table reconstruction for hOCR documents override.
-    ///
-    /// **Deprecated since 2.30.0**: hOCR support will be removed in v3.
-    pub hocr_spatial_tables: Option<bool>,
-
     /// Optional highlight style override for <mark> elements
     pub highlight_style: Option<HighlightStyle>,
 
@@ -257,7 +247,6 @@ impl Default for ConversionOptions {
             autolinks: true,
             default_title: false,
             br_in_tables: false,
-            hocr_spatial_tables: true,
             highlight_style: HighlightStyle::default(),
             extract_metadata: true,
             whitespace_mode: WhitespaceMode::default(),
@@ -329,9 +318,6 @@ impl ConversionOptions {
         }
         if let Some(br_in_tables) = update.br_in_tables {
             self.br_in_tables = br_in_tables;
-        }
-        if let Some(hocr_spatial_tables) = update.hocr_spatial_tables {
-            self.hocr_spatial_tables = hocr_spatial_tables;
         }
         if let Some(highlight_style) = update.highlight_style {
             self.highlight_style = highlight_style;

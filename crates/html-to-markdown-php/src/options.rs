@@ -60,9 +60,6 @@ pub fn parse_conversion_options(table: &ZendHashTable) -> PhpResult<ConversionOp
             "br_in_tables" => {
                 update.br_in_tables = Some(read_bool(value, &key_str)?);
             }
-            "hocr_spatial_tables" => {
-                update.hocr_spatial_tables = Some(read_bool(value, &key_str)?);
-            }
             "highlight_style" => {
                 update.highlight_style = Some(parse_highlight_style(value, &key_str)?);
             }
