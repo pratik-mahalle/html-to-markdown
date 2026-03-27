@@ -5,7 +5,7 @@
 //! These tests verify end-to-end conversion of various HTML elements
 //! to ensure correct Markdown output.
 
-use html_to_markdown_rs::{ConversionOptions, convert};
+use html_to_markdown_rs::{ConversionOptions, convert_to_string as convert};
 
 #[test]
 fn test_basic_paragraph() {

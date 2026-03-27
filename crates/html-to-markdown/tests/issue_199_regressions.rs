@@ -1,6 +1,6 @@
 //! Regression coverage for issue #199.
 
-use html_to_markdown_rs::convert;
+use html_to_markdown_rs::convert_to_string as convert;
 
 #[test]
 fn test_link_label_is_not_truncated() {

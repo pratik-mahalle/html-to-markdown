@@ -3,7 +3,7 @@
 use std::fs;
 use std::path::PathBuf;
 
-use html_to_markdown_rs::{CodeBlockStyle, ConversionOptions, convert};
+use html_to_markdown_rs::{CodeBlockStyle, ConversionOptions, convert_to_string as convert};
 
 fn fixture_path(name: &str) -> PathBuf {
     [

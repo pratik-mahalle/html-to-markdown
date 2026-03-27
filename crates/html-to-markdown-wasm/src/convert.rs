@@ -55,12 +55,12 @@ pub fn convert(html: String, options: JsValue) -> Result<String, JsValue> {
 
     #[cfg(feature = "visitor")]
     {
-        html_to_markdown_rs::safety::guard_panic(|| html_to_markdown_rs::convert(&html, rust_options))
+        html_to_markdown_rs::safety::guard_panic(|| html_to_markdown_rs::convert_to_string(&html, rust_options))
             .map_err(to_js_error)
     }
     #[cfg(not(feature = "visitor"))]
     {
-        html_to_markdown_rs::safety::guard_panic(|| html_to_markdown_rs::convert(&html, rust_options))
+        html_to_markdown_rs::safety::guard_panic(|| html_to_markdown_rs::convert_to_string(&html, rust_options))
             .map_err(to_js_error)
     }
 }
@@ -73,12 +73,12 @@ pub fn convert_bytes(html: js_sys::Uint8Array, options: JsValue) -> Result<Strin
 
     #[cfg(feature = "visitor")]
     {
-        html_to_markdown_rs::safety::guard_panic(|| html_to_markdown_rs::convert(&html, rust_options))
+        html_to_markdown_rs::safety::guard_panic(|| html_to_markdown_rs::convert_to_string(&html, rust_options))
             .map_err(to_js_error)
     }
     #[cfg(not(feature = "visitor"))]
     {
-        html_to_markdown_rs::safety::guard_panic(|| html_to_markdown_rs::convert(&html, rust_options))
+        html_to_markdown_rs::safety::guard_panic(|| html_to_markdown_rs::convert_to_string(&html, rust_options))
             .map_err(to_js_error)
     }
 }
@@ -99,13 +99,17 @@ pub fn convert_with_options_handle(
 ) -> Result<String, JsValue> {
     #[cfg(feature = "visitor")]
     {
-        html_to_markdown_rs::safety::guard_panic(|| html_to_markdown_rs::convert(&html, Some(handle.inner.clone())))
-            .map_err(to_js_error)
+        html_to_markdown_rs::safety::guard_panic(|| {
+            html_to_markdown_rs::convert_to_string(&html, Some(handle.inner.clone()))
+        })
+        .map_err(to_js_error)
     }
     #[cfg(not(feature = "visitor"))]
     {
-        html_to_markdown_rs::safety::guard_panic(|| html_to_markdown_rs::convert(&html, Some(handle.inner.clone())))
-            .map_err(to_js_error)
+        html_to_markdown_rs::safety::guard_panic(|| {
+            html_to_markdown_rs::convert_to_string(&html, Some(handle.inner.clone()))
+        })
+        .map_err(to_js_error)
     }
 }
 
@@ -119,13 +123,17 @@ pub fn convert_bytes_with_options_handle(
 
     #[cfg(feature = "visitor")]
     {
-        html_to_markdown_rs::safety::guard_panic(|| html_to_markdown_rs::convert(&html, Some(handle.inner.clone())))
-            .map_err(to_js_error)
+        html_to_markdown_rs::safety::guard_panic(|| {
+            html_to_markdown_rs::convert_to_string(&html, Some(handle.inner.clone()))
+        })
+        .map_err(to_js_error)
     }
     #[cfg(not(feature = "visitor"))]
     {
-        html_to_markdown_rs::safety::guard_panic(|| html_to_markdown_rs::convert(&html, Some(handle.inner.clone())))
-            .map_err(to_js_error)
+        html_to_markdown_rs::safety::guard_panic(|| {
+            html_to_markdown_rs::convert_to_string(&html, Some(handle.inner.clone()))
+        })
+        .map_err(to_js_error)
     }
 }
 

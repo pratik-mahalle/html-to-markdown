@@ -1,6 +1,6 @@
 //! Example: Testing HTML5 semantic tags (article, section, nav, etc.)
 
-use html_to_markdown_rs::convert;
+use html_to_markdown_rs::convert_to_string as convert;
 
 fn main() {
     let html = r"<article>

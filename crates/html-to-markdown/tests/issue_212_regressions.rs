@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 
-use html_to_markdown_rs::convert;
+use html_to_markdown_rs::convert_to_string as convert;
 
 /// Regression test for <https://github.com/kreuzberg-dev/html-to-markdown/issues/212>
 ///

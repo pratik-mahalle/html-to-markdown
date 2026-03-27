@@ -1,6 +1,6 @@
 //! Tests for Djot output format support.
 
-use html_to_markdown_rs::{ConversionOptions, OutputFormat, convert};
+use html_to_markdown_rs::{ConversionOptions, OutputFormat, convert_to_string as convert};
 
 fn djot_options() -> ConversionOptions {
     ConversionOptions {

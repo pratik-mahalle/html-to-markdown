@@ -4,7 +4,7 @@
 
 #[test]
 fn test_strong_blockquote_strong_newlines() {
-    use html_to_markdown_rs::convert;
+    use html_to_markdown_rs::convert_to_string as convert;
 
     // Test case from issue #176: strong + blockquote + strong
     let html = r"<strong>2. Point two</strong><blockquote>Option Explicit
@@ -30,7 +30,7 @@ End Function</blockquote><strong>3. Point three</strong>";
 
 #[test]
 fn test_paragraph_blockquote_paragraph_newlines() {
-    use html_to_markdown_rs::convert;
+    use html_to_markdown_rs::convert_to_string as convert;
 
     // Control test: p + blockquote + p should work correctly
     let html = r"<p>First paragraph</p><blockquote>A quote</blockquote><p>Second paragraph</p>";

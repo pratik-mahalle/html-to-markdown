@@ -1,6 +1,6 @@
 //! Example: Testing whitespace handling and normalization
 
-use html_to_markdown_rs::convert;
+use html_to_markdown_rs::convert_to_string as convert;
 
 fn main() {
     let html = "<p>text    with    multiple    spaces</p>";

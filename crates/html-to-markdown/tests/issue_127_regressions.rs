@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 use html_to_markdown_rs::{
     CodeBlockStyle, ConversionOptions, HeadingStyle, HighlightStyle, ListIndentType, PreprocessingOptions,
-    PreprocessingPreset, WhitespaceMode, convert,
+    PreprocessingPreset, WhitespaceMode, convert_to_string as convert,
 };
 
 fn fixture_path(name: &str) -> PathBuf {

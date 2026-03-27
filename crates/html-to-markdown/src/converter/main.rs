@@ -31,12 +31,13 @@ use crate::error::Result;
 use crate::options::ConversionOptions;
 
 use crate::converter::context::{Context, InlineCollectorHandle};
+use crate::types::structure_collector::StructureCollectorHandle;
 
 /// Converts HTML to Markdown using the provided conversion options.
 ///
 /// This is the main entry point for HTML to Markdown conversion.
 pub fn convert_html(html: &str, options: &ConversionOptions) -> Result<String> {
-    convert_html_impl(html, options, None, None, None)
+    convert_html_impl(html, options, None, None, None, None).map(|(md, _)| md)
 }
 
 /// Converts HTML to Markdown with a custom visitor for callbacks during traversal.
@@ -49,7 +50,7 @@ pub fn convert_html_with_visitor(
     options: &ConversionOptions,
     visitor: Option<crate::visitor::VisitorHandle>,
 ) -> Result<String> {
-    convert_html_impl(html, options, None, None, visitor)
+    convert_html_impl(html, options, None, None, visitor, None).map(|(md, _)| md)
 }
 
 /// Converts HTML to Markdown with an async visitor for callbacks during traversal.
@@ -67,8 +68,8 @@ pub async fn convert_html_with_visitor_async(
 
 /// Internal implementation of HTML to Markdown conversion.
 ///
-/// This function handles the actual conversion logic with optional inline image collection,
-/// metadata extraction, and visitor callbacks depending on enabled features.
+/// Returns `(markdown, Option<DocumentStructure>)`.  The structure is populated when
+/// `options.include_document_structure == true` and a `structure_collector` handle is provided.
 #[cfg_attr(
     any(not(feature = "inline-images"), not(feature = "metadata"), not(feature = "visitor")),
     allow(unused_variables)
@@ -82,7 +83,8 @@ pub(crate) fn convert_html_impl(
     #[cfg(not(feature = "metadata"))] _metadata_collector: Option<()>,
     #[cfg(feature = "visitor")] visitor: Option<crate::visitor::VisitorHandle>,
     #[cfg(not(feature = "visitor"))] _visitor: Option<()>,
-) -> Result<String> {
+    structure_collector: Option<StructureCollectorHandle>,
+) -> Result<(String, Option<crate::types::DocumentStructure>)> {
     // Strip script and style tags completely to prevent parser confusion from HTML-like content
     // inside script/style elements. This preserves JSON-LD for metadata extraction.
     let stripped = strip_script_and_style_tags(html);
@@ -206,13 +208,37 @@ pub(crate) fn convert_html_impl(
     }
 
     #[cfg(all(feature = "metadata", feature = "visitor"))]
-    let ctx = Context::new(options, inline_collector, metadata_collector, visitor);
+    let ctx = Context::new(
+        options,
+        inline_collector,
+        metadata_collector,
+        visitor,
+        structure_collector.as_ref().map(std::rc::Rc::clone),
+    );
     #[cfg(all(feature = "metadata", not(feature = "visitor")))]
-    let ctx = Context::new(options, inline_collector, metadata_collector, _visitor);
+    let ctx = Context::new(
+        options,
+        inline_collector,
+        metadata_collector,
+        _visitor,
+        structure_collector.as_ref().map(std::rc::Rc::clone),
+    );
     #[cfg(all(not(feature = "metadata"), feature = "visitor"))]
-    let ctx = Context::new(options, inline_collector, _metadata_collector, visitor);
+    let ctx = Context::new(
+        options,
+        inline_collector,
+        _metadata_collector,
+        visitor,
+        structure_collector.as_ref().map(std::rc::Rc::clone),
+    );
     #[cfg(all(not(feature = "metadata"), not(feature = "visitor")))]
-    let ctx = Context::new(options, inline_collector, _metadata_collector, _visitor);
+    let ctx = Context::new(
+        options,
+        inline_collector,
+        _metadata_collector,
+        _visitor,
+        structure_collector.as_ref().map(std::rc::Rc::clone),
+    );
 
     for child_handle in dom.children() {
         walk_node(child_handle, parser, &mut output, options, &ctx, 0, &dom_ctx);
@@ -227,16 +253,24 @@ pub(crate) fn convert_html_impl(
     // The full pipeline was still run above so that metadata + visitor callbacks fire.
     if is_plain_text {
         let plain = extract_plain_text(&dom, parser, options);
-        return Ok(plain);
+        let document =
+            structure_collector.and_then(|sc| std::rc::Rc::try_unwrap(sc).ok().map(|cell| cell.into_inner().finish()));
+        return Ok((plain, document));
     }
 
     trim_line_end_whitespace(&mut output);
     let trimmed = output.trim_end_matches('\n');
-    if trimmed.is_empty() {
-        Ok(String::new())
+    let markdown = if trimmed.is_empty() {
+        String::new()
     } else {
-        Ok(format!("{trimmed}\n"))
-    }
+        format!("{trimmed}\n")
+    };
+
+    // Finish the structure collector if present.
+    let document =
+        structure_collector.and_then(|sc| std::rc::Rc::try_unwrap(sc).ok().map(|cell| cell.into_inner().finish()));
+
+    Ok((markdown, document))
 }
 // has_more_than_one_char moved to main_helpers
 // is_inline_element available from utility::content
@@ -581,7 +615,7 @@ pub(crate) async fn convert_html_impl_async(
         ));
     }
     #[cfg(feature = "visitor")]
-    return convert_html_impl(html, options, _inline_collector, _metadata_collector, None);
+    return convert_html_impl(html, options, _inline_collector, _metadata_collector, None, None).map(|(md, _)| md);
     #[cfg(not(feature = "visitor"))]
-    return convert_html_impl(html, options, _inline_collector, _metadata_collector, ());
+    return convert_html_impl(html, options, _inline_collector, _metadata_collector, (), None).map(|(md, _)| md);
 }

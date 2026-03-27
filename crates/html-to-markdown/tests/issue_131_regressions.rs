@@ -1,7 +1,7 @@
 #![allow(missing_docs)]
 
 use html_to_markdown_rs::options::WhitespaceMode;
-use html_to_markdown_rs::{ConversionOptions, convert};
+use html_to_markdown_rs::{ConversionOptions, convert_to_string as convert};
 
 #[test]
 fn link_flattens_block_children_issue_131() {

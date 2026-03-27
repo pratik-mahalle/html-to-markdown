@@ -8,6 +8,7 @@ use std::borrow::Cow;
 use crate::error::Result;
 use crate::options::{ConversionOptions, WhitespaceMode};
 use crate::text;
+use crate::types::ConversionResult;
 use crate::validation::{Utf16Encoding, detect_utf16_encoding, validate_input};
 use crate::{ConversionError, ConversionOptionsUpdate};
 
@@ -20,7 +21,8 @@ use crate::{HtmlExtraction, InlineImageConfig};
 #[cfg(feature = "metadata")]
 use crate::{HtmlMetadata, MetadataConfig};
 
-/// Convert HTML to Markdown.
+/// Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images,
+/// and warnings.
 ///
 /// # Arguments
 ///
@@ -33,30 +35,220 @@ use crate::{HtmlMetadata, MetadataConfig};
 /// use html_to_markdown_rs::{convert, ConversionOptions};
 ///
 /// let html = "<h1>Hello World</h1>";
-/// let markdown = convert(html, None).unwrap();
-/// assert!(markdown.contains("Hello World"));
+/// let result = convert(html, None).unwrap();
+/// assert!(result.content.as_deref().unwrap_or("").contains("Hello World"));
 /// ```
+///
 /// # Errors
 ///
 /// Returns an error if HTML parsing fails or if the input contains invalid UTF-8.
-pub fn convert(html: &str, options: Option<ConversionOptions>) -> Result<String> {
+pub fn convert(html: &str, options: Option<ConversionOptions>) -> Result<ConversionResult> {
+    use std::cell::RefCell;
+    use std::rc::Rc;
+
     let options = options.unwrap_or_default();
 
     let normalized_html = normalize_input(html)?;
 
+    // Fast path: plain text with no HTML tags — skip full parsing pipeline.
     if !options.wrap {
         if let Some(markdown) = fast_text_only(normalized_html.as_ref(), &options) {
-            return Ok(markdown);
+            return Ok(ConversionResult {
+                content: Some(markdown),
+                ..ConversionResult::default()
+            });
         }
     }
 
-    let markdown = crate::converter::convert_html(normalized_html.as_ref(), &options)?;
+    // Determine whether metadata / inline-image extraction is requested.
+    #[cfg(feature = "metadata")]
+    let wants_metadata = options.extract_metadata;
+    #[cfg(not(feature = "metadata"))]
+    let wants_metadata = false;
 
-    if options.wrap {
-        Ok(crate::wrapper::wrap_markdown(&markdown, &options))
+    #[cfg(feature = "inline-images")]
+    let wants_images = options.extract_images;
+    #[cfg(not(feature = "inline-images"))]
+    let wants_images = false;
+
+    // Build optional collectors based on requested features.
+    #[cfg(feature = "metadata")]
+    let metadata_collector = if wants_metadata {
+        Some(Rc::new(RefCell::new(crate::metadata::MetadataCollector::new(
+            MetadataConfig::default(),
+        ))))
     } else {
-        Ok(markdown)
-    }
+        None
+    };
+
+    #[cfg(feature = "inline-images")]
+    let image_collector = if wants_images {
+        use crate::inline_images::{DEFAULT_INLINE_IMAGE_LIMIT, InlineImageConfig as IIC};
+        Some(Rc::new(RefCell::new(crate::inline_images::InlineImageCollector::new(
+            IIC::new(DEFAULT_INLINE_IMAGE_LIMIT),
+        )?)))
+    } else {
+        None
+    };
+
+    // Build optional structure collector when requested.
+    let structure_collector: Option<std::rc::Rc<std::cell::RefCell<crate::types::StructureCollector>>> =
+        if options.include_document_structure {
+            Some(std::rc::Rc::new(std::cell::RefCell::new(
+                crate::types::StructureCollector::new(),
+            )))
+        } else {
+            None
+        };
+
+    // Run the conversion pipeline.
+    let (markdown, document) = {
+        #[cfg(all(feature = "metadata", feature = "inline-images"))]
+        {
+            crate::converter::convert_html_impl(
+                normalized_html.as_ref(),
+                &options,
+                image_collector.as_ref().map(Rc::clone),
+                metadata_collector.as_ref().map(Rc::clone),
+                None,
+                structure_collector.as_ref().map(std::rc::Rc::clone),
+            )?
+        }
+        #[cfg(all(feature = "metadata", not(feature = "inline-images")))]
+        {
+            crate::converter::convert_html_impl(
+                normalized_html.as_ref(),
+                &options,
+                None,
+                metadata_collector.as_ref().map(Rc::clone),
+                None,
+                structure_collector.as_ref().map(std::rc::Rc::clone),
+            )?
+        }
+        #[cfg(all(not(feature = "metadata"), feature = "inline-images"))]
+        {
+            crate::converter::convert_html_impl(
+                normalized_html.as_ref(),
+                &options,
+                image_collector.as_ref().map(Rc::clone),
+                None,
+                None,
+                structure_collector.as_ref().map(std::rc::Rc::clone),
+            )?
+        }
+        #[cfg(all(not(feature = "metadata"), not(feature = "inline-images")))]
+        {
+            crate::converter::convert_html_impl(
+                normalized_html.as_ref(),
+                &options,
+                None,
+                None,
+                None,
+                structure_collector.as_ref().map(std::rc::Rc::clone),
+            )?
+        }
+    };
+
+    let markdown = if options.wrap {
+        crate::wrapper::wrap_markdown(&markdown, &options)
+    } else {
+        markdown
+    };
+
+    // Collect metadata if extracted.
+    #[cfg(feature = "metadata")]
+    let metadata = if let Some(collector) = metadata_collector {
+        Rc::try_unwrap(collector)
+            .map_err(|_| ConversionError::Other("failed to recover metadata state".to_string()))?
+            .into_inner()
+            .finish()
+    } else {
+        HtmlMetadata::default()
+    };
+
+    // Collect inline images if extracted.
+    #[cfg(feature = "inline-images")]
+    let (images, image_warnings) = if let Some(collector) = image_collector {
+        let c = Rc::try_unwrap(collector)
+            .map_err(|_| ConversionError::Other("failed to recover inline image state".to_string()))?
+            .into_inner();
+        c.finish()
+    } else {
+        (Vec::new(), Vec::new())
+    };
+
+    // Map InlineImageWarnings → ProcessingWarnings.
+    #[cfg(feature = "inline-images")]
+    let warnings: Vec<crate::types::ProcessingWarning> = image_warnings
+        .into_iter()
+        .map(|w| crate::types::ProcessingWarning {
+            kind: crate::types::WarningKind::ImageExtractionFailed,
+            message: w.message,
+        })
+        .collect();
+    #[cfg(not(feature = "inline-images"))]
+    let warnings: Vec<crate::types::ProcessingWarning> = Vec::new();
+
+    let _ = wants_metadata;
+    let _ = wants_images;
+
+    Ok(ConversionResult {
+        content: Some(markdown),
+        document,
+        #[cfg(feature = "metadata")]
+        metadata,
+        tables: Vec::new(),
+        #[cfg(feature = "inline-images")]
+        images,
+        warnings,
+    })
+}
+
+/// Convert HTML to Markdown, returning a plain `String` (v2 compatibility shim).
+///
+/// Calls [`convert`] and extracts the `content` field. Use [`convert`] or [`extract`] directly
+/// in new code so you have access to metadata, images, and warnings.
+///
+/// # Arguments
+///
+/// * `html` - The HTML string to convert
+/// * `options` - Optional conversion options (defaults to `ConversionOptions::default()`)
+///
+/// # Errors
+///
+/// Returns an error if HTML parsing fails or if the input contains invalid UTF-8.
+pub fn convert_to_string(html: &str, options: Option<ConversionOptions>) -> Result<String> {
+    let result = convert(html, options)?;
+    Ok(result.content.unwrap_or_default())
+}
+
+/// Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images,
+/// and warnings.
+///
+/// This is the v3 API entry point. It is identical to [`convert`] and exists as a more
+/// semantically descriptive alias — "extract" captures that the function does more than
+/// convert: it extracts structured content, metadata, and image assets in a single pass.
+///
+/// # Arguments
+///
+/// * `html` - The HTML string to convert
+/// * `options` - Optional conversion options (defaults to `ConversionOptions::default()`)
+///
+/// # Example
+///
+/// ```
+/// use html_to_markdown_rs::{extract, ConversionOptions};
+///
+/// let html = "<h1>Hello World</h1><p>Some text.</p>";
+/// let result = extract(html, None).unwrap();
+/// assert!(result.content.as_deref().unwrap_or("").contains("Hello World"));
+/// ```
+///
+/// # Errors
+///
+/// Returns an error if HTML parsing fails or if the input contains invalid UTF-8.
+pub fn extract(html: &str, options: Option<ConversionOptions>) -> Result<ConversionResult> {
+    convert(html, options)
 }
 
 /// Convert HTML to Markdown while collecting inline image assets (requires the `inline-images` feature).
@@ -69,9 +261,12 @@ pub fn convert(html: &str, options: Option<ConversionOptions>) -> Result<String>
 /// * `options` - Optional conversion options (defaults to `ConversionOptions::default()`)
 /// * `image_cfg` - Configuration controlling inline image extraction
 /// * `visitor` - Optional visitor for customizing conversion behavior. Only used if `visitor` feature is enabled.
+///
 /// # Errors
 ///
 /// Returns an error if HTML parsing fails or if the input contains invalid UTF-8.
+///
+// v2 compat - will be removed
 #[cfg(feature = "inline-images")]
 pub fn convert_with_inline_images(
     html: &str,
@@ -92,18 +287,20 @@ pub fn convert_with_inline_images(
     )?));
 
     #[cfg(feature = "visitor")]
-    let markdown = crate::converter::convert_html_impl(
+    let (markdown, _doc) = crate::converter::convert_html_impl(
         normalized_html.as_ref(),
         &options,
         Some(Rc::clone(&collector)),
         None,
         visitor,
+        None,
     )?;
     #[cfg(not(feature = "visitor"))]
-    let markdown = crate::converter::convert_html_impl(
+    let (markdown, _doc) = crate::converter::convert_html_impl(
         normalized_html.as_ref(),
         &options,
         Some(Rc::clone(&collector)),
+        None,
         None,
         None,
     )?;
@@ -244,6 +441,8 @@ pub fn convert_with_inline_images(
 /// - [`MetadataConfig`] - Configuration for metadata extraction
 /// - [`HtmlMetadata`] - Metadata structure documentation
 /// - [`metadata`] module - Detailed type documentation for metadata components
+///
+// v2 compat - will be removed
 #[cfg(feature = "metadata")]
 pub fn convert_with_metadata(
     html: &str,
@@ -258,14 +457,17 @@ pub fn convert_with_metadata(
     // Disable YAML frontmatter prepending: metadata is returned as a struct,
     // so embedding it in the content string is redundant and pollutes the output.
     let mut options = options.unwrap_or_default();
+    // We handle metadata extraction here, not inside convert().
     options.extract_metadata = false;
 
     let normalized_html = normalize_input(html)?;
     if !metadata_cfg.any_enabled() {
         #[cfg(feature = "visitor")]
-        let markdown = crate::converter::convert_html_impl(normalized_html.as_ref(), &options, None, None, visitor)?;
+        let (markdown, _doc) =
+            crate::converter::convert_html_impl(normalized_html.as_ref(), &options, None, None, visitor, None)?;
         #[cfg(not(feature = "visitor"))]
-        let markdown = crate::converter::convert_html_impl(normalized_html.as_ref(), &options, None, None, None)?;
+        let (markdown, _doc) =
+            crate::converter::convert_html_impl(normalized_html.as_ref(), &options, None, None, None, None)?;
         let markdown = if options.wrap {
             crate::wrapper::wrap_markdown(&markdown, &options)
         } else {
@@ -277,19 +479,21 @@ pub fn convert_with_metadata(
     let metadata_collector = Rc::new(RefCell::new(crate::metadata::MetadataCollector::new(metadata_cfg)));
 
     #[cfg(feature = "visitor")]
-    let markdown = crate::converter::convert_html_impl(
+    let (markdown, _doc) = crate::converter::convert_html_impl(
         normalized_html.as_ref(),
         &options,
         None,
         Some(Rc::clone(&metadata_collector)),
         visitor,
+        None,
     )?;
     #[cfg(not(feature = "visitor"))]
-    let markdown = crate::converter::convert_html_impl(
+    let (markdown, _doc) = crate::converter::convert_html_impl(
         normalized_html.as_ref(),
         &options,
         None,
         Some(Rc::clone(&metadata_collector)),
+        None,
         None,
     )?;
 
@@ -342,6 +546,8 @@ pub fn convert_with_metadata(
 /// let mut visitor = CustomVisitor;
 /// let markdown = convert_with_visitor(html, None, &mut visitor).unwrap();
 /// ```
+///
+// v2 compat - will be removed
 #[cfg(feature = "visitor")]
 /// # Errors
 ///
@@ -422,6 +628,8 @@ pub fn convert_with_visitor(
 /// let visitor = Some(Rc::new(RefCell::new(CustomAsyncVisitor) as _));
 /// let markdown = convert_with_async_visitor(html, None, visitor).await.unwrap();
 /// ```
+///
+// v2 compat - will be removed
 #[allow(clippy::future_not_send)]
 /// # Errors
 ///
@@ -799,6 +1007,8 @@ impl visitor::HtmlVisitor for TableCollector {
 /// # Errors
 ///
 /// Returns an error if HTML parsing fails or if the input contains invalid UTF-8.
+///
+// v2 compat - will be removed
 #[cfg(feature = "visitor")]
 pub fn convert_with_tables(
     html: &str,
