@@ -1,11 +1,7 @@
 ---
 name: common-task-commands
-description: "Instructions for common task commands."
+description: "Common task runner commands for build, test, lint, and format workflows"
 ---
-
-______________________________________________________________________
-
-## priority: critical
 
 # Common Task Commands
 

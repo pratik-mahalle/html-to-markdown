@@ -131,6 +131,7 @@ public class ConversionOptions
     /// Default: true
     /// </summary>
     [JsonPropertyName("hocrSpatialTables")]
+    [Obsolete("hOCR support is deprecated since 2.30.0 and will be removed in v3.")]
     public bool HocrSpatialTables { get; set; } = true;
 
     /// <summary>

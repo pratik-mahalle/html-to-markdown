@@ -1,11 +1,7 @@
 ---
 name: polyglot-bindings
-description: "Instructions for polyglot bindings."
+description: "Patterns for creating and maintaining language bindings around a Rust core"
 ---
-
-______________________________________________________________________
-
-## priority: critical
 
 # Polyglot Bindings
 

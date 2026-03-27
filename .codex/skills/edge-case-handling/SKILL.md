@@ -1,6 +1,6 @@
 ---
 name: edge-case-handling
-description: "Instructions for edge case handling."
+description: "Edge Case Handling in html-to-markdown"
 ---
 
 # Edge Case Handling in html-to-markdown

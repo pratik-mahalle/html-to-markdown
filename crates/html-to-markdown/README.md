@@ -121,7 +121,9 @@ options.preprocessing.remove_forms = true;
 let markdown = convert(scraped_html, Some(options))?;
 ```
 
-## hOCR Table Extraction
+## hOCR Table Extraction (Deprecated)
+
+> **Deprecated since 2.30.0**: hOCR support will be removed in v3.
 
 ```rust
 use html_to_markdown_rs::convert;

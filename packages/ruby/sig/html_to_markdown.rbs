@@ -62,7 +62,7 @@ module HtmlToMarkdown
     autolinks?: bool,
     default_title?: bool,
     br_in_tables?: bool,
-    hocr_spatial_tables?: bool,
+    hocr_spatial_tables?: bool, # Deprecated since 2.30.0: hOCR support will be removed in v3.
     highlight_style?: highlight_style,
     extract_metadata?: bool,
     whitespace_mode?: whitespace_mode,
