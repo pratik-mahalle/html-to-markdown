@@ -1,11 +1,7 @@
 ---
 name: universal-anti-patterns
-description: "Instructions for universal anti patterns."
+description: "Common coding anti-patterns to avoid across all languages"
 ---
-
-______________________________________________________________________
-
-## priority: critical
 
 # Universal Anti-Patterns
 

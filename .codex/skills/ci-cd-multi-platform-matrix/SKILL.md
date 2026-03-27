@@ -1,11 +1,7 @@
 ---
 name: ci-cd-multi-platform-matrix
-description: "Instructions for ci cd multi platform matrix."
+description: "CI/CD matrix strategies for multi-platform and multi-language builds"
 ---
-
-______________________________________________________________________
-
-## priority: critical
 
 # CI/CD Multi-Platform Matrix
 
@@ -20,11 +16,11 @@ Use `strategy.matrix` with `include` for specific OS/arch/language combinations.
 | Language | Versions | Action |
 |----------|----------|--------|
 | Rust | MSRV, stable, nightly | `dtolnay/rust-toolchain` |
-| Python | 3.8–3.12 | `actions/setup-python` |
+| Python | 3.8-3.12 | `actions/setup-python` |
 | Node.js | 18, 20, 22 | `actions/setup-node` |
-| Ruby | 3.0–3.3 | `ruby/setup-ruby` |
+| Ruby | 3.0-3.3 | `ruby/setup-ruby` |
 | Java | 11, 17, 21 | `actions/setup-java` (temurin) |
-| Go | 1.20–1.22 | `actions/setup-go` |
+| Go | 1.20-1.22 | `actions/setup-go` |
 
 ## Caching
 
@@ -35,14 +31,14 @@ Use `strategy.matrix` with `include` for specific OS/arch/language combinations.
 
 ## Split Workflows by Domain
 
-Separate `ci-rust.yaml`, `ci-python.yaml`, `ci-node.yaml`, etc. with path filters on relevant directories. Each runs lint → build → test → coverage.
+Separate `ci-rust.yaml`, `ci-python.yaml`, `ci-node.yaml`, etc. with path filters on relevant directories. Each runs lint -> build -> test -> coverage.
 
 ## CI Pipeline Standards
 
 - Workflows use `task` commands (never direct scripts): `task setup`, `task lint:check`, `task build:all`, `task test:all`
 - Always set `BUILD_PROFILE=ci` in GitHub Actions
 - Pre-commit hooks run in validate stage
-- Stages: Validate → Build → Test → Deploy
+- Stages: Validate -> Build -> Test -> Deploy
 
 ## Anti-Patterns
 

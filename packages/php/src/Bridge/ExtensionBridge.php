@@ -7,7 +7,6 @@ namespace HtmlToMarkdown\Bridge;
 use HtmlToMarkdown\Contract\ExtensionBridge as ExtensionBridgeContract;
 use HtmlToMarkdown\Exception\ConversionFailed;
 use HtmlToMarkdown\Exception\ExtensionNotLoaded;
-use HtmlToMarkdown\Exception\InvalidOption;
 use HtmlToMarkdown\Visitor\HtmlVisitor;
 
 /**
@@ -66,13 +65,6 @@ final class ExtensionBridge implements ExtensionBridgeContract
             throw ConversionFailed::withMessage($exception->getMessage());
         }
 
-        if (!\is_array($payload)) {
-            throw InvalidOption::because(
-                'convert_with_inline_images',
-                'extension returned unexpected payload',
-            );
-        }
-
         return $payload;
     }
 
@@ -97,13 +89,6 @@ final class ExtensionBridge implements ExtensionBridgeContract
             $payload = $callable($html, $options, $metadataConfig);
         } catch (\Throwable $exception) {
             throw ConversionFailed::withMessage($exception->getMessage());
-        }
-
-        if (!\is_array($payload)) {
-            throw InvalidOption::because(
-                'convert_with_metadata',
-                'extension returned unexpected payload',
-            );
         }
 
         return $payload;
@@ -153,13 +138,6 @@ final class ExtensionBridge implements ExtensionBridgeContract
             $payload = $callable($html, $options, $metadataConfig);
         } catch (\Throwable $exception) {
             throw ConversionFailed::withMessage($exception->getMessage());
-        }
-
-        if (!\is_array($payload)) {
-            throw InvalidOption::because(
-                'convert_with_tables',
-                'extension returned unexpected payload',
-            );
         }
 
         return $payload;

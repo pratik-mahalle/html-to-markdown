@@ -236,6 +236,8 @@ Use HTML `<br>` elements in tables instead of spaces for line breaks.
 
 ### `hocr_spatial_tables`
 
+> **Deprecated since 2.30.0**: hOCR support will be removed in v3.
+
 Enable spatial table reconstruction in hOCR documents via positioning analysis.
 
 **Type:** `boolean` | **Default:** `true`
