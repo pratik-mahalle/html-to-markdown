@@ -28,7 +28,7 @@
         <dependency>
             <groupId>dev.kreuzberg</groupId>
             <artifactId>html-to-markdown</artifactId>
-            <version>2.30.0</version>
+            <version>3.0.0-rc.1</version>
         </dependency>
 
         <!-- JUnit 5 for testing -->

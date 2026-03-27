@@ -16,6 +16,9 @@ categories = ["parsing", "text-processing", "api-bindings"]
 [package.metadata.napi]
 package-json-name = "@kreuzberg/html-to-markdown-node"
 
+[package.metadata.cargo-machete]
+ignored = ["tokio"]
+
 [lib]
 crate-type = ["cdylib"]
 
@@ -29,7 +32,7 @@ profiling = ["dep:pprof"]
 
 [dependencies]
 async-trait = "0.1"
-html-to-markdown-bindings-common = { path = "../html-to-markdown-bindings-common", version = "2.30.0", features = [
+html-to-markdown-bindings-common = { path = "../html-to-markdown-bindings-common", version = "3.0.0-rc.1", features = [
     "metadata",
     "inline-images",
 ] }

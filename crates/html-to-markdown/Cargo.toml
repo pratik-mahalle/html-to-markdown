@@ -14,7 +14,7 @@ keywords = ["html", "markdown", "converter", "astral-tl", "doc-processing"]
 categories = ["parsing", "text-processing", "web-programming"]
 
 [package.metadata.cargo-machete]
-ignored = ["once_cell", "futures"]
+ignored = ["once_cell", "futures", "ahash"]
 
 [lib]
 crate-type = ["rlib"]
