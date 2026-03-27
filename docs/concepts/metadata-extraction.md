@@ -6,7 +6,7 @@ html-to-markdown can extract structured metadata from HTML documents during conv
 
 ## What Metadata Is Extracted
 
-The `convert_with_metadata()` API returns both the converted Markdown and an `ExtendedMetadata` object containing five categories of structured data.
+The `convert_with_metadata()` API returns both the converted Markdown and an `HtmlMetadata` object containing five categories of structured data.
 
 ### Document Metadata
 
@@ -86,7 +86,7 @@ graph TD
     B -->|a href| E[Link Collector]
     B -->|img| F[Image Collector]
     B -->|script ld+json| G[Structured Data Collector]
-    C --> H[ExtendedMetadata]
+    C --> H[HtmlMetadata]
     D --> H
     E --> H
     F --> H

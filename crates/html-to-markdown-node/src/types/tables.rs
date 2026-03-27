@@ -29,7 +29,7 @@ pub struct JsTableExtraction {
     /// Converted markdown/djot/plain text content.
     pub content: String,
     /// Extended metadata (present when metadata extraction was requested).
-    pub metadata: Option<super::metadata::JsExtendedMetadata>,
+    pub metadata: Option<super::metadata::JsHtmlMetadata>,
     /// All tables found in the HTML, in document order.
     pub tables: Vec<JsTableData>,
 }

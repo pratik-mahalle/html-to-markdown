@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace HtmlToMarkdown\Value;
 
-final readonly class ExtendedMetadata
+final readonly class HtmlMetadata
 {
     /**
      * @param list<HeaderMetadata> $headers

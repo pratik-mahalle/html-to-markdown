@@ -132,7 +132,7 @@ Configuration controlling which metadata types are extracted during conversion.
 
 ---
 
-## ExtendedMetadata <span class="version-badge">v2.13.0</span>
+## HtmlMetadata <span class="version-badge">v2.13.0</span>
 
 The result type containing all extracted metadata from an HTML document.
 

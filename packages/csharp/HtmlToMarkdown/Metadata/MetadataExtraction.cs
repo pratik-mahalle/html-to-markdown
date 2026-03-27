@@ -18,5 +18,5 @@ public record MetadataExtraction
     /// Extracted metadata from the HTML document.
     /// </summary>
     [JsonPropertyName("metadata")]
-    public ExtendedMetadata Metadata { get; init; } = new();
+    public HtmlMetadata Metadata { get; init; } = new();
 }

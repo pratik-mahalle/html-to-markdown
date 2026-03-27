@@ -75,7 +75,7 @@ pub fn convert_with_metadata(
     options: Option<ConversionOptions>,
     metadata_cfg: MetadataConfig,
     visitor: Option<VisitorHandle>,  // only with "visitor" feature
-) -> Result<(String, ExtendedMetadata)>
+) -> Result<(String, HtmlMetadata)>
 ```
 
 **Arguments:**
@@ -87,7 +87,7 @@ pub fn convert_with_metadata(
 | `metadata_cfg` | `MetadataConfig` | Configuration for metadata extraction granularity |
 | `visitor` | `Option<VisitorHandle>` | Optional visitor for customizing conversion (requires `visitor` feature) |
 
-**Returns:** `Result<(String, ExtendedMetadata)>` -- a tuple of the Markdown string and extracted metadata.
+**Returns:** `Result<(String, HtmlMetadata)>` -- a tuple of the Markdown string and extracted metadata.
 
 **Example:**
 
@@ -224,7 +224,7 @@ pub fn convert_with_tables(
 | Field | Type | Description |
 |-------|------|-------------|
 | `content` | `String` | Converted markdown/djot/plain text content |
-| `metadata` | `Option<ExtendedMetadata>` | Extended metadata, if metadata extraction was requested (requires `metadata` feature) |
+| `metadata` | `Option<HtmlMetadata>` | Extended metadata, if metadata extraction was requested (requires `metadata` feature) |
 | `tables` | `Vec<TableData>` | All tables found in the HTML, in document order |
 
 #### `TableData`
@@ -315,12 +315,12 @@ pub struct MetadataConfig {
 }
 ```
 
-### `ExtendedMetadata`
+### `HtmlMetadata`
 
 Comprehensive metadata extraction result. See the [Types Reference](types.md) for field details.
 
 ```rust
-pub struct ExtendedMetadata {
+pub struct HtmlMetadata {
     pub document: DocumentMetadata,
     pub headers: Vec<HeaderMetadata>,
     pub links: Vec<LinkMetadata>,
@@ -427,7 +427,7 @@ pub struct NodeContext {
 
 | Feature | Description | Default |
 |---------|-------------|---------|
-| `metadata` | Metadata extraction (`convert_with_metadata`, `MetadataConfig`, `ExtendedMetadata`) | **yes** |
+| `metadata` | Metadata extraction (`convert_with_metadata`, `MetadataConfig`, `HtmlMetadata`) | **yes** |
 | `visitor` | Synchronous visitor pattern (`HtmlVisitor` trait, `convert_with_visitor`) | no |
 | `async-visitor` | Async visitor pattern (implies `visitor`) | no |
 | `inline-images` | Inline image extraction (`convert_with_inline_images`) | no |

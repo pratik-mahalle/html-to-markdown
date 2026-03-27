@@ -7,7 +7,7 @@ pub mod tables;
 pub use inline_image::{JsHtmlExtraction, JsInlineImage, JsInlineImageWarning};
 #[cfg(feature = "metadata")]
 pub use metadata::{
-    JsDocumentMetadata, JsExtendedMetadata, JsHeaderMetadata, JsImageMetadata, JsLinkMetadata, JsMetadataConfig,
+    JsDocumentMetadata, JsHeaderMetadata, JsHtmlMetadata, JsImageMetadata, JsLinkMetadata, JsMetadataConfig,
     JsMetadataExtraction, JsStructuredData, convert_metadata,
 };
 #[cfg(feature = "visitor")]

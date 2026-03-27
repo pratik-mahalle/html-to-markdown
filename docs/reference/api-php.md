@@ -92,7 +92,7 @@ public static function convertWithMetadata(
 | `$options` | `ConversionOptions\|array\|null` | Optional conversion configuration |
 | `$metadataConfig` | `?array` | Metadata extraction configuration |
 
-**Returns:** `array{markdown: string, metadata: ExtendedMetadata}` -- associative array with `markdown` and `metadata` keys.
+**Returns:** `array{markdown: string, metadata: HtmlMetadata}` -- associative array with `markdown` and `metadata` keys.
 
 **Example:**
 

@@ -3,7 +3,7 @@ package dev.kreuzberg.htmltomarkdown;
 import static org.junit.jupiter.api.Assertions.*;
 
 import dev.kreuzberg.htmltomarkdown.metadata.DocumentMetadata;
-import dev.kreuzberg.htmltomarkdown.metadata.ExtendedMetadata;
+import dev.kreuzberg.htmltomarkdown.metadata.HtmlMetadata;
 import dev.kreuzberg.htmltomarkdown.metadata.HeaderMetadata;
 import dev.kreuzberg.htmltomarkdown.metadata.ImageMetadata;
 import dev.kreuzberg.htmltomarkdown.metadata.LinkMetadata;
@@ -49,7 +49,7 @@ class ConvertWithMetadataTest {
             + "</body></html>";
 
     MetadataExtraction result = HtmlToMarkdown.convertWithMetadata(html);
-    ExtendedMetadata metadata = result.getMetadata();
+    HtmlMetadata metadata = result.getMetadata();
 
     assertEquals(3, metadata.getHeaderCount(), "Should have 3 headers");
 
@@ -74,7 +74,7 @@ class ConvertWithMetadataTest {
             + "</body></html>";
 
     MetadataExtraction result = HtmlToMarkdown.convertWithMetadata(html);
-    ExtendedMetadata metadata = result.getMetadata();
+    HtmlMetadata metadata = result.getMetadata();
 
     assertEquals(4, metadata.getLinkCount(), "Should have 4 links");
 
@@ -103,7 +103,7 @@ class ConvertWithMetadataTest {
             + "</body></html>";
 
     MetadataExtraction result = HtmlToMarkdown.convertWithMetadata(html);
-    ExtendedMetadata metadata = result.getMetadata();
+    HtmlMetadata metadata = result.getMetadata();
 
     assertEquals(2, metadata.getImageCount(), "Should have 2 images");
 
@@ -326,7 +326,7 @@ class ConvertWithMetadataTest {
             + "</html>";
 
     MetadataExtraction result = HtmlToMarkdown.convertWithMetadata(html);
-    ExtendedMetadata metadata = result.getMetadata();
+    HtmlMetadata metadata = result.getMetadata();
 
     DocumentMetadata doc = metadata.document();
     assertEquals("Complex Article", doc.title());
@@ -412,7 +412,7 @@ class ConvertWithMetadataTest {
             + "</body></html>";
 
     MetadataExtraction result = HtmlToMarkdown.convertWithMetadata(html);
-    ExtendedMetadata metadata = result.getMetadata();
+    HtmlMetadata metadata = result.getMetadata();
 
     assertEquals(LinkType.EXTERNAL, metadata.links().get(0).linkType());
     assertEquals(LinkType.INTERNAL, metadata.links().get(1).linkType());
@@ -485,7 +485,7 @@ class ConvertWithMetadataTest {
             + "</body></html>";
 
     MetadataExtraction result = HtmlToMarkdown.convertWithMetadata(html);
-    ExtendedMetadata metadata = result.getMetadata();
+    HtmlMetadata metadata = result.getMetadata();
 
     assertEquals(2, metadata.getExternalLinks().size(), "Should have 2 external links");
     assertEquals(2, metadata.getInternalLinks().size(), "Should have 2 internal links");
@@ -534,7 +534,7 @@ class ConvertWithMetadataTest {
             + "</html>";
 
     MetadataExtraction result = HtmlToMarkdown.convertWithMetadata(html);
-    ExtendedMetadata metadata = result.getMetadata();
+    HtmlMetadata metadata = result.getMetadata();
 
     assertTrue(metadata.getHeaderCount() >= 2, "Should have at least 2 headers");
     assertEquals(1, metadata.getLinkCount());

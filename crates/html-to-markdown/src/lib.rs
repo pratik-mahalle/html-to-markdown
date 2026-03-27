@@ -57,6 +57,7 @@ pub mod metadata;
 pub mod options;
 pub mod safety;
 pub mod text;
+pub mod types;
 #[cfg(feature = "visitor")]
 pub mod visitor;
 #[cfg(feature = "visitor")]
@@ -75,6 +76,11 @@ mod validation;
 // ============================================================================
 
 pub use exports::*;
+pub use types::{
+    AnnotationKind, ConversionResult, DocumentNode, DocumentStructure, GridCell, NodeContent, ProcessingWarning,
+    TableGrid, TextAnnotation, WarningKind,
+};
+// Note: types::TableData will replace convert_api::TableData when convert() is refactored
 
 // ============================================================================
 // Main Public API Functions

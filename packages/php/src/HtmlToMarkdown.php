@@ -7,7 +7,7 @@ namespace HtmlToMarkdown;
 use HtmlToMarkdown\Config\ConversionOptions;
 use HtmlToMarkdown\Config\InlineImageConfig;
 use HtmlToMarkdown\Service\Converter as ConverterService;
-use HtmlToMarkdown\Value\ExtendedMetadata;
+use HtmlToMarkdown\Value\HtmlMetadata;
 use HtmlToMarkdown\Value\InlineImageExtraction;
 use HtmlToMarkdown\Value\TableExtractionResult;
 use HtmlToMarkdown\Visitor\HtmlVisitor;
@@ -46,7 +46,7 @@ final class HtmlToMarkdown
      * @param ConversionOptions|ConversionOptionsInput|null $options
      * @param array<string, mixed>|null $metadataConfig
      * @phpstan-param ConversionOptions|array<string, mixed>|null $options
-     * @phpstan-return array{markdown: string, metadata: ExtendedMetadata}
+     * @phpstan-return array{markdown: string, metadata: HtmlMetadata}
      */
     public static function convertWithMetadata(
         string $html,
