@@ -84,6 +84,9 @@ final class HtmlToMarkdownFFI {
   /** Method handle for html_to_markdown_convert_with_tables. */
   static final MethodHandle html_to_markdown_convert_with_tables;
 
+  /** Method handle for html_to_markdown_extract. */
+  static final MethodHandle html_to_markdown_extract;
+
   /** Method handle for html_to_markdown_visitor_create. */
   static final MethodHandle html_to_markdown_visitor_create;
 
@@ -97,6 +100,10 @@ final class HtmlToMarkdownFFI {
   private static final FunctionDescriptor CONVERT_WITH_TABLES_DESC =
       FunctionDescriptor.of(
           ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS);
+
+  /** Function descriptor for extract (html, options_json -> json string). */
+  private static final FunctionDescriptor EXTRACT_DESC =
+      FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS);
 
   /** Function descriptor for visitor create. */
   private static final FunctionDescriptor VISITOR_CREATE_DESC =
@@ -239,6 +246,9 @@ final class HtmlToMarkdownFFI {
     html_to_markdown_convert_with_tables =
         LINKER.downcallHandle(
             findSymbol("html_to_markdown_convert_with_tables"), CONVERT_WITH_TABLES_DESC);
+
+    html_to_markdown_extract =
+        LINKER.downcallHandle(findSymbol("html_to_markdown_extract"), EXTRACT_DESC);
 
     html_to_markdown_visitor_create =
         LINKER.downcallHandle(findSymbol("html_to_markdown_visitor_create"), VISITOR_CREATE_DESC);

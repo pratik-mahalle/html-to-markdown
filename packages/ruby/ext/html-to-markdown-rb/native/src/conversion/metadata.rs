@@ -2,8 +2,8 @@
 
 use crate::types::{arg_error, symbol_to_string};
 use html_to_markdown_rs::metadata::{
-    DocumentMetadata as RustDocumentMetadata, ExtendedMetadata as RustExtendedMetadata,
-    HeaderMetadata as RustHeaderMetadata, ImageMetadata as RustImageMetadata, LinkMetadata as RustLinkMetadata,
+    DocumentMetadata as RustDocumentMetadata, HeaderMetadata as RustHeaderMetadata,
+    HtmlMetadata as RustHtmlMetadata, ImageMetadata as RustImageMetadata, LinkMetadata as RustLinkMetadata,
     MetadataConfig as RustMetadataConfig, StructuredData as RustStructuredData, TextDirection as RustTextDirection,
 };
 use magnus::prelude::*;
@@ -183,7 +183,7 @@ fn structured_data_to_ruby(ruby: &Ruby, data: Vec<RustStructuredData>) -> Result
     Ok(array.as_value())
 }
 
-pub fn extended_metadata_to_ruby(ruby: &Ruby, metadata: RustExtendedMetadata) -> Result<Value, Error> {
+pub fn extended_metadata_to_ruby(ruby: &Ruby, metadata: RustHtmlMetadata) -> Result<Value, Error> {
     let hash = ruby.hash_new();
 
     hash.aset(

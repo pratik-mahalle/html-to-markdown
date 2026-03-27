@@ -18,11 +18,11 @@ mod types;
 mod visitor_support;
 
 // Import conversion helper functions
-use build::build_html_extraction;
 #[cfg(feature = "metadata")]
 use build::build_metadata_extraction;
 #[cfg(feature = "visitor")]
 use build::build_tables_extraction;
+use build::{build_conversion_result, build_html_extraction};
 #[cfg(feature = "metadata")]
 use options::parse_metadata_config;
 use options::{parse_conversion_options, parse_inline_image_config};
@@ -40,6 +40,22 @@ pub fn convert_html(html: String, options: Option<&ZendHashTable>, _visitor: Opt
     // NOTE: PHP visitor support is not yet fully implemented with ext-php-rs.
     // The visitor parameter is accepted for API compatibility but is currently ignored.
     convert_impl(&html, rust_options)
+}
+
+// Extract structured content from HTML, returning an associative array with:
+// content, document, metadata, tables, images, warnings
+#[php_function]
+#[php(name = "html_to_markdown_extract")]
+pub fn extract_html(html: String, options: Option<&ZendHashTable>) -> PhpResult<ZBox<ZendHashTable>> {
+    let rust_options = match options {
+        Some(table) => Some(parse_conversion_options(table)?),
+        None => None,
+    };
+
+    let result = guard_panic(|| profiling::maybe_profile(|| html_to_markdown_rs::extract(&html, rust_options.clone())))
+        .map_err(to_php_exception)?;
+
+    build_conversion_result(result)
 }
 
 // Convert HTML to Markdown with inline images
@@ -196,6 +212,7 @@ pub fn module(module: ModuleBuilder) -> ModuleBuilder {
         .name("html_to_markdown")
         .version(env!("CARGO_PKG_VERSION"))
         .function(wrap_function!(convert_html))
+        .function(wrap_function!(extract_html))
         .function(wrap_function!(convert_html_with_inline_images))
         .function(wrap_function!(profile_start))
         .function(wrap_function!(profile_stop));

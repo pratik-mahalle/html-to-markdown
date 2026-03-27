@@ -87,6 +87,83 @@ fn build_warnings(warnings: Vec<InlineImageWarning>) -> PhpResult<ZBox<ZendHashT
     Ok(table)
 }
 
+/// Build a PHP hash table from a ConversionResult.
+pub fn build_conversion_result(result: html_to_markdown_rs::ConversionResult) -> PhpResult<ZBox<ZendHashTable>> {
+    let mut table = ZendHashTable::new();
+
+    // content: Option<String>
+    match result.content {
+        Some(content) => table.insert("content", content)?,
+        None => table.insert("content", ())?,
+    }
+
+    // document: not yet exposed
+    table.insert("document", ())?;
+
+    // metadata
+    #[cfg(feature = "metadata")]
+    table.insert("metadata", build_extended_metadata(result.metadata)?)?;
+    #[cfg(not(feature = "metadata"))]
+    table.insert("metadata", ())?;
+
+    // tables: Vec<types::TableData> with grid (TableGrid) and markdown
+    let mut tables_array = ZendHashTable::with_capacity(table_capacity(result.tables.len()));
+    for t in result.tables {
+        let mut entry = ZendHashTable::new();
+        // grid
+        let mut grid_entry = ZendHashTable::new();
+        grid_entry.insert("rows", t.grid.rows as i64)?;
+        grid_entry.insert("cols", t.grid.cols as i64)?;
+        let mut cells_array = ZendHashTable::with_capacity(table_capacity(t.grid.cells.len()));
+        for cell in t.grid.cells {
+            let mut cell_entry = ZendHashTable::new();
+            cell_entry.insert("content", cell.content)?;
+            cell_entry.insert("row", cell.row as i64)?;
+            cell_entry.insert("col", cell.col as i64)?;
+            cell_entry.insert("row_span", cell.row_span as i64)?;
+            cell_entry.insert("col_span", cell.col_span as i64)?;
+            cell_entry.insert("is_header", cell.is_header)?;
+            cells_array.push(cell_entry)?;
+        }
+        grid_entry.insert("cells", cells_array)?;
+        entry.insert("grid", grid_entry)?;
+        entry.insert("markdown", t.markdown)?;
+        tables_array.push(entry)?;
+    }
+    table.insert("tables", tables_array)?;
+
+    // images
+    #[cfg(feature = "inline-images")]
+    {
+        let mut images_array = ZendHashTable::with_capacity(table_capacity(result.images.len()));
+        for image in result.images {
+            images_array.push(build_inline_image_entry(image)?)?;
+        }
+        table.insert("images", images_array)?;
+    }
+    #[cfg(not(feature = "inline-images"))]
+    table.insert("images", ZendHashTable::new())?;
+
+    // warnings
+    let mut warnings_array = ZendHashTable::with_capacity(table_capacity(result.warnings.len()));
+    for warning in result.warnings {
+        let mut entry = ZendHashTable::new();
+        entry.insert("message", warning.message)?;
+        let kind = match warning.kind {
+            html_to_markdown_rs::WarningKind::ImageExtractionFailed => "image_extraction_failed",
+            html_to_markdown_rs::WarningKind::EncodingFallback => "encoding_fallback",
+            html_to_markdown_rs::WarningKind::TruncatedInput => "truncated_input",
+            html_to_markdown_rs::WarningKind::MalformedHtml => "malformed_html",
+            html_to_markdown_rs::WarningKind::SanitizationApplied => "sanitization_applied",
+        };
+        entry.insert("kind", kind)?;
+        warnings_array.push(entry)?;
+    }
+    table.insert("warnings", warnings_array)?;
+
+    Ok(table)
+}
+
 /// Build a PHP hash table from a table extraction result (requires visitor feature).
 #[cfg(feature = "visitor")]
 pub fn build_tables_extraction(result: html_to_markdown_rs::ConversionWithTables) -> PhpResult<ZBox<ZendHashTable>> {
