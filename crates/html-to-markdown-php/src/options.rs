@@ -117,6 +117,21 @@ pub fn parse_conversion_options(table: &ZendHashTable) -> PhpResult<ConversionOp
             "output_format" => {
                 update.output_format = Some(parse_output_format(value, &key_str)?);
             }
+            "include_document_structure" => {
+                update.include_document_structure = Some(read_bool(value, &key_str)?);
+            }
+            "extract_images" => {
+                update.extract_images = Some(read_bool(value, &key_str)?);
+            }
+            "max_image_size" => {
+                update.max_image_size = Some(read_u64(value, &key_str)?);
+            }
+            "capture_svg" => {
+                update.capture_svg = Some(read_bool(value, &key_str)?);
+            }
+            "infer_dimensions" => {
+                update.infer_dimensions = Some(read_bool(value, &key_str)?);
+            }
             _ => {}
         }
     }
