@@ -1,7 +1,7 @@
 package dev.kreuzberg.htmltomarkdown;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import dev.kreuzberg.htmltomarkdown.metadata.ExtendedMetadata;
+import dev.kreuzberg.htmltomarkdown.metadata.HtmlMetadata;
 import java.util.List;
 
 /**
@@ -13,5 +13,5 @@ import java.util.List;
  */
 public record TableExtractionResult(
     @JsonProperty("content") String content,
-    @JsonProperty("metadata") ExtendedMetadata metadata,
+    @JsonProperty("metadata") HtmlMetadata metadata,
     @JsonProperty("tables") List<TableData> tables) {}

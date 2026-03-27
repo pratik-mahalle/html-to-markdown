@@ -4,7 +4,7 @@ use ext_php_rs::prelude::*;
 use ext_php_rs::types::ZendHashTable;
 #[cfg(feature = "metadata")]
 use html_to_markdown_rs::metadata::{
-    DocumentMetadata, ExtendedMetadata, HeaderMetadata, ImageMetadata, LinkMetadata, StructuredData, TextDirection,
+    DocumentMetadata, HeaderMetadata, HtmlMetadata, ImageMetadata, LinkMetadata, StructuredData, TextDirection,
 };
 use html_to_markdown_rs::{HtmlExtraction, InlineImage, InlineImageWarning};
 use std::collections::BTreeMap;
@@ -132,7 +132,7 @@ pub fn build_tables_extraction(result: html_to_markdown_rs::ConversionWithTables
 
 /// Build a PHP hash table from metadata extraction (requires metadata feature).
 #[cfg(feature = "metadata")]
-pub fn build_metadata_extraction(markdown: String, metadata: ExtendedMetadata) -> PhpResult<ZBox<ZendHashTable>> {
+pub fn build_metadata_extraction(markdown: String, metadata: HtmlMetadata) -> PhpResult<ZBox<ZendHashTable>> {
     let mut result = ZendHashTable::new();
     result.insert("markdown", markdown)?;
     result.insert("metadata", build_extended_metadata(metadata)?)?;
@@ -140,7 +140,7 @@ pub fn build_metadata_extraction(markdown: String, metadata: ExtendedMetadata) -
 }
 
 #[cfg(feature = "metadata")]
-fn build_extended_metadata(metadata: ExtendedMetadata) -> PhpResult<ZBox<ZendHashTable>> {
+fn build_extended_metadata(metadata: HtmlMetadata) -> PhpResult<ZBox<ZendHashTable>> {
     let mut table = ZendHashTable::new();
     table.insert("document", build_document_metadata(metadata.document)?)?;
     table.insert("headers", build_headers_array(metadata.headers)?)?;

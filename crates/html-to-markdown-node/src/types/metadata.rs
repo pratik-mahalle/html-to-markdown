@@ -1,8 +1,8 @@
 #[cfg(feature = "metadata")]
 use html_to_markdown_rs::metadata::{
-    DocumentMetadata as RustDocumentMetadata, ExtendedMetadata as RustExtendedMetadata,
-    HeaderMetadata as RustHeaderMetadata, ImageMetadata as RustImageMetadata, LinkMetadata as RustLinkMetadata,
-    MetadataConfig as RustMetadataConfig, StructuredData as RustStructuredData,
+    DocumentMetadata as RustDocumentMetadata, HeaderMetadata as RustHeaderMetadata, HtmlMetadata as RustHtmlMetadata,
+    ImageMetadata as RustImageMetadata, LinkMetadata as RustLinkMetadata, MetadataConfig as RustMetadataConfig,
+    StructuredData as RustStructuredData,
 };
 #[cfg(feature = "metadata")]
 use napi_derive::napi;
@@ -118,7 +118,7 @@ pub struct JsStructuredData {
 /// Complete extracted metadata
 #[cfg(feature = "metadata")]
 #[napi(object)]
-pub struct JsExtendedMetadata {
+pub struct JsHtmlMetadata {
     pub document: JsDocumentMetadata,
     pub headers: Vec<JsHeaderMetadata>,
     pub links: Vec<JsLinkMetadata>,
@@ -131,7 +131,7 @@ pub struct JsExtendedMetadata {
 #[napi(object)]
 pub struct JsMetadataExtraction {
     pub markdown: String,
-    pub metadata: JsExtendedMetadata,
+    pub metadata: JsHtmlMetadata,
 }
 
 #[cfg(feature = "metadata")]
@@ -207,8 +207,8 @@ pub fn convert_structured_data(data: Vec<RustStructuredData>) -> Vec<JsStructure
 }
 
 #[cfg(feature = "metadata")]
-pub fn convert_metadata(metadata: RustExtendedMetadata) -> JsExtendedMetadata {
-    JsExtendedMetadata {
+pub fn convert_metadata(metadata: RustHtmlMetadata) -> JsHtmlMetadata {
+    JsHtmlMetadata {
         document: convert_document_metadata(metadata.document),
         headers: convert_headers(metadata.headers),
         links: convert_links(metadata.links),

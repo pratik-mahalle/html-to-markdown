@@ -239,6 +239,6 @@ fn convert_with_metadata_impl(
     html: &str,
     options: Option<html_to_markdown_rs::ConversionOptions>,
     config: html_to_markdown_rs::MetadataConfig,
-) -> PhpResult<(String, html_to_markdown_rs::ExtendedMetadata)> {
+) -> PhpResult<(String, html_to_markdown_rs::HtmlMetadata)> {
     guard_panic(|| html_to_markdown_rs::convert_with_metadata(html, options, config, None)).map_err(to_php_exception)
 }

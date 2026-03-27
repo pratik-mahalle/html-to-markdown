@@ -15,10 +15,10 @@ use crate::{ConversionError, ConversionOptionsUpdate};
 use crate::visitor;
 #[cfg(feature = "async-visitor")]
 use crate::visitor_helpers;
-#[cfg(feature = "metadata")]
-use crate::{ExtendedMetadata, MetadataConfig};
 #[cfg(feature = "inline-images")]
 use crate::{HtmlExtraction, InlineImageConfig};
+#[cfg(feature = "metadata")]
+use crate::{HtmlMetadata, MetadataConfig};
 
 /// Convert HTML to Markdown.
 ///
@@ -145,7 +145,7 @@ pub fn convert_with_inline_images(
 ///
 /// On success, returns a tuple of:
 /// - `String`: The converted Markdown output
-/// - `ExtendedMetadata`: Comprehensive metadata containing:
+/// - `HtmlMetadata`: Comprehensive metadata containing:
 ///   - `document`: Title, description, author, language, Open Graph, Twitter Card, and other meta tags
 ///   - `headers`: All heading elements (h1-h6) with hierarchy and IDs
 ///   - `links`: Hyperlinks classified as anchor, internal, external, email, or phone
@@ -242,7 +242,7 @@ pub fn convert_with_inline_images(
 /// - [`convert`] - Simple HTML to Markdown conversion without metadata
 /// - [`convert_with_inline_images`] - Conversion with inline image extraction
 /// - [`MetadataConfig`] - Configuration for metadata extraction
-/// - [`ExtendedMetadata`] - Metadata structure documentation
+/// - [`HtmlMetadata`] - Metadata structure documentation
 /// - [`metadata`] module - Detailed type documentation for metadata components
 #[cfg(feature = "metadata")]
 pub fn convert_with_metadata(
@@ -251,7 +251,7 @@ pub fn convert_with_metadata(
     metadata_cfg: MetadataConfig,
     #[cfg(feature = "visitor")] visitor: Option<visitor::VisitorHandle>,
     #[cfg(not(feature = "visitor"))] _visitor: Option<()>,
-) -> Result<(String, ExtendedMetadata)> {
+) -> Result<(String, HtmlMetadata)> {
     use std::cell::RefCell;
     use std::rc::Rc;
 
@@ -271,7 +271,7 @@ pub fn convert_with_metadata(
         } else {
             markdown
         };
-        return Ok((markdown, ExtendedMetadata::default()));
+        return Ok((markdown, HtmlMetadata::default()));
     }
 
     let metadata_collector = Rc::new(RefCell::new(crate::metadata::MetadataCollector::new(metadata_cfg)));
@@ -718,7 +718,7 @@ pub struct ConversionWithTables {
     pub content: String,
     /// Extended metadata (if metadata extraction was requested).
     #[cfg(feature = "metadata")]
-    pub metadata: Option<ExtendedMetadata>,
+    pub metadata: Option<HtmlMetadata>,
     /// All tables found in the HTML, in document order.
     pub tables: Vec<TableData>,
 }

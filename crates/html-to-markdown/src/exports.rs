@@ -13,7 +13,7 @@ pub use crate::inline_images::{
 
 #[cfg(feature = "metadata")]
 pub use crate::metadata::{
-    DEFAULT_MAX_STRUCTURED_DATA_SIZE, DocumentMetadata, ExtendedMetadata, HeaderMetadata, ImageMetadata, ImageType,
+    DEFAULT_MAX_STRUCTURED_DATA_SIZE, DocumentMetadata, HeaderMetadata, HtmlMetadata, ImageMetadata, ImageType,
     LinkMetadata, LinkType, MetadataConfig, MetadataConfigUpdate, StructuredData, StructuredDataType, TextDirection,
 };
 

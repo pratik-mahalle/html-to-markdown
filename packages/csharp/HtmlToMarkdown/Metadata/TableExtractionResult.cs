@@ -18,7 +18,7 @@ public record TableExtractionResult
     /// Optional extended metadata extracted during conversion.
     /// </summary>
     [JsonPropertyName("metadata")]
-    public ExtendedMetadata? Metadata { get; init; }
+    public HtmlMetadata? Metadata { get; init; }
 
     /// <summary>
     /// List of tables extracted during conversion.

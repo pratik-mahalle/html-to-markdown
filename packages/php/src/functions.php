@@ -6,7 +6,7 @@ namespace HtmlToMarkdown;
 
 use HtmlToMarkdown\Config\ConversionOptions;
 use HtmlToMarkdown\Config\InlineImageConfig;
-use HtmlToMarkdown\Value\ExtendedMetadata;
+use HtmlToMarkdown\Value\HtmlMetadata;
 use HtmlToMarkdown\Value\InlineImageExtraction;
 use HtmlToMarkdown\Value\TableExtractionResult;
 
@@ -71,9 +71,9 @@ function convert_with_inline_images(
  *   - extract_structured_data: bool (Extract JSON-LD/Microdata/RDFa, default: true)
  *   - max_structured_data_size: int (Size limit in bytes, default: 1000000)
  *
- * @return array{markdown: string, metadata: ExtendedMetadata} Associative array with keys:
+ * @return array{markdown: string, metadata: HtmlMetadata} Associative array with keys:
  *   - "markdown": string - The converted Markdown output
- *   - "metadata": ExtendedMetadata - Comprehensive metadata object with properties:
+ *   - "metadata": HtmlMetadata - Comprehensive metadata object with properties:
  *
  *     * document: DocumentMetadata - Document-level metadata:
  *       - title?: string - From <title> tag
@@ -185,7 +185,7 @@ function convert_with_inline_images(
  * @see ConversionOptions Configuration options documentation
  *
  * @phpstan-param ConversionOptions|array<string, mixed>|null $options
- * @return array{markdown: string, metadata: ExtendedMetadata}
+ * @return array{markdown: string, metadata: HtmlMetadata}
  */
 function convert_with_metadata(
     string $html,

@@ -8,7 +8,7 @@ namespace HtmlToMarkdown.Metadata;
 /// Contains all extracted metadata types in a single structure,
 /// suitable for serialization and transmission across language boundaries.
 /// </summary>
-public record ExtendedMetadata
+public record HtmlMetadata
 {
     /// <summary>
     /// Document-level metadata (title, description, canonical, etc.).

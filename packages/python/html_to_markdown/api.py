@@ -15,9 +15,9 @@ from html_to_markdown._html_to_markdown import (
 from html_to_markdown.options import ConversionOptions, PreprocessingOptions
 
 if TYPE_CHECKING:
-    from html_to_markdown._html_to_markdown import ExtendedMetadata  # pragma: no cover
+    from html_to_markdown._html_to_markdown import HtmlMetadata  # pragma: no cover
 else:
-    ExtendedMetadata = dict[str, object]  # type: ignore[assignment]
+    HtmlMetadata = dict[str, object]  # type: ignore[assignment]
 
 
 class TableData(TypedDict):
@@ -32,7 +32,7 @@ class TableExtractionResult(TypedDict):
     """Result of HTML-to-Markdown conversion with table extraction."""
 
     content: str
-    metadata: ExtendedMetadata | None
+    metadata: HtmlMetadata | None
     tables: list[TableData]
 
 
@@ -237,7 +237,7 @@ def convert_with_metadata(
     options: ConversionOptions | None = None,
     preprocessing: PreprocessingOptions | None = None,
     metadata_config: MetadataConfig | None = None,
-) -> tuple[str, ExtendedMetadata]:
+) -> tuple[str, HtmlMetadata]:
     """Convert HTML and extract comprehensive metadata.
 
     Args:
@@ -264,7 +264,7 @@ def convert_with_metadata_handle(
     html: str,
     handle: OptionsHandle,
     metadata_config: MetadataConfig | None = None,
-) -> tuple[str, ExtendedMetadata]:
+) -> tuple[str, HtmlMetadata]:
     """Convert HTML and extract metadata using a pre-built options handle."""
     if metadata_config is None:
         metadata_config = MetadataConfig()

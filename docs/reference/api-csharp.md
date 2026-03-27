@@ -123,14 +123,14 @@ public static string Version()
 public class ConversionResult
 {
     public string Markdown { get; }
-    public ExtendedMetadata Metadata { get; }
+    public HtmlMetadata Metadata { get; }
 }
 ```
 
-### `ExtendedMetadata`
+### `HtmlMetadata`
 
 ```csharp
-public class ExtendedMetadata
+public class HtmlMetadata
 {
     public DocumentMetadata Document { get; set; }
     public List<HeaderMetadata> Headers { get; set; }

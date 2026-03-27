@@ -11,7 +11,7 @@ final readonly class TableExtractionResult
      */
     public function __construct(
         public string $content,
-        public ?ExtendedMetadata $metadata,
+        public ?HtmlMetadata $metadata,
         public array $tables,
     ) {
     }
@@ -28,7 +28,7 @@ final readonly class TableExtractionResult
         $metadataPayload = $payload['metadata'] ?? null;
         if (\is_array($metadataPayload)) {
             /** @var array<string, mixed> $metadataPayload */
-            $metadata = ExtendedMetadata::fromExtensionPayload($metadataPayload);
+            $metadata = HtmlMetadata::fromExtensionPayload($metadataPayload);
         }
 
         $tables = [];

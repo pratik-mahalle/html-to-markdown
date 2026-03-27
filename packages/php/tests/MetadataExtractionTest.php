@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace HtmlToMarkdown\Tests;
 
 use HtmlToMarkdown\HtmlToMarkdown;
-use HtmlToMarkdown\Value\ExtendedMetadata;
+use HtmlToMarkdown\Value\HtmlMetadata;
 
 use function HtmlToMarkdown\convert_with_metadata;
 
@@ -18,7 +18,7 @@ final class MetadataExtractionTest extends TestCase
 
         self::assertArrayHasKey('markdown', $result);
         self::assertArrayHasKey('metadata', $result);
-        self::assertInstanceOf(ExtendedMetadata::class, $result['metadata']);
+        self::assertInstanceOf(HtmlMetadata::class, $result['metadata']);
     }
 
     public function testMetadataExtractionWithTitle(): void
@@ -155,7 +155,7 @@ final class MetadataExtractionTest extends TestCase
 
         self::assertArrayHasKey('markdown', $result);
         self::assertArrayHasKey('metadata', $result);
-        self::assertInstanceOf(ExtendedMetadata::class, $result['metadata']);
+        self::assertInstanceOf(HtmlMetadata::class, $result['metadata']);
     }
 
     public function testMetadataHeadersHaveRequiredFields(): void
@@ -216,7 +216,7 @@ final class MetadataExtractionTest extends TestCase
         self::assertSame('https://example.com/page', $result['metadata']->document->canonicalUrl);
     }
 
-    public function testExtendedMetadataToArray(): void
+    public function testHtmlMetadataToArray(): void
     {
         $html = '<html><head><title>Test</title></head><body><p>Content</p></body></html>';
         $result = convert_with_metadata($html);

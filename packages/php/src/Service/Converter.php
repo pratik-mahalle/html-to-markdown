@@ -9,7 +9,7 @@ use HtmlToMarkdown\Config\ConversionOptions;
 use HtmlToMarkdown\Config\InlineImageConfig;
 use HtmlToMarkdown\Contract\ExtensionBridge as ExtensionBridgeContract;
 use HtmlToMarkdown\Internal\TypeAssertions;
-use HtmlToMarkdown\Value\ExtendedMetadata;
+use HtmlToMarkdown\Value\HtmlMetadata;
 use HtmlToMarkdown\Value\InlineImageExtraction;
 use HtmlToMarkdown\Value\TableExtractionResult;
 use HtmlToMarkdown\Visitor\HtmlVisitor;
@@ -64,7 +64,7 @@ final class Converter
      * @param ConversionOptions|array<string, mixed>|null $options
      * @param array<string, mixed>|null $metadataConfig
      * @phpstan-param ConversionOptions|array<string, mixed>|null $options
-     * @phpstan-return array{markdown: string, metadata: ExtendedMetadata}
+     * @phpstan-return array{markdown: string, metadata: HtmlMetadata}
      */
     public function convertWithMetadata(
         string $html,
@@ -84,7 +84,7 @@ final class Converter
 
         return [
             'markdown' => $markdown,
-            'metadata' => ExtendedMetadata::fromExtensionPayload($metadataPayload),
+            'metadata' => HtmlMetadata::fromExtensionPayload($metadataPayload),
         ];
     }
 

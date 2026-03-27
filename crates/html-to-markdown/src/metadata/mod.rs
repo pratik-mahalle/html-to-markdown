@@ -40,7 +40,7 @@
 //! - [`ImageMetadata`]: Image element with src, alt, title, dimensions, type, and attributes
 //! - [`StructuredData`]: Structured data block with type and raw JSON
 //! - [`MetadataConfig`]: Configuration controlling extraction granularity and size limits
-//! - [`ExtendedMetadata`]: Top-level result containing all extracted metadata
+//! - [`HtmlMetadata`]: Top-level result containing all extracted metadata
 //!
 //! # Examples
 //!
@@ -146,8 +146,8 @@ pub mod types;
 pub use collector::MetadataCollector;
 pub use config::{DEFAULT_MAX_STRUCTURED_DATA_SIZE, MetadataConfig, MetadataConfigUpdate};
 pub use types::{
-    DocumentMetadata, ExtendedMetadata, HeaderMetadata, ImageMetadata, ImageType, LinkMetadata, LinkType,
-    StructuredData, StructuredDataType, TextDirection,
+    DocumentMetadata, HeaderMetadata, HtmlMetadata, ImageMetadata, ImageType, LinkMetadata, LinkType, StructuredData,
+    StructuredDataType, TextDirection,
 };
 
 // Internal handle type for shared mutable access during tree traversal
