@@ -59,9 +59,35 @@ fn conversion_error(err: ConversionError) -> Error {
 }
 
 fn convert_fn(ruby: &Ruby, args: &[Value]) -> Result<String, Error> {
+    #[cfg(feature = "visitor")]
+    let parsed = scan_args::<(String,), (Option<Value>, Option<Value>), (), (), (), ()>(args)?;
+    #[cfg(not(feature = "visitor"))]
     let parsed = scan_args::<(String,), (Option<Value>,), (), (), (), ()>(args)?;
+
     let html = parsed.required.0;
     let options = build_conversion_options(ruby, parsed.optional.0)?;
+
+    #[cfg(feature = "visitor")]
+    {
+        let visitor = parsed.optional.1;
+        if let Some(visitor_value) = visitor {
+            if !visitor_value.is_nil() {
+                let visitor_wrapper = RubyVisitorWrapper::new(visitor_value);
+                let visitor_handle = std::rc::Rc::new(std::cell::RefCell::new(visitor_wrapper.clone()));
+
+                let result = guard_panic(AssertUnwindSafe(|| {
+                    profiling::maybe_profile(|| convert_with_visitor_inner(&html, Some(options), Some(visitor_handle)))
+                }))
+                .map_err(conversion_error)?;
+
+                if let Some(error_msg) = visitor_wrapper.last_error.borrow().as_ref() {
+                    return Err(runtime_error(error_msg.clone()));
+                }
+
+                return Ok(result);
+            }
+        }
+    }
 
     guard_panic(|| profiling::maybe_profile(|| convert_inner(&html, Some(options)))).map_err(conversion_error)
 }
@@ -160,48 +186,6 @@ fn convert_with_tables_fn(ruby: &Ruby, args: &[Value]) -> Result<Value, Error> {
 
     tables_result_to_ruby(ruby, result)
 }
-
-#[cfg(feature = "visitor")]
-fn convert_with_visitor_fn(ruby: &Ruby, args: &[Value]) -> Result<String, Error> {
-    let parsed = scan_args::<(String,), (Option<Value>, Option<Value>), (), (), (), ()>(args)?;
-    let html = parsed.required.0;
-
-    let options = match parsed.optional.0 {
-        Some(opt_val) => match <&OptionsHandle>::try_convert(opt_val) {
-            Ok(handle) => handle.0.clone(),
-            Err(_) => build_conversion_options(ruby, Some(opt_val))?,
-        },
-        None => ConversionOptions::default(),
-    };
-
-    let visitor_value = match parsed.optional.1 {
-        Some(val) => {
-            if val.is_nil() {
-                return guard_panic(AssertUnwindSafe(|| {
-                    profiling::maybe_profile(|| convert_inner(&html, Some(options)))
-                }))
-                .map_err(conversion_error);
-            }
-            val
-        }
-        None => return Err(arg_error("visitor argument is required")),
-    };
-
-    let visitor_wrapper = RubyVisitorWrapper::new(visitor_value);
-    let visitor_handle = std::rc::Rc::new(std::cell::RefCell::new(visitor_wrapper.clone()));
-
-    let result = guard_panic(AssertUnwindSafe(|| {
-        profiling::maybe_profile(|| convert_with_visitor_inner(&html, Some(options), Some(visitor_handle)))
-    }))
-    .map_err(conversion_error)?;
-
-    if let Some(error_msg) = visitor_wrapper.last_error.borrow().as_ref() {
-        return Err(runtime_error(error_msg.clone()));
-    }
-
-    Ok(result)
-}
-
 #[cfg(feature = "profiling")]
 fn start_profiling_fn(_ruby: &Ruby, args: &[Value]) -> Result<bool, Error> {
     let output = args.first().ok_or_else(|| arg_error("output_path required"))?;
@@ -251,7 +235,6 @@ fn init(ruby: &Ruby) -> Result<(), Error> {
 
     #[cfg(feature = "visitor")]
     {
-        module.define_singleton_method("convert_with_visitor", function!(convert_with_visitor_fn, -1))?;
         module.define_singleton_method("convert_with_tables", function!(convert_with_tables_fn, -1))?;
     }
 

@@ -71,10 +71,6 @@ pub struct WasmConversionOptions {
     pub default_title: Option<bool>,
     /// Use <br> in tables instead of spaces
     pub br_in_tables: Option<bool>,
-    /// Enable spatial table reconstruction in hOCR documents.
-    ///
-    /// Deprecated since 2.30.0: hOCR support will be removed in v3.
-    pub hocr_spatial_tables: Option<bool>,
     /// Highlight style for `<mark>` elements
     pub highlight_style: Option<WasmHighlightStyle>,
     /// Extract metadata from HTML
@@ -131,7 +127,6 @@ impl From<WasmConversionOptions> for ConversionOptionsUpdate {
             autolinks: val.autolinks,
             default_title: val.default_title,
             br_in_tables: val.br_in_tables,
-            hocr_spatial_tables: val.hocr_spatial_tables,
             highlight_style: val.highlight_style.map(Into::into),
             extract_metadata: val.extract_metadata,
             whitespace_mode: val.whitespace_mode.map(Into::into),

@@ -33,7 +33,6 @@ mod wasm_tests {
             autolinks: None,
             default_title: None,
             br_in_tables: None,
-            hocr_spatial_tables: None,
             highlight_style: None,
             extract_metadata: None,
             whitespace_mode: None,

@@ -72,8 +72,6 @@ pub struct JsConversionOptions {
     pub default_title: Option<bool>,
     /// Use <br> in tables instead of spaces
     pub br_in_tables: Option<bool>,
-    /// Enable spatial table reconstruction in hOCR documents
-    pub hocr_spatial_tables: Option<bool>,
     /// Highlight style for <mark> elements
     pub highlight_style: Option<JsHighlightStyle>,
     /// Extract metadata from HTML
@@ -130,7 +128,6 @@ impl From<JsConversionOptions> for ConversionOptionsUpdate {
             autolinks: val.autolinks,
             default_title: val.default_title,
             br_in_tables: val.br_in_tables,
-            hocr_spatial_tables: val.hocr_spatial_tables,
             highlight_style: val.highlight_style.map(Into::into),
             extract_metadata: val.extract_metadata,
             whitespace_mode: val.whitespace_mode.map(Into::into),

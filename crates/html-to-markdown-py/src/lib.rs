@@ -200,64 +200,6 @@ fn create_options_handle(options: Option<ConversionOptions>) -> ConversionOption
     ConversionOptionsHandle::new_with_options(options)
 }
 
-/// Convert HTML to Markdown with a custom visitor.
-///
-/// Deprecated: Use convert() with the visitor parameter instead. All convert functions now accept optional visitors.
-///
-/// Example:
-///     ```ignore
-///     from html_to_markdown import convert
-///     import warnings
-///
-///     class MyVisitor:
-///         def visit_text(self, ctx, text):
-///             return {"type": "continue"}
-///
-///     # Old way (deprecated):
-///     # markdown = convert_with_visitor(html, visitor=MyVisitor())
-///
-///     # New way (recommended):
-///     markdown = convert(html, visitor=MyVisitor())
-///     ```
-#[cfg(feature = "visitor")]
-#[pyfunction]
-#[pyo3(signature = (html, options=None, visitor=None))]
-fn convert_with_visitor(
-    py: Python<'_>,
-    html: &str,
-    options: Option<ConversionOptions>,
-    visitor: Option<Py<PyAny>>,
-) -> PyResult<String> {
-    // NOTE: convert_with_visitor() is deprecated in favor of convert() with visitor parameter.
-    // All convert functions now accept optional visitors. Example: convert(html, visitor=my_visitor)
-
-    let html = html.to_owned();
-    let rust_options = options.map(|opts| opts.to_rust());
-
-    let Some(visitor_py) = visitor else {
-        return py
-            .detach(move || run_with_guard_and_profile(|| html_to_markdown_rs::convert(&html, rust_options.clone())))
-            .map_err(to_py_err);
-    };
-
-    let bridge = visitor::PyVisitorBridge::new(visitor_py);
-    let visitor_handle = std::sync::Arc::new(std::sync::Mutex::new(bridge));
-
-    py.detach(move || {
-        run_with_guard_and_profile(|| {
-            let rc_visitor: Rc<RefCell<dyn HtmlVisitor>> = {
-                Python::attach(|py| {
-                    let guard = visitor_handle.lock().unwrap();
-                    let bridge_copy = visitor::PyVisitorBridge::new(guard.visitor.clone_ref(py));
-                    Rc::new(RefCell::new(bridge_copy)) as Rc<RefCell<dyn HtmlVisitor>>
-                })
-            };
-            html_to_markdown_rs::convert_with_visitor(&html, rust_options.clone(), Some(rc_visitor))
-        })
-    })
-    .map_err(to_py_err)
-}
-
 /// Convert HTML to Markdown with a custom visitor (async-compatible version).
 ///
 /// This function provides async-compatible support for visitor methods using pyo3-async-runtimes
@@ -362,7 +304,6 @@ fn _html_to_markdown(m: &Bound<'_, PyModule>) -> PyResult<()> {
     }
     #[cfg(feature = "visitor")]
     {
-        m.add_function(wrap_pyfunction!(convert_with_visitor, m)?)?;
         m.add_function(wrap_pyfunction!(convert_with_async_visitor, m)?)?;
         m.add_function(wrap_pyfunction!(convert_with_tables, m)?)?;
     }

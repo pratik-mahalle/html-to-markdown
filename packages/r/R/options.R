@@ -18,7 +18,6 @@
 #' @param default_title Whether to use default title attributes.
 #' @param keep_inline_images_in Tags to preserve inline images in.
 #' @param br_in_tables Whether to use br tags in table cells.
-#' @param hocr_spatial_tables (Deprecated since 2.30.0) Whether to use HOCR spatial table layout. Will be removed in v3.
 #' @param highlight_style Highlight style: "double_equal", "html", "bold", "none".
 #' @param extract_metadata Whether to extract metadata.
 #' @param whitespace_mode Whitespace handling: "normalized" or "strict".
@@ -52,7 +51,6 @@ conversion_options <- function(
   default_title = NULL,
   keep_inline_images_in = NULL,
   br_in_tables = NULL,
-  hocr_spatial_tables = NULL,
   highlight_style = NULL,
   extract_metadata = NULL,
   whitespace_mode = NULL,
@@ -86,7 +84,6 @@ conversion_options <- function(
   if (!is.null(default_title)) opts$default_title <- default_title
   if (!is.null(keep_inline_images_in)) opts$keep_inline_images_in <- keep_inline_images_in
   if (!is.null(br_in_tables)) opts$br_in_tables <- br_in_tables
-  if (!is.null(hocr_spatial_tables)) opts$hocr_spatial_tables <- hocr_spatial_tables
   if (!is.null(highlight_style)) opts$highlight_style <- highlight_style
   if (!is.null(extract_metadata)) opts$extract_metadata <- extract_metadata
   if (!is.null(whitespace_mode)) opts$whitespace_mode <- whitespace_mode

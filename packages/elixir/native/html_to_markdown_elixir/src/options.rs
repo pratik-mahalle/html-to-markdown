@@ -107,7 +107,6 @@ fn apply_options(map: HashMap<String, Term>) -> NifResult<ConversionOptions> {
                 update.keep_inline_images_in = Some(decode_string_list(value, "keep_inline_images_in")?)
             }
             "br_in_tables" => update.br_in_tables = Some(decode_bool(value, "br_in_tables")?),
-            "hocr_spatial_tables" => update.hocr_spatial_tables = Some(decode_bool(value, "hocr_spatial_tables")?),
             "highlight_style" => update.highlight_style = Some(parse_highlight_style(value)?),
             "extract_metadata" => update.extract_metadata = Some(decode_bool(value, "extract_metadata")?),
             "whitespace_mode" => update.whitespace_mode = Some(parse_whitespace_mode(value)?),

@@ -50,7 +50,6 @@
 
 pub mod converter;
 pub mod error;
-pub mod hocr;
 #[cfg(feature = "inline-images")]
 mod inline_images;
 #[cfg(feature = "metadata")]
