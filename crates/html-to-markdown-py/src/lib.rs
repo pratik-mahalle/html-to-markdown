@@ -143,7 +143,9 @@ fn convert(
 
     let Some(visitor_py) = visitor else {
         return py
-            .detach(move || run_with_guard_and_profile(|| html_to_markdown_rs::convert(&html, rust_options.clone())))
+            .detach(move || {
+                run_with_guard_and_profile(|| html_to_markdown_rs::convert_to_string(&html, rust_options.clone()))
+            })
             .map_err(to_py_err);
     };
 
@@ -181,8 +183,10 @@ fn convert(
     }
     let html = html.to_owned();
     let rust_options = options.map(|opts| opts.to_rust());
-    py.detach(move || run_with_guard_and_profile(|| html_to_markdown_rs::convert(&html, rust_options.clone())))
-        .map_err(to_py_err)
+    py.detach(move || {
+        run_with_guard_and_profile(|| html_to_markdown_rs::convert_to_string(&html, rust_options.clone()))
+    })
+    .map_err(to_py_err)
 }
 
 #[pyfunction]
@@ -190,8 +194,10 @@ fn convert(
 fn convert_with_options_handle(py: Python<'_>, html: &str, handle: &ConversionOptionsHandle) -> PyResult<String> {
     let html = html.to_owned();
     let rust_options = handle.inner.clone();
-    py.detach(move || run_with_guard_and_profile(|| html_to_markdown_rs::convert(&html, Some(rust_options.clone()))))
-        .map_err(to_py_err)
+    py.detach(move || {
+        run_with_guard_and_profile(|| html_to_markdown_rs::convert_to_string(&html, Some(rust_options.clone())))
+    })
+    .map_err(to_py_err)
 }
 
 #[pyfunction]
@@ -247,7 +253,9 @@ fn convert_with_async_visitor(
 
     let Some(visitor_py) = visitor else {
         return py
-            .detach(move || run_with_guard_and_profile(|| html_to_markdown_rs::convert(&html, rust_options.clone())))
+            .detach(move || {
+                run_with_guard_and_profile(|| html_to_markdown_rs::convert_to_string(&html, rust_options.clone()))
+            })
             .map_err(to_py_err);
     };
 

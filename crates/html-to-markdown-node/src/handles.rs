@@ -46,7 +46,7 @@ pub fn convert(html: String, options: Option<JsConversionOptions>, visitor: Opti
     #[cfg(not(feature = "visitor"))]
     let _ = visitor;
 
-    guard_panic(|| profiling::maybe_profile(|| html_to_markdown_rs::convert(&html, rust_options.clone())))
+    guard_panic(|| profiling::maybe_profile(|| html_to_markdown_rs::convert_to_string(&html, rust_options.clone())))
         .map_err(to_js_error)
 }
 
@@ -66,7 +66,7 @@ pub fn stop_profiling() -> Result<()> {
 pub fn convert_buffer(html: Buffer, options: Option<JsConversionOptions>) -> Result<String> {
     let html = buffer_to_str(&html)?;
     let rust_options = options.map(Into::into);
-    guard_panic(|| profiling::maybe_profile(|| html_to_markdown_rs::convert(html, rust_options.clone())))
+    guard_panic(|| profiling::maybe_profile(|| html_to_markdown_rs::convert_to_string(html, rust_options.clone())))
         .map_err(to_js_error)
 }
 
@@ -86,15 +86,17 @@ pub fn create_metadata_config_handle(metadata_config: Option<JsMetadataConfig>) 
 /// Convert HTML using a previously-created `ConversionOptions` handle.
 #[napi]
 pub fn convert_with_options_handle(html: String, options: &External<RustConversionOptions>) -> Result<String> {
-    guard_panic(|| profiling::maybe_profile(|| html_to_markdown_rs::convert(&html, Some((**options).clone()))))
-        .map_err(to_js_error)
+    guard_panic(|| {
+        profiling::maybe_profile(|| html_to_markdown_rs::convert_to_string(&html, Some((**options).clone())))
+    })
+    .map_err(to_js_error)
 }
 
 /// Convert HTML Buffer data using a previously-created `ConversionOptions` handle.
 #[napi(js_name = "convertBufferWithOptionsHandle")]
 pub fn convert_buffer_with_options_handle(html: Buffer, options: &External<RustConversionOptions>) -> Result<String> {
     let html = buffer_to_str(&html)?;
-    guard_panic(|| profiling::maybe_profile(|| html_to_markdown_rs::convert(html, Some((**options).clone()))))
+    guard_panic(|| profiling::maybe_profile(|| html_to_markdown_rs::convert_to_string(html, Some((**options).clone()))))
         .map_err(to_js_error)
 }
 

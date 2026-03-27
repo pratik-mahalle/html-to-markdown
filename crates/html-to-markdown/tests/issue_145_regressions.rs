@@ -6,7 +6,7 @@
 //! around block elements. The root cause was that newlines were converted to spaces
 //! BEFORE whitespace-only node detection, causing the detection to fail.
 
-use html_to_markdown_rs::{ConversionOptions, convert};
+use html_to_markdown_rs::{ConversionOptions, convert_to_string as convert};
 
 #[test]
 fn test_strip_newlines_preserves_block_spacing() {

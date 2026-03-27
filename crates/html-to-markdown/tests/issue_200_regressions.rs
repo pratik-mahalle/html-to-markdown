@@ -1,6 +1,6 @@
 //! Regression coverage for issues #200 and #214.
 
-use html_to_markdown_rs::convert;
+use html_to_markdown_rs::convert_to_string as convert;
 
 #[test]
 fn test_definition_list_spacing_consistency() {

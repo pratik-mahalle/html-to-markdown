@@ -1,6 +1,6 @@
 //! Example: Testing inline formatting (bold, italic, code, etc.)
 
-use html_to_markdown_rs::{ConversionOptions, convert};
+use html_to_markdown_rs::{ConversionOptions, convert_to_string as convert};
 
 fn main() {
     let html = "<p>This is <mark>highlighted</mark> text</p>";

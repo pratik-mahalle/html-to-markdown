@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 
-use html_to_markdown_rs::{ConversionOptions, convert};
+use html_to_markdown_rs::{ConversionOptions, convert_to_string as convert};
 
 #[test]
 fn footer_without_navigation_hint_is_preserved() {

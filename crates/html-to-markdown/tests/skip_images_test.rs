@@ -10,7 +10,7 @@
 //! - Filtering out visual content for accessibility or reduced bandwidth
 //! - Converting image-heavy documents to plain text markdown
 
-use html_to_markdown_rs::{ConversionOptions, convert};
+use html_to_markdown_rs::{ConversionOptions, convert_to_string as convert};
 
 #[test]
 fn test_skip_images_enabled() {
