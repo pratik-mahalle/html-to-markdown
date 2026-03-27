@@ -110,6 +110,16 @@ pub struct JsConversionOptions {
     pub skip_images: Option<bool>,
     /// Output format for conversion
     pub output_format: Option<JsOutputFormat>,
+    /// Include structured document tree in result
+    pub include_document_structure: Option<bool>,
+    /// Extract inline images from data URIs and SVGs
+    pub extract_images: Option<bool>,
+    /// Maximum decoded image size in bytes
+    pub max_image_size: Option<BigInt>,
+    /// Capture SVG elements as images
+    pub capture_svg: Option<bool>,
+    /// Infer image dimensions from data
+    pub infer_dimensions: Option<bool>,
 }
 
 impl From<JsConversionOptions> for ConversionOptionsUpdate {
@@ -147,6 +157,14 @@ impl From<JsConversionOptions> for ConversionOptionsUpdate {
             preserve_tags: val.preserve_tags,
             skip_images: val.skip_images,
             output_format: val.output_format.map(Into::into),
+            include_document_structure: val.include_document_structure,
+            extract_images: val.extract_images,
+            max_image_size: val.max_image_size.map(|b| {
+                let (_, value, _) = b.get_u64();
+                value
+            }),
+            capture_svg: val.capture_svg,
+            infer_dimensions: val.infer_dimensions,
         }
     }
 }
