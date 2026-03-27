@@ -2,13 +2,13 @@
 
 use extendr_api::prelude::*;
 use html_to_markdown_rs::metadata::{
-    DocumentMetadata, ExtendedMetadata, HeaderMetadata, ImageMetadata, LinkMetadata, StructuredData,
+    DocumentMetadata, HeaderMetadata, HtmlMetadata, ImageMetadata, LinkMetadata, StructuredData,
 };
 use html_to_markdown_rs::{ConversionWithTables, InlineImage, TableData};
 use std::collections::HashMap;
 
-/// Convert ExtendedMetadata into an R list.
-pub fn metadata_to_robj(metadata: ExtendedMetadata) -> Robj {
+/// Convert HtmlMetadata into an R list.
+pub fn metadata_to_robj(metadata: HtmlMetadata) -> Robj {
     list!(
         document = document_metadata_to_robj(metadata.document),
         headers = List::from_values(metadata.headers.into_iter().map(header_metadata_to_robj)),
@@ -128,6 +128,76 @@ pub fn table_data_to_robj(table: TableData) -> Robj {
         cells = List::from_values(cells),
         markdown = table.markdown,
         is_header_row = table.is_header_row
+    )
+    .into()
+}
+
+/// Convert a ConversionResult into an R list.
+pub fn conversion_result_to_robj(result: html_to_markdown_rs::ConversionResult) -> Robj {
+    let content_robj: Robj = match result.content {
+        Some(s) => s.into(),
+        None => ().into(),
+    };
+
+    #[cfg(feature = "metadata")]
+    let metadata_robj = metadata_to_robj(result.metadata);
+    #[cfg(not(feature = "metadata"))]
+    let metadata_robj: Robj = ().into();
+
+    let tables: Vec<Robj> = result
+        .tables
+        .into_iter()
+        .map(|t| {
+            let cells: Vec<Robj> = t
+                .grid
+                .cells
+                .into_iter()
+                .map(|c| {
+                    list!(
+                        content = c.content,
+                        row = c.row as i32,
+                        col = c.col as i32,
+                        row_span = c.row_span as i32,
+                        col_span = c.col_span as i32,
+                        is_header = c.is_header
+                    )
+                    .into()
+                })
+                .collect();
+            list!(
+                grid = list!(
+                    rows = t.grid.rows as i32,
+                    cols = t.grid.cols as i32,
+                    cells = List::from_values(cells)
+                ),
+                markdown = t.markdown
+            )
+            .into()
+        })
+        .collect();
+
+    let warnings: Vec<Robj> = result
+        .warnings
+        .into_iter()
+        .map(|w| {
+            let kind = match w.kind {
+                html_to_markdown_rs::WarningKind::ImageExtractionFailed => {
+                    "image_extraction_failed"
+                }
+                html_to_markdown_rs::WarningKind::EncodingFallback => "encoding_fallback",
+                html_to_markdown_rs::WarningKind::TruncatedInput => "truncated_input",
+                html_to_markdown_rs::WarningKind::MalformedHtml => "malformed_html",
+                html_to_markdown_rs::WarningKind::SanitizationApplied => "sanitization_applied",
+            };
+            list!(message = w.message, kind = kind).into()
+        })
+        .collect();
+
+    list!(
+        content = content_robj,
+        metadata = metadata_robj,
+        tables = List::from_values(tables),
+        warnings = List::from_values(warnings)
     )
     .into()
 }

@@ -4,7 +4,8 @@ use extendr_api::prelude::*;
 use html_to_markdown_rs::convert_with_metadata as convert_with_metadata_inner;
 use html_to_markdown_rs::convert_with_tables as convert_with_tables_inner;
 use html_to_markdown_rs::{
-    ConversionOptions, convert as convert_inner, convert_with_inline_images as convert_with_inline_images_inner,
+    ConversionOptions, convert_to_string as convert_inner,
+    convert_with_inline_images as convert_with_inline_images_inner,
 };
 use std::path::PathBuf;
 
@@ -14,7 +15,10 @@ mod types;
 mod visitor;
 
 use options::{decode_inline_image_config, decode_metadata_config, decode_options};
-use types::{inline_image_to_robj, inline_image_warning_to_robj, metadata_to_robj, table_extraction_to_robj};
+use types::{
+    conversion_result_to_robj, inline_image_to_robj, inline_image_warning_to_robj, metadata_to_robj,
+    table_extraction_to_robj,
+};
 
 struct OptionsHandle(ConversionOptions);
 
@@ -126,6 +130,20 @@ fn convert_with_tables(html: &str, options: Robj, config: Robj) -> Result<Robj> 
     Ok(table_extraction_to_robj(result))
 }
 
+/// Extract structured content from HTML, returning a named list with:
+///   content, metadata, tables, warnings.
+/// @param html A character string of HTML content.
+/// @param options A named list of conversion options, or NULL for defaults.
+/// @return A named list with content (character or NULL), metadata (list), tables (list), warnings (list).
+/// @export
+#[extendr]
+fn extract(html: &str, options: Robj) -> Result<Robj> {
+    let opts = decode_options(options).map_err(|e| Error::Other(e))?;
+    let result = profiling::maybe_profile(|| html_to_markdown_rs::extract(html, Some(opts.clone())))
+        .map_err(|e| Error::Other(e.to_string()))?;
+    Ok(conversion_result_to_robj(result))
+}
+
 /// Convert HTML to Markdown with a visitor (simplified: standard conversion).
 /// @param html A character string of HTML content.
 /// @param visitor A visitor object (currently unused, reserved for future use).
@@ -173,6 +191,7 @@ impl OptionsHandle {}
 extendr_module! {
     mod htmltomarkdown;
     fn convert;
+    fn extract;
     fn convert_with_options;
     fn convert_with_options_handle;
     fn create_options_handle;

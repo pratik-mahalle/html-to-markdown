@@ -11,6 +11,7 @@ module HtmlToMarkdown
 
   class << self
     alias native_convert convert
+    alias native_extract extract
     alias native_convert_with_inline_images convert_with_inline_images
     alias native_convert_with_inline_images_handle convert_with_inline_images_handle
     alias native_options options
@@ -26,6 +27,21 @@ module HtmlToMarkdown
     # NOTE: visitor parameter is accepted for API compatibility but not used in standard convert mode
     # The native binding currently does not support visitor pattern
     native_convert(html.to_s, options)
+  end
+
+  # Extract structured content from HTML, returning a Hash with:
+  #   - :content [String, nil] the converted Markdown output
+  #   - :document [nil] document structure (not yet exposed)
+  #   - :metadata [Hash, nil] extracted HTML metadata
+  #   - :tables [Array<Hash>] extracted tables with :grid and :markdown
+  #   - :images [Array<Hash>] extracted inline images
+  #   - :warnings [Array<Hash>] processing warnings
+  #
+  # @param html [String] HTML string to convert
+  # @param options [Hash, nil] optional conversion options
+  # @return [Hash] extraction result
+  def extract(html, options = nil)
+    native_extract(html.to_s, options)
   end
 
   def convert_with_options(html, options_handle)

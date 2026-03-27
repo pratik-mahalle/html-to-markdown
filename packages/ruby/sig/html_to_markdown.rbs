@@ -201,6 +201,7 @@ module HtmlToMarkdown
   private
 
   def self.native_convert: (String html, conversion_options? options) -> String
+  def self.native_extract: (String html, conversion_options? options) -> Hash[String, untyped]
   def self.native_options: (conversion_options? options_hash) -> Options
   def self.native_convert_with_options: (String html, Options options_handle) -> String
   def self.native_convert_with_inline_images_handle: (
@@ -230,6 +231,7 @@ module HtmlToMarkdown
   ) -> table_extraction_result
 
   def native_convert: (String html, conversion_options? options) -> String
+  def native_extract: (String html, conversion_options? options) -> Hash[String, untyped]
   def native_options: (conversion_options? options_hash) -> Options
   def native_convert_with_options: (String html, Options options_handle) -> String
   def native_convert_with_inline_images_handle: (
@@ -279,6 +281,9 @@ module HtmlToMarkdown
   # Example:
   #   markdown = HtmlToMarkdown.convert(html, { wrap: true }, my_visitor)
   def self.convert: (String html, ?conversion_options options, ?visitor visitor) -> String
+
+  # Extract structured content from HTML
+  def self.extract: (String html, ?conversion_options options) -> Hash[String, untyped]
 
   # Create a reusable options handle for performance
   def self.options: (?conversion_options options_hash) -> Options
@@ -451,6 +456,7 @@ module HtmlToMarkdown
 
   # Instance method versions (created by module_function)
   def convert: (String html, ?conversion_options options, ?visitor visitor) -> String
+  def extract: (String html, ?conversion_options options) -> Hash[String, untyped]
   def options: (?conversion_options options_hash) -> Options
   def convert_with_options: (String html, Options options_handle) -> String
   def convert_with_inline_images_handle: (

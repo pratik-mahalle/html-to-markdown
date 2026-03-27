@@ -11,6 +11,31 @@ use std::slice;
 use html_to_markdown_rs::convert_to_string as convert;
 use html_to_markdown_rs::safety::guard_panic;
 
+fn serialize_conversion_result(result: html_to_markdown_rs::ConversionResult) -> Result<String, String> {
+    let document = match result.document {
+        Some(doc) => serde_json::to_value(&doc).map_err(|e| e.to_string())?,
+        None => serde_json::Value::Null,
+    };
+
+    let tables = serde_json::to_value(&result.tables).map_err(|e| e.to_string())?;
+    let warnings = serde_json::to_value(&result.warnings).map_err(|e| e.to_string())?;
+
+    #[cfg(feature = "metadata")]
+    let metadata = serde_json::to_value(&result.metadata).map_err(|e| e.to_string())?;
+    #[cfg(not(feature = "metadata"))]
+    let metadata = serde_json::Value::Null;
+
+    let output = serde_json::json!({
+        "content": result.content,
+        "document": document,
+        "metadata": metadata,
+        "tables": tables,
+        "warnings": warnings,
+    });
+
+    serde_json::to_string(&output).map_err(|e| e.to_string())
+}
+
 use crate::error::{HtmlToMarkdownErrorCode, capture_error, set_last_error, set_last_error_code};
 use crate::profiling;
 use crate::strings::string_to_c_string;
@@ -175,6 +200,104 @@ pub unsafe extern "C" fn html_to_markdown_convert_bytes_with_len(
                 }
                 Err(err) => {
                     set_last_error(Some(format!("failed to build CString for markdown result: {err}")));
+                    set_last_error_code(HtmlToMarkdownErrorCode::Internal);
+                    ptr::null_mut()
+                }
+            }
+        }
+        Err(err) => {
+            capture_error(err);
+            ptr::null_mut()
+        }
+    }
+}
+
+/// Extract structured content, metadata, and images from HTML, returning a JSON string.
+///
+/// The returned JSON has the shape:
+/// ```json
+/// {
+///   "content": "..." | null,
+///   "document": {...} | null,
+///   "metadata": {...} | null,
+///   "tables": [{"cells": [[...]], "markdown": "...", "is_header_row": [...]}],
+///   "warnings": [{"message": "...", "kind": "..."}]
+/// }
+/// ```
+///
+/// # Safety
+///
+/// - `html` must be a valid null-terminated C string
+/// - `options_json` may be NULL (uses defaults) or a valid null-terminated JSON C string
+/// - The returned string must be freed with `html_to_markdown_free_string`
+/// - Returns NULL on error (check error with `html_to_markdown_last_error`)
+///
+/// # Example (C)
+///
+/// ```c
+/// const char* html = "<h1>Hello</h1><p>World</p>";
+/// char* json = html_to_markdown_extract(html, NULL);
+/// if (json != NULL) {
+///     printf("%s\n", json);
+///     html_to_markdown_free_string(json);
+/// }
+/// ```
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn html_to_markdown_extract(html: *const c_char, options_json: *const c_char) -> *mut c_char {
+    if html.is_null() {
+        set_last_error(Some("html pointer was null".to_string()));
+        set_last_error_code(HtmlToMarkdownErrorCode::Internal);
+        return ptr::null_mut();
+    }
+
+    let html_str = match unsafe { CStr::from_ptr(html) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(Some("html must be valid UTF-8".to_string()));
+            set_last_error_code(HtmlToMarkdownErrorCode::InvalidUtf8);
+            return ptr::null_mut();
+        }
+    };
+
+    let options = if options_json.is_null() {
+        None
+    } else {
+        match unsafe { CStr::from_ptr(options_json) }.to_str() {
+            Ok("") => None,
+            Ok(s) => match html_to_markdown_rs::conversion_options_from_json(s) {
+                Ok(opts) => Some(opts),
+                Err(e) => {
+                    set_last_error(Some(format!("failed to parse options JSON: {e}")));
+                    set_last_error_code(HtmlToMarkdownErrorCode::Internal);
+                    return ptr::null_mut();
+                }
+            },
+            Err(_) => {
+                set_last_error(Some("options_json must be valid UTF-8".to_string()));
+                set_last_error_code(HtmlToMarkdownErrorCode::InvalidUtf8);
+                return ptr::null_mut();
+            }
+        }
+    };
+
+    match guard_panic(|| profiling::maybe_profile(|| html_to_markdown_rs::extract(html_str, options.clone()))) {
+        Ok(result) => {
+            set_last_error(None);
+            set_last_error_code(HtmlToMarkdownErrorCode::Ok);
+
+            let json = match serialize_conversion_result(result) {
+                Ok(j) => j,
+                Err(e) => {
+                    set_last_error(Some(format!("failed to serialize result to JSON: {e}")));
+                    set_last_error_code(HtmlToMarkdownErrorCode::Internal);
+                    return ptr::null_mut();
+                }
+            };
+
+            match string_to_c_string(json, "extract JSON result") {
+                Ok(c_string) => c_string.into_raw(),
+                Err(err) => {
+                    set_last_error(Some(format!("failed to build CString for extract JSON result: {err}")));
                     set_last_error_code(HtmlToMarkdownErrorCode::Internal);
                     ptr::null_mut()
                 }

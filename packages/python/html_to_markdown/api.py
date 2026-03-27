@@ -12,6 +12,9 @@ from html_to_markdown._html_to_markdown import (
     InlineImageConfig,
     MetadataConfig,
 )
+from html_to_markdown._html_to_markdown import (
+    extract as _rust_extract,
+)
 from html_to_markdown.options import ConversionOptions, PreprocessingOptions
 
 if TYPE_CHECKING:
@@ -34,6 +37,50 @@ class TableExtractionResult(TypedDict):
     content: str
     metadata: HtmlMetadata | None
     tables: list[TableData]
+
+
+class GridCell(TypedDict):
+    """A single cell in a structured table grid."""
+
+    content: str
+    row: int
+    col: int
+    row_span: int
+    col_span: int
+    is_header: bool
+
+
+class TableGrid(TypedDict):
+    """Structured table grid with cell-level data."""
+
+    rows: int
+    cols: int
+    cells: list[GridCell]
+
+
+class ExtractedTable(TypedDict):
+    """A table extracted via the new ConversionResult API."""
+
+    grid: TableGrid
+    markdown: str
+
+
+class ProcessingWarning(TypedDict):
+    """A non-fatal warning emitted during conversion."""
+
+    message: str
+    kind: str
+
+
+class ExtractionResult(TypedDict):
+    """Full result of the extract() API, wrapping ConversionResult."""
+
+    content: str | None
+    document: None
+    metadata: HtmlMetadata | None
+    tables: list[ExtractedTable]
+    images: list[object]
+    warnings: list[ProcessingWarning]
 
 
 class InlineImage(TypedDict):
@@ -298,6 +345,34 @@ def convert_with_tables(
     return _rust.convert_with_tables(html, rust_options, metadata_config)
 
 
+def extract(
+    html: str,
+    options: ConversionOptions | None = None,
+    preprocessing: PreprocessingOptions | None = None,
+) -> ExtractionResult:
+    """Extract structured data from HTML using the new ConversionResult API.
+
+    Returns a dict containing the converted content alongside all extracted
+    metadata, tables, images, and processing warnings in a single pass.
+
+    Args:
+        html: HTML string to convert
+        options: Optional conversion configuration
+        preprocessing: Optional preprocessing configuration
+
+    Returns:
+        ExtractionResult dict with keys:
+            - content (str | None): Converted markdown, or None in extraction-only mode
+            - document (None): Document structure (not yet exposed in bindings)
+            - metadata (dict | None): Extracted HTML metadata (when metadata feature is enabled)
+            - tables (list[dict]): Extracted tables with grid and markdown fields
+            - images (list): Extracted inline images (when inline-images feature is enabled)
+            - warnings (list[dict]): Non-fatal processing warnings
+    """
+    rust_options = _rust_options(options, preprocessing)
+    return cast("ExtractionResult", _rust_extract(html, rust_options))
+
+
 def convert_with_async_visitor(
     html: str,
     options: ConversionOptions | None = None,
@@ -336,13 +411,18 @@ def convert_with_async_visitor(
 
 
 __all__ = [
+    "ExtractedTable",
+    "ExtractionResult",
+    "GridCell",
     "InlineImage",
     "InlineImageConfig",
     "InlineImageWarning",
     "MetadataConfig",
     "OptionsHandle",
+    "ProcessingWarning",
     "TableData",
     "TableExtractionResult",
+    "TableGrid",
     "convert",
     "convert_with_async_visitor",
     "convert_with_handle",
@@ -352,6 +432,7 @@ __all__ = [
     "convert_with_metadata_handle",
     "convert_with_tables",
     "create_options_handle",
+    "extract",
     "start_profiling",
     "stop_profiling",
 ]

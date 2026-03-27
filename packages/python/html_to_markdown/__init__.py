@@ -12,6 +12,7 @@ API:
 
 from html_to_markdown._html_to_markdown import ConversionOptionsHandle
 from html_to_markdown.api import (
+    ExtractionResult,
     InlineImage,
     InlineImageConfig,
     InlineImageWarning,
@@ -28,6 +29,7 @@ from html_to_markdown.api import (
     convert_with_metadata_handle,
     convert_with_tables,
     create_options_handle,
+    extract,
     start_profiling,
     stop_profiling,
 )
@@ -45,6 +47,7 @@ __all__ = [
     "ConversionOptions",
     "ConversionOptionsHandle",
     "EmptyHtmlError",
+    "ExtractionResult",
     "HtmlToMarkdownError",
     "InlineImage",
     "InlineImageConfig",
@@ -66,6 +69,7 @@ __all__ = [
     "convert_with_metadata_handle",
     "convert_with_tables",
     "create_options_handle",
+    "extract",
     "start_profiling",
     "stop_profiling",
 ]

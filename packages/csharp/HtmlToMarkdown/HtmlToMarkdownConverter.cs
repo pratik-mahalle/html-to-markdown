@@ -674,6 +674,71 @@ public static class HtmlToMarkdownConverter
         }
     }
 
+    /// <summary>
+    /// Extracts structured content from HTML in a single pass.
+    /// </summary>
+    /// <param name="html">The HTML string to convert</param>
+    /// <returns>
+    /// A <see cref="Metadata.ConversionResult"/> containing the converted Markdown, extracted
+    /// metadata (title, links, images, etc.), structured table data, and any processing warnings.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">Thrown when html is null</exception>
+    /// <exception cref="HtmlToMarkdownException">Thrown when extraction or JSON parsing fails</exception>
+    public static Metadata.ConversionResult Extract(string html)
+    {
+        if (html == null)
+        {
+            throw new ArgumentNullException(nameof(html));
+        }
+
+        if (string.IsNullOrEmpty(html))
+        {
+            return new Metadata.ConversionResult();
+        }
+
+        IntPtr htmlPtr = IntPtr.Zero;
+        IntPtr resultPtr = IntPtr.Zero;
+
+        try
+        {
+            htmlPtr = StringToUtf8Ptr(html);
+
+            resultPtr = NativeMethods.html_to_markdown_extract(htmlPtr, IntPtr.Zero);
+
+            if (resultPtr == IntPtr.Zero)
+            {
+                IntPtr errorPtr = NativeMethods.html_to_markdown_last_error();
+                string? errorMsg = errorPtr != IntPtr.Zero
+                    ? PtrToStringUtf8(errorPtr)
+                    : null;
+
+                throw new HtmlToMarkdownException(
+                    errorMsg ?? "HTML extraction failed");
+            }
+
+            string jsonStr = PtrToStringUtf8(resultPtr) ?? "{}";
+            return JsonSerializer.Deserialize(jsonStr, MetadataJsonContext.Default.ConversionResult)
+                ?? new Metadata.ConversionResult();
+        }
+        catch (JsonException ex)
+        {
+            throw new HtmlToMarkdownException(
+                $"Failed to deserialize extraction JSON: {ex.Message}", ex);
+        }
+        finally
+        {
+            if (htmlPtr != IntPtr.Zero)
+            {
+                Marshal.FreeCoTaskMem(htmlPtr);
+            }
+
+            if (resultPtr != IntPtr.Zero)
+            {
+                NativeMethods.html_to_markdown_free_string(resultPtr);
+            }
+        }
+    }
+
     private static HtmlMetadata DeserializeMetadata(IntPtr metadataPtr, nuint metadataLen)
     {
         if (metadataPtr == IntPtr.Zero || metadataLen == 0)

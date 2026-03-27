@@ -129,6 +129,34 @@ defmodule HtmlToMarkdown do
   end
 
   @doc """
+  Extract structured content from HTML, returning a `ConversionResult` map with:
+  - `:content` - the converted Markdown string (or nil in extraction-only mode)
+  - `:metadata` - extracted HTML metadata (document, headers, links, images, structured_data)
+  - `:tables` - list of extracted tables with `:grid` (rows, cols, cells) and `:markdown`
+  - `:warnings` - list of processing warnings with `:message` and `:kind`
+
+  Returns `{:ok, result}` or `{:error, reason}`.
+  """
+  @spec extract(String.t(), options_input()) ::
+          {:ok, map()} | {:error, term()}
+  def extract(html, options \\ nil) when is_binary(html) do
+    options_map = normalize_options(options) || %{}
+
+    Native.extract(html, options_map)
+  end
+
+  @doc """
+  Bang variant of `extract/2`. Raises on failure.
+  """
+  @spec extract!(String.t(), options_input()) :: map()
+  def extract!(html, options \\ nil) do
+    case extract(html, options) do
+      {:ok, result} -> result
+      {:error, reason} -> raise Error, message: inspect(reason)
+    end
+  end
+
+  @doc """
   Convert HTML to Markdown and extract tables as structured data.
 
   Returns `{:ok, content, tables, metadata}` where each table is a map with:

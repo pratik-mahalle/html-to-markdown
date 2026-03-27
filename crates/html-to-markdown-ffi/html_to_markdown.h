@@ -455,6 +455,40 @@ char *html_to_markdown_convert_bytes_with_len(const uint8_t *html,
                                               uintptr_t *len_out);
 
 /**
+ * Extract structured content, metadata, and images from HTML, returning a JSON string.
+ *
+ * The returned JSON has the shape:
+ * ```json
+ * {
+ *   "content": "..." | null,
+ *   "document": {...} | null,
+ *   "metadata": {...} | null,
+ *   "tables": [{"cells": [[...]], "markdown": "...", "is_header_row": [...]}],
+ *   "warnings": [{"message": "...", "kind": "..."}]
+ * }
+ * ```
+ *
+ * # Safety
+ *
+ * - `html` must be a valid null-terminated C string
+ * - `options_json` may be NULL (uses defaults) or a valid null-terminated JSON C string
+ * - The returned string must be freed with `html_to_markdown_free_string`
+ * - Returns NULL on error (check error with `html_to_markdown_last_error`)
+ *
+ * # Example (C)
+ *
+ * ```c
+ * const char* html = "<h1>Hello</h1><p>World</p>";
+ * char* json = html_to_markdown_extract(html, NULL);
+ * if (json != NULL) {
+ *     printf("%s\n", json);
+ *     html_to_markdown_free_string(json);
+ * }
+ * ```
+ */
+HTM_EXPORT char *html_to_markdown_extract(const char *html, const char *options_json);
+
+/**
  * Convert HTML to Markdown with table extraction, returning a JSON string.
  *
  * The returned JSON has the shape:
