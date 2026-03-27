@@ -54,6 +54,11 @@ pub fn build_conversion_options(cli: &Cli) -> ConversionOptions {
         strip_tags: cli.strip_tags.clone().unwrap_or(defaults.strip_tags),
         preserve_tags: Vec::new(),
         output_format: cli.output_format.map_or(OutputFormat::default(), Into::into),
+        include_document_structure: false,
+        extract_images: false,
+        max_image_size: 5_242_880,
+        capture_svg: false,
+        infer_dimensions: true,
     }
 }
 
