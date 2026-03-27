@@ -17,6 +17,44 @@ use napi::bindgen_prelude::*;
 use napi_derive::napi;
 use std::str;
 
+fn build_extraction_json(result: html_to_markdown_rs::ConversionResult) -> Result<String> {
+    use serde_json::{Value, json};
+
+    let document = match result.document {
+        Some(doc) => serde_json::to_value(&doc).map_err(|e| Error::new(Status::GenericFailure, e.to_string()))?,
+        None => Value::Null,
+    };
+
+    let tables = serde_json::to_value(&result.tables).map_err(|e| Error::new(Status::GenericFailure, e.to_string()))?;
+
+    let warnings: Vec<Value> = result
+        .warnings
+        .into_iter()
+        .map(|w| {
+            json!({
+                "message": w.message,
+                "kind": format!("{:?}", w.kind),
+            })
+        })
+        .collect();
+
+    #[cfg(feature = "metadata")]
+    let metadata =
+        serde_json::to_value(&result.metadata).map_err(|e| Error::new(Status::GenericFailure, e.to_string()))?;
+    #[cfg(not(feature = "metadata"))]
+    let metadata = Value::Null;
+
+    let output = json!({
+        "content": result.content,
+        "document": document,
+        "metadata": metadata,
+        "tables": tables,
+        "warnings": warnings,
+    });
+
+    serde_json::to_string(&output).map_err(|e| Error::new(Status::GenericFailure, e.to_string()))
+}
+
 fn to_js_error(err: ConversionError) -> Error {
     Error::new(Status::GenericFailure, error_message(&err))
 }
@@ -98,6 +136,34 @@ pub fn convert_buffer_with_options_handle(html: Buffer, options: &External<RustC
     let html = buffer_to_str(&html)?;
     guard_panic(|| profiling::maybe_profile(|| html_to_markdown_rs::convert_to_string(html, Some((**options).clone()))))
         .map_err(to_js_error)
+}
+
+/// Extract structured content, metadata, and images from HTML in a single pass.
+///
+/// This is the v3 API entry point. Returns a JSON string encoding a `ConversionResult` object
+/// with `content`, `document`, `metadata`, `tables`, and `warnings` fields.
+///
+/// Use `JSON.parse()` on the result to obtain a JavaScript object. This approach avoids the
+/// overhead of NAPI type conversion for deeply-nested structures.
+///
+/// # Example
+///
+/// ```javascript
+/// const { extract } = require('html-to-markdown');
+///
+/// const html = '<h1>Hello</h1><p>World</p>';
+/// const result = JSON.parse(extract(html));
+/// console.log(result.content);   // '# Hello\n\nWorld'
+/// console.log(result.document);  // DocumentStructure object or null
+/// console.log(result.tables);    // []
+/// console.log(result.warnings);  // []
+/// ```
+#[napi]
+pub fn extract(html: String, options: Option<JsConversionOptions>) -> Result<String> {
+    let rust_options = options.map(Into::into);
+    let result = guard_panic(|| profiling::maybe_profile(|| html_to_markdown_rs::extract(&html, rust_options.clone())))
+        .map_err(to_js_error)?;
+    build_extraction_json(result)
 }
 
 fn build_js_extraction(extraction: html_to_markdown_rs::HtmlExtraction) -> JsHtmlExtraction {

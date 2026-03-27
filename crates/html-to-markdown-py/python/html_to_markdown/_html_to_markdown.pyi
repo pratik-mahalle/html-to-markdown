@@ -1,4 +1,4 @@
-from typing import Literal, TypedDict
+from typing import Any, Literal, TypedDict
 
 class PreprocessingOptions:
     enabled: bool
@@ -99,7 +99,37 @@ class InlineImageWarning(TypedDict):
     index: int
     message: str
 
+class GridCell(TypedDict):
+    content: str
+    row: int
+    col: int
+    row_span: int
+    col_span: int
+    is_header: bool
+
+class TableGrid(TypedDict):
+    rows: int
+    cols: int
+    cells: list[GridCell]
+
+class ExtractedTable(TypedDict):
+    grid: TableGrid
+    markdown: str
+
+class ProcessingWarning(TypedDict):
+    message: str
+    kind: str
+
+class ExtractionResult(TypedDict):
+    content: str | None
+    document: None
+    metadata: dict[str, Any] | None
+    tables: list[ExtractedTable]
+    images: list[Any]
+    warnings: list[ProcessingWarning]
+
 def convert(html: str, options: ConversionOptions | None = None) -> str: ...
+def extract(html: str, options: ConversionOptions | None = None) -> ExtractionResult: ...
 def convert_json(html: str, options_json: str | None = None) -> str: ...
 def convert_with_inline_images(
     html: str,

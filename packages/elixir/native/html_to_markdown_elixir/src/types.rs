@@ -94,3 +94,40 @@ pub struct TableExtractionTerm {
     pub metadata: Option<ExtendedMetadataTerm>,
     pub tables: Vec<TableDataTerm>,
 }
+
+#[derive(NifMap)]
+pub struct GridCellTerm {
+    pub content: String,
+    pub row: u32,
+    pub col: u32,
+    pub row_span: u32,
+    pub col_span: u32,
+    pub is_header: bool,
+}
+
+#[derive(NifMap)]
+pub struct TableGridTerm {
+    pub rows: u32,
+    pub cols: u32,
+    pub cells: Vec<GridCellTerm>,
+}
+
+#[derive(NifMap)]
+pub struct ExtractTableTerm {
+    pub grid: TableGridTerm,
+    pub markdown: String,
+}
+
+#[derive(NifMap)]
+pub struct WarningTerm {
+    pub message: String,
+    pub kind: String,
+}
+
+#[derive(NifMap)]
+pub struct ConversionResultTerm {
+    pub content: Option<String>,
+    pub metadata: ExtendedMetadataTerm,
+    pub tables: Vec<ExtractTableTerm>,
+    pub warnings: Vec<WarningTerm>,
+}

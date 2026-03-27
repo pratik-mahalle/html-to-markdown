@@ -5,10 +5,10 @@ use std::collections::HashMap;
 use html_to_markdown_rs::convert_with_metadata as convert_with_metadata_inner;
 use html_to_markdown_rs::convert_with_tables as convert_with_tables_inner;
 use html_to_markdown_rs::metadata::{
-    DocumentMetadata, ExtendedMetadata, HeaderMetadata, ImageMetadata, LinkMetadata, StructuredData,
+    DocumentMetadata, HeaderMetadata, HtmlMetadata, ImageMetadata, LinkMetadata, StructuredData,
 };
 use html_to_markdown_rs::{
-    ConversionOptions, HtmlExtraction, InlineImage, convert as convert_inner,
+    ConversionOptions, HtmlExtraction, InlineImage, convert_to_string as convert_inner,
     convert_with_inline_images as convert_with_inline_images_inner,
 };
 
@@ -22,8 +22,9 @@ use options::{
     take_invalid_option_message,
 };
 use types::{
-    DocumentMetadataTerm, ExtendedMetadataTerm, HeaderMetadataTerm, ImageMetadataTerm, InlineImageTerm,
-    InlineImageWarningTerm, LinkMetadataTerm, StructuredDataTerm, TableDataTerm, TableExtractionTerm,
+    ConversionResultTerm, DocumentMetadataTerm, ExtendedMetadataTerm, ExtractTableTerm, GridCellTerm,
+    HeaderMetadataTerm, ImageMetadataTerm, InlineImageTerm, InlineImageWarningTerm, LinkMetadataTerm,
+    StructuredDataTerm, TableDataTerm, TableExtractionTerm, TableGridTerm, WarningTerm,
 };
 
 use rustler::types::binary::{Binary, OwnedBinary};
@@ -44,7 +45,8 @@ rustler::init!(
         start_profiling,
         stop_profiling,
         convert_with_visitor,
-        convert_with_tables
+        convert_with_tables,
+        extract
     ],
     load = on_load
 );
@@ -274,7 +276,79 @@ fn convert_with_tables<'a>(
     }
 }
 
-fn build_metadata(metadata: ExtendedMetadata) -> ExtendedMetadataTerm {
+#[rustler::nif(schedule = "DirtyCpu")]
+fn extract<'a>(env: Env<'a>, html: String, options_term: Term<'a>) -> NifResult<Term<'a>> {
+    let options = match decode_options_term(options_term) {
+        Ok(options) => options,
+        Err(err) => return handle_invalid_option_error(env, err),
+    };
+
+    match profiling::maybe_profile(|| html_to_markdown_rs::extract(&html, Some(options.clone()))) {
+        Ok(result) => {
+            let tables: Vec<ExtractTableTerm> = result
+                .tables
+                .into_iter()
+                .map(|t| {
+                    let cells: Vec<GridCellTerm> = t
+                        .grid
+                        .cells
+                        .into_iter()
+                        .map(|c| GridCellTerm {
+                            content: c.content,
+                            row: c.row,
+                            col: c.col,
+                            row_span: c.row_span,
+                            col_span: c.col_span,
+                            is_header: c.is_header,
+                        })
+                        .collect();
+                    ExtractTableTerm {
+                        grid: TableGridTerm {
+                            rows: t.grid.rows,
+                            cols: t.grid.cols,
+                            cells,
+                        },
+                        markdown: t.markdown,
+                    }
+                })
+                .collect();
+
+            let warnings: Vec<WarningTerm> = result
+                .warnings
+                .into_iter()
+                .map(|w| {
+                    let kind = match w.kind {
+                        html_to_markdown_rs::WarningKind::ImageExtractionFailed => {
+                            "image_extraction_failed"
+                        }
+                        html_to_markdown_rs::WarningKind::EncodingFallback => "encoding_fallback",
+                        html_to_markdown_rs::WarningKind::TruncatedInput => "truncated_input",
+                        html_to_markdown_rs::WarningKind::MalformedHtml => "malformed_html",
+                        html_to_markdown_rs::WarningKind::SanitizationApplied => {
+                            "sanitization_applied"
+                        }
+                    };
+                    WarningTerm {
+                        message: w.message,
+                        kind: kind.to_string(),
+                    }
+                })
+                .collect();
+
+            let term = ConversionResultTerm {
+                content: result.content,
+                metadata: build_metadata(result.metadata),
+                tables,
+                warnings,
+            };
+
+            Ok((atoms::ok(), term).encode(env))
+        }
+        Err(err) => Ok((atoms::error(), err.to_string()).encode(env)),
+    }
+}
+
+fn build_metadata(metadata: HtmlMetadata) -> ExtendedMetadataTerm {
     ExtendedMetadataTerm {
         document: build_document_metadata(metadata.document),
         headers: metadata.headers.into_iter().map(build_header_metadata).collect(),

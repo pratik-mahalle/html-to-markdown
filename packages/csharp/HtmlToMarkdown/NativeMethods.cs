@@ -127,6 +127,18 @@ internal static class NativeMethods
         IntPtr metadata_config_json);
 
     /// <summary>
+    /// Extract structured content from HTML: markdown, metadata, tables, and warnings as JSON.
+    /// </summary>
+    /// <param name="html">Null-terminated HTML string</param>
+    /// <param name="options_json">Null-terminated JSON string for conversion options, or NULL</param>
+    /// <returns>Pointer to null-terminated JSON string, or NULL on error</returns>
+    /// <remarks>
+    /// The returned JSON string must be freed with html_to_markdown_free_string.
+    /// </remarks>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    internal static extern IntPtr html_to_markdown_extract(IntPtr html, IntPtr options_json);
+
+    /// <summary>
     /// Start Rust-side profiling and write a flamegraph to the given path.
     /// </summary>
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]

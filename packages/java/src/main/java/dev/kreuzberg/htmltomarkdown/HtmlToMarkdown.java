@@ -392,6 +392,71 @@ public final class HtmlToMarkdown {
   }
 
   /**
+   * Extract structured content from HTML in a single pass.
+   *
+   * <p>Returns a {@code ConversionResult} containing:
+   * <ul>
+   *   <li>The converted Markdown string (or {@code null} in extraction-only mode)</li>
+   *   <li>Extracted HTML metadata (title, links, images, structured data)</li>
+   *   <li>Extracted tables with structured grid data</li>
+   *   <li>Non-fatal processing warnings</li>
+   * </ul>
+   *
+   * @param html the HTML string to convert
+   * @return a {@code ConversionResult} with content and all extracted data
+   * @throws NullPointerException if html is null
+   * @throws ConversionException if the conversion or JSON parsing fails
+   * @since 2.30.0
+   */
+  public static ConversionResult extract(final String html) {
+    if (html == null) {
+      throw new NullPointerException("HTML cannot be null");
+    }
+
+    if (html.isEmpty()) {
+      return new ConversionResult("", null, java.util.List.of(), java.util.List.of());
+    }
+
+    try (Arena arena = Arena.ofConfined()) {
+      MemorySegment htmlSegment = HtmlToMarkdownFFI.toCString(arena, html);
+
+      MemorySegment resultSegment;
+      try {
+        resultSegment =
+            (MemorySegment)
+                HtmlToMarkdownFFI.html_to_markdown_extract.invoke(
+                    htmlSegment, MemorySegment.NULL);
+      } catch (Throwable e) {
+        throw new ConversionException("FFI call to extract failed: " + e.getMessage(), e);
+      }
+
+      if (resultSegment == null || resultSegment.address() == 0) {
+        String errorMsg = getLastError();
+        throw new ConversionException(errorMsg != null ? errorMsg : "extract failed");
+      }
+
+      try {
+        String jsonStr = HtmlToMarkdownFFI.fromCString(resultSegment);
+        return MAPPER.readValue(jsonStr, ConversionResult.class);
+      } catch (ConversionException e) {
+        throw e;
+      } catch (Exception e) {
+        throw new ConversionException(
+            "failed to parse extraction JSON: " + e.getMessage(), e);
+      } finally {
+        try {
+          HtmlToMarkdownFFI.html_to_markdown_free_string.invoke(resultSegment);
+        } catch (Throwable ignored) {
+        }
+      }
+    } catch (ConversionException e) {
+      throw e;
+    } catch (Throwable e) {
+      throw new ConversionException("Failed to extract HTML content", e);
+    }
+  }
+
+  /**
    * Parse JSON metadata string into HtmlMetadata.
    *
    * @param jsonStr the JSON metadata string

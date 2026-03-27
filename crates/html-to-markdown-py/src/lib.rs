@@ -289,10 +289,137 @@ fn convert_with_async_visitor(
     convert_with_visitor(py, html, options, visitor)
 }
 
+/// Extract structured data from HTML, returning a dict with content, metadata, tables, images, and warnings.
+///
+/// This is the primary API for the new `ConversionResult`-based workflow. It calls the Rust
+/// `convert()` function and returns all extracted data as a Python dictionary.
+///
+/// Args:
+///     html: HTML string to convert
+///     options: Optional conversion configuration
+///
+/// Returns:
+///     dict with keys:
+///         - content (str | None): Converted markdown output, or None in extraction-only mode
+///         - document (None): Document structure (not yet exposed in bindings)
+///         - metadata (dict | None): Extracted HTML metadata (requires metadata feature)
+///         - tables (list[dict]): Extracted tables with grid and markdown fields
+///         - images (list): Extracted inline images (requires inline-images feature)
+///         - warnings (list[dict]): Non-fatal processing warnings with message and kind fields
+///
+/// Raises:
+///     ValueError: Invalid HTML or configuration
+///
+/// Example:
+///     ```ignore
+///     from html_to_markdown import extract
+///
+///     result = extract("<h1>Hello</h1><p>World</p>")
+///     print(result["content"])    # "# Hello\n\nWorld\n"
+///     print(result["warnings"])   # []
+///     ```
+#[pyfunction]
+#[pyo3(signature = (html, options=None))]
+fn extract<'py>(py: Python<'py>, html: &str, options: Option<ConversionOptions>) -> PyResult<Py<pyo3::types::PyDict>> {
+    use pyo3::types::{PyDict, PyList};
+
+    let html = html.to_owned();
+    let rust_options = options.map(|opts| opts.to_rust());
+
+    let result = py
+        .detach(move || run_with_guard_and_profile(|| html_to_markdown_rs::convert(&html, rust_options.clone())))
+        .map_err(to_py_err)?;
+
+    let dict = PyDict::new(py);
+
+    // content: Option<String>
+    match result.content {
+        Some(ref s) => dict.set_item("content", s)?,
+        None => dict.set_item("content", py.None())?,
+    }
+
+    // document: not yet wired in bindings
+    dict.set_item("document", py.None())?;
+
+    // metadata: cfg(feature = "metadata")
+    #[cfg(feature = "metadata")]
+    {
+        use crate::types::extended_metadata_to_py;
+        let metadata_py = extended_metadata_to_py(py, result.metadata)?;
+        dict.set_item("metadata", metadata_py)?;
+    }
+    #[cfg(not(feature = "metadata"))]
+    dict.set_item("metadata", py.None())?;
+
+    // tables: Vec<TableData> with grid (TableGrid) and markdown fields
+    {
+        let tables_list = PyList::empty(py);
+        for table in &result.tables {
+            let table_dict = PyDict::new(py);
+            // grid: TableGrid { rows, cols, cells: Vec<GridCell> }
+            let grid_dict = PyDict::new(py);
+            grid_dict.set_item("rows", table.grid.rows)?;
+            grid_dict.set_item("cols", table.grid.cols)?;
+            let cells_list = PyList::empty(py);
+            for cell in &table.grid.cells {
+                let cell_dict = PyDict::new(py);
+                cell_dict.set_item("content", &cell.content)?;
+                cell_dict.set_item("row", cell.row)?;
+                cell_dict.set_item("col", cell.col)?;
+                cell_dict.set_item("row_span", cell.row_span)?;
+                cell_dict.set_item("col_span", cell.col_span)?;
+                cell_dict.set_item("is_header", cell.is_header)?;
+                cells_list.append(cell_dict)?;
+            }
+            grid_dict.set_item("cells", cells_list)?;
+            table_dict.set_item("grid", grid_dict)?;
+            table_dict.set_item("markdown", &table.markdown)?;
+            tables_list.append(table_dict)?;
+        }
+        dict.set_item("tables", tables_list)?;
+    }
+
+    // images: cfg(feature = "inline-images")
+    #[cfg(feature = "inline-images")]
+    {
+        use crate::types::inline_image_to_py;
+        let images_list = PyList::empty(py);
+        for image in result.images {
+            let image_py = inline_image_to_py(py, image)?;
+            images_list.append(image_py)?;
+        }
+        dict.set_item("images", images_list)?;
+    }
+    #[cfg(not(feature = "inline-images"))]
+    dict.set_item("images", PyList::empty(py))?;
+
+    // warnings: Vec<ProcessingWarning>
+    {
+        let warnings_list = PyList::empty(py);
+        for warning in &result.warnings {
+            let w_dict = PyDict::new(py);
+            w_dict.set_item("message", &warning.message)?;
+            let kind_str = match warning.kind {
+                html_to_markdown_rs::WarningKind::ImageExtractionFailed => "image_extraction_failed",
+                html_to_markdown_rs::WarningKind::EncodingFallback => "encoding_fallback",
+                html_to_markdown_rs::WarningKind::TruncatedInput => "truncated_input",
+                html_to_markdown_rs::WarningKind::MalformedHtml => "malformed_html",
+                html_to_markdown_rs::WarningKind::SanitizationApplied => "sanitization_applied",
+            };
+            w_dict.set_item("kind", kind_str)?;
+            warnings_list.append(w_dict)?;
+        }
+        dict.set_item("warnings", warnings_list)?;
+    }
+
+    Ok(dict.into())
+}
+
 /// Python bindings for html-to-markdown
 #[pymodule]
 fn _html_to_markdown(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(convert, m)?)?;
+    m.add_function(wrap_pyfunction!(extract, m)?)?;
     m.add_function(wrap_pyfunction!(convert_with_options_handle, m)?)?;
     m.add_function(wrap_pyfunction!(create_options_handle, m)?)?;
     m.add_class::<ConversionOptions>()?;
