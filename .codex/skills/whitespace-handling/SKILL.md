@@ -1,6 +1,6 @@
 ---
 name: whitespace-handling
-description: "Instructions for whitespace handling."
+description: "Whitespace Handling in html-to-markdown"
 ---
 
 # Whitespace Handling in html-to-markdown

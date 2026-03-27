@@ -18,7 +18,7 @@
 #' @param default_title Whether to use default title attributes.
 #' @param keep_inline_images_in Tags to preserve inline images in.
 #' @param br_in_tables Whether to use br tags in table cells.
-#' @param hocr_spatial_tables Whether to use HOCR spatial table layout.
+#' @param hocr_spatial_tables (Deprecated since 2.30.0) Whether to use HOCR spatial table layout. Will be removed in v3.
 #' @param highlight_style Highlight style: "double_equal", "html", "bold", "none".
 #' @param extract_metadata Whether to extract metadata.
 #' @param whitespace_mode Whitespace handling: "normalized" or "strict".

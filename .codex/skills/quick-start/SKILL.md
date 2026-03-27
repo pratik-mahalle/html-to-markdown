@@ -1,11 +1,7 @@
 ---
 name: quick-start
-description: "Instructions for quick start."
+description: "Developer quick start guide with prerequisites, setup, and workflow commands"
 ---
-
-______________________________________________________________________
-
-## priority: medium
 
 # Developer Quick Start
 

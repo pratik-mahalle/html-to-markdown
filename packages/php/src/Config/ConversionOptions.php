@@ -75,6 +75,7 @@ final readonly class ConversionOptions
         public bool $autolinks = true,
         public bool $defaultTitle = false,
         public bool $brInTables = false,
+        /** @deprecated since 2.30.0 - hOCR support will be removed in v3. */
         public bool $hocrSpatialTables = true,
         public HighlightStyle $highlightStyle = HighlightStyle::DOUBLE_EQUAL,
         public bool $extractMetadata = true,
@@ -298,7 +299,7 @@ final readonly class ConversionOptions
             $payload['code_block_style'] = $this->codeBlockStyle->value;
         }
         if ($this->keepInlineImagesIn !== $defaults->keepInlineImagesIn && $this->keepInlineImagesIn !== []) {
-            $payload['keep_inline_images_in'] = \array_values($this->keepInlineImagesIn);
+            $payload['keep_inline_images_in'] = $this->keepInlineImagesIn;
         }
         if (!$this->preprocessing->isDefault()) {
             $payload['preprocessing'] = $this->preprocessing->toArray();
@@ -313,10 +314,10 @@ final readonly class ConversionOptions
             $payload['skip_images'] = $this->skipImages;
         }
         if ($this->stripTags !== $defaults->stripTags && $this->stripTags !== []) {
-            $payload['strip_tags'] = \array_values($this->stripTags);
+            $payload['strip_tags'] = $this->stripTags;
         }
         if ($this->preserveTags !== $defaults->preserveTags && $this->preserveTags !== []) {
-            $payload['preserve_tags'] = \array_values($this->preserveTags);
+            $payload['preserve_tags'] = $this->preserveTags;
         }
         if ($this->outputFormat !== $defaults->outputFormat) {
             $payload['output_format'] = $this->outputFormat->value;

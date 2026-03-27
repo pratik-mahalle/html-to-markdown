@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.30.0] - 2026-03-27
+
+### Deprecated
+
+- **hOCR support**: The `hocr_spatial_tables` option and all hOCR-related APIs are deprecated and will be removed in v3. All hOCR functionality continues to work but emits deprecation warnings. This is the final v2 release.
+
+### Fixed
+
+- **PHP PHPStan CI errors**: Removed redundant `@var` annotations and `is_array()` runtime checks in `ExtensionBridge.php` that PHPStan flagged as always-true due to stub-defined return types. Removed redundant `array_values()` calls in `ConversionOptions.php` on properties already typed as `list<string>`. Updated PHPStan baseline count for callable invocations.
+
 ## [2.29.0] - 2026-03-22
 
 ### Added

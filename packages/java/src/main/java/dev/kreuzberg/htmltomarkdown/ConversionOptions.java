@@ -345,13 +345,20 @@ public final class ConversionOptions {
    *
    * @param enable true to enable (default), false to disable
    * @return this options object for method chaining
+   * @deprecated since 2.30.0 - hOCR support will be removed in v3.
    */
+  @Deprecated
   public ConversionOptions setHocrSpatialTables(final boolean enable) {
     this.hocrSpatialTables = enable;
     return this;
   }
 
-  /** Check if hOCR spatial table reconstruction is enabled. */
+  /**
+   * Check if hOCR spatial table reconstruction is enabled.
+   *
+   * @deprecated since 2.30.0 - hOCR support will be removed in v3.
+   */
+  @Deprecated
   public boolean isHocrSpatialTables() {
     return hocrSpatialTables;
   }
