@@ -30,7 +30,6 @@ use HtmlToMarkdown\Internal\TypeAssertions;
  *     autolinks?: bool,
  *     default_title?: bool,
  *     br_in_tables?: bool,
- *     hocr_spatial_tables?: bool,
  *     highlight_style?: value-of<HighlightStyle>,
  *     extract_metadata?: bool,
  *     whitespace_mode?: value-of<WhitespaceMode>,
@@ -75,8 +74,6 @@ final readonly class ConversionOptions
         public bool $autolinks = true,
         public bool $defaultTitle = false,
         public bool $brInTables = false,
-        /** @deprecated since 2.30.0 - hOCR support will be removed in v3. */
-        public bool $hocrSpatialTables = true,
         public HighlightStyle $highlightStyle = HighlightStyle::DOUBLE_EQUAL,
         public bool $extractMetadata = true,
         public WhitespaceMode $whitespaceMode = WhitespaceMode::NORMALIZED,
@@ -152,9 +149,6 @@ final readonly class ConversionOptions
             brInTables: \array_key_exists('br_in_tables', $input)
                 ? TypeAssertions::bool($input['br_in_tables'], 'br_in_tables')
                 : $defaults->brInTables,
-            hocrSpatialTables: \array_key_exists('hocr_spatial_tables', $input)
-                ? TypeAssertions::bool($input['hocr_spatial_tables'], 'hocr_spatial_tables')
-                : $defaults->hocrSpatialTables,
             highlightStyle: \array_key_exists('highlight_style', $input)
                 ? HighlightStyle::fromString(TypeAssertions::string($input['highlight_style'], 'highlight_style'))
                 : $defaults->highlightStyle,
@@ -261,9 +255,6 @@ final readonly class ConversionOptions
         }
         if ($this->brInTables !== $defaults->brInTables) {
             $payload['br_in_tables'] = $this->brInTables;
-        }
-        if ($this->hocrSpatialTables !== $defaults->hocrSpatialTables) {
-            $payload['hocr_spatial_tables'] = $this->hocrSpatialTables;
         }
         if ($this->highlightStyle !== $defaults->highlightStyle) {
             $payload['highlight_style'] = $this->highlightStyle->value;

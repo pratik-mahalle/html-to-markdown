@@ -27,7 +27,6 @@ fn issue_127_options() -> ConversionOptions {
         code_block_style: CodeBlockStyle::Backticks,
         strip_newlines: true,
         extract_metadata: false,
-        hocr_spatial_tables: true,
         preprocessing: PreprocessingOptions {
             enabled: true,
             preset: PreprocessingPreset::Minimal,

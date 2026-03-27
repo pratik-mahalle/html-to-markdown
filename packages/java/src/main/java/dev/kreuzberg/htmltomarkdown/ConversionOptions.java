@@ -44,7 +44,6 @@ public final class ConversionOptions {
   private boolean defaultTitle = false;
   private Set<String> keepInlineImagesIn = Collections.emptySet();
   private boolean brInTables = false;
-  private boolean hocrSpatialTables = true;
   private String highlightStyle = "double-equal";
   private boolean extractMetadata = true;
   private String whitespaceMode = "normalized";
@@ -337,30 +336,6 @@ public final class ConversionOptions {
   /** Check if &lt;br&gt; is used in tables. */
   public boolean isBrInTables() {
     return brInTables;
-  }
-
-  // hOCR Spatial Tables
-  /**
-   * Set whether to reconstruct tables in hOCR documents using spatial heuristics.
-   *
-   * @param enable true to enable (default), false to disable
-   * @return this options object for method chaining
-   * @deprecated since 2.30.0 - hOCR support will be removed in v3.
-   */
-  @Deprecated
-  public ConversionOptions setHocrSpatialTables(final boolean enable) {
-    this.hocrSpatialTables = enable;
-    return this;
-  }
-
-  /**
-   * Check if hOCR spatial table reconstruction is enabled.
-   *
-   * @deprecated since 2.30.0 - hOCR support will be removed in v3.
-   */
-  @Deprecated
-  public boolean isHocrSpatialTables() {
-    return hocrSpatialTables;
   }
 
   // Highlight Style

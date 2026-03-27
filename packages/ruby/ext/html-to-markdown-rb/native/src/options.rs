@@ -175,9 +175,6 @@ pub fn build_conversion_options(ruby: &Ruby, options: Option<Value>) -> Result<C
             "br_in_tables" => {
                 update.br_in_tables = Some(bool::try_convert(val)?);
             }
-            "hocr_spatial_tables" => {
-                update.hocr_spatial_tables = Some(bool::try_convert(val)?);
-            }
             "highlight_style" => {
                 update.highlight_style = Some(parse_highlight_style(val)?);
             }

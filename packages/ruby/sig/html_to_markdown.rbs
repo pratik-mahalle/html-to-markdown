@@ -62,7 +62,6 @@ module HtmlToMarkdown
     autolinks?: bool,
     default_title?: bool,
     br_in_tables?: bool,
-    hocr_spatial_tables?: bool, # Deprecated since 2.30.0: hOCR support will be removed in v3.
     highlight_style?: highlight_style,
     extract_metadata?: bool,
     whitespace_mode?: whitespace_mode,
@@ -224,11 +223,6 @@ module HtmlToMarkdown
     conversion_options? options,
     metadata_config? metadata_config
   ) -> [String, extended_metadata]
-  def self.native_convert_with_visitor: (
-    String html,
-    conversion_options? options,
-    visitor? visitor
-  ) -> String
   def self.native_convert_with_tables: (
     String html,
     conversion_options? options,
@@ -258,11 +252,6 @@ module HtmlToMarkdown
     conversion_options? options,
     metadata_config? metadata_config
   ) -> [String, extended_metadata]
-  def native_convert_with_visitor: (
-    String html,
-    conversion_options? options,
-    visitor? visitor
-  ) -> String
   def native_convert_with_tables: (
     String html,
     conversion_options? options,
@@ -398,9 +387,6 @@ module HtmlToMarkdown
   #     end
   #   end
   #
-  #   HtmlToMarkdown.convert_with_visitor(html, visitor: MyVisitor.new)
-  def self.convert_with_visitor: (String html, ?conversion_options options, visitor: visitor) -> String
-
   # Convert HTML to Markdown with metadata extraction
   #
   # Extracts comprehensive metadata (headers, links, images, structured data) during conversion.
@@ -478,7 +464,6 @@ module HtmlToMarkdown
     ?inline_image_config image_config,
     ?visitor visitor
   ) -> html_extraction
-  def convert_with_visitor: (String html, ?conversion_options options, visitor: visitor) -> String
   def convert_with_metadata: (
     String html,
     ?conversion_options options,

@@ -27,7 +27,6 @@ class ConversionOptions:
     autolinks: bool
     default_title: bool
     br_in_tables: bool
-    hocr_spatial_tables: bool  # Deprecated since 2.30.0: hOCR support will be removed in v3.
     highlight_style: Literal["double-equal", "html", "bold", "none"]
     extract_metadata: bool
     whitespace_mode: Literal["normalized", "strict"]
@@ -57,7 +56,6 @@ class ConversionOptions:
         autolinks: bool = True,
         default_title: bool = False,
         br_in_tables: bool = False,
-        hocr_spatial_tables: bool = True,
         highlight_style: Literal["double-equal", "html", "bold", "none"] = "double-equal",
         extract_metadata: bool = True,
         whitespace_mode: Literal["normalized", "strict"] = "normalized",

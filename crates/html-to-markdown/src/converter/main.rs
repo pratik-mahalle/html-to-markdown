@@ -15,8 +15,8 @@ use std::collections::BTreeMap;
 
 use crate::converter::dom_context::DomContext;
 use crate::converter::main_helpers::{
-    extract_head_metadata, format_metadata_frontmatter, handle_hocr_document, has_custom_element_tags,
-    repair_with_html5ever, trim_line_end_whitespace, trim_trailing_whitespace,
+    extract_head_metadata, format_metadata_frontmatter, has_custom_element_tags, repair_with_html5ever,
+    trim_line_end_whitespace, trim_trailing_whitespace,
 };
 use crate::converter::plain_text::extract_plain_text;
 use crate::converter::preprocessing_helpers::{has_inline_block_misnest, should_drop_for_preprocessing};
@@ -112,11 +112,6 @@ pub(crate) fn convert_html_impl(
     };
     let mut parser = dom.parser();
     let mut output = String::with_capacity(preprocessed_len.saturating_add(preprocessed_len / 4));
-
-    // Check and handle hOCR documents
-    if handle_hocr_document(&dom, parser, options, &mut output) {
-        return Ok(output);
-    }
 
     let mut dom_ctx = build_dom_context(&dom, parser, preprocessed_len);
 

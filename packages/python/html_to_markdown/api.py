@@ -94,7 +94,6 @@ def _rust_options(
         autolinks=options.autolinks,
         default_title=options.default_title,
         br_in_tables=options.br_in_tables,
-        hocr_spatial_tables=options.hocr_spatial_tables,
         highlight_style=options.highlight_style,
         extract_metadata=options.extract_metadata,
         whitespace_mode=options.whitespace_mode,
@@ -299,53 +298,6 @@ def convert_with_tables(
     return _rust.convert_with_tables(html, rust_options, metadata_config)
 
 
-def convert_with_visitor(
-    html: str,
-    options: ConversionOptions | None = None,
-    preprocessing: PreprocessingOptions | None = None,
-    visitor: object | None = None,
-) -> str:
-    """Convert HTML with a visitor pattern.
-
-    This function enables custom processing of HTML elements during conversion
-    using a visitor object. The visitor can inspect, modify, or skip elements
-    during the conversion process.
-
-    Args:
-        html: HTML string to convert
-        options: Optional conversion configuration
-        preprocessing: Optional preprocessing configuration
-        visitor: Optional visitor object with methods like visit_text, visit_link, etc.
-                 Methods should return a result dict with 'type' key:
-                 - {'type': 'continue'} - Use default conversion
-                 - {'type': 'skip'} - Skip this element
-                 - {'type': 'preserve_html'} - Preserve as raw HTML
-                 - {'type': 'custom', 'output': 'markdown'} - Use custom output
-                 - {'type': 'error', 'message': 'error'} - Stop with error
-
-    Returns:
-        Converted markdown string
-
-    Example:
-        >>> class MyVisitor:
-        ...     def visit_heading(self, ctx, level, text, id):
-        ...         return {"type": "custom", "output": f"HEADING[{level}]: {text}"}
-        >>>
-        >>> visitor = MyVisitor()
-        >>> markdown = convert_with_visitor("<h1>Test</h1>", visitor=visitor)
-    """
-    if options is None:
-        options = ConversionOptions()
-    if preprocessing is None:
-        preprocessing = PreprocessingOptions()
-
-    if visitor is None:
-        return convert(html, options, preprocessing)
-
-    rust_options = _rust_options(options, preprocessing)
-    return _rust.convert_with_visitor(html, rust_options, visitor)
-
-
 def convert_with_async_visitor(
     html: str,
     options: ConversionOptions | None = None,
@@ -399,7 +351,6 @@ __all__ = [
     "convert_with_metadata",
     "convert_with_metadata_handle",
     "convert_with_tables",
-    "convert_with_visitor",
     "create_options_handle",
     "start_profiling",
     "stop_profiling",
