@@ -86,7 +86,7 @@ pub use types::{
 // Main Public API Functions
 // ============================================================================
 
-pub use convert_api::convert;
+pub use convert_api::{convert, convert_to_string, extract};
 
 #[cfg(any(feature = "serde", feature = "metadata"))]
 pub use convert_api::{conversion_options_from_json, conversion_options_update_from_json};
@@ -258,7 +258,8 @@ mod basic_tests {
     #[test]
     fn test_plain_text_allowed() {
         let result = convert("Just text", None).unwrap();
-        assert!(result.contains("Just text"));
+        let content = result.content.unwrap_or_default();
+        assert!(content.contains("Just text"));
     }
 
     #[test]
@@ -269,7 +270,8 @@ mod basic_tests {
             ..ConversionOptions::default()
         };
         let result = convert("Text *asterisks* _underscores_", Some(options)).unwrap();
-        assert!(result.contains(r"\*asterisks\*"));
-        assert!(result.contains(r"\_underscores\_"));
+        let content = result.content.unwrap_or_default();
+        assert!(content.contains(r"\*asterisks\*"));
+        assert!(content.contains(r"\_underscores\_"));
     }
 }

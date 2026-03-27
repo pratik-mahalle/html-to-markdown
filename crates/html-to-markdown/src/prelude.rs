@@ -6,9 +6,10 @@
 //! use html_to_markdown_rs::prelude::*;
 //! ```
 
-pub use crate::convert;
 pub use crate::error::{ConversionError, Result};
 pub use crate::options::{ConversionOptions, HeadingStyle};
+pub use crate::types::ConversionResult;
+pub use crate::{convert, extract};
 
 #[cfg(feature = "inline-images")]
 pub use crate::convert_with_inline_images;

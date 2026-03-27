@@ -219,7 +219,7 @@ pub fn module(module: ModuleBuilder) -> ModuleBuilder {
 
 #[inline]
 fn convert_impl(html: &str, options: Option<html_to_markdown_rs::ConversionOptions>) -> PhpResult<String> {
-    guard_panic(|| profiling::maybe_profile(|| html_to_markdown_rs::convert(html, options.clone())))
+    guard_panic(|| profiling::maybe_profile(|| html_to_markdown_rs::convert_to_string(html, options.clone())))
         .map_err(to_php_exception)
 }
 

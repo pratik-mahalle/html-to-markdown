@@ -6,7 +6,7 @@
 //! from HTML before parsing, preventing the tl parser from misinterpreting
 //! HTML-like content inside scripts as actual tags.
 
-use html_to_markdown_rs::{ConversionOptions, MetadataConfig, convert, convert_with_metadata};
+use html_to_markdown_rs::{ConversionOptions, MetadataConfig, convert_to_string as convert, convert_with_metadata};
 
 #[test]
 fn test_strip_simple_script_tag() {

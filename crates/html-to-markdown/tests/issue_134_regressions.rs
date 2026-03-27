@@ -3,7 +3,7 @@
 use std::fs;
 use std::path::PathBuf;
 
-use html_to_markdown_rs::{ConversionOptions, convert};
+use html_to_markdown_rs::{ConversionOptions, convert_to_string as convert};
 
 fn fixture_path(name: &str) -> PathBuf {
     [env!("CARGO_MANIFEST_DIR"), "../../test_documents/html/issues", name]

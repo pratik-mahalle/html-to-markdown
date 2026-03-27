@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 
-use html_to_markdown_rs::convert;
+use html_to_markdown_rs::convert_to_string as convert;
 
 #[test]
 fn images_with_dimensions_render_as_markdown_links() {

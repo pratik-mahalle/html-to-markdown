@@ -1,6 +1,6 @@
 //! Example: Converting HTML tables to Markdown
 
-use html_to_markdown_rs::convert;
+use html_to_markdown_rs::convert_to_string as convert;
 
 fn main() {
     let html = r"<table>

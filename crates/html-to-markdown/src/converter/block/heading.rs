@@ -124,6 +124,21 @@ pub(crate) fn handle(
                 }
             }
         }
+
+        // Notify the structure collector if present.
+        if let Some(ref sc) = ctx.structure_collector {
+            if let Some(node) = node_handle.get(parser) {
+                if let tl::Node::Tag(tag) = node {
+                    let id = tag
+                        .attributes()
+                        .get("id")
+                        .flatten()
+                        .map(|v| v.as_utf8_str().to_string());
+                    sc.borrow_mut()
+                        .push_heading(level as u8, normalized.as_ref(), id.as_deref());
+                }
+            }
+        }
     }
 }
 

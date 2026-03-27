@@ -8,7 +8,7 @@ use std::os::raw::c_char;
 use std::ptr;
 use std::slice;
 
-use html_to_markdown_rs::convert;
+use html_to_markdown_rs::convert_to_string as convert;
 use html_to_markdown_rs::safety::guard_panic;
 
 use crate::error::{HtmlToMarkdownErrorCode, capture_error, set_last_error, set_last_error_code};

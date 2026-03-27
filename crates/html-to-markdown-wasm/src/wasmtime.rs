@@ -36,11 +36,11 @@ mod runtime {
         let result = {
             #[cfg(feature = "visitor")]
             {
-                html_to_markdown_rs::safety::guard_panic(|| html_to_markdown_rs::convert(&html, options))
+                html_to_markdown_rs::safety::guard_panic(|| html_to_markdown_rs::convert_to_string(&html, options))
             }
             #[cfg(not(feature = "visitor"))]
             {
-                html_to_markdown_rs::safety::guard_panic(|| html_to_markdown_rs::convert(&html, options))
+                html_to_markdown_rs::safety::guard_panic(|| html_to_markdown_rs::convert_to_string(&html, options))
             }
         };
         match result {

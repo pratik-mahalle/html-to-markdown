@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 
-use html_to_markdown_rs::{ConversionOptions, convert};
+use html_to_markdown_rs::{ConversionOptions, convert_to_string as convert};
 
 #[test]
 fn test_basic_table() {
@@ -711,7 +711,7 @@ fn test_table_colspan_no_header_issue_233() {
         <td>Cell 2</td>
       </tr>
     </table>"#;
-    let result = html_to_markdown_rs::convert(html, None).unwrap();
+    let result = html_to_markdown_rs::convert_to_string(html, None).unwrap();
     assert!(result.contains("| Cell spanning 2 columns | |"));
     assert!(result.contains("| Cell 1 | Cell 2 |"));
 }
