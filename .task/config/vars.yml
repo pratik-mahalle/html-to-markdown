@@ -10,7 +10,7 @@ vars:
   BUILD_PROFILE: "{{.BUILD_PROFILE | default \"release\"}}"
 
   # Toolchain versions
-  GOLANGCI_LINT_VERSION: "v2.7.2"
+  GOLANGCI_LINT_VERSION: "latest"
   GO_TOOLCHAIN: "go1.25.5"
   BUNDLER_VERSION: "4.0.0"
   RUBY_BIN:
