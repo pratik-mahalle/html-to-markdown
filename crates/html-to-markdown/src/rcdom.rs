@@ -389,7 +389,10 @@ impl TreeSink for RcDom {
             let previous_parent = child.parent.replace(Some(Rc::downgrade(new_parent)));
             assert!(Rc::ptr_eq(
                 node,
-                &previous_parent.unwrap().upgrade().expect("dangling weak")
+                &previous_parent
+                    .expect("invariant: child must have a parent during reparenting")
+                    .upgrade()
+                    .expect("dangling weak")
             ))
         }
         new_children.extend(mem::take(&mut *children));

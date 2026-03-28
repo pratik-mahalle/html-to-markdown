@@ -5,7 +5,9 @@
 //! - Strikethrough (del, s tags) with ~~ syntax
 //! - Inserted/underlined text (ins, u tags) with == syntax
 
+use crate::converter::utility::content::collect_tag_attributes;
 use crate::options::{ConversionOptions, OutputFormat};
+use std::collections::BTreeMap;
 use tl::{NodeHandle, Parser};
 
 type Context = crate::converter::Context;
@@ -135,14 +137,8 @@ pub fn handle_strikethrough(
         let strikethrough_output = if let Some(ref visitor_handle) = ctx.visitor {
             use crate::converter::get_text_content;
             use crate::visitor::{NodeContext, NodeType, VisitResult};
-            use std::collections::BTreeMap;
-
             let text_content = get_text_content(node_handle, parser, dom_ctx);
-            let attributes: BTreeMap<String, String> = tag
-                .attributes()
-                .iter()
-                .filter_map(|(k, v)| v.as_ref().map(|val| (k.to_string(), val.to_string())))
-                .collect();
+            let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
 
             let node_id = node_handle.get_inner();
             let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
@@ -262,14 +258,9 @@ pub fn handle_inserted(
     let underline_output = if let Some(ref visitor_handle) = ctx.visitor {
         use crate::converter::get_text_content;
         use crate::visitor::{NodeContext, NodeType, VisitResult};
-        use std::collections::BTreeMap;
 
         let text_content = get_text_content(node_handle, parser, dom_ctx);
-        let attributes: BTreeMap<String, String> = tag
-            .attributes()
-            .iter()
-            .filter_map(|(k, v)| v.as_ref().map(|val| (k.to_string(), val.to_string())))
-            .collect();
+        let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
 
         let node_id = node_handle.get_inner();
         let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
@@ -377,14 +368,9 @@ pub fn handle_underline(
     if let Some(ref visitor_handle) = ctx.visitor {
         use crate::converter::get_text_content;
         use crate::visitor::{NodeContext, NodeType, VisitResult};
-        use std::collections::BTreeMap;
 
         let text_content = get_text_content(node_handle, parser, dom_ctx);
-        let attributes: BTreeMap<String, String> = tag
-            .attributes()
-            .iter()
-            .filter_map(|(k, v)| v.as_ref().map(|val| (k.to_string(), val.to_string())))
-            .collect();
+        let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
 
         let node_id = node_handle.get_inner();
         let parent_tag = dom_ctx.parent_tag_name(node_id, parser);

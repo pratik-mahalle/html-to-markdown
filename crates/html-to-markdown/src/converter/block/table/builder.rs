@@ -9,6 +9,7 @@ use super::cell::{collect_table_cells, get_colspan};
 use super::cells::{append_layout_row, convert_table_row};
 use super::scanner::scan_table;
 use super::utils::{is_tag_name, normalized_tag_name};
+use crate::converter::utility::content::collect_tag_attributes;
 
 /// Maximum allowed table columns to prevent unbounded memory usage.
 const MAX_TABLE_COLS: usize = 1000;
@@ -106,11 +107,7 @@ pub fn handle_table(
             use crate::visitor::{NodeContext, NodeType, VisitResult};
             use std::collections::BTreeMap;
 
-            let attributes: BTreeMap<String, String> = tag
-                .attributes()
-                .iter()
-                .filter_map(|(k, v)| v.as_ref().map(|val| (k.to_string(), val.to_string())))
-                .collect();
+            let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
 
             let node_id = node_handle.get_inner();
             let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
@@ -343,11 +340,7 @@ pub fn handle_table(
             use crate::visitor::{NodeContext, NodeType, VisitResult};
             use std::collections::BTreeMap;
 
-            let attributes: BTreeMap<String, String> = tag
-                .attributes()
-                .iter()
-                .filter_map(|(k, v)| v.as_ref().map(|val| (k.to_string(), val.to_string())))
-                .collect();
+            let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
 
             let node_id = node_handle.get_inner();
             let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
