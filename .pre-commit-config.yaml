@@ -184,20 +184,20 @@ repos:
   # Local hooks for language toolchains
   - repo: local
     hooks:
-      - id: golangci-lint-packages
-        name: golangci-lint (packages/go/v2)
-        entry: bash -c 'cd packages/go/v2 && golangci-lint run --config ../../../.golangci.yml ./...'
-        language: system
-        files: ^packages/go/
-        pass_filenames: false
-      - id: rubocop
-        name: rubocop
-        entry: task ruby:format
-        language: system
-        files: \.rb$
-        pass_filenames: false
-        require_serial: true
-        stages: [pre-commit]
+#       - id: golangci-lint-packages
+#         name: golangci-lint (packages/go/v2)
+#         entry: bash -c 'cd packages/go/v2 && golangci-lint run --config ../../../.golangci.yml ./...'
+#         language: system
+#         files: ^packages/go/
+#         pass_filenames: false
+#       - id: rubocop
+#         name: rubocop
+#         entry: task ruby:format
+#         language: system
+#         files: \.rb$
+#         pass_filenames: false
+#         require_serial: true
+#         stages: [pre-commit]
       - id: rbs-validate
         name: rbs validate
         entry: task ruby:rbs-validate

@@ -55,21 +55,6 @@ typedef struct {
 } HtmlToMarkdownVisitorCallbacksCompat;
 
 /* ------------------------------------------------------------------ */
-/* Metadata conversion                                                */
-/* ------------------------------------------------------------------ */
-
-extern char *html_to_markdown_convert_with_metadata(const char *html, char **metadata_json_out);
-extern char *html_to_markdown_convert_with_metadata_with_len(const char *html,
-                                                             char **metadata_json_out,
-                                                             uintptr_t *markdown_len_out,
-                                                             uintptr_t *metadata_len_out);
-extern char *html_to_markdown_convert_with_metadata_bytes_with_len(const uint8_t *html,
-                                                                   uintptr_t len,
-                                                                   char **metadata_json_out,
-                                                                   uintptr_t *markdown_len_out,
-                                                                   uintptr_t *metadata_len_out);
-
-/* ------------------------------------------------------------------ */
 /* Visitor API                                                        */
 /* ------------------------------------------------------------------ */
 
@@ -90,12 +75,5 @@ extern HtmlToMarkdownVisitResult html_to_markdown_visit_result_custom(char *outp
 extern HtmlToMarkdownVisitResult html_to_markdown_visit_result_skip(void);
 extern HtmlToMarkdownVisitResult html_to_markdown_visit_result_preserve_html(void);
 extern HtmlToMarkdownVisitResult html_to_markdown_visit_result_error(char *message);
-
-/* ------------------------------------------------------------------ */
-/* Profiling                                                          */
-/* ------------------------------------------------------------------ */
-
-extern bool html_to_markdown_profile_start(const char *output, int32_t frequency);
-extern bool html_to_markdown_profile_stop(void);
 
 #endif /* TEST_FFI_DECLS_H */

@@ -1,7 +1,6 @@
 //! Basic HTML to Markdown conversion functions for C FFI.
 //!
-//! This module provides simple conversion functions without additional features
-//! like metadata extraction or callbacks.
+//! This module provides the primary conversion function.
 
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
@@ -35,11 +34,10 @@ fn serialize_conversion_result(result: html_to_markdown_rs::ConversionResult) ->
 }
 
 use crate::error::{HtmlToMarkdownErrorCode, capture_error, set_last_error, set_last_error_code};
-use crate::profiling;
 use crate::strings::string_to_c_string;
 
 /// Convert HTML to Markdown, returning a JSON string with structured content, metadata, images,
-/// and warnings in a single pass. This is the v3 primary C API entry point.
+/// and warnings in a single pass. This is the primary C API entry point.
 ///
 /// The returned JSON has the shape:
 /// ```json
@@ -107,7 +105,7 @@ pub unsafe extern "C" fn html_to_markdown_convert(html: *const c_char, options_j
         }
     };
 
-    match guard_panic(|| profiling::maybe_profile(|| html_to_markdown_rs::convert(html_str, options.clone()))) {
+    match guard_panic(|| html_to_markdown_rs::convert(html_str, options.clone())) {
         Ok(result) => {
             set_last_error(None);
             set_last_error_code(HtmlToMarkdownErrorCode::Ok);
@@ -125,137 +123,6 @@ pub unsafe extern "C" fn html_to_markdown_convert(html: *const c_char, options_j
                 Ok(c_string) => c_string.into_raw(),
                 Err(err) => {
                     set_last_error(Some(format!("failed to build CString for convert JSON result: {err}")));
-                    set_last_error_code(HtmlToMarkdownErrorCode::Internal);
-                    ptr::null_mut()
-                }
-            }
-        }
-        Err(err) => {
-            capture_error(err);
-            ptr::null_mut()
-        }
-    }
-}
-
-/// Convert HTML to Markdown with table extraction, returning a JSON string.
-///
-/// The returned JSON has the shape:
-/// ```json
-/// {
-///   "content": "...",
-///   "metadata": {...} | null,
-///   "tables": [{"cells": [[...]], "markdown": "...", "is_header_row": [...]}]
-/// }
-/// ```
-///
-/// # Safety
-///
-/// - `html` must be a valid null-terminated C string
-/// - `options_json` may be NULL (uses defaults) or a valid null-terminated JSON C string
-/// - `metadata_config_json` may be NULL (uses defaults) or a valid null-terminated JSON C string
-/// - The returned string must be freed with `html_to_markdown_free_string`
-/// - Returns NULL on error (check error with `html_to_markdown_last_error`)
-///
-/// # Example (C)
-///
-/// ```c
-/// const char* html = "<table><tr><th>Name</th></tr><tr><td>Alice</td></tr></table>";
-/// char* json = html_to_markdown_convert_with_tables(html, NULL, NULL);
-/// if (json != NULL) {
-///     printf("%s\n", json);
-///     html_to_markdown_free_string(json);
-/// }
-/// ```
-#[cfg(feature = "visitor")]
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn html_to_markdown_convert_with_tables(
-    html: *const c_char,
-    options_json: *const c_char,
-    metadata_config_json: *const c_char,
-) -> *mut c_char {
-    if html.is_null() {
-        set_last_error(Some("html pointer was null".to_string()));
-        set_last_error_code(HtmlToMarkdownErrorCode::Internal);
-        return ptr::null_mut();
-    }
-
-    let html_str = match unsafe { CStr::from_ptr(html) }.to_str() {
-        Ok(s) => s,
-        Err(_) => {
-            set_last_error(Some("html must be valid UTF-8".to_string()));
-            set_last_error_code(HtmlToMarkdownErrorCode::InvalidUtf8);
-            return ptr::null_mut();
-        }
-    };
-
-    let options = if options_json.is_null() {
-        None
-    } else {
-        match unsafe { CStr::from_ptr(options_json) }.to_str() {
-            Ok("") => None,
-            Ok(s) => match html_to_markdown_rs::conversion_options_from_json(s) {
-                Ok(opts) => Some(opts),
-                Err(e) => {
-                    set_last_error(Some(format!("failed to parse options JSON: {e}")));
-                    set_last_error_code(HtmlToMarkdownErrorCode::Internal);
-                    return ptr::null_mut();
-                }
-            },
-            Err(_) => {
-                set_last_error(Some("options_json must be valid UTF-8".to_string()));
-                set_last_error_code(HtmlToMarkdownErrorCode::InvalidUtf8);
-                return ptr::null_mut();
-            }
-        }
-    };
-
-    #[cfg(feature = "metadata")]
-    let metadata_cfg = if metadata_config_json.is_null() {
-        None
-    } else {
-        match unsafe { CStr::from_ptr(metadata_config_json) }.to_str() {
-            Ok("") => None,
-            Ok(s) => match html_to_markdown_rs::metadata_config_from_json(s) {
-                Ok(cfg) => Some(cfg),
-                Err(e) => {
-                    set_last_error(Some(format!("failed to parse metadata config JSON: {e}")));
-                    set_last_error_code(HtmlToMarkdownErrorCode::Internal);
-                    return ptr::null_mut();
-                }
-            },
-            Err(_) => {
-                set_last_error(Some("metadata_config_json must be valid UTF-8".to_string()));
-                set_last_error_code(HtmlToMarkdownErrorCode::InvalidUtf8);
-                return ptr::null_mut();
-            }
-        }
-    };
-
-    #[cfg(not(feature = "metadata"))]
-    let metadata_cfg: Option<()> = None;
-
-    match guard_panic(|| {
-        profiling::maybe_profile(|| {
-            html_to_markdown_rs::convert_with_tables(html_str, options.clone(), metadata_cfg.clone())
-        })
-    }) {
-        Ok(result) => {
-            set_last_error(None);
-            set_last_error_code(HtmlToMarkdownErrorCode::Ok);
-
-            let json = match serde_json::to_string(&result) {
-                Ok(j) => j,
-                Err(e) => {
-                    set_last_error(Some(format!("failed to serialize result to JSON: {e}")));
-                    set_last_error_code(HtmlToMarkdownErrorCode::Internal);
-                    return ptr::null_mut();
-                }
-            };
-
-            match string_to_c_string(json, "tables JSON result") {
-                Ok(c_string) => c_string.into_raw(),
-                Err(err) => {
-                    set_last_error(Some(format!("failed to build CString for tables JSON result: {err}")));
                     set_last_error_code(HtmlToMarkdownErrorCode::Internal);
                     ptr::null_mut()
                 }

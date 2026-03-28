@@ -26,17 +26,6 @@ use std::path::PathBuf;
     # Convert and save to file
     html-to-markdown input.html -o output.md
 
-    # Extract metadata with conversion (JSON output to stdout)
-    html-to-markdown input.html --with-metadata
-
-    # Extract specific metadata types
-    html-to-markdown input.html --with-metadata --extract-headers --extract-links
-
-    # Extract all metadata and save output
-    html-to-markdown input.html --with-metadata \\
-        --extract-document --extract-headers --extract-links --extract-images \\
-        -o output.json
-
     # Generate shell completions
     html-to-markdown --generate-completion bash > html-to-markdown.bash
     html-to-markdown --generate-completion zsh > _html-to-markdown
@@ -236,15 +225,6 @@ pub struct Cli {
     #[arg(long)]
     #[arg(help_heading = "Metadata")]
     pub extract_metadata: bool,
-
-    /// Extract comprehensive metadata and output as JSON
-    ///
-    /// When enabled, output will be JSON with "markdown" and "metadata" keys.
-    /// Use --extract-document, --extract-headers, etc. to control what metadata is extracted.
-    /// Deprecated: prefer --json instead.
-    #[arg(long)]
-    #[arg(help_heading = "Metadata")]
-    pub with_metadata: bool,
 
     /// Output full ConversionResult as JSON instead of markdown text
     ///

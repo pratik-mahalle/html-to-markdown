@@ -8,6 +8,7 @@ package htmltomarkdown
 // #if defined(_WIN32)
 // #include <windows.h>
 // static HMODULE ffi_handle = NULL;
+// static FARPROC html_to_markdown_convert_ptr = NULL;
 // static FARPROC html_to_markdown_free_string_ptr = NULL;
 // static FARPROC html_to_markdown_version_ptr = NULL;
 // static FARPROC html_to_markdown_last_error_ptr = NULL;
@@ -18,13 +19,13 @@ package htmltomarkdown
 // static FARPROC html_to_markdown_visitor_create_ptr = NULL;
 // static FARPROC html_to_markdown_visitor_free_ptr = NULL;
 // static FARPROC html_to_markdown_convert_with_tables_ptr = NULL;
-// static FARPROC html_to_markdown_convert_ptr = NULL;
 //
 // bool html_to_markdown_ffi_load(const char* path) {
 // 	ffi_handle = LoadLibraryA(path);
 // 	if (!ffi_handle) {
 // 		return false;
 // 	}
+// 	html_to_markdown_convert_ptr = GetProcAddress(ffi_handle, "html_to_markdown_convert");
 // 	html_to_markdown_free_string_ptr = GetProcAddress(ffi_handle, "html_to_markdown_free_string");
 // 	html_to_markdown_version_ptr = GetProcAddress(ffi_handle, "html_to_markdown_version");
 // 	html_to_markdown_last_error_ptr = GetProcAddress(ffi_handle, "html_to_markdown_last_error");
@@ -35,13 +36,12 @@ package htmltomarkdown
 // 	html_to_markdown_visitor_create_ptr = GetProcAddress(ffi_handle, "html_to_markdown_visitor_create");
 // 	html_to_markdown_visitor_free_ptr = GetProcAddress(ffi_handle, "html_to_markdown_visitor_free");
 // 	html_to_markdown_convert_with_tables_ptr = GetProcAddress(ffi_handle, "html_to_markdown_convert_with_tables");
-// 	html_to_markdown_convert_ptr = GetProcAddress(ffi_handle, "html_to_markdown_convert");
-// 	if (!html_to_markdown_free_string_ptr ||
+// 	if (!html_to_markdown_convert_ptr || !html_to_markdown_free_string_ptr ||
 // 		!html_to_markdown_version_ptr || !html_to_markdown_last_error_ptr ||
 // 		!html_to_markdown_convert_with_metadata_ptr || !html_to_markdown_profile_start_ptr ||
 // 		!html_to_markdown_profile_stop_ptr || !html_to_markdown_convert_with_visitor_ptr ||
 // 		!html_to_markdown_visitor_create_ptr || !html_to_markdown_visitor_free_ptr ||
-// 		!html_to_markdown_convert_with_tables_ptr || !html_to_markdown_convert_ptr) {
+// 		!html_to_markdown_convert_with_tables_ptr) {
 // 		FreeLibrary(ffi_handle);
 // 		ffi_handle = NULL;
 // 		return false;
@@ -51,6 +51,7 @@ package htmltomarkdown
 // #else
 // #include <dlfcn.h>
 // static void* ffi_handle = NULL;
+// static void* html_to_markdown_convert_ptr = NULL;
 // static void* html_to_markdown_free_string_ptr = NULL;
 // static void* html_to_markdown_version_ptr = NULL;
 // static void* html_to_markdown_last_error_ptr = NULL;
@@ -61,13 +62,13 @@ package htmltomarkdown
 // static void* html_to_markdown_visitor_create_ptr = NULL;
 // static void* html_to_markdown_visitor_free_ptr = NULL;
 // static void* html_to_markdown_convert_with_tables_ptr = NULL;
-// static void* html_to_markdown_convert_ptr = NULL;
 //
 // bool html_to_markdown_ffi_load(const char* path) {
 // 	ffi_handle = dlopen(path, RTLD_LAZY);
 // 	if (!ffi_handle) {
 // 		return false;
 // 	}
+// 	html_to_markdown_convert_ptr = dlsym(ffi_handle, "html_to_markdown_convert");
 // 	html_to_markdown_free_string_ptr = dlsym(ffi_handle, "html_to_markdown_free_string");
 // 	html_to_markdown_version_ptr = dlsym(ffi_handle, "html_to_markdown_version");
 // 	html_to_markdown_last_error_ptr = dlsym(ffi_handle, "html_to_markdown_last_error");
@@ -78,13 +79,12 @@ package htmltomarkdown
 // 	html_to_markdown_visitor_create_ptr = dlsym(ffi_handle, "html_to_markdown_visitor_create");
 // 	html_to_markdown_visitor_free_ptr = dlsym(ffi_handle, "html_to_markdown_visitor_free");
 // 	html_to_markdown_convert_with_tables_ptr = dlsym(ffi_handle, "html_to_markdown_convert_with_tables");
-// 	html_to_markdown_convert_ptr = dlsym(ffi_handle, "html_to_markdown_convert");
-// 	if (!html_to_markdown_free_string_ptr ||
+// 	if (!html_to_markdown_convert_ptr || !html_to_markdown_free_string_ptr ||
 // 		!html_to_markdown_version_ptr || !html_to_markdown_last_error_ptr ||
 // 		!html_to_markdown_convert_with_metadata_ptr || !html_to_markdown_profile_start_ptr ||
 // 		!html_to_markdown_profile_stop_ptr || !html_to_markdown_convert_with_visitor_ptr ||
 // 		!html_to_markdown_visitor_create_ptr || !html_to_markdown_visitor_free_ptr ||
-// 		!html_to_markdown_convert_with_tables_ptr || !html_to_markdown_convert_ptr) {
+// 		!html_to_markdown_convert_with_tables_ptr) {
 // 		dlclose(ffi_handle);
 // 		ffi_handle = NULL;
 // 		return false;
@@ -95,6 +95,7 @@ package htmltomarkdown
 //
 // static const char* html_to_markdown_ffi_error = "html-to-markdown FFI library not loaded";
 //
+// typedef char* (*convert_fn)(const char*);
 // typedef void (*free_string_fn)(char*);
 // typedef const char* (*version_fn)(void);
 // typedef const char* (*last_error_fn)(void);
@@ -105,7 +106,13 @@ package htmltomarkdown
 // typedef void* (*visitor_create_fn)(const void*);
 // typedef void (*visitor_free_fn)(void*);
 // typedef char* (*convert_with_tables_fn)(const char*, const char*, const char*);
-// typedef char* (*extract_fn)(const char*, const char*);
+//
+// char* html_to_markdown_convert_proxy(const char* html) {
+// 	if (!html_to_markdown_convert_ptr) {
+// 		return NULL;
+// 	}
+// 	return ((convert_fn)html_to_markdown_convert_ptr)(html);
+// }
 //
 // void html_to_markdown_free_string_proxy(char* s) {
 // 	if (!html_to_markdown_free_string_ptr) {
@@ -176,13 +183,6 @@ package htmltomarkdown
 // 	}
 // 	return ((convert_with_tables_fn)html_to_markdown_convert_with_tables_ptr)(html, options_json, metadata_config_json);
 // }
-//
-// char* html_to_markdown_convert_proxy(const char* html, const char* options_json) {
-// 	if (!html_to_markdown_convert_ptr) {
-// 		return NULL;
-// 	}
-// 	return ((extract_fn)html_to_markdown_convert_ptr)(html, options_json);
-// }
 import "C"
 
 import (
@@ -203,7 +203,7 @@ import (
 )
 
 const (
-	defaultFFIVersion = "3.0.0"
+	defaultFFIVersion = "2.30.0"
 	githubRepo        = "kreuzberg-dev/html-to-markdown"
 
 	archAMD64    = "amd64"

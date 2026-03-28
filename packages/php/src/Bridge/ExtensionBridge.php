@@ -7,142 +7,30 @@ namespace HtmlToMarkdown\Bridge;
 use HtmlToMarkdown\Contract\ExtensionBridge as ExtensionBridgeContract;
 use HtmlToMarkdown\Exception\ConversionFailed;
 use HtmlToMarkdown\Exception\ExtensionNotLoaded;
-use HtmlToMarkdown\Visitor\HtmlVisitor;
 
 /**
  * @phpstan-import-type ConversionOptionsInput from \HtmlToMarkdown\Config\ConversionOptions
- * @phpstan-import-type InlineImageConfigInput from \HtmlToMarkdown\Config\InlineImageConfig
  */
 
 final class ExtensionBridge implements ExtensionBridgeContract
 {
     private const CONVERT_FUNCTION = 'html_to_markdown_convert';
-    private const CONVERT_INLINE_FUNCTION = 'html_to_markdown_convert_with_inline_images';
-    private const CONVERT_METADATA_FUNCTION = 'html_to_markdown_convert_with_metadata';
-    private const CONVERT_VISITOR_FUNCTION = 'html_to_markdown_convert_with_visitor';
-    private const CONVERT_TABLES_FUNCTION = 'html_to_markdown_convert_with_tables';
 
     /**
      * @param ConversionOptionsInput|null $options
+     *
+     * @return array<string, mixed>
      */
-    public function convert(string $html, ?array $options = null): string
+    public function convert(string $html, ?array $options = null): array
     {
-        $callable = self::CONVERT_FUNCTION;
-        if (!\function_exists($callable)) {
+        if (!\function_exists(self::CONVERT_FUNCTION)) {
             throw ExtensionNotLoaded::create();
         }
 
         try {
-            $result = $callable($html, $options);
+            return \html_to_markdown_convert($html, $options);
         } catch (\Throwable $exception) {
             throw ConversionFailed::withMessage($exception->getMessage());
         }
-
-        if (\is_array($result)) {
-            return \is_string($result['content'] ?? null) ? $result['content'] : '';
-        }
-
-        return \is_string($result) ? $result : '';
-    }
-
-    /**
-     * @param ConversionOptionsInput|null $options
-     * @param InlineImageConfigInput|null $config
-     *
-     * @return array<string, mixed>
-     */
-    public function convertWithInlineImages(
-        string $html,
-        ?array $options = null,
-        ?array $config = null,
-    ): array {
-        $callable = self::CONVERT_INLINE_FUNCTION;
-        if (!\function_exists($callable)) {
-            throw ExtensionNotLoaded::create();
-        }
-
-        try {
-            /** @var array<string, mixed> $payload */
-            $payload = $callable($html, $options, $config);
-        } catch (\Throwable $exception) {
-            throw ConversionFailed::withMessage($exception->getMessage());
-        }
-
-        return $payload;
-    }
-
-    /**
-     * @param ConversionOptionsInput|null $options
-     * @param array<string, mixed>|null $metadataConfig
-     *
-     * @return array<string, mixed>
-     */
-    public function convertWithMetadata(
-        string $html,
-        ?array $options = null,
-        ?array $metadataConfig = null,
-    ): array {
-        $callable = self::CONVERT_METADATA_FUNCTION;
-        if (!\function_exists($callable)) {
-            throw ExtensionNotLoaded::create();
-        }
-
-        try {
-            /** @var array<string, mixed> $payload */
-            $payload = $callable($html, $options, $metadataConfig);
-        } catch (\Throwable $exception) {
-            throw ConversionFailed::withMessage($exception->getMessage());
-        }
-
-        return $payload;
-    }
-
-    /**
-     * @param ConversionOptionsInput|null $options
-     */
-    public function convertWithVisitor(
-        string $html,
-        ?array $options = null,
-        ?HtmlVisitor $visitor = null,
-    ): string {
-        $callable = self::CONVERT_VISITOR_FUNCTION;
-        if (!\function_exists($callable)) {
-            throw ExtensionNotLoaded::create();
-        }
-
-        try {
-            /** @var string $result */
-            $result = $callable($html, $options, $visitor);
-        } catch (\Throwable $exception) {
-            throw ConversionFailed::withMessage($exception->getMessage());
-        }
-
-        return $result;
-    }
-
-    /**
-     * @param ConversionOptionsInput|null $options
-     * @param array<string, mixed>|null $metadataConfig
-     *
-     * @return array<string, mixed>
-     */
-    public function convertWithTables(
-        string $html,
-        ?array $options = null,
-        ?array $metadataConfig = null,
-    ): array {
-        $callable = self::CONVERT_TABLES_FUNCTION;
-        if (!\function_exists($callable)) {
-            throw ExtensionNotLoaded::create();
-        }
-
-        try {
-            /** @var array<string, mixed> $payload */
-            $payload = $callable($html, $options, $metadataConfig);
-        } catch (\Throwable $exception) {
-            throw ConversionFailed::withMessage($exception->getMessage());
-        }
-
-        return $payload;
     }
 }
