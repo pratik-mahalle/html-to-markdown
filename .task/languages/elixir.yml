@@ -137,6 +137,20 @@ tasks:
       - cmd: cd {{.ELIXIR_PKG}} && mix deps.clean --all
         ignore_error: true
 
+  e2e:generate:
+    desc: "Generate Elixir E2E tests from fixtures using e2e-generator"
+    silent: false
+    cmds:
+      - cmd: cargo run --release -p e2e-generator -- --language elixir --output e2e/elixir
+        ignore_error: false
+
+  e2e:test:
+    desc: "Run Elixir E2E tests in e2e/elixir directory"
+    silent: false
+    cmds:
+      - cmd: cd e2e/elixir && mix test test/
+        ignore_error: false
+
   release:
     desc: "Build Elixir release (mix release)"
     silent: false

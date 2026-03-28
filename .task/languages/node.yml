@@ -99,6 +99,20 @@ tasks:
       - pnpm up --latest -r
       - pnpm up --latest -w
 
+  e2e:generate:
+    desc: "Generate Node/TypeScript E2E tests from fixtures using e2e-generator"
+    silent: false
+    cmds:
+      - cmd: cargo run --release -p e2e-generator -- --language typescript --output e2e/typescript
+        ignore_error: false
+
+  e2e:test:
+    desc: "Run Node/TypeScript E2E tests in e2e/typescript directory"
+    silent: false
+    cmds:
+      - cmd: cd e2e/typescript && pnpm install && pnpm test
+        ignore_error: false
+
   clean:
     desc: "Clean Node.js build artifacts (cross-platform)"
     silent: false

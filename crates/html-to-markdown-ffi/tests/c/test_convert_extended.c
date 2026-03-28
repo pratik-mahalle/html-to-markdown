@@ -4,64 +4,49 @@
 #include <string.h>
 
 int main(void) {
-    /* Test convert_with_len with valid HTML */
+    /* Test convert with valid HTML returns JSON containing content */
     {
-        uintptr_t len = 0;
-        char *result = html_to_markdown_convert_to_string_with_len("<h1>Hello</h1>", &len);
+        char *result = html_to_markdown_convert("<h1>Hello</h1>", NULL);
         assert(result != NULL);
-        assert(len > 0);
-        assert(len == strlen(result));
+        assert(strlen(result) > 0);
+        /* Result is JSON; the content field should include "Hello" */
         assert(strstr(result, "Hello") != NULL);
+        assert(strstr(result, "content") != NULL);
         html_to_markdown_free_string(result);
     }
 
-    /* Test convert_with_len with empty input */
+    /* Test convert with empty input returns JSON */
     {
-        uintptr_t len = 0;
-        char *result = html_to_markdown_convert_to_string_with_len("", &len);
+        char *result = html_to_markdown_convert("", NULL);
         assert(result != NULL);
-        assert(len == strlen(result));
+        assert(strlen(result) > 0);
+        /* Even empty input should produce valid JSON with content key */
+        assert(strstr(result, "content") != NULL);
         html_to_markdown_free_string(result);
     }
 
-    /* Test convert_with_len with NULL input */
+    /* Test convert with NULL input returns NULL */
     {
-        uintptr_t len = 0;
-        const char *result = html_to_markdown_convert_to_string_with_len(NULL, &len);
+        const char *result = html_to_markdown_convert(NULL, NULL);
         assert(result == NULL);
     }
 
-    /* Test convert_bytes_with_len with valid UTF-8 bytes */
+    /* Test convert with paragraph HTML */
     {
         const char *html = "<p>World</p>";
-        uintptr_t len_out = 0;
-        char *result = html_to_markdown_convert_to_string_bytes_with_len((const uint8_t *)html,
-                                                                         strlen(html), &len_out);
+        char *result = html_to_markdown_convert(html, NULL);
         assert(result != NULL);
-        assert(len_out > 0);
-        assert(len_out == strlen(result));
+        assert(strlen(result) > 0);
         assert(strstr(result, "World") != NULL);
         html_to_markdown_free_string(result);
     }
 
-    /* Test convert_bytes_with_len with zero length */
+    /* Test convert with options_json set to "{}" (empty options object) */
     {
-        uintptr_t len_out = 0;
-        char *result = html_to_markdown_convert_to_string_bytes_with_len((const uint8_t *)"ignored",
-                                                                         0, &len_out);
+        char *result = html_to_markdown_convert("<p>Options test</p>", "{}");
         assert(result != NULL);
-        assert(len_out == strlen(result));
+        assert(strstr(result, "Options test") != NULL);
         html_to_markdown_free_string(result);
-    }
-
-    /* Test convert_bytes_with_len with NULL pointer */
-    {
-        uintptr_t len_out = 0;
-        char *result = html_to_markdown_convert_to_string_bytes_with_len(NULL, 0, &len_out);
-        /* Should handle NULL gracefully */
-        if (result != NULL) {
-            html_to_markdown_free_string(result);
-        }
     }
 
     printf("test_convert_extended: all tests passed\n");

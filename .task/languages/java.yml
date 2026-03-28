@@ -144,6 +144,20 @@ tasks:
       - echo "Checking for remaining outdated dependencies..."
       - "{{.MAVEN_CMD}} versions:display-dependency-updates || true"
 
+  e2e:generate:
+    desc: "Generate Java E2E tests from fixtures using e2e-generator"
+    silent: false
+    cmds:
+      - cmd: cargo run --release -p e2e-generator -- --language java --output e2e/java
+        ignore_error: false
+
+  e2e:test:
+    desc: "Run Java E2E tests in e2e/java directory"
+    silent: false
+    cmds:
+      - cmd: cd e2e/java && "{{.MAVEN_CMD}}" test
+        ignore_error: false
+
   clean:
     desc: "Clean Maven build artifacts and target directory"
     silent: false

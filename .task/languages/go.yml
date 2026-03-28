@@ -165,6 +165,28 @@ tasks:
           GOTOOLCHAIN: "{{.GO_TOOLCHAIN}}"
         ignore_error: false
 
+  e2e:generate:
+    desc: "Generate Go E2E tests from fixtures using e2e-generator"
+    silent: false
+    cmds:
+      - cmd: cargo run --release -p e2e-generator -- --language go --output e2e/go
+        ignore_error: false
+
+  e2e:test:
+    desc: "Run Go E2E tests in e2e/go directory"
+    silent: false
+    cmds:
+      - cmd: cargo build --release -p html-to-markdown-ffi --quiet
+        ignore_error: false
+      - cmd: cd e2e/go && go test -v ./...
+        env:
+          GOTOOLCHAIN: "{{.GO_TOOLCHAIN}}"
+          LD_LIBRARY_PATH: '{{if ne .OS "windows"}}{{.TARGET_DIR}}/release{{if .LD_LIBRARY_PATH}}:{{.LD_LIBRARY_PATH}}{{end}}{{end}}'
+          DYLD_LIBRARY_PATH: '{{if eq .OS "darwin"}}{{.TARGET_DIR}}/release{{if .DYLD_LIBRARY_PATH}}:{{.DYLD_LIBRARY_PATH}}{{end}}{{end}}'
+          PATH: '{{if eq .OS "windows"}}{{.TARGET_DIR}}/release;{{end}}{{.PATH}}'
+          CGO_LDFLAGS: "-L{{.TARGET_DIR}}/release -lhtml_to_markdown_ffi"
+        ignore_error: false
+
   clean:
     desc: "Clean Go build and test caches"
     silent: false
