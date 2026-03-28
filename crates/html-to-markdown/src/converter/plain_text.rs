@@ -311,20 +311,28 @@ fn collapse_triple_newlines(buf: &mut String) {
     *buf = result;
 }
 
+/// Trim trailing whitespace from every line in a buffer without allocating per-line strings.
+///
+/// Uses a single allocation of the same capacity, writing each line's trimmed content
+/// and inserting newline separators directly.
+fn trim_line_ends(buf: &mut String) {
+    let mut result = String::with_capacity(buf.len());
+    for line in buf.lines() {
+        if !result.is_empty() {
+            result.push('\n');
+        }
+        result.push_str(line.trim_end());
+    }
+    *buf = result;
+}
+
 /// Post-process: collapse 3+ newlines to 2, trim line-end whitespace, ensure single trailing newline.
 fn post_process(buf: &mut String) {
     // Collapse runs of 3+ newlines to exactly 2
     collapse_triple_newlines(buf);
 
-    // Trim trailing whitespace from each line — collect owned strings to avoid borrow conflict
-    let lines: Vec<String> = buf.lines().map(|line| line.trim_end().to_string()).collect();
-    buf.clear();
-    for (i, line) in lines.iter().enumerate() {
-        buf.push_str(line);
-        if i < lines.len() - 1 {
-            buf.push('\n');
-        }
-    }
+    // Trim trailing whitespace from each line in-place
+    trim_line_ends(buf);
 
     // Trim to single trailing newline
     let keep = buf.trim_end_matches('\n').len();

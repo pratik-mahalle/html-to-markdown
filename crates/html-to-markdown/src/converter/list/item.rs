@@ -8,7 +8,7 @@
 
 use crate::converter::main_helpers::tag_name_eq;
 use crate::converter::main_helpers::trim_trailing_whitespace;
-use crate::converter::utility::content::normalized_tag_name;
+use crate::converter::utility::content::{collect_tag_attributes, normalized_tag_name};
 use crate::converter::walk_node;
 use crate::options::ConversionOptions;
 use tl;
@@ -216,11 +216,7 @@ pub(crate) fn handle_li(
             use crate::visitor::{NodeContext, NodeType, VisitResult};
             use std::collections::BTreeMap;
 
-            let attributes: BTreeMap<String, String> = tag
-                .attributes()
-                .iter()
-                .filter_map(|(k, v)| v.as_ref().map(|val| (k.to_string(), val.to_string())))
-                .collect();
+            let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
 
             let parent_tag = dom_ctx
                 .parent_of(node_handle.get_inner())

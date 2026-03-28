@@ -5,9 +5,21 @@
 
 use crate::text;
 use std::borrow::Cow;
+use std::collections::BTreeMap;
 
 // Forward declare DomContext from parent module to avoid circular imports
 pub(crate) use crate::converter::DomContext;
+
+/// Collect all attributes from an HTML tag as a `BTreeMap<String, String>`.
+///
+/// Boolean attributes (those with `None` as the value) are skipped; only
+/// attributes that carry an explicit value are included.
+pub(crate) fn collect_tag_attributes(tag: &tl::HTMLTag) -> BTreeMap<String, String> {
+    tag.attributes()
+        .iter()
+        .filter_map(|(k, v)| v.as_ref().map(|val| (k.to_string(), val.to_string())))
+        .collect()
+}
 
 /// Chomp whitespace from inline element content, preserving line breaks.
 ///

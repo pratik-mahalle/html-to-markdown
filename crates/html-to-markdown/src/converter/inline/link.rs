@@ -9,7 +9,9 @@
 //! - Metadata collection for links (links, URLs, titles, rel attributes)
 //! - Block-level content within links (via inline context)
 
-use crate::converter::utility::content::{collect_link_label_text, escape_link_label, normalize_link_label};
+use crate::converter::utility::content::{
+    collect_link_label_text, collect_tag_attributes, escape_link_label, normalize_link_label,
+};
 use crate::converter::utility::preprocessing::sanitize_markdown_url;
 use crate::options::ConversionOptions;
 use std::collections::BTreeMap;
@@ -230,11 +232,7 @@ pub(crate) fn handle(
         let link_output = if let Some(ref visitor_handle) = ctx.visitor {
             use crate::visitor::{NodeContext, NodeType, VisitResult};
 
-            let attributes: BTreeMap<String, String> = tag
-                .attributes()
-                .iter()
-                .filter_map(|(k, v)| v.as_ref().map(|val| (k.to_string(), val.to_string())))
-                .collect();
+            let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
 
             let node_id = node_handle.get_inner();
             let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
