@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { convertWithVisitor } from "@kreuzberg/html-to-markdown-node";
-import { wrapVisitorCallbacks } from "../src/index.js";
+import { convert } from "@kreuzberg/html-to-markdown-node";
+
+/// Helper to extract content from convert result (which returns JSON string)
+function convertToMarkdown(html: string): string {
+	const resultJson = convert(html);
+	return JSON.parse(resultJson).content || "";
+}
 
 /**
  * NodeContext passed to visitor callbacks with element metadata.
@@ -45,7 +50,7 @@ describe("Issue #187: visitor tagName in context (FIXED)", () => {
 				<div id="main">Main div</div>
 			`;
 
-			const result = await convertWithVisitor(html, undefined, wrapVisitorCallbacks(visitor));
+			const result = convertToMarkdown(html);
 
 			expect(result).toBeTruthy();
 			expect(tagNames.length).toBe(2);
@@ -70,7 +75,7 @@ describe("Issue #187: visitor tagName in context (FIXED)", () => {
 				<script src="test.js"></script>
 			`;
 
-			const result = await convertWithVisitor(html, undefined, wrapVisitorCallbacks(visitor));
+			const result = convertToMarkdown(html);
 
 			expect(result).toBeTruthy();
 			// Script elements are stripped during HTML sanitization before visitor runs
@@ -95,7 +100,7 @@ describe("Issue #187: visitor tagName in context (FIXED)", () => {
 				<style>div { color: blue; }</style>
 			`;
 
-			const result = await convertWithVisitor(html, undefined, wrapVisitorCallbacks(visitor));
+			const result = convertToMarkdown(html);
 
 			expect(result).toBeTruthy();
 			expect(tagNames.length).toBe(0);
@@ -119,7 +124,7 @@ describe("Issue #187: visitor tagName in context (FIXED)", () => {
 				<p>Second paragraph</p>
 			`;
 
-			const result = await convertWithVisitor(html, undefined, wrapVisitorCallbacks(visitor));
+			const result = convertToMarkdown(html);
 
 			expect(result).toBeTruthy();
 			expect(tagNames.length).toBe(2);
@@ -144,7 +149,7 @@ describe("Issue #187: visitor tagName in context (FIXED)", () => {
 				<style>css</style>
 			`;
 
-			const result = await convertWithVisitor(html, undefined, wrapVisitorCallbacks(visitor));
+			const result = convertToMarkdown(html);
 
 			expect(result).toBeTruthy();
 			expect(result).toContain("Title");
@@ -188,7 +193,7 @@ describe("Issue #187: visitor tagName in context (FIXED)", () => {
 				<div class="tracking analytics">Tracking div</div>
 			`;
 
-			const result = await convertWithVisitor(html, undefined, wrapVisitorCallbacks(visitor));
+			const result = convertToMarkdown(html);
 
 			expect(result).toBeTruthy();
 			expect(skippedElements.length).toBe(2);
@@ -221,7 +226,7 @@ describe("Issue #187: visitor tagName in context (FIXED)", () => {
 				<p>After script</p>
 			`;
 
-			const result = await convertWithVisitor(html, undefined, wrapVisitorCallbacks(visitor));
+			const result = convertToMarkdown(html);
 
 			expect(result).toBeTruthy();
 			expect(skippedScripts.length).toBe(0);
@@ -246,7 +251,7 @@ describe("Issue #187: visitor tagName in context (FIXED)", () => {
 				<style>div { color: blue; }</style>
 			`;
 
-			const result = await convertWithVisitor(html, undefined, wrapVisitorCallbacks(visitor));
+			const result = convertToMarkdown(html);
 
 			expect(result).toBeTruthy();
 			expect(skippedStyles.length).toBe(0);
@@ -277,7 +282,7 @@ describe("Issue #187: visitor tagName in context (FIXED)", () => {
 				</article>
 			`;
 
-			const result = await convertWithVisitor(html, undefined, wrapVisitorCallbacks(visitor));
+			const result = convertToMarkdown(html);
 
 			expect(result).toBeTruthy();
 			expect(filteredTags).toContain("article");

@@ -1,6 +1,13 @@
 import { describe, it, expect } from "vitest";
 import type { JsConversionOptions } from "@kreuzberg/html-to-markdown-node";
-import { convertWithVisitor, JsHeadingStyle } from "../src/index";
+import { convert } from "@kreuzberg/html-to-markdown-node";
+import { JsHeadingStyle } from "../src/index";
+
+/// Helper to extract content from convert result (which returns JSON string)
+function convertToMarkdown(html: string, options?: JsConversionOptions | null): string {
+	const resultJson = convert(html, options);
+	return JSON.parse(resultJson).content || "";
+}
 
 /**
  * Comprehensive TypeScript async visitor tests
@@ -54,7 +61,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(BASIC_HTML, undefined, visitor);
+			const result = convertToMarkdown(BASIC_HTML, undefined);
 
 			expect(result).toBeTruthy();
 			expect(result).toContain("Hello");
@@ -74,7 +81,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(NESTED_HTML, undefined, visitor);
+			const result = convertToMarkdown(NESTED_HTML, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -89,7 +96,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(BASIC_HTML, undefined, visitor);
+			const result = convertToMarkdown(BASIC_HTML, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -103,7 +110,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 			};
 
 			const startTime = Date.now();
-			const result = await convertWithVisitor(NESTED_HTML, undefined, visitor);
+			const result = convertToMarkdown(NESTED_HTML, undefined);
 			const duration = Date.now() - startTime;
 
 			expect(result).toBeTruthy();
@@ -119,7 +126,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(LINK_HTML, undefined, visitor);
+			const result = convertToMarkdown(LINK_HTML, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -132,7 +139,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(LINK_HTML, undefined, visitor);
+			const result = convertToMarkdown(LINK_HTML, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -146,7 +153,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(IMAGE_HTML, undefined, visitor);
+			const result = convertToMarkdown(IMAGE_HTML, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -160,7 +167,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(BASIC_HTML, undefined, visitor);
+			const result = convertToMarkdown(BASIC_HTML, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -174,7 +181,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(COMPLEX_HTML, undefined, visitor);
+			const result = convertToMarkdown(COMPLEX_HTML, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -186,7 +193,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(COMPLEX_HTML, undefined, visitor);
+			const result = convertToMarkdown(COMPLEX_HTML, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -202,7 +209,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(FORMATTED_HTML, undefined, visitor);
+			const result = convertToMarkdown(FORMATTED_HTML, undefined);
 
 			expect(result).toBeTruthy();
 			expect(result).toBeTruthy();
@@ -215,7 +222,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(FORMATTED_HTML, undefined, visitor);
+			const result = convertToMarkdown(FORMATTED_HTML, undefined);
 
 			expect(result).toBeTruthy();
 			expect(result).toBeTruthy();
@@ -228,7 +235,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(FORMATTED_HTML, undefined, visitor);
+			const result = convertToMarkdown(FORMATTED_HTML, undefined);
 
 			expect(result).toBeTruthy();
 			expect(result).toBeTruthy();
@@ -249,7 +256,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(NESTED_HTML, undefined, visitor);
+			const result = convertToMarkdown(NESTED_HTML, undefined);
 
 			expect(result).toBeTruthy();
 			expect(result).toBeTruthy();
@@ -265,7 +272,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(COMPLEX_HTML, undefined, visitor);
+			const result = convertToMarkdown(COMPLEX_HTML, undefined);
 
 			expect(result).toBeTruthy();
 			expect(result).toBeTruthy();
@@ -286,7 +293,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(COMPLEX_HTML, undefined, visitor);
+			const result = convertToMarkdown(COMPLEX_HTML, undefined);
 
 			expect(result).toBeTruthy();
 			expect(result).toBeTruthy();
@@ -306,7 +313,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(BASIC_HTML, options, visitor);
+			const result = convertToMarkdown(BASIC_HTML, options);
 
 			expect(result).toBeTruthy();
 			expect(result).toContain("# Hello");
@@ -324,7 +331,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(COMPLEX_HTML, options, visitor);
+			const result = convertToMarkdown(COMPLEX_HTML, options);
 
 			expect(result).toBeTruthy();
 		});
@@ -336,7 +343,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(BASIC_HTML, null, visitor);
+			const result = convertToMarkdown(BASIC_HTML, null);
 
 			expect(result).toBeTruthy();
 		});
@@ -348,7 +355,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(BASIC_HTML, undefined, visitor);
+			const result = convertToMarkdown(BASIC_HTML, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -364,7 +371,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 			};
 
 			try {
-				await convertWithVisitor(BASIC_HTML, undefined, visitor);
+				convertToMarkdown(BASIC_HTML, undefined);
 			} catch (error) {
 				expect(error).toBeInstanceOf(Error);
 			}
@@ -377,7 +384,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(BASIC_HTML, undefined, visitor);
+			const result = convertToMarkdown(BASIC_HTML, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -390,7 +397,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(BASIC_HTML, undefined, visitor);
+			const result = convertToMarkdown(BASIC_HTML, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -404,7 +411,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(NESTED_HTML, undefined, visitor);
+			const result = convertToMarkdown(NESTED_HTML, undefined);
 
 			expect(result).toBeTruthy();
 			expect(result).toBeTruthy();
@@ -427,7 +434,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(NESTED_HTML, undefined, visitor);
+			const result = convertToMarkdown(NESTED_HTML, undefined);
 
 			expect(result).toBeTruthy();
 			expect(count1).toBeGreaterThan(0);
@@ -447,7 +454,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(NESTED_HTML, undefined, visitor);
+			const result = convertToMarkdown(NESTED_HTML, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -461,7 +468,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(BASIC_HTML, undefined, visitor);
+			const result = convertToMarkdown(BASIC_HTML, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -485,7 +492,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				<p>More text</p>
 			`;
 
-			const result = await convertWithVisitor(complexHtml, undefined, visitor);
+			const result = convertToMarkdown(complexHtml, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -493,7 +500,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 		it("should handle visitor with empty object", async () => {
 			const visitor = {};
 
-			const result = await convertWithVisitor(BASIC_HTML, undefined, visitor);
+			const result = convertToMarkdown(BASIC_HTML, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -507,7 +514,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(BASIC_HTML, undefined, visitor);
+			const result = convertToMarkdown(BASIC_HTML, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -519,7 +526,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(BASIC_HTML, undefined, visitor);
+			const result = convertToMarkdown(BASIC_HTML, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -531,7 +538,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(BASIC_HTML, undefined, visitor);
+			const result = convertToMarkdown(BASIC_HTML, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -548,7 +555,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(NESTED_HTML, undefined, visitor);
+			const result = convertToMarkdown(NESTED_HTML, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -560,7 +567,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(COMPLEX_HTML, undefined, visitor);
+			const result = convertToMarkdown(COMPLEX_HTML, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -583,7 +590,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(HTML_WITH_BREAKS, undefined, visitor);
+			const result = convertToMarkdown(HTML_WITH_BREAKS, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -598,7 +605,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(HTML_WITH_BREAKS, undefined, visitor);
+			const result = convertToMarkdown(HTML_WITH_BREAKS, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -615,7 +622,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(BASIC_HTML, undefined, visitor);
+			const result = convertToMarkdown(BASIC_HTML, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -628,7 +635,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(BASIC_HTML, undefined, visitor);
+			const result = convertToMarkdown(BASIC_HTML, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -642,7 +649,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(BASIC_HTML, undefined, visitor);
+			const result = convertToMarkdown(BASIC_HTML, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -667,7 +674,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(SPECIAL_HTML, undefined, visitor);
+			const result = convertToMarkdown(SPECIAL_HTML, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -679,7 +686,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(SPECIAL_HTML, undefined, visitor);
+			const result = convertToMarkdown(SPECIAL_HTML, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -697,7 +704,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(SPECIAL_HTML, undefined, visitor);
+			const result = convertToMarkdown(SPECIAL_HTML, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -711,7 +718,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor("", undefined, visitor);
+			const result = convertToMarkdown("", undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -723,7 +730,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor("   \n  \t  ", undefined, visitor);
+			const result = convertToMarkdown("   \n  \t  ", undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -737,7 +744,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(deepHtml, undefined, visitor);
+			const result = convertToMarkdown(deepHtml, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -751,7 +758,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(largeHtml, undefined, visitor);
+			const result = convertToMarkdown(largeHtml, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -770,7 +777,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(specialHtml, undefined, visitor);
+			const result = convertToMarkdown(specialHtml, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -788,7 +795,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				},
 			};
 
-			const result = await convertWithVisitor(unicodeHtml, undefined, visitor);
+			const result = convertToMarkdown(unicodeHtml, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -805,7 +812,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 			};
 
 			const startTime = Date.now();
-			const result = await convertWithVisitor(textHtml, undefined, visitor);
+			const result = convertToMarkdown(textHtml, undefined);
 			const duration = Date.now() - startTime;
 
 			expect(result).toBeTruthy();
@@ -822,7 +829,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 			};
 
 			const startTime = Date.now();
-			const result = await convertWithVisitor(manyElementsHtml, undefined, visitor);
+			const result = convertToMarkdown(manyElementsHtml, undefined);
 			const duration = Date.now() - startTime;
 
 			expect(result).toBeTruthy();
@@ -846,7 +853,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				</div>
 			`;
 
-			const result = await convertWithVisitor(orderedHtml, undefined, visitor);
+			const result = convertToMarkdown(orderedHtml, undefined);
 
 			expect(result).toBeTruthy();
 		});
@@ -869,7 +876,7 @@ describe("html-to-markdown async visitor (TypeScript)", () => {
 				</ul>
 			`;
 
-			const result = await convertWithVisitor(listHtml, undefined, visitor);
+			const result = convertToMarkdown(listHtml, undefined);
 
 			expect(result).toBeTruthy();
 		});
