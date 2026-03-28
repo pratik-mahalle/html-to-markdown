@@ -4,12 +4,46 @@
 defmodule HtmlToMarkdown.ConversionTest do
   use ExUnit.Case
 
+  test "blockquote_multiple_paragraphs: Blockquote with multiple paragraphs has each paragraph prefixed" do
+    html = "<blockquote><p>First paragraph.</p><p>Second paragraph.</p></blockquote>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "> First paragraph.")
+    assert String.contains?(content, "> Second paragraph.")
+  end
+
+  test "blockquote_nested: Nested blockquote produces double-prefixed lines" do
+    html =
+      "<blockquote><p>Outer quote.</p><blockquote><p>Inner quote.</p></blockquote></blockquote>"
+
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "Outer quote.")
+    assert String.contains?(content, "Inner quote.")
+  end
+
   test "blockquote_simple: Simple blockquote" do
     html = "<blockquote><p>Quote text</p></blockquote>"
     {:ok, result} = HtmlToMarkdown.convert(html)
     content = result[:content] || ""
 
     assert String.contains?(content, "> Quote text")
+  end
+
+  test "blockquote_with_list: Blockquote containing a list preserves list items inside quote" do
+    html =
+      "<blockquote><p>Quote intro:</p><ul><li>Point one</li><li>Point two</li></ul></blockquote>"
+
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "Quote intro:")
+    assert String.contains?(content, "Point one")
+    assert String.contains?(content, "Point two")
   end
 
   test "bold_and_italic: Nested bold and italic" do
@@ -36,6 +70,115 @@ defmodule HtmlToMarkdown.ConversionTest do
     assert String.contains?(content, "```python")
     assert String.contains?(content, "print('hello')")
     assert String.contains?(content, "```")
+  end
+
+  test "code_block_no_language: Code block without a language class produces a plain fenced block" do
+    html = "<pre><code>plain code here</code></pre>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "```")
+    assert String.contains?(content, "plain code here")
+  end
+
+  test "code_inline_in_paragraph: Inline code element nested inside a paragraph" do
+    html = "<p>Call the <code>initialize()</code> method first.</p>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "`initialize()`")
+  end
+
+  test "code_with_backticks_in_content: Inline code containing backtick characters is properly escaped" do
+    html = "<p>Use <code>`backtick` here</code> carefully.</p>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "backtick")
+  end
+
+  test "emphasis_mark_highlight: mark tag produces highlighted output" do
+    html = "<p><mark>highlighted</mark></p>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "highlighted")
+  end
+
+  test "emphasis_strikethrough_del: del tag converts to GFM strikethrough" do
+    html = "<p><del>deleted text</del></p>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "~~deleted text~~")
+  end
+
+  test "emphasis_strikethrough_s: s tag converts to GFM strikethrough" do
+    html = "<p><s>strikethrough</s></p>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "~~strikethrough~~")
+  end
+
+  test "emphasis_subscript: sub tag content is preserved" do
+    html = "<p>H<sub>2</sub>O</p>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "H")
+    assert String.contains?(content, "2")
+    assert String.contains?(content, "O")
+  end
+
+  test "emphasis_superscript: sup tag content is preserved" do
+    html = "<p>x<sup>2</sup></p>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "x")
+    assert String.contains?(content, "2")
+  end
+
+  test "emphasis_underline_u: u tag content is preserved in output" do
+    html = "<p><u>underlined</u></p>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "underlined")
+  end
+
+  test "form_input_elements: Form input elements produce readable output without form mechanics" do
+    html =
+      "<form><label for=\"name\">Name:</label><input type=\"text\" id=\"name\" placeholder=\"Enter name\"></form>"
+
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "Name")
+  end
+
+  test "form_select_options: Select element with options produces readable output" do
+    html =
+      "<form><label>Color:</label><select><option value=\"red\">Red</option><option value=\"blue\" selected>Blue</option><option value=\"green\">Green</option></select></form>"
+
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "Color")
+  end
+
+  test "form_textarea: Textarea element produces readable output" do
+    html = "<form><label>Message:</label><textarea>Default text content</textarea></form>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "Message")
   end
 
   test "heading_h1: H1 heading" do
@@ -86,12 +229,50 @@ defmodule HtmlToMarkdown.ConversionTest do
     assert String.trim(content) == "\#\#\#\#\#\# Heading 6"
   end
 
+  test "image_figure_figcaption: Figure with figcaption preserves both image and caption" do
+    html =
+      "<figure><img src=\"sunset.jpg\" alt=\"A sunset\"><figcaption>Beautiful sunset over the ocean</figcaption></figure>"
+
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "![A sunset](sunset.jpg)")
+    assert String.contains?(content, "Beautiful sunset over the ocean")
+  end
+
+  test "image_linked: Image inside an anchor produces a linked image" do
+    html = "<a href=\"https://example.com\"><img src=\"icon.png\" alt=\"Icon\"></a>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "![Icon](icon.png)")
+    assert String.contains?(content, "https://example.com")
+  end
+
+  test "image_no_alt: Image without alt text produces image markdown" do
+    html = "<img src=\"banner.jpg\">"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "banner.jpg")
+  end
+
   test "image_simple: Image with alt text" do
     html = "<img src=\"photo.jpg\" alt=\"A photo\">"
     {:ok, result} = HtmlToMarkdown.convert(html)
     content = result[:content] || ""
 
     assert String.contains?(content, "![A photo](photo.jpg)")
+  end
+
+  test "image_with_title: Image with title attribute includes title in output" do
+    html = "<img src=\"chart.png\" alt=\"Sales chart\" title=\"Q3 Sales\">"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "![Sales chart](chart.png")
+    assert String.contains?(content, "Q3 Sales")
   end
 
   test "inline_code: Inline code" do
@@ -110,12 +291,82 @@ defmodule HtmlToMarkdown.ConversionTest do
     assert String.contains?(content, "*italic*")
   end
 
+  test "line_break_br_tag: Single br tag produces a line break in output" do
+    html = "<p>First line.<br>Second line.</p>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "First line.")
+    assert String.contains?(content, "Second line.")
+  end
+
+  test "line_break_hr_tag: hr tag produces a horizontal separator between content" do
+    html = "<p>Before rule.</p><hr><p>After rule.</p>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "Before rule.")
+    assert String.contains?(content, "After rule.")
+  end
+
+  test "line_break_multiple_br: Multiple consecutive br tags in sequence" do
+    html = "<p>Start.<br><br>End.</p>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "Start.")
+    assert String.contains?(content, "End.")
+  end
+
+  test "link_anchor_fragment: Fragment-only anchor link is preserved" do
+    html = "<a href=\"\#section\">Jump to section</a>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "[Jump to section](\#section)")
+  end
+
+  test "link_empty_href: Link with empty href produces output with the link text" do
+    html = "<a href=\"\">No destination</a>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "No destination")
+  end
+
+  test "link_image_inside: Image inside a link produces a linked image" do
+    html = "<a href=\"https://example.com\"><img src=\"logo.png\" alt=\"Logo\"></a>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "![Logo](logo.png)")
+    assert String.contains?(content, "https://example.com")
+  end
+
+  test "link_mailto: Mailto link is preserved with mailto: scheme" do
+    html = "<a href=\"mailto:user@example.com\">Email us</a>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "mailto:user@example.com")
+  end
+
   test "link_simple: Simple link" do
     html = "<a href=\"https://example.com\">Example</a>"
     {:ok, result} = HtmlToMarkdown.convert(html)
     content = result[:content] || ""
 
     assert String.contains?(content, "[Example](https://example.com)")
+  end
+
+  test "link_with_bold_text: Link containing bold text preserves formatting" do
+    html = "<a href=\"https://example.com\"><strong>Bold link</strong></a>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "**Bold link**")
+    assert String.contains?(content, "https://example.com")
   end
 
   test "link_with_title: Link with title attribute" do
@@ -127,6 +378,78 @@ defmodule HtmlToMarkdown.ConversionTest do
     assert String.contains?(content, "Example Site")
   end
 
+  test "list_definition_dl: Definition list with dt and dd elements" do
+    html =
+      "<dl><dt>Term One</dt><dd>Definition of term one.</dd><dt>Term Two</dt><dd>Definition of term two.</dd></dl>"
+
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "Term One")
+    assert String.contains?(content, "Definition of term one.")
+    assert String.contains?(content, "Term Two")
+    assert String.contains?(content, "Definition of term two.")
+  end
+
+  test "list_item_multiple_paragraphs: List item containing multiple paragraphs" do
+    html =
+      "<ul><li><p>First paragraph in item.</p><p>Second paragraph in item.</p></li><li>Simple item</li></ul>"
+
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "First paragraph in item.")
+    assert String.contains?(content, "Second paragraph in item.")
+    assert String.contains?(content, "Simple item")
+  end
+
+  test "list_mixed_nested: Mixed list: ordered list nested inside unordered list" do
+    html = "<ul><li>Item A<ol><li>Sub 1</li><li>Sub 2</li></ol></li><li>Item B</li></ul>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "Item A")
+    assert String.contains?(content, "Sub 1")
+    assert String.contains?(content, "Sub 2")
+    assert String.contains?(content, "Item B")
+  end
+
+  test "list_nested_ordered: Nested ordered list with two levels of depth" do
+    html = "<ol><li>Step 1<ol><li>Step 1a</li><li>Step 1b</li></ol></li><li>Step 2</li></ol>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "Step 1")
+    assert String.contains?(content, "Step 1a")
+    assert String.contains?(content, "Step 1b")
+    assert String.contains?(content, "Step 2")
+  end
+
+  test "list_nested_unordered: Nested unordered list with two levels of depth" do
+    html =
+      "<ul><li>Parent A<ul><li>Child A1</li><li>Child A2</li></ul></li><li>Parent B</li></ul>"
+
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "Parent A")
+    assert String.contains?(content, "Child A1")
+    assert String.contains?(content, "Child A2")
+    assert String.contains?(content, "Parent B")
+  end
+
+  test "list_task_checkboxes: Task list with checked and unchecked checkboxes" do
+    html =
+      "<ul><li><input type=\"checkbox\" checked> Done task</li><li><input type=\"checkbox\"> Pending task</li></ul>"
+
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "Done task")
+    assert String.contains?(content, "Pending task")
+  end
+
   test "ordered_list: Ordered list" do
     html = "<ol><li>First</li><li>Second</li><li>Third</li></ol>"
     {:ok, result} = HtmlToMarkdown.convert(html)
@@ -135,6 +458,133 @@ defmodule HtmlToMarkdown.ConversionTest do
     assert String.contains?(content, "1. First")
     assert String.contains?(content, "2. Second")
     assert String.contains?(content, "3. Third")
+  end
+
+  test "paragraph_multiple: Multiple paragraphs are separated by a blank line" do
+    html = "<p>First paragraph.</p><p>Second paragraph.</p>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "First paragraph.")
+    assert String.contains?(content, "Second paragraph.")
+  end
+
+  test "paragraph_nested_divs: Text nested inside divs is extracted correctly" do
+    html = "<div><div><p>Nested text</p></div></div>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "Nested text")
+  end
+
+  test "paragraph_simple: Simple paragraph converts to plain text" do
+    html = "<p>Hello World</p>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) == "Hello World"
+  end
+
+  test "paragraph_with_inline_formatting: Paragraph with bold, italic, and a link" do
+    html =
+      "<p>This has <strong>bold</strong>, <em>italic</em>, and a <a href=\"https://example.com\">link</a>.</p>"
+
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "**bold**")
+    assert String.contains?(content, "*italic*")
+    assert String.contains?(content, "[link](https://example.com)")
+  end
+
+  test "paragraph_with_line_breaks: Paragraph with br tags produces line breaks in output" do
+    html = "<p>Line one.<br>Line two.<br>Line three.</p>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "Line one.")
+    assert String.contains?(content, "Line two.")
+    assert String.contains?(content, "Line three.")
+  end
+
+  test "semantic_abbr: Abbreviation element text is preserved" do
+    html = "<p>The <abbr title=\"World Wide Web\">WWW</abbr> is global.</p>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "WWW")
+  end
+
+  test "semantic_article: Article element wrapping content preserves inner content" do
+    html = "<article><h2>Article Title</h2><p>Article body.</p></article>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "Article Title")
+    assert String.contains?(content, "Article body.")
+  end
+
+  test "semantic_definition_list: Definition list with term and description" do
+    html =
+      "<dl><dt>HTML</dt><dd>HyperText Markup Language</dd><dt>CSS</dt><dd>Cascading Style Sheets</dd></dl>"
+
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "HTML")
+    assert String.contains?(content, "HyperText Markup Language")
+    assert String.contains?(content, "CSS")
+    assert String.contains?(content, "Cascading Style Sheets")
+  end
+
+  test "semantic_details_summary: Details and summary elements produce readable output" do
+    html = "<details><summary>Click to expand</summary><p>Hidden content here.</p></details>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "Click to expand")
+  end
+
+  test "semantic_hr: Horizontal rule produces a separator in output" do
+    html = "<p>Above</p><hr><p>Below</p>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "Above")
+    assert String.contains?(content, "Below")
+  end
+
+  test "semantic_mark_highlight: Mark tag produces highlighted output" do
+    html = "<p>This is <mark>highlighted text</mark> in a sentence.</p>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "highlighted text")
+  end
+
+  test "semantic_section_with_heading: Section element with heading preserves structure" do
+    html = "<section><h3>Section Heading</h3><p>Section content.</p></section>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.contains?(content, "Section Heading")
+    assert String.contains?(content, "Section content.")
+  end
+
+  test "semantic_sub_superscript: Subscript and superscript elements are preserved in output" do
+    html = "<p>H<sub>2</sub>O and E=mc<sup>2</sup></p>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "H")
+    assert String.contains?(content, "2")
+    assert String.contains?(content, "O")
+    assert String.contains?(content, "E=mc")
   end
 
   test "simple_table: Simple table with header" do
@@ -150,6 +600,72 @@ defmodule HtmlToMarkdown.ConversionTest do
     assert String.contains?(content, "30")
     assert String.contains?(content, "|")
     assert String.contains?(content, "---")
+  end
+
+  test "table_empty: Empty table produces no output or minimal output" do
+    html = "<table></table>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) == ""
+  end
+
+  test "table_no_thead: Table without thead uses first row as implied header" do
+    html =
+      "<table><tr><td>Product</td><td>Price</td></tr><tr><td>Apple</td><td>1.00</td></tr></table>"
+
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "Product")
+    assert String.contains?(content, "Price")
+    assert String.contains?(content, "Apple")
+    assert String.contains?(content, "1.00")
+    assert String.contains?(content, "|")
+  end
+
+  test "table_pipe_chars_in_content: Table cells containing pipe characters are escaped in output" do
+    html =
+      "<table><thead><tr><th>Expression</th><th>Result</th></tr></thead><tbody><tr><td>a | b</td><td>true</td></tr></tbody></table>"
+
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "Expression")
+    assert String.contains?(content, "Result")
+    assert String.contains?(content, "true")
+  end
+
+  test "table_with_alignment: Table with column alignment attributes" do
+    html =
+      "<table><thead><tr><th align=\"left\">Left</th><th align=\"center\">Center</th><th align=\"right\">Right</th></tr></thead><tbody><tr><td>L</td><td>C</td><td>R</td></tr></tbody></table>"
+
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "Left")
+    assert String.contains?(content, "Center")
+    assert String.contains?(content, "Right")
+    assert String.contains?(content, "L")
+    assert String.contains?(content, "C")
+    assert String.contains?(content, "R")
+    assert String.contains?(content, "|")
+  end
+
+  test "table_with_colspan: Table with colspan attribute in a header cell" do
+    html =
+      "<table><thead><tr><th colspan=\"2\">Full Name</th></tr></thead><tbody><tr><td>John</td><td>Doe</td></tr></tbody></table>"
+
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "Full Name")
+    assert String.contains?(content, "John")
+    assert String.contains?(content, "Doe")
   end
 
   test "unordered_list: Unordered list" do

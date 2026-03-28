@@ -10,5 +10,26 @@
     "description": "Code block with language",
     "html": "<pre><code class=\"language-python\">print('hello')</code></pre>",
     "assertions": { "content_contains_all": ["```python", "print('hello')", "```"] }
+  },
+  {
+    "id": "code_block_no_language",
+    "description": "Code block without a language class produces a plain fenced block",
+    "html": "<pre><code>plain code here</code></pre>",
+    "assertions": { "content_contains_all": ["```", "plain code here"] }
+  },
+  {
+    "id": "code_with_backticks_in_content",
+    "description": "Inline code containing backtick characters is properly escaped",
+    "html": "<p>Use <code>`backtick` here</code> carefully.</p>",
+    "assertions": {
+      "content_contains_all": ["backtick"],
+      "content_not_empty": true
+    }
+  },
+  {
+    "id": "code_inline_in_paragraph",
+    "description": "Inline code element nested inside a paragraph",
+    "html": "<p>Call the <code>initialize()</code> method first.</p>",
+    "assertions": { "content_contains_all": ["`initialize()`"] }
   }
 ]

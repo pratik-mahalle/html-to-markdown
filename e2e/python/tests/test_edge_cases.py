@@ -15,6 +15,147 @@ def test_empty_html() -> None:
     assert content.strip() == ""
 
 
+def test_encoding_cjk_characters() -> None:
+    """CJK (Chinese, Japanese, Korean) characters are preserved."""
+    html = "<p>中文内容</p><p>日本語テキスト</p><p>한국어 텍스트</p>"
+    result = convert(html)
+    content = result if isinstance(result, str) else (result.get("content") or "")
+
+    assert content.strip() != "", "expected non-empty content"
+    assert "中文内容" in content
+    assert "日本語テキスト" in content
+    assert "한국어 텍스트" in content
+
+
+def test_encoding_html_entities() -> None:
+    """Common HTML entities are decoded in output."""
+    html = "<p>&amp; &lt; &gt; &nbsp; &quot; &apos;</p>"
+    result = convert(html)
+    content = result if isinstance(result, str) else (result.get("content") or "")
+
+    assert content.strip() != "", "expected non-empty content"
+    assert "&" in content
+    assert "<" in content
+    assert ">" in content
+
+
+def test_encoding_named_entities() -> None:
+    """Named HTML entities like &mdash; and &hellip; are decoded."""
+    html = "<p>Em dash&mdash;used for parenthetical remarks&mdash;is common. Ellipsis&hellip; indicates omission. Non-breaking&nbsp;space.</p>"
+    result = convert(html)
+    content = result if isinstance(result, str) else (result.get("content") or "")
+
+    assert content.strip() != "", "expected non-empty content"
+    assert "—" in content
+    assert "…" in content
+
+
+def test_encoding_numeric_entities() -> None:
+    """Numeric HTML entities (decimal and hex) are decoded."""
+    html = "<p>Copyright: &#169; Trade: &#174; Euro: &#8364; Hex: &#x00A9;</p>"
+    result = convert(html)
+    content = result if isinstance(result, str) else (result.get("content") or "")
+
+    assert content.strip() != "", "expected non-empty content"
+    assert "©" in content
+    assert "®" in content
+    assert "€" in content
+
+
+def test_encoding_unicode_emoji() -> None:
+    """Emoji and Unicode characters are preserved."""
+    html = "<p>Hello 🌍 World 🚀</p><p>Stars: ⭐ ✨</p>"
+    result = convert(html)
+    content = result if isinstance(result, str) else (result.get("content") or "")
+
+    assert content.strip() != "", "expected non-empty content"
+    assert "🌍" in content
+    assert "🚀" in content
+    assert "⭐" in content
+
+
+def test_html_comments_only() -> None:
+    """Document containing only HTML comments produces empty output."""
+    html = "<!-- This is a comment --><!-- Another comment -->"
+    result = convert(html)
+    content = result if isinstance(result, str) else (result.get("content") or "")
+
+    assert content.strip() == ""
+
+
+def test_just_whitespace_input() -> None:
+    """Input that is only whitespace characters (spaces, tabs, newlines) produces empty output."""
+    html = "   "
+    result = convert(html)
+    content = result if isinstance(result, str) else (result.get("content") or "")
+
+    assert content.strip() == ""
+
+
+def test_malformed_deeply_nested_elements() -> None:
+    """Deeply nested elements (100 levels) are handled without stack overflow."""
+    html = "<div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><p>Deeply nested content</p></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div>"
+    result = convert(html)
+    content = result if isinstance(result, str) else (result.get("content") or "")
+
+    assert content.strip() != "", "expected non-empty content"
+    assert "Deeply nested content" in content
+
+
+def test_malformed_missing_block_closing_tags() -> None:
+    """Missing closing tags on block elements are auto-closed by parser."""
+    html = "<div><h1>Title<p>First paragraph<p>Second paragraph</div>"
+    result = convert(html)
+    content = result if isinstance(result, str) else (result.get("content") or "")
+
+    assert content.strip() != "", "expected non-empty content"
+    assert "Title" in content
+    assert "First paragraph" in content
+    assert "Second paragraph" in content
+
+
+def test_malformed_overlapping_tags() -> None:
+    """Overlapping bold/italic tags are recovered by the HTML parser without panic."""
+    html = "<p><b><i>bold and italic</b></i></p>"
+    result = convert(html)
+    content = result if isinstance(result, str) else (result.get("content") or "")
+
+    assert content.strip() != "", "expected non-empty content"
+    assert "bold and italic" in content
+
+
+def test_malformed_unclosed_paragraph() -> None:
+    """Unclosed <p> tag is recovered gracefully and content is preserved."""
+    html = "<p>This paragraph is never closed"
+    result = convert(html)
+    content = result if isinstance(result, str) else (result.get("content") or "")
+
+    assert content.strip() != "", "expected non-empty content"
+    assert "This paragraph is never closed" in content
+
+
+def test_script_tags_only() -> None:
+    """Document with only script tags produces empty output (scripts are stripped)."""
+    html = (
+        "<html><head><script>alert('xss')</script></head><body><script>document.write('hello')</script></body></html>"
+    )
+    result = convert(html)
+    content = result if isinstance(result, str) else (result.get("content") or "")
+
+    assert content.strip() == ""
+
+
+def test_style_tags_only() -> None:
+    """Document with only style tags produces empty output (styles are stripped)."""
+    html = (
+        "<html><head><style>body { color: red; }</style></head><body><style>.foo { margin: 0; }</style></body></html>"
+    )
+    result = convert(html)
+    content = result if isinstance(result, str) else (result.get("content") or "")
+
+    assert content.strip() == ""
+
+
 def test_whitespace_only() -> None:
     """Whitespace-only content."""
     html = "<p>   </p>"
@@ -22,3 +163,57 @@ def test_whitespace_only() -> None:
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() == ""
+
+
+def test_xss_javascript_url_blocked() -> None:
+    """javascript: URLs in href attributes are blocked and not included in output."""
+    html = "<p><a href=\"javascript:alert('xss')\">Click me</a></p>"
+    result = convert(html)
+    content = result if isinstance(result, str) else (result.get("content") or "")
+
+    assert content.strip() != "", "expected non-empty content"
+    assert "Click me" in content
+    assert "javascript:" not in content
+    assert "alert(" not in content
+
+
+def test_xss_onclick_handler_removed() -> None:
+    """Onclick and other on* event handlers are removed from elements."""
+    html = '<p><a href="https://example.com" onclick="alert(\'xss\')">Click me</a></p><button onmouseover="steal_data()">Hover me</button>'
+    result = convert(html)
+    content = result if isinstance(result, str) else (result.get("content") or "")
+
+    assert content.strip() != "", "expected non-empty content"
+    assert "Click me" in content
+    assert "onclick" not in content
+    assert "onmouseover" not in content
+    assert "alert(" not in content
+    assert "steal_data" not in content
+
+
+def test_xss_script_tag_stripped() -> None:
+    """Script tag content is stripped and does not appear in output."""
+    html = "<p>Safe content.</p><script>alert('xss')</script><p>More safe content.</p>"
+    result = convert(html)
+    content = result if isinstance(result, str) else (result.get("content") or "")
+
+    assert content.strip() != "", "expected non-empty content"
+    assert "Safe content" in content
+    assert "More safe content" in content
+    assert "<script>" not in content
+    assert "alert(" not in content
+    assert "xss" not in content
+
+
+def test_xss_svg_nested_script_stripped() -> None:
+    """Script tags nested inside SVG are stripped."""
+    html = "<p>Before SVG.</p><svg xmlns=\"http://www.w3.org/2000/svg\"><script>alert('svg-xss')</script><text>SVG text</text></svg><p>After SVG.</p>"
+    result = convert(html)
+    content = result if isinstance(result, str) else (result.get("content") or "")
+
+    assert content.strip() != "", "expected non-empty content"
+    assert "Before SVG" in content
+    assert "After SVG" in content
+    assert "<script>" not in content
+    assert "alert(" not in content
+    assert "svg-xss" not in content

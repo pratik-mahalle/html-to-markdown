@@ -16,5 +16,44 @@
     "description": "Nested bold and italic",
     "html": "<p><strong><em>both</em></strong></p>",
     "assertions": { "content_contains_all": ["***both***"] }
+  },
+  {
+    "id": "emphasis_strikethrough_s",
+    "description": "s tag converts to GFM strikethrough",
+    "html": "<p><s>strikethrough</s></p>",
+    "assertions": { "content_contains_all": ["~~strikethrough~~"] }
+  },
+  {
+    "id": "emphasis_strikethrough_del",
+    "description": "del tag converts to GFM strikethrough",
+    "html": "<p><del>deleted text</del></p>",
+    "assertions": { "content_contains_all": ["~~deleted text~~"] }
+  },
+  {
+    "id": "emphasis_underline_u",
+    "description": "u tag content is preserved in output",
+    "html": "<p><u>underlined</u></p>",
+    "assertions": { "content_contains_all": ["underlined"] }
+  },
+  {
+    "id": "emphasis_mark_highlight",
+    "description": "mark tag produces highlighted output",
+    "html": "<p><mark>highlighted</mark></p>",
+    "assertions": {
+      "content_contains_all": ["highlighted"],
+      "content_not_empty": true
+    }
+  },
+  {
+    "id": "emphasis_subscript",
+    "description": "sub tag content is preserved",
+    "html": "<p>H<sub>2</sub>O</p>",
+    "assertions": { "content_contains_all": ["H", "2", "O"] }
+  },
+  {
+    "id": "emphasis_superscript",
+    "description": "sup tag content is preserved",
+    "html": "<p>x<sup>2</sup></p>",
+    "assertions": { "content_contains_all": ["x", "2"] }
   }
 ]

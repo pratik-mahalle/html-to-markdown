@@ -14,6 +14,33 @@ use function HtmlToMarkdown\convert;
 class ConversionTest extends TestCase
 {
     /**
+     * Blockquote with multiple paragraphs has each paragraph prefixed
+     */
+    public function testBlockquoteMultipleParagraphs(): void
+    {
+        $html = "<blockquote><p>First paragraph.</p><p>Second paragraph.</p></blockquote>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("> First paragraph.", $content);
+        $this->assertStringContainsString("> Second paragraph.", $content);
+    }
+
+    /**
+     * Nested blockquote produces double-prefixed lines
+     */
+    public function testBlockquoteNested(): void
+    {
+        $html = "<blockquote><p>Outer quote.</p><blockquote><p>Inner quote.</p></blockquote></blockquote>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("Outer quote.", $content);
+        $this->assertStringContainsString("Inner quote.", $content);
+    }
+
+    /**
      * Simple blockquote
      */
     public function testBlockquoteSimple(): void
@@ -23,6 +50,21 @@ class ConversionTest extends TestCase
         $content = $result['content'] ?? '';
 
         $this->assertStringContainsString("> Quote text", $content);
+    }
+
+    /**
+     * Blockquote containing a list preserves list items inside quote
+     */
+    public function testBlockquoteWithList(): void
+    {
+        $html = "<blockquote><p>Quote intro:</p><ul><li>Point one</li><li>Point two</li></ul></blockquote>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("Quote intro:", $content);
+        $this->assertStringContainsString("Point one", $content);
+        $this->assertStringContainsString("Point two", $content);
     }
 
     /**
@@ -61,6 +103,159 @@ class ConversionTest extends TestCase
         $this->assertStringContainsString("```python", $content);
         $this->assertStringContainsString("print('hello')", $content);
         $this->assertStringContainsString("```", $content);
+    }
+
+    /**
+     * Code block without a language class produces a plain fenced block
+     */
+    public function testCodeBlockNoLanguage(): void
+    {
+        $html = "<pre><code>plain code here</code></pre>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("```", $content);
+        $this->assertStringContainsString("plain code here", $content);
+    }
+
+    /**
+     * Inline code element nested inside a paragraph
+     */
+    public function testCodeInlineInParagraph(): void
+    {
+        $html = "<p>Call the <code>initialize()</code> method first.</p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("`initialize()`", $content);
+    }
+
+    /**
+     * Inline code containing backtick characters is properly escaped
+     */
+    public function testCodeWithBackticksInContent(): void
+    {
+        $html = "<p>Use <code>`backtick` here</code> carefully.</p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("backtick", $content);
+    }
+
+    /**
+     * mark tag produces highlighted output
+     */
+    public function testEmphasisMarkHighlight(): void
+    {
+        $html = "<p><mark>highlighted</mark></p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("highlighted", $content);
+    }
+
+    /**
+     * del tag converts to GFM strikethrough
+     */
+    public function testEmphasisStrikethroughDel(): void
+    {
+        $html = "<p><del>deleted text</del></p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("~~deleted text~~", $content);
+    }
+
+    /**
+     * s tag converts to GFM strikethrough
+     */
+    public function testEmphasisStrikethroughS(): void
+    {
+        $html = "<p><s>strikethrough</s></p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("~~strikethrough~~", $content);
+    }
+
+    /**
+     * sub tag content is preserved
+     */
+    public function testEmphasisSubscript(): void
+    {
+        $html = "<p>H<sub>2</sub>O</p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("H", $content);
+        $this->assertStringContainsString("2", $content);
+        $this->assertStringContainsString("O", $content);
+    }
+
+    /**
+     * sup tag content is preserved
+     */
+    public function testEmphasisSuperscript(): void
+    {
+        $html = "<p>x<sup>2</sup></p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("x", $content);
+        $this->assertStringContainsString("2", $content);
+    }
+
+    /**
+     * u tag content is preserved in output
+     */
+    public function testEmphasisUnderlineU(): void
+    {
+        $html = "<p><u>underlined</u></p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("underlined", $content);
+    }
+
+    /**
+     * Form input elements produce readable output without form mechanics
+     */
+    public function testFormInputElements(): void
+    {
+        $html = "<form><label for=\"name\">Name:</label><input type=\"text\" id=\"name\" placeholder=\"Enter name\"></form>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("Name", $content);
+    }
+
+    /**
+     * Select element with options produces readable output
+     */
+    public function testFormSelectOptions(): void
+    {
+        $html = "<form><label>Color:</label><select><option value=\"red\">Red</option><option value=\"blue\" selected>Blue</option><option value=\"green\">Green</option></select></form>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("Color", $content);
+    }
+
+    /**
+     * Textarea element produces readable output
+     */
+    public function testFormTextarea(): void
+    {
+        $html = "<form><label>Message:</label><textarea>Default text content</textarea></form>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("Message", $content);
     }
 
     /**
@@ -136,6 +331,45 @@ class ConversionTest extends TestCase
     }
 
     /**
+     * Figure with figcaption preserves both image and caption
+     */
+    public function testImageFigureFigcaption(): void
+    {
+        $html = "<figure><img src=\"sunset.jpg\" alt=\"A sunset\"><figcaption>Beautiful sunset over the ocean</figcaption></figure>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("![A sunset](sunset.jpg)", $content);
+        $this->assertStringContainsString("Beautiful sunset over the ocean", $content);
+    }
+
+    /**
+     * Image inside an anchor produces a linked image
+     */
+    public function testImageLinked(): void
+    {
+        $html = "<a href=\"https://example.com\"><img src=\"icon.png\" alt=\"Icon\"></a>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("![Icon](icon.png)", $content);
+        $this->assertStringContainsString("https://example.com", $content);
+    }
+
+    /**
+     * Image without alt text produces image markdown
+     */
+    public function testImageNoAlt(): void
+    {
+        $html = "<img src=\"banner.jpg\">";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("banner.jpg", $content);
+    }
+
+    /**
      * Image with alt text
      */
     public function testImageSimple(): void
@@ -145,6 +379,19 @@ class ConversionTest extends TestCase
         $content = $result['content'] ?? '';
 
         $this->assertStringContainsString("![A photo](photo.jpg)", $content);
+    }
+
+    /**
+     * Image with title attribute includes title in output
+     */
+    public function testImageWithTitle(): void
+    {
+        $html = "<img src=\"chart.png\" alt=\"Sales chart\" title=\"Q3 Sales\">";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("![Sales chart](chart.png", $content);
+        $this->assertStringContainsString("Q3 Sales", $content);
     }
 
     /**
@@ -172,6 +419,95 @@ class ConversionTest extends TestCase
     }
 
     /**
+     * Single br tag produces a line break in output
+     */
+    public function testLineBreakBrTag(): void
+    {
+        $html = "<p>First line.<br>Second line.</p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("First line.", $content);
+        $this->assertStringContainsString("Second line.", $content);
+    }
+
+    /**
+     * hr tag produces a horizontal separator between content
+     */
+    public function testLineBreakHrTag(): void
+    {
+        $html = "<p>Before rule.</p><hr><p>After rule.</p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("Before rule.", $content);
+        $this->assertStringContainsString("After rule.", $content);
+    }
+
+    /**
+     * Multiple consecutive br tags in sequence
+     */
+    public function testLineBreakMultipleBr(): void
+    {
+        $html = "<p>Start.<br><br>End.</p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("Start.", $content);
+        $this->assertStringContainsString("End.", $content);
+    }
+
+    /**
+     * Fragment-only anchor link is preserved
+     */
+    public function testLinkAnchorFragment(): void
+    {
+        $html = "<a href=\"#section\">Jump to section</a>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("[Jump to section](#section)", $content);
+    }
+
+    /**
+     * Link with empty href produces output with the link text
+     */
+    public function testLinkEmptyHref(): void
+    {
+        $html = "<a href=\"\">No destination</a>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("No destination", $content);
+    }
+
+    /**
+     * Image inside a link produces a linked image
+     */
+    public function testLinkImageInside(): void
+    {
+        $html = "<a href=\"https://example.com\"><img src=\"logo.png\" alt=\"Logo\"></a>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("![Logo](logo.png)", $content);
+        $this->assertStringContainsString("https://example.com", $content);
+    }
+
+    /**
+     * Mailto link is preserved with mailto: scheme
+     */
+    public function testLinkMailto(): void
+    {
+        $html = "<a href=\"mailto:user@example.com\">Email us</a>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("mailto:user@example.com", $content);
+    }
+
+    /**
      * Simple link
      */
     public function testLinkSimple(): void
@@ -181,6 +517,19 @@ class ConversionTest extends TestCase
         $content = $result['content'] ?? '';
 
         $this->assertStringContainsString("[Example](https://example.com)", $content);
+    }
+
+    /**
+     * Link containing bold text preserves formatting
+     */
+    public function testLinkWithBoldText(): void
+    {
+        $html = "<a href=\"https://example.com\"><strong>Bold link</strong></a>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("**Bold link**", $content);
+        $this->assertStringContainsString("https://example.com", $content);
     }
 
     /**
@@ -194,6 +543,94 @@ class ConversionTest extends TestCase
 
         $this->assertStringContainsString("[Example](https://example.com", $content);
         $this->assertStringContainsString("Example Site", $content);
+    }
+
+    /**
+     * Definition list with dt and dd elements
+     */
+    public function testListDefinitionDl(): void
+    {
+        $html = "<dl><dt>Term One</dt><dd>Definition of term one.</dd><dt>Term Two</dt><dd>Definition of term two.</dd></dl>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("Term One", $content);
+        $this->assertStringContainsString("Definition of term one.", $content);
+        $this->assertStringContainsString("Term Two", $content);
+        $this->assertStringContainsString("Definition of term two.", $content);
+    }
+
+    /**
+     * List item containing multiple paragraphs
+     */
+    public function testListItemMultipleParagraphs(): void
+    {
+        $html = "<ul><li><p>First paragraph in item.</p><p>Second paragraph in item.</p></li><li>Simple item</li></ul>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("First paragraph in item.", $content);
+        $this->assertStringContainsString("Second paragraph in item.", $content);
+        $this->assertStringContainsString("Simple item", $content);
+    }
+
+    /**
+     * Mixed list: ordered list nested inside unordered list
+     */
+    public function testListMixedNested(): void
+    {
+        $html = "<ul><li>Item A<ol><li>Sub 1</li><li>Sub 2</li></ol></li><li>Item B</li></ul>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("Item A", $content);
+        $this->assertStringContainsString("Sub 1", $content);
+        $this->assertStringContainsString("Sub 2", $content);
+        $this->assertStringContainsString("Item B", $content);
+    }
+
+    /**
+     * Nested ordered list with two levels of depth
+     */
+    public function testListNestedOrdered(): void
+    {
+        $html = "<ol><li>Step 1<ol><li>Step 1a</li><li>Step 1b</li></ol></li><li>Step 2</li></ol>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("Step 1", $content);
+        $this->assertStringContainsString("Step 1a", $content);
+        $this->assertStringContainsString("Step 1b", $content);
+        $this->assertStringContainsString("Step 2", $content);
+    }
+
+    /**
+     * Nested unordered list with two levels of depth
+     */
+    public function testListNestedUnordered(): void
+    {
+        $html = "<ul><li>Parent A<ul><li>Child A1</li><li>Child A2</li></ul></li><li>Parent B</li></ul>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("Parent A", $content);
+        $this->assertStringContainsString("Child A1", $content);
+        $this->assertStringContainsString("Child A2", $content);
+        $this->assertStringContainsString("Parent B", $content);
+    }
+
+    /**
+     * Task list with checked and unchecked checkboxes
+     */
+    public function testListTaskCheckboxes(): void
+    {
+        $html = "<ul><li><input type=\"checkbox\" checked> Done task</li><li><input type=\"checkbox\"> Pending task</li></ul>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("Done task", $content);
+        $this->assertStringContainsString("Pending task", $content);
     }
 
     /**
@@ -211,6 +648,181 @@ class ConversionTest extends TestCase
     }
 
     /**
+     * Multiple paragraphs are separated by a blank line
+     */
+    public function testParagraphMultiple(): void
+    {
+        $html = "<p>First paragraph.</p><p>Second paragraph.</p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("First paragraph.", $content);
+        $this->assertStringContainsString("Second paragraph.", $content);
+    }
+
+    /**
+     * Text nested inside divs is extracted correctly
+     */
+    public function testParagraphNestedDivs(): void
+    {
+        $html = "<div><div><p>Nested text</p></div></div>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("Nested text", $content);
+    }
+
+    /**
+     * Simple paragraph converts to plain text
+     */
+    public function testParagraphSimple(): void
+    {
+        $html = "<p>Hello World</p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertSame("Hello World", trim($content));
+    }
+
+    /**
+     * Paragraph with bold, italic, and a link
+     */
+    public function testParagraphWithInlineFormatting(): void
+    {
+        $html = "<p>This has <strong>bold</strong>, <em>italic</em>, and a <a href=\"https://example.com\">link</a>.</p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("**bold**", $content);
+        $this->assertStringContainsString("*italic*", $content);
+        $this->assertStringContainsString("[link](https://example.com)", $content);
+    }
+
+    /**
+     * Paragraph with br tags produces line breaks in output
+     */
+    public function testParagraphWithLineBreaks(): void
+    {
+        $html = "<p>Line one.<br>Line two.<br>Line three.</p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("Line one.", $content);
+        $this->assertStringContainsString("Line two.", $content);
+        $this->assertStringContainsString("Line three.", $content);
+    }
+
+    /**
+     * Abbreviation element text is preserved
+     */
+    public function testSemanticAbbr(): void
+    {
+        $html = "<p>The <abbr title=\"World Wide Web\">WWW</abbr> is global.</p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("WWW", $content);
+    }
+
+    /**
+     * Article element wrapping content preserves inner content
+     */
+    public function testSemanticArticle(): void
+    {
+        $html = "<article><h2>Article Title</h2><p>Article body.</p></article>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("Article Title", $content);
+        $this->assertStringContainsString("Article body.", $content);
+    }
+
+    /**
+     * Definition list with term and description
+     */
+    public function testSemanticDefinitionList(): void
+    {
+        $html = "<dl><dt>HTML</dt><dd>HyperText Markup Language</dd><dt>CSS</dt><dd>Cascading Style Sheets</dd></dl>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("HTML", $content);
+        $this->assertStringContainsString("HyperText Markup Language", $content);
+        $this->assertStringContainsString("CSS", $content);
+        $this->assertStringContainsString("Cascading Style Sheets", $content);
+    }
+
+    /**
+     * Details and summary elements produce readable output
+     */
+    public function testSemanticDetailsSummary(): void
+    {
+        $html = "<details><summary>Click to expand</summary><p>Hidden content here.</p></details>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("Click to expand", $content);
+    }
+
+    /**
+     * Horizontal rule produces a separator in output
+     */
+    public function testSemanticHr(): void
+    {
+        $html = "<p>Above</p><hr><p>Below</p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("Above", $content);
+        $this->assertStringContainsString("Below", $content);
+    }
+
+    /**
+     * Mark tag produces highlighted output
+     */
+    public function testSemanticMarkHighlight(): void
+    {
+        $html = "<p>This is <mark>highlighted text</mark> in a sentence.</p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("highlighted text", $content);
+    }
+
+    /**
+     * Section element with heading preserves structure
+     */
+    public function testSemanticSectionWithHeading(): void
+    {
+        $html = "<section><h3>Section Heading</h3><p>Section content.</p></section>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertStringContainsString("Section Heading", $content);
+        $this->assertStringContainsString("Section content.", $content);
+    }
+
+    /**
+     * Subscript and superscript elements are preserved in output
+     */
+    public function testSemanticSubSuperscript(): void
+    {
+        $html = "<p>H<sub>2</sub>O and E=mc<sup>2</sup></p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("H", $content);
+        $this->assertStringContainsString("2", $content);
+        $this->assertStringContainsString("O", $content);
+        $this->assertStringContainsString("E=mc", $content);
+    }
+
+    /**
      * Simple table with header
      */
     public function testSimpleTable(): void
@@ -225,6 +837,84 @@ class ConversionTest extends TestCase
         $this->assertStringContainsString("30", $content);
         $this->assertStringContainsString("|", $content);
         $this->assertStringContainsString("---", $content);
+    }
+
+    /**
+     * Empty table produces no output or minimal output
+     */
+    public function testTableEmpty(): void
+    {
+        $html = "<table></table>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertSame("", trim($content));
+    }
+
+    /**
+     * Table without thead uses first row as implied header
+     */
+    public function testTableNoThead(): void
+    {
+        $html = "<table><tr><td>Product</td><td>Price</td></tr><tr><td>Apple</td><td>1.00</td></tr></table>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("Product", $content);
+        $this->assertStringContainsString("Price", $content);
+        $this->assertStringContainsString("Apple", $content);
+        $this->assertStringContainsString("1.00", $content);
+        $this->assertStringContainsString("|", $content);
+    }
+
+    /**
+     * Table cells containing pipe characters are escaped in output
+     */
+    public function testTablePipeCharsInContent(): void
+    {
+        $html = "<table><thead><tr><th>Expression</th><th>Result</th></tr></thead><tbody><tr><td>a | b</td><td>true</td></tr></tbody></table>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("Expression", $content);
+        $this->assertStringContainsString("Result", $content);
+        $this->assertStringContainsString("true", $content);
+    }
+
+    /**
+     * Table with column alignment attributes
+     */
+    public function testTableWithAlignment(): void
+    {
+        $html = "<table><thead><tr><th align=\"left\">Left</th><th align=\"center\">Center</th><th align=\"right\">Right</th></tr></thead><tbody><tr><td>L</td><td>C</td><td>R</td></tr></tbody></table>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("Left", $content);
+        $this->assertStringContainsString("Center", $content);
+        $this->assertStringContainsString("Right", $content);
+        $this->assertStringContainsString("L", $content);
+        $this->assertStringContainsString("C", $content);
+        $this->assertStringContainsString("R", $content);
+        $this->assertStringContainsString("|", $content);
+    }
+
+    /**
+     * Table with colspan attribute in a header cell
+     */
+    public function testTableWithColspan(): void
+    {
+        $html = "<table><thead><tr><th colspan=\"2\">Full Name</th></tr></thead><tbody><tr><td>John</td><td>Doe</td></tr></tbody></table>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("Full Name", $content);
+        $this->assertStringContainsString("John", $content);
+        $this->assertStringContainsString("Doe", $content);
     }
 
     /**

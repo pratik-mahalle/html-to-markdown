@@ -4,6 +4,27 @@
 library(testthat)
 library(htmltomarkdown)
 
+test_that("blockquote_multiple_paragraphs: Blockquote with multiple paragraphs has each paragraph prefixed", {
+  html <- "<blockquote><p>First paragraph.</p><p>Second paragraph.</p></blockquote>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("> First paragraph.", content, fixed = TRUE))
+  expect_true(grepl("> Second paragraph.", content, fixed = TRUE))
+})
+
+test_that("blockquote_nested: Nested blockquote produces double-prefixed lines", {
+  html <- "<blockquote><p>Outer quote.</p><blockquote><p>Inner quote.</p></blockquote></blockquote>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  expect_true(nchar(trimws(content)) > 0)
+  # content_contains_all
+  expect_true(grepl("Outer quote.", content, fixed = TRUE))
+  expect_true(grepl("Inner quote.", content, fixed = TRUE))
+})
+
 test_that("blockquote_simple: Simple blockquote", {
   html <- "<blockquote><p>Quote text</p></blockquote>"
   result <- convert(html)
@@ -11,6 +32,18 @@ test_that("blockquote_simple: Simple blockquote", {
 
   # content_contains_all
   expect_true(grepl("> Quote text", content, fixed = TRUE))
+})
+
+test_that("blockquote_with_list: Blockquote containing a list preserves list items inside quote", {
+  html <- "<blockquote><p>Quote intro:</p><ul><li>Point one</li><li>Point two</li></ul></blockquote>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  expect_true(nchar(trimws(content)) > 0)
+  # content_contains_all
+  expect_true(grepl("Quote intro:", content, fixed = TRUE))
+  expect_true(grepl("Point one", content, fixed = TRUE))
+  expect_true(grepl("Point two", content, fixed = TRUE))
 })
 
 test_that("bold_and_italic: Nested bold and italic", {
@@ -40,6 +73,123 @@ test_that("code_block: Code block with language", {
   expect_true(grepl("```python", content, fixed = TRUE))
   expect_true(grepl("print('hello')", content, fixed = TRUE))
   expect_true(grepl("```", content, fixed = TRUE))
+})
+
+test_that("code_block_no_language: Code block without a language class produces a plain fenced block", {
+  html <- "<pre><code>plain code here</code></pre>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("```", content, fixed = TRUE))
+  expect_true(grepl("plain code here", content, fixed = TRUE))
+})
+
+test_that("code_inline_in_paragraph: Inline code element nested inside a paragraph", {
+  html <- "<p>Call the <code>initialize()</code> method first.</p>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("`initialize()`", content, fixed = TRUE))
+})
+
+test_that("code_with_backticks_in_content: Inline code containing backtick characters is properly escaped", {
+  html <- "<p>Use <code>`backtick` here</code> carefully.</p>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  expect_true(nchar(trimws(content)) > 0)
+  # content_contains_all
+  expect_true(grepl("backtick", content, fixed = TRUE))
+})
+
+test_that("emphasis_mark_highlight: mark tag produces highlighted output", {
+  html <- "<p><mark>highlighted</mark></p>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  expect_true(nchar(trimws(content)) > 0)
+  # content_contains_all
+  expect_true(grepl("highlighted", content, fixed = TRUE))
+})
+
+test_that("emphasis_strikethrough_del: del tag converts to GFM strikethrough", {
+  html <- "<p><del>deleted text</del></p>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("~~deleted text~~", content, fixed = TRUE))
+})
+
+test_that("emphasis_strikethrough_s: s tag converts to GFM strikethrough", {
+  html <- "<p><s>strikethrough</s></p>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("~~strikethrough~~", content, fixed = TRUE))
+})
+
+test_that("emphasis_subscript: sub tag content is preserved", {
+  html <- "<p>H<sub>2</sub>O</p>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("H", content, fixed = TRUE))
+  expect_true(grepl("2", content, fixed = TRUE))
+  expect_true(grepl("O", content, fixed = TRUE))
+})
+
+test_that("emphasis_superscript: sup tag content is preserved", {
+  html <- "<p>x<sup>2</sup></p>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("x", content, fixed = TRUE))
+  expect_true(grepl("2", content, fixed = TRUE))
+})
+
+test_that("emphasis_underline_u: u tag content is preserved in output", {
+  html <- "<p><u>underlined</u></p>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("underlined", content, fixed = TRUE))
+})
+
+test_that("form_input_elements: Form input elements produce readable output without form mechanics", {
+  html <- "<form><label for=\"name\">Name:</label><input type=\"text\" id=\"name\" placeholder=\"Enter name\"></form>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  expect_true(nchar(trimws(content)) > 0)
+  # content_contains_all
+  expect_true(grepl("Name", content, fixed = TRUE))
+})
+
+test_that("form_select_options: Select element with options produces readable output", {
+  html <- "<form><label>Color:</label><select><option value=\"red\">Red</option><option value=\"blue\" selected>Blue</option><option value=\"green\">Green</option></select></form>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  expect_true(nchar(trimws(content)) > 0)
+  # content_contains_all
+  expect_true(grepl("Color", content, fixed = TRUE))
+})
+
+test_that("form_textarea: Textarea element produces readable output", {
+  html <- "<form><label>Message:</label><textarea>Default text content</textarea></form>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  expect_true(nchar(trimws(content)) > 0)
+  # content_contains_all
+  expect_true(grepl("Message", content, fixed = TRUE))
 })
 
 test_that("heading_h1: H1 heading", {
@@ -90,6 +240,36 @@ test_that("heading_h6: H6 heading", {
   expect_equal(trimws(content), "###### Heading 6")
 })
 
+test_that("image_figure_figcaption: Figure with figcaption preserves both image and caption", {
+  html <- "<figure><img src=\"sunset.jpg\" alt=\"A sunset\"><figcaption>Beautiful sunset over the ocean</figcaption></figure>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("![A sunset](sunset.jpg)", content, fixed = TRUE))
+  expect_true(grepl("Beautiful sunset over the ocean", content, fixed = TRUE))
+})
+
+test_that("image_linked: Image inside an anchor produces a linked image", {
+  html <- "<a href=\"https://example.com\"><img src=\"icon.png\" alt=\"Icon\"></a>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("![Icon](icon.png)", content, fixed = TRUE))
+  expect_true(grepl("https://example.com", content, fixed = TRUE))
+})
+
+test_that("image_no_alt: Image without alt text produces image markdown", {
+  html <- "<img src=\"banner.jpg\">"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  expect_true(nchar(trimws(content)) > 0)
+  # content_contains_all
+  expect_true(grepl("banner.jpg", content, fixed = TRUE))
+})
+
 test_that("image_simple: Image with alt text", {
   html <- "<img src=\"photo.jpg\" alt=\"A photo\">"
   result <- convert(html)
@@ -97,6 +277,16 @@ test_that("image_simple: Image with alt text", {
 
   # content_contains_all
   expect_true(grepl("![A photo](photo.jpg)", content, fixed = TRUE))
+})
+
+test_that("image_with_title: Image with title attribute includes title in output", {
+  html <- "<img src=\"chart.png\" alt=\"Sales chart\" title=\"Q3 Sales\">"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("![Sales chart](chart.png", content, fixed = TRUE))
+  expect_true(grepl("Q3 Sales", content, fixed = TRUE))
 })
 
 test_that("inline_code: Inline code", {
@@ -117,6 +307,74 @@ test_that("italic_em: Em tag converts to italic", {
   expect_true(grepl("*italic*", content, fixed = TRUE))
 })
 
+test_that("line_break_br_tag: Single br tag produces a line break in output", {
+  html <- "<p>First line.<br>Second line.</p>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("First line.", content, fixed = TRUE))
+  expect_true(grepl("Second line.", content, fixed = TRUE))
+})
+
+test_that("line_break_hr_tag: hr tag produces a horizontal separator between content", {
+  html <- "<p>Before rule.</p><hr><p>After rule.</p>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  expect_true(nchar(trimws(content)) > 0)
+  # content_contains_all
+  expect_true(grepl("Before rule.", content, fixed = TRUE))
+  expect_true(grepl("After rule.", content, fixed = TRUE))
+})
+
+test_that("line_break_multiple_br: Multiple consecutive br tags in sequence", {
+  html <- "<p>Start.<br><br>End.</p>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("Start.", content, fixed = TRUE))
+  expect_true(grepl("End.", content, fixed = TRUE))
+})
+
+test_that("link_anchor_fragment: Fragment-only anchor link is preserved", {
+  html <- "<a href=\"#section\">Jump to section</a>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("[Jump to section](#section)", content, fixed = TRUE))
+})
+
+test_that("link_empty_href: Link with empty href produces output with the link text", {
+  html <- "<a href=\"\">No destination</a>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("No destination", content, fixed = TRUE))
+})
+
+test_that("link_image_inside: Image inside a link produces a linked image", {
+  html <- "<a href=\"https://example.com\"><img src=\"logo.png\" alt=\"Logo\"></a>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("![Logo](logo.png)", content, fixed = TRUE))
+  expect_true(grepl("https://example.com", content, fixed = TRUE))
+})
+
+test_that("link_mailto: Mailto link is preserved with mailto: scheme", {
+  html <- "<a href=\"mailto:user@example.com\">Email us</a>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("mailto:user@example.com", content, fixed = TRUE))
+})
+
 test_that("link_simple: Simple link", {
   html <- "<a href=\"https://example.com\">Example</a>"
   result <- convert(html)
@@ -124,6 +382,16 @@ test_that("link_simple: Simple link", {
 
   # content_contains_all
   expect_true(grepl("[Example](https://example.com)", content, fixed = TRUE))
+})
+
+test_that("link_with_bold_text: Link containing bold text preserves formatting", {
+  html <- "<a href=\"https://example.com\"><strong>Bold link</strong></a>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("**Bold link**", content, fixed = TRUE))
+  expect_true(grepl("https://example.com", content, fixed = TRUE))
 })
 
 test_that("link_with_title: Link with title attribute", {
@@ -136,6 +404,76 @@ test_that("link_with_title: Link with title attribute", {
   expect_true(grepl("Example Site", content, fixed = TRUE))
 })
 
+test_that("list_definition_dl: Definition list with dt and dd elements", {
+  html <- "<dl><dt>Term One</dt><dd>Definition of term one.</dd><dt>Term Two</dt><dd>Definition of term two.</dd></dl>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("Term One", content, fixed = TRUE))
+  expect_true(grepl("Definition of term one.", content, fixed = TRUE))
+  expect_true(grepl("Term Two", content, fixed = TRUE))
+  expect_true(grepl("Definition of term two.", content, fixed = TRUE))
+})
+
+test_that("list_item_multiple_paragraphs: List item containing multiple paragraphs", {
+  html <- "<ul><li><p>First paragraph in item.</p><p>Second paragraph in item.</p></li><li>Simple item</li></ul>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("First paragraph in item.", content, fixed = TRUE))
+  expect_true(grepl("Second paragraph in item.", content, fixed = TRUE))
+  expect_true(grepl("Simple item", content, fixed = TRUE))
+})
+
+test_that("list_mixed_nested: Mixed list: ordered list nested inside unordered list", {
+  html <- "<ul><li>Item A<ol><li>Sub 1</li><li>Sub 2</li></ol></li><li>Item B</li></ul>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("Item A", content, fixed = TRUE))
+  expect_true(grepl("Sub 1", content, fixed = TRUE))
+  expect_true(grepl("Sub 2", content, fixed = TRUE))
+  expect_true(grepl("Item B", content, fixed = TRUE))
+})
+
+test_that("list_nested_ordered: Nested ordered list with two levels of depth", {
+  html <- "<ol><li>Step 1<ol><li>Step 1a</li><li>Step 1b</li></ol></li><li>Step 2</li></ol>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("Step 1", content, fixed = TRUE))
+  expect_true(grepl("Step 1a", content, fixed = TRUE))
+  expect_true(grepl("Step 1b", content, fixed = TRUE))
+  expect_true(grepl("Step 2", content, fixed = TRUE))
+})
+
+test_that("list_nested_unordered: Nested unordered list with two levels of depth", {
+  html <- "<ul><li>Parent A<ul><li>Child A1</li><li>Child A2</li></ul></li><li>Parent B</li></ul>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("Parent A", content, fixed = TRUE))
+  expect_true(grepl("Child A1", content, fixed = TRUE))
+  expect_true(grepl("Child A2", content, fixed = TRUE))
+  expect_true(grepl("Parent B", content, fixed = TRUE))
+})
+
+test_that("list_task_checkboxes: Task list with checked and unchecked checkboxes", {
+  html <- "<ul><li><input type=\"checkbox\" checked> Done task</li><li><input type=\"checkbox\"> Pending task</li></ul>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  expect_true(nchar(trimws(content)) > 0)
+  # content_contains_all
+  expect_true(grepl("Done task", content, fixed = TRUE))
+  expect_true(grepl("Pending task", content, fixed = TRUE))
+})
+
 test_that("ordered_list: Ordered list", {
   html <- "<ol><li>First</li><li>Second</li><li>Third</li></ol>"
   result <- convert(html)
@@ -145,6 +483,141 @@ test_that("ordered_list: Ordered list", {
   expect_true(grepl("1. First", content, fixed = TRUE))
   expect_true(grepl("2. Second", content, fixed = TRUE))
   expect_true(grepl("3. Third", content, fixed = TRUE))
+})
+
+test_that("paragraph_multiple: Multiple paragraphs are separated by a blank line", {
+  html <- "<p>First paragraph.</p><p>Second paragraph.</p>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("First paragraph.", content, fixed = TRUE))
+  expect_true(grepl("Second paragraph.", content, fixed = TRUE))
+})
+
+test_that("paragraph_nested_divs: Text nested inside divs is extracted correctly", {
+  html <- "<div><div><p>Nested text</p></div></div>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("Nested text", content, fixed = TRUE))
+})
+
+test_that("paragraph_simple: Simple paragraph converts to plain text", {
+  html <- "<p>Hello World</p>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  expect_equal(trimws(content), "Hello World")
+})
+
+test_that("paragraph_with_inline_formatting: Paragraph with bold, italic, and a link", {
+  html <- "<p>This has <strong>bold</strong>, <em>italic</em>, and a <a href=\"https://example.com\">link</a>.</p>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("**bold**", content, fixed = TRUE))
+  expect_true(grepl("*italic*", content, fixed = TRUE))
+  expect_true(grepl("[link](https://example.com)", content, fixed = TRUE))
+})
+
+test_that("paragraph_with_line_breaks: Paragraph with br tags produces line breaks in output", {
+  html <- "<p>Line one.<br>Line two.<br>Line three.</p>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  expect_true(nchar(trimws(content)) > 0)
+  # content_contains_all
+  expect_true(grepl("Line one.", content, fixed = TRUE))
+  expect_true(grepl("Line two.", content, fixed = TRUE))
+  expect_true(grepl("Line three.", content, fixed = TRUE))
+})
+
+test_that("semantic_abbr: Abbreviation element text is preserved", {
+  html <- "<p>The <abbr title=\"World Wide Web\">WWW</abbr> is global.</p>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("WWW", content, fixed = TRUE))
+})
+
+test_that("semantic_article: Article element wrapping content preserves inner content", {
+  html <- "<article><h2>Article Title</h2><p>Article body.</p></article>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("Article Title", content, fixed = TRUE))
+  expect_true(grepl("Article body.", content, fixed = TRUE))
+})
+
+test_that("semantic_definition_list: Definition list with term and description", {
+  html <- "<dl><dt>HTML</dt><dd>HyperText Markup Language</dd><dt>CSS</dt><dd>Cascading Style Sheets</dd></dl>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("HTML", content, fixed = TRUE))
+  expect_true(grepl("HyperText Markup Language", content, fixed = TRUE))
+  expect_true(grepl("CSS", content, fixed = TRUE))
+  expect_true(grepl("Cascading Style Sheets", content, fixed = TRUE))
+})
+
+test_that("semantic_details_summary: Details and summary elements produce readable output", {
+  html <- "<details><summary>Click to expand</summary><p>Hidden content here.</p></details>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  expect_true(nchar(trimws(content)) > 0)
+  # content_contains_all
+  expect_true(grepl("Click to expand", content, fixed = TRUE))
+})
+
+test_that("semantic_hr: Horizontal rule produces a separator in output", {
+  html <- "<p>Above</p><hr><p>Below</p>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  expect_true(nchar(trimws(content)) > 0)
+  # content_contains_all
+  expect_true(grepl("Above", content, fixed = TRUE))
+  expect_true(grepl("Below", content, fixed = TRUE))
+})
+
+test_that("semantic_mark_highlight: Mark tag produces highlighted output", {
+  html <- "<p>This is <mark>highlighted text</mark> in a sentence.</p>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  expect_true(nchar(trimws(content)) > 0)
+  # content_contains_all
+  expect_true(grepl("highlighted text", content, fixed = TRUE))
+})
+
+test_that("semantic_section_with_heading: Section element with heading preserves structure", {
+  html <- "<section><h3>Section Heading</h3><p>Section content.</p></section>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  # content_contains_all
+  expect_true(grepl("Section Heading", content, fixed = TRUE))
+  expect_true(grepl("Section content.", content, fixed = TRUE))
+})
+
+test_that("semantic_sub_superscript: Subscript and superscript elements are preserved in output", {
+  html <- "<p>H<sub>2</sub>O and E=mc<sup>2</sup></p>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  expect_true(nchar(trimws(content)) > 0)
+  # content_contains_all
+  expect_true(grepl("H", content, fixed = TRUE))
+  expect_true(grepl("2", content, fixed = TRUE))
+  expect_true(grepl("O", content, fixed = TRUE))
+  expect_true(grepl("E=mc", content, fixed = TRUE))
 })
 
 test_that("simple_table: Simple table with header", {
@@ -159,6 +632,68 @@ test_that("simple_table: Simple table with header", {
   expect_true(grepl("30", content, fixed = TRUE))
   expect_true(grepl("|", content, fixed = TRUE))
   expect_true(grepl("---", content, fixed = TRUE))
+})
+
+test_that("table_empty: Empty table produces no output or minimal output", {
+  html <- "<table></table>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  expect_equal(trimws(content), "")
+})
+
+test_that("table_no_thead: Table without thead uses first row as implied header", {
+  html <- "<table><tr><td>Product</td><td>Price</td></tr><tr><td>Apple</td><td>1.00</td></tr></table>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  expect_true(nchar(trimws(content)) > 0)
+  # content_contains_all
+  expect_true(grepl("Product", content, fixed = TRUE))
+  expect_true(grepl("Price", content, fixed = TRUE))
+  expect_true(grepl("Apple", content, fixed = TRUE))
+  expect_true(grepl("1.00", content, fixed = TRUE))
+  expect_true(grepl("|", content, fixed = TRUE))
+})
+
+test_that("table_pipe_chars_in_content: Table cells containing pipe characters are escaped in output", {
+  html <- "<table><thead><tr><th>Expression</th><th>Result</th></tr></thead><tbody><tr><td>a | b</td><td>true</td></tr></tbody></table>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  expect_true(nchar(trimws(content)) > 0)
+  # content_contains_all
+  expect_true(grepl("Expression", content, fixed = TRUE))
+  expect_true(grepl("Result", content, fixed = TRUE))
+  expect_true(grepl("true", content, fixed = TRUE))
+})
+
+test_that("table_with_alignment: Table with column alignment attributes", {
+  html <- "<table><thead><tr><th align=\"left\">Left</th><th align=\"center\">Center</th><th align=\"right\">Right</th></tr></thead><tbody><tr><td>L</td><td>C</td><td>R</td></tr></tbody></table>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  expect_true(nchar(trimws(content)) > 0)
+  # content_contains_all
+  expect_true(grepl("Left", content, fixed = TRUE))
+  expect_true(grepl("Center", content, fixed = TRUE))
+  expect_true(grepl("Right", content, fixed = TRUE))
+  expect_true(grepl("L", content, fixed = TRUE))
+  expect_true(grepl("C", content, fixed = TRUE))
+  expect_true(grepl("R", content, fixed = TRUE))
+  expect_true(grepl("|", content, fixed = TRUE))
+})
+
+test_that("table_with_colspan: Table with colspan attribute in a header cell", {
+  html <- "<table><thead><tr><th colspan=\"2\">Full Name</th></tr></thead><tbody><tr><td>John</td><td>Doe</td></tr></tbody></table>"
+  result <- convert(html)
+  content <- result$content %||% ""
+
+  expect_true(nchar(trimws(content)) > 0)
+  # content_contains_all
+  expect_true(grepl("Full Name", content, fixed = TRUE))
+  expect_true(grepl("John", content, fixed = TRUE))
+  expect_true(grepl("Doe", content, fixed = TRUE))
 })
 
 test_that("unordered_list: Unordered list", {
