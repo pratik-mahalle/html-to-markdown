@@ -1,0 +1,8 @@
+[
+  {
+    "id": "blockquote_simple",
+    "description": "Simple blockquote",
+    "html": "<blockquote><p>Quote text</p></blockquote>",
+    "assertions": { "content_contains_all": ["> Quote text"] }
+  }
+]

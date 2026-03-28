@@ -1,0 +1,20 @@
+[
+  {
+    "id": "bold_strong",
+    "description": "Strong tag converts to bold",
+    "html": "<p><strong>bold</strong></p>",
+    "assertions": { "content_contains_all": ["**bold**"] }
+  },
+  {
+    "id": "italic_em",
+    "description": "Em tag converts to italic",
+    "html": "<p><em>italic</em></p>",
+    "assertions": { "content_contains_all": ["*italic*"] }
+  },
+  {
+    "id": "bold_and_italic",
+    "description": "Nested bold and italic",
+    "html": "<p><strong><em>both</em></strong></p>",
+    "assertions": { "content_contains_all": ["***both***"] }
+  }
+]

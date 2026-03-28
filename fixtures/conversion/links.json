@@ -1,0 +1,14 @@
+[
+  {
+    "id": "link_simple",
+    "description": "Simple link",
+    "html": "<a href=\"https://example.com\">Example</a>",
+    "assertions": { "content_contains_all": ["[Example](https://example.com)"] }
+  },
+  {
+    "id": "link_with_title",
+    "description": "Link with title attribute",
+    "html": "<a href=\"https://example.com\" title=\"Example Site\">Example</a>",
+    "assertions": { "content_contains_all": ["[Example](https://example.com", "Example Site"] }
+  }
+]

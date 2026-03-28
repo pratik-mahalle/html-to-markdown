@@ -11,7 +11,7 @@ from typing import Any
 
 import pytest
 
-from html_to_markdown import convert_to_markdown
+from html_to_markdown import convert_to_string
 
 pytestmark = pytest.mark.filterwarnings("ignore::DeprecationWarning")
 
@@ -224,7 +224,7 @@ def profile_function(func: Callable[..., Any], *args: Any, **kwargs: Any) -> str
 
 def test_streaming_performance() -> None:
     html = generate_complex_html(10)
-    result = convert_to_markdown(html)
+    result = convert_to_string(html)
     assert len(result) > 0, "Should produce output"
 
 
@@ -240,7 +240,7 @@ def run_comprehensive_benchmark() -> None:
         input_size_mb = len(html) / (1024 * 1024)
         print(f"   Input size: {input_size_mb:.2f} MB")  # noqa: T201
 
-        metrics = benchmark_function(convert_to_markdown, html)
+        metrics = benchmark_function(convert_to_string, html)
         print(  # noqa: T201
             f"   Processing: {metrics.execution_time:.3f}s, {metrics.throughput_mb_s:.2f} MB/s"
         )
@@ -257,7 +257,7 @@ def profile_bottlenecks() -> None:
     html = generate_complex_html(50)
 
     print("\n📈 Processing Profile:")  # noqa: T201
-    profile_result = profile_function(convert_to_markdown, html)
+    profile_result = profile_function(convert_to_string, html)
     print(profile_result)  # noqa: T201
 
 

@@ -9,8 +9,8 @@ members = [
     "crates/html-to-markdown-php",
     "crates/html-to-markdown-py",
     "crates/html-to-markdown-wasm",
-    "e2e/wasm-wasmtime",
     "tools/benchmark-harness",
+    "tools/e2e-generator",
 ]
 exclude = [
     "packages/elixir/native/html_to_markdown_elixir",

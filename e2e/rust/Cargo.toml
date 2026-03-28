@@ -1,0 +1,15 @@
+[package]
+name = "html-to-markdown-e2e-rust"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+# Standalone crate — not part of the workspace to avoid circular dependency.
+[workspace]
+
+[dependencies]
+html-to-markdown-rs = { path = "../../crates/html-to-markdown" }
+
+[[test]]
+name = "smoke_test"
+path = "tests/smoke_test.rs"

@@ -1,0 +1,14 @@
+[
+  {
+    "id": "inline_code",
+    "description": "Inline code",
+    "html": "<p>Use <code>console.log()</code> to debug</p>",
+    "assertions": { "content_contains_all": ["`console.log()`"] }
+  },
+  {
+    "id": "code_block",
+    "description": "Code block with language",
+    "html": "<pre><code class=\"language-python\">print('hello')</code></pre>",
+    "assertions": { "content_contains_all": ["```python", "print('hello')", "```"] }
+  }
+]

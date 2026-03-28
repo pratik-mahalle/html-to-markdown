@@ -1,0 +1,14 @@
+[
+  {
+    "id": "empty_html",
+    "description": "Empty HTML document",
+    "html": "<html><head></head><body></body></html>",
+    "assertions": { "content_equals": "" }
+  },
+  {
+    "id": "whitespace_only",
+    "description": "Whitespace-only content",
+    "html": "<p>   </p>",
+    "assertions": { "content_equals": "" }
+  }
+]
