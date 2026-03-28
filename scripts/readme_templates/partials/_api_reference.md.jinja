@@ -1,178 +1,139 @@
-### Core Functions
+### Core Function
 
 {% if language == 'python' %}
-**`convert(html: str, options?: ConversionOptions) -> str`**
+**`convert(html: str, options?: ConversionOptions, visitor?: object) -> ConversionResult`**
 
-Basic HTML-to-Markdown conversion. Fast and simple.
+Converts HTML to Markdown. Returns a `ConversionResult` dict with all results in a single call.
 
-**`convert_with_metadata(html: str, options?: ConversionOptions, metadata_config?: MetadataConfig) -> tuple[str, dict]`**
+```python
+from html_to_markdown import convert, ConversionOptions
 
-Extract Markdown plus metadata (headers, links, images, structured data) in a single pass. See [Metadata Extraction Guide](../../examples/metadata-extraction/).
-
-**`convert_with_visitor(html: str, visitor: object, options?: ConversionOptions) -> str`**
-
-Customize conversion with visitor callbacks for element interception. See [Visitor Pattern Guide](../../examples/visitor-pattern/).
-
-**`convert_with_async_visitor(html: str, visitor: object, options?: ConversionOptions) -> str`**
-
-Async version of visitor pattern with asyncio integration.
-
-**`convert_with_inline_images(html: str, image_config?: InlineImageConfig) -> tuple[str, list[dict], list[str]]`**
-
-Extract base64-encoded inline images with metadata.
-
-**`convert_with_tables(html: str, options?: ConversionOptions, metadata_config?: MetadataConfig) -> ConversionWithTables`**
-
-Extract structured table data (cells, headers, rendered markdown) alongside conversion.
+result = convert(html)
+markdown = result["content"]           # Converted Markdown string
+metadata = result["metadata"]          # Metadata (when extract_metadata=True)
+tables   = result["tables"]            # Structured table data (when extract_tables=True)
+document = result["document"]          # Document-level info
+images   = result["images"]            # Extracted images
+warnings = result["warnings"]          # Any conversion warnings
+```
 
 {% elif language == 'typescript' %}
-**`convert(html: string, options?: ConversionOptions): string`**
+**`convert(html: string, options?: ConversionOptions, visitor?: Visitor): ConversionResult`**
 
-Basic HTML-to-Markdown conversion. Fast and simple.
+Converts HTML to Markdown. Returns a `ConversionResult` object with all results in a single call.
 
-**`convertWithMetadata(html: string, options?: ConversionOptions, config?: MetadataConfig): { markdown: string; metadata: Metadata }`**
+```typescript
+import { convert, ConversionOptions } from '@kreuzberg/html-to-markdown';
 
-Extract Markdown plus metadata (headers, links, images, structured data) in a single pass. See [Metadata Extraction Guide](../../examples/metadata-extraction/).
-
-**`convertWithVisitor(html: string, options: { visitor: Visitor } & ConversionOptions): string`**
-
-Customize conversion with visitor callbacks for element interception. See [Visitor Pattern Guide](../../examples/visitor-pattern/).
-
-**`convertWithAsyncVisitor(html: string, options: { visitor: AsyncVisitor } & ConversionOptions): Promise<string>`**
-
-Async version of visitor pattern for I/O operations.
-
-**`convertWithInlineImages(html: string, config?: InlineImageConfig): { markdown: string; images: ImageData[]; warnings: string[] }`**
-
-Extract base64-encoded inline images with metadata.
-
-**`convertWithTables(html: string, options?: ConversionOptions, config?: MetadataConfig): { content: string; tables: TableData[]; metadata?: Metadata }`**
-
-Extract structured table data (cells, headers, rendered markdown) alongside conversion.
+const result = convert(html);
+const markdown  = result.content;    // Converted Markdown string
+const metadata  = result.metadata;   // Metadata (when extractMetadata: true)
+const tables    = result.tables;     // Structured table data (when extractTables: true)
+const document  = result.document;   // Document-level info
+const images    = result.images;     // Extracted images
+const warnings  = result.warnings;   // Any conversion warnings
+```
 
 {% elif language == 'ruby' %}
-**`convert(html, options: nil) -> String`**
+**`convert(html, options: nil, visitor: nil) -> ConversionResult`**
 
-Basic HTML-to-Markdown conversion. Fast and simple.
+Converts HTML to Markdown. Returns a `ConversionResult` hash with all results in a single call.
 
-**`convert_with_metadata(html, options: nil, config: nil) -> [String, Hash]`**
+```ruby
+require 'html_to_markdown'
 
-Extract Markdown plus metadata (headers, links, images, structured data) in a single pass. See [Metadata Extraction Guide](../../examples/metadata-extraction/).
-
-**`convert_with_visitor(html, visitor:, options: nil) -> String`**
-
-Customize conversion with visitor callbacks for element interception. See [Visitor Pattern Guide](../../examples/visitor-pattern/).
-
-**`convert_with_inline_images(html, config: nil) -> [String, Array, Array]`**
-
-Extract base64-encoded inline images with metadata.
-
-**`convert_with_tables(html, options: nil, config: nil) -> ConversionWithTables`**
-
-Extract structured table data (cells, headers, rendered markdown) alongside conversion.
+result = HtmlToMarkdown.convert(html)
+markdown = result[:content]       # Converted Markdown string
+metadata = result[:metadata]      # Metadata (when extract_metadata: true)
+tables   = result[:tables]        # Structured table data (when extract_tables: true)
+document = result[:document]      # Document-level info
+images   = result[:images]        # Extracted images
+warnings = result[:warnings]      # Any conversion warnings
+```
 
 {% elif language == 'php' %}
-**`Converter::convert(string $html, ?ConversionOptions $options = null): string`**
+**`Converter::convert(string $html, ?ConversionOptions $options = null, ?VisitorInterface $visitor = null): array`**
 
-Basic HTML-to-Markdown conversion. Fast and simple.
+Converts HTML to Markdown. Returns an array `ConversionResult` with all results in a single call.
 
-**`Converter::convertWithMetadata(string $html, ?ConversionOptions $options = null, ?MetadataConfig $config = null): [string, array]`**
+```php
+<?php
+use HtmlToMarkdown\Service\Converter;
 
-Extract Markdown plus metadata (headers, links, images, structured data) in a single pass. See [Metadata Extraction Guide](../../examples/metadata-extraction/).
-
-**`Converter::convertWithVisitor(string $html, VisitorInterface $visitor, ?ConversionOptions $options = null): string`**
-
-Customize conversion with visitor callbacks for element interception. See [Visitor Pattern Guide](../../examples/visitor-pattern/).
-
-**`Converter::convertWithInlineImages(string $html, ?InlineImageConfig $config = null): [string, array, array]`**
-
-Extract base64-encoded inline images with metadata.
-
-**`Converter::convertWithTables(string $html, ?ConversionOptions $options = null, ?MetadataConfig $config = null): ConversionWithTables`**
-
-Extract structured table data (cells, headers, rendered markdown) alongside conversion.
+$result  = Converter::create()->convert($html);
+$markdown = $result['content'];    // Converted Markdown string
+$metadata = $result['metadata'];   // Metadata (when extractMetadata: true)
+$tables   = $result['tables'];     // Structured table data (when extractTables: true)
+$document = $result['document'];   // Document-level info
+$images   = $result['images'];     // Extracted images
+$warnings = $result['warnings'];   // Any conversion warnings
+```
 
 {% elif language == 'go' %}
-**`Convert(html string) (string, error)`**
+**`Convert(html string, options ...ConversionOptions) (ConversionResult, error)`**
 
-Basic HTML-to-Markdown conversion. Fast and simple.
+Converts HTML to Markdown. Returns a `ConversionResult` struct with all results in a single call.
 
-**`ConvertWithMetadata(html string, options *ConversionOptions, config *MetadataConfig) (string, Metadata, error)`**
-
-Extract Markdown plus metadata in a single pass. See [Metadata Extraction Guide](../../examples/metadata-extraction/).
-
-**`ConvertWithInlineImages(html string, config *InlineImageConfig) (string, []ImageData, []string, error)`**
-
-Extract base64-encoded inline images with metadata.
+```go
+result, err := htmltomarkdown.Convert(html)
+markdown  := result.Content    // *string — converted Markdown
+metadata  := result.Metadata   // *Metadata — when ExtractMetadata: true
+tables    := result.Tables     // []TableData — when ExtractTables: true
+```
 
 {% elif language == 'java' %}
-**`convert(String html) : String`**
-**`convert(String html, ConversionOptions options) : String`**
+**`HtmlToMarkdown.convert(String html) : ConversionResult`**
+**`HtmlToMarkdown.convert(String html, ConversionOptions options) : ConversionResult`**
 
-Basic HTML-to-Markdown conversion. Fast and simple.
+Converts HTML to Markdown. Returns a `ConversionResult` record with all results in a single call.
 
-**`convertWithMetadata(String html) : ConversionResult<MetadataResult>`**
-**`convertWithMetadata(String html, ConversionOptions options, MetadataConfig config) : ConversionResult<MetadataResult>`**
-
-Extract Markdown plus metadata in a single pass. See [Metadata Extraction Guide](../../examples/metadata-extraction/).
-
-**`convertWithInlineImages(String html, InlineImageConfig config) : ConversionResult<InlineImagesResult>`**
-
-Extract base64-encoded inline images with metadata.
+```java
+ConversionResult result = HtmlToMarkdown.convert(html);
+String   markdown = result.content();   // Converted Markdown string
+Metadata metadata = result.metadata();  // null unless extractMetadata(true)
+List<?>  tables   = result.tables();    // empty unless extractTables(true)
+```
 
 {% elif language == 'csharp' %}
-**`Convert(string html, ConversionOptions? options = null) : string`**
+**`HtmlToMarkdownConverter.Convert(string html, ConversionOptions? options = null) : ConversionResult`**
 
-Basic HTML-to-Markdown conversion. Fast and simple.
+Converts HTML to Markdown. Returns a `ConversionResult` record with all results in a single call.
 
-**`ConvertWithMetadata(string html, ConversionOptions? options = null, MetadataConfig? config = null) : (string markdown, MetadataResult metadata)`**
-
-Extract Markdown plus metadata in a single pass. See [Metadata Extraction Guide](../../examples/metadata-extraction/).
-
-**`ConvertWithInlineImages(string html, InlineImageConfig? config = null) : (string markdown, InlineImageData[] images, string[] warnings)`**
-
-Extract base64-encoded inline images with metadata.
+```csharp
+var result   = HtmlToMarkdownConverter.Convert(html);
+var markdown = result.Content;    // Converted Markdown string
+var metadata = result.Metadata;   // null unless ExtractMetadata = true
+var tables   = result.Tables;     // empty unless ExtractTables = true
+```
 
 {% elif language == 'elixir' %}
-**`HtmlToMarkdown.convert(html, options \\ nil) :: String.t()`**
+**`HtmlToMarkdown.convert(html, options \\ nil) :: {:ok, ConversionResult.t()} | {:error, term()}`**
 
-Basic HTML-to-Markdown conversion. Fast and simple.
+Converts HTML to Markdown. Returns `{:ok, result}` where result is a struct with all results in a single call.
 
-**`HtmlToMarkdown.convert_with_metadata(html, options \\ nil, config \\ nil) :: {String.t(), map()}`**
-
-Extract Markdown plus metadata in a single pass. See [Metadata Extraction Guide](../../examples/metadata-extraction/).
-
-**`HtmlToMarkdown.convert_with_inline_images(html, config \\ nil) :: {String.t(), list(map()), list(String.t())}`**
-
-Extract base64-encoded inline images with metadata.
-
-**`HtmlToMarkdown.convert_with_tables(html, options \\ nil, config \\ nil) :: %ConversionWithTables{}`**
-
-Extract structured table data (cells, headers, rendered markdown) alongside conversion.
+```elixir
+{:ok, result} = HtmlToMarkdown.convert(html)
+result.content    # Converted Markdown string
+result.metadata   # Metadata map (when extract_metadata: true)
+result.tables     # Table data list (when extract_tables: true)
+result.document   # Document-level info
+result.images     # Extracted images
+result.warnings   # Any conversion warnings
+```
 
 {% elif language == 'r' %}
 **`convert(html, options = NULL)`**
 
-Basic HTML-to-Markdown conversion. Fast and simple.
+Converts HTML to Markdown. Returns a named list `ConversionResult` with all results in a single call.
 
-**`convert_with_metadata(html, options = NULL, config = NULL)`**
-
-Extract Markdown plus metadata in a single pass. See [Metadata Extraction Guide](../../examples/metadata-extraction/).
-
-**`convert_with_visitor(html, visitor, options = NULL)`**
-
-Customize conversion with visitor callbacks for element interception. See [Visitor Pattern Guide](../../examples/visitor-pattern/).
-
-**`convert_with_inline_images(html, config = NULL)`**
-
-Extract base64-encoded inline images with metadata.
-
-**`convert_with_tables(html, options = NULL, config = NULL)`**
-
-Extract structured table data (cells, headers, rendered markdown) alongside conversion.
+```r
+result   <- convert(html)
+markdown <- result$content    # Converted Markdown string
+metadata <- result$metadata   # Metadata (when extract_metadata = TRUE)
+tables   <- result$tables     # Table data (when extract_tables = TRUE)
+```
 
 {% else %}
-See the [Visitor Pattern Guide](../../examples/visitor-pattern/) and [Metadata Extraction Guide](../../examples/metadata-extraction/) for comprehensive API documentation and examples.
 {% endif %}
 
 ### Options
@@ -184,12 +145,6 @@ See the [Visitor Pattern Guide](../../examples/visitor-pattern/) and [Metadata E
 - `wrap`: Enable text wrapping — default: `false`
 - `wrap_width`: Wrap at column — default: `80`
 - `code_language`: Default fenced code block language — default: none
-- `extract_metadata`: Embed metadata as YAML frontmatter — default: `false`
+- `extract_metadata`: Enable metadata extraction into `result.metadata` — default: `false`
+- `extract_tables`: Enable structured table extraction into `result.tables` — default: `false`
 - `output_format`: Output markup format (`"markdown"` | `"djot"` | `"plain"`) — default: `"markdown"`
-
-**`MetadataConfig`** – Selective metadata extraction:
-- `extract_headers`: h1-h6 elements — default: `true`
-- `extract_links`: Hyperlinks — default: `true`
-- `extract_images`: Image elements — default: `true`
-- `extract_structured_data`: JSON-LD, Microdata, RDFa — default: `true`
-- `max_structured_data_size`: Size limit in bytes — default: `100KB`

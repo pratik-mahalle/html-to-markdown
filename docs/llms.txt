@@ -203,12 +203,13 @@ Formatting:
   --wrap-width N           Wrap column (default: 80)
 
 Metadata:
-  --with-metadata          Output JSON with markdown + metadata
-  --extract-document       Extract document-level metadata
-  --extract-headers        Extract headings
-  --extract-links          Extract links
-  --extract-images         Extract images
-  --extract-structured-data Extract JSON-LD, Microdata, RDFa
+  --extract-metadata       Prepend metadata comment block to output
+  --json                   Output full ConversionResult as JSON
+  --extract-document       Extract document-level metadata (requires --json)
+  --extract-headers        Extract headings (requires --json)
+  --extract-links          Extract links (requires --json)
+  --extract-images         Extract images (requires --json)
+  --extract-structured-data Extract JSON-LD, Microdata, RDFa (requires --json)
 
 Preprocessing:
   -p, --preprocess         Clean HTML before conversion

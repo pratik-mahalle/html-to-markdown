@@ -18,7 +18,7 @@
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown?label=Java&color=007ec6" alt="Java">
   </a>
   <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown">
-    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/html-to-markdown?label=Go&color=007ec6&filter=v2.29.0" alt="Go">
+    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/html-to-markdown?label=Go&color=007ec6&filter=v3.0.0" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/">
     <img src="https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown?label=C%23&color=007ec6" alt="C#">
@@ -56,9 +56,11 @@
   </a>
 </div>
 
+
 High-performance HTML to Markdown converter with a clean Python API (powered by a Rust core).
 The same engine also drives the Node.js, Ruby, PHP, and WebAssembly bindings, so rendered Markdown
 stays identical across runtimes. Wheels are published for Linux, macOS, and Windows.
+
 
 ## Installation
 
@@ -66,7 +68,13 @@ stays identical across runtimes. Wheels are published for Linux, macOS, and Wind
 pip install html-to-markdown
 ```
 
+
 Requires Python 3.10+. Wheels are published for Linux, macOS, and Windows on PyPI.
+
+
+
+
+
 
 ## Performance Snapshot
 
@@ -78,7 +86,8 @@ Apple M4 • Real Wikipedia documents • `convert()` (Python)
 | Tables (Countries) | 360KB | 2.02ms | 178 MB/s |
 | Mixed (Python wiki) | 656KB | 4.56ms | 144 MB/s |
 
-See for detailed benchmarks.
+
+
 
 ## Quick Start
 
@@ -88,8 +97,11 @@ Basic conversion:
 from html_to_markdown import convert
 
 html = "<h1>Hello</h1><p>This is <strong>fast</strong>!</p>"
-markdown = convert(html)
+result = convert(html)
+markdown = result["content"]
 ```
+
+
 
 With conversion options:
 
@@ -101,50 +113,35 @@ options = ConversionOptions(
     heading_style="atx",
     list_indent_width=2,
 )
-markdown = convert(html, options)
+result = convert(html, options)
+markdown = result["content"]
 ```
 
-With async support:
 
-```python
-import asyncio
-from html_to_markdown import convert_with_async_visitor
 
-class AsyncVisitor:
-    async def visit_link(self, ctx, href, text, title):
-        # Validate URLs asynchronously
-        return {"type": "continue"}
-
-markdown = convert_with_async_visitor(html, visitor=AsyncVisitor())
-```
 
 ## API Reference
 
-### Core Functions
+### Core Function
 
-**`convert(html: str, options?: ConversionOptions) -> str`**
 
-Basic HTML-to-Markdown conversion. Fast and simple.
+**`convert(html: str, options?: ConversionOptions, visitor?: object) -> ConversionResult`**
 
-**`convert_with_metadata(html: str, options?: ConversionOptions, metadata_config?: MetadataConfig) -> tuple[str, dict]`**
+Converts HTML to Markdown. Returns a `ConversionResult` dict with all results in a single call.
 
-Extract Markdown plus metadata (headers, links, images, structured data) in a single pass.
+```python
+from html_to_markdown import convert, ConversionOptions
 
-**`convert_with_visitor(html: str, visitor: object, options?: ConversionOptions) -> str`**
+result = convert(html)
+markdown = result["content"]           # Converted Markdown string
+metadata = result["metadata"]          # Metadata (when extract_metadata=True)
+tables   = result["tables"]            # Structured table data (when extract_tables=True)
+document = result["document"]          # Document-level info
+images   = result["images"]            # Extracted images
+warnings = result["warnings"]          # Any conversion warnings
+```
 
-Customize conversion with visitor callbacks for element interception.
 
-**`convert_with_async_visitor(html: str, visitor: object, options?: ConversionOptions) -> str`**
-
-Async version of visitor pattern with asyncio integration.
-
-**`convert_with_inline_images(html: str, image_config?: InlineImageConfig) -> tuple[str, list[dict], list[str]]`**
-
-Extract base64-encoded inline images with metadata.
-
-**`convert_with_tables(html: str, options?: ConversionOptions, metadata_config?: MetadataConfig) -> ConversionWithTables`**
-
-Extract structured table data (cells, headers, rendered markdown) alongside conversion.
 
 ### Options
 
@@ -156,16 +153,10 @@ Extract structured table data (cells, headers, rendered markdown) alongside conv
 - `wrap`: Enable text wrapping — default: `false`
 - `wrap_width`: Wrap at column — default: `80`
 - `code_language`: Default fenced code block language — default: none
-- `extract_metadata`: Embed metadata as YAML frontmatter — default: `false`
+- `extract_metadata`: Enable metadata extraction into `result.metadata` — default: `false`
+- `extract_tables`: Enable structured table extraction into `result.tables` — default: `false`
 - `output_format`: Output markup format (`"markdown"` | `"djot"` | `"plain"`) — default: `"markdown"`
 
-**`MetadataConfig`** – Selective metadata extraction:
-
-- `extract_headers`: h1-h6 elements — default: `true`
-- `extract_links`: Hyperlinks — default: `true`
-- `extract_images`: Image elements — default: `true`
-- `extract_structured_data`: JSON-LD, Microdata, RDFa — default: `true`
-- `max_structured_data_size`: Size limit in bytes — default: `100KB`
 
 ## Djot Output Format
 
@@ -185,6 +176,7 @@ The library supports converting HTML to [Djot](https://djot.net/), a lightweight
 
 ### Example Usage
 
+
 ```python
 from html_to_markdown import convert, ConversionOptions
 
@@ -199,11 +191,14 @@ djot = convert(html, ConversionOptions(output_format="djot"))
 # Result: "This is *bold* and _italic_ text."
 ```
 
+
 Djot's extended syntax allows you to express more semantic meaning in lightweight text, making it useful for documents that require strikethrough, insertion tracking, or mathematical notation.
+
 
 ## Plain Text Output
 
 Set `output_format` to `"plain"` to strip all markup and return only visible text. This bypasses the Markdown conversion pipeline entirely for maximum speed.
+
 
 ```python
 from html_to_markdown import convert, ConversionOptions
@@ -214,11 +209,14 @@ plain = convert(html, ConversionOptions(output_format="plain"))
 # Result: "Title\n\nThis is bold and italic text."
 ```
 
+
 Plain text mode is useful for search indexing, text extraction, and feeding content to LLMs.
+
+
 
 ## Metadata Extraction
 
-The metadata extraction feature enables comprehensive document analysis during conversion. Extract document properties, headers, links, images, and structured data in a single pass.
+The metadata extraction feature enables comprehensive document analysis during conversion. Extract document properties, headers, links, images, and structured data in a single pass — all via the standard `convert()` function.
 
 **Use Cases:**
 
@@ -228,28 +226,34 @@ The metadata extraction feature enables comprehensive document analysis during c
 - **Accessibility audits** – Check for images without alt text, empty links, invalid heading hierarchy
 - **Link validation** – Classify and validate anchor, internal, external, email, and phone links
 
-**Zero Overhead When Disabled:** Metadata extraction adds negligible overhead and happens during the HTML parsing pass. Disable unused metadata types in `MetadataConfig` to optimize further.
+**Zero Overhead When Disabled:** Metadata extraction adds negligible overhead and happens during the HTML parsing pass. Pass `extract_metadata: true` in `ConversionOptions` to enable it; the result is available at `result.metadata`.
 
 ### Example: Quick Start
 
+
 ```python
-from html_to_markdown import convert_with_metadata
+from html_to_markdown import convert, ConversionOptions
 
 html = '<h1>Article</h1><img src="test.jpg" alt="test">'
-markdown, metadata = convert_with_metadata(html)
+result = convert(html, ConversionOptions(extract_metadata=True))
 
-print(metadata["document"]["title"])      # Document title
-print(metadata["headers"])                 # All h1-h6 elements
-print(metadata["links"])                   # All hyperlinks
-print(metadata["images"])                  # All images with alt text
-print(metadata["structured_data"])        # JSON-LD, Microdata, RDFa
+print(result["content"])                          # Converted Markdown
+print(result["metadata"]["document"]["title"])    # Document title
+print(result["metadata"]["headers"])              # All h1-h6 elements
+print(result["metadata"]["links"])                # All hyperlinks
+print(result["metadata"]["images"])               # All images with alt text
+print(result["metadata"]["structured_data"])      # JSON-LD, Microdata, RDFa
 ```
 
-For detailed examples including SEO extraction, table-of-contents generation, link validation, and accessibility audits, see the .
+
+
+
+
+
 
 ## Visitor Pattern
 
-The visitor pattern enables custom HTML→Markdown conversion logic by providing callbacks for specific HTML elements during traversal. Use visitors to transform content, filter elements, validate structure, or collect analytics.
+The visitor pattern enables custom HTML→Markdown conversion logic by providing callbacks for specific HTML elements during traversal. Pass a visitor as the third argument to `convert()`.
 
 **Use Cases:**
 
@@ -263,8 +267,9 @@ The visitor pattern enables custom HTML→Markdown conversion logic by providing
 
 ### Example: Quick Start
 
+
 ```python
-from html_to_markdown import convert_with_visitor
+from html_to_markdown import convert
 
 class MyVisitor:
     def visit_link(self, ctx, href, text, title):
@@ -280,26 +285,14 @@ class MyVisitor:
         return {"type": "continue"}
 
 html = '<a href="https://old-cdn.com/file.pdf">Download</a>'
-markdown = convert_with_visitor(html, visitor=MyVisitor())
+result = convert(html, visitor=MyVisitor())
+markdown = result["content"]
 ```
 
-Async support:
 
-```python
-import asyncio
-from html_to_markdown import convert_with_async_visitor
 
-class AsyncVisitor:
-    async def visit_link(self, ctx, href, text, title):
-        is_valid = await validate_url(href)
-        if not is_valid:
-            return {"type": "error", "message": f"Broken link: {href}"}
-        return {"type": "continue"}
 
-markdown = await convert_with_async_visitor(html, visitor=AsyncVisitor())
-```
 
-For comprehensive examples including content filtering, link footnotes, accessibility validation, and asynchronous URL validation, see the .
 
 ## Examples
 
