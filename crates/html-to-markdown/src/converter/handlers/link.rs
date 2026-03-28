@@ -16,7 +16,8 @@ use crate::converter::dom_context::DomContext;
 use crate::converter::inline::link::append_markdown_link;
 use crate::converter::main::walk_node;
 use crate::converter::utility::content::{
-    collect_link_label_text, escape_link_label, get_text_content, normalize_link_label, normalized_tag_name,
+    collect_link_label_text, collect_tag_attributes, escape_link_label, get_text_content, normalize_link_label,
+    normalized_tag_name,
 };
 use crate::options::ConversionOptions;
 use crate::text;
@@ -194,11 +195,7 @@ pub fn handle_link(
         let link_output = if let Some(ref visitor_handle) = ctx.visitor {
             use crate::visitor::{NodeContext, NodeType, VisitResult};
 
-            let attributes: BTreeMap<String, String> = tag
-                .attributes()
-                .iter()
-                .filter_map(|(k, v)| v.as_ref().map(|val| (k.to_string(), val.to_string())))
-                .collect();
+            let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
 
             let node_id = node_handle.get_inner();
             let parent_tag = dom_ctx.parent_tag_name(node_id, parser);

@@ -769,7 +769,7 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         // Wait for response
         self.response_rx
             .lock()
-            .unwrap()
+            .expect("response_rx mutex poisoned")
             .recv()
             .unwrap_or(crate::visitor::VisitResult::Continue)
     }
@@ -786,7 +786,7 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         // Wait for response
         self.response_rx
             .lock()
-            .unwrap()
+            .expect("response_rx mutex poisoned")
             .recv()
             .unwrap_or(crate::visitor::VisitResult::Continue)
     }
@@ -801,7 +801,7 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         }
         self.response_rx
             .lock()
-            .unwrap()
+            .expect("response_rx mutex poisoned")
             .recv()
             .unwrap_or(crate::visitor::VisitResult::Continue)
     }
@@ -827,7 +827,7 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         }
         self.response_rx
             .lock()
-            .unwrap()
+            .expect("response_rx mutex poisoned")
             .recv()
             .unwrap_or(crate::visitor::VisitResult::Continue)
     }
@@ -853,7 +853,7 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         }
         self.response_rx
             .lock()
-            .unwrap()
+            .expect("response_rx mutex poisoned")
             .recv()
             .unwrap_or(crate::visitor::VisitResult::Continue)
     }
@@ -879,7 +879,7 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         }
         self.response_rx
             .lock()
-            .unwrap()
+            .expect("response_rx mutex poisoned")
             .recv()
             .unwrap_or(crate::visitor::VisitResult::Continue)
     }
@@ -903,7 +903,7 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         }
         self.response_rx
             .lock()
-            .unwrap()
+            .expect("response_rx mutex poisoned")
             .recv()
             .unwrap_or(crate::visitor::VisitResult::Continue)
     }
@@ -918,7 +918,7 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         }
         self.response_rx
             .lock()
-            .unwrap()
+            .expect("response_rx mutex poisoned")
             .recv()
             .unwrap_or(crate::visitor::VisitResult::Continue)
     }
@@ -944,7 +944,7 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         }
         self.response_rx
             .lock()
-            .unwrap()
+            .expect("response_rx mutex poisoned")
             .recv()
             .unwrap_or(crate::visitor::VisitResult::Continue)
     }
@@ -959,7 +959,7 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         }
         self.response_rx
             .lock()
-            .unwrap()
+            .expect("response_rx mutex poisoned")
             .recv()
             .unwrap_or(crate::visitor::VisitResult::Continue)
     }
@@ -979,7 +979,7 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         }
         self.response_rx
             .lock()
-            .unwrap()
+            .expect("response_rx mutex poisoned")
             .recv()
             .unwrap_or(crate::visitor::VisitResult::Continue)
     }
@@ -990,7 +990,7 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         }
         self.response_rx
             .lock()
-            .unwrap()
+            .expect("response_rx mutex poisoned")
             .recv()
             .unwrap_or(crate::visitor::VisitResult::Continue)
     }
@@ -1010,7 +1010,7 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         }
         self.response_rx
             .lock()
-            .unwrap()
+            .expect("response_rx mutex poisoned")
             .recv()
             .unwrap_or(crate::visitor::VisitResult::Continue)
     }
@@ -1025,7 +1025,7 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         }
         self.response_rx
             .lock()
-            .unwrap()
+            .expect("response_rx mutex poisoned")
             .recv()
             .unwrap_or(crate::visitor::VisitResult::Continue)
     }
@@ -1045,7 +1045,7 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         }
         self.response_rx
             .lock()
-            .unwrap()
+            .expect("response_rx mutex poisoned")
             .recv()
             .unwrap_or(crate::visitor::VisitResult::Continue)
     }
@@ -1060,7 +1060,7 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         }
         self.response_rx
             .lock()
-            .unwrap()
+            .expect("response_rx mutex poisoned")
             .recv()
             .unwrap_or(crate::visitor::VisitResult::Continue)
     }
@@ -1075,7 +1075,7 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         }
         self.response_rx
             .lock()
-            .unwrap()
+            .expect("response_rx mutex poisoned")
             .recv()
             .unwrap_or(crate::visitor::VisitResult::Continue)
     }
@@ -1090,7 +1090,7 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         }
         self.response_rx
             .lock()
-            .unwrap()
+            .expect("response_rx mutex poisoned")
             .recv()
             .unwrap_or(crate::visitor::VisitResult::Continue)
     }
@@ -1105,7 +1105,7 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         }
         self.response_rx
             .lock()
-            .unwrap()
+            .expect("response_rx mutex poisoned")
             .recv()
             .unwrap_or(crate::visitor::VisitResult::Continue)
     }
@@ -1120,7 +1120,7 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         }
         self.response_rx
             .lock()
-            .unwrap()
+            .expect("response_rx mutex poisoned")
             .recv()
             .unwrap_or(crate::visitor::VisitResult::Continue)
     }
@@ -1135,7 +1135,7 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         }
         self.response_rx
             .lock()
-            .unwrap()
+            .expect("response_rx mutex poisoned")
             .recv()
             .unwrap_or(crate::visitor::VisitResult::Continue)
     }
@@ -1146,7 +1146,7 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         }
         self.response_rx
             .lock()
-            .unwrap()
+            .expect("response_rx mutex poisoned")
             .recv()
             .unwrap_or(crate::visitor::VisitResult::Continue)
     }
@@ -1161,7 +1161,7 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         }
         self.response_rx
             .lock()
-            .unwrap()
+            .expect("response_rx mutex poisoned")
             .recv()
             .unwrap_or(crate::visitor::VisitResult::Continue)
     }
@@ -1176,7 +1176,7 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         }
         self.response_rx
             .lock()
-            .unwrap()
+            .expect("response_rx mutex poisoned")
             .recv()
             .unwrap_or(crate::visitor::VisitResult::Continue)
     }
@@ -1200,7 +1200,7 @@ impl crate::visitor::HtmlVisitor for AsyncToSyncVisitorBridge {
         }
         self.response_rx
             .lock()
-            .unwrap()
+            .expect("response_rx mutex poisoned")
             .recv()
             .unwrap_or(crate::visitor::VisitResult::Continue)
     }

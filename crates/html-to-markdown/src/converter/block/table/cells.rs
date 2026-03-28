@@ -5,7 +5,7 @@
 //! - Cell layout handling with colspan/rowspan support
 //! - Layout table row conversion to list items
 
-use crate::converter::utility::content::normalized_tag_name;
+use crate::converter::utility::content::{collect_tag_attributes, normalized_tag_name};
 use std::borrow::Cow;
 
 use super::cell::{collect_table_cells, convert_table_cell, get_colspan_rowspan};
@@ -156,11 +156,7 @@ pub fn convert_table_row(
         use std::collections::BTreeMap;
 
         if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
-            let attributes: BTreeMap<String, String> = tag
-                .attributes()
-                .iter()
-                .filter_map(|(k, v)| v.as_ref().map(|val| (k.to_string(), val.to_string())))
-                .collect();
+            let attributes: BTreeMap<String, String> = collect_tag_attributes(tag);
 
             let node_ctx = NodeContext {
                 node_type: NodeType::TableRow,
