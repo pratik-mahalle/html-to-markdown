@@ -10,8 +10,9 @@ declare(strict_types=1);
 
 /**
  * @param array<string, mixed>|null $options
+ * @return array<string, mixed>
  */
-function html_to_markdown_convert(string $html, ?array $options = null): string
+function html_to_markdown_convert(string $html, ?array $options = null): array
 {
     throw new \RuntimeException('html_to_markdown extension not loaded');
 }

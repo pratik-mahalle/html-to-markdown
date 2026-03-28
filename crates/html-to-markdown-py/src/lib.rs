@@ -370,7 +370,7 @@ mod tests {
         Python::attach(|py| -> PyResult<()> {
             let html = "<h1>Hello</h1>";
             let result = convert(py, html, None)?;
-            let content: String = result.bind(py).get_item("content").unwrap().extract().unwrap();
+            let content: String = result.bind(py).get_item("content").unwrap().unwrap().extract().unwrap();
             assert!(content.contains("Hello"));
             Ok(())
         })
@@ -393,26 +393,30 @@ mod tests {
             true,
             false,
             false,
-            true,
             "double-equal".to_string(),
             true,
             "normalized".to_string(),
-            false,
+            true,
             false,
             80,
             false,
+            "utf-8".to_string(),
             "".to_string(),
             "".to_string(),
             "spaces".to_string(),
-            "indented".to_string(),
             Vec::new(),
             None,
             false,
             Vec::new(),
             Vec::new(),
-            "utf-8".to_string(),
+            "indented".to_string(),
             false,
             "markdown".to_string(),
+            false,
+            false,
+            5_242_880u64,
+            false,
+            false,
         );
         let rust_opts = opts.to_rust();
         assert_eq!(rust_opts.list_indent_width, 4);
