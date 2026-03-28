@@ -51,7 +51,7 @@ updates:
       interval: "weekly"
 
   - package-ecosystem: "gomod"
-    directory: "/packages/go/v2"
+    directory: "/packages/go/v3"
     schedule:
       interval: "weekly"
 

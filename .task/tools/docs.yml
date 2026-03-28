@@ -12,7 +12,7 @@ tasks:
       - packages/typescript/README.md
       - packages/ruby/README.md
       - packages/php/README.md
-      - packages/go/v2/README.md
+      - packages/go/v3/README.md
       - packages/java/README.md
       - packages/csharp/README.md
       - packages/elixir/README.md

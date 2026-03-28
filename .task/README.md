@@ -288,7 +288,7 @@ tasks:
 - Node.js (packages/typescript/package.json)
 - Ruby (packages/ruby/lib/html_to_markdown/version.rb)
 - PHP (packages/php/composer.json)
-- Go (packages/go/v2/version.go)
+- Go (packages/go/v3/version.go)
 - Java (packages/java/pom.xml)
 - C# (packages/csharp/HtmlToMarkdown.csproj)
 - Elixir (packages/elixir/mix.exs)
