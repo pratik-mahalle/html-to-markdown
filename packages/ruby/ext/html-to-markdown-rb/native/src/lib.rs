@@ -5,13 +5,6 @@ use html_to_markdown_rs::{
     convert_with_inline_images as convert_with_inline_images_inner, error::ConversionError, safety::guard_panic,
 };
 
-fn convert_inner(html: &str, options: Option<ConversionOptions>) -> html_to_markdown_rs::error::Result<String> {
-    convert_rs(html, options).map(|r| r.content.unwrap_or_default())
-}
-
-#[cfg(feature = "visitor")]
-use html_to_markdown_rs::convert_with_visitor as convert_with_visitor_inner;
-
 #[cfg(feature = "visitor")]
 use html_to_markdown_rs::convert_with_tables as convert_with_tables_inner;
 
@@ -45,8 +38,6 @@ use visitor::RubyVisitorWrapper;
 use magnus::prelude::*;
 use magnus::{Error, Ruby, TryConvert, Value, function, scan_args::scan_args};
 
-#[cfg(feature = "visitor")]
-use std::panic::AssertUnwindSafe;
 
 #[cfg(feature = "profiling")]
 use std::path::PathBuf;
@@ -65,40 +56,6 @@ fn conversion_error(err: ConversionError) -> Error {
     }
 }
 
-fn convert_fn(ruby: &Ruby, args: &[Value]) -> Result<String, Error> {
-    #[cfg(feature = "visitor")]
-    let parsed = scan_args::<(String,), (Option<Value>, Option<Value>), (), (), (), ()>(args)?;
-    #[cfg(not(feature = "visitor"))]
-    let parsed = scan_args::<(String,), (Option<Value>,), (), (), (), ()>(args)?;
-
-    let html = parsed.required.0;
-    let options = build_conversion_options(ruby, parsed.optional.0)?;
-
-    #[cfg(feature = "visitor")]
-    {
-        let visitor = parsed.optional.1;
-        if let Some(visitor_value) = visitor {
-            if !visitor_value.is_nil() {
-                let visitor_wrapper = RubyVisitorWrapper::new(visitor_value);
-                let visitor_handle = std::rc::Rc::new(std::cell::RefCell::new(visitor_wrapper.clone()));
-
-                let result = guard_panic(AssertUnwindSafe(|| {
-                    profiling::maybe_profile(|| convert_with_visitor_inner(&html, Some(options), Some(visitor_handle)))
-                }))
-                .map_err(conversion_error)?;
-
-                if let Some(error_msg) = visitor_wrapper.last_error.borrow().as_ref() {
-                    return Err(runtime_error(error_msg.clone()));
-                }
-
-                return Ok(result);
-            }
-        }
-    }
-
-    guard_panic(|| profiling::maybe_profile(|| convert_inner(&html, Some(options)))).map_err(conversion_error)
-}
-
 fn options_handle_fn(ruby: &Ruby, args: &[Value]) -> Result<OptionsHandle, Error> {
     let parsed = scan_args::<(), (Option<Value>,), (), (), (), ()>(args)?;
     let options = build_conversion_options(ruby, parsed.optional.0)?;
@@ -111,7 +68,10 @@ fn convert_with_options_handle_fn(_ruby: &Ruby, args: &[Value]) -> Result<String
     let handle = parsed.required.1;
     let options = handle.0.clone();
 
-    guard_panic(|| profiling::maybe_profile(|| convert_inner(&html, Some(options)))).map_err(conversion_error)
+    guard_panic(|| {
+        profiling::maybe_profile(|| convert_rs(&html, Some(options)).map(|r| r.content.unwrap_or_default()))
+    })
+    .map_err(conversion_error)
 }
 
 #[cfg(feature = "inline-images")]
@@ -311,7 +271,6 @@ fn stop_profiling_fn(_ruby: &Ruby, _args: &[Value]) -> Result<bool, Error> {
 #[magnus::init]
 fn init(ruby: &Ruby) -> Result<(), Error> {
     let module = ruby.define_module("HtmlToMarkdown")?;
-    module.define_singleton_method("convert_to_string", function!(convert_fn, -1))?;
     module.define_singleton_method("convert", function!(convert_full_fn, -1))?;
     module.define_singleton_method("options", function!(options_handle_fn, -1))?;
     module.define_singleton_method("convert_with_options", function!(convert_with_options_handle_fn, -1))?;

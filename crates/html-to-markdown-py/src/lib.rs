@@ -99,92 +99,6 @@ fn stop_profiling() -> PyResult<()> {
     Ok(())
 }
 
-/// Convert HTML to Markdown, returning a plain Markdown string (v2 compat).
-///
-/// For the full v3 API returning content, metadata, tables and warnings use `convert()`.
-///
-/// Args:
-///     html: HTML string to convert
-///     options: Optional conversion configuration
-///     visitor: Optional visitor for custom conversion logic (requires visitor feature)
-///
-/// Returns:
-///     Markdown string
-///
-/// Raises:
-///     ValueError: Invalid HTML or configuration
-///
-/// Example:
-///     ```ignore
-///     from html_to_markdown import convert_to_string, ConversionOptions
-///
-///     html = "<h1>Hello</h1><p>World</p>"
-///     markdown = convert_to_string(html)
-///     ```
-#[pyfunction]
-#[cfg(feature = "visitor")]
-#[pyo3(signature = (html, options=None, visitor=None))]
-fn convert_to_string(
-    py: Python<'_>,
-    html: &str,
-    options: Option<ConversionOptions>,
-    visitor: Option<Py<PyAny>>,
-) -> PyResult<String> {
-    let html = html.to_owned();
-    let rust_options = options.map(|opts| opts.to_rust());
-
-    let Some(visitor_py) = visitor else {
-        return py
-            .detach(move || {
-                run_with_guard_and_profile(|| {
-                    html_to_markdown_rs::convert(&html, rust_options.clone()).map(|r| r.content.unwrap_or_default())
-                })
-            })
-            .map_err(to_py_err);
-    };
-
-    let bridge = visitor::PyVisitorBridge::new(visitor_py);
-    let visitor_handle = std::sync::Arc::new(std::sync::Mutex::new(bridge));
-
-    py.detach(move || {
-        run_with_guard_and_profile(|| {
-            let rc_visitor: Rc<RefCell<dyn HtmlVisitor>> = {
-                Python::attach(|py| {
-                    let guard = visitor_handle.lock().unwrap();
-                    let bridge_copy = visitor::PyVisitorBridge::new(guard.visitor.clone_ref(py));
-                    Rc::new(RefCell::new(bridge_copy)) as Rc<RefCell<dyn HtmlVisitor>>
-                })
-            };
-            html_to_markdown_rs::convert_with_visitor(&html, rust_options.clone(), Some(rc_visitor))
-        })
-    })
-    .map_err(to_py_err)
-}
-
-#[pyfunction]
-#[cfg(not(feature = "visitor"))]
-#[pyo3(signature = (html, options=None, visitor=None))]
-fn convert_to_string(
-    py: Python<'_>,
-    html: &str,
-    options: Option<ConversionOptions>,
-    visitor: Option<Py<PyAny>>,
-) -> PyResult<String> {
-    if visitor.is_some() {
-        return Err(PyErr::new::<pyo3::exceptions::PyNotImplementedError, _>(
-            "Visitor support requires the 'visitor' feature to be enabled",
-        ));
-    }
-    let html = html.to_owned();
-    let rust_options = options.map(|opts| opts.to_rust());
-    py.detach(move || {
-        run_with_guard_and_profile(|| {
-            html_to_markdown_rs::convert(&html, rust_options.clone()).map(|r| r.content.unwrap_or_default())
-        })
-    })
-    .map_err(to_py_err)
-}
-
 #[pyfunction]
 #[pyo3(signature = (html, handle))]
 fn convert_with_options_handle(py: Python<'_>, html: &str, handle: &ConversionOptionsHandle) -> PyResult<String> {
@@ -419,7 +333,6 @@ fn convert<'py>(py: Python<'py>, html: &str, options: Option<ConversionOptions>)
 #[pymodule]
 fn _html_to_markdown(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(convert, m)?)?;
-    m.add_function(wrap_pyfunction!(convert_to_string, m)?)?;
     m.add_function(wrap_pyfunction!(convert_with_options_handle, m)?)?;
     m.add_function(wrap_pyfunction!(create_options_handle, m)?)?;
     m.add_class::<ConversionOptions>()?;
@@ -456,8 +369,9 @@ mod tests {
         Python::initialize();
         Python::attach(|py| -> PyResult<()> {
             let html = "<h1>Hello</h1>";
-            let result = convert_to_string(py, html, None, None)?;
-            assert!(result.contains("Hello"));
+            let result = convert(py, html, None)?;
+            let content: String = result.bind(py).get_item("content").unwrap().extract().unwrap();
+            assert!(content.contains("Hello"));
             Ok(())
         })
         .expect("conversion succeeds");

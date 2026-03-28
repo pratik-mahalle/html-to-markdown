@@ -208,7 +208,6 @@ class TableExtractionResult(TypedDict):
     tables: list[TableData]
 
 def convert(html: str, options: ConversionOptions | None = None) -> dict[str, object]: ...
-def convert_to_string(html: str, options: ConversionOptions | None = None, visitor: object | None = None) -> str: ...
 def convert_with_inline_images(
     html: str,
     options: ConversionOptions | None = None,

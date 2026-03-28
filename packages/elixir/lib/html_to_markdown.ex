@@ -45,33 +45,6 @@ defmodule HtmlToMarkdown do
   end
 
   @doc """
-  Convert HTML to Markdown, returning a plain Markdown string (v2 compat).
-
-  The `options` argument accepts an `%HtmlToMarkdown.Options{}` struct,
-  a map/keyword list with option keys, or `nil` (defaults).
-  """
-  @spec convert_to_string(String.t(), options_input()) :: {:ok, String.t()} | {:error, term()}
-  def convert_to_string(html, options \\ nil) when is_binary(html) do
-    options_map = normalize_options(options)
-
-    case call_convert_to_string(html, options_map) do
-      {:ok, markdown} -> {:ok, markdown}
-      {:error, reason} -> {:error, reason}
-    end
-  end
-
-  @doc """
-  Bang variant of `convert_to_string/2`. Raises on failure.
-  """
-  @spec convert_to_string!(String.t(), options_input()) :: String.t()
-  def convert_to_string!(html, options \\ nil) do
-    case convert_to_string(html, options) do
-      {:ok, markdown} -> markdown
-      {:error, reason} -> raise Error, message: inspect(reason)
-    end
-  end
-
-  @doc """
   Convert HTML using a reusable options handle.
   """
   @spec convert_with_options(String.t(), reference()) :: {:ok, String.t()} | {:error, term()}
@@ -241,13 +214,6 @@ defmodule HtmlToMarkdown do
   def stop_profiling do
     Native.stop_profiling()
   end
-
-  defp call_convert_to_string(html, nil), do: Native.convert_to_string(html)
-
-  defp call_convert_to_string(html, options) when options == %{},
-    do: Native.convert_to_string(html)
-
-  defp call_convert_to_string(html, options), do: Native.convert_with_options_map(html, options)
 
   defp normalize_options(nil), do: nil
 

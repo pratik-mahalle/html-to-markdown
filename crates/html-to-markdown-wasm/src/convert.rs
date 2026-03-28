@@ -4,14 +4,6 @@ use html_to_markdown_rs::ConversionError;
 use wasm_bindgen::prelude::*;
 
 #[cfg(feature = "js-bindings")]
-fn convert_to_string_inner(
-    html: &str,
-    options: Option<html_to_markdown_rs::ConversionOptions>,
-) -> html_to_markdown_rs::error::Result<String> {
-    html_to_markdown_rs::convert(html, options).map(|r| r.content.unwrap_or_default())
-}
-
-#[cfg(feature = "js-bindings")]
 pub fn to_js_error(err: ConversionError) -> JsValue {
     JsValue::from_str(&html_to_markdown_bindings_common::error::error_message(&err))
 }
@@ -40,37 +32,16 @@ pub fn bytes_to_string(bytes: js_sys::Uint8Array) -> Result<String, JsValue> {
     String::from_utf8(buffer).map_err(|e| JsValue::from_str(&format!("HTML must be valid UTF-8: {}", e)))
 }
 
-/// Convert HTML to Markdown, returning a plain Markdown string (v2 compat).
-///
-/// # Arguments
-///
-/// * `html` - The HTML string to convert
-/// * `options` - Optional conversion options (as a JavaScript object)
-///
-/// # Example
-///
-/// ```javascript
-/// import { convertToString } from 'html-to-markdown-wasm';
-///
-/// const html = '<h1>Hello World</h1>';
-/// const markdown = convertToString(html);
-/// console.log(markdown); // # Hello World
-/// ```
-#[cfg(feature = "js-bindings")]
-#[wasm_bindgen(js_name = convertToString)]
-pub fn convert_to_string(html: String, options: JsValue) -> Result<String, JsValue> {
-    let rust_options = parse_wasm_options(options)?;
-
-    html_to_markdown_rs::safety::guard_panic(|| convert_to_string_inner(&html, rust_options)).map_err(to_js_error)
-}
-
 #[cfg(feature = "js-bindings")]
 #[wasm_bindgen(js_name = convertBytes)]
 pub fn convert_bytes(html: js_sys::Uint8Array, options: JsValue) -> Result<String, JsValue> {
     let html = bytes_to_string(html)?;
     let rust_options = parse_wasm_options(options)?;
 
-    html_to_markdown_rs::safety::guard_panic(|| convert_to_string_inner(&html, rust_options)).map_err(to_js_error)
+    html_to_markdown_rs::safety::guard_panic(|| {
+        html_to_markdown_rs::convert(&html, rust_options).map(|r| r.content.unwrap_or_default())
+    })
+    .map_err(to_js_error)
 }
 
 #[cfg(feature = "js-bindings")]
@@ -87,8 +58,10 @@ pub fn convert_with_options_handle(
     html: String,
     handle: &crate::options::WasmConversionOptionsHandle,
 ) -> Result<String, JsValue> {
-    html_to_markdown_rs::safety::guard_panic(|| convert_to_string_inner(&html, Some(handle.inner.clone())))
-        .map_err(to_js_error)
+    html_to_markdown_rs::safety::guard_panic(|| {
+        html_to_markdown_rs::convert(&html, Some(handle.inner.clone())).map(|r| r.content.unwrap_or_default())
+    })
+    .map_err(to_js_error)
 }
 
 #[cfg(feature = "js-bindings")]
@@ -99,8 +72,10 @@ pub fn convert_bytes_with_options_handle(
 ) -> Result<String, JsValue> {
     let html = bytes_to_string(html)?;
 
-    html_to_markdown_rs::safety::guard_panic(|| convert_to_string_inner(&html, Some(handle.inner.clone())))
-        .map_err(to_js_error)
+    html_to_markdown_rs::safety::guard_panic(|| {
+        html_to_markdown_rs::convert(&html, Some(handle.inner.clone())).map(|r| r.content.unwrap_or_default())
+    })
+    .map_err(to_js_error)
 }
 
 /// Convert HTML to Markdown, returning a JavaScript object with structured content, metadata,
