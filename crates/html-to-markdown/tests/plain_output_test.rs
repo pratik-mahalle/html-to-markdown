@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 fn convert(
     html: &str,
     opts: Option<html_to_markdown_rs::ConversionOptions>,

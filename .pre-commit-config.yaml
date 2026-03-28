@@ -84,8 +84,6 @@ repos:
             "--exclude=html-to-markdown-py",
             "--exclude=html-to-markdown-node",
             "--exclude=html-to-markdown-wasm",
-            "--exclude=benchmark-harness",
-            "--exclude=html-to-markdown-wasm-wasmtime-tests",
             "--exclude=html-to-markdown-e2e-rust",
             "--all-features",
             "--all-targets",
