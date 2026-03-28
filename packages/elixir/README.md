@@ -18,7 +18,7 @@
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown?label=Java&color=007ec6" alt="Java">
   </a>
   <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown">
-    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/html-to-markdown?label=Go&color=007ec6&filter=v2.29.0" alt="Go">
+    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/html-to-markdown?label=Go&color=007ec6&filter=v3.0.0" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/">
     <img src="https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown?label=C%23&color=007ec6" alt="C#">
@@ -56,24 +56,33 @@
   </a>
 </div>
 
+
 Elixir bindings for the Rust html-to-markdown engine. The package exposes a fast HTML to Markdown converter implemented with Rustler.
 Ship identical Markdown across every runtime while enjoying native performance with Rustler NIF bindings.
+
 
 ## Installation
 
 ```bash
-Add {:html_to_markdown, "~> 2.28.3"} to mix.exs deps
+Add {:html_to_markdown, "~> 3.0"} to mix.exs deps
 ```
+
+
 
 Requires Elixir 1.19+ and OTP 28. Add to your `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:html_to_markdown, "~> 2.29.0"}
+    {:html_to_markdown, "~> 3.0.0"}
   ]
 end
 ```
+
+
+
+
+
 
 ## Performance Snapshot
 
@@ -86,48 +95,52 @@ Apple M4 • Real Wikipedia documents • `convert()` (Elixir)
 | Medium (Python) | 656KB | 439 | 281.5 MB/s |
 | Large (Rust) | 567KB | 485 | 268.7 MB/s |
 | Small (Intro) | 463KB | 581 | 262.9 MB/s |
-| HOCR German PDF | 44KB | 7,106 | 303.1 MB/s |
-| HOCR Embedded Tables | 37KB | 6,231 | 226.1 MB/s |
-| HOCR Invoice | 4KB | 62,657 | 256.4 MB/s |
 
-See for detailed benchmarks.
+
+
 
 ## Quick Start
 
 Basic conversion:
 
 ```elixir
-{:ok, markdown} = HtmlToMarkdown.convert("<h1>Hello</h1><p>This is <strong>fast</strong>!</p>")
-IO.puts(markdown)
+{:ok, result} = HtmlToMarkdown.convert("<h1>Hello</h1><p>This is <strong>fast</strong>!</p>")
+IO.puts(result.content)
 ```
+
+
 
 With conversion options:
 
 ```elixir
-handle = HtmlToMarkdown.options(%HtmlToMarkdown.Options{wrap: true, wrap_width: 40})
-{:ok, markdown} = HtmlToMarkdown.convert_with_options("<h1>Hello</h1><p>World</p>", handle)
-IO.puts(markdown)
+opts = %HtmlToMarkdown.Options{wrap: true, wrap_width: 40}
+{:ok, result} = HtmlToMarkdown.convert("<h1>Hello</h1><p>World</p>", opts)
+IO.puts(result.content)
 ```
+
+
+
 
 ## API Reference
 
-### Core Functions
+### Core Function
 
-**`HtmlToMarkdown.convert(html, options \\ nil) :: String.t()`**
 
-Basic HTML-to-Markdown conversion. Fast and simple.
+**`HtmlToMarkdown.convert(html, options \\ nil) :: {:ok, ConversionResult.t()} | {:error, term()}`**
 
-**`HtmlToMarkdown.convert_with_metadata(html, options \\ nil, config \\ nil) :: {String.t(), map()}`**
+Converts HTML to Markdown. Returns `{:ok, result}` where result is a struct with all results in a single call.
 
-Extract Markdown plus metadata in a single pass.
+```elixir
+{:ok, result} = HtmlToMarkdown.convert(html)
+result.content    # Converted Markdown string
+result.metadata   # Metadata map (when extract_metadata: true)
+result.tables     # Table data list (when extract_tables: true)
+result.document   # Document-level info
+result.images     # Extracted images
+result.warnings   # Any conversion warnings
+```
 
-**`HtmlToMarkdown.convert_with_inline_images(html, config \\ nil) :: {String.t(), list(map()), list(String.t())}`**
 
-Extract base64-encoded inline images with metadata.
-
-**`HtmlToMarkdown.convert_with_tables(html, options \\ nil, config \\ nil) :: %ConversionWithTables{}`**
-
-Extract structured table data (cells, headers, rendered markdown) alongside conversion.
 
 ### Options
 
@@ -139,16 +152,10 @@ Extract structured table data (cells, headers, rendered markdown) alongside conv
 - `wrap`: Enable text wrapping — default: `false`
 - `wrap_width`: Wrap at column — default: `80`
 - `code_language`: Default fenced code block language — default: none
-- `extract_metadata`: Embed metadata as YAML frontmatter — default: `false`
+- `extract_metadata`: Enable metadata extraction into `result.metadata` — default: `false`
+- `extract_tables`: Enable structured table extraction into `result.tables` — default: `false`
 - `output_format`: Output markup format (`"markdown"` | `"djot"` | `"plain"`) — default: `"markdown"`
 
-**`MetadataConfig`** – Selective metadata extraction:
-
-- `extract_headers`: h1-h6 elements — default: `true`
-- `extract_links`: Hyperlinks — default: `true`
-- `extract_images`: Image elements — default: `true`
-- `extract_structured_data`: JSON-LD, Microdata, RDFa — default: `true`
-- `max_structured_data_size`: Size limit in bytes — default: `100KB`
 
 ## Djot Output Format
 
@@ -168,6 +175,7 @@ The library supports converting HTML to [Djot](https://djot.net/), a lightweight
 
 ### Example Usage
 
+
 ```elixir
 html = "<p>This is <strong>bold</strong> and <em>italic</em> text.</p>"
 
@@ -180,11 +188,14 @@ html = "<p>This is <strong>bold</strong> and <em>italic</em> text.</p>"
 # Result: "This is *bold* and _italic_ text."
 ```
 
+
 Djot's extended syntax allows you to express more semantic meaning in lightweight text, making it useful for documents that require strikethrough, insertion tracking, or mathematical notation.
+
 
 ## Plain Text Output
 
 Set `output_format` to `"plain"` to strip all markup and return only visible text. This bypasses the Markdown conversion pipeline entirely for maximum speed.
+
 
 ```elixir
 html = "<h1>Title</h1><p>This is <strong>bold</strong> and <em>italic</em> text.</p>"
@@ -193,11 +204,14 @@ html = "<h1>Title</h1><p>This is <strong>bold</strong> and <em>italic</em> text.
 # Result: "Title\n\nThis is bold and italic text."
 ```
 
+
 Plain text mode is useful for search indexing, text extraction, and feeding content to LLMs.
+
+
 
 ## Metadata Extraction
 
-The metadata extraction feature enables comprehensive document analysis during conversion. Extract document properties, headers, links, images, and structured data in a single pass.
+The metadata extraction feature enables comprehensive document analysis during conversion. Extract document properties, headers, links, images, and structured data in a single pass — all via the standard `convert()` function.
 
 **Use Cases:**
 
@@ -207,28 +221,33 @@ The metadata extraction feature enables comprehensive document analysis during c
 - **Accessibility audits** – Check for images without alt text, empty links, invalid heading hierarchy
 - **Link validation** – Classify and validate anchor, internal, external, email, and phone links
 
-**Zero Overhead When Disabled:** Metadata extraction adds negligible overhead and happens during the HTML parsing pass. Disable unused metadata types in `MetadataConfig` to optimize further.
+**Zero Overhead When Disabled:** Metadata extraction adds negligible overhead and happens during the HTML parsing pass. Pass `extract_metadata: true` in `ConversionOptions` to enable it; the result is available at `result.metadata`.
 
 ### Example: Quick Start
 
+
 ```elixir
-alias HtmlToMarkdown
-
 html = "<h1>Article</h1><img src=\"test.jpg\" alt=\"test\">"
-{markdown, metadata} = HtmlToMarkdown.convert_with_metadata(html)
+opts = %HtmlToMarkdown.Options{extract_metadata: true}
+{:ok, result} = HtmlToMarkdown.convert(html, opts)
 
-IO.inspect(metadata.document.title)        # Document title
-IO.inspect(metadata.headers)               # All h1-h6 elements
-IO.inspect(metadata.links)                 # All hyperlinks
-IO.inspect(metadata.images)                # All images with alt text
-IO.inspect(metadata.structured_data)       # JSON-LD, Microdata, RDFa
+IO.puts(result.content)                           # Converted Markdown
+IO.inspect(result.metadata["document"]["title"])  # Document title
+IO.inspect(result.metadata["headers"])            # All h1-h6 elements
+IO.inspect(result.metadata["links"])              # All hyperlinks
+IO.inspect(result.metadata["images"])             # All images with alt text
+IO.inspect(result.metadata["structured_data"])    # JSON-LD, Microdata, RDFa
 ```
 
-For detailed examples including SEO extraction, table-of-contents generation, link validation, and accessibility audits, see the .
+
+
+
+
+
 
 ## Visitor Pattern
 
-The visitor pattern enables custom HTML→Markdown conversion logic by providing callbacks for specific HTML elements during traversal. Use visitors to transform content, filter elements, validate structure, or collect analytics.
+The visitor pattern enables custom HTML→Markdown conversion logic by providing callbacks for specific HTML elements during traversal. Pass a visitor as the third argument to `convert()`.
 
 **Use Cases:**
 
@@ -242,9 +261,13 @@ The visitor pattern enables custom HTML→Markdown conversion logic by providing
 
 ### Example: Quick Start
 
+
 ```elixir
 defmodule MyVisitor do
-  def visit_link(ctx, href, text, title) do
+  use HtmlToMarkdown.Visitor
+
+  @impl true
+  def handle_link(_ctx, href, text, _title) do
     # Rewrite CDN URLs
     href = if String.starts_with?(href, "https://old-cdn.com") do
       String.replace(href, "https://old-cdn.com", "https://new-cdn.com")
@@ -254,21 +277,23 @@ defmodule MyVisitor do
     {:custom, "[#{text}](#{href})"}
   end
 
-  def visit_image(ctx, src, alt, title) do
+  @impl true
+  def handle_image(_ctx, src, _alt, _title) do
     # Skip tracking pixels
-    if String.contains?(src, "tracking") do
-      :skip
-    else
-      :continue
-    end
+    if String.contains?(src, "tracking"), do: :skip, else: :continue
   end
 end
 
 html = "<a href=\"https://old-cdn.com/file.pdf\">Download</a>"
-markdown = HtmlToMarkdown.convert_with_visitor(html, visitor: MyVisitor)
+opts = %HtmlToMarkdown.Options{visitor: MyVisitor}
+{:ok, result} = HtmlToMarkdown.convert(html, opts)
+result.content
 ```
 
-For comprehensive examples including content filtering, link footnotes, accessibility validation, and asynchronous URL validation, see the .
+
+
+
+
 
 ## Examples
 

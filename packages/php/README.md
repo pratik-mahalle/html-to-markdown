@@ -18,7 +18,7 @@
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown?label=Java&color=007ec6" alt="Java">
   </a>
   <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown">
-    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/html-to-markdown?label=Go&color=007ec6&filter=v2.29.0" alt="Go">
+    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/html-to-markdown?label=Go&color=007ec6&filter=v3.0.0" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/">
     <img src="https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown?label=C%23&color=007ec6" alt="C#">
@@ -56,16 +56,20 @@
   </a>
 </div>
 
+
 High-performance HTML to Markdown converter with typed PHP bindings powered by a Rust core.
 Provides a type-safe API with full PHPStan level 9 support, modern PHP 8.2+ features, and comprehensive metadata extraction.
 
 Note: The package was previously published as `goldziher/html-to-markdown`, which still works for backward compatibility.
+
 
 ## Installation
 
 ```bash
 composer require kreuzberg-dev/html-to-markdown
 ```
+
+
 
 Requires PHP 8.2+. Install the native extension via PIE:
 
@@ -79,6 +83,11 @@ Or use Composer (requires ext-html_to_markdown):
 composer require goldziher/html-to-markdown
 ```
 
+
+
+
+
+
 ## Performance Snapshot
 
 Apple M4 • Real Wikipedia documents • `convert()` (PHP)
@@ -89,7 +98,8 @@ Apple M4 • Real Wikipedia documents • `convert()` (PHP)
 | Tables (Countries) | 360KB | 973 |
 | Medium (Python) | 657KB | 485 |
 
-See for detailed benchmarks.
+
+
 
 ## Quick Start
 
@@ -101,11 +111,15 @@ use function HtmlToMarkdown\convert;
 
 // Object-oriented usage
 $converter = Converter::create();
-$markdown = $converter->convert('<h1>Hello</h1><p>This is <strong>fast</strong>!</p>');
+$result = $converter->convert('<h1>Hello</h1><p>This is <strong>fast</strong>!</p>');
+$markdown = $result['content'];
 
 // Procedural helper
-$markdown = convert('<h1>Hello</h1>');
+$result = convert('<h1>Hello</h1>');
+$markdown = $result['content'];
 ```
+
+
 
 With conversion options:
 
@@ -120,32 +134,36 @@ $options = new ConversionOptions(
     listIndentWidth: 2,
 );
 
-$markdown = $converter->convert('<h1>Hello</h1>', $options);
+$result = $converter->convert('<h1>Hello</h1>', $options);
+$markdown = $result['content'];
 ```
+
+
+
 
 ## API Reference
 
-### Core Functions
+### Core Function
 
-**`Converter::convert(string $html, ?ConversionOptions $options = null): string`**
 
-Basic HTML-to-Markdown conversion. Fast and simple.
+**`Converter::convert(string $html, ?ConversionOptions $options = null, ?VisitorInterface $visitor = null): array`**
 
-**`Converter::convertWithMetadata(string $html, ?ConversionOptions $options = null, ?MetadataConfig $config = null): [string, array]`**
+Converts HTML to Markdown. Returns an array `ConversionResult` with all results in a single call.
 
-Extract Markdown plus metadata (headers, links, images, structured data) in a single pass.
+```php
+<?php
+use HtmlToMarkdown\Service\Converter;
 
-**`Converter::convertWithVisitor(string $html, VisitorInterface $visitor, ?ConversionOptions $options = null): string`**
+$result  = Converter::create()->convert($html);
+$markdown = $result['content'];    // Converted Markdown string
+$metadata = $result['metadata'];   // Metadata (when extractMetadata: true)
+$tables   = $result['tables'];     // Structured table data (when extractTables: true)
+$document = $result['document'];   // Document-level info
+$images   = $result['images'];     // Extracted images
+$warnings = $result['warnings'];   // Any conversion warnings
+```
 
-Customize conversion with visitor callbacks for element interception.
 
-**`Converter::convertWithInlineImages(string $html, ?InlineImageConfig $config = null): [string, array, array]`**
-
-Extract base64-encoded inline images with metadata.
-
-**`Converter::convertWithTables(string $html, ?ConversionOptions $options = null, ?MetadataConfig $config = null): ConversionWithTables`**
-
-Extract structured table data (cells, headers, rendered markdown) alongside conversion.
 
 ### Options
 
@@ -157,16 +175,10 @@ Extract structured table data (cells, headers, rendered markdown) alongside conv
 - `wrap`: Enable text wrapping — default: `false`
 - `wrap_width`: Wrap at column — default: `80`
 - `code_language`: Default fenced code block language — default: none
-- `extract_metadata`: Embed metadata as YAML frontmatter — default: `false`
+- `extract_metadata`: Enable metadata extraction into `result.metadata` — default: `false`
+- `extract_tables`: Enable structured table extraction into `result.tables` — default: `false`
 - `output_format`: Output markup format (`"markdown"` | `"djot"` | `"plain"`) — default: `"markdown"`
 
-**`MetadataConfig`** – Selective metadata extraction:
-
-- `extract_headers`: h1-h6 elements — default: `true`
-- `extract_links`: Hyperlinks — default: `true`
-- `extract_images`: Image elements — default: `true`
-- `extract_structured_data`: JSON-LD, Microdata, RDFa — default: `true`
-- `max_structured_data_size`: Size limit in bytes — default: `100KB`
 
 ## Djot Output Format
 
@@ -186,6 +198,7 @@ The library supports converting HTML to [Djot](https://djot.net/), a lightweight
 
 ### Example Usage
 
+
 ```php
 use HtmlToMarkdown\Converter;
 use HtmlToMarkdown\ConversionOptions;
@@ -201,11 +214,14 @@ $djot = Converter::convert($html, new ConversionOptions(outputFormat: 'djot'));
 // Result: "This is *bold* and _italic_ text."
 ```
 
+
 Djot's extended syntax allows you to express more semantic meaning in lightweight text, making it useful for documents that require strikethrough, insertion tracking, or mathematical notation.
+
 
 ## Plain Text Output
 
 Set `output_format` to `"plain"` to strip all markup and return only visible text. This bypasses the Markdown conversion pipeline entirely for maximum speed.
+
 
 ```php
 use HtmlToMarkdown\Converter;
@@ -217,11 +233,14 @@ $plain = Converter::convert($html, new ConversionOptions(outputFormat: 'plain'))
 // Result: "Title\n\nThis is bold and italic text."
 ```
 
+
 Plain text mode is useful for search indexing, text extraction, and feeding content to LLMs.
+
+
 
 ## Metadata Extraction
 
-The metadata extraction feature enables comprehensive document analysis during conversion. Extract document properties, headers, links, images, and structured data in a single pass.
+The metadata extraction feature enables comprehensive document analysis during conversion. Extract document properties, headers, links, images, and structured data in a single pass — all via the standard `convert()` function.
 
 **Use Cases:**
 
@@ -231,29 +250,39 @@ The metadata extraction feature enables comprehensive document analysis during c
 - **Accessibility audits** – Check for images without alt text, empty links, invalid heading hierarchy
 - **Link validation** – Classify and validate anchor, internal, external, email, and phone links
 
-**Zero Overhead When Disabled:** Metadata extraction adds negligible overhead and happens during the HTML parsing pass. Disable unused metadata types in `MetadataConfig` to optimize further.
+**Zero Overhead When Disabled:** Metadata extraction adds negligible overhead and happens during the HTML parsing pass. Pass `extract_metadata: true` in `ConversionOptions` to enable it; the result is available at `result.metadata`.
 
 ### Example: Quick Start
 
+
 ```php
 <?php
-use HtmlToMarkdown\Converter;
+use HtmlToMarkdown\Config\ConversionOptions;
+use HtmlToMarkdown\Service\Converter;
 
 $html = '<h1>Article</h1><img src="test.jpg" alt="test">';
-[$markdown, $metadata] = Converter::convertWithMetadata($html);
+$result = Converter::create()->convert(
+    $html,
+    new ConversionOptions(extractMetadata: true)
+);
 
-echo $metadata['document']['title'];       // Document title
-print_r($metadata['headers']);             // All h1-h6 elements
-print_r($metadata['links']);               // All hyperlinks
-print_r($metadata['images']);              // All images with alt text
-print_r($metadata['structured_data']);     // JSON-LD, Microdata, RDFa
+echo $result['content'];                          // Converted Markdown
+echo $result['metadata']->document->title;        // Document title
+print_r($result['metadata']->headers);            // All h1-h6 elements
+print_r($result['metadata']->links);              // All hyperlinks
+print_r($result['metadata']->images);             // All images with alt text
+print_r($result['metadata']->structured_data);    // JSON-LD, Microdata, RDFa
 ```
 
-For detailed examples including SEO extraction, table-of-contents generation, link validation, and accessibility audits, see the .
+
+
+
+
+
 
 ## Visitor Pattern
 
-The visitor pattern enables custom HTML→Markdown conversion logic by providing callbacks for specific HTML elements during traversal. Use visitors to transform content, filter elements, validate structure, or collect analytics.
+The visitor pattern enables custom HTML→Markdown conversion logic by providing callbacks for specific HTML elements during traversal. Pass a visitor as the third argument to `convert()`.
 
 **Use Cases:**
 
@@ -267,30 +296,45 @@ The visitor pattern enables custom HTML→Markdown conversion logic by providing
 
 ### Example: Quick Start
 
+
 ```php
 <?php
-use HtmlToMarkdown\Converter;
+use HtmlToMarkdown\Config\ConversionOptions;
+use HtmlToMarkdown\Service\Converter;
+use HtmlToMarkdown\Visitor\AbstractVisitor;
+use HtmlToMarkdown\Visitor\NodeContext;
+use HtmlToMarkdown\Visitor\VisitResult;
 
-readonly class MyVisitor {
-    public function visitLink(array $ctx, string $href, string $text, ?string $title): array {
+class MyVisitor extends AbstractVisitor
+{
+    public function visitLink(NodeContext $ctx, string $href, string $text, ?string $title): array
+    {
         // Rewrite CDN URLs
         if (str_starts_with($href, 'https://old-cdn.com')) {
             $href = str_replace('https://old-cdn.com', 'https://new-cdn.com', $href);
         }
-        return ['type' => 'custom', 'output' => "[{$text}]({$href})"];
+        return VisitResult::custom("[{$text}]({$href})");
     }
 
-    public function visitImage(array $ctx, string $src, ?string $alt, ?string $title): array {
+    public function visitImage(NodeContext $ctx, string $src, ?string $alt, ?string $title): array
+    {
         // Skip tracking pixels
-        return str_contains($src, 'tracking') ? ['type' => 'skip'] : ['type' => 'continue'];
+        return str_contains($src, 'tracking') ? VisitResult::skip() : VisitResult::continue();
     }
 }
 
 $html = '<a href="https://old-cdn.com/file.pdf">Download</a>';
-$markdown = Converter::convertWithVisitor($html, new MyVisitor());
+$result = Converter::create()->convert(
+    $html,
+    new ConversionOptions(visitor: new MyVisitor())
+);
+$markdown = $result['content'];
 ```
 
-For comprehensive examples including content filtering, link footnotes, accessibility validation, and asynchronous URL validation, see the .
+
+
+
+
 
 ## Examples
 

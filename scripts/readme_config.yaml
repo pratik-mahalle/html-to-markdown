@@ -18,8 +18,6 @@ languages:
     features:
       visitor_pattern: true
       metadata_extraction: true
-      inline_images: true
-      async_support: true
       cli_proxy: false
     performance:
       platform: "Apple M4"
@@ -41,7 +39,6 @@ languages:
     snippets:
       basic_usage: "getting-started/basic_usage.md"
       with_options: "getting-started/with_options.md"
-      async_example: "getting-started/async_example.md"
       metadata_extraction: "metadata/basic_extraction.md"
       visitor_basic: "visitor/basic_visitor.md"
       table_extraction: "table-extraction/basic_extraction.md"
@@ -64,8 +61,6 @@ languages:
     features:
       visitor_pattern: true
       metadata_extraction: true
-      inline_images: true
-      async_support: false
       cli_proxy: false
     performance:
       platform: "Apple M4"
@@ -107,8 +102,6 @@ languages:
     features:
       visitor_pattern: true
       metadata_extraction: true
-      inline_images: true
-      async_support: false
       cli_proxy: true
     performance:
       platform: "Apple M4"
@@ -151,8 +144,6 @@ languages:
     features:
       visitor_pattern: true
       metadata_extraction: true
-      inline_images: true
-      async_support: false
       cli_proxy: false
     performance:
       platform: "Apple M4"
@@ -190,8 +181,6 @@ languages:
     features:
       visitor_pattern: false
       metadata_extraction: false
-      inline_images: false
-      async_support: true
       cli_proxy: false
     performance:
       platform: "Apple M4"
@@ -237,8 +226,6 @@ languages:
     features:
       visitor_pattern: false
       metadata_extraction: false
-      inline_images: false
-      async_support: false
       cli_proxy: false
     performance:
       platform: "Apple M4"
@@ -277,8 +264,6 @@ languages:
     features:
       visitor_pattern: false
       metadata_extraction: false
-      inline_images: false
-      async_support: false
       cli_proxy: false
     performance:
       platform: "Apple M4"
@@ -317,8 +302,6 @@ languages:
     features:
       visitor_pattern: true
       metadata_extraction: true
-      inline_images: true
-      async_support: false
       cli_proxy: false
     performance:
       platform: "Apple M4"
@@ -367,8 +350,6 @@ languages:
     features:
       visitor_pattern: true
       metadata_extraction: true
-      inline_images: true
-      async_support: false
       cli_proxy: false
     performance:
       platform: "Apple M4"

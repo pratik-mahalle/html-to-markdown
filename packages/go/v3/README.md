@@ -18,7 +18,7 @@
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown?label=Java&color=007ec6" alt="Java">
   </a>
   <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown">
-    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/html-to-markdown?label=Go&color=007ec6&filter=v2.29.0" alt="Go">
+    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/html-to-markdown?label=Go&color=007ec6&filter=v3.0.0" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/">
     <img src="https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown?label=C%23&color=007ec6" alt="C#">
@@ -56,14 +56,18 @@
   </a>
 </div>
 
+
 High-performance HTML to Markdown converter with Go bindings to the Rust core library.
 Supports automatic downloading of prebuilt FFI libraries for Linux, macOS, and Windows with customizable caching.
+
 
 ## Installation
 
 ```bash
-go get github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown
+go get github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown
 ```
+
+
 
 Requires Go 1.25+. After installing the package, run `go generate` to automatically download the platform-specific FFI library:
 
@@ -75,6 +79,11 @@ This downloads the native library from GitHub releases and generates the necessa
 
 Alternatively, you can manually set `CGO_CFLAGS` and `CGO_LDFLAGS` environment variables if you prefer to manage the FFI library yourself.
 
+
+
+
+
+
 ## Performance Snapshot
 
 Apple M4 • Real Wikipedia documents • `Convert()` (Go)
@@ -85,7 +94,8 @@ Apple M4 • Real Wikipedia documents • `Convert()` (Go)
 | Tables (Countries) | 360KB | 1.37ms | 262.1 MB/s |
 | Mixed (Python wiki) | 656KB | 2.75ms | 237.9 MB/s |
 
-See for detailed benchmarks.
+
+
 
 ## Quick Start
 
@@ -98,20 +108,24 @@ import (
     "fmt"
     "log"
 
-    "github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown"
+    "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown"
 )
 
 func main() {
     html := "<h1>Hello World</h1><p>This is a paragraph.</p>"
 
-    markdown, err := htmltomarkdown.Convert(html)
+    result, err := htmltomarkdown.Convert(html)
     if err != nil {
         log.Fatal(err)
     }
 
-    fmt.Println(markdown)
+    if result.Content != nil {
+        fmt.Println(*result.Content)
+    }
 }
 ```
+
+
 
 With conversion options:
 
@@ -122,7 +136,7 @@ import (
     "fmt"
     "log"
 
-    "github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown"
+    "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown"
 )
 
 func main() {
@@ -133,34 +147,37 @@ func main() {
     html := "<h1>Hello</h1><p>Welcome</p>"
 
     // Convert with error handling
-    markdown, err := htmltomarkdown.Convert(html)
+    result, err := htmltomarkdown.Convert(html)
     if err != nil {
         log.Fatalf("Conversion failed: %v", err)
     }
 
-    fmt.Println(markdown)
-
-    // Alternative: Use MustConvert for panicking on error
-    anotherMarkdown := htmltomarkdown.MustConvert("<p>Safe HTML</p>")
-    fmt.Println(anotherMarkdown)
+    if result.Content != nil {
+        fmt.Println(*result.Content)
+    }
 }
 ```
 
+
+
+
 ## API Reference
 
-### Core Functions
+### Core Function
 
-**`Convert(html string) (string, error)`**
 
-Basic HTML-to-Markdown conversion. Fast and simple.
+**`Convert(html string, options ...ConversionOptions) (ConversionResult, error)`**
 
-**`ConvertWithMetadata(html string, options *ConversionOptions, config *MetadataConfig) (string, Metadata, error)`**
+Converts HTML to Markdown. Returns a `ConversionResult` struct with all results in a single call.
 
-Extract Markdown plus metadata in a single pass.
+```go
+result, err := htmltomarkdown.Convert(html)
+markdown  := result.Content    // *string — converted Markdown
+metadata  := result.Metadata   // *Metadata — when ExtractMetadata: true
+tables    := result.Tables     // []TableData — when ExtractTables: true
+```
 
-**`ConvertWithInlineImages(html string, config *InlineImageConfig) (string, []ImageData, []string, error)`**
 
-Extract base64-encoded inline images with metadata.
 
 ### Options
 
@@ -172,16 +189,10 @@ Extract base64-encoded inline images with metadata.
 - `wrap`: Enable text wrapping — default: `false`
 - `wrap_width`: Wrap at column — default: `80`
 - `code_language`: Default fenced code block language — default: none
-- `extract_metadata`: Embed metadata as YAML frontmatter — default: `false`
+- `extract_metadata`: Enable metadata extraction into `result.metadata` — default: `false`
+- `extract_tables`: Enable structured table extraction into `result.tables` — default: `false`
 - `output_format`: Output markup format (`"markdown"` | `"djot"` | `"plain"`) — default: `"markdown"`
 
-**`MetadataConfig`** – Selective metadata extraction:
-
-- `extract_headers`: h1-h6 elements — default: `true`
-- `extract_links`: Hyperlinks — default: `true`
-- `extract_images`: Image elements — default: `true`
-- `extract_structured_data`: JSON-LD, Microdata, RDFa — default: `true`
-- `max_structured_data_size`: Size limit in bytes — default: `100KB`
 
 ## Djot Output Format
 
@@ -201,6 +212,7 @@ The library supports converting HTML to [Djot](https://djot.net/), a lightweight
 
 ### Example Usage
 
+
 ```go
 import "github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown"
 
@@ -213,11 +225,14 @@ markdown, _ := htmltomarkdown.Convert(html)
 // Note: Djot output format configuration is not yet supported in Go bindings
 ```
 
+
 Djot's extended syntax allows you to express more semantic meaning in lightweight text, making it useful for documents that require strikethrough, insertion tracking, or mathematical notation.
+
 
 ## Plain Text Output
 
 Set `output_format` to `"plain"` to strip all markup and return only visible text. This bypasses the Markdown conversion pipeline entirely for maximum speed.
+
 
 ```go
 import "github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown"
@@ -228,7 +243,13 @@ plain, _ := htmltomarkdown.Convert(html, htmltomarkdown.WithOutputFormat("plain"
 // Result: "Title\n\nThis is bold and italic text."
 ```
 
+
 Plain text mode is useful for search indexing, text extraction, and feeding content to LLMs.
+
+
+
+
+
 
 ## Examples
 

@@ -44,7 +44,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     "#;
 
     let result = convert(html, None)?;
-    println!("{}", result.content);
+    println!("{}", result.content.unwrap_or_default());
 
     if let Some(metadata) = &result.metadata {
         println!("Title: {:?}", metadata.document.title);
@@ -84,7 +84,7 @@ let options = ConversionOptions::builder()
     .build();
 
 let result = convert(html, Some(options))?;
-println!("{}", result.content);
+println!("{}", result.content.unwrap_or_default());
 ```
 
 ### Struct Literal
@@ -108,6 +108,7 @@ let options = ConversionOptions {
 };
 
 let result = convert(html, Some(options))?;
+println!("{}", result.content.unwrap_or_default());
 ```
 
 ### Preserving HTML Tags
@@ -147,7 +148,7 @@ options.preprocessing.remove_navigation = true;
 options.preprocessing.remove_forms = true;
 
 let result = convert(scraped_html, Some(options))?;
-println!("{}", result.content);
+println!("{}", result.content.unwrap_or_default());
 ```
 
 ## Metadata Extraction
@@ -190,7 +191,7 @@ let options = ConversionOptions::builder()
     .build();
 
 let result = convert(html, Some(options))?;
-println!("{}", result.content);
+println!("{}", result.content.unwrap_or_default());
 for img in &result.images {
     println!("Image: {} ({} bytes)", img.src, img.data.as_ref().map_or(0, |d| d.len()));
 }
@@ -213,7 +214,7 @@ let html = r#"
 
 let result = convert(html, None)?;
 
-println!("{}", result.content);
+println!("{}", result.content.unwrap_or_default());
 for table in &result.tables {
     println!("Table with {} rows:", table.cells.len());
     for (i, row) in table.cells.iter().enumerate() {
@@ -248,7 +249,7 @@ let options = ConversionOptions::builder()
     .build();
 
 let result = convert(html, Some(options))?;
-println!("{}", result.content);
+println!("{}", result.content.unwrap_or_default());
 ```
 
 ## Other Language Bindings

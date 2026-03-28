@@ -126,12 +126,12 @@ html-to-markdown --url https://example.com > output.md
 | Flag | Description |
 |------|-------------|
 | `--extract-metadata` | Prepend a metadata comment block to the Markdown output. |
-| `--with-metadata` | Output JSON with `markdown` and `metadata` keys. |
-| `--extract-document` | Extract document-level metadata (requires `--with-metadata`). |
-| `--extract-headers` | Extract heading elements (requires `--with-metadata`). |
-| `--extract-links` | Extract anchor tags (requires `--with-metadata`). |
-| `--extract-images` | Extract image elements (requires `--with-metadata`). |
-| `--extract-structured-data` | Extract JSON-LD, Microdata, and RDFa (requires `--with-metadata`). |
+| `--json` | Output a full `ConversionResult` as JSON (content, metadata, tables, images, warnings). |
+| `--extract-document` | Extract document-level metadata (requires `--json`). |
+| `--extract-headers` | Extract heading elements (requires `--json`). |
+| `--extract-links` | Extract anchor tags (requires `--json`). |
+| `--extract-images` | Extract image elements (requires `--json`). |
+| `--extract-structured-data` | Extract JSON-LD, Microdata, and RDFa (requires `--json`). |
 
 ## Preprocessing
 
@@ -166,8 +166,8 @@ html-to-markdown --generate-man > html-to-markdown.1
 # Web scraping with aggressive preprocessing
 html-to-markdown page.html --preprocess --preset aggressive
 
-# Extract all metadata as JSON
-html-to-markdown input.html --with-metadata \
+# Extract full structured result as JSON
+html-to-markdown input.html --json \
     --extract-document --extract-headers --extract-links --extract-images \
     -o output.json
 
