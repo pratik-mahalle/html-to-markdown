@@ -3,6 +3,7 @@
 //! Provides the TableScan struct and scanning functions for analyzing table structure
 //! to determine if it should be rendered as a Markdown table or converted to list format.
 
+use crate::converter::utility::content::normalized_tag_name;
 use std::borrow::Cow;
 
 /// Scan results for a table element.
@@ -141,17 +142,5 @@ fn scan_table_node(
             }
             _ => {}
         }
-    }
-}
-
-/// Normalize HTML tag names to lowercase.
-///
-/// Converts tag names to a consistent lowercase form for comparison.
-fn normalized_tag_name(raw: Cow<'_, str>) -> Cow<'_, str> {
-    let lowercased = raw.to_lowercase();
-    if lowercased.as_str() == raw.as_ref() {
-        raw
-    } else {
-        Cow::Owned(lowercased)
     }
 }

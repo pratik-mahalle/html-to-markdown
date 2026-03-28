@@ -15,6 +15,8 @@
 // Note: Context and DomContext are defined in converter.rs
 // walk_node is also defined there and must be called via the parent module
 
+use crate::converter::utility::content::chomp_inline;
+
 /// Handles the `<dfn>` element.
 ///
 /// A dfn element marks a term that is being defined. The content represents
@@ -254,28 +256,6 @@ pub fn handle(
         "q" => handle_q(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
         _ => {}
     }
-}
-
-/// Extracts prefix, suffix, and trimmed content from inline element text.
-///
-/// This helper function splits leading and trailing whitespace from content,
-/// allowing inline elements to preserve surrounding whitespace context.
-///
-/// # Returns
-///
-/// A tuple of `(prefix, suffix, trimmed_content)` where:
-/// - `prefix`: Leading whitespace (spaces, tabs, newlines)
-/// - `suffix`: Trailing whitespace (spaces, tabs, newlines)
-/// - `trimmed_content`: The content without leading/trailing whitespace
-fn chomp_inline(content: &str) -> (&str, &str, &str) {
-    let trimmed = content.trim();
-    let prefix_len = content.len() - content.trim_start().len();
-    let suffix_len = content.len() - content.trim_end().len();
-
-    let prefix = &content[..prefix_len];
-    let suffix = &content[content.len() - suffix_len..];
-
-    (prefix, suffix, trimmed)
 }
 
 /// Appends inline suffix to the output.

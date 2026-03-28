@@ -5,6 +5,7 @@
 //! - Cell layout handling with colspan/rowspan support
 //! - Layout table row conversion to list items
 
+use crate::converter::utility::content::normalized_tag_name;
 use std::borrow::Cow;
 
 use super::cell::{collect_table_cells, convert_table_cell, get_colspan_rowspan};
@@ -81,18 +82,6 @@ pub fn append_layout_row(
             output.push_str(formatted);
             output.push('\n');
         }
-    }
-}
-
-/// Normalize HTML tag names to lowercase.
-///
-/// Converts tag names to a consistent lowercase form for comparison.
-fn normalized_tag_name(raw: Cow<'_, str>) -> Cow<'_, str> {
-    let lowercased = raw.to_lowercase();
-    if lowercased.as_str() == raw.as_ref() {
-        raw
-    } else {
-        Cow::Owned(lowercased)
     }
 }
 
