@@ -2,6 +2,7 @@
 name: Input Validation Pipeline
 priority: high
 ---
+
 Comprehensive input validation before parsing
 
 - Implement validate_input() function

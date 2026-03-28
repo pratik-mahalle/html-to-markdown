@@ -7,15 +7,18 @@ This document summarizes the comprehensive updates made to the WASM test applica
 ## Files Updated
 
 ### 1. package.json
+
 - Updated `@kreuzberg/html-to-markdown-wasm` version to `2.24.1` (from `2.23.1`)
 - Added descriptive comment about testing published npm package
 - Maintains testing dependencies: vitest 4.0.18, TypeScript 5.0.0, @types/node 20.0.0
 
 ### 2. smoke.spec.ts (Enhanced)
+
 **Previous:** Basic smoke tests (8 tests)
 **Updated:** Comprehensive test suite organized into 4 categories (25+ tests)
 
-#### New Categories:
+#### New Categories
+
 - **Module Loading Tests**
   - Package import verification
   - Function exports (convert function exists)
@@ -39,10 +42,11 @@ This document summarizes the comprehensive updates made to the WASM test applica
   - Null/undefined input safety
 
 ### 3. comprehensive.spec.ts (Significantly Enhanced)
+
 **Previous:** Basic fixture tests + 4 edge case tests
 **Updated:** Multi-category test suite with 60+ tests
 
-#### New Test Categories:
+#### New Test Categories
 
 1. **Fixture-Based Tests**
    - Load `basic-html.json` from shared fixtures
@@ -89,6 +93,7 @@ This document summarizes the comprehensive updates made to the WASM test applica
    - Options parameter support
 
 ### 4. README.md (Completely Rewritten)
+
 - Added comprehensive purpose statement
 - Expanded test coverage documentation
 - Added environment support section (Browser, Node.js, Deno, Cloudflare Workers)
@@ -98,6 +103,7 @@ This document summarizes the comprehensive updates made to the WASM test applica
 - Documented all test categories with full descriptions
 
 ### 5. package-lock.json (Updated)
+
 - Updated version reference to 2.24.1
 - Locked all dependencies for reproducible builds
 - Ready for npm install when version is published
@@ -105,6 +111,7 @@ This document summarizes the comprehensive updates made to the WASM test applica
 ## Test Coverage Metrics
 
 ### Before Updates
+
 - **Total Tests:** ~12 tests
 - **Test Files:** 2 (smoke.spec.ts, comprehensive.spec.ts)
 - **Coverage Areas:** Basic conversion, basic edge cases
@@ -112,6 +119,7 @@ This document summarizes the comprehensive updates made to the WASM test applica
 - **Feature Coverage:** ~20% of HTML elements
 
 ### After Updates
+
 - **Total Tests:** 60+ tests
 - **Test Files:** 2 (significantly expanded)
 - **Coverage Areas:** Module loading, async, errors, bundle size, HTML elements, edge cases
@@ -121,6 +129,7 @@ This document summarizes the comprehensive updates made to the WASM test applica
 ## Test Execution
 
 All tests are designed to:
+
 1. **Test Published Package Only** - Uses npm-installed WASM package, not local builds
 2. **Cross-Platform Compatible** - Works in Node.js, browsers, Deno, Cloudflare Workers
 3. **Async-Safe** - Proper awaiting of WASM module initialization
@@ -130,11 +139,13 @@ All tests are designed to:
 ## Key Features Validated
 
 ### Module Initialization
+
 ✓ Package imports successfully
 ✓ All expected functions exposed
 ✓ Version information available
 
 ### Basic Conversion
+
 ✓ Paragraph to plain text
 ✓ Headings (h1-h6) to markdown
 ✓ Lists (ordered/unordered) preserved
@@ -142,6 +153,7 @@ All tests are designed to:
 ✓ Formatting (bold, italic) converted
 
 ### Advanced Features
+
 ✓ Nested HTML handling
 ✓ Mixed content types
 ✓ Code blocks and inline code
@@ -149,6 +161,7 @@ All tests are designed to:
 ✓ Tables (if supported)
 
 ### Error Resilience
+
 ✓ Malformed HTML doesn't crash
 ✓ Very long inputs handled
 ✓ XSS attempts escaped safely
@@ -156,6 +169,7 @@ All tests are designed to:
 ✓ Special characters processed
 
 ### Performance
+
 ✓ Bundle size within acceptable range (1KB-2MB)
 ✓ Deterministic output (consistent results)
 ✓ Multiple conversions in sequence
@@ -163,12 +177,14 @@ All tests are designed to:
 ## Gaps and Limitations
 
 ### Current Gaps
+
 1. **Async Operations** - Tests include async support but marked as conditional (not all WASM builds expose async)
 2. **Image Handling** - Image tests are marked `if supported` since HTML→Markdown doesn't typically render images
 3. **Table Support** - Table conversion depends on WASM implementation features
 4. **Options Parameter** - Tests include options but don't validate specific option behaviors (would need API documentation)
 
 ### Recommended Future Enhancements
+
 1. Add tests for specific conversion options (if API exposes them)
 2. Add performance benchmarking (measure conversion time)
 3. Add memory usage tests (especially for very large HTML)

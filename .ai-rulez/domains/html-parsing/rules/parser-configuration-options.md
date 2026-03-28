@@ -2,6 +2,7 @@
 name: Parser Configuration Options
 priority: high
 ---
+
 Provide comprehensive parser customization
 
 - Expose ParserConfig struct with options:

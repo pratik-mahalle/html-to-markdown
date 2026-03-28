@@ -2,6 +2,7 @@
 name: Error Message Clarity
 priority: high
 ---
+
 Provide clear security error messages
 
 - Binary detection: Name detected format

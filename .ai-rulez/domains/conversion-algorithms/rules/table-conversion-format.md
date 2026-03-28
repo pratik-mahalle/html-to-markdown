@@ -2,6 +2,7 @@
 name: Table Conversion Format
 priority: high
 ---
+
 Convert tables to Markdown pipe format
 
 - Use GFM pipe table format (|---|---|)

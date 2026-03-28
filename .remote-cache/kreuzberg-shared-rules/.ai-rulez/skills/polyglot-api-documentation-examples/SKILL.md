@@ -627,7 +627,7 @@ For each language binding, add equivalent documentation:
 
 Create language-specific examples:
 
-```
+```text
 docs/snippets/
 ├── rust/api/new_function.rs
 ├── python/api/new_function.py

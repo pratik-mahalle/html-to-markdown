@@ -8,7 +8,7 @@ The Rust core library is the authoritative implementation of business logic, dat
 
 ### High-Level Module Structure
 
-```
+```text
 src/
 ├── lib.rs                 # Public API and re-exports
 ├── error.rs              # Error types and conversions

@@ -38,6 +38,7 @@ mvn clean install
 ```
 
 The first command will:
+
 1. Build the Rust FFI library via cargo
 2. Create native bindings for JNI/FFI
 3. Package the library for local Maven repository
@@ -84,6 +85,7 @@ mvn test -Dtest=SmokeTest#testBasicConversion
 ## Test Coverage
 
 ### SmokeTest (14 tests)
+
 - Package loading and class availability
 - Basic HTML to Markdown conversion
 - Heading, list, link, code, and blockquote conversion
@@ -92,6 +94,7 @@ mvn test -Dtest=SmokeTest#testBasicConversion
 - Combined element conversion
 
 ### ComprehensiveTest (13 tests)
+
 - Fixture-based test validation (basic-html.json)
 - Complex HTML formatting with mixed elements
 - Metadata extraction with document metadata
@@ -104,6 +107,7 @@ mvn test -Dtest=SmokeTest#testBasicConversion
 - HTML attribute preservation
 
 ### ErrorHandlingTest (13 tests)
+
 - Null input validation
 - Empty and empty element handling
 - Malformed HTML resilience
@@ -118,6 +122,7 @@ mvn test -Dtest=SmokeTest#testBasicConversion
 - Visitor error cases
 
 ### TypeSafetyTest (13 tests)
+
 - ConversionOptions type validation
 - Builder pattern type safety
 - OutputFormat enum type safety
@@ -133,6 +138,7 @@ mvn test -Dtest=SmokeTest#testBasicConversion
 - Metadata component type validation
 
 ### MetadataExtractionTest (18 tests)
+
 - Basic document metadata extraction
 - Markdown content extraction with metadata
 - Multiple header extraction
@@ -149,6 +155,7 @@ mvn test -Dtest=SmokeTest#testBasicConversion
 - Null input validation
 
 ### VisitorFunctionalityTest (14 tests)
+
 - Basic visitor implementation
 - Element skipping functionality
 - Conditional element handling
@@ -180,11 +187,13 @@ mvn test -Dtest=SmokeTest#testBasicConversion
 ## Features Tested
 
 ### Core Conversion
+
 - Basic HTML elements (paragraphs, headings, lists, links, code, blockquotes)
 - Text formatting (bold, italic, strikethrough)
 - Nested structures and complex layouts
 
 ### Error Handling
+
 - Null input validation with proper exceptions
 - Malformed HTML resilience
 - Unicode and special character support
@@ -192,18 +201,21 @@ mvn test -Dtest=SmokeTest#testBasicConversion
 - Deep nesting handling
 
 ### Type Safety
+
 - Strong Java typing with generics
 - Builder pattern implementation
 - Enum type validation
 - Exception hierarchy
 
 ### Metadata Extraction
+
 - Document title, description, author extraction
 - Header hierarchy extraction
 - Link and image metadata
 - Open Graph and Twitter Card support
 
 ### Advanced Features
+
 - Custom visitor pattern for element interception
 - Element skipping and filtering
 - Conditional processing based on attributes
@@ -219,10 +231,13 @@ mvn test -Dtest=SmokeTest#testBasicConversion
 ## Troubleshooting
 
 ### "Failed to find html-to-markdown"
+
 Ensure Maven Central is accessible and that your Maven repositories are configured correctly.
 
 ### "Cannot enable preview features"
+
 Make sure Java 25+ is installed and the maven-compiler-plugin is configured with `--enable-preview`.
 
 ### "UnsatisfiedLinkError"
+
 This test app does not build the FFI library - it uses the published package which includes pre-built binaries. Ensure the html-to-markdown Maven package is properly downloaded.

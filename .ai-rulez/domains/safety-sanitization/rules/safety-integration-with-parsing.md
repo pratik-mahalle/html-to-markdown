@@ -2,6 +2,7 @@
 name: Safety Integration with Parsing
 priority: high
 ---
+
 Ensure parsing uses validated input
 
 - Run validate_input() before parsing

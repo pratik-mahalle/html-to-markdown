@@ -5,6 +5,7 @@ Validates the published `@kreuzberg/html-to-markdown-wasm` package from npm in r
 ## Purpose
 
 This test app:
+
 - Tests the **published npm package** (not local path dependencies)
 - Verifies WASM module loads and functions correctly
 - Validates HTML to Markdown conversion across all platform targets
@@ -45,11 +46,13 @@ pnpm test:comprehensive
 ### Smoke Tests (smoke.spec.ts)
 
 **Module Loading:**
+
 - Package import verification
 - Function exports validation
 - Version information checks
 
 **Basic Conversion:**
+
 - Simple HTML to Markdown conversion
 - Heading support
 - List handling (ordered/unordered)
@@ -57,10 +60,12 @@ pnpm test:comprehensive
 - Empty input handling
 
 **Async Operations:**
+
 - Async conversion support (if available)
 - Sync conversion verification
 
 **Error Handling:**
+
 - Malformed HTML resilience
 - Very long input handling (10KB+)
 - Special HTML character escaping
@@ -70,10 +75,12 @@ pnpm test:comprehensive
 ### Comprehensive Tests (comprehensive.spec.ts)
 
 **Fixture-Based Tests:**
+
 - Load and run fixture files from `../fixtures/`
 - Basic HTML conversions from JSON fixtures
 
 **HTML Element Coverage:**
+
 - All heading levels (h1-h6)
 - Paragraphs and text formatting
 - Unordered and ordered lists
@@ -89,6 +96,7 @@ pnpm test:comprehensive
 - Tables (if supported)
 
 **Edge Cases & Special Scenarios:**
+
 - Nested HTML structures
 - Mixed content types
 - Special HTML characters (&, <, >, etc.)
@@ -101,11 +109,13 @@ pnpm test:comprehensive
 - Multi-language content (English, French, German, Chinese)
 
 **Bundle Size Validation:**
+
 - Verifies WASM binary size is within acceptable range (1KB - 2MB)
 - Logs actual bundle size in KB
 - Warns if size constraints are violated
 
 **Module Functionality:**
+
 - Result consistency (same input = same output)
 - Multiple sequential conversions
 - Options parameter support
@@ -124,6 +134,7 @@ All tests use standard Node.js testing patterns compatible with all platforms.
 ## Test Fixtures
 
 Fixtures are stored in `../fixtures/`:
+
 - `basic-html.json` - Core HTML element conversions
 - `complex-html.json` - Complex nested structures
 - `edge-cases.json` - Edge case handling

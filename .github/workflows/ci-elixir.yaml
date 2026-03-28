@@ -64,3 +64,12 @@ jobs:
         working-directory: packages/elixir
         run: ../../scripts/ci/elixir/run-credo.sh
         shell: bash
+
+      - name: Install Task
+        uses: go-task/setup-task@v2 # v2
+        with:
+          version: 3.46.4
+
+      - name: Run E2E tests
+        run: task elixir:e2e:test
+        shell: bash

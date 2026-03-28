@@ -56,18 +56,14 @@
   </a>
 </div>
 
-
 High-performance HTML to Markdown converter with R bindings powered by a Rust core via extendr.
 Ship identical Markdown across every runtime while enjoying native performance with extendr bindings.
-
 
 ## Installation
 
 ```bash
 install.packages("htmltomarkdown")
 ```
-
-
 
 Requires R 4.3+ and a Rust toolchain (cargo, rustc).
 
@@ -81,11 +77,6 @@ Or install the development version from GitHub:
 devtools::install_github("kreuzberg-dev/html-to-markdown", subdir = "packages/r")
 ```
 
-
-
-
-
-
 ## Performance Snapshot
 
 Apple M4 • Real Wikipedia documents • `convert()` (R)
@@ -96,9 +87,7 @@ Apple M4 • Real Wikipedia documents • `convert()` (R)
 | Tables (Countries) | 360KB | 2.10ms | 171 MB/s |
 | Mixed (Python wiki) | 656KB | 4.75ms | 138 MB/s |
 
-
-See [Performance Guide](../../examples/performance/) for detailed benchmarks.
-
+See for detailed benchmarks.
 
 ## Quick Start
 
@@ -111,8 +100,6 @@ html <- "<h1>Hello</h1><p>This is <strong>fast</strong>!</p>"
 markdown <- convert(html)
 cat(markdown)
 ```
-
-
 
 With conversion options:
 
@@ -129,15 +116,9 @@ markdown <- convert_with_options("<h1>Hello</h1><p>World</p>", opts)
 cat(markdown)
 ```
 
-
-
-
-
-
 ## API Reference
 
 ### Core Functions
-
 
 **`convert(html, options = NULL)`**
 
@@ -145,11 +126,11 @@ Basic HTML-to-Markdown conversion. Fast and simple.
 
 **`convert_with_metadata(html, options = NULL, config = NULL)`**
 
-Extract Markdown plus metadata in a single pass. See [Metadata Extraction Guide](../../examples/metadata-extraction/).
+Extract Markdown plus metadata in a single pass.
 
 **`convert_with_visitor(html, visitor, options = NULL)`**
 
-Customize conversion with visitor callbacks for element interception. See [Visitor Pattern Guide](../../examples/visitor-pattern/).
+Customize conversion with visitor callbacks for element interception.
 
 **`convert_with_inline_images(html, config = NULL)`**
 
@@ -159,11 +140,10 @@ Extract base64-encoded inline images with metadata.
 
 Extract structured table data (cells, headers, rendered markdown) alongside conversion.
 
-
-
 ### Options
 
 **`ConversionOptions`** – Key configuration fields:
+
 - `heading_style`: Heading format (`"underlined"` | `"atx"` | `"atx_closed"`) — default: `"underlined"`
 - `list_indent_width`: Spaces per indent level — default: `2`
 - `bullets`: Bullet characters cycle — default: `"*+-"`
@@ -174,12 +154,12 @@ Extract structured table data (cells, headers, rendered markdown) alongside conv
 - `output_format`: Output markup format (`"markdown"` | `"djot"` | `"plain"`) — default: `"markdown"`
 
 **`MetadataConfig`** – Selective metadata extraction:
+
 - `extract_headers`: h1-h6 elements — default: `true`
 - `extract_links`: Hyperlinks — default: `true`
 - `extract_images`: Image elements — default: `true`
 - `extract_structured_data`: JSON-LD, Microdata, RDFa — default: `true`
 - `max_structured_data_size`: Size limit in bytes — default: `100KB`
-
 
 ## Djot Output Format
 
@@ -199,15 +179,11 @@ The library supports converting HTML to [Djot](https://djot.net/), a lightweight
 
 ### Example Usage
 
-
-
 Djot's extended syntax allows you to express more semantic meaning in lightweight text, making it useful for documents that require strikethrough, insertion tracking, or mathematical notation.
-
 
 ## Plain Text Output
 
 Set `output_format` to `"plain"` to strip all markup and return only visible text. This bypasses the Markdown conversion pipeline entirely for maximum speed.
-
 
 ```r
 html <- "<h1>Title</h1><p>This is <strong>bold</strong> and <em>italic</em> text.</p>"
@@ -216,16 +192,14 @@ plain <- html_to_markdown(html, output_format = "plain")
 # Result: "Title\n\nThis is bold and italic text."
 ```
 
-
 Plain text mode is useful for search indexing, text extraction, and feeding content to LLMs.
-
-
 
 ## Metadata Extraction
 
 The metadata extraction feature enables comprehensive document analysis during conversion. Extract document properties, headers, links, images, and structured data in a single pass.
 
 **Use Cases:**
+
 - **SEO analysis** – Extract title, description, Open Graph tags, Twitter cards
 - **Table of contents generation** – Build structured outlines from heading hierarchy
 - **Content migration** – Document all external links and resources
@@ -236,18 +210,14 @@ The metadata extraction feature enables comprehensive document analysis during c
 
 ### Example: Quick Start
 
-
-
-For detailed examples including SEO extraction, table-of-contents generation, link validation, and accessibility audits, see the [Metadata Extraction Guide](../../examples/metadata-extraction/).
-
-
-
+For detailed examples including SEO extraction, table-of-contents generation, link validation, and accessibility audits, see the .
 
 ## Visitor Pattern
 
 The visitor pattern enables custom HTML→Markdown conversion logic by providing callbacks for specific HTML elements during traversal. Use visitors to transform content, filter elements, validate structure, or collect analytics.
 
 **Use Cases:**
+
 - **Custom Markdown dialects** – Convert to Obsidian, Notion, or other flavors
 - **Content filtering** – Remove tracking pixels, ads, or unwanted elements
 - **URL rewriting** – Rewrite CDN URLs, add query parameters, validate links
@@ -258,17 +228,10 @@ The visitor pattern enables custom HTML→Markdown conversion logic by providing
 
 ### Example: Quick Start
 
-
-
-For comprehensive examples including content filtering, link footnotes, accessibility validation, and asynchronous URL validation, see the [Visitor Pattern Guide](../../examples/visitor-pattern/).
-
-
+For comprehensive examples including content filtering, link footnotes, accessibility validation, and asynchronous URL validation, see the .
 
 ## Examples
 
-- [Visitor Pattern Guide](../../examples/visitor-pattern/)
-- [Metadata Extraction Guide](../../examples/metadata-extraction/)
-- [Performance Guide](../../examples/performance/)
 
 ## Links
 

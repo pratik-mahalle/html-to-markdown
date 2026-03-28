@@ -10,7 +10,7 @@ This document defines the architectural principles for the polyglot Rust library
 
 The FFI (Foreign Function Interface) boundary is the critical security perimeter of our architecture. All binding layers implement strict safety guarantees:
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │      Host Language Runtime               │
 │    (Python, Node, Ruby, etc.)            │
@@ -106,7 +106,7 @@ Each language was chosen based on:
 
 ### The Rust Core as Single Source of Truth
 
-```
+```text
 ┌─────────────────────────────────────┐
 │     Canonical Rust Core             │
 │  - API surface definition           │

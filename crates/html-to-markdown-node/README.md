@@ -29,11 +29,13 @@ High-performance HTML to Markdown conversion using native Rust code compiled to 
 ### Install Updated Package
 
 **Before (v2.18.x):**
+
 ```bash
 npm install html-to-markdown-node
 ```
 
 **After (v2.19.0+):**
+
 ```bash
 npm install @kreuzberg/html-to-markdown-node
 ```
@@ -41,11 +43,13 @@ npm install @kreuzberg/html-to-markdown-node
 ### Update Import Statements
 
 **Before:**
+
 ```typescript
 import { convert } from 'html-to-markdown-node';
 ```
 
 **After:**
+
 ```typescript
 import { convert } from '@kreuzberg/html-to-markdown-node';
 ```

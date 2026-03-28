@@ -2,18 +2,22 @@
 description: "Inline Code Conversion"
 name: inline-code-conversion
 ---
+
 Convert code elements to Markdown
 
 Key source files:
+
 - crates/html-to-markdown/src/converter.rs
 
 Master concepts:
+
 - Backtick wrapping
 - Content preservation
 - Nested code handling
 - Escape rules
 
 Step by step:
+
 1. Extract code content
 2. Determine backtick count needed
    - No backticks in content means use single backtick

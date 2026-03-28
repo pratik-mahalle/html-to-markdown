@@ -279,7 +279,7 @@ impl AsyncBridge {
 
 Structure async code separately from sync:
 
-```
+```text
 src/
 ├── lib.rs              # Main API (sync)
 ├── async/              # Async implementations

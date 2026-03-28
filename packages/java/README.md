@@ -56,10 +56,8 @@
   </a>
 </div>
 
-
 High-performance HTML to Markdown converter with Java Panama FFI bindings to the Rust core.
 Uses Foreign Function & Memory API for zero-dependency, thread-safe conversion with full metadata extraction support.
-
 
 ## Installation
 
@@ -73,11 +71,10 @@ Uses Foreign Function & Memory API for zero-dependency, thread-safe conversion w
 
 ```
 
-
-
 Requires Java 25+ with Panama FFI support.
 
 **Maven:**
+
 ```xml
 <dependency>
     <groupId>dev.kreuzberg</groupId>
@@ -87,14 +84,10 @@ Requires Java 25+ with Panama FFI support.
 ```
 
 **Gradle (Kotlin DSL):**
+
 ```kotlin
 implementation("dev.kreuzberg:html-to-markdown:2.29.0")
 ```
-
-
-
-
-
 
 ## Performance Snapshot
 
@@ -106,9 +99,7 @@ Apple M4 • Real Wikipedia documents • `convert()` (Java)
 | Tables (Countries) | 360KB | 773 | 272.0 MB/s |
 | Mixed (Python) | 656KB | 403 | 258.5 MB/s |
 
-
-See [Performance Guide](../../examples/performance/) for detailed benchmarks.
-
+See for detailed benchmarks.
 
 ## Quick Start
 
@@ -125,8 +116,6 @@ public class Example {
     }
 }
 ```
-
-
 
 With conversion options:
 
@@ -149,15 +138,9 @@ public class MetadataExample {
 }
 ```
 
-
-
-
-
-
 ## API Reference
 
 ### Core Functions
-
 
 **`convert(String html) : String`**
 **`convert(String html, ConversionOptions options) : String`**
@@ -167,17 +150,16 @@ Basic HTML-to-Markdown conversion. Fast and simple.
 **`convertWithMetadata(String html) : ConversionResult<MetadataResult>`**
 **`convertWithMetadata(String html, ConversionOptions options, MetadataConfig config) : ConversionResult<MetadataResult>`**
 
-Extract Markdown plus metadata in a single pass. See [Metadata Extraction Guide](../../examples/metadata-extraction/).
+Extract Markdown plus metadata in a single pass.
 
 **`convertWithInlineImages(String html, InlineImageConfig config) : ConversionResult<InlineImagesResult>`**
 
 Extract base64-encoded inline images with metadata.
 
-
-
 ### Options
 
 **`ConversionOptions`** – Key configuration fields:
+
 - `heading_style`: Heading format (`"underlined"` | `"atx"` | `"atx_closed"`) — default: `"underlined"`
 - `list_indent_width`: Spaces per indent level — default: `2`
 - `bullets`: Bullet characters cycle — default: `"*+-"`
@@ -188,12 +170,12 @@ Extract base64-encoded inline images with metadata.
 - `output_format`: Output markup format (`"markdown"` | `"djot"` | `"plain"`) — default: `"markdown"`
 
 **`MetadataConfig`** – Selective metadata extraction:
+
 - `extract_headers`: h1-h6 elements — default: `true`
 - `extract_links`: Hyperlinks — default: `true`
 - `extract_images`: Image elements — default: `true`
 - `extract_structured_data`: JSON-LD, Microdata, RDFa — default: `true`
 - `max_structured_data_size`: Size limit in bytes — default: `100KB`
-
 
 ## Djot Output Format
 
@@ -213,7 +195,6 @@ The library supports converting HTML to [Djot](https://djot.net/), a lightweight
 
 ### Example Usage
 
-
 ```java
 import dev.kreuzberg.htmltomarkdown.HtmlToMarkdown;
 import dev.kreuzberg.htmltomarkdown.ConversionOptions;
@@ -231,14 +212,11 @@ String djot = HtmlToMarkdown.convert(html,
 // Result: "This is *bold* and _italic_ text."
 ```
 
-
 Djot's extended syntax allows you to express more semantic meaning in lightweight text, making it useful for documents that require strikethrough, insertion tracking, or mathematical notation.
-
 
 ## Plain Text Output
 
 Set `output_format` to `"plain"` to strip all markup and return only visible text. This bypasses the Markdown conversion pipeline entirely for maximum speed.
-
 
 ```java
 import dev.kreuzberg.htmltomarkdown.HtmlToMarkdown;
@@ -252,19 +230,10 @@ String plain = HtmlToMarkdown.convert(html,
 // Result: "Title\n\nThis is bold and italic text."
 ```
 
-
 Plain text mode is useful for search indexing, text extraction, and feeding content to LLMs.
-
-
-
-
-
 
 ## Examples
 
-- [Visitor Pattern Guide](../../examples/visitor-pattern/)
-- [Metadata Extraction Guide](../../examples/metadata-extraction/)
-- [Performance Guide](../../examples/performance/)
 
 ## Links
 

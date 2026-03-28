@@ -2,6 +2,7 @@
 name: Semantic HTML5 Handling
 priority: high
 ---
+
 Convert semantic elements to readable Markdown
 
 - <article> → optional heading or section marker

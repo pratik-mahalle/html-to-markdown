@@ -1,5 +1,7 @@
 ```javascript
-import { convertWithTables } from 'html-to-markdown-wasm';
+import init, { convert } from '@kreuzberg/html-to-markdown-wasm';
+
+await init();
 
 const html = `
 <table>
@@ -9,11 +11,11 @@ const html = `
 </table>
 `;
 
-const result = convertWithTables(html);
+const result = convert(html, { extractTables: true });
 
-for (const table of result.tables) {
+for (const table of result.tables ?? []) {
   for (let i = 0; i < table.cells.length; i++) {
-    const prefix = table.is_header_row[i] ? 'Header' : 'Row';
+    const prefix = table.isHeaderRow[i] ? 'Header' : 'Row';
     console.log(`  ${prefix}: ${table.cells[i].join(', ')}`);
   }
 }

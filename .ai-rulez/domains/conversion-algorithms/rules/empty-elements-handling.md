@@ -2,6 +2,7 @@
 name: Empty Elements Handling
 priority: high
 ---
+
 Gracefully handle empty elements
 
 - Empty paragraphs: Skip or render as blank line

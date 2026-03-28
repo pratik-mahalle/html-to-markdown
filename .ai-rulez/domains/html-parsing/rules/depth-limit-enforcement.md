@@ -2,6 +2,7 @@
 name: Depth Limit Enforcement
 priority: high
 ---
+
 Prevent stack overflow from deeply nested HTML
 
 - Track nesting depth during traversal

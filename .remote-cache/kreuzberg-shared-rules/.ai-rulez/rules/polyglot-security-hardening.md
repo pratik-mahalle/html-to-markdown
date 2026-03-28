@@ -15,7 +15,7 @@ Security is a shared responsibility across all language ecosystems. Rust core, P
 ### Private Disclosure Period
 
 - **Duration**: 90 days minimum from vulnerability report receipt
-- **Reporting channel**: security@kreuzberg.dev (or project security contact)
+- **Reporting channel**: <security@kreuzberg.dev> (or project security contact)
 - **Scope**: All reported CVEs before public disclosure
 - **Exceptions**: Zero-day exploits in active exploitation may require faster response
 

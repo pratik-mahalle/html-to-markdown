@@ -56,18 +56,14 @@
   </a>
 </div>
 
-
 High-performance HTML to Markdown converter with Go bindings to the Rust core library.
 Supports automatic downloading of prebuilt FFI libraries for Linux, macOS, and Windows with customizable caching.
-
 
 ## Installation
 
 ```bash
 go get github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown
 ```
-
-
 
 Requires Go 1.25+. After installing the package, run `go generate` to automatically download the platform-specific FFI library:
 
@@ -79,11 +75,6 @@ This downloads the native library from GitHub releases and generates the necessa
 
 Alternatively, you can manually set `CGO_CFLAGS` and `CGO_LDFLAGS` environment variables if you prefer to manage the FFI library yourself.
 
-
-
-
-
-
 ## Performance Snapshot
 
 Apple M4 • Real Wikipedia documents • `Convert()` (Go)
@@ -94,9 +85,7 @@ Apple M4 • Real Wikipedia documents • `Convert()` (Go)
 | Tables (Countries) | 360KB | 1.37ms | 262.1 MB/s |
 | Mixed (Python wiki) | 656KB | 2.75ms | 237.9 MB/s |
 
-
-See [Performance Guide](../../examples/performance/) for detailed benchmarks.
-
+See for detailed benchmarks.
 
 ## Quick Start
 
@@ -123,8 +112,6 @@ func main() {
     fmt.Println(markdown)
 }
 ```
-
-
 
 With conversion options:
 
@@ -159,15 +146,9 @@ func main() {
 }
 ```
 
-
-
-
-
-
 ## API Reference
 
 ### Core Functions
-
 
 **`Convert(html string) (string, error)`**
 
@@ -175,17 +156,16 @@ Basic HTML-to-Markdown conversion. Fast and simple.
 
 **`ConvertWithMetadata(html string, options *ConversionOptions, config *MetadataConfig) (string, Metadata, error)`**
 
-Extract Markdown plus metadata in a single pass. See [Metadata Extraction Guide](../../examples/metadata-extraction/).
+Extract Markdown plus metadata in a single pass.
 
 **`ConvertWithInlineImages(html string, config *InlineImageConfig) (string, []ImageData, []string, error)`**
 
 Extract base64-encoded inline images with metadata.
 
-
-
 ### Options
 
 **`ConversionOptions`** – Key configuration fields:
+
 - `heading_style`: Heading format (`"underlined"` | `"atx"` | `"atx_closed"`) — default: `"underlined"`
 - `list_indent_width`: Spaces per indent level — default: `2`
 - `bullets`: Bullet characters cycle — default: `"*+-"`
@@ -196,12 +176,12 @@ Extract base64-encoded inline images with metadata.
 - `output_format`: Output markup format (`"markdown"` | `"djot"` | `"plain"`) — default: `"markdown"`
 
 **`MetadataConfig`** – Selective metadata extraction:
+
 - `extract_headers`: h1-h6 elements — default: `true`
 - `extract_links`: Hyperlinks — default: `true`
 - `extract_images`: Image elements — default: `true`
 - `extract_structured_data`: JSON-LD, Microdata, RDFa — default: `true`
 - `max_structured_data_size`: Size limit in bytes — default: `100KB`
-
 
 ## Djot Output Format
 
@@ -221,7 +201,6 @@ The library supports converting HTML to [Djot](https://djot.net/), a lightweight
 
 ### Example Usage
 
-
 ```go
 import "github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown"
 
@@ -234,14 +213,11 @@ markdown, _ := htmltomarkdown.Convert(html)
 // Note: Djot output format configuration is not yet supported in Go bindings
 ```
 
-
 Djot's extended syntax allows you to express more semantic meaning in lightweight text, making it useful for documents that require strikethrough, insertion tracking, or mathematical notation.
-
 
 ## Plain Text Output
 
 Set `output_format` to `"plain"` to strip all markup and return only visible text. This bypasses the Markdown conversion pipeline entirely for maximum speed.
-
 
 ```go
 import "github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown"
@@ -252,19 +228,10 @@ plain, _ := htmltomarkdown.Convert(html, htmltomarkdown.WithOutputFormat("plain"
 // Result: "Title\n\nThis is bold and italic text."
 ```
 
-
 Plain text mode is useful for search indexing, text extraction, and feeding content to LLMs.
-
-
-
-
-
 
 ## Examples
 
-- [Visitor Pattern Guide](../../examples/visitor-pattern/)
-- [Metadata Extraction Guide](../../examples/metadata-extraction/)
-- [Performance Guide](../../examples/performance/)
 
 ## Links
 

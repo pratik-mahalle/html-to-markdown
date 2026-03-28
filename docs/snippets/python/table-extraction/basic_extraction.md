@@ -1,5 +1,5 @@
 ```python
-from html_to_markdown import convert_with_tables
+from html_to_markdown import ConversionOptions, convert
 
 html = """
 <table>
@@ -9,7 +9,8 @@ html = """
 </table>
 """
 
-result = convert_with_tables(html)
+options = ConversionOptions(extract_tables=True)
+result = convert(html, options)
 
 for table in result["tables"]:
     for i, row in enumerate(table["cells"]):

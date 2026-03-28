@@ -2,18 +2,22 @@
 description: "Input Binary Detection"
 name: input-binary-detection
 ---
+
 Detect binary and non-UTF-8 input before parsing
 
 Key source files:
+
 - crates/html-to-markdown/src/lib.rs (validate_input, detect_binary_*)
 
 Master concepts:
+
 - Magic number detection
 - UTF-16 heuristics
 - Control character ratio
 - Encoding validation
 
 Step by step:
+
 1. Get input bytes
 2. Check magic number prefixes
    - 0x1F8B indicates gzip

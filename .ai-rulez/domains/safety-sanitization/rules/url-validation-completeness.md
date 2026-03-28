@@ -2,6 +2,7 @@
 name: URL Validation Completeness
 priority: high
 ---
+
 Validate all URL attributes
 
 - Validate href in links, form actions

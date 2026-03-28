@@ -2,6 +2,7 @@
 name: SVG URL Validation
 priority: high
 ---
+
 Validate URLs within SVG content
 
 - Validate xlink:href attributes

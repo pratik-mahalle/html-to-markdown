@@ -36,7 +36,7 @@ Kreuzberg is built on a **Rust-first architecture** principle: all extraction lo
 
 **The Architecture Pattern:**
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                    Consuming Applications                     │
 │         (Python, TypeScript, Ruby, Java, PHP, Go, etc.)      │
@@ -394,7 +394,7 @@ ______________________________________________________________________
 
 ### Rust Core Layout
 
-```
+```text
 crates/
 ├── kreuzberg/                 # Main Rust core library
 │   ├── src/
@@ -424,7 +424,7 @@ crates/
 
 ### Language Binding Packages
 
-```
+```text
 packages/
 ├── python/                    # Python wrapper library
 ├── typescript/                # TypeScript SDK wrapper

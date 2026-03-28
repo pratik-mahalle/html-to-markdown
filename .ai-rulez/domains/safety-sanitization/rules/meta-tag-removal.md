@@ -2,6 +2,7 @@
 name: Meta Tag Removal
 priority: high
 ---
+
 Remove metadata that could expose information
 
 - Remove all <meta> tags by default

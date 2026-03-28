@@ -88,3 +88,14 @@ jobs:
         shell: bash
         env:
           EXTENSION_PATH: ${{ steps.build-php-extension.outputs.extension-path }}
+
+      - name: Install Task
+        uses: go-task/setup-task@v2 # v2
+        with:
+          version: 3.46.4
+
+      - name: Run E2E tests
+        run: task php:e2e:test
+        shell: bash
+        env:
+          EXTENSION_PATH: ${{ steps.build-php-extension.outputs.extension-path }}

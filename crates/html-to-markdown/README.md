@@ -18,42 +18,80 @@ Fast, reliable HTML to Markdown conversion with full CommonMark compliance. Buil
 
 ```toml
 [dependencies]
-html-to-markdown-rs = "2.3"
+html-to-markdown-rs = "3.0"
 ```
 
 ## Basic Usage
 
+`convert()` returns a structured `ConversionResult` with the converted text, metadata, tables, and more:
+
 ```rust
-use html_to_markdown_rs::{convert, ConversionOptions};
+use html_to_markdown_rs::convert;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let html = r#"
-        <h1>Welcome</h1>
-        <p>This is <strong>fast</strong> conversion!</p>
-        <ul>
-            <li>Built with Rust</li>
-            <li>CommonMark compliant</li>
-        </ul>
+        <html lang="en">
+          <head><title>Welcome</title></head>
+          <body>
+            <h1>Welcome</h1>
+            <p>This is <strong>fast</strong> conversion!</p>
+            <ul>
+                <li>Built with Rust</li>
+                <li>CommonMark compliant</li>
+            </ul>
+          </body>
+        </html>
     "#;
 
-    let markdown = convert(html, None)?;
-    println!("{}", markdown);
+    let result = convert(html, None)?;
+    println!("{}", result.content);
+
+    if let Some(metadata) = &result.metadata {
+        println!("Title: {:?}", metadata.document.title);
+        println!("Headers: {:?}", metadata.headers);
+    }
+
+    for table in &result.tables {
+        println!("Table with {} rows", table.cells.len());
+    }
+
     Ok(())
 }
 ```
 
 ## Error Handling
 
-Conversion returns a `Result<String, ConversionError>`. Inputs that look like binary data are rejected with
+Conversion returns a `Result<ConversionResult, ConversionError>`. Inputs that look like binary data are rejected with
 `ConversionError::InvalidInput` to prevent runaway allocations. Table `colspan`/`rowspan` values are also clamped
 internally to keep output sizes bounded.
 
 ## Configuration
 
+### Builder Pattern
+
+```rust
+use html_to_markdown_rs::{
+    convert, ConversionOptions, HeadingStyle, CodeBlockStyle,
+};
+
+let options = ConversionOptions::builder()
+    .heading_style(HeadingStyle::Atx)
+    .list_indent_width(2)
+    .bullets("-")
+    .autolinks(true)
+    .wrap(true)
+    .wrap_width(80)
+    .build();
+
+let result = convert(html, Some(options))?;
+println!("{}", result.content);
+```
+
+### Struct Literal
+
 ```rust
 use html_to_markdown_rs::{
     convert, ConversionOptions, HeadingStyle, ListIndentType,
-    PreprocessingOptions, PreprocessingPreset,
 };
 
 let options = ConversionOptions {
@@ -69,12 +107,12 @@ let options = ConversionOptions {
     ..Default::default()
 };
 
-let markdown = convert(html, Some(options))?;
+let result = convert(html, Some(options))?;
 ```
 
 ### Preserving HTML Tags
 
-The `preserve_tags` option allows you to keep specific HTML tags in their original form instead of converting them to Markdown. This is useful for complex elements like tables that may not convert well:
+The `preserve_tags` option allows you to keep specific HTML tags in their original form instead of converting them to Markdown:
 
 ```rust
 use html_to_markdown_rs::{convert, ConversionOptions};
@@ -93,18 +131,8 @@ let options = ConversionOptions {
     ..Default::default()
 };
 
-let markdown = convert(html, Some(options))?;
-// Result: "Before table\n\n<table class=\"data\">...</table>\n\nAfter table\n"
-```
-
-You can preserve multiple tag types and combine with `strip_tags`:
-
-```rust
-let options = ConversionOptions {
-    preserve_tags: vec!["table".to_string(), "form".to_string()],
-    strip_tags: vec!["script".to_string(), "style".to_string()],
-    ..Default::default()
-};
+let result = convert(html, Some(options))?;
+// result.content => "Before table\n\n<table class=\"data\">...</table>\n\nAfter table\n"
 ```
 
 ## Web Scraping with Preprocessing
@@ -118,46 +146,62 @@ options.preprocessing.preset = html_to_markdown_rs::PreprocessingPreset::Aggress
 options.preprocessing.remove_navigation = true;
 options.preprocessing.remove_forms = true;
 
-let markdown = convert(scraped_html, Some(options))?;
+let result = convert(scraped_html, Some(options))?;
+println!("{}", result.content);
 ```
 
-## hOCR Table Extraction (Deprecated)
+## Metadata Extraction
 
-> **Deprecated since 2.30.0**: hOCR support will be removed in v3.
+Metadata is automatically included in the result. Configure which fields to extract via `MetadataConfig`:
 
 ```rust
-use html_to_markdown_rs::convert;
+use html_to_markdown_rs::{convert, ConversionOptions, MetadataConfig};
 
-// hOCR documents (from Tesseract, etc.) are detected automatically.
-// Tables and spatial layout are reconstructed without additional options.
-let markdown = convert(hocr_html, None)?;
+let options = ConversionOptions::builder()
+    .metadata_config(MetadataConfig {
+        extract_headers: true,
+        extract_links: true,
+        extract_images: false,
+        ..Default::default()
+    })
+    .build();
+
+let result = convert(html, Some(options))?;
+if let Some(metadata) = &result.metadata {
+    println!("Title: {:?}", metadata.document.title);
+    for header in &metadata.headers {
+        println!("H{}: {}", header.level, header.text);
+    }
+    for link in &metadata.links {
+        println!("Link: {} -> {}", link.text, link.href);
+    }
+}
 ```
 
-## Inline Image Extraction
+## Image Extraction
 
 ```rust
-use html_to_markdown_rs::{convert_with_inline_images, InlineImageConfig};
+use html_to_markdown_rs::{convert, ConversionOptions};
 
-let config = InlineImageConfig::new(5 * 1024 * 1024) // 5MB max
-    .with_infer_dimensions(true)
-    .with_filename_prefix("img_".to_string());
+let options = ConversionOptions::builder()
+    .extract_images(true)
+    .max_image_size(5 * 1024 * 1024) // 5 MB max
+    .infer_dimensions(true)
+    .build();
 
-let extraction = convert_with_inline_images(html, None, config)?;
-
-println!("{}", extraction.markdown);
-for (i, img) in extraction.inline_images.iter().enumerate() {
-    println!("Image {}: {} ({} bytes)", i, img.format, img.data.len());
+let result = convert(html, Some(options))?;
+println!("{}", result.content);
+for img in &result.images {
+    println!("Image: {} ({} bytes)", img.src, img.data.as_ref().map_or(0, |d| d.len()));
 }
 ```
 
 ## Table Extraction
 
-Extract structured table data alongside the Markdown conversion. Each table found in the HTML is returned with its cell contents, header row flags, and rendered Markdown output.
-
-Requires the `visitor` feature.
+Structured table data is always included in `ConversionResult.tables`:
 
 ```rust
-use html_to_markdown_rs::convert_with_tables;
+use html_to_markdown_rs::convert;
 
 let html = r#"
 <table>
@@ -167,7 +211,7 @@ let html = r#"
 </table>
 "#;
 
-let result = convert_with_tables(html, None, None)?;
+let result = convert(html, None)?;
 
 println!("{}", result.content);
 for table in &result.tables {
@@ -177,6 +221,34 @@ for table in &result.tables {
         println!("  {}: {:?}", prefix, row);
     }
 }
+```
+
+## Custom Visitors
+
+```rust
+use html_to_markdown_rs::{convert, ConversionOptions};
+use html_to_markdown_rs::visitor::{HtmlVisitor, NodeContext, VisitResult};
+
+struct NoImagesVisitor;
+
+impl HtmlVisitor for NoImagesVisitor {
+    fn visit_image(
+        &mut self,
+        _ctx: &NodeContext,
+        _src: &str,
+        _alt: &str,
+        _title: Option<&str>,
+    ) -> VisitResult {
+        VisitResult::Skip
+    }
+}
+
+let options = ConversionOptions::builder()
+    .visitor(Box::new(NoImagesVisitor))
+    .build();
+
+let result = convert(html, Some(options))?;
+println!("{}", result.content);
 ```
 
 ## Other Language Bindings
@@ -191,13 +263,14 @@ This is the core Rust library. For other languages:
 
 ## Documentation
 
-- [Full Documentation](https://github.com/kreuzberg-dev/html-to-markdown/blob/main/README.md)
+- [Full Documentation](https://docs.html-to-markdown.kreuzberg.dev)
 - [API Reference](https://docs.rs/html-to-markdown-rs)
+- [Migration Guide (v2 -> v3)](https://docs.html-to-markdown.kreuzberg.dev/migration/v3/)
 - [Contributing Guide](https://github.com/kreuzberg-dev/html-to-markdown/blob/main/CONTRIBUTING.md)
 
 ## Performance
 
-10-30x faster than pure Python/JavaScript implementations, delivering 150-210 MB/s throughput.
+10-30x faster than pure Python/JavaScript implementations, delivering 150-280 MB/s throughput.
 
 ## License
 

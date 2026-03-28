@@ -1,6 +1,7 @@
 ---
 description: "Visitor Pattern Usage for html-to-markdown"
 ---
+
 # Visitor Pattern Usage for html-to-markdown
 
 ## Overview
@@ -10,6 +11,7 @@ The visitor pattern in html-to-markdown provides extensible hooks into the HTML-
 ## Architecture Philosophy
 
 **Key Principles:**
+
 - **Flexibility over performance**: Give users full control over conversion
 - **Zero-cost when unused**: No overhead if visitor feature disabled
 - **Comprehensive coverage**: All HTML element types have dedicated visitor methods
@@ -28,6 +30,7 @@ pub use visitor_helpers::AsyncVisitorHandle;
 ```
 
 **In Cargo.toml:**
+
 ```toml
 [features]
 default = ["metadata"]
@@ -614,6 +617,7 @@ println!("Internal: {:?}", visitor.internal_links);
 ### Optimization Strategies
 
 1. **Fast path for most elements:**
+
    ```rust
    fn visit_text(&mut self, _ctx: &NodeContext, _text: &str) -> VisitResult {
        VisitResult::Default  // Quick return for most text nodes
@@ -621,12 +625,14 @@ println!("Internal: {:?}", visitor.internal_links);
    ```
 
 2. **Only override when needed:**
+
    ```rust
    // Only override link handling
    // All other methods inherit Default implementation
    ```
 
 3. **Avoid allocations in hot path:**
+
    ```rust
    // Bad: allocate string for every node
    VisitResult::Custom(format!(">{}<", text))
@@ -700,11 +706,13 @@ task ruby:test  # packages/ruby/spec/visitor_spec.rb
 ## Implementation Location
 
 **Core Files:**
+
 - `/crates/html-to-markdown/src/visitor.rs` - Trait definitions and NodeType enum
 - `/crates/html-to-markdown/src/visitor_helpers.rs` - VisitorHandle and async support
 - `/crates/html-to-markdown/src/converter.rs` - Integration with conversion pipeline
 
 **Binding Examples:**
+
 - `/crates/html-to-markdown-py/src/lib.rs` - PyO3 visitor wrapping
 - `/crates/html-to-markdown-node/src/lib.rs` - NAPI-RS visitor support
 - `/packages/ruby/lib/visitor.rb` - Ruby visitor interface
@@ -727,9 +735,6 @@ pub async fn convert_with_async_visitor(
     options: Option<ConversionOptions>,
     visitor: Option<AsyncVisitorHandle>,
 ) -> Result<String>
-
-// Combined with metadata (future enhancement)
-// pub fn convert_with_metadata_and_visitor(...) -> Result<(String, ExtendedMetadata)>
 ```
 
 ## Quick Reference: Common Visitor Patterns

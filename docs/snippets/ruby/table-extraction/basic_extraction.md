@@ -9,7 +9,7 @@ html = <<~HTML
   </table>
 HTML
 
-result = HtmlToMarkdown.convert_with_tables(html)
+result = HtmlToMarkdown.convert(html, extract_tables: true)
 
 result[:tables].each do |table|
   table[:cells].each_with_index do |row, i|

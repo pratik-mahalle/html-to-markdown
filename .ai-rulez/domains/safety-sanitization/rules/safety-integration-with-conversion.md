@@ -2,6 +2,7 @@
 name: Safety Integration with Conversion
 priority: high
 ---
+
 Apply safety checks during conversion
 
 - Sanitize URLs in links/images

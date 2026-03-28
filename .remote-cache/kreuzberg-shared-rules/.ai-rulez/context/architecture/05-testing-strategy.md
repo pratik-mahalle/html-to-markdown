@@ -295,7 +295,7 @@ describe('API Parity Tests', () => {
 
 ### Directory Structure
 
-```
+```text
 tests/
 ├── fixtures/
 │   ├── api-parity.yaml         # Shared test fixtures

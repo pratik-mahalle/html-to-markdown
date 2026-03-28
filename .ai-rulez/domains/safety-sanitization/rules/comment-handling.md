@@ -2,6 +2,7 @@
 name: Comment Handling
 priority: high
 ---
+
 Decide comment preservation strategy
 
 - Remove HTML comments by default

@@ -8,9 +8,10 @@ var html = @"
     <tr><td>Bob</td><td>25</td></tr>
 </table>";
 
-var result = HtmlToMarkdownConverter.ConvertWithTables(html);
+var options = new ConversionOptions { ExtractTables = true };
+var result = HtmlToMarkdownConverter.Convert(html, options);
 
-foreach (var table in result.Tables)
+foreach (var table in result.Tables ?? [])
 {
     for (int i = 0; i < table.Cells.Count; i++)
     {

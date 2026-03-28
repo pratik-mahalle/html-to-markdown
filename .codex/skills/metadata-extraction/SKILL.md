@@ -31,6 +31,7 @@ let metadata = metadata_collector.finish();
 ```
 
 **Key Benefits:**
+
 - **Zero overhead when disabled**: Entire module compilable out via feature flags
 - **Single tree traversal**: No separate metadata extraction pass
 - **Memory efficient**: Pre-allocated buffers (typical: 32 headers, 64 links, 16 images)
@@ -149,6 +150,7 @@ pub enum TextDirection {
 ```
 
 **Extracted Result:**
+
 ```rust
 DocumentMetadata {
     title: Some("My Article"),
@@ -205,6 +207,7 @@ Headers are extracted with context about document structure:
 ```
 
 **Extracted Headers:**
+
 ```rust
 vec![
     HeaderMetadata { level: 1, text: "Main Title", id: None, hierarchy_depth: 0, position: 0 },
@@ -253,7 +256,7 @@ pub struct LinkMetadata {
 
 ### Classification Logic
 
-```
+```text
 href="#intro"                 → LinkType::Anchor
 href="/page"                  → LinkType::Internal
 href="../sibling"             → LinkType::Internal
@@ -292,6 +295,7 @@ href="javascript:void(0)"     → LinkType::Other
 ```
 
 **Extracted Links:**
+
 ```rust
 vec![
     LinkMetadata {
@@ -408,6 +412,7 @@ pub struct ImageMetadata {
 ```
 
 **Extracted Images:**
+
 ```rust
 vec![
     ImageMetadata {
@@ -500,6 +505,7 @@ pub struct StructuredData {
 ```
 
 **Extracted:**
+
 ```rust
 StructuredData {
     data_type: StructuredDataType::JsonLd,
@@ -596,11 +602,13 @@ pub fn convert_with_metadata(
 ## Performance Characteristics
 
 **Benchmarking:**
+
 - Single-pass collection adds < 5% overhead to conversion
 - Memory: Typical document (50 headers, 100 links, 20 images) < 50KB overhead
 - Large documents (1000+ links): Pre-allocated buffers grow as needed
 
 **Memory Safety:**
+
 - `max_structured_data_size` prevents DoS from huge JSON-LD blocks
 - Recursive metadata collection depth-limited
 - No unbounded allocations
@@ -608,11 +616,13 @@ pub fn convert_with_metadata(
 ## Implementation Location
 
 **Core Files:**
+
 - `/crates/html-to-markdown/src/metadata.rs` - All metadata types and collector
 - `/crates/html-to-markdown/src/lib.rs` - `convert_with_metadata()` public API (lines 310-462)
 - `/crates/html-to-markdown/src/converter.rs` - Integration with conversion pipeline
 
 **Testing:**
+
 - `/crates/html-to-markdown/src/lib.rs` - Tests starting at line 604
 
 ## API Pattern Consistency

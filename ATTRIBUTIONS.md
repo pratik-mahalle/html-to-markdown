@@ -7,13 +7,13 @@ provides the required attribution and license information.
 
 - **Version vendored**: 0.36.0+unofficial
 - **Original authors**: The html5ever Project Developers
-- **Repository**: https://github.com/servo/html5ever
+- **Repository**: <https://github.com/servo/html5ever>
 - **Vendored into**: `crates/html-to-markdown/src/rcdom.rs`
 - **License**: MIT OR Apache-2.0
 
 ### MIT License
 
-```
+```text
 Copyright (c) 2014 The html5ever Project Developers
 
 Permission is hereby granted, free of charge, to any
@@ -43,7 +43,7 @@ DEALINGS IN THE SOFTWARE.
 
 ### Apache License, Version 2.0
 
-```
+```text
                               Apache License
                         Version 2.0, January 2004
                      http://www.apache.org/licenses/

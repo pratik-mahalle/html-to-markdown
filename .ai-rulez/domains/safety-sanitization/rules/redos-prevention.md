@@ -2,6 +2,7 @@
 name: ReDoS Prevention
 priority: high
 ---
+
 Prevent Regular Expression Denial of Service
 
 - Avoid catastrophic backtracking in regex

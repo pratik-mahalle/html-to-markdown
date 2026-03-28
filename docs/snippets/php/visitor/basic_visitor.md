@@ -2,6 +2,7 @@
 use HtmlToMarkdown\Visitor\AbstractVisitor;
 use HtmlToMarkdown\Visitor\NodeContext;
 use HtmlToMarkdown\Visitor\VisitResult;
+use HtmlToMarkdown\Config\ConversionOptions;
 use HtmlToMarkdown\Service\Converter;
 
 class CustomVisitor extends AbstractVisitor
@@ -20,9 +21,9 @@ class CustomVisitor extends AbstractVisitor
 }
 
 $converter = Converter::create();
-$markdown = $converter->convertWithVisitor(
+$result = $converter->convert(
     '<a href="/page">Link</a><img src="pic.png" alt="pic">',
-    null,
-    new CustomVisitor()
+    new ConversionOptions(visitor: new CustomVisitor())
 );
+$markdown = $result['content'];
 ```

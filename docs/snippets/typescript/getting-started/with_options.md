@@ -7,5 +7,6 @@ const options: ConversionOptions = {
   wrap: true,
 };
 
-const markdown = convert('<h1>Title</h1><p>Content</p>', options);
+const result = convert('<h1>Title</h1><p>Content</p>', options);
+const markdown = result.content;
 ```

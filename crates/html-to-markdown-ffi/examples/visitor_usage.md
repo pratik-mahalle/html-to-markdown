@@ -11,6 +11,7 @@ The visitor pattern allows language bindings (Go, Java, C#, etc.) to intercept a
 ### Node Type Enumeration
 
 Covers all 88 HTML element types:
+
 - **Text/Generic**: TEXT, ELEMENT
 - **Block Elements**: HEADING, PARAGRAPH, DIV, BLOCKQUOTE, PRE, HR
 - **Lists**: LIST, LIST_ITEM, DEFINITION_LIST, DEFINITION_TERM, DEFINITION_DESCRIPTION
@@ -26,6 +27,7 @@ Covers all 88 HTML element types:
 ### Visit Result Type
 
 Controls conversion flow:
+
 ```c
 typedef enum {
     HTML_TO_MARKDOWN_VISIT_CONTINUE = 0,      // Use default behavior
@@ -496,6 +498,7 @@ Each language binding implements:
 4. **Error handling**: Maps C errors to language-native exceptions
 
 Bindings are generated for:
+
 - **Go**: crates/go/ (FFI wrapper)
 - **Java**: crates/java/ (JNI + Panama FFM)
 - **C#**: crates/csharp/ (P/Invoke)

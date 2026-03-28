@@ -7,9 +7,10 @@ html = """
 </table>
 """
 
-{:ok, content, tables, _metadata} = HtmlToMarkdown.convert_with_tables(html)
+opts = %HtmlToMarkdown.Options{extract_tables: true}
+{:ok, result} = HtmlToMarkdown.convert(html, opts)
 
-for %{cells: cells, is_header_row: is_header_row} <- tables do
+for %{cells: cells, is_header_row: is_header_row} <- result.tables do
   cells
   |> Enum.with_index()
   |> Enum.each(fn {row, i} ->

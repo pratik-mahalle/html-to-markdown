@@ -164,7 +164,7 @@ pub fn is_void_element(tag: &str) -> bool;
 
 The overall conversion flow from HTML to Markdown:
 
-```
+```text
 Input HTML String
     ↓
 validate_input() [Binary detection, encoding check]
@@ -191,11 +191,13 @@ Markdown Output String
 ### Parser-Specific Implementations
 
 **html5ever-based path** (`crates/html-to-markdown/src/`):
+
 - Uses `html5ever::parse_document()` for standards-compliant parsing
 - Returns `RcDom` tree with reference-counted nodes
 - Handles malformed HTML recovery
 
 **tl-based path** (potential `converter/mod.rs`):
+
 - Lightweight `astral-tl` parser for high performance
 - Direct DOM access without reference counting overhead
 - Suitable for pre-validated HTML

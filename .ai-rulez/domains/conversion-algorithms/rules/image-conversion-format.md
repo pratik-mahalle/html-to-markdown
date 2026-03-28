@@ -2,6 +2,7 @@
 name: Image Conversion Format
 priority: high
 ---
+
 Convert images to Markdown ![alt](src) format
 
 - Extract src and alt text, convert to ![alt](src)

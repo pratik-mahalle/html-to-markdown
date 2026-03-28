@@ -1,5 +1,5 @@
 ```typescript
-import { convertWithTables } from '@kreuzberg/html-to-markdown';
+import { convert, ConversionOptions } from '@kreuzberg/html-to-markdown';
 
 const html = `
 <table>
@@ -9,9 +9,10 @@ const html = `
 </table>
 `;
 
-const result = convertWithTables(html);
+const options: ConversionOptions = { extractTables: true };
+const result = convert(html, options);
 
-for (const table of result.tables) {
+for (const table of result.tables ?? []) {
   for (let i = 0; i < table.cells.length; i++) {
     const prefix = table.isHeaderRow[i] ? 'Header' : 'Row';
     console.log(`  ${prefix}: ${table.cells[i].join(', ')}`);

@@ -56,10 +56,8 @@
   </a>
 </div>
 
-
 High-performance HTML to Markdown converter with C#/.NET bindings using P/Invoke to the Rust core.
 Provides type-safe record-based APIs for metadata extraction, visitor patterns, and thread-safe concurrent conversion.
-
 
 ## Installation
 
@@ -67,18 +65,11 @@ Provides type-safe record-based APIs for metadata extraction, visitor patterns, 
 dotnet add package KreuzbergDev.HtmlToMarkdown
 ```
 
-
-
 Requires .NET 8.0+ SDK.
 
 ```bash
 dotnet add package KreuzbergDev.HtmlToMarkdown
 ```
-
-
-
-
-
 
 ## Performance Snapshot
 
@@ -90,9 +81,7 @@ Apple M4 • Real Wikipedia documents • `Convert()` (C# / .NET)
 | Tables (Countries) | 360KB | 853 | 300.1 MB/s |
 | Mixed (Python) | 656KB | 456 | 292.3 MB/s |
 
-
-See [Performance Guide](../../examples/performance/) for detailed benchmarks.
-
+See for detailed benchmarks.
 
 ## Quick Start
 
@@ -105,8 +94,6 @@ var html = "<h1>Hello World</h1><p>This is a paragraph.</p>";
 var markdown = HtmlToMarkdownConverter.Convert(html);
 Console.WriteLine(markdown);
 ```
-
-
 
 With conversion options:
 
@@ -126,15 +113,9 @@ var markdown = HtmlToMarkdownConverter.Convert(html);
 Console.WriteLine(markdown);
 ```
 
-
-
-
-
-
 ## API Reference
 
 ### Core Functions
-
 
 **`Convert(string html, ConversionOptions? options = null) : string`**
 
@@ -142,17 +123,16 @@ Basic HTML-to-Markdown conversion. Fast and simple.
 
 **`ConvertWithMetadata(string html, ConversionOptions? options = null, MetadataConfig? config = null) : (string markdown, MetadataResult metadata)`**
 
-Extract Markdown plus metadata in a single pass. See [Metadata Extraction Guide](../../examples/metadata-extraction/).
+Extract Markdown plus metadata in a single pass.
 
 **`ConvertWithInlineImages(string html, InlineImageConfig? config = null) : (string markdown, InlineImageData[] images, string[] warnings)`**
 
 Extract base64-encoded inline images with metadata.
 
-
-
 ### Options
 
 **`ConversionOptions`** – Key configuration fields:
+
 - `heading_style`: Heading format (`"underlined"` | `"atx"` | `"atx_closed"`) — default: `"underlined"`
 - `list_indent_width`: Spaces per indent level — default: `2`
 - `bullets`: Bullet characters cycle — default: `"*+-"`
@@ -163,12 +143,12 @@ Extract base64-encoded inline images with metadata.
 - `output_format`: Output markup format (`"markdown"` | `"djot"` | `"plain"`) — default: `"markdown"`
 
 **`MetadataConfig`** – Selective metadata extraction:
+
 - `extract_headers`: h1-h6 elements — default: `true`
 - `extract_links`: Hyperlinks — default: `true`
 - `extract_images`: Image elements — default: `true`
 - `extract_structured_data`: JSON-LD, Microdata, RDFa — default: `true`
 - `max_structured_data_size`: Size limit in bytes — default: `100KB`
-
 
 ## Djot Output Format
 
@@ -188,7 +168,6 @@ The library supports converting HTML to [Djot](https://djot.net/), a lightweight
 
 ### Example Usage
 
-
 ```csharp
 using HtmlToMarkdown;
 
@@ -203,14 +182,11 @@ var djot = Converter.Convert(html, new ConversionOptions { OutputFormat = "djot"
 // Result: "This is *bold* and _italic_ text."
 ```
 
-
 Djot's extended syntax allows you to express more semantic meaning in lightweight text, making it useful for documents that require strikethrough, insertion tracking, or mathematical notation.
-
 
 ## Plain Text Output
 
 Set `output_format` to `"plain"` to strip all markup and return only visible text. This bypasses the Markdown conversion pipeline entirely for maximum speed.
-
 
 ```csharp
 using HtmlToMarkdown;
@@ -221,19 +197,10 @@ var plain = Converter.Convert(html, new ConversionOptions { OutputFormat = "plai
 // Result: "Title\n\nThis is bold and italic text."
 ```
 
-
 Plain text mode is useful for search indexing, text extraction, and feeding content to LLMs.
-
-
-
-
-
 
 ## Examples
 
-- [Visitor Pattern Guide](../../examples/visitor-pattern/)
-- [Metadata Extraction Guide](../../examples/metadata-extraction/)
-- [Performance Guide](../../examples/performance/)
 
 ## Links
 

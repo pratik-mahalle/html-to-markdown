@@ -2,9 +2,11 @@
 name: list-converter
 description: Convert HTML lists to Markdown lists
 ---
+
 Source: crates/html-to-markdown/src/converter.rs (list conversion)
 
 Key concepts:
+
 - Unordered list conversion
 - Ordered list conversion
 - List nesting and indentation
@@ -12,6 +14,7 @@ Key concepts:
 - Task list detection
 
 Capabilities:
+
 - Convert ul/ol to Markdown lists
 - Handle nested lists (multiple levels)
 - Configure list bullet style (-, *, +)
@@ -21,6 +24,7 @@ Capabilities:
 - Handle tight vs loose list detection
 
 Patterns:
+
 - Unordered items use -, *, or + prefix
 - Ordered items use 1., 2., etc.
 - Nested items have proper indentation at each level

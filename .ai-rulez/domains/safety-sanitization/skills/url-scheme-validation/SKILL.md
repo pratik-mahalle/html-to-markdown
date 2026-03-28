@@ -2,18 +2,22 @@
 description: "Url Scheme Validation"
 name: url-scheme-validation
 ---
+
 Validate and sanitize URLs
 
 Key source files:
+
 - crates/html-to-markdown/src/safety.rs
 
 Master concepts:
+
 - Scheme extraction
 - Whitelist enforcement
 - Dangerous scheme blocking
 - URL-encoded bypass detection
 
 Step by step:
+
 1. Extract URL from attribute
 2. Trim and lowercase for checking
 3. Check for dangerous schemes

@@ -65,7 +65,7 @@ repos:
     rev: v1.19.1
     hooks:
       - id: mypy
-        exclude: "e2e/|scripts/|examples/|crates/|tests/test_apps/"
+        exclude: "e2e/|scripts/|crates/|tests/test_apps/"
 
   # Rust: formatting, linting, and license checking
   - repo: https://github.com/AndrejOrsula/pre-commit-cargo
@@ -74,24 +74,25 @@ repos:
       - id: cargo-fmt
         args: ["--all"]
       - id: cargo-clippy
-        args: [
-          "--fix",
-          "--allow-dirty",
-          "--allow-staged",
-          "--workspace",
-          "--exclude=html-to-markdown-php",
-          "--exclude=html-to-markdown-py",
-          "--exclude=html-to-markdown-node",
-          "--exclude=html-to-markdown-wasm",
-          "--exclude=benchmark-harness",
-          "--exclude=html-to-markdown-wasm-wasmtime-tests",
-          "--exclude=html-to-markdown-e2e-rust",
-          "--all-features",
-          "--all-targets",
-          "--",
-          "-D",
-          "warnings",
-        ]
+        args:
+          [
+            "--fix",
+            "--allow-dirty",
+            "--allow-staged",
+            "--workspace",
+            "--exclude=html-to-markdown-php",
+            "--exclude=html-to-markdown-py",
+            "--exclude=html-to-markdown-node",
+            "--exclude=html-to-markdown-wasm",
+            "--exclude=benchmark-harness",
+            "--exclude=html-to-markdown-wasm-wasmtime-tests",
+            "--exclude=html-to-markdown-e2e-rust",
+            "--all-features",
+            "--all-targets",
+            "--",
+            "-D",
+            "warnings",
+          ]
 
   - repo: https://github.com/bnjbvr/cargo-machete
     rev: v0.9.1
@@ -127,7 +128,13 @@ repos:
         args: [--style=file]
         files: ^crates/html-to-markdown-ffi/tests/c/
       - id: cppcheck
-        args: ["--std=c11", "--enable=warning,style,performance", "--suppress=missingIncludeSystem", "--suppress=unusedStructMember"]
+        args:
+          [
+            "--std=c11",
+            "--enable=warning,style,performance",
+            "--suppress=missingIncludeSystem",
+            "--suppress=unusedStructMember",
+          ]
         files: ^crates/html-to-markdown-ffi/tests/c/
 
   - repo: https://github.com/checkmake/checkmake
@@ -161,8 +168,20 @@ repos:
       - id: cpd
         exclude: ^\.mvn/wrapper/|^e2e/
       - id: checkstyle
-        args: ["-c", "packages/java/checkstyle.xml", "-p", "packages/java/checkstyle.properties"]
+        args:
+          [
+            "-c",
+            "packages/java/checkstyle.xml",
+            "-p",
+            "packages/java/checkstyle.properties",
+          ]
         exclude: ^\.mvn/wrapper/|^e2e/
+
+  - repo: https://github.com/rvben/rumdl-pre-commit
+    rev: "v0.1.62"
+    hooks:
+      - id: rumdl-fmt
+        exclude: 'test_documents/|\.ai-rulez/|\.remote-cache/|e2e/|fixtures/'
 
   # Local hooks for language toolchains
   - repo: local

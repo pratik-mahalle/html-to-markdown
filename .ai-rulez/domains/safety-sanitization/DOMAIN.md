@@ -60,6 +60,7 @@ The Safety & Sanitization domain protects the html-to-markdown conversion pipeli
   - Optional: Strip all styles if configured
 
 - **Ammonia Configuration**:
+
   ```rust
   let mut cleaner = ammonia::Builder::default();
   cleaner.tags(SAFE_TAGS);           // Whitelist elements
@@ -112,6 +113,7 @@ The Safety & Sanitization domain protects the html-to-markdown conversion pipeli
   - Unicode tricks: `jаvascript:` (Cyrillic 'a') → Detected if configured
 
 - **Implementation**:
+
   ```rust
   pub fn sanitize_url(url: &str, whitelist: &[&str]) -> Option<String> {
       if url.is_empty() {
@@ -161,6 +163,7 @@ The Safety & Sanitization domain protects the html-to-markdown conversion pipeli
   - **Style**: Inline CSS sanitization (see Style Handling)
 
 - **Dangerous Attributes Removal**:
+
   ```rust
   const DANGEROUS_ATTRIBUTES: &[&str] = &[
       "on*",           // All event handlers
@@ -403,7 +406,7 @@ impl Default for SafetyConfig {
 
 ### Safety Pipeline
 
-```
+```text
 Untrusted HTML Input
     ↓
 validate_input() [Binary detection, encoding check]
@@ -466,6 +469,7 @@ pub struct ConversionOptions {
 **Attacker Goal**: Execute JavaScript in user's browser via converted Markdown
 
 **Attack Vector**: Malicious HTML input containing:
+
 - `<script>` tags
 - Event handler attributes (onclick, onerror, etc.)
 - javascript: URLs in links/image sources
@@ -473,6 +477,7 @@ pub struct ConversionOptions {
 - SVG with embedded scripts
 
 **Defense**:
+
 1. Ammonia sanitization removes dangerous elements/attributes
 2. URL sanitization blocks javascript: and data: schemes
 3. Markdown output cannot execute scripts

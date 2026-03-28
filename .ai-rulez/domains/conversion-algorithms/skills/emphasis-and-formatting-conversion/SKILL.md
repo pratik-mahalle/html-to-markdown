@@ -2,12 +2,15 @@
 description: "Emphasis And Formatting Conversion"
 name: emphasis-and-formatting-conversion
 ---
+
 Convert text emphasis tags to Markdown
 
 Key source files:
+
 - crates/html-to-markdown/src/converter.rs
 
 Master concepts:
+
 - Bold/strong formatting
 - Italic/emphasis formatting
 - Strikethrough
@@ -15,6 +18,7 @@ Master concepts:
 - Escaping rules
 
 Step by step:
+
 1. For strong tags wrap with double asterisks
 2. For em tags wrap with single asterisk
 3. For del/s tags wrap with double tildes

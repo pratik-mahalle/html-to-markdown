@@ -2,6 +2,7 @@
 name: Default Visitor Behavior
 priority: high
 ---
+
 Define sensible default conversions
 
 - Default converter for each element type

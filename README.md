@@ -17,8 +17,8 @@
   <a href="https://central.sonatype.com/artifact/dev.kreuzberg/html-to-markdown">
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown?label=Java&color=007ec6" alt="Java">
   </a>
-  <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown">
-    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/html-to-markdown?label=Go&color=007ec6&filter=v2.28.4" alt="Go">
+  <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown">
+    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/html-to-markdown?label=Go&color=007ec6&filter=v3.0.0" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/">
     <img src="https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown?label=C%23&color=007ec6" alt="C#">
@@ -65,6 +65,7 @@ High-performance HTML to Markdown conversion powered by Rust. Ships as native bi
 
 - **150-280 MB/s** throughput (10-80x faster than pure Python alternatives)
 - **12 language bindings** with consistent output across all runtimes
+- **Structured result** — `convert()` returns `ConversionResult` with `content`, `metadata`, `tables`, `images`, and `warnings`
 - **Metadata extraction** — title, headers, links, images, structured data (JSON-LD, Microdata, RDFa)
 - **Visitor pattern** — custom callbacks for content filtering, URL rewriting, domain-specific dialects
 - **Table extraction** — extract structured table data (cells, headers, rendered markdown) during conversion

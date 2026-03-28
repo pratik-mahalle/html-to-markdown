@@ -2,6 +2,7 @@
 name: Clear Error Messages
 priority: high
 ---
+
 Provide actionable error information
 
 - Include specific error type (binary, encoding, malformed)

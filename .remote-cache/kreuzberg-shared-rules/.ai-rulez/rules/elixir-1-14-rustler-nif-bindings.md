@@ -21,7 +21,7 @@ ______________________________________________________________________
 
 Rustler NIF crates follow the pattern `crates/{module_name}-elixir`:
 
-```
+```text
 crates/my-module-elixir/
   ├── Cargo.toml          # NIF crate metadata, rustler dependency
   ├── src/
@@ -41,7 +41,7 @@ crates/my-module-elixir/
 
 Elixir Mix projects consuming NIFs:
 
-```
+```text
 packages/elixir/
   ├── mix.exs             # Application, deps, :rustler compiler
   ├── lib/
@@ -161,7 +161,7 @@ end
 
 Credo enforces code quality:
 
-```
+```text
 mix credo --strict
 ```
 

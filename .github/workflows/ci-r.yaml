@@ -52,3 +52,12 @@ jobs:
         working-directory: packages/r
         run: ../../scripts/ci/r/run-lintr.sh
         shell: bash
+
+      - name: Install Task
+        uses: go-task/setup-task@v2 # v2
+        with:
+          version: 3.46.4
+
+      - name: Run E2E tests
+        run: task r:e2e:test
+        shell: bash

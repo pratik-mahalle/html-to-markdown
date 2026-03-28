@@ -13,10 +13,12 @@ Cargo.toml `workspace.package.version` is the authoritative version source for a
 ## Single Source of Truth
 
 - **Cargo.toml workspace.package.version**: Primary version definition
+
   ```toml
   [workspace.package]
   version = "0.8.2"
   ```
+
 - All packages in the monorepo share the same version (no independent versioning)
 - Version bumps occur exclusively in Cargo.toml
 - Never manually edit language-specific package manifests for versions

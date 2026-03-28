@@ -2,6 +2,7 @@
 name: Stack Overflow Prevention
 priority: high
 ---
+
 Prevent stack overflow from deep recursion
 
 - Track nesting depth during traversal

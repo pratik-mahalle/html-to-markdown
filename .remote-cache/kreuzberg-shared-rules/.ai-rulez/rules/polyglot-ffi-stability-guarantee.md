@@ -51,11 +51,13 @@ ______________________________________________________________________
 ### Version Constants and Checks
 
 - C headers define three versioning constants:
+
   ```c
   #define HTML_TO_MARKDOWN_VERSION_MAJOR 1
   #define HTML_TO_MARKDOWN_VERSION_MINOR 2
   #define HTML_TO_MARKDOWN_VERSION_PATCH 0
   ```
+
 - Runtime version query function: `const char* html_to_markdown_version(void)` returns "1.2.0"
 - All FFI bindings call version check at initialization: `assert_version_compatible(major, minor)`
 - Binding code refuses to link if major version mismatch detected
@@ -73,9 +75,11 @@ ______________________________________________________________________
 
 1. **Announce (MAJOR - 1)**: Document breaking change in RFC issue, provide migration guide
 1. **Deprecate (MAJOR)**: Add `_deprecated` suffix to old function, mark with `#[deprecated]` in Rust
+
    ```c
    void html_to_markdown_convert_deprecated(const HtmlInput* input, HtmlOutput* output);
    ```
+
 1. **Support dual API (MAJOR)**: Both old and new functions work simultaneously
 1. **Remove (MAJOR + 1)**: Delete deprecated function; announce removal in docs
 1. **Communicate**: Email all FFI binding maintainers 6 weeks before removal

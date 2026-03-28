@@ -2,6 +2,7 @@
 name: Safe Tree Navigation
 priority: high
 ---
+
 Provide safe, panic-free DOM tree traversal
 
 - Implement parent(), children(), next_sibling(), prev_sibling()

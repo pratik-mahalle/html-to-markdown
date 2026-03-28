@@ -2,17 +2,21 @@
 description: "Markdown Validation"
 name: markdown-validation
 ---
+
 Validate generated Markdown syntax
 
 Key source files:
+
 - Markdown specification
 
 Master concepts:
+
 - Valid Markdown syntax
 - Structure preservation
 - Roundtrip testing
 
 Step by step:
+
 1. Generate Markdown from HTML
 2. Parse with Markdown validator
 3. Check for syntax errors

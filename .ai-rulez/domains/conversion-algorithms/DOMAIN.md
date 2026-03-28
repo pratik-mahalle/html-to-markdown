@@ -196,7 +196,7 @@ The Conversion Algorithms domain implements the core HTML→Markdown transformat
 ### 7. Special Elements
 
 - **Line Breaks** (`<br>`):
-  - Convert to two spaces + newline (`  \n`) or backslash newline (`\\\n`)
+  - Convert to two spaces + newline (`\n`) or backslash newline (`\\\n`)
   - Configurable via `NewlineStyle` option
 
 - **Comments** (`<!-- -->`):
@@ -297,7 +297,7 @@ pub fn build_table_separator(columns: usize, alignments: &[Alignment]) -> String
 
 ### Conversion Pipeline
 
-```
+```text
 Parsed DOM Tree
     ↓
 walk_tree() [Depth-first traversal]
@@ -367,7 +367,7 @@ pub struct ConversionOptions {
 
 ### Nested Structure Handling
 
-```
+```text
 <ul>
   <li>Item 1
     <ul>

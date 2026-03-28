@@ -2,6 +2,7 @@
 name: Attribute Whitelisting
 priority: high
 ---
+
 Only allow safe attributes on elements
 
 - Whitelist global attributes: id, class, title, lang, dir, data-*

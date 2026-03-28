@@ -1,5 +1,5 @@
 ```go
-import "github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown"
+import "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown"
 
 html := `
 <table>
@@ -9,7 +9,8 @@ html := `
 </table>
 `
 
-result, err := htmltomarkdown.ConvertWithTables(html)
+opts := htmltomarkdown.ConversionOptions{ExtractTables: true}
+result, err := htmltomarkdown.Convert(html, opts)
 if err != nil {
     log.Fatal(err)
 }

@@ -33,7 +33,7 @@ The test suite (`main.c`) validates 9 sections of the C FFI API:
 
 ## File Structure
 
-```
+```text
 tests/test_apps/c/
 ├── main.c              # Comprehensive test suite
 ├── Makefile            # Build instructions
@@ -55,7 +55,7 @@ make HTM_ROOT=/path/to/html-to-markdown
 
 ## Expected Output
 
-```
+```text
 ================================================================================
 HTML-TO-MARKDOWN C FFI COMPREHENSIVE TEST SUITE
 ================================================================================

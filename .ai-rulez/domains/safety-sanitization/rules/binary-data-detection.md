@@ -2,6 +2,7 @@
 name: Binary Data Detection
 priority: high
 ---
+
 Reject binary and non-UTF-8 input
 
 - Check for magic number prefixes (gzip, zstd, ZIP, PDF)

@@ -2,18 +2,22 @@
 description: "Binary Data Detection"
 name: binary-data-detection
 ---
+
 Detect and reject binary input before parsing
 
 Key source files:
+
 - crates/html-to-markdown/src/lib.rs (validate_input, detect_binary_magic)
 
 Master concepts:
+
 - Magic number identification
 - UTF-16 detection via null bytes
 - Control character ratio analysis
 - Format-specific detection
 
 Step by step:
+
 1. Get input bytes
 2. Check for magic number prefixes
    - 0x1F8B indicates gzip compressed

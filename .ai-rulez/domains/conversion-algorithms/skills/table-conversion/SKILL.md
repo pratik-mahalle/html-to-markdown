@@ -2,18 +2,22 @@
 description: "Table Conversion"
 name: table-conversion
 ---
+
 Convert HTML tables to Markdown GFM pipe tables
 
 Key source files:
+
 - crates/html-to-markdown/src/converter.rs (convert_table)
 
 Master concepts:
+
 - Table structure (thead, tbody, tfoot)
 - Cell content and alignment
 - GFM pipe format
 - Header detection
 
 Step by step:
+
 1. Extract table structure
    - Headers from thead or th elements
    - Data from tbody or td elements
