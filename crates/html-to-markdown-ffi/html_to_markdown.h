@@ -406,55 +406,6 @@ typedef struct HtmlToMarkdownVisitResult {
 } HtmlToMarkdownVisitResult;
 
 /**
- * Convert HTML to Markdown using default options, returning a plain Markdown string (v2 compat).
- *
- * # Safety
- *
- * - `html` must be a valid null-terminated C string
- * - The returned string must be freed with `html_to_markdown_free_string`
- * - Returns NULL on error
- *
- * # Example (C)
- *
- * ```c
- * const char* html = "<h1>Hello</h1>";
- * char* markdown = html_to_markdown_convert_to_string(html);
- * if (markdown != NULL) {
- *     printf("%s\n", markdown);
- *     html_to_markdown_free_string(markdown);
- * }
- * ```
- */
-HTM_EXPORT char *html_to_markdown_convert_to_string(const char *html);
-
-/**
- * Convert HTML to Markdown using default options, returning the output length (plain string).
- *
- * # Safety
- *
- * - `html` must be a valid null-terminated C string
- * - `len_out` must be a valid pointer to a size_t
- * - The returned string must be freed with `html_to_markdown_free_string`
- * - Returns NULL on error
- */
-HTM_EXPORT char *html_to_markdown_convert_to_string_with_len(const char *html, uintptr_t *len_out);
-
-/**
- * Convert UTF-8 HTML bytes to Markdown and return the output length (plain string).
- *
- * # Safety
- *
- * - `html` must point to `len` bytes of UTF-8 data
- * - `len_out` must be a valid pointer to a size_t
- * - The returned string must be freed with `html_to_markdown_free_string`
- * - Returns NULL on error
- */
-HTM_EXPORT
-char *html_to_markdown_convert_to_string_bytes_with_len(const uint8_t *html,
-                                                        uintptr_t len,
-                                                        uintptr_t *len_out);
-
-/**
  * Convert HTML to Markdown, returning a JSON string with structured content, metadata, images,
  * and warnings in a single pass. This is the v3 primary C API entry point.
  *

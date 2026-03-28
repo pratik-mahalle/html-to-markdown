@@ -33,10 +33,6 @@ final class HtmlToMarkdownFFI {
   /** Symbol lookup for native functions. */
   private static final SymbolLookup SYMBOL_LOOKUP;
 
-  /** Function descriptor for convert. */
-  private static final FunctionDescriptor CONVERT_DESC =
-      FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS);
-
   /** Function descriptor for free string. */
   private static final FunctionDescriptor FREE_STRING_DESC =
       FunctionDescriptor.ofVoid(ValueLayout.ADDRESS);
@@ -59,9 +55,6 @@ final class HtmlToMarkdownFFI {
   /** Function descriptor for profile stop. */
   private static final FunctionDescriptor PROFILE_STOP_DESC =
       FunctionDescriptor.of(ValueLayout.JAVA_BOOLEAN);
-
-  /** Method handle for html_to_markdown_convert_to_string. */
-  static final MethodHandle html_to_markdown_convert_to_string;
 
   /** Method handle for html_to_markdown_free_string. */
   static final MethodHandle html_to_markdown_free_string;
@@ -220,9 +213,6 @@ final class HtmlToMarkdownFFI {
     loadNativeLibrary();
 
     SYMBOL_LOOKUP = SymbolLookup.loaderLookup();
-
-    html_to_markdown_convert_to_string =
-        LINKER.downcallHandle(findSymbol("html_to_markdown_convert_to_string"), CONVERT_DESC);
 
     html_to_markdown_free_string =
         LINKER.downcallHandle(findSymbol("html_to_markdown_free_string"), FREE_STRING_DESC);

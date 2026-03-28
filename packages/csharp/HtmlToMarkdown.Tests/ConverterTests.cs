@@ -8,15 +8,15 @@ public class ConverterTests
     public void Convert_SimpleHeading_ReturnsMarkdown()
     {
         var html = "<h1>Hello World</h1>";
-        var markdown = HtmlToMarkdownConverter.ConvertToString(html);
-        Assert.Contains("Hello World", markdown);
+        var result = HtmlToMarkdownConverter.Convert(html);
+        Assert.Contains("Hello World", result.Content);
     }
 
     [Fact]
     public void Convert_EmptyString_ReturnsEmptyString()
     {
-        var markdown = HtmlToMarkdownConverter.ConvertToString("");
-        Assert.Equal("", markdown);
+        var result = HtmlToMarkdownConverter.Convert("");
+        Assert.Equal("", result.Content ?? "");
     }
 
     [Fact]
@@ -24,32 +24,32 @@ public class ConverterTests
     {
         string? html = null;
         Assert.Throws<ArgumentNullException>(() =>
-            HtmlToMarkdownConverter.ConvertToString(html!));
+            HtmlToMarkdownConverter.Convert(html!));
     }
 
     [Fact]
     public void Convert_Paragraph_ReturnsMarkdown()
     {
         var html = "<p>This is a test.</p>";
-        var markdown = HtmlToMarkdownConverter.ConvertToString(html);
-        Assert.Contains("This is a test", markdown);
+        var result = HtmlToMarkdownConverter.Convert(html);
+        Assert.Contains("This is a test", result.Content);
     }
 
     [Fact]
     public void Convert_StrongText_ReturnsMarkdown()
     {
         var html = "<strong>Bold text</strong>";
-        var markdown = HtmlToMarkdownConverter.ConvertToString(html);
-        Assert.Contains("Bold text", markdown);
+        var result = HtmlToMarkdownConverter.Convert(html);
+        Assert.Contains("Bold text", result.Content);
     }
 
     [Fact]
     public void Convert_List_ReturnsMarkdown()
     {
         var html = "<ul><li>Item 1</li><li>Item 2</li></ul>";
-        var markdown = HtmlToMarkdownConverter.ConvertToString(html);
-        Assert.Contains("Item 1", markdown);
-        Assert.Contains("Item 2", markdown);
+        var result = HtmlToMarkdownConverter.Convert(html);
+        Assert.Contains("Item 1", result.Content);
+        Assert.Contains("Item 2", result.Content);
     }
 
     [Fact]

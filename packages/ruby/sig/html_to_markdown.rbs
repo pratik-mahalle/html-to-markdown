@@ -205,7 +205,6 @@ module HtmlToMarkdown
   # These are aliased from the Rust extension and available as both module and instance methods
   private
 
-  def self.native_convert_to_string: (String html, conversion_options? options) -> String
   def self.native_convert: (String html, conversion_options? options) -> Hash[String, untyped]
   def self.native_extract: (String html, conversion_options? options) -> Hash[String, untyped]
   def self.native_options: (conversion_options? options_hash) -> Options
@@ -236,7 +235,6 @@ module HtmlToMarkdown
     metadata_config? metadata_config
   ) -> table_extraction_result
 
-  def native_convert_to_string: (String html, conversion_options? options) -> String
   def native_convert: (String html, conversion_options? options) -> Hash[String, untyped]
   def native_extract: (String html, conversion_options? options) -> Hash[String, untyped]
   def native_options: (conversion_options? options_hash) -> Options
@@ -287,15 +285,6 @@ module HtmlToMarkdown
   # Example:
   #   result = HtmlToMarkdown.convert(html)
   def self.convert: (String html, ?conversion_options options) -> Hash[String, untyped]
-
-  # Convert HTML to Markdown, returning a plain Markdown string (v2 compat).
-  #
-  # Example:
-  #   markdown = HtmlToMarkdown.convert_to_string(html, { wrap: true }, my_visitor)
-  def self.convert_to_string: (String html, ?conversion_options options, ?visitor visitor) -> String
-
-  # Instance method version (created by module_function)
-  def convert_to_string: (String html, ?conversion_options options, ?visitor visitor) -> String
 
   # Create a reusable options handle for performance
   def self.options: (?conversion_options options_hash) -> Options

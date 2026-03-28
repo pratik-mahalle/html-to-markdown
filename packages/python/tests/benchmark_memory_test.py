@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 import pytest
 
-from html_to_markdown import convert_to_string
+from html_to_markdown import convert
 
 pytest_plugins: list[str] = []
 
@@ -84,7 +84,7 @@ class TestMemoryProfiling:
         html = generate_complex_html(size_factor=5)
 
         with memory_snapshot() as memory_data:
-            result = convert_to_string(html)
+            result = convert(html)["content"] or ""
 
         assert len(result) > 0
 
@@ -98,7 +98,7 @@ class TestMemoryProfiling:
         html = generate_complex_html(size_factor=100)
 
         with memory_snapshot() as memory_data:
-            result = convert_to_string(html)
+            result = convert(html)["content"] or ""
 
         assert len(result) > 0
 
@@ -118,7 +118,7 @@ class TestMemoryProfiling:
             _memory_before = process.memory_info().rss
 
             for _ in range(10):
-                result = convert_to_string(html)
+                result = convert(html)["content"] or ""
                 assert len(result) > 0
 
             gc.collect()
@@ -142,7 +142,7 @@ class TestMemrayProfiling:
         output_file = tmp_path / "memray_profile.bin"
 
         with memray.Tracker(output_file):
-            result = convert_to_string(html)
+            result = convert(html)["content"] or ""
 
         assert len(result) > 0
         assert output_file.exists()
@@ -161,7 +161,7 @@ def run_memory_analysis() -> None:
         print(f"\n📊 Document size factor: {size} ({input_size_mb:.2f}MB)")
 
         with memory_snapshot() as memory_data:
-            result = convert_to_string(html)
+            result = convert(html)["content"] or ""
 
         memory_used_mb = (
             (memory_data["process_after"]["rss_after"] - memory_data["process_before"]["rss_before"]) / 1024 / 1024

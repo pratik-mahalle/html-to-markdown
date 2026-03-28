@@ -11,7 +11,13 @@ from typing import Any
 
 import pytest
 
-from html_to_markdown import convert_to_string
+from html_to_markdown import convert as _convert
+
+
+def convert_to_string(html: str) -> str:
+    """Thin shim that returns the content string from convert()."""
+    return _convert(html)["content"] or ""
+
 
 pytestmark = pytest.mark.filterwarnings("ignore::DeprecationWarning")
 

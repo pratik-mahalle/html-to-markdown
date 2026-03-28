@@ -64,52 +64,6 @@ public final class HtmlToMarkdown {
               false);
 
   /**
-   * Convert HTML to Markdown using default options, returning a plain Markdown string (v2 compat).
-   *
-   * <p>This method uses CommonMark-compliant defaults:
-   *
-   * <ul>
-   *   <li>ATX-style headings ({@code # Heading})
-   *   <li>Two-space line breaks
-   *   <li>Cycling bullets for nested lists ({@code * + -})
-   *   <li>Minimal character escaping
-   * </ul>
-   *
-   * @param html the HTML string to convert
-   * @return the converted Markdown string
-   * @throws NullPointerException if html is null
-   * @throws ConversionException if the conversion fails
-   */
-  public static String convertToString(final String html) {
-    if (html == null) {
-      throw new NullPointerException("HTML cannot be null");
-    }
-
-    try (Arena arena = Arena.ofConfined()) {
-      MemorySegment htmlSegment = HtmlToMarkdownFFI.toCString(arena, html);
-
-      MemorySegment resultSegment =
-          (MemorySegment) HtmlToMarkdownFFI.html_to_markdown_convert_to_string.invoke(htmlSegment);
-
-      if (resultSegment == null || resultSegment.address() == 0) {
-        String error = getLastError();
-        throw new ConversionException(
-            error != null ? error : "Conversion failed with unknown error");
-      }
-
-      try {
-        return HtmlToMarkdownFFI.fromCString(resultSegment);
-      } finally {
-        HtmlToMarkdownFFI.html_to_markdown_free_string.invoke(resultSegment);
-      }
-    } catch (ConversionException e) {
-      throw e;
-    } catch (Throwable e) {
-      throw new ConversionException("Failed to convert HTML to Markdown", e);
-    }
-  }
-
-  /**
    * Convert HTML to Markdown using a custom visitor for interception and customization.
    *
    * <p>The visitor interface allows you to intercept and customize the conversion process for

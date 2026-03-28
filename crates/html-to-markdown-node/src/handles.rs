@@ -17,13 +17,6 @@ use napi::bindgen_prelude::*;
 use napi_derive::napi;
 use std::str;
 
-fn convert_to_string_inner(
-    html: &str,
-    options: Option<RustConversionOptions>,
-) -> html_to_markdown_rs::error::Result<String> {
-    html_to_markdown_rs::convert(html, options).map(|r| r.content.unwrap_or_default())
-}
-
 fn build_extraction_json(result: html_to_markdown_rs::ConversionResult) -> Result<String> {
     use serde_json::{Value, json};
 
@@ -70,35 +63,6 @@ fn buffer_to_str(html: &Buffer) -> Result<&str> {
     str::from_utf8(html.as_ref()).map_err(|e| Error::new(Status::InvalidArg, format!("HTML must be valid UTF-8: {e}")))
 }
 
-/// const { convertToString } = require('html-to-markdown');
-///
-/// const html = '<h1>Hello World</h1>';
-/// const markdown = convertToString(html);
-/// console.log(markdown); // # Hello World
-/// ```
-#[napi(js_name = "convertToString")]
-pub fn convert_to_string(
-    html: String,
-    options: Option<JsConversionOptions>,
-    visitor: Option<Object>,
-) -> Result<String> {
-    let rust_options = options.map(Into::into);
-
-    #[cfg(feature = "visitor")]
-    if visitor.is_some() {
-        // Visitor support for synchronous conversion would require a separate implementation
-        return Err(Error::new(
-            Status::GenericFailure,
-            "Use convertWithVisitor for async visitor support",
-        ));
-    }
-    #[cfg(not(feature = "visitor"))]
-    let _ = visitor;
-
-    guard_panic(|| profiling::maybe_profile(|| convert_to_string_inner(&html, rust_options.clone())))
-        .map_err(to_js_error)
-}
-
 #[napi]
 pub fn start_profiling(output_path: String, frequency: Option<i32>) -> Result<()> {
     let freq = frequency.unwrap_or(1000);
@@ -115,8 +79,12 @@ pub fn stop_profiling() -> Result<()> {
 pub fn convert_buffer(html: Buffer, options: Option<JsConversionOptions>) -> Result<String> {
     let html = buffer_to_str(&html)?;
     let rust_options = options.map(Into::into);
-    guard_panic(|| profiling::maybe_profile(|| convert_to_string_inner(html, rust_options.clone())))
-        .map_err(to_js_error)
+    guard_panic(|| {
+        profiling::maybe_profile(|| {
+            html_to_markdown_rs::convert(html, rust_options.clone()).map(|r| r.content.unwrap_or_default())
+        })
+    })
+    .map_err(to_js_error)
 }
 
 /// Create a reusable `ConversionOptions` handle.
@@ -135,16 +103,24 @@ pub fn create_metadata_config_handle(metadata_config: Option<JsMetadataConfig>) 
 /// Convert HTML using a previously-created `ConversionOptions` handle.
 #[napi]
 pub fn convert_with_options_handle(html: String, options: &External<RustConversionOptions>) -> Result<String> {
-    guard_panic(|| profiling::maybe_profile(|| convert_to_string_inner(&html, Some((**options).clone()))))
-        .map_err(to_js_error)
+    guard_panic(|| {
+        profiling::maybe_profile(|| {
+            html_to_markdown_rs::convert(&html, Some((**options).clone())).map(|r| r.content.unwrap_or_default())
+        })
+    })
+    .map_err(to_js_error)
 }
 
 /// Convert HTML Buffer data using a previously-created `ConversionOptions` handle.
 #[napi(js_name = "convertBufferWithOptionsHandle")]
 pub fn convert_buffer_with_options_handle(html: Buffer, options: &External<RustConversionOptions>) -> Result<String> {
     let html = buffer_to_str(&html)?;
-    guard_panic(|| profiling::maybe_profile(|| convert_to_string_inner(html, Some((**options).clone()))))
-        .map_err(to_js_error)
+    guard_panic(|| {
+        profiling::maybe_profile(|| {
+            html_to_markdown_rs::convert(html, Some((**options).clone())).map(|r| r.content.unwrap_or_default())
+        })
+    })
+    .map_err(to_js_error)
 }
 
 /// Convert HTML and return structured content, metadata, and images in a single pass.

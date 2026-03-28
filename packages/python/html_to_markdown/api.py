@@ -221,18 +221,6 @@ def _build_metadata_config(config: MetadataConfig | dict[str, object] | None) ->
     )
 
 
-def convert_to_string(
-    html: str,
-    options: ConversionOptions | None = None,
-    preprocessing: PreprocessingOptions | None = None,
-) -> str:
-    """Convert HTML to Markdown, returning a plain Markdown string (v2 compat)."""
-    rust_options = _rust_options(options, preprocessing)
-    if rust_options is None:
-        return _rust.convert_to_string(html, None)
-    return _rust.convert_to_string(html, rust_options)
-
-
 def convert_with_inline_images(
     html: str,
     options: ConversionOptions | None = None,
@@ -432,7 +420,6 @@ __all__ = [
     "TableExtractionResult",
     "TableGrid",
     "convert",
-    "convert_to_string",
     "convert_with_async_visitor",
     "convert_with_handle",
     "convert_with_inline_images",
