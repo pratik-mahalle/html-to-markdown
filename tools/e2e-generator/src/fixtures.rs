@@ -18,17 +18,22 @@ pub struct Fixture {
     /// Human-readable description of what this fixture tests.
     pub description: String,
 
-    /// Optional tags for filtering.
-    pub tags: Option<Vec<String>>,
+    /// Optional tags for filtering (part of fixture schema; not yet used by generators).
+    #[serde(rename = "tags")]
+    pub _tags: Option<Vec<String>>,
 
     /// Inline HTML input string.
     pub html: Option<String>,
 
     /// Path to an HTML file in test_documents/ (relative to repo root).
-    pub html_file: Option<String>,
+    /// TODO: implement html_file support in generators.
+    #[serde(rename = "html_file")]
+    pub _html_file: Option<String>,
 
     /// Conversion options to apply (map of option name -> value).
-    pub options: Option<BTreeMap<String, serde_json::Value>>,
+    /// TODO: wire options into each generator's conversion call.
+    #[serde(rename = "options")]
+    pub _options: Option<BTreeMap<String, serde_json::Value>>,
 
     /// Assertions to verify on the conversion result.
     #[serde(default)]
@@ -134,8 +139,9 @@ pub struct SkipDirective {
     /// Language names to skip (e.g. `["go", "java"]`). `None` means skip all.
     pub languages: Option<Vec<String>>,
 
-    /// Human-readable reason for skipping.
-    pub reason: Option<String>,
+    /// Human-readable reason for skipping (part of fixture schema; informational only).
+    #[serde(rename = "reason")]
+    pub _reason: Option<String>,
 }
 
 impl Fixture {
@@ -154,6 +160,9 @@ impl Fixture {
     /// Returns the HTML content for this fixture.
     ///
     /// Prefers `html` over `html_file`. Returns an error if neither is set.
+    ///
+    /// TODO: implement `html_file` resolution once generators support it.
+    #[allow(dead_code)] // TODO: call this from generators once html_file support lands
     pub fn html_content(&self) -> Result<&str> {
         if let Some(html) = &self.html {
             return Ok(html.as_str());

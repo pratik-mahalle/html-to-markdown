@@ -32,37 +32,69 @@ use crate::options::validation::{
     serde(rename_all = "camelCase", default)
 )]
 pub struct ConversionOptions {
+    /// Heading style to use in Markdown output (ATX `#` or Setext underline).
     pub heading_style: HeadingStyle,
+    /// How to indent nested list items (spaces or tab).
     pub list_indent_type: ListIndentType,
+    /// Number of spaces (or tabs) to use for each level of list indentation.
     pub list_indent_width: usize,
+    /// Bullet character(s) to use for unordered list items (e.g. `"-"`, `"*"`).
     pub bullets: String,
+    /// Character used for bold/italic emphasis markers (`*` or `_`).
     pub strong_em_symbol: char,
+    /// Escape `*` characters in plain text to avoid unintended bold/italic.
     pub escape_asterisks: bool,
+    /// Escape `_` characters in plain text to avoid unintended bold/italic.
     pub escape_underscores: bool,
+    /// Escape miscellaneous Markdown metacharacters (`[]()#` etc.) in plain text.
     pub escape_misc: bool,
+    /// Escape ASCII characters that have special meaning in certain Markdown dialects.
     pub escape_ascii: bool,
+    /// Default language annotation for fenced code blocks that have no language hint.
     pub code_language: String,
+    /// Automatically convert bare URLs into Markdown autolinks.
     pub autolinks: bool,
+    /// Emit a default title when no `<title>` tag is present.
     pub default_title: bool,
+    /// Render `<br>` elements inside table cells as literal line breaks.
     pub br_in_tables: bool,
+    /// Style used for `<mark>` / highlighted text (e.g. `==text==`).
     pub highlight_style: HighlightStyle,
+    /// Extract `<meta>` and `<head>` information into the result metadata.
     pub extract_metadata: bool,
+    /// Controls how whitespace is normalised during conversion.
     pub whitespace_mode: WhitespaceMode,
+    /// Strip all newlines from the output, producing a single-line result.
     pub strip_newlines: bool,
+    /// Wrap long lines at [`wrap_width`](Self::wrap_width) characters.
     pub wrap: bool,
+    /// Maximum line width when [`wrap`](Self::wrap) is enabled (default `80`).
     pub wrap_width: usize,
+    /// Treat the entire document as inline content (no block-level wrappers).
     pub convert_as_inline: bool,
+    /// Markdown notation for subscript text (e.g. `"~"`).
     pub sub_symbol: String,
+    /// Markdown notation for superscript text (e.g. `"^"`).
     pub sup_symbol: String,
+    /// How to encode hard line breaks (`<br>`) in Markdown.
     pub newline_style: NewlineStyle,
+    /// Style used for fenced code blocks (backticks or tilde).
     pub code_block_style: CodeBlockStyle,
+    /// HTML tag names whose `<img>` children are kept inline instead of block.
     pub keep_inline_images_in: Vec<String>,
+    /// Pre-processing options applied to the HTML before conversion.
     pub preprocessing: PreprocessingOptions,
+    /// Expected character encoding of the input HTML (default `"utf-8"`).
     pub encoding: String,
+    /// Emit debug information during conversion.
     pub debug: bool,
+    /// HTML tag names whose content is stripped from the output entirely.
     pub strip_tags: Vec<String>,
+    /// HTML tag names that are preserved verbatim in the output.
     pub preserve_tags: Vec<String>,
+    /// Skip conversion of `<img>` elements (omit images from output).
     pub skip_images: bool,
+    /// Target output format (Markdown, plain text, etc.).
     pub output_format: OutputFormat,
     /// Include structured document tree in result.
     pub include_document_structure: bool,
@@ -129,114 +161,151 @@ impl ConversionOptions {
         ConversionOptionsBuilder(Self::default())
     }
 
+    /// Get the heading style option.
     pub fn heading_style(&self) -> HeadingStyle {
         self.heading_style
     }
+    /// Get the list indent type option.
     pub fn list_indent_type(&self) -> ListIndentType {
         self.list_indent_type
     }
+    /// Get the list indent width option.
     pub fn list_indent_width(&self) -> usize {
         self.list_indent_width
     }
+    /// Get the bullet characters option.
     pub fn bullets(&self) -> &str {
         &self.bullets
     }
+    /// Get the strong/emphasis symbol option.
     pub fn strong_em_symbol(&self) -> char {
         self.strong_em_symbol
     }
+    /// Get the escape asterisks option.
     pub fn escape_asterisks(&self) -> bool {
         self.escape_asterisks
     }
+    /// Get the escape underscores option.
     pub fn escape_underscores(&self) -> bool {
         self.escape_underscores
     }
+    /// Get the escape misc option.
     pub fn escape_misc(&self) -> bool {
         self.escape_misc
     }
+    /// Get the escape ASCII option.
     pub fn escape_ascii(&self) -> bool {
         self.escape_ascii
     }
+    /// Get the default code language option.
     pub fn code_language(&self) -> &str {
         &self.code_language
     }
+    /// Get the autolinks option.
     pub fn autolinks(&self) -> bool {
         self.autolinks
     }
+    /// Get the default title option.
     pub fn default_title(&self) -> bool {
         self.default_title
     }
+    /// Get the br-in-tables option.
     pub fn br_in_tables(&self) -> bool {
         self.br_in_tables
     }
+    /// Get the highlight style option.
     pub fn highlight_style(&self) -> HighlightStyle {
         self.highlight_style
     }
+    /// Get the extract metadata option.
     pub fn extract_metadata(&self) -> bool {
         self.extract_metadata
     }
+    /// Get the whitespace mode option.
     pub fn whitespace_mode(&self) -> WhitespaceMode {
         self.whitespace_mode
     }
+    /// Get the strip newlines option.
     pub fn strip_newlines(&self) -> bool {
         self.strip_newlines
     }
+    /// Get the wrap option.
     pub fn wrap(&self) -> bool {
         self.wrap
     }
+    /// Get the wrap width option.
     pub fn wrap_width(&self) -> usize {
         self.wrap_width
     }
+    /// Get the convert-as-inline option.
     pub fn convert_as_inline(&self) -> bool {
         self.convert_as_inline
     }
+    /// Get the subscript symbol option.
     pub fn sub_symbol(&self) -> &str {
         &self.sub_symbol
     }
+    /// Get the superscript symbol option.
     pub fn sup_symbol(&self) -> &str {
         &self.sup_symbol
     }
+    /// Get the newline style option.
     pub fn newline_style(&self) -> NewlineStyle {
         self.newline_style
     }
+    /// Get the code block style option.
     pub fn code_block_style(&self) -> CodeBlockStyle {
         self.code_block_style
     }
+    /// Get the keep-inline-images-in tag list option.
     pub fn keep_inline_images_in(&self) -> &[String] {
         &self.keep_inline_images_in
     }
+    /// Get the preprocessing options.
     pub fn preprocessing(&self) -> &PreprocessingOptions {
         &self.preprocessing
     }
+    /// Get the encoding option.
     pub fn encoding(&self) -> &str {
         &self.encoding
     }
+    /// Get the debug option.
     pub fn debug(&self) -> bool {
         self.debug
     }
+    /// Get the strip tags list option.
     pub fn strip_tags(&self) -> &[String] {
         &self.strip_tags
     }
+    /// Get the preserve tags list option.
     pub fn preserve_tags(&self) -> &[String] {
         &self.preserve_tags
     }
+    /// Get the skip images option.
     pub fn skip_images(&self) -> bool {
         self.skip_images
     }
+    /// Get the output format option.
     pub fn output_format(&self) -> OutputFormat {
         self.output_format
     }
+    /// Get the include document structure option.
     pub fn include_document_structure(&self) -> bool {
         self.include_document_structure
     }
+    /// Get the extract images option.
     pub fn extract_images(&self) -> bool {
         self.extract_images
     }
+    /// Get the maximum image size option.
     pub fn max_image_size(&self) -> u64 {
         self.max_image_size
     }
+    /// Get the capture SVG option.
     pub fn capture_svg(&self) -> bool {
         self.capture_svg
     }
+    /// Get the infer dimensions option.
     pub fn infer_dimensions(&self) -> bool {
         self.infer_dimensions
     }
@@ -252,6 +321,7 @@ pub struct ConversionOptionsBuilder(ConversionOptions);
 
 macro_rules! builder_setter {
     ($name:ident, $ty:ty) => {
+        /// Set the value.
         #[must_use]
         pub fn $name(mut self, value: $ty) -> Self {
             self.0.$name = value;
@@ -262,6 +332,7 @@ macro_rules! builder_setter {
 
 macro_rules! builder_setter_into {
     ($name:ident, $ty:ty) => {
+        /// Set the value.
         #[must_use]
         pub fn $name(mut self, value: impl Into<$ty>) -> Self {
             self.0.$name = value.into();
@@ -309,18 +380,21 @@ impl ConversionOptionsBuilder {
     builder_setter!(convert_as_inline, bool);
     builder_setter!(skip_images, bool);
 
+    /// Set the list of HTML tag names whose content is stripped from output.
     #[must_use]
     pub fn strip_tags(mut self, tags: Vec<String>) -> Self {
         self.0.strip_tags = tags;
         self
     }
 
+    /// Set the list of HTML tag names that are preserved verbatim in output.
     #[must_use]
     pub fn preserve_tags(mut self, tags: Vec<String>) -> Self {
         self.0.preserve_tags = tags;
         self
     }
 
+    /// Set the list of HTML tag names whose `<img>` children are kept inline.
     #[must_use]
     pub fn keep_inline_images_in(mut self, tags: Vec<String>) -> Self {
         self.0.keep_inline_images_in = tags;
@@ -333,6 +407,7 @@ impl ConversionOptionsBuilder {
     builder_setter!(infer_dimensions, bool);
 
     // Preprocessing
+    /// Set the pre-processing options applied to the HTML before conversion.
     #[must_use]
     pub fn preprocessing(mut self, preprocessing: PreprocessingOptions) -> Self {
         self.0.preprocessing = preprocessing;
@@ -367,42 +442,79 @@ use crate::options::preprocessing::PreprocessingOptionsUpdate;
 )]
 #[cfg_attr(any(feature = "serde", feature = "metadata"), serde(rename_all = "camelCase"))]
 pub struct ConversionOptionsUpdate {
+    /// Optional override for [`ConversionOptions::heading_style`].
     pub heading_style: Option<HeadingStyle>,
+    /// Optional override for [`ConversionOptions::list_indent_type`].
     pub list_indent_type: Option<ListIndentType>,
+    /// Optional override for [`ConversionOptions::list_indent_width`].
     pub list_indent_width: Option<usize>,
+    /// Optional override for [`ConversionOptions::bullets`].
     pub bullets: Option<String>,
+    /// Optional override for [`ConversionOptions::strong_em_symbol`].
     pub strong_em_symbol: Option<char>,
+    /// Optional override for [`ConversionOptions::escape_asterisks`].
     pub escape_asterisks: Option<bool>,
+    /// Optional override for [`ConversionOptions::escape_underscores`].
     pub escape_underscores: Option<bool>,
+    /// Optional override for [`ConversionOptions::escape_misc`].
     pub escape_misc: Option<bool>,
+    /// Optional override for [`ConversionOptions::escape_ascii`].
     pub escape_ascii: Option<bool>,
+    /// Optional override for [`ConversionOptions::code_language`].
     pub code_language: Option<String>,
+    /// Optional override for [`ConversionOptions::autolinks`].
     pub autolinks: Option<bool>,
+    /// Optional override for [`ConversionOptions::default_title`].
     pub default_title: Option<bool>,
+    /// Optional override for [`ConversionOptions::br_in_tables`].
     pub br_in_tables: Option<bool>,
+    /// Optional override for [`ConversionOptions::highlight_style`].
     pub highlight_style: Option<HighlightStyle>,
+    /// Optional override for [`ConversionOptions::extract_metadata`].
     pub extract_metadata: Option<bool>,
+    /// Optional override for [`ConversionOptions::whitespace_mode`].
     pub whitespace_mode: Option<WhitespaceMode>,
+    /// Optional override for [`ConversionOptions::strip_newlines`].
     pub strip_newlines: Option<bool>,
+    /// Optional override for [`ConversionOptions::wrap`].
     pub wrap: Option<bool>,
+    /// Optional override for [`ConversionOptions::wrap_width`].
     pub wrap_width: Option<usize>,
+    /// Optional override for [`ConversionOptions::convert_as_inline`].
     pub convert_as_inline: Option<bool>,
+    /// Optional override for [`ConversionOptions::sub_symbol`].
     pub sub_symbol: Option<String>,
+    /// Optional override for [`ConversionOptions::sup_symbol`].
     pub sup_symbol: Option<String>,
+    /// Optional override for [`ConversionOptions::newline_style`].
     pub newline_style: Option<NewlineStyle>,
+    /// Optional override for [`ConversionOptions::code_block_style`].
     pub code_block_style: Option<CodeBlockStyle>,
+    /// Optional override for [`ConversionOptions::keep_inline_images_in`].
     pub keep_inline_images_in: Option<Vec<String>>,
+    /// Optional override for [`ConversionOptions::preprocessing`].
     pub preprocessing: Option<PreprocessingOptionsUpdate>,
+    /// Optional override for [`ConversionOptions::encoding`].
     pub encoding: Option<String>,
+    /// Optional override for [`ConversionOptions::debug`].
     pub debug: Option<bool>,
+    /// Optional override for [`ConversionOptions::strip_tags`].
     pub strip_tags: Option<Vec<String>>,
+    /// Optional override for [`ConversionOptions::preserve_tags`].
     pub preserve_tags: Option<Vec<String>>,
+    /// Optional override for [`ConversionOptions::skip_images`].
     pub skip_images: Option<bool>,
+    /// Optional override for [`ConversionOptions::output_format`].
     pub output_format: Option<OutputFormat>,
+    /// Optional override for [`ConversionOptions::include_document_structure`].
     pub include_document_structure: Option<bool>,
+    /// Optional override for [`ConversionOptions::extract_images`].
     pub extract_images: Option<bool>,
+    /// Optional override for [`ConversionOptions::max_image_size`].
     pub max_image_size: Option<u64>,
+    /// Optional override for [`ConversionOptions::capture_svg`].
     pub capture_svg: Option<bool>,
+    /// Optional override for [`ConversionOptions::infer_dimensions`].
     pub infer_dimensions: Option<bool>,
 }
 
