@@ -21,6 +21,7 @@ package htmltomarkdown
 // #include <stdbool.h>
 // #include <stdint.h>
 //
+// char* html_to_markdown_convert_proxy(const char* html);
 // void html_to_markdown_free_string_proxy(char* s);
 // const char* html_to_markdown_version_proxy(void);
 // const char* html_to_markdown_last_error_proxy(void);
@@ -28,7 +29,6 @@ package htmltomarkdown
 // bool html_to_markdown_profile_start_proxy(const char* output, int32_t frequency);
 // bool html_to_markdown_profile_stop_proxy(void);
 // char* html_to_markdown_convert_with_tables_proxy(const char* html, const char* options_json, const char* metadata_config_json);
-// char* html_to_markdown_convert_proxy(const char* html, const char* options_json);
 import "C"
 import (
 	"encoding/json"
@@ -37,6 +37,60 @@ import (
 )
 
 const unknownValue = "unknown"
+
+// Convert converts HTML to Markdown using default options.
+//
+// It returns the converted Markdown string or an error if the conversion fails.
+// The function handles memory management automatically using defer.
+//
+// Example:
+//
+//	markdown, err := htmltomarkdown.Convert("<h1>Title</h1>")
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//	fmt.Println(markdown)
+func Convert(html string) (string, error) {
+	if html == "" {
+		return "", nil
+	}
+	if err := ensureFFILoaded(); err != nil {
+		return "", err
+	}
+
+	cHTML := C.CString(html)
+	defer C.free(unsafe.Pointer(cHTML))
+
+	result := C.html_to_markdown_convert_proxy(cHTML)
+	if result == nil {
+		errMsg := C.html_to_markdown_last_error_proxy()
+		if errMsg != nil {
+			return "", errors.New(C.GoString(errMsg))
+		}
+		return "", errors.New("html to markdown conversion failed")
+	}
+	defer C.html_to_markdown_free_string_proxy(result)
+
+	markdown := C.GoString(result)
+	return markdown, nil
+}
+
+// MustConvert is like Convert but panics if an error occurs.
+//
+// This is useful in situations where conversion errors are unexpected
+// and should cause the program to terminate.
+//
+// Example:
+//
+//	markdown := htmltomarkdown.MustConvert("<h1>Title</h1>")
+//	fmt.Println(markdown)
+func MustConvert(html string) string {
+	markdown, err := Convert(html)
+	if err != nil {
+		panic(err)
+	}
+	return markdown
+}
 
 // Version returns the version string of the underlying html-to-markdown library.
 //
@@ -251,11 +305,11 @@ type StructuredData struct {
 	SchemaType *string `json:"schema_type,omitempty"`
 }
 
-// HTMLMetadata is the comprehensive metadata extraction result from an HTML document.
+// ExtendedMetadata is the comprehensive metadata extraction result from an HTML document.
 //
 // Contains all extracted metadata types in a single structure,
 // suitable for serialization and transmission across language boundaries.
-type HTMLMetadata struct {
+type ExtendedMetadata struct {
 	Document DocumentMetadata `json:"document"`
 
 	Headers []HeaderMetadata `json:"headers,omitempty"`
@@ -273,7 +327,7 @@ type HTMLMetadata struct {
 type MetadataExtraction struct {
 	Markdown string
 
-	Metadata HTMLMetadata
+	Metadata ExtendedMetadata
 }
 
 // ConvertWithMetadata converts HTML to Markdown and extracts comprehensive metadata.
@@ -315,7 +369,7 @@ func ConvertWithMetadata(html string) (MetadataExtraction, error) {
 	if html == "" {
 		return MetadataExtraction{
 			Markdown: "",
-			Metadata: HTMLMetadata{},
+			Metadata: ExtendedMetadata{},
 		}, nil
 	}
 	if err := ensureFFILoaded(); err != nil {
@@ -346,7 +400,7 @@ func ConvertWithMetadata(html string) (MetadataExtraction, error) {
 	markdown := C.GoString(result)
 
 	// Parse metadata JSON if available
-	var metadata HTMLMetadata
+	var metadata ExtendedMetadata
 	if metadataPtr != nil {
 		metadataJSON := C.GoString(metadataPtr)
 		if err := json.Unmarshal([]byte(metadataJSON), &metadata); err != nil {
@@ -387,7 +441,7 @@ type TableData struct {
 // TableExtractionResult contains the conversion result with table extraction.
 type TableExtractionResult struct {
 	Content  string            `json:"content"`
-	Metadata *HTMLMetadata `json:"metadata,omitempty"`
+	Metadata *ExtendedMetadata `json:"metadata,omitempty"`
 	Tables   []TableData       `json:"tables"`
 }
 
@@ -441,103 +495,6 @@ func ConvertWithTables(html string) (TableExtractionResult, error) {
 // MustConvertWithTables is like ConvertWithTables but panics if an error occurs.
 func MustConvertWithTables(html string) TableExtractionResult {
 	result, err := ConvertWithTables(html)
-	if err != nil {
-		panic(err)
-	}
-	return result
-}
-
-// GridCell is a single cell within a table grid, with position and span information.
-type GridCell struct {
-	Content  string `json:"content"`
-	Row      uint32 `json:"row"`
-	Col      uint32 `json:"col"`
-	RowSpan  uint32 `json:"row_span"`
-	ColSpan  uint32 `json:"col_span"`
-	IsHeader bool   `json:"is_header"`
-}
-
-// TableGrid is a structured table grid with row/column dimensions and cell-level data.
-type TableGrid struct {
-	Rows  uint32     `json:"rows"`
-	Cols  uint32     `json:"cols"`
-	Cells []GridCell `json:"cells"`
-}
-
-// ExtractTable is a single table extracted via Extract(), with structured grid data and Markdown.
-type ExtractTable struct {
-	Grid     TableGrid `json:"grid"`
-	Markdown string    `json:"markdown"`
-}
-
-// ProcessingWarning is a non-fatal processing warning produced during conversion.
-type ProcessingWarning struct {
-	Message string `json:"message"`
-	Kind    string `json:"kind"`
-}
-
-// ExtractionResult is the primary result of Extract(), containing all extracted content.
-type ExtractionResult struct {
-	Content  *string           `json:"content,omitempty"`
-	Metadata *HTMLMetadata     `json:"metadata,omitempty"`
-	Tables   []ExtractTable    `json:"tables,omitempty"`
-	Warnings []ProcessingWarning `json:"warnings,omitempty"`
-}
-
-// Convert converts HTML to Markdown and returns comprehensive structured data in a single pass.
-//
-// Returns an ExtractionResult containing:
-//   - The converted Markdown string
-//   - Extracted HTML metadata (title, links, images, structured data)
-//   - Extracted tables with structured grid data
-//   - Non-fatal processing warnings
-//
-// Example:
-//
-//	html := `<html><head><title>Test</title></head><body>
-//	  <h1>Hello</h1>
-//	  <table><tr><th>Name</th><th>Age</th></tr><tr><td>Alice</td><td>30</td></tr></table>
-//	</body></html>`
-//	result, err := htmltomarkdown.Convert(html)
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
-//	fmt.Println(*result.Content)
-//	fmt.Printf("Tables: %d\n", len(result.Tables))
-func Convert(html string) (ExtractionResult, error) {
-	if html == "" {
-		return ExtractionResult{}, nil
-	}
-	if err := ensureFFILoaded(); err != nil {
-		return ExtractionResult{}, err
-	}
-
-	cHTML := C.CString(html)
-	defer C.free(unsafe.Pointer(cHTML))
-
-	result := C.html_to_markdown_convert_proxy(cHTML, nil)
-	if result == nil {
-		errMsg := C.html_to_markdown_last_error_proxy()
-		if errMsg != nil {
-			return ExtractionResult{}, errors.New(C.GoString(errMsg))
-		}
-		return ExtractionResult{}, errors.New("html conversion failed")
-	}
-	defer C.html_to_markdown_free_string_proxy(result)
-
-	jsonStr := C.GoString(result)
-
-	var extraction ExtractionResult
-	if err := json.Unmarshal([]byte(jsonStr), &extraction); err != nil {
-		return ExtractionResult{}, errors.New("failed to parse conversion JSON: " + err.Error())
-	}
-
-	return extraction, nil
-}
-
-// MustConvert is like Convert but panics if an error occurs.
-func MustConvert(html string) ExtractionResult {
-	result, err := Convert(html)
 	if err != nil {
 		panic(err)
 	}

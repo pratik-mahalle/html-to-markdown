@@ -5,10 +5,7 @@
 mod enums;
 mod handles;
 mod options;
-mod profiling;
 mod types;
-#[cfg(feature = "async-visitor")]
-mod visitor;
 
 // Public re-exports of enums
 pub use enums::{
@@ -17,20 +14,10 @@ pub use enums::{
 };
 
 // Public re-exports of options
-pub use options::{JsConversionOptions, JsInlineImageConfig, JsPreprocessingOptions};
+pub use options::{JsConversionOptions, JsPreprocessingOptions};
 
 // Public re-exports of types
-pub use types::{JsHtmlExtraction, JsInlineImage, JsInlineImageWarning};
-
-#[cfg(feature = "metadata")]
-pub use types::{
-    JsDocumentMetadata, JsHeaderMetadata, JsHtmlMetadata, JsImageMetadata, JsLinkMetadata, JsMetadataConfig,
-    JsMetadataExtraction, JsStructuredData,
-};
-
-// Public re-exports of visitor types
-#[cfg(feature = "async-visitor")]
-pub use visitor::{JsNodeContext, JsVisitResult, JsVisitorBridge};
+pub use types::{JsConversionResult, JsConversionTable, JsConversionWarning, JsGridCell, JsTableGrid};
 
 // Re-export NAPI handlers
 pub use handles::*;

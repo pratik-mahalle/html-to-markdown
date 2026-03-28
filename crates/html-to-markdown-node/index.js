@@ -591,7 +591,6 @@ module.exports.convertWithMetadataBufferWithOptionsHandle = nativeBinding.conver
 module.exports.convertWithMetadataHandle = nativeBinding.convertWithMetadataHandle
 module.exports.convertWithOptionsHandle = nativeBinding.convertWithOptionsHandle
 module.exports.convertWithTables = nativeBinding.convertWithTables
-module.exports.convertWithVisitor = nativeBinding.convertWithVisitor
 module.exports.createConversionOptionsHandle = nativeBinding.createConversionOptionsHandle
 module.exports.createMetadataConfigHandle = nativeBinding.createMetadataConfigHandle
 module.exports.JsCodeBlockStyle = nativeBinding.JsCodeBlockStyle

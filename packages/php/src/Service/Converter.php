@@ -6,17 +6,10 @@ namespace HtmlToMarkdown\Service;
 
 use HtmlToMarkdown\Bridge\ExtensionBridge;
 use HtmlToMarkdown\Config\ConversionOptions;
-use HtmlToMarkdown\Config\InlineImageConfig;
 use HtmlToMarkdown\Contract\ExtensionBridge as ExtensionBridgeContract;
-use HtmlToMarkdown\Internal\TypeAssertions;
-use HtmlToMarkdown\Value\HtmlMetadata;
-use HtmlToMarkdown\Value\InlineImageExtraction;
-use HtmlToMarkdown\Value\TableExtractionResult;
-use HtmlToMarkdown\Visitor\HtmlVisitor;
 
 /**
  * @phpstan-import-type ConversionOptionsInput from \HtmlToMarkdown\Config\ConversionOptions
- * @phpstan-import-type InlineImageConfigInput from \HtmlToMarkdown\Config\InlineImageConfig
  */
 
 final class Converter
@@ -34,100 +27,12 @@ final class Converter
     /**
      * @param ConversionOptions|ConversionOptionsInput|null $options
      * @phpstan-param ConversionOptions|array<string, mixed>|null $options
+     *
+     * @return array<string, mixed>
      */
-    public function convert(string $html, ConversionOptions|array|null $options = null): string
+    public function convert(string $html, ConversionOptions|array|null $options = null): array
     {
         return $this->bridge->convert($html, $this->normalizeOptions($options));
-    }
-
-    /**
-     * @param ConversionOptions|ConversionOptionsInput|null $options
-     * @param InlineImageConfig|InlineImageConfigInput|null $config
-     * @phpstan-param ConversionOptions|array<string, mixed>|null $options
-     * @phpstan-param InlineImageConfig|array<string, mixed>|null $config
-     */
-    public function convertWithInlineImages(
-        string $html,
-        ConversionOptions|array|null $options = null,
-        InlineImageConfig|array|null $config = null,
-    ): InlineImageExtraction {
-        $payload = $this->bridge->convertWithInlineImages(
-            $html,
-            $this->normalizeOptions($options),
-            $this->normalizeImageConfig($config),
-        );
-
-        return InlineImageExtraction::fromExtensionPayload($payload);
-    }
-
-    /**
-     * @param ConversionOptions|array<string, mixed>|null $options
-     * @param array<string, mixed>|null $metadataConfig
-     * @phpstan-param ConversionOptions|array<string, mixed>|null $options
-     * @phpstan-return array{markdown: string, metadata: HtmlMetadata}
-     */
-    public function convertWithMetadata(
-        string $html,
-        ConversionOptions|array|null $options = null,
-        ?array $metadataConfig = null,
-    ): array {
-        $payload = $this->bridge->convertWithMetadata(
-            $html,
-            $this->normalizeOptions($options),
-            $metadataConfig,
-        );
-
-        $markdown = TypeAssertions::string($payload['markdown'] ?? '', 'convert_with_metadata.markdown');
-        $metadataRaw = $payload['metadata'] ?? null;
-        /** @var array<string, mixed> $metadataPayload */
-        $metadataPayload = \is_array($metadataRaw) ? $metadataRaw : [];
-
-        return [
-            'markdown' => $markdown,
-            'metadata' => HtmlMetadata::fromExtensionPayload($metadataPayload),
-        ];
-    }
-
-    /**
-     * Convert HTML with a custom visitor for advanced control.
-     *
-     * The visitor object should implement HtmlVisitor interface or have
-     * methods matching the visitor callback signatures.
-     *
-     * @param ConversionOptions|ConversionOptionsInput|null $options
-     * @phpstan-param ConversionOptions|array<string, mixed>|null $options
-     */
-    public function convertWithVisitor(
-        string $html,
-        ConversionOptions|array|null $options = null,
-        ?HtmlVisitor $visitor = null,
-    ): string {
-        return $this->bridge->convertWithVisitor(
-            $html,
-            $this->normalizeOptions($options),
-            $visitor,
-        );
-    }
-
-    /**
-     * Convert HTML to Markdown and extract tables as structured data.
-     *
-     * @param ConversionOptions|array<string, mixed>|null $options
-     * @param array<string, mixed>|null $metadataConfig
-     * @phpstan-param ConversionOptions|array<string, mixed>|null $options
-     */
-    public function convertWithTables(
-        string $html,
-        ConversionOptions|array|null $options = null,
-        ?array $metadataConfig = null,
-    ): TableExtractionResult {
-        $payload = $this->bridge->convertWithTables(
-            $html,
-            $this->normalizeOptions($options),
-            $metadataConfig,
-        );
-
-        return TableExtractionResult::fromExtensionPayload($payload);
     }
 
     /**
@@ -147,22 +52,5 @@ final class Converter
         }
 
         return $payload === [] ? null : $payload;
-    }
-
-    /**
-     * @phpstan-param InlineImageConfig|array<string, mixed>|null $config
-     * @phpstan-return InlineImageConfigInput|null
-     */
-    private function normalizeImageConfig(InlineImageConfig|array|null $config): ?array
-    {
-        if ($config === null) {
-            return null;
-        }
-
-        if ($config instanceof InlineImageConfig) {
-            return $config->toArray();
-        }
-
-        return InlineImageConfig::fromArray($config)->toArray();
     }
 }

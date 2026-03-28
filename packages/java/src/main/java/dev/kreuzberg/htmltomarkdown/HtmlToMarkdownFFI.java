@@ -37,79 +37,22 @@ final class HtmlToMarkdownFFI {
   private static final FunctionDescriptor FREE_STRING_DESC =
       FunctionDescriptor.ofVoid(ValueLayout.ADDRESS);
 
-  /** Function descriptor for version. */
-  private static final FunctionDescriptor VERSION_DESC = FunctionDescriptor.of(ValueLayout.ADDRESS);
-
   /** Function descriptor for last error. */
   private static final FunctionDescriptor LAST_ERROR_DESC =
       FunctionDescriptor.of(ValueLayout.ADDRESS);
-
-  /** Function descriptor for convert with metadata. */
-  private static final FunctionDescriptor CONVERT_WITH_METADATA_DESC =
-      FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS);
-
-  /** Function descriptor for profile start. */
-  private static final FunctionDescriptor PROFILE_START_DESC =
-      FunctionDescriptor.of(ValueLayout.JAVA_BOOLEAN, ValueLayout.ADDRESS, ValueLayout.JAVA_INT);
-
-  /** Function descriptor for profile stop. */
-  private static final FunctionDescriptor PROFILE_STOP_DESC =
-      FunctionDescriptor.of(ValueLayout.JAVA_BOOLEAN);
-
-  /** Method handle for html_to_markdown_free_string. */
-  static final MethodHandle html_to_markdown_free_string;
-
-  /** Method handle for html_to_markdown_version. */
-  static final MethodHandle html_to_markdown_version;
-
-  /** Method handle for html_to_markdown_last_error. */
-  static final MethodHandle html_to_markdown_last_error;
-
-  /** Method handle for html_to_markdown_convert_with_metadata. */
-  static final MethodHandle html_to_markdown_convert_with_metadata;
-
-  /** Method handle for html_to_markdown_profile_start. */
-  static final MethodHandle html_to_markdown_profile_start;
-
-  /** Method handle for html_to_markdown_profile_stop. */
-  static final MethodHandle html_to_markdown_profile_stop;
-
-  /** Method handle for html_to_markdown_convert_with_tables. */
-  static final MethodHandle html_to_markdown_convert_with_tables;
-
-  /** Method handle for html_to_markdown_convert (v3 full result). */
-  static final MethodHandle html_to_markdown_convert;
-
-  /** Method handle for html_to_markdown_visitor_create. */
-  static final MethodHandle html_to_markdown_visitor_create;
-
-  /** Method handle for html_to_markdown_visitor_free. */
-  static final MethodHandle html_to_markdown_visitor_free;
-
-  /** Method handle for html_to_markdown_convert_with_visitor. */
-  static final MethodHandle html_to_markdown_convert_with_visitor;
-
-  /** Function descriptor for convert with tables. */
-  private static final FunctionDescriptor CONVERT_WITH_TABLES_DESC =
-      FunctionDescriptor.of(
-          ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS);
 
   /** Function descriptor for extract (html, options_json -> json string). */
   private static final FunctionDescriptor EXTRACT_DESC =
       FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS);
 
-  /** Function descriptor for visitor create. */
-  private static final FunctionDescriptor VISITOR_CREATE_DESC =
-      FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS);
+  /** Method handle for html_to_markdown_free_string. */
+  static final MethodHandle html_to_markdown_free_string;
 
-  /** Function descriptor for visitor free. */
-  private static final FunctionDescriptor VISITOR_FREE_DESC =
-      FunctionDescriptor.ofVoid(ValueLayout.ADDRESS);
+  /** Method handle for html_to_markdown_last_error. */
+  static final MethodHandle html_to_markdown_last_error;
 
-  /** Function descriptor for convert with visitor. */
-  private static final FunctionDescriptor CONVERT_WITH_VISITOR_DESC =
-      FunctionDescriptor.of(
-          ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS);
+  /** Method handle for html_to_markdown_convert (v3 full result). */
+  static final MethodHandle html_to_markdown_convert;
 
   /**
    * Load the native library either from java.library.path or by extracting from classpath.
@@ -217,38 +160,11 @@ final class HtmlToMarkdownFFI {
     html_to_markdown_free_string =
         LINKER.downcallHandle(findSymbol("html_to_markdown_free_string"), FREE_STRING_DESC);
 
-    html_to_markdown_version =
-        LINKER.downcallHandle(findSymbol("html_to_markdown_version"), VERSION_DESC);
-
     html_to_markdown_last_error =
         LINKER.downcallHandle(findSymbol("html_to_markdown_last_error"), LAST_ERROR_DESC);
 
-    html_to_markdown_convert_with_metadata =
-        LINKER.downcallHandle(
-            findSymbol("html_to_markdown_convert_with_metadata"), CONVERT_WITH_METADATA_DESC);
-
-    html_to_markdown_profile_start =
-        LINKER.downcallHandle(findSymbol("html_to_markdown_profile_start"), PROFILE_START_DESC);
-
-    html_to_markdown_profile_stop =
-        LINKER.downcallHandle(findSymbol("html_to_markdown_profile_stop"), PROFILE_STOP_DESC);
-
-    html_to_markdown_convert_with_tables =
-        LINKER.downcallHandle(
-            findSymbol("html_to_markdown_convert_with_tables"), CONVERT_WITH_TABLES_DESC);
-
     html_to_markdown_convert =
         LINKER.downcallHandle(findSymbol("html_to_markdown_convert"), EXTRACT_DESC);
-
-    html_to_markdown_visitor_create =
-        LINKER.downcallHandle(findSymbol("html_to_markdown_visitor_create"), VISITOR_CREATE_DESC);
-
-    html_to_markdown_visitor_free =
-        LINKER.downcallHandle(findSymbol("html_to_markdown_visitor_free"), VISITOR_FREE_DESC);
-
-    html_to_markdown_convert_with_visitor =
-        LINKER.downcallHandle(
-            findSymbol("html_to_markdown_convert_with_visitor"), CONVERT_WITH_VISITOR_DESC);
   }
 
   /**

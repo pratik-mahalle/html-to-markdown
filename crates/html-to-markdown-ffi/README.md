@@ -132,10 +132,10 @@ target_link_libraries(my_app PRIVATE html-to-markdown-ffi::html-to-markdown-ffi)
 #include <html_to_markdown.h>
 
 int main(void) {
-    char *md = html_to_markdown_convert("<h1>Hello</h1><p>World</p>");
-    if (md) {
-        printf("%s\n", md);
-        html_to_markdown_free_string(md);
+    char *json = html_to_markdown_convert("<h1>Hello</h1><p>World</p>", NULL);
+    if (json) {
+        printf("%s\n", json);
+        html_to_markdown_free_string(json);
     } else {
         printf("Error: %s\n", html_to_markdown_last_error());
     }
@@ -180,19 +180,10 @@ Rust Core Library (crates/html-to-markdown)
 
 ## API Reference
 
-### Core Conversion (4 functions)
+### Core Conversion
 
 ```c
-// Basic conversion -- returns malloc'd plain Markdown string or NULL on error (v2 compat)
-char *html_to_markdown_convert_to_string(const char *html);
-
-// Conversion with output length (v2 compat)
-char *html_to_markdown_convert_to_string_with_len(const char *html, size_t *len_out);
-
-// Conversion from raw UTF-8 bytes with output length (v2 compat)
-char *html_to_markdown_convert_to_string_bytes_with_len(const uint8_t *html, size_t len, size_t *len_out);
-
-// v3 primary API: full conversion result as JSON (content, metadata, tables, warnings)
+// v3 primary API: full conversion result as JSON (content, document, metadata, tables, warnings)
 char *html_to_markdown_convert(const char *html, const char *options_json);
 ```
 
@@ -434,7 +425,7 @@ typedef void *HtmlToMarkdownVisitor;  // Opaque visitor handle
 ## Error Handling
 
 ```c
-char *result = html_to_markdown_convert(html);
+char *result = html_to_markdown_convert(html, NULL);
 if (!result) {
     const char *msg = html_to_markdown_last_error();
     uint32_t code = html_to_markdown_last_error_code();
