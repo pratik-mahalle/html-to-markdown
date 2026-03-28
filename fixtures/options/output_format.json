@@ -1,0 +1,31 @@
+[
+  {
+    "id": "options_output_format_markdown",
+    "description": "Default markdown output format produces standard markdown",
+    "html": "<h1>Title</h1><p>Some text.</p>",
+    "options": { "outputFormat": "markdown" },
+    "assertions": {
+      "content_contains_all": ["# Title", "Some text."]
+    }
+  },
+  {
+    "id": "options_output_format_plain",
+    "description": "Plain text output format strips markdown syntax",
+    "html": "<h1>Title</h1><p>Some <strong>bold</strong> text.</p>",
+    "options": { "outputFormat": "plain" },
+    "assertions": {
+      "content_contains_all": ["Title", "bold", "text."],
+      "content_not_contains": ["**bold**", "# Title"]
+    }
+  },
+  {
+    "id": "options_output_format_djot",
+    "description": "Djot output format produces djot-compatible markup",
+    "html": "<p>Simple paragraph.</p>",
+    "options": { "outputFormat": "djot" },
+    "assertions": {
+      "content_contains_all": ["Simple paragraph."],
+      "content_not_empty": true
+    }
+  }
+]

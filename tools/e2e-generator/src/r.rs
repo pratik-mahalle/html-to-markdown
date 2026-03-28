@@ -61,11 +61,20 @@ fn render_test_file(category: &str, fixtures: &[&Fixture]) -> String {
     let _ = writeln!(out, "library(htmltomarkdown)");
     let _ = writeln!(out);
 
-    for fixture in fixtures {
+    for (i, fixture) in fixtures.iter().enumerate() {
         render_test_function(&mut out, fixture);
-        let _ = writeln!(out);
+        if i + 1 < fixtures.len() {
+            let _ = writeln!(out);
+        }
     }
 
+    // Ensure exactly one trailing newline
+    while out.ends_with("\n\n") {
+        out.pop();
+    }
+    if !out.ends_with('\n') {
+        out.push('\n');
+    }
     out
 }
 

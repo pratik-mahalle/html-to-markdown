@@ -22,6 +22,156 @@ class EdgeCasesTest {
     }
 
     @Test
+    void testEncodingCjkCharacters() {
+        // CJK (Chinese, Japanese, Korean) characters are preserved
+        var html = "<p>中文内容</p><p>日本語テキスト</p><p>한국어 텍스트</p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("中文内容"), "expected content to contain: 中文内容");
+        assertTrue(content.contains("日本語テキスト"), "expected content to contain: 日本語テキスト");
+        assertTrue(content.contains("한국어 텍스트"), "expected content to contain: 한국어 텍스트");
+    }
+
+    @Test
+    void testEncodingHtmlEntities() {
+        // Common HTML entities are decoded in output
+        var html = "<p>&amp; &lt; &gt; &nbsp; &quot; &apos;</p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("&"), "expected content to contain: &");
+        assertTrue(content.contains("<"), "expected content to contain: <");
+        assertTrue(content.contains(">"), "expected content to contain: >");
+    }
+
+    @Test
+    void testEncodingNamedEntities() {
+        // Named HTML entities like &mdash; and &hellip; are decoded
+        var html = "<p>Em dash&mdash;used for parenthetical remarks&mdash;is common. Ellipsis&hellip; indicates omission. Non-breaking&nbsp;space.</p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("—"), "expected content to contain: —");
+        assertTrue(content.contains("…"), "expected content to contain: …");
+    }
+
+    @Test
+    void testEncodingNumericEntities() {
+        // Numeric HTML entities (decimal and hex) are decoded
+        var html = "<p>Copyright: &#169; Trade: &#174; Euro: &#8364; Hex: &#x00A9;</p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("©"), "expected content to contain: ©");
+        assertTrue(content.contains("®"), "expected content to contain: ®");
+        assertTrue(content.contains("€"), "expected content to contain: €");
+    }
+
+    @Test
+    void testEncodingUnicodeEmoji() {
+        // Emoji and Unicode characters are preserved
+        var html = "<p>Hello 🌍 World 🚀</p><p>Stars: ⭐ ✨</p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("🌍"), "expected content to contain: 🌍");
+        assertTrue(content.contains("🚀"), "expected content to contain: 🚀");
+        assertTrue(content.contains("⭐"), "expected content to contain: ⭐");
+    }
+
+    @Test
+    void testHtmlCommentsOnly() {
+        // Document containing only HTML comments produces empty output
+        var html = "<!-- This is a comment --><!-- Another comment -->";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertEquals("", content.strip(), "content_equals mismatch");
+    }
+
+    @Test
+    void testJustWhitespaceInput() {
+        // Input that is only whitespace characters (spaces, tabs, newlines) produces empty output
+        var html = "   ";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertEquals("", content.strip(), "content_equals mismatch");
+    }
+
+    @Test
+    void testMalformedDeeplyNestedElements() {
+        // Deeply nested elements (100 levels) are handled without stack overflow
+        var html = "<div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><p>Deeply nested content</p></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("Deeply nested content"), "expected content to contain: Deeply nested content");
+    }
+
+    @Test
+    void testMalformedMissingBlockClosingTags() {
+        // Missing closing tags on block elements are auto-closed by parser
+        var html = "<div><h1>Title<p>First paragraph<p>Second paragraph</div>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("Title"), "expected content to contain: Title");
+        assertTrue(content.contains("First paragraph"), "expected content to contain: First paragraph");
+        assertTrue(content.contains("Second paragraph"), "expected content to contain: Second paragraph");
+    }
+
+    @Test
+    void testMalformedOverlappingTags() {
+        // Overlapping bold/italic tags are recovered by the HTML parser without panic
+        var html = "<p><b><i>bold and italic</b></i></p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("bold and italic"), "expected content to contain: bold and italic");
+    }
+
+    @Test
+    void testMalformedUnclosedParagraph() {
+        // Unclosed <p> tag is recovered gracefully and content is preserved
+        var html = "<p>This paragraph is never closed";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("This paragraph is never closed"), "expected content to contain: This paragraph is never closed");
+    }
+
+    @Test
+    void testScriptTagsOnly() {
+        // Document with only script tags produces empty output (scripts are stripped)
+        var html = "<html><head><script>alert('xss')</script></head><body><script>document.write('hello')</script></body></html>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertEquals("", content.strip(), "content_equals mismatch");
+    }
+
+    @Test
+    void testStyleTagsOnly() {
+        // Document with only style tags produces empty output (styles are stripped)
+        var html = "<html><head><style>body { color: red; }</style></head><body><style>.foo { margin: 0; }</style></body></html>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertEquals("", content.strip(), "content_equals mismatch");
+    }
+
+    @Test
     void testWhitespaceOnly() {
         // Whitespace-only content
         var html = "<p>   </p>";
@@ -29,6 +179,64 @@ class EdgeCasesTest {
         var content = result.content() != null ? result.content() : "";
 
         assertEquals("", content.strip(), "content_equals mismatch");
+    }
+
+    @Test
+    void testXssJavascriptUrlBlocked() {
+        // javascript: URLs in href attributes are blocked and not included in output
+        var html = "<p><a href=\"javascript:alert('xss')\">Click me</a></p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("Click me"), "expected content to contain: Click me");
+        assertFalse(content.contains("javascript:"), "expected content NOT to contain: javascript:");
+        assertFalse(content.contains("alert("), "expected content NOT to contain: alert(");
+    }
+
+    @Test
+    void testXssOnclickHandlerRemoved() {
+        // onclick and other on* event handlers are removed from elements
+        var html = "<p><a href=\"https://example.com\" onclick=\"alert('xss')\">Click me</a></p><button onmouseover=\"steal_data()\">Hover me</button>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("Click me"), "expected content to contain: Click me");
+        assertFalse(content.contains("onclick"), "expected content NOT to contain: onclick");
+        assertFalse(content.contains("onmouseover"), "expected content NOT to contain: onmouseover");
+        assertFalse(content.contains("alert("), "expected content NOT to contain: alert(");
+        assertFalse(content.contains("steal_data"), "expected content NOT to contain: steal_data");
+    }
+
+    @Test
+    void testXssScriptTagStripped() {
+        // Script tag content is stripped and does not appear in output
+        var html = "<p>Safe content.</p><script>alert('xss')</script><p>More safe content.</p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("Safe content"), "expected content to contain: Safe content");
+        assertTrue(content.contains("More safe content"), "expected content to contain: More safe content");
+        assertFalse(content.contains("<script>"), "expected content NOT to contain: <script>");
+        assertFalse(content.contains("alert("), "expected content NOT to contain: alert(");
+        assertFalse(content.contains("xss"), "expected content NOT to contain: xss");
+    }
+
+    @Test
+    void testXssSvgNestedScriptStripped() {
+        // Script tags nested inside SVG are stripped
+        var html = "<p>Before SVG.</p><svg xmlns=\"http://www.w3.org/2000/svg\"><script>alert('svg-xss')</script><text>SVG text</text></svg><p>After SVG.</p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("Before SVG"), "expected content to contain: Before SVG");
+        assertTrue(content.contains("After SVG"), "expected content to contain: After SVG");
+        assertFalse(content.contains("<script>"), "expected content NOT to contain: <script>");
+        assertFalse(content.contains("alert("), "expected content NOT to contain: alert(");
+        assertFalse(content.contains("svg-xss"), "expected content NOT to contain: svg-xss");
     }
 
 }

@@ -74,6 +74,10 @@ fn render_test_file(category: &str, fixtures: &[&Fixture]) -> String {
         let _ = writeln!(out);
     }
 
+    // Ensure final newline
+    if !out.ends_with('\n') {
+        out.push('\n');
+    }
     out
 }
 
@@ -88,8 +92,8 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
     // HTML input.
     match &fixture.html {
         Some(html) => {
-            let escaped = escape_raw_string(html);
-            let _ = writeln!(out, "    let html = r#\"{escaped}\"#;");
+            let literal = raw_string_literal(html);
+            let _ = writeln!(out, "    let html = {literal};");
         }
         None => {
             // html_file is not supported in the inline Rust generator.
@@ -254,11 +258,32 @@ fn escape_string(s: &str) -> String {
         .replace('\t', "\\t")
 }
 
-/// Escape a string for use inside a Rust raw string `r#"..."#`.
-/// Raw strings cannot contain `"#` sequences; fall back to a regular escaped string if needed.
-fn escape_raw_string(s: &str) -> String {
-    // The raw string delimiter is `r#"..."#`.  If the content contains `"#` we'd
-    // need more hashes, but for simplicity we just use a regular escaped literal.
-    // This helper is only used for the raw string path; caller must ensure safety.
-    s.replace('\r', "")
+/// Determine how many `#` delimiters are needed for a raw string containing `s`.
+fn raw_string_hashes(s: &str) -> usize {
+    let mut max_run = 0;
+    let mut run = 0;
+    let mut after_quote = false;
+    for ch in s.chars() {
+        if ch == '"' {
+            after_quote = true;
+            run = 0;
+        } else if ch == '#' && after_quote {
+            run += 1;
+            if run > max_run {
+                max_run = run;
+            }
+        } else {
+            after_quote = false;
+            run = 0;
+        }
+    }
+    max_run + 1
+}
+
+/// Format a string as a Rust raw string literal with sufficient `#` delimiters.
+fn raw_string_literal(s: &str) -> String {
+    let clean = s.replace('\r', "");
+    let hashes = raw_string_hashes(&clean);
+    let h = "#".repeat(hashes);
+    format!("r{h}\"{clean}\"{h}")
 }

@@ -9,8 +9,32 @@ int main(void) {
     int passed = 0;
     int failed = 0;
 
+    printf("Running {}...\n", "test_smoke_empty_string");
+    test_smoke_empty_string();
+    passed++;
+
+    printf("Running {}...\n", "test_smoke_simple_heading");
+    test_smoke_simple_heading();
+    passed++;
+
+    printf("Running {}...\n", "test_smoke_simple_paragraph");
+    test_smoke_simple_paragraph();
+    passed++;
+
+    printf("Running {}...\n", "test_blockquote_multiple_paragraphs");
+    test_blockquote_multiple_paragraphs();
+    passed++;
+
+    printf("Running {}...\n", "test_blockquote_nested");
+    test_blockquote_nested();
+    passed++;
+
     printf("Running {}...\n", "test_blockquote_simple");
     test_blockquote_simple();
+    passed++;
+
+    printf("Running {}...\n", "test_blockquote_with_list");
+    test_blockquote_with_list();
     passed++;
 
     printf("Running {}...\n", "test_bold_and_italic");
@@ -23,6 +47,54 @@ int main(void) {
 
     printf("Running {}...\n", "test_code_block");
     test_code_block();
+    passed++;
+
+    printf("Running {}...\n", "test_code_block_no_language");
+    test_code_block_no_language();
+    passed++;
+
+    printf("Running {}...\n", "test_code_inline_in_paragraph");
+    test_code_inline_in_paragraph();
+    passed++;
+
+    printf("Running {}...\n", "test_code_with_backticks_in_content");
+    test_code_with_backticks_in_content();
+    passed++;
+
+    printf("Running {}...\n", "test_emphasis_mark_highlight");
+    test_emphasis_mark_highlight();
+    passed++;
+
+    printf("Running {}...\n", "test_emphasis_strikethrough_del");
+    test_emphasis_strikethrough_del();
+    passed++;
+
+    printf("Running {}...\n", "test_emphasis_strikethrough_s");
+    test_emphasis_strikethrough_s();
+    passed++;
+
+    printf("Running {}...\n", "test_emphasis_subscript");
+    test_emphasis_subscript();
+    passed++;
+
+    printf("Running {}...\n", "test_emphasis_superscript");
+    test_emphasis_superscript();
+    passed++;
+
+    printf("Running {}...\n", "test_emphasis_underline_u");
+    test_emphasis_underline_u();
+    passed++;
+
+    printf("Running {}...\n", "test_form_input_elements");
+    test_form_input_elements();
+    passed++;
+
+    printf("Running {}...\n", "test_form_select_options");
+    test_form_select_options();
+    passed++;
+
+    printf("Running {}...\n", "test_form_textarea");
+    test_form_textarea();
     passed++;
 
     printf("Running {}...\n", "test_heading_h1");
@@ -49,8 +121,24 @@ int main(void) {
     test_heading_h6();
     passed++;
 
+    printf("Running {}...\n", "test_image_figure_figcaption");
+    test_image_figure_figcaption();
+    passed++;
+
+    printf("Running {}...\n", "test_image_linked");
+    test_image_linked();
+    passed++;
+
+    printf("Running {}...\n", "test_image_no_alt");
+    test_image_no_alt();
+    passed++;
+
     printf("Running {}...\n", "test_image_simple");
     test_image_simple();
+    passed++;
+
+    printf("Running {}...\n", "test_image_with_title");
+    test_image_with_title();
     passed++;
 
     printf("Running {}...\n", "test_inline_code");
@@ -61,44 +149,388 @@ int main(void) {
     test_italic_em();
     passed++;
 
+    printf("Running {}...\n", "test_line_break_br_tag");
+    test_line_break_br_tag();
+    passed++;
+
+    printf("Running {}...\n", "test_line_break_hr_tag");
+    test_line_break_hr_tag();
+    passed++;
+
+    printf("Running {}...\n", "test_line_break_multiple_br");
+    test_line_break_multiple_br();
+    passed++;
+
+    printf("Running {}...\n", "test_link_anchor_fragment");
+    test_link_anchor_fragment();
+    passed++;
+
+    printf("Running {}...\n", "test_link_empty_href");
+    test_link_empty_href();
+    passed++;
+
+    printf("Running {}...\n", "test_link_image_inside");
+    test_link_image_inside();
+    passed++;
+
+    printf("Running {}...\n", "test_link_mailto");
+    test_link_mailto();
+    passed++;
+
     printf("Running {}...\n", "test_link_simple");
     test_link_simple();
+    passed++;
+
+    printf("Running {}...\n", "test_link_with_bold_text");
+    test_link_with_bold_text();
     passed++;
 
     printf("Running {}...\n", "test_link_with_title");
     test_link_with_title();
     passed++;
 
+    printf("Running {}...\n", "test_list_definition_dl");
+    test_list_definition_dl();
+    passed++;
+
+    printf("Running {}...\n", "test_list_item_multiple_paragraphs");
+    test_list_item_multiple_paragraphs();
+    passed++;
+
+    printf("Running {}...\n", "test_list_mixed_nested");
+    test_list_mixed_nested();
+    passed++;
+
+    printf("Running {}...\n", "test_list_nested_ordered");
+    test_list_nested_ordered();
+    passed++;
+
+    printf("Running {}...\n", "test_list_nested_unordered");
+    test_list_nested_unordered();
+    passed++;
+
+    printf("Running {}...\n", "test_list_task_checkboxes");
+    test_list_task_checkboxes();
+    passed++;
+
     printf("Running {}...\n", "test_ordered_list");
     test_ordered_list();
+    passed++;
+
+    printf("Running {}...\n", "test_paragraph_multiple");
+    test_paragraph_multiple();
+    passed++;
+
+    printf("Running {}...\n", "test_paragraph_nested_divs");
+    test_paragraph_nested_divs();
+    passed++;
+
+    printf("Running {}...\n", "test_paragraph_simple");
+    test_paragraph_simple();
+    passed++;
+
+    printf("Running {}...\n", "test_paragraph_with_inline_formatting");
+    test_paragraph_with_inline_formatting();
+    passed++;
+
+    printf("Running {}...\n", "test_paragraph_with_line_breaks");
+    test_paragraph_with_line_breaks();
+    passed++;
+
+    printf("Running {}...\n", "test_semantic_abbr");
+    test_semantic_abbr();
+    passed++;
+
+    printf("Running {}...\n", "test_semantic_article");
+    test_semantic_article();
+    passed++;
+
+    printf("Running {}...\n", "test_semantic_definition_list");
+    test_semantic_definition_list();
+    passed++;
+
+    printf("Running {}...\n", "test_semantic_details_summary");
+    test_semantic_details_summary();
+    passed++;
+
+    printf("Running {}...\n", "test_semantic_hr");
+    test_semantic_hr();
+    passed++;
+
+    printf("Running {}...\n", "test_semantic_mark_highlight");
+    test_semantic_mark_highlight();
+    passed++;
+
+    printf("Running {}...\n", "test_semantic_section_with_heading");
+    test_semantic_section_with_heading();
+    passed++;
+
+    printf("Running {}...\n", "test_semantic_sub_superscript");
+    test_semantic_sub_superscript();
     passed++;
 
     printf("Running {}...\n", "test_simple_table");
     test_simple_table();
     passed++;
 
+    printf("Running {}...\n", "test_table_empty");
+    test_table_empty();
+    passed++;
+
+    printf("Running {}...\n", "test_table_no_thead");
+    test_table_no_thead();
+    passed++;
+
+    printf("Running {}...\n", "test_table_pipe_chars_in_content");
+    test_table_pipe_chars_in_content();
+    passed++;
+
+    printf("Running {}...\n", "test_table_with_alignment");
+    test_table_with_alignment();
+    passed++;
+
+    printf("Running {}...\n", "test_table_with_colspan");
+    test_table_with_colspan();
+    passed++;
+
     printf("Running {}...\n", "test_unordered_list");
     test_unordered_list();
     passed++;
 
-    printf("Running {}...\n", "test_smoke_empty_string");
-    test_smoke_empty_string();
+    printf("Running {}...\n", "test_metadata_author_meta");
+    test_metadata_author_meta();
     passed++;
 
-    printf("Running {}...\n", "test_smoke_simple_heading");
-    test_smoke_simple_heading();
+    printf("Running {}...\n", "test_metadata_canonical_url");
+    test_metadata_canonical_url();
     passed++;
 
-    printf("Running {}...\n", "test_smoke_simple_paragraph");
-    test_smoke_simple_paragraph();
+    printf("Running {}...\n", "test_metadata_description_meta");
+    test_metadata_description_meta();
+    passed++;
+
+    printf("Running {}...\n", "test_metadata_extract_all_images");
+    test_metadata_extract_all_images();
+    passed++;
+
+    printf("Running {}...\n", "test_metadata_extract_all_links");
+    test_metadata_extract_all_links();
+    passed++;
+
+    printf("Running {}...\n", "test_metadata_headers_hierarchy");
+    test_metadata_headers_hierarchy();
+    passed++;
+
+    printf("Running {}...\n", "test_metadata_keywords_meta");
+    test_metadata_keywords_meta();
+    passed++;
+
+    printf("Running {}...\n", "test_metadata_title_tag");
+    test_metadata_title_tag();
+    passed++;
+
+    printf("Running {}...\n", "test_og_basic_tags");
+    test_og_basic_tags();
+    passed++;
+
+    printf("Running {}...\n", "test_og_multiple_tags");
+    test_og_multiple_tags();
+    passed++;
+
+    printf("Running {}...\n", "test_structured_data_json_ld");
+    test_structured_data_json_ld();
+    passed++;
+
+    printf("Running {}...\n", "test_structured_data_multiple_json_ld");
+    test_structured_data_multiple_json_ld();
+    passed++;
+
+    printf("Running {}...\n", "test_twitter_card_tags");
+    test_twitter_card_tags();
+    passed++;
+
+    printf("Running {}...\n", "test_options_code_block_backticks");
+    test_options_code_block_backticks();
+    passed++;
+
+    printf("Running {}...\n", "test_options_code_block_tildes");
+    test_options_code_block_tildes();
+    passed++;
+
+    printf("Running {}...\n", "test_options_escape_asterisks");
+    test_options_escape_asterisks();
+    passed++;
+
+    printf("Running {}...\n", "test_options_escape_misc");
+    test_options_escape_misc();
+    passed++;
+
+    printf("Running {}...\n", "test_options_escape_underscores");
+    test_options_escape_underscores();
+    passed++;
+
+    printf("Running {}...\n", "test_options_heading_style_atx");
+    test_options_heading_style_atx();
+    passed++;
+
+    printf("Running {}...\n", "test_options_heading_style_atx_closed");
+    test_options_heading_style_atx_closed();
+    passed++;
+
+    printf("Running {}...\n", "test_options_heading_style_underlined");
+    test_options_heading_style_underlined();
+    passed++;
+
+    printf("Running {}...\n", "test_options_list_custom_bullets");
+    test_options_list_custom_bullets();
+    passed++;
+
+    printf("Running {}...\n", "test_options_list_indent_tabs");
+    test_options_list_indent_tabs();
+    passed++;
+
+    printf("Running {}...\n", "test_options_output_format_djot");
+    test_options_output_format_djot();
+    passed++;
+
+    printf("Running {}...\n", "test_options_output_format_markdown");
+    test_options_output_format_markdown();
+    passed++;
+
+    printf("Running {}...\n", "test_options_output_format_plain");
+    test_options_output_format_plain();
+    passed++;
+
+    printf("Running {}...\n", "test_options_whitespace_normalized");
+    test_options_whitespace_normalized();
+    passed++;
+
+    printf("Running {}...\n", "test_options_whitespace_strict");
+    test_options_whitespace_strict();
+    passed++;
+
+    printf("Running {}...\n", "test_options_wrap_disabled");
+    test_options_wrap_disabled();
+    passed++;
+
+    printf("Running {}...\n", "test_options_wrap_enabled");
+    test_options_wrap_enabled();
+    passed++;
+
+    printf("Running {}...\n", "test_real_world_blog_post");
+    test_real_world_blog_post();
+    passed++;
+
+    printf("Running {}...\n", "test_real_world_documentation_page");
+    test_real_world_documentation_page();
+    passed++;
+
+    printf("Running {}...\n", "test_real_world_product_page");
+    test_real_world_product_page();
     passed++;
 
     printf("Running {}...\n", "test_empty_html");
     test_empty_html();
     passed++;
 
+    printf("Running {}...\n", "test_encoding_cjk_characters");
+    test_encoding_cjk_characters();
+    passed++;
+
+    printf("Running {}...\n", "test_encoding_html_entities");
+    test_encoding_html_entities();
+    passed++;
+
+    printf("Running {}...\n", "test_encoding_named_entities");
+    test_encoding_named_entities();
+    passed++;
+
+    printf("Running {}...\n", "test_encoding_numeric_entities");
+    test_encoding_numeric_entities();
+    passed++;
+
+    printf("Running {}...\n", "test_encoding_unicode_emoji");
+    test_encoding_unicode_emoji();
+    passed++;
+
+    printf("Running {}...\n", "test_html_comments_only");
+    test_html_comments_only();
+    passed++;
+
+    printf("Running {}...\n", "test_just_whitespace_input");
+    test_just_whitespace_input();
+    passed++;
+
+    printf("Running {}...\n", "test_malformed_deeply_nested_elements");
+    test_malformed_deeply_nested_elements();
+    passed++;
+
+    printf("Running {}...\n", "test_malformed_missing_block_closing_tags");
+    test_malformed_missing_block_closing_tags();
+    passed++;
+
+    printf("Running {}...\n", "test_malformed_overlapping_tags");
+    test_malformed_overlapping_tags();
+    passed++;
+
+    printf("Running {}...\n", "test_malformed_unclosed_paragraph");
+    test_malformed_unclosed_paragraph();
+    passed++;
+
+    printf("Running {}...\n", "test_script_tags_only");
+    test_script_tags_only();
+    passed++;
+
+    printf("Running {}...\n", "test_style_tags_only");
+    test_style_tags_only();
+    passed++;
+
     printf("Running {}...\n", "test_whitespace_only");
     test_whitespace_only();
+    passed++;
+
+    printf("Running {}...\n", "test_xss_javascript_url_blocked");
+    test_xss_javascript_url_blocked();
+    passed++;
+
+    printf("Running {}...\n", "test_xss_onclick_handler_removed");
+    test_xss_onclick_handler_removed();
+    passed++;
+
+    printf("Running {}...\n", "test_xss_script_tag_stripped");
+    test_xss_script_tag_stripped();
+    passed++;
+
+    printf("Running {}...\n", "test_xss_svg_nested_script_stripped");
+    test_xss_svg_nested_script_stripped();
+    passed++;
+
+    printf("Running {}...\n", "test_structure_code_block");
+    test_structure_code_block();
+    passed++;
+
+    printf("Running {}...\n", "test_structure_deep_nesting_h1_h2_h3");
+    test_structure_deep_nesting_h1_h2_h3();
+    passed++;
+
+    printf("Running {}...\n", "test_structure_h1_h2_nested_group");
+    test_structure_h1_h2_nested_group();
+    passed++;
+
+    printf("Running {}...\n", "test_structure_heading_paragraph");
+    test_structure_heading_paragraph();
+    passed++;
+
+    printf("Running {}...\n", "test_structure_list");
+    test_structure_list();
+    passed++;
+
+    printf("Running {}...\n", "test_structure_multiple_headings");
+    test_structure_multiple_headings();
+    passed++;
+
+    printf("Running {}...\n", "test_structure_sibling_h1_groups");
+    test_structure_sibling_h1_groups();
     passed++;
 
     printf("\n==== RESULTS ====\n");

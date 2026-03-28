@@ -6,12 +6,42 @@
 require 'html_to_markdown'
 
 RSpec.describe 'conversion' do
+  it 'blockquote_multiple_paragraphs: Blockquote with multiple paragraphs has each paragraph prefixed' do
+    html = '<blockquote><p>First paragraph.</p><p>Second paragraph.</p></blockquote>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('> First paragraph.')
+    expect(content).to include('> Second paragraph.')
+  end
+
+  it 'blockquote_nested: Nested blockquote produces double-prefixed lines' do
+    html = '<blockquote><p>Outer quote.</p><blockquote><p>Inner quote.</p></blockquote></blockquote>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content.strip).not_to be_empty
+    expect(content).to include('Outer quote.')
+    expect(content).to include('Inner quote.')
+  end
+
   it 'blockquote_simple: Simple blockquote' do
     html = '<blockquote><p>Quote text</p></blockquote>'
     result = HtmlToMarkdown.convert(html)
     content = result[:content] || ''
 
     expect(content).to include('> Quote text')
+  end
+
+  it 'blockquote_with_list: Blockquote containing a list preserves list items inside quote' do
+    html = '<blockquote><p>Quote intro:</p><ul><li>Point one</li><li>Point two</li></ul></blockquote>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content.strip).not_to be_empty
+    expect(content).to include('Quote intro:')
+    expect(content).to include('Point one')
+    expect(content).to include('Point two')
   end
 
   it 'bold_and_italic: Nested bold and italic' do
@@ -38,6 +68,111 @@ RSpec.describe 'conversion' do
     expect(content).to include('```python')
     expect(content).to include("print('hello')")
     expect(content).to include('```')
+  end
+
+  it 'code_block_no_language: Code block without a language class produces a plain fenced block' do
+    html = '<pre><code>plain code here</code></pre>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('```')
+    expect(content).to include('plain code here')
+  end
+
+  it 'code_inline_in_paragraph: Inline code element nested inside a paragraph' do
+    html = '<p>Call the <code>initialize()</code> method first.</p>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('`initialize()`')
+  end
+
+  it 'code_with_backticks_in_content: Inline code containing backtick characters is properly escaped' do
+    html = '<p>Use <code>`backtick` here</code> carefully.</p>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content.strip).not_to be_empty
+    expect(content).to include('backtick')
+  end
+
+  it 'emphasis_mark_highlight: mark tag produces highlighted output' do
+    html = '<p><mark>highlighted</mark></p>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content.strip).not_to be_empty
+    expect(content).to include('highlighted')
+  end
+
+  it 'emphasis_strikethrough_del: del tag converts to GFM strikethrough' do
+    html = '<p><del>deleted text</del></p>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('~~deleted text~~')
+  end
+
+  it 'emphasis_strikethrough_s: s tag converts to GFM strikethrough' do
+    html = '<p><s>strikethrough</s></p>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('~~strikethrough~~')
+  end
+
+  it 'emphasis_subscript: sub tag content is preserved' do
+    html = '<p>H<sub>2</sub>O</p>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('H')
+    expect(content).to include('2')
+    expect(content).to include('O')
+  end
+
+  it 'emphasis_superscript: sup tag content is preserved' do
+    html = '<p>x<sup>2</sup></p>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('x')
+    expect(content).to include('2')
+  end
+
+  it 'emphasis_underline_u: u tag content is preserved in output' do
+    html = '<p><u>underlined</u></p>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('underlined')
+  end
+
+  it 'form_input_elements: Form input elements produce readable output without form mechanics' do
+    html = '<form><label for="name">Name:</label><input type="text" id="name" placeholder="Enter name"></form>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content.strip).not_to be_empty
+    expect(content).to include('Name')
+  end
+
+  it 'form_select_options: Select element with options produces readable output' do
+    html = '<form><label>Color:</label><select><option value="red">Red</option><option value="blue" selected>Blue</option><option value="green">Green</option></select></form>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content.strip).not_to be_empty
+    expect(content).to include('Color')
+  end
+
+  it 'form_textarea: Textarea element produces readable output' do
+    html = '<form><label>Message:</label><textarea>Default text content</textarea></form>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content.strip).not_to be_empty
+    expect(content).to include('Message')
   end
 
   it 'heading_h1: H1 heading' do
@@ -88,12 +223,48 @@ RSpec.describe 'conversion' do
     expect(content.strip).to eq('###### Heading 6')
   end
 
+  it 'image_figure_figcaption: Figure with figcaption preserves both image and caption' do
+    html = '<figure><img src="sunset.jpg" alt="A sunset"><figcaption>Beautiful sunset over the ocean</figcaption></figure>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('![A sunset](sunset.jpg)')
+    expect(content).to include('Beautiful sunset over the ocean')
+  end
+
+  it 'image_linked: Image inside an anchor produces a linked image' do
+    html = '<a href="https://example.com"><img src="icon.png" alt="Icon"></a>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('![Icon](icon.png)')
+    expect(content).to include('https://example.com')
+  end
+
+  it 'image_no_alt: Image without alt text produces image markdown' do
+    html = '<img src="banner.jpg">'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content.strip).not_to be_empty
+    expect(content).to include('banner.jpg')
+  end
+
   it 'image_simple: Image with alt text' do
     html = '<img src="photo.jpg" alt="A photo">'
     result = HtmlToMarkdown.convert(html)
     content = result[:content] || ''
 
     expect(content).to include('![A photo](photo.jpg)')
+  end
+
+  it 'image_with_title: Image with title attribute includes title in output' do
+    html = '<img src="chart.png" alt="Sales chart" title="Q3 Sales">'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('![Sales chart](chart.png')
+    expect(content).to include('Q3 Sales')
   end
 
   it 'inline_code: Inline code' do
@@ -112,12 +283,82 @@ RSpec.describe 'conversion' do
     expect(content).to include('*italic*')
   end
 
+  it 'line_break_br_tag: Single br tag produces a line break in output' do
+    html = '<p>First line.<br>Second line.</p>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('First line.')
+    expect(content).to include('Second line.')
+  end
+
+  it 'line_break_hr_tag: hr tag produces a horizontal separator between content' do
+    html = '<p>Before rule.</p><hr><p>After rule.</p>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content.strip).not_to be_empty
+    expect(content).to include('Before rule.')
+    expect(content).to include('After rule.')
+  end
+
+  it 'line_break_multiple_br: Multiple consecutive br tags in sequence' do
+    html = '<p>Start.<br><br>End.</p>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('Start.')
+    expect(content).to include('End.')
+  end
+
+  it 'link_anchor_fragment: Fragment-only anchor link is preserved' do
+    html = '<a href="#section">Jump to section</a>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('[Jump to section](#section)')
+  end
+
+  it 'link_empty_href: Link with empty href produces output with the link text' do
+    html = '<a href="">No destination</a>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('No destination')
+  end
+
+  it 'link_image_inside: Image inside a link produces a linked image' do
+    html = '<a href="https://example.com"><img src="logo.png" alt="Logo"></a>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('![Logo](logo.png)')
+    expect(content).to include('https://example.com')
+  end
+
+  it 'link_mailto: Mailto link is preserved with mailto: scheme' do
+    html = '<a href="mailto:user@example.com">Email us</a>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('mailto:user@example.com')
+  end
+
   it 'link_simple: Simple link' do
     html = '<a href="https://example.com">Example</a>'
     result = HtmlToMarkdown.convert(html)
     content = result[:content] || ''
 
     expect(content).to include('[Example](https://example.com)')
+  end
+
+  it 'link_with_bold_text: Link containing bold text preserves formatting' do
+    html = '<a href="https://example.com"><strong>Bold link</strong></a>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('**Bold link**')
+    expect(content).to include('https://example.com')
   end
 
   it 'link_with_title: Link with title attribute' do
@@ -129,6 +370,70 @@ RSpec.describe 'conversion' do
     expect(content).to include('Example Site')
   end
 
+  it 'list_definition_dl: Definition list with dt and dd elements' do
+    html = '<dl><dt>Term One</dt><dd>Definition of term one.</dd><dt>Term Two</dt><dd>Definition of term two.</dd></dl>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('Term One')
+    expect(content).to include('Definition of term one.')
+    expect(content).to include('Term Two')
+    expect(content).to include('Definition of term two.')
+  end
+
+  it 'list_item_multiple_paragraphs: List item containing multiple paragraphs' do
+    html = '<ul><li><p>First paragraph in item.</p><p>Second paragraph in item.</p></li><li>Simple item</li></ul>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('First paragraph in item.')
+    expect(content).to include('Second paragraph in item.')
+    expect(content).to include('Simple item')
+  end
+
+  it 'list_mixed_nested: Mixed list: ordered list nested inside unordered list' do
+    html = '<ul><li>Item A<ol><li>Sub 1</li><li>Sub 2</li></ol></li><li>Item B</li></ul>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('Item A')
+    expect(content).to include('Sub 1')
+    expect(content).to include('Sub 2')
+    expect(content).to include('Item B')
+  end
+
+  it 'list_nested_ordered: Nested ordered list with two levels of depth' do
+    html = '<ol><li>Step 1<ol><li>Step 1a</li><li>Step 1b</li></ol></li><li>Step 2</li></ol>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('Step 1')
+    expect(content).to include('Step 1a')
+    expect(content).to include('Step 1b')
+    expect(content).to include('Step 2')
+  end
+
+  it 'list_nested_unordered: Nested unordered list with two levels of depth' do
+    html = '<ul><li>Parent A<ul><li>Child A1</li><li>Child A2</li></ul></li><li>Parent B</li></ul>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('Parent A')
+    expect(content).to include('Child A1')
+    expect(content).to include('Child A2')
+    expect(content).to include('Parent B')
+  end
+
+  it 'list_task_checkboxes: Task list with checked and unchecked checkboxes' do
+    html = '<ul><li><input type="checkbox" checked> Done task</li><li><input type="checkbox"> Pending task</li></ul>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content.strip).not_to be_empty
+    expect(content).to include('Done task')
+    expect(content).to include('Pending task')
+  end
+
   it 'ordered_list: Ordered list' do
     html = '<ol><li>First</li><li>Second</li><li>Third</li></ol>'
     result = HtmlToMarkdown.convert(html)
@@ -137,6 +442,129 @@ RSpec.describe 'conversion' do
     expect(content).to include('1. First')
     expect(content).to include('2. Second')
     expect(content).to include('3. Third')
+  end
+
+  it 'paragraph_multiple: Multiple paragraphs are separated by a blank line' do
+    html = '<p>First paragraph.</p><p>Second paragraph.</p>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('First paragraph.')
+    expect(content).to include('Second paragraph.')
+  end
+
+  it 'paragraph_nested_divs: Text nested inside divs is extracted correctly' do
+    html = '<div><div><p>Nested text</p></div></div>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('Nested text')
+  end
+
+  it 'paragraph_simple: Simple paragraph converts to plain text' do
+    html = '<p>Hello World</p>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content.strip).to eq('Hello World')
+  end
+
+  it 'paragraph_with_inline_formatting: Paragraph with bold, italic, and a link' do
+    html = '<p>This has <strong>bold</strong>, <em>italic</em>, and a <a href="https://example.com">link</a>.</p>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('**bold**')
+    expect(content).to include('*italic*')
+    expect(content).to include('[link](https://example.com)')
+  end
+
+  it 'paragraph_with_line_breaks: Paragraph with br tags produces line breaks in output' do
+    html = '<p>Line one.<br>Line two.<br>Line three.</p>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content.strip).not_to be_empty
+    expect(content).to include('Line one.')
+    expect(content).to include('Line two.')
+    expect(content).to include('Line three.')
+  end
+
+  it 'semantic_abbr: Abbreviation element text is preserved' do
+    html = '<p>The <abbr title="World Wide Web">WWW</abbr> is global.</p>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('WWW')
+  end
+
+  it 'semantic_article: Article element wrapping content preserves inner content' do
+    html = '<article><h2>Article Title</h2><p>Article body.</p></article>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('Article Title')
+    expect(content).to include('Article body.')
+  end
+
+  it 'semantic_definition_list: Definition list with term and description' do
+    html = '<dl><dt>HTML</dt><dd>HyperText Markup Language</dd><dt>CSS</dt><dd>Cascading Style Sheets</dd></dl>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('HTML')
+    expect(content).to include('HyperText Markup Language')
+    expect(content).to include('CSS')
+    expect(content).to include('Cascading Style Sheets')
+  end
+
+  it 'semantic_details_summary: Details and summary elements produce readable output' do
+    html = '<details><summary>Click to expand</summary><p>Hidden content here.</p></details>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content.strip).not_to be_empty
+    expect(content).to include('Click to expand')
+  end
+
+  it 'semantic_hr: Horizontal rule produces a separator in output' do
+    html = '<p>Above</p><hr><p>Below</p>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content.strip).not_to be_empty
+    expect(content).to include('Above')
+    expect(content).to include('Below')
+  end
+
+  it 'semantic_mark_highlight: Mark tag produces highlighted output' do
+    html = '<p>This is <mark>highlighted text</mark> in a sentence.</p>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content.strip).not_to be_empty
+    expect(content).to include('highlighted text')
+  end
+
+  it 'semantic_section_with_heading: Section element with heading preserves structure' do
+    html = '<section><h3>Section Heading</h3><p>Section content.</p></section>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content).to include('Section Heading')
+    expect(content).to include('Section content.')
+  end
+
+  it 'semantic_sub_superscript: Subscript and superscript elements are preserved in output' do
+    html = '<p>H<sub>2</sub>O and E=mc<sup>2</sup></p>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content.strip).not_to be_empty
+    expect(content).to include('H')
+    expect(content).to include('2')
+    expect(content).to include('O')
+    expect(content).to include('E=mc')
   end
 
   it 'simple_table: Simple table with header' do
@@ -150,6 +578,64 @@ RSpec.describe 'conversion' do
     expect(content).to include('30')
     expect(content).to include('|')
     expect(content).to include('---')
+  end
+
+  it 'table_empty: Empty table produces no output or minimal output' do
+    html = '<table></table>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content.strip).to eq('')
+  end
+
+  it 'table_no_thead: Table without thead uses first row as implied header' do
+    html = '<table><tr><td>Product</td><td>Price</td></tr><tr><td>Apple</td><td>1.00</td></tr></table>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content.strip).not_to be_empty
+    expect(content).to include('Product')
+    expect(content).to include('Price')
+    expect(content).to include('Apple')
+    expect(content).to include('1.00')
+    expect(content).to include('|')
+  end
+
+  it 'table_pipe_chars_in_content: Table cells containing pipe characters are escaped in output' do
+    html = '<table><thead><tr><th>Expression</th><th>Result</th></tr></thead><tbody><tr><td>a | b</td><td>true</td></tr></tbody></table>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content.strip).not_to be_empty
+    expect(content).to include('Expression')
+    expect(content).to include('Result')
+    expect(content).to include('true')
+  end
+
+  it 'table_with_alignment: Table with column alignment attributes' do
+    html = '<table><thead><tr><th align="left">Left</th><th align="center">Center</th><th align="right">Right</th></tr></thead><tbody><tr><td>L</td><td>C</td><td>R</td></tr></tbody></table>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content.strip).not_to be_empty
+    expect(content).to include('Left')
+    expect(content).to include('Center')
+    expect(content).to include('Right')
+    expect(content).to include('L')
+    expect(content).to include('C')
+    expect(content).to include('R')
+    expect(content).to include('|')
+  end
+
+  it 'table_with_colspan: Table with colspan attribute in a header cell' do
+    html = '<table><thead><tr><th colspan="2">Full Name</th></tr></thead><tbody><tr><td>John</td><td>Doe</td></tr></tbody></table>'
+    result = HtmlToMarkdown.convert(html)
+    content = result[:content] || ''
+
+    expect(content.strip).not_to be_empty
+    expect(content).to include('Full Name')
+    expect(content).to include('John')
+    expect(content).to include('Doe')
   end
 
   it 'unordered_list: Unordered list' do

@@ -7,6 +7,33 @@
 #include <stdio.h>
 #include <string.h>
 
+void test_blockquote_multiple_paragraphs(void) {
+    /* Blockquote with multiple paragraphs has each paragraph prefixed */
+    const char *html = "<blockquote><p>First paragraph.</p><p>Second paragraph.</p></blockquote>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "> First paragraph.") != NULL);
+    assert(strstr(result, "> Second paragraph.") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_blockquote_nested(void) {
+    /* Nested blockquote produces double-prefixed lines */
+    const char *html =
+        "<blockquote><p>Outer quote.</p><blockquote><p>Inner quote.</p></blockquote></blockquote>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "Outer quote.") != NULL);
+    assert(strstr(result, "Inner quote.") != NULL);
+    html_to_markdown_free_string(result);
+}
+
 void test_blockquote_simple(void) {
     /* Simple blockquote */
     const char *html = "<blockquote><p>Quote text</p></blockquote>";
@@ -15,6 +42,22 @@ void test_blockquote_simple(void) {
 
     /* content_contains_all */
     assert(strstr(result, "> Quote text") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_blockquote_with_list(void) {
+    /* Blockquote containing a list preserves list items inside quote */
+    const char *html =
+        "<blockquote><p>Quote intro:</p><ul><li>Point one</li><li>Point two</li></ul></blockquote>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "Quote intro:") != NULL);
+    assert(strstr(result, "Point one") != NULL);
+    assert(strstr(result, "Point two") != NULL);
     html_to_markdown_free_string(result);
 }
 
@@ -50,6 +93,157 @@ void test_code_block(void) {
     assert(strstr(result, "```python") != NULL);
     assert(strstr(result, "print('hello')") != NULL);
     assert(strstr(result, "```") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_code_block_no_language(void) {
+    /* Code block without a language class produces a plain fenced block */
+    const char *html = "<pre><code>plain code here</code></pre>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "```") != NULL);
+    assert(strstr(result, "plain code here") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_code_inline_in_paragraph(void) {
+    /* Inline code element nested inside a paragraph */
+    const char *html = "<p>Call the <code>initialize()</code> method first.</p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "`initialize()`") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_code_with_backticks_in_content(void) {
+    /* Inline code containing backtick characters is properly escaped */
+    const char *html = "<p>Use <code>`backtick` here</code> carefully.</p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "backtick") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_emphasis_mark_highlight(void) {
+    /* mark tag produces highlighted output */
+    const char *html = "<p><mark>highlighted</mark></p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "highlighted") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_emphasis_strikethrough_del(void) {
+    /* del tag converts to GFM strikethrough */
+    const char *html = "<p><del>deleted text</del></p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "~~deleted text~~") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_emphasis_strikethrough_s(void) {
+    /* s tag converts to GFM strikethrough */
+    const char *html = "<p><s>strikethrough</s></p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "~~strikethrough~~") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_emphasis_subscript(void) {
+    /* sub tag content is preserved */
+    const char *html = "<p>H<sub>2</sub>O</p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "H") != NULL);
+    assert(strstr(result, "2") != NULL);
+    assert(strstr(result, "O") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_emphasis_superscript(void) {
+    /* sup tag content is preserved */
+    const char *html = "<p>x<sup>2</sup></p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "x") != NULL);
+    assert(strstr(result, "2") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_emphasis_underline_u(void) {
+    /* u tag content is preserved in output */
+    const char *html = "<p><u>underlined</u></p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "underlined") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_form_input_elements(void) {
+    /* Form input elements produce readable output without form mechanics */
+    const char *html = "<form><label for=\"name\">Name:</label><input type=\"text\" id=\"name\" "
+                       "placeholder=\"Enter name\"></form>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "Name") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_form_select_options(void) {
+    /* Select element with options produces readable output */
+    const char *html =
+        "<form><label>Color:</label><select><option value=\"red\">Red</option><option "
+        "value=\"blue\" selected>Blue</option><option "
+        "value=\"green\">Green</option></select></form>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "Color") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_form_textarea(void) {
+    /* Textarea element produces readable output */
+    const char *html =
+        "<form><label>Message:</label><textarea>Default text content</textarea></form>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "Message") != NULL);
     html_to_markdown_free_string(result);
 }
 
@@ -119,6 +313,44 @@ void test_heading_h6(void) {
     html_to_markdown_free_string(result);
 }
 
+void test_image_figure_figcaption(void) {
+    /* Figure with figcaption preserves both image and caption */
+    const char *html = "<figure><img src=\"sunset.jpg\" alt=\"A sunset\"><figcaption>Beautiful "
+                       "sunset over the ocean</figcaption></figure>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "![A sunset](sunset.jpg)") != NULL);
+    assert(strstr(result, "Beautiful sunset over the ocean") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_image_linked(void) {
+    /* Image inside an anchor produces a linked image */
+    const char *html = "<a href=\"https://example.com\"><img src=\"icon.png\" alt=\"Icon\"></a>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "![Icon](icon.png)") != NULL);
+    assert(strstr(result, "https://example.com") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_image_no_alt(void) {
+    /* Image without alt text produces image markdown */
+    const char *html = "<img src=\"banner.jpg\">";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "banner.jpg") != NULL);
+    html_to_markdown_free_string(result);
+}
+
 void test_image_simple(void) {
     /* Image with alt text */
     const char *html = "<img src=\"photo.jpg\" alt=\"A photo\">";
@@ -127,6 +359,18 @@ void test_image_simple(void) {
 
     /* content_contains_all */
     assert(strstr(result, "![A photo](photo.jpg)") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_image_with_title(void) {
+    /* Image with title attribute includes title in output */
+    const char *html = "<img src=\"chart.png\" alt=\"Sales chart\" title=\"Q3 Sales\">";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "![Sales chart](chart.png") != NULL);
+    assert(strstr(result, "Q3 Sales") != NULL);
     html_to_markdown_free_string(result);
 }
 
@@ -152,6 +396,89 @@ void test_italic_em(void) {
     html_to_markdown_free_string(result);
 }
 
+void test_line_break_br_tag(void) {
+    /* Single br tag produces a line break in output */
+    const char *html = "<p>First line.<br>Second line.</p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "First line.") != NULL);
+    assert(strstr(result, "Second line.") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_line_break_hr_tag(void) {
+    /* hr tag produces a horizontal separator between content */
+    const char *html = "<p>Before rule.</p><hr><p>After rule.</p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "Before rule.") != NULL);
+    assert(strstr(result, "After rule.") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_line_break_multiple_br(void) {
+    /* Multiple consecutive br tags in sequence */
+    const char *html = "<p>Start.<br><br>End.</p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "Start.") != NULL);
+    assert(strstr(result, "End.") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_link_anchor_fragment(void) {
+    /* Fragment-only anchor link is preserved */
+    const char *html = "<a href=\"#section\">Jump to section</a>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "[Jump to section](#section)") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_link_empty_href(void) {
+    /* Link with empty href produces output with the link text */
+    const char *html = "<a href=\"\">No destination</a>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "No destination") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_link_image_inside(void) {
+    /* Image inside a link produces a linked image */
+    const char *html = "<a href=\"https://example.com\"><img src=\"logo.png\" alt=\"Logo\"></a>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "![Logo](logo.png)") != NULL);
+    assert(strstr(result, "https://example.com") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_link_mailto(void) {
+    /* Mailto link is preserved with mailto: scheme */
+    const char *html = "<a href=\"mailto:user@example.com\">Email us</a>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "mailto:user@example.com") != NULL);
+    html_to_markdown_free_string(result);
+}
+
 void test_link_simple(void) {
     /* Simple link */
     const char *html = "<a href=\"https://example.com\">Example</a>";
@@ -160,6 +487,18 @@ void test_link_simple(void) {
 
     /* content_contains_all */
     assert(strstr(result, "[Example](https://example.com)") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_link_with_bold_text(void) {
+    /* Link containing bold text preserves formatting */
+    const char *html = "<a href=\"https://example.com\"><strong>Bold link</strong></a>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "**Bold link**") != NULL);
+    assert(strstr(result, "https://example.com") != NULL);
     html_to_markdown_free_string(result);
 }
 
@@ -175,6 +514,95 @@ void test_link_with_title(void) {
     html_to_markdown_free_string(result);
 }
 
+void test_list_definition_dl(void) {
+    /* Definition list with dt and dd elements */
+    const char *html = "<dl><dt>Term One</dt><dd>Definition of term one.</dd><dt>Term "
+                       "Two</dt><dd>Definition of term two.</dd></dl>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "Term One") != NULL);
+    assert(strstr(result, "Definition of term one.") != NULL);
+    assert(strstr(result, "Term Two") != NULL);
+    assert(strstr(result, "Definition of term two.") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_list_item_multiple_paragraphs(void) {
+    /* List item containing multiple paragraphs */
+    const char *html = "<ul><li><p>First paragraph in item.</p><p>Second paragraph in "
+                       "item.</p></li><li>Simple item</li></ul>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "First paragraph in item.") != NULL);
+    assert(strstr(result, "Second paragraph in item.") != NULL);
+    assert(strstr(result, "Simple item") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_list_mixed_nested(void) {
+    /* Mixed list: ordered list nested inside unordered list */
+    const char *html =
+        "<ul><li>Item A<ol><li>Sub 1</li><li>Sub 2</li></ol></li><li>Item B</li></ul>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "Item A") != NULL);
+    assert(strstr(result, "Sub 1") != NULL);
+    assert(strstr(result, "Sub 2") != NULL);
+    assert(strstr(result, "Item B") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_list_nested_ordered(void) {
+    /* Nested ordered list with two levels of depth */
+    const char *html =
+        "<ol><li>Step 1<ol><li>Step 1a</li><li>Step 1b</li></ol></li><li>Step 2</li></ol>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "Step 1") != NULL);
+    assert(strstr(result, "Step 1a") != NULL);
+    assert(strstr(result, "Step 1b") != NULL);
+    assert(strstr(result, "Step 2") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_list_nested_unordered(void) {
+    /* Nested unordered list with two levels of depth */
+    const char *html =
+        "<ul><li>Parent A<ul><li>Child A1</li><li>Child A2</li></ul></li><li>Parent B</li></ul>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "Parent A") != NULL);
+    assert(strstr(result, "Child A1") != NULL);
+    assert(strstr(result, "Child A2") != NULL);
+    assert(strstr(result, "Parent B") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_list_task_checkboxes(void) {
+    /* Task list with checked and unchecked checkboxes */
+    const char *html = "<ul><li><input type=\"checkbox\" checked> Done task</li><li><input "
+                       "type=\"checkbox\"> Pending task</li></ul>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "Done task") != NULL);
+    assert(strstr(result, "Pending task") != NULL);
+    html_to_markdown_free_string(result);
+}
+
 void test_ordered_list(void) {
     /* Ordered list */
     const char *html = "<ol><li>First</li><li>Second</li><li>Third</li></ol>";
@@ -185,6 +613,176 @@ void test_ordered_list(void) {
     assert(strstr(result, "1. First") != NULL);
     assert(strstr(result, "2. Second") != NULL);
     assert(strstr(result, "3. Third") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_paragraph_multiple(void) {
+    /* Multiple paragraphs are separated by a blank line */
+    const char *html = "<p>First paragraph.</p><p>Second paragraph.</p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "First paragraph.") != NULL);
+    assert(strstr(result, "Second paragraph.") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_paragraph_nested_divs(void) {
+    /* Text nested inside divs is extracted correctly */
+    const char *html = "<div><div><p>Nested text</p></div></div>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "Nested text") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_paragraph_simple(void) {
+    /* Simple paragraph converts to plain text */
+    const char *html = "<p>Hello World</p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_equals */
+    assert(strcmp(result, "Hello World") == 0);
+    html_to_markdown_free_string(result);
+}
+
+void test_paragraph_with_inline_formatting(void) {
+    /* Paragraph with bold, italic, and a link */
+    const char *html = "<p>This has <strong>bold</strong>, <em>italic</em>, and a <a "
+                       "href=\"https://example.com\">link</a>.</p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "**bold**") != NULL);
+    assert(strstr(result, "*italic*") != NULL);
+    assert(strstr(result, "[link](https://example.com)") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_paragraph_with_line_breaks(void) {
+    /* Paragraph with br tags produces line breaks in output */
+    const char *html = "<p>Line one.<br>Line two.<br>Line three.</p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "Line one.") != NULL);
+    assert(strstr(result, "Line two.") != NULL);
+    assert(strstr(result, "Line three.") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_semantic_abbr(void) {
+    /* Abbreviation element text is preserved */
+    const char *html = "<p>The <abbr title=\"World Wide Web\">WWW</abbr> is global.</p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "WWW") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_semantic_article(void) {
+    /* Article element wrapping content preserves inner content */
+    const char *html = "<article><h2>Article Title</h2><p>Article body.</p></article>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "Article Title") != NULL);
+    assert(strstr(result, "Article body.") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_semantic_definition_list(void) {
+    /* Definition list with term and description */
+    const char *html = "<dl><dt>HTML</dt><dd>HyperText Markup "
+                       "Language</dd><dt>CSS</dt><dd>Cascading Style Sheets</dd></dl>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "HTML") != NULL);
+    assert(strstr(result, "HyperText Markup Language") != NULL);
+    assert(strstr(result, "CSS") != NULL);
+    assert(strstr(result, "Cascading Style Sheets") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_semantic_details_summary(void) {
+    /* Details and summary elements produce readable output */
+    const char *html =
+        "<details><summary>Click to expand</summary><p>Hidden content here.</p></details>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "Click to expand") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_semantic_hr(void) {
+    /* Horizontal rule produces a separator in output */
+    const char *html = "<p>Above</p><hr><p>Below</p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "Above") != NULL);
+    assert(strstr(result, "Below") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_semantic_mark_highlight(void) {
+    /* Mark tag produces highlighted output */
+    const char *html = "<p>This is <mark>highlighted text</mark> in a sentence.</p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "highlighted text") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_semantic_section_with_heading(void) {
+    /* Section element with heading preserves structure */
+    const char *html = "<section><h3>Section Heading</h3><p>Section content.</p></section>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_contains_all */
+    assert(strstr(result, "Section Heading") != NULL);
+    assert(strstr(result, "Section content.") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_semantic_sub_superscript(void) {
+    /* Subscript and superscript elements are preserved in output */
+    const char *html = "<p>H<sub>2</sub>O and E=mc<sup>2</sup></p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "H") != NULL);
+    assert(strstr(result, "2") != NULL);
+    assert(strstr(result, "O") != NULL);
+    assert(strstr(result, "E=mc") != NULL);
     html_to_markdown_free_string(result);
 }
 
@@ -202,6 +800,90 @@ void test_simple_table(void) {
     assert(strstr(result, "30") != NULL);
     assert(strstr(result, "|") != NULL);
     assert(strstr(result, "---") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_table_empty(void) {
+    /* Empty table produces no output or minimal output */
+    const char *html = "<table></table>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_equals */
+    assert(strcmp(result, "") == 0);
+    html_to_markdown_free_string(result);
+}
+
+void test_table_no_thead(void) {
+    /* Table without thead uses first row as implied header */
+    const char *html = "<table><tr><td>Product</td><td>Price</td></tr><tr><td>Apple</td><td>1.00</"
+                       "td></tr></table>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "Product") != NULL);
+    assert(strstr(result, "Price") != NULL);
+    assert(strstr(result, "Apple") != NULL);
+    assert(strstr(result, "1.00") != NULL);
+    assert(strstr(result, "|") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_table_pipe_chars_in_content(void) {
+    /* Table cells containing pipe characters are escaped in output */
+    const char *html = "<table><thead><tr><th>Expression</th><th>Result</th></tr></"
+                       "thead><tbody><tr><td>a | b</td><td>true</td></tr></tbody></table>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "Expression") != NULL);
+    assert(strstr(result, "Result") != NULL);
+    assert(strstr(result, "true") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_table_with_alignment(void) {
+    /* Table with column alignment attributes */
+    const char *html =
+        "<table><thead><tr><th align=\"left\">Left</th><th align=\"center\">Center</th><th "
+        "align=\"right\">Right</th></tr></thead><tbody><tr><td>L</td><td>C</td><td>R</td></tr></"
+        "tbody></table>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "Left") != NULL);
+    assert(strstr(result, "Center") != NULL);
+    assert(strstr(result, "Right") != NULL);
+    assert(strstr(result, "L") != NULL);
+    assert(strstr(result, "C") != NULL);
+    assert(strstr(result, "R") != NULL);
+    assert(strstr(result, "|") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_table_with_colspan(void) {
+    /* Table with colspan attribute in a header cell */
+    const char *html =
+        "<table><thead><tr><th colspan=\"2\">Full "
+        "Name</th></tr></thead><tbody><tr><td>John</td><td>Doe</td></tr></tbody></table>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "Full Name") != NULL);
+    assert(strstr(result, "John") != NULL);
+    assert(strstr(result, "Doe") != NULL);
     html_to_markdown_free_string(result);
 }
 
