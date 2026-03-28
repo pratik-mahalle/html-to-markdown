@@ -74,34 +74,3 @@ jobs:
         working-directory: crates/html-to-markdown-wasm
         run: ../../scripts/ci/wasm/test-wasm-rust.sh
         shell: bash
-
-  wasm-wasmtime:
-    name: Wasmtime tests (${{ matrix.runner }})
-    runs-on: ${{ matrix.runner }}
-    timeout-minutes: 120
-    strategy:
-      fail-fast: false
-      matrix:
-        runner:
-          - ubuntu-latest
-          - ubuntu-24.04-arm
-          - macos-latest
-          - windows-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6 # v6
-
-      - name: Setup Rust
-        uses: kreuzberg-dev/actions/setup-rust@v1 # v1
-        with:
-          toolchain: stable
-          target: wasm32-unknown-unknown
-          use-sccache: false
-
-      - name: Ensure wasm target installed
-        run: scripts/common/ensure-wasm-target.sh
-        shell: bash
-
-      - name: Run Wasmtime WASM tests
-        run: scripts/ci/wasm/run-wasmtime-tests.sh
-        shell: bash

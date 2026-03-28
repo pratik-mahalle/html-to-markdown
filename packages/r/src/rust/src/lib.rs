@@ -143,7 +143,7 @@ fn convert_with_tables(html: &str, options: Robj, config: Robj) -> Result<Robj> 
 #[extendr]
 fn extract(html: &str, options: Robj) -> Result<Robj> {
     let opts = decode_options(options).map_err(|e| Error::Other(e))?;
-    let result = profiling::maybe_profile(|| html_to_markdown_rs::extract(html, Some(opts.clone())))
+    let result = profiling::maybe_profile(|| html_to_markdown_rs::convert(html, Some(opts.clone())))
         .map_err(|e| Error::Other(e.to_string()))?;
     Ok(conversion_result_to_robj(result))
 }
