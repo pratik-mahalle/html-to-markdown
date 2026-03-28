@@ -3,11 +3,11 @@
 //
 // Usage:
 //
-//	go run github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/cmd/install@latest
+//	go run github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/cmd/install@latest
 //
 // Or via go generate (recommended):
 //
-//	go generate github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown
+//	go generate github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown
 //
 // The command downloads the FFI library and generates a cgo_flags.go file with
 // the correct CGO directives, eliminating the need to set environment variables.
