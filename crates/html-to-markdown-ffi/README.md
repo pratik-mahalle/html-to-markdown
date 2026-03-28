@@ -179,17 +179,20 @@ Rust Core Library (crates/html-to-markdown)
 
 ## API Reference
 
-### Core Conversion (3 functions)
+### Core Conversion (4 functions)
 
 ```c
-// Basic conversion -- returns malloc'd string or NULL on error
-char *html_to_markdown_convert(const char *html);
+// Basic conversion -- returns malloc'd plain Markdown string or NULL on error (v2 compat)
+char *html_to_markdown_convert_to_string(const char *html);
 
-// Conversion with output length
-char *html_to_markdown_convert_with_len(const char *html, size_t *len_out);
+// Conversion with output length (v2 compat)
+char *html_to_markdown_convert_to_string_with_len(const char *html, size_t *len_out);
 
-// Conversion from raw UTF-8 bytes with output length
-char *html_to_markdown_convert_bytes_with_len(const uint8_t *html, size_t len, size_t *len_out);
+// Conversion from raw UTF-8 bytes with output length (v2 compat)
+char *html_to_markdown_convert_to_string_bytes_with_len(const uint8_t *html, size_t len, size_t *len_out);
+
+// v3 primary API: full conversion result as JSON (content, metadata, tables, warnings)
+char *html_to_markdown_convert(const char *html, const char *options_json);
 ```
 
 ### Metadata Extraction (3 functions)

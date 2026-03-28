@@ -95,7 +95,7 @@ fn test_convert_with_tables_with_metadata() {
 fn test_basic_conversion() {
     unsafe {
         let html = CString::new("<h1>Hello World</h1>").unwrap();
-        let result = html_to_markdown_convert(html.as_ptr());
+        let result = html_to_markdown_convert_to_string(html.as_ptr());
         assert!(!result.is_null());
 
         let markdown = CStr::from_ptr(result).to_str().unwrap();
@@ -108,7 +108,7 @@ fn test_basic_conversion() {
 #[test]
 fn test_null_html() {
     unsafe {
-        let result = html_to_markdown_convert(ptr::null());
+        let result = html_to_markdown_convert_to_string(ptr::null());
         assert!(result.is_null());
         let err = html_to_markdown_last_error();
         assert!(!err.is_null());
@@ -130,12 +130,12 @@ fn test_version() {
 #[test]
 fn test_last_error_clears_after_success() {
     unsafe {
-        let _ = html_to_markdown_convert(ptr::null());
+        let _ = html_to_markdown_convert_to_string(ptr::null());
         let err = html_to_markdown_last_error();
         assert!(!err.is_null());
 
         let html = CString::new("<p>ok</p>").unwrap();
-        let result = html_to_markdown_convert(html.as_ptr());
+        let result = html_to_markdown_convert_to_string(html.as_ptr());
         assert!(!result.is_null());
         html_to_markdown_free_string(result);
 
@@ -197,7 +197,7 @@ fn test_convert_with_len_reports_length() {
     unsafe {
         let html = CString::new("<p>hello</p>").unwrap();
         let mut len: usize = 0;
-        let result = html_to_markdown_convert_with_len(html.as_ptr(), &mut len);
+        let result = html_to_markdown_convert_to_string_with_len(html.as_ptr(), &mut len);
         assert!(!result.is_null());
         assert!(len > 0);
         html_to_markdown_free_string(result);
@@ -209,7 +209,7 @@ fn test_convert_bytes_with_len_reports_length() {
     unsafe {
         let html = b"<p>hello</p>";
         let mut len: usize = 0;
-        let result = html_to_markdown_convert_bytes_with_len(html.as_ptr(), html.len(), &mut len);
+        let result = html_to_markdown_convert_to_string_bytes_with_len(html.as_ptr(), html.len(), &mut len);
         assert!(!result.is_null());
         assert!(len > 0);
         html_to_markdown_free_string(result);

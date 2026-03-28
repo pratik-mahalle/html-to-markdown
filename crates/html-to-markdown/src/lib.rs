@@ -86,7 +86,7 @@ pub use types::{
 // Main Public API Functions
 // ============================================================================
 
-pub use convert_api::{convert, convert_to_string, extract};
+pub use convert_api::convert;
 
 #[cfg(any(feature = "serde", feature = "metadata"))]
 pub use convert_api::{conversion_options_from_json, conversion_options_update_from_json};

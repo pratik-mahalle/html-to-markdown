@@ -17,6 +17,13 @@ use napi::bindgen_prelude::*;
 use napi_derive::napi;
 use std::str;
 
+fn convert_to_string_inner(
+    html: &str,
+    options: Option<RustConversionOptions>,
+) -> html_to_markdown_rs::error::Result<String> {
+    html_to_markdown_rs::convert(html, options).map(|r| r.content.unwrap_or_default())
+}
+
 fn build_extraction_json(result: html_to_markdown_rs::ConversionResult) -> Result<String> {
     use serde_json::{Value, json};
 
@@ -63,14 +70,18 @@ fn buffer_to_str(html: &Buffer) -> Result<&str> {
     str::from_utf8(html.as_ref()).map_err(|e| Error::new(Status::InvalidArg, format!("HTML must be valid UTF-8: {e}")))
 }
 
-/// const { convert } = require('html-to-markdown');
+/// const { convertToString } = require('html-to-markdown');
 ///
 /// const html = '<h1>Hello World</h1>';
-/// const markdown = convert(html);
+/// const markdown = convertToString(html);
 /// console.log(markdown); // # Hello World
 /// ```
-#[napi]
-pub fn convert(html: String, options: Option<JsConversionOptions>, visitor: Option<Object>) -> Result<String> {
+#[napi(js_name = "convertToString")]
+pub fn convert_to_string(
+    html: String,
+    options: Option<JsConversionOptions>,
+    visitor: Option<Object>,
+) -> Result<String> {
     let rust_options = options.map(Into::into);
 
     #[cfg(feature = "visitor")]
@@ -84,7 +95,7 @@ pub fn convert(html: String, options: Option<JsConversionOptions>, visitor: Opti
     #[cfg(not(feature = "visitor"))]
     let _ = visitor;
 
-    guard_panic(|| profiling::maybe_profile(|| html_to_markdown_rs::convert_to_string(&html, rust_options.clone())))
+    guard_panic(|| profiling::maybe_profile(|| convert_to_string_inner(&html, rust_options.clone())))
         .map_err(to_js_error)
 }
 
@@ -104,7 +115,7 @@ pub fn stop_profiling() -> Result<()> {
 pub fn convert_buffer(html: Buffer, options: Option<JsConversionOptions>) -> Result<String> {
     let html = buffer_to_str(&html)?;
     let rust_options = options.map(Into::into);
-    guard_panic(|| profiling::maybe_profile(|| html_to_markdown_rs::convert_to_string(html, rust_options.clone())))
+    guard_panic(|| profiling::maybe_profile(|| convert_to_string_inner(html, rust_options.clone())))
         .map_err(to_js_error)
 }
 
@@ -124,24 +135,22 @@ pub fn create_metadata_config_handle(metadata_config: Option<JsMetadataConfig>) 
 /// Convert HTML using a previously-created `ConversionOptions` handle.
 #[napi]
 pub fn convert_with_options_handle(html: String, options: &External<RustConversionOptions>) -> Result<String> {
-    guard_panic(|| {
-        profiling::maybe_profile(|| html_to_markdown_rs::convert_to_string(&html, Some((**options).clone())))
-    })
-    .map_err(to_js_error)
+    guard_panic(|| profiling::maybe_profile(|| convert_to_string_inner(&html, Some((**options).clone()))))
+        .map_err(to_js_error)
 }
 
 /// Convert HTML Buffer data using a previously-created `ConversionOptions` handle.
 #[napi(js_name = "convertBufferWithOptionsHandle")]
 pub fn convert_buffer_with_options_handle(html: Buffer, options: &External<RustConversionOptions>) -> Result<String> {
     let html = buffer_to_str(&html)?;
-    guard_panic(|| profiling::maybe_profile(|| html_to_markdown_rs::convert_to_string(html, Some((**options).clone()))))
+    guard_panic(|| profiling::maybe_profile(|| convert_to_string_inner(html, Some((**options).clone()))))
         .map_err(to_js_error)
 }
 
-/// Extract structured content, metadata, and images from HTML in a single pass.
+/// Convert HTML and return structured content, metadata, and images in a single pass.
 ///
-/// This is the v3 API entry point. Returns a JSON string encoding a `ConversionResult` object
-/// with `content`, `document`, `metadata`, `tables`, and `warnings` fields.
+/// This is the v3 primary API entry point. Returns a JSON string encoding a `ConversionResult`
+/// object with `content`, `document`, `metadata`, `tables`, and `warnings` fields.
 ///
 /// Use `JSON.parse()` on the result to obtain a JavaScript object. This approach avoids the
 /// overhead of NAPI type conversion for deeply-nested structures.
@@ -149,19 +158,19 @@ pub fn convert_buffer_with_options_handle(html: Buffer, options: &External<RustC
 /// # Example
 ///
 /// ```javascript
-/// const { extract } = require('html-to-markdown');
+/// const { convert } = require('html-to-markdown');
 ///
 /// const html = '<h1>Hello</h1><p>World</p>';
-/// const result = JSON.parse(extract(html));
+/// const result = JSON.parse(convert(html));
 /// console.log(result.content);   // '# Hello\n\nWorld'
 /// console.log(result.document);  // DocumentStructure object or null
 /// console.log(result.tables);    // []
 /// console.log(result.warnings);  // []
 /// ```
 #[napi]
-pub fn extract(html: String, options: Option<JsConversionOptions>) -> Result<String> {
+pub fn convert(html: String, options: Option<JsConversionOptions>) -> Result<String> {
     let rust_options = options.map(Into::into);
-    let result = guard_panic(|| profiling::maybe_profile(|| html_to_markdown_rs::extract(&html, rust_options.clone())))
+    let result = guard_panic(|| profiling::maybe_profile(|| html_to_markdown_rs::convert(&html, rust_options.clone())))
         .map_err(to_js_error)?;
     build_extraction_json(result)
 }

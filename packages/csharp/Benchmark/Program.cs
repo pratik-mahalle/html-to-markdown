@@ -18,7 +18,7 @@ internal class Program
         }
         else
         {
-            HtmlToMarkdownConverter.Convert(html);
+            HtmlToMarkdownConverter.ConvertToString(html);
         }
     }
 

@@ -36,7 +36,7 @@ pub use options::WasmMetadataConfig;
 #[cfg(feature = "js-bindings")]
 pub use convert::{
     convert, convert_bytes, convert_bytes_with_inline_images, convert_bytes_with_options_handle,
-    convert_with_inline_images, convert_with_options_handle, create_conversion_options_handle, extract,
+    convert_with_inline_images, convert_with_options_handle, create_conversion_options_handle,
 };
 
 #[cfg(all(feature = "js-bindings", feature = "metadata"))]

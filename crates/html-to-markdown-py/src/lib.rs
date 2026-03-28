@@ -99,7 +99,9 @@ fn stop_profiling() -> PyResult<()> {
     Ok(())
 }
 
-/// Convert HTML to Markdown.
+/// Convert HTML to Markdown, returning a plain Markdown string (v2 compat).
+///
+/// For the full v3 API returning content, metadata, tables and warnings use `convert()`.
 ///
 /// Args:
 ///     html: HTML string to convert
@@ -114,25 +116,15 @@ fn stop_profiling() -> PyResult<()> {
 ///
 /// Example:
 ///     ```ignore
-///     from html_to_markdown import convert, ConversionOptions
+///     from html_to_markdown import convert_to_string, ConversionOptions
 ///
 ///     html = "<h1>Hello</h1><p>World</p>"
-///     markdown = convert(html)
-///
-///     # With options
-///     options = ConversionOptions(heading_style="atx")
-///     markdown = convert(html, options)
-///
-///     # With visitor (visitor feature required)
-///     class CustomVisitor:
-///         def visit_text(self, ctx, text):
-///            return {"type": "continue"}
-///     markdown = convert(html, visitor=CustomVisitor())
+///     markdown = convert_to_string(html)
 ///     ```
 #[pyfunction]
 #[cfg(feature = "visitor")]
 #[pyo3(signature = (html, options=None, visitor=None))]
-fn convert(
+fn convert_to_string(
     py: Python<'_>,
     html: &str,
     options: Option<ConversionOptions>,
@@ -144,7 +136,9 @@ fn convert(
     let Some(visitor_py) = visitor else {
         return py
             .detach(move || {
-                run_with_guard_and_profile(|| html_to_markdown_rs::convert_to_string(&html, rust_options.clone()))
+                run_with_guard_and_profile(|| {
+                    html_to_markdown_rs::convert(&html, rust_options.clone()).map(|r| r.content.unwrap_or_default())
+                })
             })
             .map_err(to_py_err);
     };
@@ -170,7 +164,7 @@ fn convert(
 #[pyfunction]
 #[cfg(not(feature = "visitor"))]
 #[pyo3(signature = (html, options=None, visitor=None))]
-fn convert(
+fn convert_to_string(
     py: Python<'_>,
     html: &str,
     options: Option<ConversionOptions>,
@@ -184,7 +178,9 @@ fn convert(
     let html = html.to_owned();
     let rust_options = options.map(|opts| opts.to_rust());
     py.detach(move || {
-        run_with_guard_and_profile(|| html_to_markdown_rs::convert_to_string(&html, rust_options.clone()))
+        run_with_guard_and_profile(|| {
+            html_to_markdown_rs::convert(&html, rust_options.clone()).map(|r| r.content.unwrap_or_default())
+        })
     })
     .map_err(to_py_err)
 }
@@ -195,7 +191,9 @@ fn convert_with_options_handle(py: Python<'_>, html: &str, handle: &ConversionOp
     let html = html.to_owned();
     let rust_options = handle.inner.clone();
     py.detach(move || {
-        run_with_guard_and_profile(|| html_to_markdown_rs::convert_to_string(&html, Some(rust_options.clone())))
+        run_with_guard_and_profile(|| {
+            html_to_markdown_rs::convert(&html, Some(rust_options.clone())).map(|r| r.content.unwrap_or_default())
+        })
     })
     .map_err(to_py_err)
 }
@@ -254,7 +252,9 @@ fn convert_with_async_visitor(
     let Some(visitor_py) = visitor else {
         return py
             .detach(move || {
-                run_with_guard_and_profile(|| html_to_markdown_rs::convert_to_string(&html, rust_options.clone()))
+                run_with_guard_and_profile(|| {
+                    html_to_markdown_rs::convert(&html, rust_options.clone()).map(|r| r.content.unwrap_or_default())
+                })
             })
             .map_err(to_py_err);
     };
@@ -289,10 +289,10 @@ fn convert_with_async_visitor(
     convert_with_visitor(py, html, options, visitor)
 }
 
-/// Extract structured data from HTML, returning a dict with content, metadata, tables, images, and warnings.
+/// Convert HTML to Markdown, returning a dict with content, metadata, tables, images, and warnings.
 ///
-/// This is the primary API for the new `ConversionResult`-based workflow. It calls the Rust
-/// `convert()` function and returns all extracted data as a Python dictionary.
+/// This is the v3 primary API. It calls the Rust `convert()` function and returns all
+/// extracted data as a Python dictionary.
 ///
 /// Args:
 ///     html: HTML string to convert
@@ -312,15 +312,15 @@ fn convert_with_async_visitor(
 ///
 /// Example:
 ///     ```ignore
-///     from html_to_markdown import extract
+///     from html_to_markdown import convert
 ///
-///     result = extract("<h1>Hello</h1><p>World</p>")
+///     result = convert("<h1>Hello</h1><p>World</p>")
 ///     print(result["content"])    # "# Hello\n\nWorld\n"
 ///     print(result["warnings"])   # []
 ///     ```
 #[pyfunction]
 #[pyo3(signature = (html, options=None))]
-fn extract<'py>(py: Python<'py>, html: &str, options: Option<ConversionOptions>) -> PyResult<Py<pyo3::types::PyDict>> {
+fn convert<'py>(py: Python<'py>, html: &str, options: Option<ConversionOptions>) -> PyResult<Py<pyo3::types::PyDict>> {
     use pyo3::types::{PyDict, PyList};
 
     let html = html.to_owned();
@@ -419,7 +419,7 @@ fn extract<'py>(py: Python<'py>, html: &str, options: Option<ConversionOptions>)
 #[pymodule]
 fn _html_to_markdown(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(convert, m)?)?;
-    m.add_function(wrap_pyfunction!(extract, m)?)?;
+    m.add_function(wrap_pyfunction!(convert_to_string, m)?)?;
     m.add_function(wrap_pyfunction!(convert_with_options_handle, m)?)?;
     m.add_function(wrap_pyfunction!(create_options_handle, m)?)?;
     m.add_class::<ConversionOptions>()?;
@@ -456,7 +456,7 @@ mod tests {
         Python::initialize();
         Python::attach(|py| -> PyResult<()> {
             let html = "<h1>Hello</h1>";
-            let result = convert(py, html, None, None)?;
+            let result = convert_to_string(py, html, None, None)?;
             assert!(result.contains("Hello"));
             Ok(())
         })

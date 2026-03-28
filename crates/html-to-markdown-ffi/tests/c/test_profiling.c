@@ -23,7 +23,7 @@ int main(void) {
         bool started = html_to_markdown_profile_start("/tmp/test_profile.svg", 100);
         if (started) {
             /* Do some work to profile */
-            char *md = html_to_markdown_convert("<h1>Profile test</h1>");
+            char *md = html_to_markdown_convert("<h1>Profile test</h1>", NULL);
             if (md)
                 html_to_markdown_free_string(md);
 

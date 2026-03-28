@@ -60,8 +60,8 @@ final class HtmlToMarkdownFFI {
   private static final FunctionDescriptor PROFILE_STOP_DESC =
       FunctionDescriptor.of(ValueLayout.JAVA_BOOLEAN);
 
-  /** Method handle for html_to_markdown_convert. */
-  static final MethodHandle html_to_markdown_convert;
+  /** Method handle for html_to_markdown_convert_to_string. */
+  static final MethodHandle html_to_markdown_convert_to_string;
 
   /** Method handle for html_to_markdown_free_string. */
   static final MethodHandle html_to_markdown_free_string;
@@ -84,8 +84,8 @@ final class HtmlToMarkdownFFI {
   /** Method handle for html_to_markdown_convert_with_tables. */
   static final MethodHandle html_to_markdown_convert_with_tables;
 
-  /** Method handle for html_to_markdown_extract. */
-  static final MethodHandle html_to_markdown_extract;
+  /** Method handle for html_to_markdown_convert (v3 full result). */
+  static final MethodHandle html_to_markdown_convert;
 
   /** Method handle for html_to_markdown_visitor_create. */
   static final MethodHandle html_to_markdown_visitor_create;
@@ -221,8 +221,8 @@ final class HtmlToMarkdownFFI {
 
     SYMBOL_LOOKUP = SymbolLookup.loaderLookup();
 
-    html_to_markdown_convert =
-        LINKER.downcallHandle(findSymbol("html_to_markdown_convert"), CONVERT_DESC);
+    html_to_markdown_convert_to_string =
+        LINKER.downcallHandle(findSymbol("html_to_markdown_convert_to_string"), CONVERT_DESC);
 
     html_to_markdown_free_string =
         LINKER.downcallHandle(findSymbol("html_to_markdown_free_string"), FREE_STRING_DESC);
@@ -247,8 +247,8 @@ final class HtmlToMarkdownFFI {
         LINKER.downcallHandle(
             findSymbol("html_to_markdown_convert_with_tables"), CONVERT_WITH_TABLES_DESC);
 
-    html_to_markdown_extract =
-        LINKER.downcallHandle(findSymbol("html_to_markdown_extract"), EXTRACT_DESC);
+    html_to_markdown_convert =
+        LINKER.downcallHandle(findSymbol("html_to_markdown_convert"), EXTRACT_DESC);
 
     html_to_markdown_visitor_create =
         LINKER.downcallHandle(findSymbol("html_to_markdown_visitor_create"), VISITOR_CREATE_DESC);

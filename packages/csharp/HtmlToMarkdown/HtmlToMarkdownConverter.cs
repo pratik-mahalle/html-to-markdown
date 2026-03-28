@@ -12,13 +12,14 @@ namespace HtmlToMarkdown;
 public static class HtmlToMarkdownConverter
 {
     /// <summary>
-    /// Converts HTML to Markdown using default options.
+    /// Converts HTML to Markdown and returns the plain Markdown string (v2 compat).
+    /// For the full conversion result with metadata, tables, and warnings, use <see cref="Convert(string)"/>.
     /// </summary>
     /// <param name="html">The HTML string to convert</param>
     /// <returns>The converted Markdown string</returns>
     /// <exception cref="ArgumentNullException">Thrown when html is null</exception>
     /// <exception cref="HtmlToMarkdownException">Thrown when conversion fails</exception>
-    public static string Convert(string html)
+    public static string ConvertToString(string html)
     {
         if (html == null)
         {
@@ -38,7 +39,7 @@ public static class HtmlToMarkdownConverter
         {
             htmlPtr = StringToUtf8Ptr(html);
 
-            resultPtr = NativeMethods.html_to_markdown_convert_with_len(htmlPtr, out resultLen);
+            resultPtr = NativeMethods.html_to_markdown_convert_to_string_with_len(htmlPtr, out resultLen);
 
             if (resultPtr == IntPtr.Zero)
             {
@@ -68,12 +69,13 @@ public static class HtmlToMarkdownConverter
     }
 
     /// <summary>
-    /// Converts UTF-8 HTML bytes to Markdown using default options.
+    /// Converts UTF-8 HTML bytes to Markdown and returns the plain Markdown string (v2 compat).
+    /// For the full conversion result with metadata, tables, and warnings, use <see cref="Convert(string)"/>.
     /// </summary>
     /// <param name="html">UTF-8 encoded HTML bytes</param>
     /// <returns>The converted Markdown string</returns>
     /// <exception cref="HtmlToMarkdownException">Thrown when conversion fails</exception>
-    public static unsafe string Convert(ReadOnlySpan<byte> html)
+    public static unsafe string ConvertToString(ReadOnlySpan<byte> html)
     {
         if (html.IsEmpty)
         {
@@ -85,7 +87,7 @@ public static class HtmlToMarkdownConverter
 
         fixed (byte* htmlPtr = html)
         {
-            resultPtr = NativeMethods.html_to_markdown_convert_bytes_with_len(
+            resultPtr = NativeMethods.html_to_markdown_convert_to_string_bytes_with_len(
                 (IntPtr)htmlPtr,
                 (nuint)html.Length,
                 out resultLen);
@@ -675,7 +677,7 @@ public static class HtmlToMarkdownConverter
     }
 
     /// <summary>
-    /// Extracts structured content from HTML in a single pass.
+    /// Converts HTML and returns full structured content in a single pass.
     /// </summary>
     /// <param name="html">The HTML string to convert</param>
     /// <returns>
@@ -683,8 +685,8 @@ public static class HtmlToMarkdownConverter
     /// metadata (title, links, images, etc.), structured table data, and any processing warnings.
     /// </returns>
     /// <exception cref="ArgumentNullException">Thrown when html is null</exception>
-    /// <exception cref="HtmlToMarkdownException">Thrown when extraction or JSON parsing fails</exception>
-    public static Metadata.ConversionResult Extract(string html)
+    /// <exception cref="HtmlToMarkdownException">Thrown when conversion or JSON parsing fails</exception>
+    public static Metadata.ConversionResult Convert(string html)
     {
         if (html == null)
         {
@@ -703,7 +705,7 @@ public static class HtmlToMarkdownConverter
         {
             htmlPtr = StringToUtf8Ptr(html);
 
-            resultPtr = NativeMethods.html_to_markdown_extract(htmlPtr, IntPtr.Zero);
+            resultPtr = NativeMethods.html_to_markdown_convert(htmlPtr, IntPtr.Zero);
 
             if (resultPtr == IntPtr.Zero)
             {
@@ -713,7 +715,7 @@ public static class HtmlToMarkdownConverter
                     : null;
 
                 throw new HtmlToMarkdownException(
-                    errorMsg ?? "HTML extraction failed");
+                    errorMsg ?? "HTML conversion failed");
             }
 
             string jsonStr = PtrToStringUtf8(resultPtr) ?? "{}";
@@ -723,7 +725,7 @@ public static class HtmlToMarkdownConverter
         catch (JsonException ex)
         {
             throw new HtmlToMarkdownException(
-                $"Failed to deserialize extraction JSON: {ex.Message}", ex);
+                $"Failed to deserialize conversion JSON: {ex.Message}", ex);
         }
         finally
         {

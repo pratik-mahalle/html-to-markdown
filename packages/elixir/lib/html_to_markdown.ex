@@ -18,27 +18,54 @@ defmodule HtmlToMarkdown do
   @type metadata_config_input :: MetadataConfig.t() | map() | keyword() | nil
 
   @doc """
-  Convert HTML to Markdown.
+  Convert HTML to Markdown, returning a `ConversionResult` map with:
+  - `:content` - the converted Markdown string (or nil in extraction-only mode)
+  - `:metadata` - extracted HTML metadata (document, headers, links, images, structured_data)
+  - `:tables` - list of extracted tables with `:grid` (rows, cols, cells) and `:markdown`
+  - `:warnings` - list of processing warnings with `:message` and `:kind`
+
+  Returns `{:ok, result}` or `{:error, reason}`.
+  """
+  @spec convert(String.t(), options_input()) :: {:ok, map()} | {:error, term()}
+  def convert(html, options \\ nil) when is_binary(html) do
+    options_map = normalize_options(options) || %{}
+
+    Native.convert(html, options_map)
+  end
+
+  @doc """
+  Bang variant of `convert/2`. Raises on failure.
+  """
+  @spec convert!(String.t(), options_input()) :: map()
+  def convert!(html, options \\ nil) do
+    case convert(html, options) do
+      {:ok, result} -> result
+      {:error, reason} -> raise Error, message: inspect(reason)
+    end
+  end
+
+  @doc """
+  Convert HTML to Markdown, returning a plain Markdown string (v2 compat).
 
   The `options` argument accepts an `%HtmlToMarkdown.Options{}` struct,
   a map/keyword list with option keys, or `nil` (defaults).
   """
-  @spec convert(String.t(), options_input()) :: {:ok, String.t()} | {:error, term()}
-  def convert(html, options \\ nil) when is_binary(html) do
+  @spec convert_to_string(String.t(), options_input()) :: {:ok, String.t()} | {:error, term()}
+  def convert_to_string(html, options \\ nil) when is_binary(html) do
     options_map = normalize_options(options)
 
-    case call_convert(html, options_map) do
+    case call_convert_to_string(html, options_map) do
       {:ok, markdown} -> {:ok, markdown}
       {:error, reason} -> {:error, reason}
     end
   end
 
   @doc """
-  Convert HTML to Markdown and raise on failure.
+  Bang variant of `convert_to_string/2`. Raises on failure.
   """
-  @spec convert!(String.t(), options_input()) :: String.t()
-  def convert!(html, options \\ nil) do
-    case convert(html, options) do
+  @spec convert_to_string!(String.t(), options_input()) :: String.t()
+  def convert_to_string!(html, options \\ nil) do
+    case convert_to_string(html, options) do
       {:ok, markdown} -> markdown
       {:error, reason} -> raise Error, message: inspect(reason)
     end
@@ -124,34 +151,6 @@ defmodule HtmlToMarkdown do
   def convert_with_metadata!(html, options \\ nil, metadata_config \\ nil) do
     case convert_with_metadata(html, options, metadata_config) do
       {:ok, markdown, metadata} -> {markdown, metadata}
-      {:error, reason} -> raise Error, message: inspect(reason)
-    end
-  end
-
-  @doc """
-  Extract structured content from HTML, returning a `ConversionResult` map with:
-  - `:content` - the converted Markdown string (or nil in extraction-only mode)
-  - `:metadata` - extracted HTML metadata (document, headers, links, images, structured_data)
-  - `:tables` - list of extracted tables with `:grid` (rows, cols, cells) and `:markdown`
-  - `:warnings` - list of processing warnings with `:message` and `:kind`
-
-  Returns `{:ok, result}` or `{:error, reason}`.
-  """
-  @spec extract(String.t(), options_input()) ::
-          {:ok, map()} | {:error, term()}
-  def extract(html, options \\ nil) when is_binary(html) do
-    options_map = normalize_options(options) || %{}
-
-    Native.extract(html, options_map)
-  end
-
-  @doc """
-  Bang variant of `extract/2`. Raises on failure.
-  """
-  @spec extract!(String.t(), options_input()) :: map()
-  def extract!(html, options \\ nil) do
-    case extract(html, options) do
-      {:ok, result} -> result
       {:error, reason} -> raise Error, message: inspect(reason)
     end
   end
@@ -243,11 +242,12 @@ defmodule HtmlToMarkdown do
     Native.stop_profiling()
   end
 
-  defp call_convert(html, nil), do: Native.convert(html)
+  defp call_convert_to_string(html, nil), do: Native.convert_to_string(html)
 
-  defp call_convert(html, options) when options == %{}, do: Native.convert(html)
+  defp call_convert_to_string(html, options) when options == %{},
+    do: Native.convert_to_string(html)
 
-  defp call_convert(html, options), do: Native.convert_with_options_map(html, options)
+  defp call_convert_to_string(html, options), do: Native.convert_with_options_map(html, options)
 
   defp normalize_options(nil), do: nil
 

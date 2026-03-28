@@ -582,7 +582,14 @@ func ConvertWithVisitor(html string, visitor *Visitor) (string, error) {
 	}
 
 	if visitor == nil {
-		return Convert(html)
+		result, err := Convert(html)
+		if err != nil {
+			return "", err
+		}
+		if result.Content != nil {
+			return *result.Content, nil
+		}
+		return "", nil
 	}
 
 	if err := ensureFFILoaded(); err != nil {
