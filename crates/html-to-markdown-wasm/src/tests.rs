@@ -52,6 +52,11 @@ mod wasm_tests {
             strip_tags: None,
             preserve_tags: None,
             output_format: None,
+            include_document_structure: None,
+            extract_images: None,
+            max_image_size: None,
+            capture_svg: None,
+            infer_dimensions: None,
         };
 
         let js_options = serde_wasm_bindgen::to_value(&options).unwrap();
