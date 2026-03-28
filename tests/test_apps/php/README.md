@@ -3,6 +3,7 @@
 Comprehensive test suite validating the published `kreuzberg-dev/html-to-markdown` PHP package from Packagist.
 
 This test app verifies:
+
 - **Package installation** from Packagist registry (not local path dependency)
 - **Core conversion functions** - basic HTML to Markdown conversion
 - **Metadata extraction** - document properties, headers, links, images
@@ -55,6 +56,7 @@ vendor/bin/phpstan analyse SmokeTest.php ComprehensiveTest.php
 ## Test Coverage
 
 ### SmokeTest.php
+
 - Package loads (extension_loaded check)
 - Basic conversion with function interface
 - Basic conversion with extension interface
@@ -62,6 +64,7 @@ vendor/bin/phpstan analyse SmokeTest.php ComprehensiveTest.php
 - Empty input handling
 
 ### ComprehensiveTest.php
+
 - **Fixture-based tests**: Parametrized tests from JSON fixtures
   - basic-html.json (10+ basic element tests)
   - complex-html.json (5+ complex structure tests)
@@ -92,6 +95,7 @@ vendor/bin/phpstan analyse SmokeTest.php ComprehensiveTest.php
 ## Features Tested
 
 ### Core Conversion
+
 - ✅ Headings (h1-h6)
 - ✅ Paragraphs
 - ✅ Bold/Strong
@@ -106,6 +110,7 @@ vendor/bin/phpstan analyse SmokeTest.php ComprehensiveTest.php
 - ✅ Mixed formatting
 
 ### Metadata Extraction
+
 - ✅ Document metadata (title, description, keywords, author, language)
 - ✅ Header structure with levels and ids
 - ✅ Link types and attributes
@@ -115,6 +120,7 @@ vendor/bin/phpstan analyse SmokeTest.php ComprehensiveTest.php
 - ✅ Structured data (JSON-LD, Microdata)
 
 ### Configuration
+
 - ✅ ConversionOptions class
 - ✅ Array-based options
 - ✅ Selective metadata extraction
@@ -122,6 +128,7 @@ vendor/bin/phpstan analyse SmokeTest.php ComprehensiveTest.php
 - ✅ List indentation configuration
 
 ### Type Safety
+
 - ✅ PHPStan level 9 validation
 - ✅ Type stubs for native functions
 - ✅ Return type verification
@@ -130,12 +137,14 @@ vendor/bin/phpstan analyse SmokeTest.php ComprehensiveTest.php
 ## Gaps in Test Coverage
 
 ### Current Coverage
+
 - Basic HTML conversion: 10+ test cases from fixtures
 - Metadata extraction: 5+ test cases
 - Error handling: Basic UTF-8, null options
 - Type safety: PHPStan level 9
 
 ### Known Gaps
+
 - **HTML5 semantic elements**: Further testing of `<article>`, `<aside>`, `<section>`, `<nav>`
 - **Complex tables**: Table to Markdown conversion
 - **Horizontal rules**: `<hr>` conversion

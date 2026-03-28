@@ -49,7 +49,7 @@ php -d extension=/path/to/libhtml_to_markdown_php.so main.php      # Linux
 
 ## Expected Output
 
-```
+```text
 ========================================================================
   TEST SUMMARY
 ========================================================================

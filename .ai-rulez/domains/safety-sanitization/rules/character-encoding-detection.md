@@ -2,6 +2,7 @@
 name: Character Encoding Detection
 priority: high
 ---
+
 Handle multiple character encodings safely
 
 - Detect encoding from HTML5 charset meta tag

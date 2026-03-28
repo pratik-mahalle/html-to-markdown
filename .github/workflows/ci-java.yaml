@@ -51,3 +51,13 @@ jobs:
           ffi-crate-name: html-to-markdown-ffi
           ffi-lib-name: html_to_markdown_ffi
           java-version: ${{ matrix.java }}
+
+      - name: Install Task
+        uses: go-task/setup-task@v2 # v2
+        with:
+          version: 3.46.4
+
+      - name: Run E2E tests
+        if: matrix.os == 'ubuntu-latest'
+        run: task java:e2e:test
+        shell: bash

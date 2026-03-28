@@ -1,6 +1,7 @@
 ---
 description: "HTML Parsing Strategies for html-to-markdown"
 ---
+
 # HTML Parsing Strategies for html-to-markdown
 
 ## Overview
@@ -15,6 +16,7 @@ The html-to-markdown project uses two complementary HTML parsers to handle diffe
 ### astral-tl (tl crate)
 
 **Strengths:**
+
 - Ultra-fast parsing performance with minimal memory overhead
 - Ideal for streaming/large document processing
 - Lightweight footprint in binary distributions
@@ -22,24 +24,28 @@ The html-to-markdown project uses two complementary HTML parsers to handle diffe
 - Direct integration in core conversion pipeline
 
 **Weaknesses:**
+
 - Less tolerant of severely malformed HTML
 - May require pre-processing for certain edge cases
 - Limited HTML5 spec compliance for recovery strategies
 - No automatic tag closure or namespace handling
 
 **Use Cases:**
+
 - Well-formed HTML from web servers
 - Templated HTML with consistent structure
 - High-throughput conversion pipelines
 - Resource-constrained environments (WASM, mobile)
 
 **Implementation Location:**
+
 - `/crates/html-to-markdown/src/converter.rs` - Primary conversion logic
 - Dependency: `tl.workspace = true` in Cargo.toml
 
 ### html5ever (html5ever + markup5ever_rcdom)
 
 **Strengths:**
+
 - Full HTML5 spec compliance with automatic error recovery
 - Handles severely malformed HTML gracefully
 - Proper tag closure and namespacing (SVG, MathML)
@@ -47,18 +53,21 @@ The html-to-markdown project uses two complementary HTML parsers to handle diffe
 - Comprehensive entity decoding
 
 **Weaknesses:**
+
 - Higher memory footprint due to full tree construction
 - Slower parsing for well-formed documents
 - Larger compiled binary size
 - Not used by default in fast path
 
 **Use Cases:**
+
 - Untrusted/adversarial HTML input
 - Legacy or malformed markup from old systems
 - Documents with embedded XML/SVG content
 - Scenarios where correctness > performance
 
 **Implementation Location:**
+
 - Dependency: `html5ever.workspace = true` and `markup5ever_rcdom.workspace = true`
 - Feature-gated or used in specific edge case handlers
 
@@ -89,6 +98,7 @@ for node in dom.iter() {
 ```
 
 **Characteristics:**
+
 - Single-pass traversal in document order
 - Minimal allocations during walk
 - Reference-based access (no deep cloning)
@@ -106,6 +116,7 @@ The `markup5ever_rcdom` provides a full DOM tree:
 ```
 
 **Characteristics:**
+
 - Complete parent/child/sibling relationships
 - Full attribute parsing with namespaces
 - Post-processing and recovery applied
@@ -159,19 +170,21 @@ The converter preserves whitespace exactly as parsed:
 ```
 
 **Modes:**
+
 - **Strict**: All whitespace (spaces, tabs, newlines) preserved exactly
 - **Normalized**: Multiple spaces/newlines collapsed to single space (configurable)
 
 ### Entity Decoding
 
 Both parsers decode HTML entities:
+
 - `html-escape` crate for quick common entities
 - Both parsers handle numeric (`&#123;`) and named (`&amp;`) entities
 - Context-aware decoding in `text::decode_html_entities_cow()`
 
 ## Practical Selection Flow
 
-```
+```text
 Input HTML string
     |
     +-- validate_input() checks for binary/encoding issues
@@ -192,12 +205,13 @@ Input HTML string
 
 ## Performance Considerations
 
-### Benchmark Context
+### Parser Performance
 
-The `/tools/benchmark-harness/` suite includes parser benchmarks:
+Parser performance characteristics:
+
 - astral-tl performance: Sub-millisecond for typical documents
 - html5ever fallback: Used sparingly for worst-case handling
-- Memory profiling via `benchmark:harness:memory` task
+- Memory efficiency: Monitor with profiling tools like `cargo flamegraph`
 
 ### Optimization Strategies
 

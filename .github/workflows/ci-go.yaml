@@ -5,7 +5,6 @@ on:
     branches: [main]
     paths:
       - packages/go/**
-      - examples/go-smoke/**
       - scripts/publish/go/**
       - crates/html-to-markdown-ffi/**
       - crates/html-to-markdown/**
@@ -18,7 +17,6 @@ on:
     branches: [main]
     paths:
       - packages/go/**
-      - examples/go-smoke/**
       - scripts/publish/go/**
       - crates/html-to-markdown-ffi/**
       - crates/html-to-markdown/**
@@ -82,4 +80,29 @@ jobs:
       - name: Run golangci-lint
         working-directory: ${{ matrix.module }}
         run: ${{ github.workspace }}/scripts/ci/go/run-golangci-lint.sh
+        shell: bash
+
+  go-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6 # v6
+
+      - name: Setup Rust
+        uses: kreuzberg-dev/actions/setup-rust@v1 # v1
+
+      - name: Setup Go
+        uses: actions/setup-go@v6 # v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          check-latest: true
+
+      - name: Install Task
+        uses: go-task/setup-task@v2 # v2
+        with:
+          version: 3.46.4
+
+      - name: Run E2E tests
+        run: task go:e2e:test
         shell: bash

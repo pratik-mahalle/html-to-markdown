@@ -2,6 +2,7 @@
 name: Hidden Input Handling
 priority: high
 ---
+
 Handle hidden form fields safely
 
 - Remove <input type="hidden">

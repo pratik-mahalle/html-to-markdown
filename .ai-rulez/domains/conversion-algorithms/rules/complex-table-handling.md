@@ -2,6 +2,7 @@
 name: Complex Table Handling
 priority: high
 ---
+
 Handle advanced table features
 
 - Rowspan/colspan: Split into multiple cells or merge content

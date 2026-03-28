@@ -2,6 +2,7 @@
 name: Consistent Output Format
 priority: high
 ---
+
 Generate consistent, readable Markdown
 
 - Standardize spacing (blank lines between blocks)

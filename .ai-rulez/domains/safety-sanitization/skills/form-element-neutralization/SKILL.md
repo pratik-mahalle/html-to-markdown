@@ -2,17 +2,21 @@
 description: "Form Element Neutralization"
 name: form-element-neutralization
 ---
+
 Neutralize or remove form elements
 
 Key source files:
+
 - ammonia configuration
 
 Master concepts:
+
 - Form submission prevention
 - Hidden field handling
 - Button neutralization
 
 Step by step:
+
 1. Remove <form> elements entirely
 2. Remove formaction attributes
 3. Remove form event handlers

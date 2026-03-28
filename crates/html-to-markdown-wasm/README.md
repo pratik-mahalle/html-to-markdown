@@ -29,11 +29,13 @@ Runs anywhere: Node.js, Deno, Bun, browsers, and edge runtimes.
 ### Install Updated Package
 
 **Before (v2.18.x):**
+
 ```bash
 npm install html-to-markdown-wasm
 ```
 
 **After (v2.19.0+):**
+
 ```bash
 npm install @kreuzberg/html-to-markdown-wasm
 ```
@@ -41,6 +43,7 @@ npm install @kreuzberg/html-to-markdown-wasm
 ### Update Import Statements
 
 **Before:**
+
 ```typescript
 import { convert } from 'html-to-markdown-wasm';
 // or
@@ -48,6 +51,7 @@ import { convert } from "npm:html-to-markdown-wasm";  // Deno
 ```
 
 **After:**
+
 ```typescript
 import { convert } from '@kreuzberg/html-to-markdown-wasm';
 // or
@@ -57,11 +61,13 @@ import { convert } from "npm:@kreuzberg/html-to-markdown-wasm";  // Deno
 ### Update Browser ESM Imports
 
 **Before:**
+
 ```javascript
 import init, { convert } from 'https://unpkg.com/html-to-markdown-wasm/dist-web/html_to_markdown_wasm.js';
 ```
 
 **After:**
+
 ```javascript
 import init, { convert } from 'https://unpkg.com/@kreuzberg/html-to-markdown-wasm/dist-web/html_to_markdown_wasm.js';
 ```
@@ -152,9 +158,7 @@ console.log(markdown);
 > **Heads up for edge runtimes:** Cloudflare Workers, Vite dev servers, and other environments that instantiate `.wasm` files asynchronously must call `await initWasm()` (or `await wasmReady`) once during startup before invoking `convert`. Traditional bundlers (Webpack, Rollup) and Deno/Node imports continue to work without manual initialization.
 
 **Working Examples:**
-- [**Browser with Rollup**](https://github.com/kreuzberg-dev/html-to-markdown/tree/main/examples/wasm-rollup) - Using dist-web target in browser
-- [**Node.js**](https://github.com/kreuzberg-dev/html-to-markdown/tree/main/examples/wasm-node) - Using dist-node target
-- [**Cloudflare Workers**](https://github.com/kreuzberg-dev/html-to-markdown/tree/main/examples/wasm-cloudflare) - Using bundler target with Wrangler
+
 
 ### Reusing Options Handles
 
@@ -295,7 +299,6 @@ export default {
 };
 ```
 
-> See the full [Cloudflare Workers example](https://github.com/kreuzberg-dev/html-to-markdown/tree/main/examples/wasm-cloudflare) with Wrangler configuration.
 
 ## TypeScript
 
@@ -504,6 +507,7 @@ Use [@kreuzberg/html-to-markdown-node](https://www.npmjs.com/package/@kreuzberg/
 Choose one of these approaches:
 
 #### 1. Use Node.js Binding (Recommended)
+
 For best performance with visitor support, use the native Node.js binding:
 
 ```typescript
@@ -523,9 +527,11 @@ const markdown = convertWithVisitor(html, { visitor });
 **Use when:** Running on Node.js or Bun server-side.
 
 #### 2. Use Server-Side Bindings
+
 For other platforms, use Python, Ruby, or PHP bindings with visitor support:
 
 **Python:**
+
 ```python
 from html_to_markdown import convert_with_visitor
 
@@ -538,6 +544,7 @@ markdown = convert_with_visitor(html, visitor=MyVisitor())
 ```
 
 **Ruby:**
+
 ```ruby
 require 'html_to_markdown'
 
@@ -551,6 +558,7 @@ markdown = HtmlToMarkdown.convert_with_visitor(html, visitor: MyVisitor.new)
 ```
 
 **PHP:**
+
 ```php
 use HtmlToMarkdown\Converter;
 
@@ -564,6 +572,7 @@ $markdown = Converter::convertWithVisitor($html, new MyVisitor());
 ```
 
 #### 3. Preprocess HTML Before Conversion
+
 For simple transformations, manipulate the HTML before passing to WASM:
 
 ```typescript
@@ -581,6 +590,7 @@ const markdown = convert(processedHtml);
 **Use when:** Only simple text replacements are needed.
 
 #### 4. Post-Process Markdown
+
 Transform the output Markdown after conversion:
 
 ```typescript
@@ -611,7 +621,7 @@ const transformed = markdown
 | **Elixir** | ❌ No | Basic conversion only |
 | **WebAssembly** | ❌ No | Browser, Edge, Deno (see alternatives above) |
 
-For comprehensive visitor pattern documentation with examples, see [Visitor Pattern Guide](../../examples/visitor-pattern/).
+For comprehensive visitor pattern documentation with examples, see .
 
 ## Configuration Options
 

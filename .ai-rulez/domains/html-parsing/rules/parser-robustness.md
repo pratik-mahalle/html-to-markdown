@@ -2,6 +2,7 @@
 name: Parser Robustness
 priority: high
 ---
+
 Parsers must handle malformed HTML without panicking
 
 - Both html5ever and tl handle malformed HTML gracefully

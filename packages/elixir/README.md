@@ -56,18 +56,14 @@
   </a>
 </div>
 
-
 Elixir bindings for the Rust html-to-markdown engine. The package exposes a fast HTML to Markdown converter implemented with Rustler.
 Ship identical Markdown across every runtime while enjoying native performance with Rustler NIF bindings.
-
 
 ## Installation
 
 ```bash
 Add {:html_to_markdown, "~> 2.28.3"} to mix.exs deps
 ```
-
-
 
 Requires Elixir 1.19+ and OTP 28. Add to your `mix.exs`:
 
@@ -78,11 +74,6 @@ def deps do
   ]
 end
 ```
-
-
-
-
-
 
 ## Performance Snapshot
 
@@ -99,9 +90,7 @@ Apple M4 • Real Wikipedia documents • `convert()` (Elixir)
 | HOCR Embedded Tables | 37KB | 6,231 | 226.1 MB/s |
 | HOCR Invoice | 4KB | 62,657 | 256.4 MB/s |
 
-
-See [Performance Guide](../../examples/performance/) for detailed benchmarks.
-
+See for detailed benchmarks.
 
 ## Quick Start
 
@@ -112,8 +101,6 @@ Basic conversion:
 IO.puts(markdown)
 ```
 
-
-
 With conversion options:
 
 ```elixir
@@ -122,15 +109,9 @@ handle = HtmlToMarkdown.options(%HtmlToMarkdown.Options{wrap: true, wrap_width: 
 IO.puts(markdown)
 ```
 
-
-
-
-
-
 ## API Reference
 
 ### Core Functions
-
 
 **`HtmlToMarkdown.convert(html, options \\ nil) :: String.t()`**
 
@@ -138,7 +119,7 @@ Basic HTML-to-Markdown conversion. Fast and simple.
 
 **`HtmlToMarkdown.convert_with_metadata(html, options \\ nil, config \\ nil) :: {String.t(), map()}`**
 
-Extract Markdown plus metadata in a single pass. See [Metadata Extraction Guide](../../examples/metadata-extraction/).
+Extract Markdown plus metadata in a single pass.
 
 **`HtmlToMarkdown.convert_with_inline_images(html, config \\ nil) :: {String.t(), list(map()), list(String.t())}`**
 
@@ -148,11 +129,10 @@ Extract base64-encoded inline images with metadata.
 
 Extract structured table data (cells, headers, rendered markdown) alongside conversion.
 
-
-
 ### Options
 
 **`ConversionOptions`** – Key configuration fields:
+
 - `heading_style`: Heading format (`"underlined"` | `"atx"` | `"atx_closed"`) — default: `"underlined"`
 - `list_indent_width`: Spaces per indent level — default: `2`
 - `bullets`: Bullet characters cycle — default: `"*+-"`
@@ -163,12 +143,12 @@ Extract structured table data (cells, headers, rendered markdown) alongside conv
 - `output_format`: Output markup format (`"markdown"` | `"djot"` | `"plain"`) — default: `"markdown"`
 
 **`MetadataConfig`** – Selective metadata extraction:
+
 - `extract_headers`: h1-h6 elements — default: `true`
 - `extract_links`: Hyperlinks — default: `true`
 - `extract_images`: Image elements — default: `true`
 - `extract_structured_data`: JSON-LD, Microdata, RDFa — default: `true`
 - `max_structured_data_size`: Size limit in bytes — default: `100KB`
-
 
 ## Djot Output Format
 
@@ -188,7 +168,6 @@ The library supports converting HTML to [Djot](https://djot.net/), a lightweight
 
 ### Example Usage
 
-
 ```elixir
 html = "<p>This is <strong>bold</strong> and <em>italic</em> text.</p>"
 
@@ -201,14 +180,11 @@ html = "<p>This is <strong>bold</strong> and <em>italic</em> text.</p>"
 # Result: "This is *bold* and _italic_ text."
 ```
 
-
 Djot's extended syntax allows you to express more semantic meaning in lightweight text, making it useful for documents that require strikethrough, insertion tracking, or mathematical notation.
-
 
 ## Plain Text Output
 
 Set `output_format` to `"plain"` to strip all markup and return only visible text. This bypasses the Markdown conversion pipeline entirely for maximum speed.
-
 
 ```elixir
 html = "<h1>Title</h1><p>This is <strong>bold</strong> and <em>italic</em> text.</p>"
@@ -217,16 +193,14 @@ html = "<h1>Title</h1><p>This is <strong>bold</strong> and <em>italic</em> text.
 # Result: "Title\n\nThis is bold and italic text."
 ```
 
-
 Plain text mode is useful for search indexing, text extraction, and feeding content to LLMs.
-
-
 
 ## Metadata Extraction
 
 The metadata extraction feature enables comprehensive document analysis during conversion. Extract document properties, headers, links, images, and structured data in a single pass.
 
 **Use Cases:**
+
 - **SEO analysis** – Extract title, description, Open Graph tags, Twitter cards
 - **Table of contents generation** – Build structured outlines from heading hierarchy
 - **Content migration** – Document all external links and resources
@@ -236,7 +210,6 @@ The metadata extraction feature enables comprehensive document analysis during c
 **Zero Overhead When Disabled:** Metadata extraction adds negligible overhead and happens during the HTML parsing pass. Disable unused metadata types in `MetadataConfig` to optimize further.
 
 ### Example: Quick Start
-
 
 ```elixir
 alias HtmlToMarkdown
@@ -251,18 +224,14 @@ IO.inspect(metadata.images)                # All images with alt text
 IO.inspect(metadata.structured_data)       # JSON-LD, Microdata, RDFa
 ```
 
-
-
-For detailed examples including SEO extraction, table-of-contents generation, link validation, and accessibility audits, see the [Metadata Extraction Guide](../../examples/metadata-extraction/).
-
-
-
+For detailed examples including SEO extraction, table-of-contents generation, link validation, and accessibility audits, see the .
 
 ## Visitor Pattern
 
 The visitor pattern enables custom HTML→Markdown conversion logic by providing callbacks for specific HTML elements during traversal. Use visitors to transform content, filter elements, validate structure, or collect analytics.
 
 **Use Cases:**
+
 - **Custom Markdown dialects** – Convert to Obsidian, Notion, or other flavors
 - **Content filtering** – Remove tracking pixels, ads, or unwanted elements
 - **URL rewriting** – Rewrite CDN URLs, add query parameters, validate links
@@ -272,7 +241,6 @@ The visitor pattern enables custom HTML→Markdown conversion logic by providing
 **Supported Visitor Methods:** 40+ callbacks for text, inline elements, links, images, headings, lists, blocks, and tables.
 
 ### Example: Quick Start
-
 
 ```elixir
 defmodule MyVisitor do
@@ -300,17 +268,10 @@ html = "<a href=\"https://old-cdn.com/file.pdf\">Download</a>"
 markdown = HtmlToMarkdown.convert_with_visitor(html, visitor: MyVisitor)
 ```
 
-
-
-For comprehensive examples including content filtering, link footnotes, accessibility validation, and asynchronous URL validation, see the [Visitor Pattern Guide](../../examples/visitor-pattern/).
-
-
+For comprehensive examples including content filtering, link footnotes, accessibility validation, and asynchronous URL validation, see the .
 
 ## Examples
 
-- [Visitor Pattern Guide](../../examples/visitor-pattern/)
-- [Metadata Extraction Guide](../../examples/metadata-extraction/)
-- [Performance Guide](../../examples/performance/)
 
 ## Links
 

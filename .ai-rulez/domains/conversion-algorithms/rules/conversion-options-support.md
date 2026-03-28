@@ -2,6 +2,7 @@
 name: Conversion Options Support
 priority: high
 ---
+
 Expose configuration for conversion behavior
 
 - HeadingStyle: ATX vs Setext

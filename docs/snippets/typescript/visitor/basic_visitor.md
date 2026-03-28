@@ -1,5 +1,5 @@
 ```typescript
-import { convertWithVisitor } from '@kreuzberg/html-to-markdown';
+import { convert, ConversionOptions } from '@kreuzberg/html-to-markdown';
 import { Visitor, NodeContext, VisitResult } from '@kreuzberg/html-to-markdown';
 
 const visitor: Visitor = {
@@ -18,7 +18,7 @@ const visitor: Visitor = {
   },
 };
 
-const markdown = convertWithVisitor('<h1>Title</h1><a href="url">Link</a>', {
-  visitor,
-});
+const options: ConversionOptions = { visitor };
+const result = convert('<h1>Title</h1><a href="url">Link</a>', options);
+const markdown = result.content;
 ```

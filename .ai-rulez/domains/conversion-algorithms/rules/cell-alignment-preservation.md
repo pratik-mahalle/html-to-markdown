@@ -2,6 +2,7 @@
 name: Cell Alignment Preservation
 priority: high
 ---
+
 Preserve table cell alignment in Markdown
 
 - Detect align attribute (left, center, right)

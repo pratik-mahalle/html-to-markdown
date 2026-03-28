@@ -1,5 +1,5 @@
 ```rust
-use html_to_markdown_rs::convert_with_tables;
+use html_to_markdown_rs::{convert, ConversionOptions};
 
 let html = r#"
 <table>
@@ -9,9 +9,12 @@ let html = r#"
 </table>
 "#;
 
-let result = convert_with_tables(html, None, None)?;
+let options = ConversionOptions::builder()
+    .extract_tables(true)
+    .build();
+let result = convert(html, Some(options))?;
 
-for table in &result.tables {
+for table in result.tables.unwrap_or_default() {
     for (i, row) in table.cells.iter().enumerate() {
         let prefix = if table.is_header_row[i] { "Header" } else { "Row" };
         println!("  {prefix}: {}", row.join(", "));

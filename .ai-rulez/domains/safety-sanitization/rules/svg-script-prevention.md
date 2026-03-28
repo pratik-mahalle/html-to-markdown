@@ -2,6 +2,7 @@
 name: SVG Script Prevention
 priority: high
 ---
+
 Remove executable content from SVG
 
 - Remove <script> tags within SVG

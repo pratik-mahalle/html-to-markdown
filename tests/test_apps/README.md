@@ -19,12 +19,14 @@ Unlike the main test suites that validate local development builds, `test_apps/`
 **Purpose**: Quick validation that packages are installable and functional.
 
 **Characteristics**:
+
 - **Fast**: <30 seconds per language, <5 minutes total
 - **Minimal**: Basic import/require + simple conversion test
 - **Pre-Release Gate**: Runs before publishing to registries
 - **CI Integration**: `task e2e:smoke:all` in publish workflow
 
 **Example** (`python/smoke_test.py`):
+
 ```python
 def test_package_imports():
     """Verify package can be imported."""
@@ -44,12 +46,14 @@ def test_basic_conversion():
 **Purpose**: Exhaustive validation using shared fixtures across all languages.
 
 **Characteristics**:
+
 - **Thorough**: 1-3 minutes per language
 - **Fixture-Driven**: Shared JSON fixtures ensure language parity
 - **Post-Release Validation**: Runs after publishing (can run locally too)
 - **CI Integration**: `task e2e:test:all` (optional, can be manual)
 
 **Example** (`python/comprehensive_test.py`):
+
 ```python
 import json
 from pathlib import Path
@@ -78,7 +82,7 @@ def test_basic_html_conversion(test_case):
 
 ## Directory Structure
 
-```
+```text
 tests/test_apps/
 ├── fixtures/                          # Shared test fixtures (JSON)
 │   ├── README.md                     # Fixture format documentation
@@ -183,6 +187,7 @@ All fixtures follow a consistent JSON schema to ensure language parity.
 ```
 
 **Schema Fields**:
+
 - `name` (string): Human-readable test case name
 - `html` (string): Input HTML
 - `expectedMarkdown` (string): Expected Markdown output
@@ -299,6 +304,7 @@ jobs:
 ```
 
 **Behavior**:
+
 - Runs BEFORE publishing packages
 - Blocks release if ANY smoke test fails
 - Fast feedback (<5 min total)
@@ -328,6 +334,7 @@ jobs:
 ```
 
 **Behavior**:
+
 - Runs AFTER packages are published
 - Validates real-world installation
 - Does NOT block release (informational)
@@ -354,6 +361,7 @@ version = "2.18.0"
 ```
 
 **Usage**:
+
 ```bash
 task versions:sync  # Updates all manifests including test_apps
 ```
@@ -671,6 +679,7 @@ mix test
 **Problem**: Tests pass locally but fail in CI with version errors
 
 **Solution**: Run `task versions:sync` to ensure all test_apps manifests use correct version:
+
 ```bash
 task versions:sync
 git diff tests/test_apps/  # Review changes
@@ -681,6 +690,7 @@ git diff tests/test_apps/  # Review changes
 **Problem**: `FileNotFoundError: ../fixtures/basic-html.json`
 
 **Solution**: Ensure tests load fixtures relative to `test_apps/` directory:
+
 ```python
 # ✅ Correct
 fixture_path = Path(__file__).parent.parent / "fixtures" / "basic-html.json"
@@ -694,6 +704,7 @@ fixture_path = Path("../fixtures/basic-html.json")  # Depends on cwd
 **Problem**: Comprehensive tests timeout in CI
 
 **Solution**: Reduce fixture count or increase CI timeout:
+
 ```yaml
 # .github/workflows/post-release-validation.yaml
 - run: task e2e:test:all

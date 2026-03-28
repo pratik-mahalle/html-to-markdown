@@ -2,9 +2,10 @@
 name: Line Break Conversion
 priority: high
 ---
+
 Convert <br> to Markdown line breaks
 
-- Support two spaces + newline (  \n)
+- Support two spaces + newline ( \n)
 - Support backslash newline (\\\n)
 - Make style configurable via NewlineStyle option
 - Test with multiple <br> in sequence

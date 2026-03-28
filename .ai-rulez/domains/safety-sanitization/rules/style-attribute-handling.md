@@ -2,6 +2,7 @@
 name: Style Attribute Handling
 priority: high
 ---
+
 Sanitize or remove inline styles safely
 
 - Option 1: Remove style attribute entirely (safest)

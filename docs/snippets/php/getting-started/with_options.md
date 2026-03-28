@@ -9,5 +9,6 @@ $options = new ConversionOptions(
     listIndentWidth: 2,
 );
 
-$markdown = $converter->convert('<h1>Hello</h1>', $options);
+$result = $converter->convert('<h1>Hello</h1>', $options);
+$markdown = $result['content'];
 ```

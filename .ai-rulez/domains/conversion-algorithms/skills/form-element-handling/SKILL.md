@@ -2,17 +2,21 @@
 description: "Form Element Handling"
 name: form-element-handling
 ---
+
 Convert form elements to Markdown equivalents
 
 Key source files:
+
 - crates/html-to-markdown/src/converter.rs
 
 Master concepts:
+
 - Input type detection
 - Label association
 - Fallback formats
 
 Step by step:
+
 1. Identify input type
    - text becomes code block or input notation
    - checkbox becomes task list

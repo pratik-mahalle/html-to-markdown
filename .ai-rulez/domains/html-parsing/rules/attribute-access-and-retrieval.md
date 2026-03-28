@@ -2,6 +2,7 @@
 name: Attribute Access & Retrieval
 priority: high
 ---
+
 Provide comprehensive attribute inspection
 
 - Implement get_attribute(elem, name) → Option<String>

@@ -12,5 +12,6 @@ class MyVisitor
 end
 
 html = "<p><a href='https://example.com'>Link</a></p>"
-result = HtmlToMarkdown.convert_with_visitor(html, visitor: MyVisitor.new)
+result = HtmlToMarkdown.convert(html, visitor: MyVisitor.new)
+markdown = result[:content]
 ```

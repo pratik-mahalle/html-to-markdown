@@ -2,6 +2,7 @@
 name: Size Limit Enforcement
 priority: high
 ---
+
 Prevent unbounded memory allocation
 
 - Enforce maximum document size (default 50MB)

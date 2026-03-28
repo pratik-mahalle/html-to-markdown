@@ -18,8 +18,9 @@ defmodule MyLinkFilter do
 end
 
 html = "<p>Visit <a href='https://example.com'>our site</a> for more!</p>"
-{:ok, markdown} = HtmlToMarkdown.Visitor.convert_with_visitor(html, MyLinkFilter, nil)
-# markdown == "Visit our site for more!\n"
+opts = %HtmlToMarkdown.Options{visitor: MyLinkFilter}
+{:ok, result} = HtmlToMarkdown.convert(html, opts)
+# result.content == "Visit our site for more!\n"
 ```
 
 ## Available Callbacks
@@ -130,8 +131,9 @@ defmodule NoLinksVisitor do
 end
 
 html = "<p>Check <a href='#'>this</a> out.</p>"
-{:ok, markdown} = HtmlToMarkdown.Visitor.convert_with_visitor(html, NoLinksVisitor, nil)
-# markdown == "Check this out.\n"
+opts = %HtmlToMarkdown.Options{visitor: NoLinksVisitor}
+{:ok, result} = HtmlToMarkdown.convert(html, opts)
+# result.content == "Check this out.\n"
 ```
 
 ## Advanced Example: Stateful Image Collection
@@ -159,7 +161,8 @@ defmodule ImageCollector do
 end
 
 {:ok, pid} = ImageCollector.start_link(nil)
-{:ok, markdown} = HtmlToMarkdown.Visitor.convert_with_visitor(html, pid, nil)
+opts = %HtmlToMarkdown.Options{visitor: pid}
+{:ok, result} = HtmlToMarkdown.convert(html, opts)
 # Can query collected images via GenServer API
 ```
 

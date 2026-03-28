@@ -2,6 +2,7 @@
 name: Parser Implementation Flexibility
 priority: high
 ---
+
 Support multiple HTML parser implementations with graceful fallback
 
 - Implement ParserType enum with html5ever and tl variants

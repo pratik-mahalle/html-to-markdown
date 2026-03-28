@@ -2,18 +2,22 @@
 description: "Link Conversion"
 name: link-conversion
 ---
+
 Convert HTML links to Markdown format
 
 Key source files:
+
 - crates/html-to-markdown/src/converter.rs (convert_link)
 
 Master concepts:
+
 - href extraction
 - Link text processing
 - Title attribute handling
 - URL sanitization
 
 Step by step:
+
 1. Extract href attribute
 2. Sanitize URL with sanitize_url()
 3. Extract link text

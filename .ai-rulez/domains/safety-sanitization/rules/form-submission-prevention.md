@@ -2,6 +2,7 @@
 name: Form Submission Prevention
 priority: high
 ---
+
 Remove or neutralize form elements
 
 - Remove <form> elements entirely

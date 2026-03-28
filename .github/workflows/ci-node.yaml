@@ -118,3 +118,8 @@ jobs:
         working-directory: packages/typescript
         run: bun test
         shell: bash
+
+      - name: Run E2E tests
+        if: matrix.runtime == 'node'
+        run: task node:e2e:test
+        shell: bash

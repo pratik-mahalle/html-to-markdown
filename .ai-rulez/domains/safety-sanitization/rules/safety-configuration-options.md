@@ -2,6 +2,7 @@
 name: Safety Configuration Options
 priority: high
 ---
+
 Provide comprehensive safety configuration
 
 - SafetyConfig struct with options:

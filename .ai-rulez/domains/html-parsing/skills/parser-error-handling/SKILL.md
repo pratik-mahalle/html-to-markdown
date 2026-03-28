@@ -2,18 +2,22 @@
 description: "Parser Error Handling"
 name: parser-error-handling
 ---
+
 Handle parser errors gracefully with recovery
 
 Key source files:
+
 - crates/html-to-markdown/src/error.rs
 
 Master concepts:
+
 - Error types and classification
 - Partial parsing recovery
 - Error context preservation
 - User-friendly messages
 
 Step by step:
+
 1. Wrap parser call in Result
 2. Catch parser errors
 3. Classify error type

@@ -2,6 +2,7 @@
 name: Void Element Recognition
 priority: high
 ---
+
 Correctly identify void elements (no children)
 
 - List all void elements: br, img, input, hr, meta, link, etc.

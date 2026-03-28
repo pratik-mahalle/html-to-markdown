@@ -2,18 +2,22 @@
 description: "Character Encoding Validation"
 name: character-encoding-validation
 ---
+
 Detect and convert character encodings safely
 
 Key source files:
+
 - crates/html-to-markdown/src/lib.rs
 
 Master concepts:
+
 - BOM detection
 - HTML5 charset meta tag
 - Auto-detection via encoding_rs
 - Safe UTF-8 conversion
 
 Step by step:
+
 1. Check for BOM (Byte Order Mark)
    - 0xEFBBBF indicates UTF-8 BOM
    - 0xFFFE indicates UTF-16LE BOM

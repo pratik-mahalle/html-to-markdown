@@ -2,6 +2,7 @@
 name: Parser Test Coverage
 priority: high
 ---
+
 Comprehensive parser testing
 
 - Unit tests for each parser implementation

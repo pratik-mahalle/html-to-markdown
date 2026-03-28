@@ -2,6 +2,7 @@
 name: Parser Error Recovery
 priority: high
 ---
+
 Recover gracefully from parse errors
 
 - Capture and report parser errors

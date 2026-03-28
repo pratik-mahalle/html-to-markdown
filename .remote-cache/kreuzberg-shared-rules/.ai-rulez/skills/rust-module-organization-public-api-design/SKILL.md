@@ -15,7 +15,7 @@ ______________________________________________________________________
 
 ## Module Hierarchy Example
 
-```
+```text
 src/
 ├── lib.rs                    # Root: re-exports public API
 ├── parsing/                  # Feature module

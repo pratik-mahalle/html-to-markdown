@@ -2,18 +2,22 @@
 description: "Paragraph Conversion"
 name: paragraph-conversion
 ---
+
 Convert paragraph tags to Markdown
 
 Key source files:
+
 - crates/html-to-markdown/src/converter.rs (convert_p)
 
 Master concepts:
+
 - Content extraction
 - Inline formatting preservation
 - Blank line separation
 - Whitespace handling
 
 Step by step:
+
 1. Extract paragraph content
 2. Process inline formatting
    - Bold: convert strong tags to **text**

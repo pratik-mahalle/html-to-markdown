@@ -2,6 +2,7 @@
 name: Entity Decoding
 priority: high
 ---
+
 Decode HTML entities in text content
 
 - Decode named entities: &nbsp; &lt; &gt; &amp; etc.

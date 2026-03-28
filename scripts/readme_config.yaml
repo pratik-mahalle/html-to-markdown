@@ -310,7 +310,7 @@ languages:
     package_manager:
       - mix
     package_name: html_to_markdown
-    install_command: "Add {:html_to_markdown, \"~> 2.28.3\"} to mix.exs deps"
+    install_command: "Add {:html_to_markdown, \"~> 3.0\"} to mix.exs deps"
     description: |
       Elixir bindings for the Rust html-to-markdown engine. The package exposes a fast HTML to Markdown converter implemented with Rustler.
       Ship identical Markdown across every runtime while enjoying native performance with Rustler NIF bindings.
@@ -345,18 +345,6 @@ languages:
           size: "463KB"
           ops_sec: 581
           throughput: "262.9 MB/s"
-        - name: "HOCR German PDF"
-          size: "44KB"
-          ops_sec: 7106
-          throughput: "303.1 MB/s"
-        - name: "HOCR Embedded Tables"
-          size: "37KB"
-          ops_sec: 6231
-          throughput: "226.1 MB/s"
-        - name: "HOCR Invoice"
-          size: "4KB"
-          ops_sec: 62657
-          throughput: "256.4 MB/s"
     snippets:
       basic_usage: "getting-started/basic_usage.md"
       with_options: "getting-started/with_options.md"

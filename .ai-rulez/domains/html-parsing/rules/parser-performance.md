@@ -2,6 +2,7 @@
 name: Parser Performance
 priority: high
 ---
+
 Maintain fast parsing times
 
 - Target <5ms parsing time for 100KB documents

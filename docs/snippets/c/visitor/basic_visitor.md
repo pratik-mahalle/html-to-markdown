@@ -23,10 +23,12 @@ int main(void) {
     };
 
     HtmlToMarkdownVisitor *visitor = html_to_markdown_visitor_new(&callbacks);
-    char *markdown = html_to_markdown_convert_with_visitor(html, visitor);
-    if (markdown) {
-        printf("%s\n", markdown);
-        html_to_markdown_free_string(markdown);
+    /* Returns JSON: {"content":"...","metadata":null,"tables":null} */
+    char *json = html_to_markdown_convert_with_visitor(html, visitor, NULL);
+    if (json) {
+        /* Parse JSON to extract content field */
+        printf("%s\n", json);
+        html_to_markdown_free_string(json);
     }
     html_to_markdown_visitor_free(visitor);
     return 0;

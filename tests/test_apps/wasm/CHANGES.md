@@ -1,12 +1,15 @@
 # WASM Test App Updates - Changelog
 
 ## Summary
+
 Updated the WASM test app to comprehensively validate the published `@kreuzberg/html-to-markdown-wasm` npm package (version 2.24.1) across all target environments.
 
 ## Files Changed
 
 ### 1. `package.json`
+
 **Before:**
+
 ```json
 "dependencies": {
   "@kreuzberg/html-to-markdown-wasm": "2.23.1"
@@ -14,6 +17,7 @@ Updated the WASM test app to comprehensively validate the published `@kreuzberg/
 ```
 
 **After:**
+
 ```json
 "dependencies": {
   "@kreuzberg/html-to-markdown-wasm": "2.24.1"
@@ -25,10 +29,12 @@ Updated the WASM test app to comprehensively validate the published `@kreuzberg/
 ---
 
 ### 2. `smoke.spec.ts`
+
 **Before:** 8 basic tests, flat structure
 **After:** 25+ tests organized into 4 test suites
 
 **New Test Categories:**
+
 1. **Module Loading** (3 tests)
    - Package imports
    - Function exports
@@ -52,6 +58,7 @@ Updated the WASM test app to comprehensively validate the published `@kreuzberg/
    - Null/undefined input safety
 
 **Key Improvements:**
+
 - Better test organization with describe blocks
 - Proper error handling validation
 - XSS safety verification
@@ -60,6 +67,7 @@ Updated the WASM test app to comprehensively validate the published `@kreuzberg/
 ---
 
 ### 3. `comprehensive.spec.ts`
+
 **Before:** 10 tests (basic fixtures + edge cases)
 **After:** 60+ tests across 5 major categories
 
@@ -110,6 +118,7 @@ Updated the WASM test app to comprehensively validate the published `@kreuzberg/
    - Options parameter support
 
 **Key Improvements:**
+
 - Comprehensive HTML element coverage
 - Bundle size monitoring
 - Unicode and internationalization testing
@@ -120,10 +129,12 @@ Updated the WASM test app to comprehensively validate the published `@kreuzberg/
 ---
 
 ### 4. `README.md`
+
 **Before:** 37 lines, basic description
 **After:** 180+ lines, comprehensive guide
 
 **Major Additions:**
+
 - Detailed purpose statement
 - Prerequisites section
 - Full test coverage breakdown
@@ -134,6 +145,7 @@ Updated the WASM test app to comprehensively validate the published `@kreuzberg/
 - Test quality metrics
 
 **Sections Added:**
+
 1. Purpose and goals
 2. Prerequisites and setup
 3. Test coverage details (organized by test file)
@@ -145,12 +157,15 @@ Updated the WASM test app to comprehensively validate the published `@kreuzberg/
 ---
 
 ### 5. `package-lock.json`
+
 **Changes:**
+
 - Updated all references from 2.23.4 to 2.24.1
 - Locked all dependency versions for reproducible builds
 - Ready for `npm install` when version 2.24.1 is published
 
 **Key Updates:**
+
 - `@kreuzberg/html-to-markdown-wasm` version → 2.24.1
 - Resolver URL updated to 2.24.1 path
 - All other dependencies remain locked
@@ -158,8 +173,10 @@ Updated the WASM test app to comprehensively validate the published `@kreuzberg/
 ---
 
 ### 6. `TEST_COVERAGE_SUMMARY.md` (New File)
+
 **Purpose:** Detailed coverage documentation
 **Contents:**
+
 - Before/after comparison
 - Test categories breakdown
 - Coverage metrics
@@ -186,6 +203,7 @@ Updated the WASM test app to comprehensively validate the published `@kreuzberg/
 ## Coverage Matrix
 
 ### HTML Elements
+
 - ✓ Paragraphs
 - ✓ Headings (h1-h6)
 - ✓ Lists (ordered, unordered, nested)
@@ -198,6 +216,7 @@ Updated the WASM test app to comprehensively validate the published `@kreuzberg/
 - ✓ Tables (conditional)
 
 ### Error Scenarios
+
 - ✓ Malformed HTML
 - ✓ Long inputs (10K+ characters)
 - ✓ XSS attempts (script tag escaping)
@@ -206,6 +225,7 @@ Updated the WASM test app to comprehensively validate the published `@kreuzberg/
 - ✓ Special characters
 
 ### Performance & Quality
+
 - ✓ Bundle size monitoring (1KB-2MB)
 - ✓ Deterministic output
 - ✓ Sequential conversion handling
@@ -214,6 +234,7 @@ Updated the WASM test app to comprehensively validate the published `@kreuzberg/
 - ✓ Function exports
 
 ### Internationalization
+
 - ✓ Unicode characters (CJK, emoji, diacritics)
 - ✓ Multi-language content mixing
 - ✓ Character encoding
@@ -223,6 +244,7 @@ Updated the WASM test app to comprehensively validate the published `@kreuzberg/
 ## Validation
 
 The test app:
+
 1. ✓ Tests **published npm package** (version 2.24.1)
 2. ✓ Validates **published package only** (not local builds)
 3. ✓ Covers **all major HTML elements**

@@ -2,6 +2,7 @@
 name: Markdown-Level Security
 priority: high
 ---
+
 Ensure Markdown output is inherently safe
 
 - Markdown output cannot contain executable code

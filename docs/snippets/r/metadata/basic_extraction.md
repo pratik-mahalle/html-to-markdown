@@ -10,9 +10,10 @@ html <- '
   </body>
 </html>'
 
-result <- convert_with_metadata(html)
+opts <- conversion_options(extract_metadata = TRUE)
+result <- convert(html, opts)
 
-cat(result$markdown)
+cat(result$content)
 result$metadata$document$title
 result$metadata$headers[[1]]$text
 result$metadata$links[[1]]$link_type

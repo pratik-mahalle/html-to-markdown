@@ -2,18 +2,22 @@
 description: "Ammonia Sanitization"
 name: ammonia-sanitization
 ---
+
 Use ammonia crate for HTML sanitization
 
 Key source files:
+
 - ammonia crate integration
 
 Master concepts:
+
 - Whitelist configuration
 - Element filtering
 - Attribute filtering
 - URL validation
 
 Step by step:
+
 1. Create ammonia Builder instance
 2. Configure element whitelist
    - Safe tags: p, div, h1-h6, ul, ol, li, a, img, strong, em, code

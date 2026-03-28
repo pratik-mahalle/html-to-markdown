@@ -4,8 +4,10 @@ use function HtmlToMarkdown\convert;
 
 // Object-oriented usage
 $converter = Converter::create();
-$markdown = $converter->convert('<h1>Hello</h1><p>This is <strong>fast</strong>!</p>');
+$result = $converter->convert('<h1>Hello</h1><p>This is <strong>fast</strong>!</p>');
+$markdown = $result['content'];
 
 // Procedural helper
-$markdown = convert('<h1>Hello</h1>');
+$result = convert('<h1>Hello</h1>');
+$markdown = $result['content'];
 ```

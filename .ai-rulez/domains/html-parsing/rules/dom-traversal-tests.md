@@ -2,6 +2,7 @@
 name: DOM Traversal Tests
 priority: high
 ---
+
 Test all traversal patterns
 
 - Test parent(), children(), sibling() navigation

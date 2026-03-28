@@ -2,6 +2,7 @@
 name: Performance Optimization
 priority: high
 ---
+
 Maintain fast conversion speed
 
 - Target <1ms per 1000 elements

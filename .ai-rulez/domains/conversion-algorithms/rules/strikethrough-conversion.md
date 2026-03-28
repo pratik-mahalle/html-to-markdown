@@ -2,6 +2,7 @@
 name: Strikethrough Conversion
 priority: high
 ---
+
 Convert deleted text to strikethrough
 
 - Support <s>, <strike>, <del> tags

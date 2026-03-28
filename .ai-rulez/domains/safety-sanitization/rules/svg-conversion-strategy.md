@@ -2,6 +2,7 @@
 name: SVG Conversion Strategy
 priority: high
 ---
+
 Define how SVG is handled in conversion
 
 - Option 1: Extract text content from SVG

@@ -157,42 +157,8 @@ extra_css:
 
 nav:
   - Home: index.md
-  - Installation: getting-started/installation.md
-  - Quick Start: getting-started/quickstart.md
-  - Features: features.md
-  - Concepts:
-      - Architecture: concepts/architecture.md
-      - Conversion Pipeline: concepts/conversion-pipeline.md
-      - Visitor Pattern: concepts/visitor-pattern.md
-      - Metadata Extraction: concepts/metadata-extraction.md
-      - Tag Preservation: concepts/tag-preservation.md
-      - Performance: concepts/performance.md
-  - Guides:
-      - Basic Conversion: guides/basic-conversion.md
-      - Configuration Options: guides/configuration.md
-      - Metadata Extraction: guides/metadata.md
-      - Visitor Pattern: guides/visitor.md
-      - CLI Usage: guides/cli.md
-      - Security: guides/security.md
-  - API Reference:
-      - Rust: reference/api-rust.md
-      - Python: reference/api-python.md
-      - TypeScript: reference/api-typescript.md
-      - Ruby: reference/api-ruby.md
-      - PHP: reference/api-php.md
-      - Go: reference/api-go.md
-      - Java: reference/api-java.md
-      - C#: reference/api-csharp.md
-      - Elixir: reference/api-elixir.md
-      - R: reference/api-r.md
-      - C: reference/api-c.md
-      - WASM: reference/api-wasm.md
-      - Configuration: reference/configuration.md
-      - Types: reference/types.md
-  - Migration Guides:
-      - C# v2.19.0: migration/csharp-2.19.0.md
-      - Java v2.19.0: migration/java-2.19.0.md
-      - TypeScript v2.19.0: migration/typescript-2.19.0.md
-  - Live Demo: https://docs.html-to-markdown.kreuzberg.dev/demo/
+  - Installation: installation.md
+  - Usage: usage.md
+  - Configuration: configuration.md
+  - CLI: cli.md
   - Changelog: https://github.com/kreuzberg-dev/html-to-markdown/blob/main/CHANGELOG.md
-  - Contributing: contributing.md

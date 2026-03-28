@@ -76,6 +76,7 @@ dotnet test --filter "Name~TestBasicParagraphConversion"
 ## Test Coverage
 
 ### SmokeTest.cs (20+ tests)
+
 - Package loading and type availability
 - Basic paragraph, heading, and multi-level heading conversion
 - Bold and italic text formatting
@@ -87,6 +88,7 @@ dotnet test --filter "Name~TestBasicParagraphConversion"
 - Null input and malformed HTML error handling
 
 ### ComprehensiveTest.cs (20+ tests)
+
 - Fixture-driven conversion accuracy (basic-html.json)
 - Output type safety (returns non-null string)
 - Conversion consistency (idempotence)
@@ -114,6 +116,7 @@ Test fixtures are located in the shared `tests/test_apps/fixtures/` directory:
 ## Type Safety
 
 The C# test app uses:
+
 - **Strict typing**: All variables properly typed
 - **xUnit assertions**: Type-safe assertion framework
 - **Nullable reference types**: `#nullable enable` for safety
@@ -144,7 +147,9 @@ nuget list KreuzbergDev.HtmlToMarkdown -AllVersions
 ## Troubleshooting
 
 ### Package Not Found
+
 If you get a "Package not found" error:
+
 ```bash
 # Ensure NuGet sources are configured
 dotnet nuget list source
@@ -154,7 +159,9 @@ dotnet restore --verbosity detailed
 ```
 
 ### Test Fixture Path Issues
+
 If fixture files are not found:
+
 ```bash
 # Verify fixture files exist
 ls -la ../fixtures/
@@ -164,7 +171,9 @@ pwd
 ```
 
 ### P/Invoke Binding Issues
+
 If P/Invoke binding fails:
+
 - Verify the native library is installed on the system
 - Check that the architecture (x64, arm64) matches
 - Ensure the FFI version matches the NuGet package version

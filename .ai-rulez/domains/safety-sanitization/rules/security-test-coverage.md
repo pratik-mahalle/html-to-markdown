@@ -2,6 +2,7 @@
 name: Security Test Coverage
 priority: high
 ---
+
 Comprehensive security testing
 
 - XSS payload tests (OWASP cheat sheets)

@@ -15,20 +15,27 @@ This skill documents how html-to-markdown maps 60+ HTML element types to their M
 
 ```markdown
 # Heading 1
+
 ## Heading 2
+
 ### Heading 3
+
 #### Heading 4
+
 ##### Heading 5
+
 ###### Heading 6
 ```
 
 **Implementation:**
+
 - Option: `HeadingStyle::Atx` (default)
 - Each heading level uses n hashes
 - Single space after hashes required
 - Trailing hashes optional (ATX closed style adds them)
 
 **HTML Example:**
+
 ```html
 <h1>Title</h1>          → # Title
 <h2 id="intro">Intro</h2> → ## Intro
@@ -46,12 +53,14 @@ Heading 2
 ```
 
 **Implementation:**
+
 - Option: `HeadingStyle::Underlined`
 - H1: `=` characters for full line width
 - H2: `-` characters for full line width
 - H3+ not supported in Setext (fallback to ATX)
 
 **HTML Example:**
+
 ```html
 <h1>Main Title</h1>  → Main Title\n===========
 <h2>Subtitle</h2>    → Subtitle\n---------
@@ -62,11 +71,14 @@ Heading 2
 
 ```markdown
 # Heading 1 #
+
 ## Heading 2 ##
+
 ### Heading 3 ###
 ```
 
 **Implementation:**
+
 - Option: `HeadingStyle::AtxClosed`
 - Closing hashes must match opening count
 - Single space before closing hashes
@@ -77,11 +89,13 @@ Heading 2
 ### Paragraph (`<p>`)
 
 **Mapping:**
+
 - Text content extracted and escaped
 - Trailing/leading whitespace trimmed
 - Single newline after paragraph
 
 **Example:**
+
 ```html
 <p>This is a paragraph with <strong>bold</strong> text.</p>
 → This is a paragraph with **bold** text.\n
@@ -90,12 +104,14 @@ Heading 2
 ### Division (`<div>`)
 
 **Behavior:**
+
 - Transparent wrapper for Markdown
 - Content treated as block-level
 - No wrapping markers in output
 - Preserves child semantics
 
 **Example:**
+
 ```html
 <div>
   <p>Paragraph inside div</p>
@@ -106,11 +122,13 @@ Heading 2
 ### Blockquote (`<blockquote>`)
 
 **Mapping:**
-- Each line prefixed with `> `
-- Nested blockquotes: `> > `
+
+- Each line prefixed with `>`
+- Nested blockquotes: `> >`
 - Handles multiple paragraphs
 
 **Example:**
+
 ```html
 <blockquote>
   <p>Quote line 1</p>
@@ -122,12 +140,14 @@ Heading 2
 ### Preformatted Text (`<pre>`)
 
 **Behavior:**
+
 - Whitespace preserved exactly
 - Treated as code block (see Code Blocks below)
 - No entity decoding in content
 - Trimmed and indented
 
 **Example:**
+
 ```html
 <pre>    code with spaces</pre>
 → (indented code or fenced, depends on CodeBlockStyle)
@@ -136,6 +156,7 @@ Heading 2
 ### Code Blocks
 
 **Indented Style (Default):**
+
 ```markdown
     line 1
     line 2
@@ -143,17 +164,21 @@ Heading 2
 ```
 
 **Implementation:**
+
 - Option: `CodeBlockStyle::Indented`
 - Each line prefixed with 4 spaces
 - Requires blank line before/after
 - CommonMark default
 
 **Fenced Backtick Style:**
+
 ```markdown
 ```language
 code here
 ```
-```
+
+
+```text
 
 **Implementation:**
 - Option: `CodeBlockStyle::Backticks`
@@ -169,11 +194,13 @@ code here
 ```
 
 **Implementation:**
+
 - Option: `CodeBlockStyle::Tildes`
 - Triple tildes with optional language specifier
 - Less common variant of fenced style
 
 **HTML Mapping:**
+
 ```html
 <pre><code>simple code</code></pre>
 <pre><code class="language-python">def foo(): pass</code></pre>
@@ -191,6 +218,7 @@ code here
 #### Unordered Lists (`<ul>`)
 
 **Default Syntax (dashes):**
+
 ```markdown
 - Item 1
 - Item 2
@@ -199,6 +227,7 @@ code here
 ```
 
 **Implementation:**
+
 - `-` marker (could be `*` or `+`, but `-` is default)
 - Indentation for nesting: spaces or tabs
 - Option: `ListIndentType::Spaces` (default) or `ListIndentType::Tabs`
@@ -212,13 +241,15 @@ code here
 ```
 
 **Implementation:**
+
 - `1.` through `9.` for first 9 items (reset per list)
-- Number must be followed by `. ` (dot space)
+- Number must be followed by `.` (dot space)
 - Indentation matches unordered for nesting
 
 #### List Items (`<li>`)
 
 **Behavior:**
+
 - Content can include block elements (paragraphs, code blocks)
 - Continuation lines indented to match marker
 - Multi-line items:
@@ -230,6 +261,7 @@ code here
 ```
 
 **HTML Example:**
+
 ```html
 <ul>
   <li>
@@ -251,6 +283,7 @@ Another Term
 ```
 
 **Implementation:**
+
 - `<dt>`: Term on its own line
 - `<dd>`: Definition with `:` prefix and indentation
 - Multiple definitions per term supported
@@ -258,6 +291,7 @@ Another Term
 ### Tables (`<table>`, `<tr>`, `<td>`, `<th>`)
 
 **Mapping:**
+
 ```markdown
 | Header 1 | Header 2 |
 |----------|----------|
@@ -266,6 +300,7 @@ Another Term
 ```
 
 **Implementation:**
+
 - `<table>` → GFM (GitHub Flavored Markdown) table
 - `<thead>` content becomes header row
 - `<tbody>` rows become data rows
@@ -274,6 +309,7 @@ Another Term
 - Right-alignment: `:---|` Left: `|:--` Center: `:--:`
 
 **Cell Content:**
+
 - Escaped for pipe characters (`|` → `\|`)
 - Nested elements converted (e.g., `<strong>` → `**`)
 - Newlines converted to `<br>` representation
@@ -281,32 +317,39 @@ Another Term
 ### Semantic HTML5 Elements
 
 #### Article (`<article>`)
+
 - Treated as transparent block wrapper
 - No semantic markers in Markdown
 - Content flows as-is
 
 #### Section (`<section>`)
+
 - Transparent block wrapper
 - Could insert heading separator in future
 
 #### Nav (`<nav>`)
+
 - List-like wrapper
 - Children converted normally
 - Could insert navigation markers
 
 #### Aside (`<aside>`)
+
 - Optional blockquote prefix (configurable)
 - Or treated as transparent block
 
 #### Header (`<header>`)
+
 - Transparent wrapper
 - Content converted normally
 
 #### Footer (`<footer>`)
+
 - Transparent wrapper
 - Could insert footer marker (e.g., `---\n`)
 
 #### Main (`<main>`)
+
 - Transparent wrapper
 - Content flows normally
 
@@ -317,11 +360,13 @@ Another Term
 **Mapping:** `*text*` or `_text_`
 
 **Implementation:**
+
 - Default: `*` (asterisk italic)
 - No underscore escaping needed in this context
 - Trimmed of excess whitespace
 
 **Example:**
+
 ```html
 <em>emphasized</em>  → *emphasized*
 <i>italic</i>        → *italic*
@@ -332,11 +377,13 @@ Another Term
 **Mapping:** `**text**`
 
 **Implementation:**
+
 - Double asterisks (bold)
 - Trimmed of excess whitespace
 - Can be nested with emphasis
 
 **Example:**
+
 ```html
 <strong>bold</strong>           → **bold**
 <b>bold</b>                     → **bold**
@@ -348,11 +395,13 @@ Another Term
 **Mapping:** `` `text` `` (backtick inline code)
 
 **Implementation:**
+
 - Single backticks for inline
 - Escaped if backticks present in content
 - No entity decoding within code
 
 **Example:**
+
 ```html
 <code>variable_name</code>        → `variable_name`
 <code>don't</code>                → `don't`
@@ -364,6 +413,7 @@ Another Term
 **Mapping:** `[link text](url "title")`
 
 **Implementation:**
+
 - `href` attribute becomes URL
 - Text content becomes link text
 - `title` attribute becomes optional title (in quotes)
@@ -376,6 +426,7 @@ Another Term
   - `href="tel:+1234567890"` → Phone link
 
 **Examples:**
+
 ```html
 <a href="https://example.com">Link</a>
 → [Link](https://example.com)
@@ -395,6 +446,7 @@ Another Term
 **Mapping:** `![alt text](url "title")`
 
 **Implementation:**
+
 - `src` attribute becomes URL
 - `alt` attribute becomes alt text
 - `title` attribute becomes optional title
@@ -403,6 +455,7 @@ Another Term
 - Relative paths preserved
 
 **Examples:**
+
 ```html
 <img src="photo.jpg" alt="A photo">
 → ![A photo](photo.jpg)
@@ -417,12 +470,14 @@ Another Term
 ### Line Break (`<br>`)
 
 **Mapping:**
-- Two spaces + newline: `  \n`
+
+- Two spaces + newline: `\n`
 - Or backslash + newline: `\\\n`
 
 **Option:** `NewlineStyle::Spaces` (default) or `NewlineStyle::Backslash`
 
 **Example:**
+
 ```html
 <p>Line 1<br>Line 2</p>
 → Line 1  \nLine 2\n
@@ -433,11 +488,13 @@ Another Term
 **Mapping:** `~~strikethrough~~`
 
 **Implementation:**
+
 - GFM strikethrough syntax (double tilde)
 - Not standard Markdown, but widely supported
 - Trimmed of excess whitespace
 
 **Example:**
+
 ```html
 <del>removed text</del>  → ~~removed text~~
 <s>strikethrough</s>     → ~~strikethrough~~
@@ -446,11 +503,13 @@ Another Term
 ### Subscript/Superscript (`<sub>`, `<sup>`)
 
 **Behavior:**
+
 - No native Markdown support
 - Typically converted to plain text or HTML passthrough
 - Implementation: Extract text content, no markup
 
 **Example:**
+
 ```html
 H<sub>2</sub>O          → H2O (plain text)
 E=mc<sup>2</sup>        → E=mc2 (plain text)
@@ -459,12 +518,14 @@ E=mc<sup>2</sup>        → E=mc2 (plain text)
 ### Mark/Highlight (`<mark>`)
 
 **Options:**
+
 1. `HighlightStyle::DoubleEqual`: `==text==`
 2. `HighlightStyle::Html`: `<mark>text</mark>`
 3. `HighlightStyle::Bold`: `**text**`
 4. `HighlightStyle::None`: plain text
 
 **Example:**
+
 ```html
 <mark>highlighted</mark>
 → ==highlighted==  (DoubleEqual mode)
@@ -475,11 +536,13 @@ E=mc<sup>2</sup>        → E=mc2 (plain text)
 ### Ruby Annotations (`<ruby>`, `<rt>`, `<rp>`)
 
 **Mapping:**
+
 - Japanese ruby text support
 - Format: `text {rt_text}` or similar
 - Implementation: Extract base text with rt annotation
 
 **Example:**
+
 ```html
 <ruby>漢字<rt>かんじ</rt></ruby>
 → 漢字 (かんじ)
@@ -490,11 +553,13 @@ E=mc<sup>2</sup>        → E=mc2 (plain text)
 ### Audio (`<audio>`)
 
 **Behavior:**
+
 - No direct Markdown equivalent
 - Typically extracted as metadata or skipped
 - Could insert link to source if `src` attribute
 
 **Handling:**
+
 ```html
 <audio src="sound.mp3">Audio</audio>
 → (Skipped or converted to link in metadata)
@@ -503,6 +568,7 @@ E=mc<sup>2</sup>        → E=mc2 (plain text)
 ### Video (`<video>`)
 
 **Behavior:**
+
 - Similar to audio
 - Could extract `poster` image
 - Typically skipped in markdown output
@@ -510,6 +576,7 @@ E=mc<sup>2</sup>        → E=mc2 (plain text)
 ### Picture/Source (`<picture>`, `<source>`)
 
 **Behavior:**
+
 - Responsive image container
 - Extract from child `<img>` inside
 - Or use first source `src`
@@ -519,17 +586,20 @@ E=mc<sup>2</sup>        → E=mc2 (plain text)
 ### Input (`<input>`)
 
 **Behavior:**
+
 - Generally skipped or marked as form element
 - Could convert to metadata about form structure
 - Types: text, checkbox, radio, button, hidden
 
 **Implementation:**
+
 - Placeholder preserved in metadata
 - Value not typically included in markdown
 
 ### Select/Option (`<select>`, `<option>`)
 
 **Behavior:**
+
 - Converted to list or metadata
 - Option text extracted
 - Selected state noted
@@ -537,6 +607,7 @@ E=mc<sup>2</sup>        → E=mc2 (plain text)
 ### Button (`<button>`)
 
 **Behavior:**
+
 - Text content extracted (ignores `<button>` wrapper)
 - Click handlers ignored
 - Treated as inline text
@@ -544,6 +615,7 @@ E=mc<sup>2</sup>        → E=mc2 (plain text)
 ### Textarea (`<textarea>`)
 
 **Behavior:**
+
 - Content treated as code block or preformatted
 - Whitespace preserved
 
@@ -552,6 +624,7 @@ E=mc<sup>2</sup>        → E=mc2 (plain text)
 ### SVG (`<svg>`)
 
 **Behavior:**
+
 - Can be preserved as inline image or skipped
 - Feature: `inline-images` can extract inline SVG
 - Typically rendered as-is in compatible markdown renderers
@@ -559,6 +632,7 @@ E=mc<sup>2</sup>        → E=mc2 (plain text)
 ### MathML (`<math>`)
 
 **Behavior:**
+
 - Skipped in standard markdown
 - Could be preserved with feature gate
 - Converted to LaTeX or plain text fallback
@@ -566,6 +640,7 @@ E=mc<sup>2</sup>        → E=mc2 (plain text)
 ### iframe (`<iframe>`)
 
 **Behavior:**
+
 - Generally skipped
 - Could extract as metadata (video embeds, etc.)
 - URL captured if needed
@@ -575,11 +650,13 @@ E=mc<sup>2</sup>        → E=mc2 (plain text)
 ### Whitespace Mode
 
 **Normalized (default):**
+
 - Multiple spaces collapsed to single space
 - Multiple newlines → single newline
 - Leading/trailing whitespace trimmed per element
 
 **Strict:**
+
 - All whitespace preserved exactly
 - Multiple spaces and newlines intact
 - Useful for poetry, ASCII art, etc.
@@ -587,12 +664,14 @@ E=mc<sup>2</sup>        → E=mc2 (plain text)
 ### Text Escaping
 
 **Options:**
+
 - `escape_asterisks`: `*` → `\*`
 - `escape_underscores`: `_` → `\_`
-- `escape_misc`: Special chars `\ & < ` [ > ~ # = + | -`
+- `escape_misc`: Special chars `\ & <` [ > ~ # = + | -`
 - `escape_ascii`: All ASCII punctuation (CommonMark spec)
 
 **Example:**
+
 ```html
 <p>Price: $10 & free shipping *limited time*</p>
 
@@ -609,6 +688,7 @@ escape_ascii=true:
 ## Implementation Details Location
 
 **Key Files:**
+
 - `/crates/html-to-markdown/src/converter.rs` - Element dispatch and conversion
 - `/crates/html-to-markdown/src/options.rs` - Style configuration enums
 - `/crates/html-to-markdown/src/text.rs` - Text escaping and normalization
@@ -657,7 +737,7 @@ See `/crates/html-to-markdown/src/visitor.rs` for exhaustive `NodeType` enum cov
 | `<pre>` | Indented or fenced | Code block |
 | `<blockquote>` | `> text` | Quote |
 | `<table>` | GFM table | Pipe-delimited |
-| `<br>` | `  \n` | Line break |
+| `<br>` | `\n` | Line break |
 | `<hr>` | `---` | Horizontal rule |
 | `<del>` | `~~text~~` | Strikethrough |
 | `<mark>` | `==text==` | Highlight (configurable) |

@@ -2,18 +2,22 @@
 description: "Metadata Handling"
 name: metadata-handling
 ---
+
 Safely handle metadata and structured data
 
 Key source files:
+
 - ammonia configuration
 
 Master concepts:
+
 - Meta tag removal
 - Structured data safety
 - Comment preservation
 - Information leakage prevention
 
 Step by step:
+
 1. Meta tags removed by default
    - Remove all meta tags
    - Prevents http-equiv and tracking

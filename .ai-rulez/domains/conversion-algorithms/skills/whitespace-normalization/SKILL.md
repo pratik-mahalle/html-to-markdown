@@ -2,17 +2,21 @@
 description: "Whitespace Normalization"
 name: whitespace-normalization
 ---
+
 Normalize whitespace per configuration
 
 Key source files:
+
 - crates/html-to-markdown/src/options.rs (WhitespaceMode)
 
 Master concepts:
+
 - Preserve mode (identity)
 - Minimal mode (trim, normalize internal)
 - Collapse mode (HTML5 rules)
 
 Step by step:
+
 1. Get WhitespaceMode from options
 2. Apply based on mode
    - Preserve means no change

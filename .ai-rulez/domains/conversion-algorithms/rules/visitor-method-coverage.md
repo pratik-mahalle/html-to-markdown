@@ -2,6 +2,7 @@
 name: Visitor Method Coverage
 priority: high
 ---
+
 Implement visitor methods for all elements
 
 - Visitor trait covers 60+ HTML element types

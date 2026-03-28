@@ -220,7 +220,7 @@ members = [
 
 **Solution**: Clearly defined dependency graph.
 
-```
+```text
 html-to-markdown (core library)
 ├── html-to-markdown-py (depends on core)
 ├── html-to-markdown-node (depends on core)
@@ -231,7 +231,7 @@ html-to-markdown (core library)
 
 **Bad structure** (avoid):
 
-```
+```text
 - html-to-markdown depends on html-to-markdown-py
 - html-to-markdown-py depends on html-to-markdown
 # Circular!

@@ -1,5 +1,6 @@
 ```java
 import dev.kreuzberg.htmltomarkdown.HtmlToMarkdown;
+import dev.kreuzberg.htmltomarkdown.ConversionOptions;
 import dev.kreuzberg.htmltomarkdown.ConversionResult;
 
 public class MetadataExample {
@@ -9,10 +10,13 @@ public class MetadataExample {
             <body><h1>Hello</h1><a href="https://example.com">Link</a></body></html>
             """;
 
-        ConversionResult result = HtmlToMarkdown.convertWithMetadata(html);
-        System.out.println("Markdown: " + result.getMarkdown());
-        System.out.println("Title: " + result.getMetadata().getTitle());
-        System.out.println("Links: " + result.getMetadata().getLinks());
+        ConversionOptions options = ConversionOptions.builder()
+            .extractMetadata(true)
+            .build();
+        ConversionResult result = HtmlToMarkdown.convert(html, options);
+        System.out.println("Markdown: " + result.content());
+        System.out.println("Title: " + result.metadata().getTitle());
+        System.out.println("Links: " + result.metadata().getLinks());
     }
 }
 ```

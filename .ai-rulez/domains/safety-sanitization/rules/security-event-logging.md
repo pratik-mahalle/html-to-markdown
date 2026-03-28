@@ -2,6 +2,7 @@
 name: Security Event Logging
 priority: high
 ---
+
 Log security-relevant events
 
 - Log binary data detection

@@ -1,12 +1,12 @@
 ```typescript
-import { convertWithMetadata } from '@kreuzberg/html-to-markdown';
+import { convert, ConversionOptions } from '@kreuzberg/html-to-markdown';
 
-const result = convertWithMetadata('<h1>Title</h1><p>Content</p>');
-const { markdown, metadata } = result;
+const options: ConversionOptions = { extractMetadata: true };
+const result = convert('<h1>Title</h1><p>Content</p>', options);
 
-console.log(markdown);           // Converted markdown
-console.log(metadata.document);  // Document metadata (title, description, etc.)
-console.log(metadata.headers);   // Header elements (h1-h6)
-console.log(metadata.links);     // Extracted links
-console.log(metadata.images);    // Extracted images
+console.log(result.content);           // Converted markdown
+console.log(result.metadata?.document); // Document metadata (title, description, etc.)
+console.log(result.metadata?.headers);  // Header elements (h1-h6)
+console.log(result.metadata?.links);    // Extracted links
+console.log(result.metadata?.images);   // Extracted images
 ```

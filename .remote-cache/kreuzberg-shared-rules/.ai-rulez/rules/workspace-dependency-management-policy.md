@@ -11,6 +11,7 @@ ______________________________________________________________________
 ### Workspace Root Configuration
 
 - **Workspace definition**: `Cargo.toml` at repository root defines entire workspace:
+
   ```toml
   [workspace]
   members = [
@@ -21,7 +22,9 @@ ______________________________________________________________________
   ]
   resolver = "2"
   ```
+
 - **Version inheritance**: All member crates inherit version from workspace root:
+
   ```toml
   # Cargo.toml (root)
   [workspace]
@@ -39,6 +42,7 @@ ______________________________________________________________________
   authors.workspace = true
   edition.workspace = true
   ```
+
 - **Single version source**: Update version in workspace root only; propagates to all members
 - **No scattered versions**: All crates use workspace version; never hardcode per-crate versions
 - **Dependency coordination**: `scripts/sync_versions.py` propagates workspace version to non-Rust packages (Python, PHP, Ruby, Node.js)
@@ -47,9 +51,11 @@ ______________________________________________________________________
 
 1. **Increment workspace version** in `Cargo.toml` (root)
 1. **Run sync_versions.py** to update language-specific versions:
+
    ```bash
    python scripts/sync_versions.py 1.2.3
    ```
+
 1. **Commit Cargo.toml + version sync outputs** atomically
 1. **Tag release** on git: `git tag v1.2.3`
 1. **Verify all lock files updated** before pushing
@@ -59,24 +65,29 @@ ______________________________________________________________________
 ### Shared Dependencies
 
 - **Define common dependencies in workspace root**:
+
   ```toml
   [workspace.dependencies]
   tokio = { version = "1.35", features = ["full"] }
   serde = { version = "1.0", features = ["derive"] }
   anyhow = "1.0"
   ```
+
 - **Members inherit shared dependencies**:
+
   ```toml
   # crates/html-to-markdown/Cargo.toml
   [dependencies]
   tokio = { workspace = true }
   serde = { workspace = true }
   ```
+
 - **Consistency requirement**: No member crate pins different version than workspace definition
 
 ### Feature Inheritance
 
 - **Workspace defines feature sets**:
+
   ```toml
   [workspace.dependencies]
   hyper = { version = "1.0", features = ["full"] }
@@ -85,16 +96,19 @@ ______________________________________________________________________
   [dependencies]
   hyper = { workspace = true }
   ```
+
 - **Per-crate feature overrides**: Only allowed if documented and approved by **dependency-management-coordinator**
 - **Document overrides**: Add comment explaining why crate deviates from workspace norm
 
 ### Internal Workspace Dependencies
 
 - **Use relative paths for workspace members**:
+
   ```toml
   [dependencies]
   html-to-markdown = { path = "../html-to-markdown", version = "1.2" }
   ```
+
 - **Always include version requirement** even with path dependency; version must match workspace
 - **Path dependencies never published**: Path deps are workspace-internal only; remove before publishing
 
@@ -103,10 +117,12 @@ ______________________________________________________________________
 ### MSRV Definition
 
 - **Workspace MSRV**: Defined in root `Cargo.toml`:
+
   ```toml
   [package]
   rust-version = "1.70"  # All crates must be compatible
   ```
+
 - **MSRV is binding**: No member crate can use features from newer Rust versions
 - **MSRV testing**: CI runs `cargo +1.70 build --workspace` on minimum version
 - **Document MSRV**: All crates include MSRV in crate-level rustdoc
@@ -121,10 +137,12 @@ ______________________________________________________________________
 ### MSRV-Safe Dependencies
 
 - **Verify MSRV compatibility**:
+
   ```bash
   cargo update
   cargo +1.70 check --workspace
   ```
+
 - **Dependencies older than MSRV target version**: Fail CI if any dependency drops support below MSRV
 - **Document exceptional cases**: If dependency requires higher MSRV, mark as optional/feature-gated
 
@@ -133,10 +151,12 @@ ______________________________________________________________________
 ### Path Dependency Strategy
 
 - **Workspace members**: Use relative paths only
+
   ```toml
   [dependencies]
   html-to-markdown-core = { path = "../html-to-markdown-core" }
   ```
+
 - **Crates depending on path members**: Must also specify workspace version
 - **Path dependency rules**:
   - Only for workspace members
@@ -146,11 +166,13 @@ ______________________________________________________________________
 ### Published Crate Dependencies
 
 - **External crates**: Use published versions from crates.io
+
   ```toml
   [dependencies]
   tokio = "1.35"
   serde = "1.0"
   ```
+
 - **Version specification**:
   - Use semantic versions: `"1.35"` (not `"1.35.0"`)
   - Allow patch updates: `"1.35"` allows `1.35.x`
@@ -160,6 +182,7 @@ ______________________________________________________________________
 ### Pre-Release Dependencies
 
 - **Never depend on pre-release versions** for stable releases:
+
   ```toml
   # BAD for stable release
   tokio = "1.35.0-rc.1"
@@ -167,6 +190,7 @@ ______________________________________________________________________
   # GOOD when crate requires it
   html5ever = "0.27.0"  # Currently pre-release but stable enough
   ```
+
 - **Track pre-release dependencies**: Document in RFC if required
 - **Clear deprecation path**: Mark when moving off pre-release versions
 
@@ -175,10 +199,12 @@ ______________________________________________________________________
 ### Cargo.lock Commitment
 
 - **Commit Cargo.lock to repository**: Version control ensures reproducible builds
+
   ```bash
   git add Cargo.lock
   git commit -m "Update Cargo.lock"
   ```
+
 - **Never .gitignore Cargo.lock**: All developers and CI use identical dependency versions
 - **Lock file updates**: `cargo update` updates Cargo.lock for minor/patch versions
 
@@ -196,6 +222,7 @@ ______________________________________________________________________
 
 - **Never rebase lock files**: Always merge with three-way merge strategy
 - **Conflict resolution**: Keep lock file from base branch, run `cargo update` to resolve
+
   ```bash
   git checkout --ours Cargo.lock
   cargo update --aggressive
@@ -207,9 +234,11 @@ ______________________________________________________________________
 ### Cargo Audit Integration
 
 - **CI: cargo-audit step**: Run before every merge to main
+
   ```bash
   cargo audit --deny warnings
   ```
+
 - **Audit policy**: Zero tolerance for known vulnerabilities in dependency tree
 - **Fail-fast**: Any crate with vulnerability blocks CI; must be fixed immediately
 

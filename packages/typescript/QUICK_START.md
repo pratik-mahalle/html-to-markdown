@@ -41,6 +41,7 @@ console.log(metadata.links[0].href);      // "https://example.com"
 ### Functions
 
 #### `convertWithMetadata(html, options?, metadataConfig?)`
+
 Convert HTML string to Markdown with metadata extraction.
 
 ```typescript
@@ -48,6 +49,7 @@ const { markdown, metadata } = convertWithMetadata(html);
 ```
 
 #### `convertWithMetadataBuffer(buffer, options?, metadataConfig?)`
+
 Convert from Buffer/Uint8Array (zero-copy).
 
 ```typescript
@@ -56,6 +58,7 @@ const { markdown, metadata } = convertWithMetadataBuffer(buffer);
 ```
 
 #### `convertFileWithMetadata(filePath, options?, metadataConfig?)`
+
 Convert HTML file asynchronously.
 
 ```typescript
@@ -63,6 +66,7 @@ const { markdown, metadata } = await convertFileWithMetadata('page.html');
 ```
 
 #### `convertStreamWithMetadata(stream, options?, metadataConfig?)`
+
 Convert from Node.js stream.
 
 ```typescript
@@ -90,6 +94,7 @@ const result = convertWithMetadata(html, undefined, config);
 ## Metadata Structure
 
 ### Document Metadata
+
 ```typescript
 const doc = result.metadata.document;
 console.log(doc.title);           // Page title
@@ -104,6 +109,7 @@ console.log(doc.twitterCard);     // twitter:* properties
 ```
 
 ### Headers
+
 ```typescript
 result.metadata.headers.forEach(header => {
   console.log(`H${header.level}: ${header.text}`);
@@ -113,6 +119,7 @@ result.metadata.headers.forEach(header => {
 ```
 
 ### Links
+
 ```typescript
 result.metadata.links.forEach(link => {
   console.log(`[${link.text}](${link.href})`);
@@ -122,6 +129,7 @@ result.metadata.links.forEach(link => {
 ```
 
 ### Images
+
 ```typescript
 result.metadata.images.forEach(img => {
   console.log(`![${img.alt}](${img.src})`);
@@ -133,6 +141,7 @@ result.metadata.images.forEach(img => {
 ```
 
 ### Structured Data
+
 ```typescript
 result.metadata.structuredData.forEach(data => {
   console.log(`Type: ${data.dataType}`); // "json_ld", "microdata", "rdfa"
@@ -144,6 +153,7 @@ result.metadata.structuredData.forEach(data => {
 ## Common Use Cases
 
 ### Extract SEO Metadata
+
 ```typescript
 function getSeoMetadata(html: string) {
   const { metadata } = convertWithMetadata(html);
@@ -161,6 +171,7 @@ function getSeoMetadata(html: string) {
 ```
 
 ### Build Table of Contents
+
 ```typescript
 function buildTOC(html: string) {
   const { metadata } = convertWithMetadata(html);
@@ -174,6 +185,7 @@ function buildTOC(html: string) {
 ```
 
 ### Extract All Links
+
 ```typescript
 function getLinks(html: string) {
   const { metadata } = convertWithMetadata(html);
@@ -187,6 +199,7 @@ function getLinks(html: string) {
 ```
 
 ### Extract Images
+
 ```typescript
 function getImages(html: string) {
   const { metadata } = convertWithMetadata(html);
@@ -200,6 +213,7 @@ function getImages(html: string) {
 ```
 
 ### Check Accessibility
+
 ```typescript
 function checkA11y(html: string) {
   const { metadata } = convertWithMetadata(html);
@@ -218,18 +232,21 @@ function checkA11y(html: string) {
 ## Performance Tips
 
 1. **Use Buffer variant for large files**:
+
    ```typescript
    const buffer = await fs.promises.readFile('large.html');
    const result = convertWithMetadataBuffer(buffer);
    ```
 
 2. **Use Stream for processing**:
+
    ```typescript
    const stream = fs.createReadStream('large.html', 'utf8');
    const result = await convertStreamWithMetadata(stream);
    ```
 
 3. **Disable unused metadata extraction**:
+
    ```typescript
    const result = convertWithMetadata(html, undefined, {
      extractHeaders: true,
@@ -281,6 +298,7 @@ try {
 ## Support
 
 For issues or questions:
+
 - Check the main README.md
 - See METADATA.md for detailed API documentation
 - Review test cases in `tests/metadata.spec.ts`

@@ -5,6 +5,7 @@ Comprehensive test suite for the html-to-markdown Go module. Tests the FFI bindi
 ## Overview
 
 This test app validates:
+
 - **Basic HTML conversion** via FFI bindings
 - **Metadata extraction** (title, description, headers, links, images)
 - **Complex HTML structures** (nested lists, tables, code blocks, etc.)
@@ -52,16 +53,19 @@ go test -cover
 ## Test Structure
 
 ### Smoke Tests (`smoke_test.go`)
+
 - Package imports work correctly
 - Basic HTML to Markdown conversion
 - Heading conversion validation
 - Empty input handling
 
 ### Comprehensive Tests (`comprehensive_test.go`)
+
 - Fixture-driven tests loading from JSON
 - Basic HTML conversions (paragraphs, headings, links, etc.)
 
 ### Feature Tests (`feature_test.go`)
+
 - **API Tests**: Version information, MustConvert panic behavior
 - **Conversion Tests**: Complex HTML structures (nested lists, tables, code blocks, images, etc.)
 - **Error Handling**: Valid HTML, malformed HTML, empty strings, whitespace
@@ -96,7 +100,7 @@ The `go.mod` file uses a local `replace` directive for development. This can be 
 
 All 51 tests should pass:
 
-```
+```text
 ok  	github.com/kreuzberg-dev/html-to-markdown-test-app	0.3s
 ```
 

@@ -2,18 +2,22 @@
 description: "Event Handler Removal"
 name: event-handler-removal
 ---
+
 Remove JavaScript event handlers from HTML
 
 Key source files:
+
 - ammonia crate configuration
 
 Master concepts:
+
 - Event handler attributes
 - Wildcard pattern matching
 - SVG event handlers
 - Complete removal
 
 Step by step:
+
 1. Identify event handler attributes
    - HTML events like onclick, onload, onerror, onmouseover, etc.
    - SVG events like onload, onactivate, onbuild, etc.

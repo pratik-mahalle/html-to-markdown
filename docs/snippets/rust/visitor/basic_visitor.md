@@ -1,5 +1,5 @@
 ```rust
-use html_to_markdown_rs::{convert_with_visitor, Visitor, VisitResult};
+use html_to_markdown_rs::{convert, ConversionOptions, Visitor, VisitResult};
 
 struct LinkRewriter;
 
@@ -12,7 +12,11 @@ impl Visitor for LinkRewriter {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let html = r#"<a href="https://example.com">Click here</a>"#;
-    let markdown = convert_with_visitor(html, LinkRewriter, None)?;
+    let options = ConversionOptions::builder()
+        .visitor(LinkRewriter)
+        .build();
+    let result = convert(html, Some(options))?;
+    let markdown = result.content.unwrap_or_default();
     println!("{markdown}");
     Ok(())
 }

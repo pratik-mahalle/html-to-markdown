@@ -21,7 +21,7 @@ ______________________________________________________________________
 
 WASM crates follow the pattern `crates/{module_name}-wasm`:
 
-```
+```text
 crates/my-module-wasm/
   ├── Cargo.toml          # [lib] cdylib, wasm-bindgen dependencies
   ├── src/

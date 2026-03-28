@@ -2,6 +2,7 @@
 name: Whitespace Normalization
 priority: high
 ---
+
 Normalize whitespace per configuration
 
 - Preserve mode: Keep all whitespace as-is

@@ -2,18 +2,22 @@
 description: "Sanitization Verification"
 name: sanitization-verification
 ---
+
 Verify sanitization is effective
 
 Key source files:
+
 - Test suite
 
 Master concepts:
+
 - Input to Output comparison
 - Element removal verification
 - Content preservation
 - Edge case validation
 
 Step by step:
+
 1. For each XSS payload:
    a. Run through sanitizer
    b. Verify dangerous elements removed

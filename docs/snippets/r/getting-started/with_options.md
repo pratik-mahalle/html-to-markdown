@@ -7,6 +7,6 @@ opts <- conversion_options(
   wrap_width = 80L
 )
 
-markdown <- convert_with_options("<h1>Hello</h1><p>World</p>", opts)
-cat(markdown)
+result <- convert("<h1>Hello</h1><p>World</p>", opts)
+cat(result$content)
 ```

@@ -163,9 +163,9 @@ html-to-markdown/
 1. Edit code in `crates/html-to-markdown/src/`
 1. Run Rust tests: `task test:rust` or `cargo test`
 1. Rebuild bindings:
-    - Python: `task build`
-    - Node.js: `cd crates/html-to-markdown-node && pnpm run build`
-    - WASM: `cd crates/html-to-markdown-wasm && pnpm run build:all`
+   - Python: `task build`
+   - Node.js: `cd crates/html-to-markdown-node && pnpm run build`
+   - WASM: `cd crates/html-to-markdown-wasm && pnpm run build:all`
 1. Run integration tests: `task test:python` or `pnpm test`
 
 ### Python API Changes
@@ -289,21 +289,23 @@ All Python/Rust checks run automatically via prek on commit.
 
 1. **Update versions** in:
 
-    - `Cargo.toml` (workspace.package.version)
-    - `packages/*/package.json`
-    - `crates/html-to-markdown-node/package.json`
-    - `crates/html-to-markdown-wasm/package.json`
+   - `Cargo.toml` (workspace.package.version)
+   - `packages/*/package.json`
+   - `crates/html-to-markdown-node/package.json`
+   - `crates/html-to-markdown-wasm/package.json`
 
-    ```toml
-    # Cargo.toml
+     ```toml
+
+## Cargo.toml
+
     [workspace.package]
     version = "2.4.2"
-    ```
+     ```
 
-    ```json
+     ```json
     // package.json files
     "version": "2.4.2"
-    ```
+     ```
 
 1. Update `CHANGELOG.md` with changes
 
@@ -334,11 +336,11 @@ All Python/Rust checks run automatically via prek on commit.
 
 1. **Automated workflows trigger**:
 
-    - `release.yml` - GitHub release with CLI binaries
-    - `release-homebrew.yml` - Updates Homebrew formula
-    - `publish-cargo.yml` - Publishes to crates.io
-    - `release.yaml` - Publishes Python to PyPI
-    - Manual npm publish required (see below)
+   - `release.yml` - GitHub release with CLI binaries
+   - `release-homebrew.yml` - Updates Homebrew formula
+   - `publish-cargo.yml` - Publishes to crates.io
+   - `release.yaml` - Publishes Python to PyPI
+   - Manual npm publish required (see below)
 
 1. **Publish npm packages** (manual):
 
@@ -363,13 +365,13 @@ All Python/Rust checks run automatically via prek on commit.
 
 1. **Required secrets** (already configured):
 
-    - `CARGO_TOKEN` - From <https://crates.io/settings/tokens>
-    - `HOMEBREW_TOKEN` - GitHub token with `repo` scope
-    - PyPI uses trusted publishing (OIDC); no `PYPI_TOKEN` secret is required
-    - npm uses trusted publishing (OIDC); no `NPM_TOKEN` secret is required
-    - NuGet uses trusted publishing (OIDC); no `NUGET_API_KEY` secret is required
+   - `CARGO_TOKEN` - From <https://crates.io/settings/tokens>
+   - `HOMEBREW_TOKEN` - GitHub token with `repo` scope
+   - PyPI uses trusted publishing (OIDC); no `PYPI_TOKEN` secret is required
+   - npm uses trusted publishing (OIDC); no `NPM_TOKEN` secret is required
+   - NuGet uses trusted publishing (OIDC); no `NUGET_API_KEY` secret is required
 
-### Post-release Verification
+#### Post-release Verification
 
 Verify all distributions are published:
 
@@ -381,12 +383,12 @@ Verify all distributions are published:
 - **Homebrew**: <https://github.com/kreuzberg-dev/homebrew-tap>
 - **GitHub**: <https://github.com/kreuzberg-dev/html-to-markdown/releases>
 
-## Getting Help
+### Getting Help
 
 - **Issues**: [GitHub Issues](https://github.com/kreuzberg-dev/html-to-markdown/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/kreuzberg-dev/html-to-markdown/discussions)
 - **Discord**: [Kreuzberg Community](https://discord.gg/pXxagNK2zN)
 
-## License
+### License
 
 By contributing, you agree that your contributions will be licensed under the MIT License.
