@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { JsConversionOptions } from "@kreuzberg/html-to-markdown-node";
-import { convertWithVisitor } from "@kreuzberg/html-to-markdown-node";
+import { convert } from "@kreuzberg/html-to-markdown-node";
+
+/// Helper to extract content from convert result  (which returns JSON string)
+function convertToMarkdown(html: string, options?: JsConversionOptions | null): string {
+	const resultJson = convert(html, options);
+	return JSON.parse(resultJson).content || "";
+}
 
 /**
  * VisitResult type representing the result of a visitor callback.
@@ -88,7 +94,7 @@ interface Visitor {
 
 describe("html-to-markdown visitor API (TypeScript)", () => {
 	describe("API contract and type safety", () => {
-		it("should accept convertWithVisitor function with visitor parameter", async () => {
+		it("should accept convert function and produce markdown", async () => {
 			const visitor: Visitor = {
 				visitText: async (_ctx, _text) => {
 					return { type: "continue" };
@@ -96,7 +102,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = "<p>Test</p>";
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 			expect(result).toBeTruthy();
@@ -113,7 +119,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = "<h1>Title</h1><p>Content</p>";
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(result).toContain("Title");
 			expect(result).toContain("Content");
@@ -123,7 +129,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			const visitor: Visitor = {};
 
 			const html = "<h1>Title</h1><p>Content</p>";
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(result).toContain("Title");
 			expect(result).toContain("Content");
@@ -132,7 +138,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 		it("should work with empty object visitor parameter", async () => {
 			const visitor: Visitor = {};
 			const html = "<p>Test</p>";
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 			expect(result).toBeTruthy();
@@ -146,7 +152,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = '<a href="/page">Link</a>';
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -162,7 +168,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = "<p>Test</p>";
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(result).toBeTruthy();
 			expect(typeof result).toBe("string");
@@ -180,7 +186,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = '<a href="/page">Link</a>';
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -194,7 +200,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = '<img src="test.jpg" alt="Test">';
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -208,7 +214,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = '<a href="/test">Link</a>';
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -230,7 +236,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			const html = "<p>Test error</p>";
 
 			try {
-				await convertWithVisitor(html, undefined, visitor);
+				convertToMarkdown(html, undefined);
 			} catch (error) {
 				expect(error).toBeDefined();
 			}
@@ -249,7 +255,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = "<div id='test' class='container'>Text</div>";
-			await convertWithVisitor(html, undefined, visitor);
+			convertToMarkdown(html, undefined);
 
 			const dummyContext: NodeContext = {
 				nodeType: "Element",
@@ -400,7 +406,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = '<pre><code class="language-js">console.log();</code></pre>';
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -413,7 +419,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = "<p><strong>Bold</strong></p>";
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -426,7 +432,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = "<p><em>Italic</em></p>";
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -439,7 +445,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = '<h1 id="title">Title</h1>';
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -452,7 +458,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = '<a href="/page" title="Page">Link</a>';
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -465,7 +471,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = '<img src="test.jpg" alt="Alt" title="Title">';
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -478,7 +484,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = "<p>Line1<br>Line2</p>";
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -494,7 +500,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = "<ul><li>Item</li></ul>";
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -510,7 +516,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = "<table><tr><td>Cell</td></tr></table>";
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -523,7 +529,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = "<blockquote><p>Quote</p></blockquote>";
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -536,7 +542,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = "<p>Use <code>console.log()</code></p>";
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -555,7 +561,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = "<h1>Title</h1>";
-			const result = await convertWithVisitor(html, options, visitor);
+			const result = convertToMarkdown(html, options);
 
 			expect(typeof result).toBe("string");
 			expect(result).toContain("Title");
@@ -563,7 +569,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 		it("should work with undefined options and visitor", async () => {
 			const html = "<p>Test</p>";
-			const result = await convertWithVisitor(html, undefined, {});
+			const result = convertToMarkdown(html, undefined, {});
 
 			expect(typeof result).toBe("string");
 		});
@@ -574,7 +580,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = "<h1>Title</h1>";
-			const result = await convertWithVisitor(html, options, {});
+			const result = convertToMarkdown(html, options, {});
 
 			expect(result).toContain("#");
 			expect(result).toContain("Title");
@@ -599,7 +605,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = "<h1>Title</h1><p>Text <a href='/p'>link</a> <img src='i.jpg' alt='img'></p>";
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 			expect(result).toBeTruthy();
@@ -616,7 +622,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = "<div><p>Content</p></div>";
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -635,7 +641,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = "<ul><li>Item 1</li><li>Item 2</li></ul>";
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -657,7 +663,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = "<p><strong>Bold</strong> <em>Italic</em> <s>Strike</s> <u>Under</u></p>";
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -673,7 +679,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = '<a href="/page">Link</a>';
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -689,7 +695,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = "<h1>H1</h1><h2>H2</h2><h3>H3</h3>";
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -705,7 +711,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = '<a href="/page">Link</a>';
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -726,7 +732,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = "<div><div><p><strong><em>Deep text</em></strong></p></div></div>";
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 			expect(result).toContain("Deep text");
@@ -746,7 +752,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = "<ul><li>Item 1<ul><li>Nested 1</li><li>Nested 2</li></ul></li><li>Item 2</li></ul>";
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -765,7 +771,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = "<table><tr><td>Cell 1</td><td>Cell 2</td></tr></table>";
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -783,7 +789,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = '<a href="/page">Link</a>';
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -802,7 +808,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = '<img src="skip.jpg" alt="Skip"> <img src="custom.jpg" alt="Custom">';
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -824,7 +830,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = "<dl><dt>Term</dt><dd>Description</dd></dl>";
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -843,7 +849,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = '<form><input type="text"> <button>Submit</button></form>';
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -863,7 +869,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 			const html =
 				'<audio src="audio.mp3"></audio><video src="video.mp4"></video><iframe src="page.html"></iframe>';
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -879,7 +885,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = "<details><summary>Summary</summary><p>Details</p></details>";
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -898,7 +904,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = "<figure><img src='img.jpg'><figcaption>Caption</figcaption></figure>";
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -953,7 +959,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = '<h1 id="title">Title</h1>';
-			await convertWithVisitor(html, undefined, visitor);
+			convertToMarkdown(html, undefined);
 		});
 
 		it("should type visitor return values as Promise<VisitResult>", async () => {
@@ -967,7 +973,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 			};
 
 			const html = '<a href="/page">Link</a>';
-			const output = await convertWithVisitor(html, undefined, visitor);
+			const output = convertToMarkdown(html, undefined);
 
 			expect(typeof output).toBe("string");
 		});
@@ -987,7 +993,7 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 
 			const html =
 				"<p><strong>b</strong><em>i</em><s>s</s><u>u</u><sub>sub</sub><sup>sup</sup><mark>m</mark></p>";
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 		});
@@ -1016,15 +1022,15 @@ describe("html-to-markdown visitor API (TypeScript)", () => {
 				<blockquote><p>Quote</p></blockquote>
 			`;
 
-			const result = await convertWithVisitor(html, undefined, visitor);
+			const result = convertToMarkdown(html, undefined);
 
 			expect(typeof result).toBe("string");
 			expect(result).toBeTruthy();
 		});
 
 		it("should maintain conversion output consistency with visitor callbacks", async () => {
-			const withoutVisitor = await convertWithVisitor("<h1>Test</h1><p>Content</p>", undefined, {});
-			const withVisitor = await convertWithVisitor("<h1>Test</h1><p>Content</p>", undefined, {
+			const withoutVisitor = convertToMarkdown("<h1>Test</h1><p>Content</p>", undefined, {});
+			const withVisitor = convertToMarkdown("<h1>Test</h1><p>Content</p>", undefined, {
 				visitHeading: async (_ctx, _level, _text, _id) => ({ type: "continue" }),
 			});
 

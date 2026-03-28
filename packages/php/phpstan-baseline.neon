@@ -1,7 +1,2 @@
 parameters:
-	ignoreErrors:
-		-
-			message: '#^Trying to invoke ''html_to_markdown…'' but it''s not a callable\.$#'
-			identifier: callable.nonCallable
-			count: 5
-			path: src/Bridge/ExtensionBridge.php
+	ignoreErrors: []
