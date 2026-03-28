@@ -257,8 +257,9 @@ fn collect_definition_items(dl_tag: &tl::HTMLTag, parser: &tl::Parser) -> Vec<(S
                 if pending_terms.is_empty() {
                     items.push((String::new(), definition));
                 } else {
-                    let last_idx = pending_terms.len().saturating_sub(1);
-                    for (i, term) in pending_terms.drain(..).enumerate() {
+                    let drained: Vec<String> = std::mem::take(&mut pending_terms);
+                    let last_idx = drained.len().saturating_sub(1);
+                    for (i, term) in drained.into_iter().enumerate() {
                         if i == last_idx {
                             items.push((term, definition.clone()));
                         } else {

@@ -33,7 +33,7 @@ async-visitor = ["html-to-markdown-rs/async-visitor", "visitor"]
 
 [dependencies]
 async-trait.workspace = true
-html-to-markdown-bindings-common = { path = "../html-to-markdown-bindings-common", version = "3.0.0-rc.1", features = [
+html-to-markdown-bindings-common = { path = "../html-to-markdown-bindings-common", version = "3.0.0", features = [
     "metadata",
     "inline-images",
 ] }
