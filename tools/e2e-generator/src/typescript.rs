@@ -78,6 +78,10 @@ fn render_test_file(category: &str, fixtures: &[&Fixture]) -> String {
 
     let _ = writeln!(out, "}});");
 
+    // Ensure final newline
+    if !out.ends_with('\n') {
+        out.push('\n');
+    }
     out
 }
 

@@ -4,6 +4,41 @@
 use html_to_markdown_rs::convert;
 
 #[test]
+fn test_blockquote_multiple_paragraphs() {
+    // Blockquote with multiple paragraphs has each paragraph prefixed
+    let html = r#"<blockquote><p>First paragraph.</p><p>Second paragraph.</p></blockquote>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(
+        content.contains("> First paragraph."),
+        "expected content to contain: > First paragraph."
+    );
+    assert!(
+        content.contains("> Second paragraph."),
+        "expected content to contain: > Second paragraph."
+    );
+}
+
+#[test]
+fn test_blockquote_nested() {
+    // Nested blockquote produces double-prefixed lines
+    let html = r#"<blockquote><p>Outer quote.</p><blockquote><p>Inner quote.</p></blockquote></blockquote>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert!(
+        content.contains("Outer quote."),
+        "expected content to contain: Outer quote."
+    );
+    assert!(
+        content.contains("Inner quote."),
+        "expected content to contain: Inner quote."
+    );
+}
+
+#[test]
 fn test_blockquote_simple() {
     // Simple blockquote
     let html = r#"<blockquote><p>Quote text</p></blockquote>"#;
@@ -14,6 +49,22 @@ fn test_blockquote_simple() {
         content.contains("> Quote text"),
         "expected content to contain: > Quote text"
     );
+}
+
+#[test]
+fn test_blockquote_with_list() {
+    // Blockquote containing a list preserves list items inside quote
+    let html = r#"<blockquote><p>Quote intro:</p><ul><li>Point one</li><li>Point two</li></ul></blockquote>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert!(
+        content.contains("Quote intro:"),
+        "expected content to contain: Quote intro:"
+    );
+    assert!(content.contains("Point one"), "expected content to contain: Point one");
+    assert!(content.contains("Point two"), "expected content to contain: Point two");
 }
 
 #[test]
@@ -52,6 +103,153 @@ fn test_code_block() {
         "expected content to contain: print('hello')"
     );
     assert!(content.contains("```"), "expected content to contain: ```");
+}
+
+#[test]
+fn test_code_block_no_language() {
+    // Code block without a language class produces a plain fenced block
+    let html = r#"<pre><code>plain code here</code></pre>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(content.contains("```"), "expected content to contain: ```");
+    assert!(
+        content.contains("plain code here"),
+        "expected content to contain: plain code here"
+    );
+}
+
+#[test]
+fn test_code_inline_in_paragraph() {
+    // Inline code element nested inside a paragraph
+    let html = r#"<p>Call the <code>initialize()</code> method first.</p>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(
+        content.contains("`initialize()`"),
+        "expected content to contain: `initialize()`"
+    );
+}
+
+#[test]
+fn test_code_with_backticks_in_content() {
+    // Inline code containing backtick characters is properly escaped
+    let html = r#"<p>Use <code>`backtick` here</code> carefully.</p>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert!(content.contains("backtick"), "expected content to contain: backtick");
+}
+
+#[test]
+fn test_emphasis_mark_highlight() {
+    // mark tag produces highlighted output
+    let html = r#"<p><mark>highlighted</mark></p>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert!(
+        content.contains("highlighted"),
+        "expected content to contain: highlighted"
+    );
+}
+
+#[test]
+fn test_emphasis_strikethrough_del() {
+    // del tag converts to GFM strikethrough
+    let html = r#"<p><del>deleted text</del></p>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(
+        content.contains("~~deleted text~~"),
+        "expected content to contain: ~~deleted text~~"
+    );
+}
+
+#[test]
+fn test_emphasis_strikethrough_s() {
+    // s tag converts to GFM strikethrough
+    let html = r#"<p><s>strikethrough</s></p>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(
+        content.contains("~~strikethrough~~"),
+        "expected content to contain: ~~strikethrough~~"
+    );
+}
+
+#[test]
+fn test_emphasis_subscript() {
+    // sub tag content is preserved
+    let html = r#"<p>H<sub>2</sub>O</p>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(content.contains("H"), "expected content to contain: H");
+    assert!(content.contains("2"), "expected content to contain: 2");
+    assert!(content.contains("O"), "expected content to contain: O");
+}
+
+#[test]
+fn test_emphasis_superscript() {
+    // sup tag content is preserved
+    let html = r#"<p>x<sup>2</sup></p>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(content.contains("x"), "expected content to contain: x");
+    assert!(content.contains("2"), "expected content to contain: 2");
+}
+
+#[test]
+fn test_emphasis_underline_u() {
+    // u tag content is preserved in output
+    let html = r#"<p><u>underlined</u></p>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(
+        content.contains("underlined"),
+        "expected content to contain: underlined"
+    );
+}
+
+#[test]
+fn test_form_input_elements() {
+    // Form input elements produce readable output without form mechanics
+    let html = r#"<form><label for="name">Name:</label><input type="text" id="name" placeholder="Enter name"></form>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert!(content.contains("Name"), "expected content to contain: Name");
+}
+
+#[test]
+fn test_form_select_options() {
+    // Select element with options produces readable output
+    let html = r#"<form><label>Color:</label><select><option value="red">Red</option><option value="blue" selected>Blue</option><option value="green">Green</option></select></form>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert!(content.contains("Color"), "expected content to contain: Color");
+}
+
+#[test]
+fn test_form_textarea() {
+    // Textarea element produces readable output
+    let html = r#"<form><label>Message:</label><textarea>Default text content</textarea></form>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert!(content.contains("Message"), "expected content to contain: Message");
 }
 
 #[test]
@@ -115,6 +313,54 @@ fn test_heading_h6() {
 }
 
 #[test]
+fn test_image_figure_figcaption() {
+    // Figure with figcaption preserves both image and caption
+    let html = r#"<figure><img src="sunset.jpg" alt="A sunset"><figcaption>Beautiful sunset over the ocean</figcaption></figure>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(
+        content.contains("![A sunset](sunset.jpg)"),
+        "expected content to contain: ![A sunset](sunset.jpg)"
+    );
+    assert!(
+        content.contains("Beautiful sunset over the ocean"),
+        "expected content to contain: Beautiful sunset over the ocean"
+    );
+}
+
+#[test]
+fn test_image_linked() {
+    // Image inside an anchor produces a linked image
+    let html = r#"<a href="https://example.com"><img src="icon.png" alt="Icon"></a>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(
+        content.contains("![Icon](icon.png)"),
+        "expected content to contain: ![Icon](icon.png)"
+    );
+    assert!(
+        content.contains("https://example.com"),
+        "expected content to contain: https://example.com"
+    );
+}
+
+#[test]
+fn test_image_no_alt() {
+    // Image without alt text produces image markdown
+    let html = r#"<img src="banner.jpg">"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert!(
+        content.contains("banner.jpg"),
+        "expected content to contain: banner.jpg"
+    );
+}
+
+#[test]
 fn test_image_simple() {
     // Image with alt text
     let html = r#"<img src="photo.jpg" alt="A photo">"#;
@@ -125,6 +371,20 @@ fn test_image_simple() {
         content.contains("![A photo](photo.jpg)"),
         "expected content to contain: ![A photo](photo.jpg)"
     );
+}
+
+#[test]
+fn test_image_with_title() {
+    // Image with title attribute includes title in output
+    let html = r#"<img src="chart.png" alt="Sales chart" title="Q3 Sales">"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(
+        content.contains("![Sales chart](chart.png"),
+        "expected content to contain: ![Sales chart](chart.png"
+    );
+    assert!(content.contains("Q3 Sales"), "expected content to contain: Q3 Sales");
 }
 
 #[test]
@@ -151,6 +411,108 @@ fn test_italic_em() {
 }
 
 #[test]
+fn test_line_break_br_tag() {
+    // Single br tag produces a line break in output
+    let html = r#"<p>First line.<br>Second line.</p>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(
+        content.contains("First line."),
+        "expected content to contain: First line."
+    );
+    assert!(
+        content.contains("Second line."),
+        "expected content to contain: Second line."
+    );
+}
+
+#[test]
+fn test_line_break_hr_tag() {
+    // hr tag produces a horizontal separator between content
+    let html = r#"<p>Before rule.</p><hr><p>After rule.</p>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert!(
+        content.contains("Before rule."),
+        "expected content to contain: Before rule."
+    );
+    assert!(
+        content.contains("After rule."),
+        "expected content to contain: After rule."
+    );
+}
+
+#[test]
+fn test_line_break_multiple_br() {
+    // Multiple consecutive br tags in sequence
+    let html = r#"<p>Start.<br><br>End.</p>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(content.contains("Start."), "expected content to contain: Start.");
+    assert!(content.contains("End."), "expected content to contain: End.");
+}
+
+#[test]
+fn test_link_anchor_fragment() {
+    // Fragment-only anchor link is preserved
+    let html = r##"<a href="#section">Jump to section</a>"##;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(
+        content.contains("[Jump to section](#section)"),
+        "expected content to contain: [Jump to section](#section)"
+    );
+}
+
+#[test]
+fn test_link_empty_href() {
+    // Link with empty href produces output with the link text
+    let html = r#"<a href="">No destination</a>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(
+        content.contains("No destination"),
+        "expected content to contain: No destination"
+    );
+}
+
+#[test]
+fn test_link_image_inside() {
+    // Image inside a link produces a linked image
+    let html = r#"<a href="https://example.com"><img src="logo.png" alt="Logo"></a>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(
+        content.contains("![Logo](logo.png)"),
+        "expected content to contain: ![Logo](logo.png)"
+    );
+    assert!(
+        content.contains("https://example.com"),
+        "expected content to contain: https://example.com"
+    );
+}
+
+#[test]
+fn test_link_mailto() {
+    // Mailto link is preserved with mailto: scheme
+    let html = r#"<a href="mailto:user@example.com">Email us</a>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(
+        content.contains("mailto:user@example.com"),
+        "expected content to contain: mailto:user@example.com"
+    );
+}
+
+#[test]
 fn test_link_simple() {
     // Simple link
     let html = r#"<a href="https://example.com">Example</a>"#;
@@ -160,6 +522,23 @@ fn test_link_simple() {
     assert!(
         content.contains("[Example](https://example.com)"),
         "expected content to contain: [Example](https://example.com)"
+    );
+}
+
+#[test]
+fn test_link_with_bold_text() {
+    // Link containing bold text preserves formatting
+    let html = r#"<a href="https://example.com"><strong>Bold link</strong></a>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(
+        content.contains("**Bold link**"),
+        "expected content to contain: **Bold link**"
+    );
+    assert!(
+        content.contains("https://example.com"),
+        "expected content to contain: https://example.com"
     );
 }
 
@@ -181,6 +560,102 @@ fn test_link_with_title() {
 }
 
 #[test]
+fn test_list_definition_dl() {
+    // Definition list with dt and dd elements
+    let html = r#"<dl><dt>Term One</dt><dd>Definition of term one.</dd><dt>Term Two</dt><dd>Definition of term two.</dd></dl>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(content.contains("Term One"), "expected content to contain: Term One");
+    assert!(
+        content.contains("Definition of term one."),
+        "expected content to contain: Definition of term one."
+    );
+    assert!(content.contains("Term Two"), "expected content to contain: Term Two");
+    assert!(
+        content.contains("Definition of term two."),
+        "expected content to contain: Definition of term two."
+    );
+}
+
+#[test]
+fn test_list_item_multiple_paragraphs() {
+    // List item containing multiple paragraphs
+    let html =
+        r#"<ul><li><p>First paragraph in item.</p><p>Second paragraph in item.</p></li><li>Simple item</li></ul>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(
+        content.contains("First paragraph in item."),
+        "expected content to contain: First paragraph in item."
+    );
+    assert!(
+        content.contains("Second paragraph in item."),
+        "expected content to contain: Second paragraph in item."
+    );
+    assert!(
+        content.contains("Simple item"),
+        "expected content to contain: Simple item"
+    );
+}
+
+#[test]
+fn test_list_mixed_nested() {
+    // Mixed list: ordered list nested inside unordered list
+    let html = r#"<ul><li>Item A<ol><li>Sub 1</li><li>Sub 2</li></ol></li><li>Item B</li></ul>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(content.contains("Item A"), "expected content to contain: Item A");
+    assert!(content.contains("Sub 1"), "expected content to contain: Sub 1");
+    assert!(content.contains("Sub 2"), "expected content to contain: Sub 2");
+    assert!(content.contains("Item B"), "expected content to contain: Item B");
+}
+
+#[test]
+fn test_list_nested_ordered() {
+    // Nested ordered list with two levels of depth
+    let html = r#"<ol><li>Step 1<ol><li>Step 1a</li><li>Step 1b</li></ol></li><li>Step 2</li></ol>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(content.contains("Step 1"), "expected content to contain: Step 1");
+    assert!(content.contains("Step 1a"), "expected content to contain: Step 1a");
+    assert!(content.contains("Step 1b"), "expected content to contain: Step 1b");
+    assert!(content.contains("Step 2"), "expected content to contain: Step 2");
+}
+
+#[test]
+fn test_list_nested_unordered() {
+    // Nested unordered list with two levels of depth
+    let html = r#"<ul><li>Parent A<ul><li>Child A1</li><li>Child A2</li></ul></li><li>Parent B</li></ul>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(content.contains("Parent A"), "expected content to contain: Parent A");
+    assert!(content.contains("Child A1"), "expected content to contain: Child A1");
+    assert!(content.contains("Child A2"), "expected content to contain: Child A2");
+    assert!(content.contains("Parent B"), "expected content to contain: Parent B");
+}
+
+#[test]
+fn test_list_task_checkboxes() {
+    // Task list with checked and unchecked checkboxes
+    let html =
+        r#"<ul><li><input type="checkbox" checked> Done task</li><li><input type="checkbox"> Pending task</li></ul>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert!(content.contains("Done task"), "expected content to contain: Done task");
+    assert!(
+        content.contains("Pending task"),
+        "expected content to contain: Pending task"
+    );
+}
+
+#[test]
 fn test_ordered_list() {
     // Ordered list
     let html = r#"<ol><li>First</li><li>Second</li><li>Third</li></ol>"#;
@@ -190,6 +665,195 @@ fn test_ordered_list() {
     assert!(content.contains("1. First"), "expected content to contain: 1. First");
     assert!(content.contains("2. Second"), "expected content to contain: 2. Second");
     assert!(content.contains("3. Third"), "expected content to contain: 3. Third");
+}
+
+#[test]
+fn test_paragraph_multiple() {
+    // Multiple paragraphs are separated by a blank line
+    let html = r#"<p>First paragraph.</p><p>Second paragraph.</p>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(
+        content.contains("First paragraph."),
+        "expected content to contain: First paragraph."
+    );
+    assert!(
+        content.contains("Second paragraph."),
+        "expected content to contain: Second paragraph."
+    );
+}
+
+#[test]
+fn test_paragraph_nested_divs() {
+    // Text nested inside divs is extracted correctly
+    let html = r#"<div><div><p>Nested text</p></div></div>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(
+        content.contains("Nested text"),
+        "expected content to contain: Nested text"
+    );
+}
+
+#[test]
+fn test_paragraph_simple() {
+    // Simple paragraph converts to plain text
+    let html = r#"<p>Hello World</p>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert_eq!(content.trim(), "Hello World", "content_equals mismatch");
+}
+
+#[test]
+fn test_paragraph_with_inline_formatting() {
+    // Paragraph with bold, italic, and a link
+    let html =
+        r#"<p>This has <strong>bold</strong>, <em>italic</em>, and a <a href="https://example.com">link</a>.</p>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(content.contains("**bold**"), "expected content to contain: **bold**");
+    assert!(content.contains("*italic*"), "expected content to contain: *italic*");
+    assert!(
+        content.contains("[link](https://example.com)"),
+        "expected content to contain: [link](https://example.com)"
+    );
+}
+
+#[test]
+fn test_paragraph_with_line_breaks() {
+    // Paragraph with br tags produces line breaks in output
+    let html = r#"<p>Line one.<br>Line two.<br>Line three.</p>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert!(content.contains("Line one."), "expected content to contain: Line one.");
+    assert!(content.contains("Line two."), "expected content to contain: Line two.");
+    assert!(
+        content.contains("Line three."),
+        "expected content to contain: Line three."
+    );
+}
+
+#[test]
+fn test_semantic_abbr() {
+    // Abbreviation element text is preserved
+    let html = r#"<p>The <abbr title="World Wide Web">WWW</abbr> is global.</p>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(content.contains("WWW"), "expected content to contain: WWW");
+}
+
+#[test]
+fn test_semantic_article() {
+    // Article element wrapping content preserves inner content
+    let html = r#"<article><h2>Article Title</h2><p>Article body.</p></article>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(
+        content.contains("Article Title"),
+        "expected content to contain: Article Title"
+    );
+    assert!(
+        content.contains("Article body."),
+        "expected content to contain: Article body."
+    );
+}
+
+#[test]
+fn test_semantic_definition_list() {
+    // Definition list with term and description
+    let html = r#"<dl><dt>HTML</dt><dd>HyperText Markup Language</dd><dt>CSS</dt><dd>Cascading Style Sheets</dd></dl>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(content.contains("HTML"), "expected content to contain: HTML");
+    assert!(
+        content.contains("HyperText Markup Language"),
+        "expected content to contain: HyperText Markup Language"
+    );
+    assert!(content.contains("CSS"), "expected content to contain: CSS");
+    assert!(
+        content.contains("Cascading Style Sheets"),
+        "expected content to contain: Cascading Style Sheets"
+    );
+}
+
+#[test]
+fn test_semantic_details_summary() {
+    // Details and summary elements produce readable output
+    let html = r#"<details><summary>Click to expand</summary><p>Hidden content here.</p></details>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert!(
+        content.contains("Click to expand"),
+        "expected content to contain: Click to expand"
+    );
+}
+
+#[test]
+fn test_semantic_hr() {
+    // Horizontal rule produces a separator in output
+    let html = r#"<p>Above</p><hr><p>Below</p>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert!(content.contains("Above"), "expected content to contain: Above");
+    assert!(content.contains("Below"), "expected content to contain: Below");
+}
+
+#[test]
+fn test_semantic_mark_highlight() {
+    // Mark tag produces highlighted output
+    let html = r#"<p>This is <mark>highlighted text</mark> in a sentence.</p>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert!(
+        content.contains("highlighted text"),
+        "expected content to contain: highlighted text"
+    );
+}
+
+#[test]
+fn test_semantic_section_with_heading() {
+    // Section element with heading preserves structure
+    let html = r#"<section><h3>Section Heading</h3><p>Section content.</p></section>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(
+        content.contains("Section Heading"),
+        "expected content to contain: Section Heading"
+    );
+    assert!(
+        content.contains("Section content."),
+        "expected content to contain: Section content."
+    );
+}
+
+#[test]
+fn test_semantic_sub_superscript() {
+    // Subscript and superscript elements are preserved in output
+    let html = r#"<p>H<sub>2</sub>O and E=mc<sup>2</sup></p>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert!(content.contains("H"), "expected content to contain: H");
+    assert!(content.contains("2"), "expected content to contain: 2");
+    assert!(content.contains("O"), "expected content to contain: O");
+    assert!(content.contains("E=mc"), "expected content to contain: E=mc");
 }
 
 #[test]
@@ -205,6 +869,77 @@ fn test_simple_table() {
     assert!(content.contains("30"), "expected content to contain: 30");
     assert!(content.contains("|"), "expected content to contain: |");
     assert!(content.contains("---"), "expected content to contain: ---");
+}
+
+#[test]
+fn test_table_empty() {
+    // Empty table produces no output or minimal output
+    let html = r#"<table></table>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert_eq!(content.trim(), "", "content_equals mismatch");
+}
+
+#[test]
+fn test_table_no_thead() {
+    // Table without thead uses first row as implied header
+    let html = r#"<table><tr><td>Product</td><td>Price</td></tr><tr><td>Apple</td><td>1.00</td></tr></table>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert!(content.contains("Product"), "expected content to contain: Product");
+    assert!(content.contains("Price"), "expected content to contain: Price");
+    assert!(content.contains("Apple"), "expected content to contain: Apple");
+    assert!(content.contains("1.00"), "expected content to contain: 1.00");
+    assert!(content.contains("|"), "expected content to contain: |");
+}
+
+#[test]
+fn test_table_pipe_chars_in_content() {
+    // Table cells containing pipe characters are escaped in output
+    let html = r#"<table><thead><tr><th>Expression</th><th>Result</th></tr></thead><tbody><tr><td>a | b</td><td>true</td></tr></tbody></table>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert!(
+        content.contains("Expression"),
+        "expected content to contain: Expression"
+    );
+    assert!(content.contains("Result"), "expected content to contain: Result");
+    assert!(content.contains("true"), "expected content to contain: true");
+}
+
+#[test]
+fn test_table_with_alignment() {
+    // Table with column alignment attributes
+    let html = r#"<table><thead><tr><th align="left">Left</th><th align="center">Center</th><th align="right">Right</th></tr></thead><tbody><tr><td>L</td><td>C</td><td>R</td></tr></tbody></table>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert!(content.contains("Left"), "expected content to contain: Left");
+    assert!(content.contains("Center"), "expected content to contain: Center");
+    assert!(content.contains("Right"), "expected content to contain: Right");
+    assert!(content.contains("L"), "expected content to contain: L");
+    assert!(content.contains("C"), "expected content to contain: C");
+    assert!(content.contains("R"), "expected content to contain: R");
+    assert!(content.contains("|"), "expected content to contain: |");
+}
+
+#[test]
+fn test_table_with_colspan() {
+    // Table with colspan attribute in a header cell
+    let html = r#"<table><thead><tr><th colspan="2">Full Name</th></tr></thead><tbody><tr><td>John</td><td>Doe</td></tr></tbody></table>"#;
+    let result = convert(html, None).expect("conversion should succeed");
+    let content = result.content.unwrap_or_default();
+
+    assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert!(content.contains("Full Name"), "expected content to contain: Full Name");
+    assert!(content.contains("John"), "expected content to contain: John");
+    assert!(content.contains("Doe"), "expected content to contain: Doe");
 }
 
 #[test]

@@ -26,6 +26,182 @@ class EdgeCasesTest extends TestCase
     }
 
     /**
+     * CJK (Chinese, Japanese, Korean) characters are preserved
+     */
+    public function testEncodingCjkCharacters(): void
+    {
+        $html = "<p>中文内容</p><p>日本語テキスト</p><p>한국어 텍스트</p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("中文内容", $content);
+        $this->assertStringContainsString("日本語テキスト", $content);
+        $this->assertStringContainsString("한국어 텍스트", $content);
+    }
+
+    /**
+     * Common HTML entities are decoded in output
+     */
+    public function testEncodingHtmlEntities(): void
+    {
+        $html = "<p>&amp; &lt; &gt; &nbsp; &quot; &apos;</p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("&", $content);
+        $this->assertStringContainsString("<", $content);
+        $this->assertStringContainsString(">", $content);
+    }
+
+    /**
+     * Named HTML entities like &mdash; and &hellip; are decoded
+     */
+    public function testEncodingNamedEntities(): void
+    {
+        $html = "<p>Em dash&mdash;used for parenthetical remarks&mdash;is common. Ellipsis&hellip; indicates omission. Non-breaking&nbsp;space.</p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("—", $content);
+        $this->assertStringContainsString("…", $content);
+    }
+
+    /**
+     * Numeric HTML entities (decimal and hex) are decoded
+     */
+    public function testEncodingNumericEntities(): void
+    {
+        $html = "<p>Copyright: &#169; Trade: &#174; Euro: &#8364; Hex: &#x00A9;</p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("©", $content);
+        $this->assertStringContainsString("®", $content);
+        $this->assertStringContainsString("€", $content);
+    }
+
+    /**
+     * Emoji and Unicode characters are preserved
+     */
+    public function testEncodingUnicodeEmoji(): void
+    {
+        $html = "<p>Hello 🌍 World 🚀</p><p>Stars: ⭐ ✨</p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("🌍", $content);
+        $this->assertStringContainsString("🚀", $content);
+        $this->assertStringContainsString("⭐", $content);
+    }
+
+    /**
+     * Document containing only HTML comments produces empty output
+     */
+    public function testHtmlCommentsOnly(): void
+    {
+        $html = "<!-- This is a comment --><!-- Another comment -->";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertSame("", trim($content));
+    }
+
+    /**
+     * Input that is only whitespace characters (spaces, tabs, newlines) produces empty output
+     */
+    public function testJustWhitespaceInput(): void
+    {
+        $html = "   ";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertSame("", trim($content));
+    }
+
+    /**
+     * Deeply nested elements (100 levels) are handled without stack overflow
+     */
+    public function testMalformedDeeplyNestedElements(): void
+    {
+        $html = "<div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><p>Deeply nested content</p></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("Deeply nested content", $content);
+    }
+
+    /**
+     * Missing closing tags on block elements are auto-closed by parser
+     */
+    public function testMalformedMissingBlockClosingTags(): void
+    {
+        $html = "<div><h1>Title<p>First paragraph<p>Second paragraph</div>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("Title", $content);
+        $this->assertStringContainsString("First paragraph", $content);
+        $this->assertStringContainsString("Second paragraph", $content);
+    }
+
+    /**
+     * Overlapping bold/italic tags are recovered by the HTML parser without panic
+     */
+    public function testMalformedOverlappingTags(): void
+    {
+        $html = "<p><b><i>bold and italic</b></i></p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("bold and italic", $content);
+    }
+
+    /**
+     * Unclosed <p> tag is recovered gracefully and content is preserved
+     */
+    public function testMalformedUnclosedParagraph(): void
+    {
+        $html = "<p>This paragraph is never closed";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("This paragraph is never closed", $content);
+    }
+
+    /**
+     * Document with only script tags produces empty output (scripts are stripped)
+     */
+    public function testScriptTagsOnly(): void
+    {
+        $html = "<html><head><script>alert('xss')</script></head><body><script>document.write('hello')</script></body></html>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertSame("", trim($content));
+    }
+
+    /**
+     * Document with only style tags produces empty output (styles are stripped)
+     */
+    public function testStyleTagsOnly(): void
+    {
+        $html = "<html><head><style>body { color: red; }</style></head><body><style>.foo { margin: 0; }</style></body></html>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertSame("", trim($content));
+    }
+
+    /**
      * Whitespace-only content
      */
     public function testWhitespaceOnly(): void
@@ -35,6 +211,72 @@ class EdgeCasesTest extends TestCase
         $content = $result['content'] ?? '';
 
         $this->assertSame("", trim($content));
+    }
+
+    /**
+     * javascript: URLs in href attributes are blocked and not included in output
+     */
+    public function testXssJavascriptUrlBlocked(): void
+    {
+        $html = "<p><a href=\"javascript:alert('xss')\">Click me</a></p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("Click me", $content);
+        $this->assertStringNotContainsString("javascript:", $content);
+        $this->assertStringNotContainsString("alert(", $content);
+    }
+
+    /**
+     * onclick and other on* event handlers are removed from elements
+     */
+    public function testXssOnclickHandlerRemoved(): void
+    {
+        $html = "<p><a href=\"https://example.com\" onclick=\"alert('xss')\">Click me</a></p><button onmouseover=\"steal_data()\">Hover me</button>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("Click me", $content);
+        $this->assertStringNotContainsString("onclick", $content);
+        $this->assertStringNotContainsString("onmouseover", $content);
+        $this->assertStringNotContainsString("alert(", $content);
+        $this->assertStringNotContainsString("steal_data", $content);
+    }
+
+    /**
+     * Script tag content is stripped and does not appear in output
+     */
+    public function testXssScriptTagStripped(): void
+    {
+        $html = "<p>Safe content.</p><script>alert('xss')</script><p>More safe content.</p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("Safe content", $content);
+        $this->assertStringContainsString("More safe content", $content);
+        $this->assertStringNotContainsString("<script>", $content);
+        $this->assertStringNotContainsString("alert(", $content);
+        $this->assertStringNotContainsString("xss", $content);
+    }
+
+    /**
+     * Script tags nested inside SVG are stripped
+     */
+    public function testXssSvgNestedScriptStripped(): void
+    {
+        $html = "<p>Before SVG.</p><svg xmlns=\"http://www.w3.org/2000/svg\"><script>alert('svg-xss')</script><text>SVG text</text></svg><p>After SVG.</p>";
+        $result = convert($html);
+        $content = $result['content'] ?? '';
+
+        $this->assertNotEmpty(trim($content), 'expected non-empty content');
+        $this->assertStringContainsString("Before SVG", $content);
+        $this->assertStringContainsString("After SVG", $content);
+        $this->assertStringNotContainsString("<script>", $content);
+        $this->assertStringNotContainsString("alert(", $content);
+        $this->assertStringNotContainsString("svg-xss", $content);
     }
 
 }

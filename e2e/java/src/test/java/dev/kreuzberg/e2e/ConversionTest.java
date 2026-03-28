@@ -12,6 +12,29 @@ import dev.kreuzberg.htmltomarkdown.ConversionResult;
 class ConversionTest {
 
     @Test
+    void testBlockquoteMultipleParagraphs() {
+        // Blockquote with multiple paragraphs has each paragraph prefixed
+        var html = "<blockquote><p>First paragraph.</p><p>Second paragraph.</p></blockquote>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("> First paragraph."), "expected content to contain: > First paragraph.");
+        assertTrue(content.contains("> Second paragraph."), "expected content to contain: > Second paragraph.");
+    }
+
+    @Test
+    void testBlockquoteNested() {
+        // Nested blockquote produces double-prefixed lines
+        var html = "<blockquote><p>Outer quote.</p><blockquote><p>Inner quote.</p></blockquote></blockquote>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("Outer quote."), "expected content to contain: Outer quote.");
+        assertTrue(content.contains("Inner quote."), "expected content to contain: Inner quote.");
+    }
+
+    @Test
     void testBlockquoteSimple() {
         // Simple blockquote
         var html = "<blockquote><p>Quote text</p></blockquote>";
@@ -19,6 +42,19 @@ class ConversionTest {
         var content = result.content() != null ? result.content() : "";
 
         assertTrue(content.contains("> Quote text"), "expected content to contain: > Quote text");
+    }
+
+    @Test
+    void testBlockquoteWithList() {
+        // Blockquote containing a list preserves list items inside quote
+        var html = "<blockquote><p>Quote intro:</p><ul><li>Point one</li><li>Point two</li></ul></blockquote>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("Quote intro:"), "expected content to contain: Quote intro:");
+        assertTrue(content.contains("Point one"), "expected content to contain: Point one");
+        assertTrue(content.contains("Point two"), "expected content to contain: Point two");
     }
 
     @Test
@@ -51,6 +87,135 @@ class ConversionTest {
         assertTrue(content.contains("```python"), "expected content to contain: ```python");
         assertTrue(content.contains("print('hello')"), "expected content to contain: print('hello')");
         assertTrue(content.contains("```"), "expected content to contain: ```");
+    }
+
+    @Test
+    void testCodeBlockNoLanguage() {
+        // Code block without a language class produces a plain fenced block
+        var html = "<pre><code>plain code here</code></pre>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("```"), "expected content to contain: ```");
+        assertTrue(content.contains("plain code here"), "expected content to contain: plain code here");
+    }
+
+    @Test
+    void testCodeInlineInParagraph() {
+        // Inline code element nested inside a paragraph
+        var html = "<p>Call the <code>initialize()</code> method first.</p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("`initialize()`"), "expected content to contain: `initialize()`");
+    }
+
+    @Test
+    void testCodeWithBackticksInContent() {
+        // Inline code containing backtick characters is properly escaped
+        var html = "<p>Use <code>`backtick` here</code> carefully.</p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("backtick"), "expected content to contain: backtick");
+    }
+
+    @Test
+    void testEmphasisMarkHighlight() {
+        // mark tag produces highlighted output
+        var html = "<p><mark>highlighted</mark></p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("highlighted"), "expected content to contain: highlighted");
+    }
+
+    @Test
+    void testEmphasisStrikethroughDel() {
+        // del tag converts to GFM strikethrough
+        var html = "<p><del>deleted text</del></p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("~~deleted text~~"), "expected content to contain: ~~deleted text~~");
+    }
+
+    @Test
+    void testEmphasisStrikethroughS() {
+        // s tag converts to GFM strikethrough
+        var html = "<p><s>strikethrough</s></p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("~~strikethrough~~"), "expected content to contain: ~~strikethrough~~");
+    }
+
+    @Test
+    void testEmphasisSubscript() {
+        // sub tag content is preserved
+        var html = "<p>H<sub>2</sub>O</p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("H"), "expected content to contain: H");
+        assertTrue(content.contains("2"), "expected content to contain: 2");
+        assertTrue(content.contains("O"), "expected content to contain: O");
+    }
+
+    @Test
+    void testEmphasisSuperscript() {
+        // sup tag content is preserved
+        var html = "<p>x<sup>2</sup></p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("x"), "expected content to contain: x");
+        assertTrue(content.contains("2"), "expected content to contain: 2");
+    }
+
+    @Test
+    void testEmphasisUnderlineU() {
+        // u tag content is preserved in output
+        var html = "<p><u>underlined</u></p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("underlined"), "expected content to contain: underlined");
+    }
+
+    @Test
+    void testFormInputElements() {
+        // Form input elements produce readable output without form mechanics
+        var html = "<form><label for=\"name\">Name:</label><input type=\"text\" id=\"name\" placeholder=\"Enter name\"></form>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("Name"), "expected content to contain: Name");
+    }
+
+    @Test
+    void testFormSelectOptions() {
+        // Select element with options produces readable output
+        var html = "<form><label>Color:</label><select><option value=\"red\">Red</option><option value=\"blue\" selected>Blue</option><option value=\"green\">Green</option></select></form>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("Color"), "expected content to contain: Color");
+    }
+
+    @Test
+    void testFormTextarea() {
+        // Textarea element produces readable output
+        var html = "<form><label>Message:</label><textarea>Default text content</textarea></form>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("Message"), "expected content to contain: Message");
     }
 
     @Test
@@ -114,6 +279,39 @@ class ConversionTest {
     }
 
     @Test
+    void testImageFigureFigcaption() {
+        // Figure with figcaption preserves both image and caption
+        var html = "<figure><img src=\"sunset.jpg\" alt=\"A sunset\"><figcaption>Beautiful sunset over the ocean</figcaption></figure>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("![A sunset](sunset.jpg)"), "expected content to contain: ![A sunset](sunset.jpg)");
+        assertTrue(content.contains("Beautiful sunset over the ocean"), "expected content to contain: Beautiful sunset over the ocean");
+    }
+
+    @Test
+    void testImageLinked() {
+        // Image inside an anchor produces a linked image
+        var html = "<a href=\"https://example.com\"><img src=\"icon.png\" alt=\"Icon\"></a>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("![Icon](icon.png)"), "expected content to contain: ![Icon](icon.png)");
+        assertTrue(content.contains("https://example.com"), "expected content to contain: https://example.com");
+    }
+
+    @Test
+    void testImageNoAlt() {
+        // Image without alt text produces image markdown
+        var html = "<img src=\"banner.jpg\">";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("banner.jpg"), "expected content to contain: banner.jpg");
+    }
+
+    @Test
     void testImageSimple() {
         // Image with alt text
         var html = "<img src=\"photo.jpg\" alt=\"A photo\">";
@@ -121,6 +319,17 @@ class ConversionTest {
         var content = result.content() != null ? result.content() : "";
 
         assertTrue(content.contains("![A photo](photo.jpg)"), "expected content to contain: ![A photo](photo.jpg)");
+    }
+
+    @Test
+    void testImageWithTitle() {
+        // Image with title attribute includes title in output
+        var html = "<img src=\"chart.png\" alt=\"Sales chart\" title=\"Q3 Sales\">";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("![Sales chart](chart.png"), "expected content to contain: ![Sales chart](chart.png");
+        assertTrue(content.contains("Q3 Sales"), "expected content to contain: Q3 Sales");
     }
 
     @Test
@@ -144,6 +353,81 @@ class ConversionTest {
     }
 
     @Test
+    void testLineBreakBrTag() {
+        // Single br tag produces a line break in output
+        var html = "<p>First line.<br>Second line.</p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("First line."), "expected content to contain: First line.");
+        assertTrue(content.contains("Second line."), "expected content to contain: Second line.");
+    }
+
+    @Test
+    void testLineBreakHrTag() {
+        // hr tag produces a horizontal separator between content
+        var html = "<p>Before rule.</p><hr><p>After rule.</p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("Before rule."), "expected content to contain: Before rule.");
+        assertTrue(content.contains("After rule."), "expected content to contain: After rule.");
+    }
+
+    @Test
+    void testLineBreakMultipleBr() {
+        // Multiple consecutive br tags in sequence
+        var html = "<p>Start.<br><br>End.</p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("Start."), "expected content to contain: Start.");
+        assertTrue(content.contains("End."), "expected content to contain: End.");
+    }
+
+    @Test
+    void testLinkAnchorFragment() {
+        // Fragment-only anchor link is preserved
+        var html = "<a href=\"#section\">Jump to section</a>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("[Jump to section](#section)"), "expected content to contain: [Jump to section](#section)");
+    }
+
+    @Test
+    void testLinkEmptyHref() {
+        // Link with empty href produces output with the link text
+        var html = "<a href=\"\">No destination</a>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("No destination"), "expected content to contain: No destination");
+    }
+
+    @Test
+    void testLinkImageInside() {
+        // Image inside a link produces a linked image
+        var html = "<a href=\"https://example.com\"><img src=\"logo.png\" alt=\"Logo\"></a>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("![Logo](logo.png)"), "expected content to contain: ![Logo](logo.png)");
+        assertTrue(content.contains("https://example.com"), "expected content to contain: https://example.com");
+    }
+
+    @Test
+    void testLinkMailto() {
+        // Mailto link is preserved with mailto: scheme
+        var html = "<a href=\"mailto:user@example.com\">Email us</a>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("mailto:user@example.com"), "expected content to contain: mailto:user@example.com");
+    }
+
+    @Test
     void testLinkSimple() {
         // Simple link
         var html = "<a href=\"https://example.com\">Example</a>";
@@ -151,6 +435,17 @@ class ConversionTest {
         var content = result.content() != null ? result.content() : "";
 
         assertTrue(content.contains("[Example](https://example.com)"), "expected content to contain: [Example](https://example.com)");
+    }
+
+    @Test
+    void testLinkWithBoldText() {
+        // Link containing bold text preserves formatting
+        var html = "<a href=\"https://example.com\"><strong>Bold link</strong></a>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("**Bold link**"), "expected content to contain: **Bold link**");
+        assertTrue(content.contains("https://example.com"), "expected content to contain: https://example.com");
     }
 
     @Test
@@ -162,6 +457,82 @@ class ConversionTest {
 
         assertTrue(content.contains("[Example](https://example.com"), "expected content to contain: [Example](https://example.com");
         assertTrue(content.contains("Example Site"), "expected content to contain: Example Site");
+    }
+
+    @Test
+    void testListDefinitionDl() {
+        // Definition list with dt and dd elements
+        var html = "<dl><dt>Term One</dt><dd>Definition of term one.</dd><dt>Term Two</dt><dd>Definition of term two.</dd></dl>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("Term One"), "expected content to contain: Term One");
+        assertTrue(content.contains("Definition of term one."), "expected content to contain: Definition of term one.");
+        assertTrue(content.contains("Term Two"), "expected content to contain: Term Two");
+        assertTrue(content.contains("Definition of term two."), "expected content to contain: Definition of term two.");
+    }
+
+    @Test
+    void testListItemMultipleParagraphs() {
+        // List item containing multiple paragraphs
+        var html = "<ul><li><p>First paragraph in item.</p><p>Second paragraph in item.</p></li><li>Simple item</li></ul>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("First paragraph in item."), "expected content to contain: First paragraph in item.");
+        assertTrue(content.contains("Second paragraph in item."), "expected content to contain: Second paragraph in item.");
+        assertTrue(content.contains("Simple item"), "expected content to contain: Simple item");
+    }
+
+    @Test
+    void testListMixedNested() {
+        // Mixed list: ordered list nested inside unordered list
+        var html = "<ul><li>Item A<ol><li>Sub 1</li><li>Sub 2</li></ol></li><li>Item B</li></ul>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("Item A"), "expected content to contain: Item A");
+        assertTrue(content.contains("Sub 1"), "expected content to contain: Sub 1");
+        assertTrue(content.contains("Sub 2"), "expected content to contain: Sub 2");
+        assertTrue(content.contains("Item B"), "expected content to contain: Item B");
+    }
+
+    @Test
+    void testListNestedOrdered() {
+        // Nested ordered list with two levels of depth
+        var html = "<ol><li>Step 1<ol><li>Step 1a</li><li>Step 1b</li></ol></li><li>Step 2</li></ol>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("Step 1"), "expected content to contain: Step 1");
+        assertTrue(content.contains("Step 1a"), "expected content to contain: Step 1a");
+        assertTrue(content.contains("Step 1b"), "expected content to contain: Step 1b");
+        assertTrue(content.contains("Step 2"), "expected content to contain: Step 2");
+    }
+
+    @Test
+    void testListNestedUnordered() {
+        // Nested unordered list with two levels of depth
+        var html = "<ul><li>Parent A<ul><li>Child A1</li><li>Child A2</li></ul></li><li>Parent B</li></ul>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("Parent A"), "expected content to contain: Parent A");
+        assertTrue(content.contains("Child A1"), "expected content to contain: Child A1");
+        assertTrue(content.contains("Child A2"), "expected content to contain: Child A2");
+        assertTrue(content.contains("Parent B"), "expected content to contain: Parent B");
+    }
+
+    @Test
+    void testListTaskCheckboxes() {
+        // Task list with checked and unchecked checkboxes
+        var html = "<ul><li><input type=\"checkbox\" checked> Done task</li><li><input type=\"checkbox\"> Pending task</li></ul>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("Done task"), "expected content to contain: Done task");
+        assertTrue(content.contains("Pending task"), "expected content to contain: Pending task");
     }
 
     @Test
@@ -177,6 +548,155 @@ class ConversionTest {
     }
 
     @Test
+    void testParagraphMultiple() {
+        // Multiple paragraphs are separated by a blank line
+        var html = "<p>First paragraph.</p><p>Second paragraph.</p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("First paragraph."), "expected content to contain: First paragraph.");
+        assertTrue(content.contains("Second paragraph."), "expected content to contain: Second paragraph.");
+    }
+
+    @Test
+    void testParagraphNestedDivs() {
+        // Text nested inside divs is extracted correctly
+        var html = "<div><div><p>Nested text</p></div></div>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("Nested text"), "expected content to contain: Nested text");
+    }
+
+    @Test
+    void testParagraphSimple() {
+        // Simple paragraph converts to plain text
+        var html = "<p>Hello World</p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertEquals("Hello World", content.strip(), "content_equals mismatch");
+    }
+
+    @Test
+    void testParagraphWithInlineFormatting() {
+        // Paragraph with bold, italic, and a link
+        var html = "<p>This has <strong>bold</strong>, <em>italic</em>, and a <a href=\"https://example.com\">link</a>.</p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("**bold**"), "expected content to contain: **bold**");
+        assertTrue(content.contains("*italic*"), "expected content to contain: *italic*");
+        assertTrue(content.contains("[link](https://example.com)"), "expected content to contain: [link](https://example.com)");
+    }
+
+    @Test
+    void testParagraphWithLineBreaks() {
+        // Paragraph with br tags produces line breaks in output
+        var html = "<p>Line one.<br>Line two.<br>Line three.</p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("Line one."), "expected content to contain: Line one.");
+        assertTrue(content.contains("Line two."), "expected content to contain: Line two.");
+        assertTrue(content.contains("Line three."), "expected content to contain: Line three.");
+    }
+
+    @Test
+    void testSemanticAbbr() {
+        // Abbreviation element text is preserved
+        var html = "<p>The <abbr title=\"World Wide Web\">WWW</abbr> is global.</p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("WWW"), "expected content to contain: WWW");
+    }
+
+    @Test
+    void testSemanticArticle() {
+        // Article element wrapping content preserves inner content
+        var html = "<article><h2>Article Title</h2><p>Article body.</p></article>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("Article Title"), "expected content to contain: Article Title");
+        assertTrue(content.contains("Article body."), "expected content to contain: Article body.");
+    }
+
+    @Test
+    void testSemanticDefinitionList() {
+        // Definition list with term and description
+        var html = "<dl><dt>HTML</dt><dd>HyperText Markup Language</dd><dt>CSS</dt><dd>Cascading Style Sheets</dd></dl>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("HTML"), "expected content to contain: HTML");
+        assertTrue(content.contains("HyperText Markup Language"), "expected content to contain: HyperText Markup Language");
+        assertTrue(content.contains("CSS"), "expected content to contain: CSS");
+        assertTrue(content.contains("Cascading Style Sheets"), "expected content to contain: Cascading Style Sheets");
+    }
+
+    @Test
+    void testSemanticDetailsSummary() {
+        // Details and summary elements produce readable output
+        var html = "<details><summary>Click to expand</summary><p>Hidden content here.</p></details>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("Click to expand"), "expected content to contain: Click to expand");
+    }
+
+    @Test
+    void testSemanticHr() {
+        // Horizontal rule produces a separator in output
+        var html = "<p>Above</p><hr><p>Below</p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("Above"), "expected content to contain: Above");
+        assertTrue(content.contains("Below"), "expected content to contain: Below");
+    }
+
+    @Test
+    void testSemanticMarkHighlight() {
+        // Mark tag produces highlighted output
+        var html = "<p>This is <mark>highlighted text</mark> in a sentence.</p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("highlighted text"), "expected content to contain: highlighted text");
+    }
+
+    @Test
+    void testSemanticSectionWithHeading() {
+        // Section element with heading preserves structure
+        var html = "<section><h3>Section Heading</h3><p>Section content.</p></section>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertTrue(content.contains("Section Heading"), "expected content to contain: Section Heading");
+        assertTrue(content.contains("Section content."), "expected content to contain: Section content.");
+    }
+
+    @Test
+    void testSemanticSubSuperscript() {
+        // Subscript and superscript elements are preserved in output
+        var html = "<p>H<sub>2</sub>O and E=mc<sup>2</sup></p>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("H"), "expected content to contain: H");
+        assertTrue(content.contains("2"), "expected content to contain: 2");
+        assertTrue(content.contains("O"), "expected content to contain: O");
+        assertTrue(content.contains("E=mc"), "expected content to contain: E=mc");
+    }
+
+    @Test
     void testSimpleTable() {
         // Simple table with header
         var html = "<table><thead><tr><th>Name</th><th>Age</th></tr></thead><tbody><tr><td>Alice</td><td>30</td></tr></tbody></table>";
@@ -189,6 +709,74 @@ class ConversionTest {
         assertTrue(content.contains("30"), "expected content to contain: 30");
         assertTrue(content.contains("|"), "expected content to contain: |");
         assertTrue(content.contains("---"), "expected content to contain: ---");
+    }
+
+    @Test
+    void testTableEmpty() {
+        // Empty table produces no output or minimal output
+        var html = "<table></table>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertEquals("", content.strip(), "content_equals mismatch");
+    }
+
+    @Test
+    void testTableNoThead() {
+        // Table without thead uses first row as implied header
+        var html = "<table><tr><td>Product</td><td>Price</td></tr><tr><td>Apple</td><td>1.00</td></tr></table>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("Product"), "expected content to contain: Product");
+        assertTrue(content.contains("Price"), "expected content to contain: Price");
+        assertTrue(content.contains("Apple"), "expected content to contain: Apple");
+        assertTrue(content.contains("1.00"), "expected content to contain: 1.00");
+        assertTrue(content.contains("|"), "expected content to contain: |");
+    }
+
+    @Test
+    void testTablePipeCharsInContent() {
+        // Table cells containing pipe characters are escaped in output
+        var html = "<table><thead><tr><th>Expression</th><th>Result</th></tr></thead><tbody><tr><td>a | b</td><td>true</td></tr></tbody></table>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("Expression"), "expected content to contain: Expression");
+        assertTrue(content.contains("Result"), "expected content to contain: Result");
+        assertTrue(content.contains("true"), "expected content to contain: true");
+    }
+
+    @Test
+    void testTableWithAlignment() {
+        // Table with column alignment attributes
+        var html = "<table><thead><tr><th align=\"left\">Left</th><th align=\"center\">Center</th><th align=\"right\">Right</th></tr></thead><tbody><tr><td>L</td><td>C</td><td>R</td></tr></tbody></table>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("Left"), "expected content to contain: Left");
+        assertTrue(content.contains("Center"), "expected content to contain: Center");
+        assertTrue(content.contains("Right"), "expected content to contain: Right");
+        assertTrue(content.contains("L"), "expected content to contain: L");
+        assertTrue(content.contains("C"), "expected content to contain: C");
+        assertTrue(content.contains("R"), "expected content to contain: R");
+        assertTrue(content.contains("|"), "expected content to contain: |");
+    }
+
+    @Test
+    void testTableWithColspan() {
+        // Table with colspan attribute in a header cell
+        var html = "<table><thead><tr><th colspan=\"2\">Full Name</th></tr></thead><tbody><tr><td>John</td><td>Doe</td></tr></tbody></table>";
+        var result = HtmlToMarkdown.convert(html);
+        var content = result.content() != null ? result.content() : "";
+
+        assertNotEquals("", content.strip(), "expected non-empty content");
+        assertTrue(content.contains("Full Name"), "expected content to contain: Full Name");
+        assertTrue(content.contains("John"), "expected content to contain: John");
+        assertTrue(content.contains("Doe"), "expected content to contain: Doe");
     }
 
     @Test

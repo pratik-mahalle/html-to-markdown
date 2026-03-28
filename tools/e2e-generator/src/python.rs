@@ -108,13 +108,28 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
     }
 
     let _ = writeln!(out, "    result = convert(html)");
-    let _ = writeln!(
-        out,
-        "    content = result if isinstance(result, str) else (result.get(\"content\") or \"\")"
-    );
-    let _ = writeln!(out);
 
     let a = &fixture.assertions;
+
+    // Check if we need the content variable
+    let needs_content = a.content_equals.is_some()
+        || a.content_not_empty == Some(true)
+        || a.content_is_none == Some(true)
+        || a.content_contains_all.is_some()
+        || a.content_contains_any.is_some()
+        || a.content_not_contains.is_some()
+        || a.min_content_length.is_some()
+        || a.max_content_length.is_some()
+        || a.content_starts_with.is_some()
+        || a.content_ends_with.is_some();
+
+    if needs_content {
+        let _ = writeln!(
+            out,
+            "    content = result if isinstance(result, str) else (result.get(\"content\") or \"\")"
+        );
+        let _ = writeln!(out);
+    }
 
     // content_equals
     if let Some(expected) = &a.content_equals {

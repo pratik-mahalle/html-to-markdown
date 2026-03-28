@@ -12,11 +12,197 @@ defmodule HtmlToMarkdown.EdgeCasesTest do
     assert String.trim(content) == ""
   end
 
+  test "encoding_cjk_characters: CJK (Chinese, Japanese, Korean) characters are preserved" do
+    html = "<p>中文内容</p><p>日本語テキスト</p><p>한국어 텍스트</p>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "中文内容")
+    assert String.contains?(content, "日本語テキスト")
+    assert String.contains?(content, "한국어 텍스트")
+  end
+
+  test "encoding_html_entities: Common HTML entities are decoded in output" do
+    html = "<p>&amp; &lt; &gt; &nbsp; &quot; &apos;</p>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "&")
+    assert String.contains?(content, "<")
+    assert String.contains?(content, ">")
+  end
+
+  test "encoding_named_entities: Named HTML entities like &mdash; and &hellip; are decoded" do
+    html =
+      "<p>Em dash&mdash;used for parenthetical remarks&mdash;is common. Ellipsis&hellip; indicates omission. Non-breaking&nbsp;space.</p>"
+
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "—")
+    assert String.contains?(content, "…")
+  end
+
+  test "encoding_numeric_entities: Numeric HTML entities (decimal and hex) are decoded" do
+    html = "<p>Copyright: &\#169; Trade: &\#174; Euro: &\#8364; Hex: &\#x00A9;</p>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "©")
+    assert String.contains?(content, "®")
+    assert String.contains?(content, "€")
+  end
+
+  test "encoding_unicode_emoji: Emoji and Unicode characters are preserved" do
+    html = "<p>Hello 🌍 World 🚀</p><p>Stars: ⭐ ✨</p>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "🌍")
+    assert String.contains?(content, "🚀")
+    assert String.contains?(content, "⭐")
+  end
+
+  test "html_comments_only: Document containing only HTML comments produces empty output" do
+    html = "<!-- This is a comment --><!-- Another comment -->"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) == ""
+  end
+
+  test "just_whitespace_input: Input that is only whitespace characters (spaces, tabs, newlines) produces empty output" do
+    html = "   "
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) == ""
+  end
+
+  test "malformed_deeply_nested_elements: Deeply nested elements (100 levels) are handled without stack overflow" do
+    html =
+      "<div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><p>Deeply nested content</p></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div>"
+
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "Deeply nested content")
+  end
+
+  test "malformed_missing_block_closing_tags: Missing closing tags on block elements are auto-closed by parser" do
+    html = "<div><h1>Title<p>First paragraph<p>Second paragraph</div>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "Title")
+    assert String.contains?(content, "First paragraph")
+    assert String.contains?(content, "Second paragraph")
+  end
+
+  test "malformed_overlapping_tags: Overlapping bold/italic tags are recovered by the HTML parser without panic" do
+    html = "<p><b><i>bold and italic</b></i></p>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "bold and italic")
+  end
+
+  test "malformed_unclosed_paragraph: Unclosed <p> tag is recovered gracefully and content is preserved" do
+    html = "<p>This paragraph is never closed"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "This paragraph is never closed")
+  end
+
+  test "script_tags_only: Document with only script tags produces empty output (scripts are stripped)" do
+    html =
+      "<html><head><script>alert('xss')</script></head><body><script>document.write('hello')</script></body></html>"
+
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) == ""
+  end
+
+  test "style_tags_only: Document with only style tags produces empty output (styles are stripped)" do
+    html =
+      "<html><head><style>body { color: red; }</style></head><body><style>.foo { margin: 0; }</style></body></html>"
+
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) == ""
+  end
+
   test "whitespace_only: Whitespace-only content" do
     html = "<p>   </p>"
     {:ok, result} = HtmlToMarkdown.convert(html)
     content = result[:content] || ""
 
     assert String.trim(content) == ""
+  end
+
+  test "xss_javascript_url_blocked: javascript: URLs in href attributes are blocked and not included in output" do
+    html = "<p><a href=\"javascript:alert('xss')\">Click me</a></p>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "Click me")
+    refute String.contains?(content, "javascript:")
+    refute String.contains?(content, "alert(")
+  end
+
+  test "xss_onclick_handler_removed: onclick and other on* event handlers are removed from elements" do
+    html =
+      "<p><a href=\"https://example.com\" onclick=\"alert('xss')\">Click me</a></p><button onmouseover=\"steal_data()\">Hover me</button>"
+
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "Click me")
+    refute String.contains?(content, "onclick")
+    refute String.contains?(content, "onmouseover")
+    refute String.contains?(content, "alert(")
+    refute String.contains?(content, "steal_data")
+  end
+
+  test "xss_script_tag_stripped: Script tag content is stripped and does not appear in output" do
+    html = "<p>Safe content.</p><script>alert('xss')</script><p>More safe content.</p>"
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "Safe content")
+    assert String.contains?(content, "More safe content")
+    refute String.contains?(content, "<script>")
+    refute String.contains?(content, "alert(")
+    refute String.contains?(content, "xss")
+  end
+
+  test "xss_svg_nested_script_stripped: Script tags nested inside SVG are stripped" do
+    html =
+      "<p>Before SVG.</p><svg xmlns=\"http://www.w3.org/2000/svg\"><script>alert('svg-xss')</script><text>SVG text</text></svg><p>After SVG.</p>"
+
+    {:ok, result} = HtmlToMarkdown.convert(html)
+    content = result[:content] || ""
+
+    assert String.trim(content) != ""
+    assert String.contains?(content, "Before SVG")
+    assert String.contains?(content, "After SVG")
+    refute String.contains?(content, "<script>")
+    refute String.contains?(content, "alert(")
+    refute String.contains?(content, "svg-xss")
   end
 end

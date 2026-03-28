@@ -18,6 +18,188 @@ void test_empty_html(void) {
     html_to_markdown_free_string(result);
 }
 
+void test_encoding_cjk_characters(void) {
+    /* CJK (Chinese, Japanese, Korean) characters are preserved */
+    const char *html = "<p>中文内容</p><p>日本語テキスト</p><p>한국어 텍스트</p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "中文内容") != NULL);
+    assert(strstr(result, "日本語テキスト") != NULL);
+    assert(strstr(result, "한국어 텍스트") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_encoding_html_entities(void) {
+    /* Common HTML entities are decoded in output */
+    const char *html = "<p>&amp; &lt; &gt; &nbsp; &quot; &apos;</p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "&") != NULL);
+    assert(strstr(result, "<") != NULL);
+    assert(strstr(result, ">") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_encoding_named_entities(void) {
+    /* Named HTML entities like &mdash; and &hellip; are decoded */
+    const char *html = "<p>Em dash&mdash;used for parenthetical remarks&mdash;is common. "
+                       "Ellipsis&hellip; indicates omission. Non-breaking&nbsp;space.</p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "—") != NULL);
+    assert(strstr(result, "…") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_encoding_numeric_entities(void) {
+    /* Numeric HTML entities (decimal and hex) are decoded */
+    const char *html = "<p>Copyright: &#169; Trade: &#174; Euro: &#8364; Hex: &#x00A9;</p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "©") != NULL);
+    assert(strstr(result, "®") != NULL);
+    assert(strstr(result, "€") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_encoding_unicode_emoji(void) {
+    /* Emoji and Unicode characters are preserved */
+    const char *html = "<p>Hello 🌍 World 🚀</p><p>Stars: ⭐ ✨</p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "🌍") != NULL);
+    assert(strstr(result, "🚀") != NULL);
+    assert(strstr(result, "⭐") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_html_comments_only(void) {
+    /* Document containing only HTML comments produces empty output */
+    const char *html = "<!-- This is a comment --><!-- Another comment -->";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_equals */
+    assert(strcmp(result, "") == 0);
+    html_to_markdown_free_string(result);
+}
+
+void test_just_whitespace_input(void) {
+    /* Input that is only whitespace characters (spaces, tabs, newlines) produces empty output */
+    const char *html = "   ";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_equals */
+    assert(strcmp(result, "") == 0);
+    html_to_markdown_free_string(result);
+}
+
+void test_malformed_deeply_nested_elements(void) {
+    /* Deeply nested elements (100 levels) are handled without stack overflow */
+    const char *html =
+        "<div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div>"
+        "<div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div>"
+        "<div><div><div><div><div><div><div><div><div><div><div><div><div><div><p>Deeply nested "
+        "content</p></div></div></div></div></div></div></div></div></div></div></div></div></"
+        "div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></"
+        "div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></"
+        "div></div></div></div></div></div></div></div>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "Deeply nested content") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_malformed_missing_block_closing_tags(void) {
+    /* Missing closing tags on block elements are auto-closed by parser */
+    const char *html = "<div><h1>Title<p>First paragraph<p>Second paragraph</div>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "Title") != NULL);
+    assert(strstr(result, "First paragraph") != NULL);
+    assert(strstr(result, "Second paragraph") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_malformed_overlapping_tags(void) {
+    /* Overlapping bold/italic tags are recovered by the HTML parser without panic */
+    const char *html = "<p><b><i>bold and italic</b></i></p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "bold and italic") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_malformed_unclosed_paragraph(void) {
+    /* Unclosed <p> tag is recovered gracefully and content is preserved */
+    const char *html = "<p>This paragraph is never closed";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "This paragraph is never closed") != NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_script_tags_only(void) {
+    /* Document with only script tags produces empty output (scripts are stripped) */
+    const char *html = "<html><head><script>alert('xss')</script></"
+                       "head><body><script>document.write('hello')</script></body></html>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_equals */
+    assert(strcmp(result, "") == 0);
+    html_to_markdown_free_string(result);
+}
+
+void test_style_tags_only(void) {
+    /* Document with only style tags produces empty output (styles are stripped) */
+    const char *html = "<html><head><style>body { color: red; }</style></head><body><style>.foo { "
+                       "margin: 0; }</style></body></html>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_equals */
+    assert(strcmp(result, "") == 0);
+    html_to_markdown_free_string(result);
+}
+
 void test_whitespace_only(void) {
     /* Whitespace-only content */
     const char *html = "<p>   </p>";
@@ -26,5 +208,78 @@ void test_whitespace_only(void) {
 
     /* content_equals */
     assert(strcmp(result, "") == 0);
+    html_to_markdown_free_string(result);
+}
+
+void test_xss_javascript_url_blocked(void) {
+    /* javascript: URLs in href attributes are blocked and not included in output */
+    const char *html = "<p><a href=\"javascript:alert('xss')\">Click me</a></p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "Click me") != NULL);
+    /* content_not_contains */
+    assert(strstr(result, "javascript:") == NULL);
+    assert(strstr(result, "alert(") == NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_xss_onclick_handler_removed(void) {
+    /* onclick and other on* event handlers are removed from elements */
+    const char *html = "<p><a href=\"https://example.com\" onclick=\"alert('xss')\">Click "
+                       "me</a></p><button onmouseover=\"steal_data()\">Hover me</button>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "Click me") != NULL);
+    /* content_not_contains */
+    assert(strstr(result, "onclick") == NULL);
+    assert(strstr(result, "onmouseover") == NULL);
+    assert(strstr(result, "alert(") == NULL);
+    assert(strstr(result, "steal_data") == NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_xss_script_tag_stripped(void) {
+    /* Script tag content is stripped and does not appear in output */
+    const char *html = "<p>Safe content.</p><script>alert('xss')</script><p>More safe content.</p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "Safe content") != NULL);
+    assert(strstr(result, "More safe content") != NULL);
+    /* content_not_contains */
+    assert(strstr(result, "<script>") == NULL);
+    assert(strstr(result, "alert(") == NULL);
+    assert(strstr(result, "xss") == NULL);
+    html_to_markdown_free_string(result);
+}
+
+void test_xss_svg_nested_script_stripped(void) {
+    /* Script tags nested inside SVG are stripped */
+    const char *html = "<p>Before SVG.</p><svg "
+                       "xmlns=\"http://www.w3.org/2000/svg\"><script>alert('svg-xss')</"
+                       "script><text>SVG text</text></svg><p>After SVG.</p>";
+    char *result = html_to_markdown_convert(html, NULL);
+    assert(result != NULL && "conversion should succeed");
+
+    /* content_not_empty */
+    assert(strlen(result) > 0);
+    /* content_contains_all */
+    assert(strstr(result, "Before SVG") != NULL);
+    assert(strstr(result, "After SVG") != NULL);
+    /* content_not_contains */
+    assert(strstr(result, "<script>") == NULL);
+    assert(strstr(result, "alert(") == NULL);
+    assert(strstr(result, "svg-xss") == NULL);
     html_to_markdown_free_string(result);
 }
