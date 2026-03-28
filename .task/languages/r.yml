@@ -118,6 +118,20 @@ tasks:
       - cmd: cd {{.R_PKG}} && R CMD check --as-cran --no-manual htmltomarkdown_*.tar.gz
         ignore_error: false
 
+  e2e:generate:
+    desc: "Generate R E2E tests from fixtures using e2e-generator"
+    silent: false
+    cmds:
+      - cmd: cargo run --release -p e2e-generator -- --language r --output e2e/r
+        ignore_error: false
+
+  e2e:test:
+    desc: "Run R E2E tests in e2e/r directory"
+    silent: false
+    cmds:
+      - cmd: cd e2e/r && Rscript tests/testthat.R
+        ignore_error: false
+
   clean:
     desc: "Clean R build artifacts"
     silent: false

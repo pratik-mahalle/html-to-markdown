@@ -12,8 +12,10 @@ mod wasm_tests {
         let html = "<h1>Hello World</h1>".to_string();
         let result = crate::convert::convert(html, JsValue::UNDEFINED);
         assert!(result.is_ok());
-        let markdown = result.unwrap();
-        assert!(markdown.contains("Hello World"));
+        let obj = result.unwrap();
+        let content = js_sys::Reflect::get(&obj, &JsValue::from_str("content")).unwrap();
+        let content_str = content.as_string().unwrap_or_default();
+        assert!(content_str.contains("Hello World"));
     }
 
     #[wasm_bindgen_test]

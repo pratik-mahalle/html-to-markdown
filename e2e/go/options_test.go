@@ -22,8 +22,8 @@ func Test_OptionsCodeBlockBackticks(t *testing.T) {
         content = *result.Content
     }
 
-    if !strings.Contains(content, "\`\`\`") {
-        t.Errorf("expected content to contain: \`\`\`")
+    if !strings.Contains(content, "```") {
+        t.Errorf("expected content to contain: ```")
     }
     if !strings.Contains(content, "console.log('hi');") {
         t.Errorf("expected content to contain: console.log('hi');")

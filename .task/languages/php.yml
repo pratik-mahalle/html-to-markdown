@@ -68,32 +68,32 @@ tasks:
     desc: "Lint PHP code WITH auto-fix (PHPStan + phpcbf)"
     silent: false
     cmds:
-      - cmd: vendor/bin/phpstan analyse --level 9 packages/php/src/
+      - cmd: php -d detect_unicode=0 vendor/bin/phpstan --configuration=packages/php/phpstan.neon --memory-limit=512M
         ignore_error: false
-      - cmd: vendor/bin/phpcbf --standard=PSR12 packages/php/src/ packages/php/tests/
+      - cmd: PHP_CS_FIXER_IGNORE_ENV=1 php vendor/bin/php-cs-fixer fix --config packages/php/php-cs-fixer.php packages/php/src packages/php/tests
         ignore_error: false
 
   lint:check:
-    desc: "Lint PHP code WITHOUT auto-fix (PHPStan + phpcs check)"
+    desc: "Lint PHP code WITHOUT auto-fix (PHPStan + php-cs-fixer check)"
     silent: false
     cmds:
-      - cmd: vendor/bin/phpstan analyse --level 9 packages/php/src/
+      - cmd: php -d detect_unicode=0 vendor/bin/phpstan --configuration=packages/php/phpstan.neon --memory-limit=512M
         ignore_error: false
-      - cmd: vendor/bin/phpcs --standard=PSR12 packages/php/src/ packages/php/tests/
+      - cmd: PHP_CS_FIXER_IGNORE_ENV=1 php vendor/bin/php-cs-fixer fix --config packages/php/php-cs-fixer.php --dry-run packages/php/src packages/php/tests
         ignore_error: false
 
   format:
-    desc: "Format PHP code with phpcbf (auto-fix)"
+    desc: "Format PHP code with php-cs-fixer (auto-fix)"
     silent: false
     cmds:
-      - cmd: vendor/bin/phpcbf --standard=PSR12 packages/php/src/ packages/php/tests/
+      - cmd: PHP_CS_FIXER_IGNORE_ENV=1 php vendor/bin/php-cs-fixer fix --config packages/php/php-cs-fixer.php packages/php/src packages/php/tests
         ignore_error: false
 
   format:check:
     desc: "Check PHP code formatting without modifications"
     silent: false
     cmds:
-      - cmd: vendor/bin/phpcs --standard=PSR12 packages/php/src/ packages/php/tests/
+      - cmd: PHP_CS_FIXER_IGNORE_ENV=1 php vendor/bin/php-cs-fixer fix --config packages/php/php-cs-fixer.php --dry-run packages/php/src packages/php/tests
         ignore_error: false
 
   update:
@@ -101,6 +101,20 @@ tasks:
     silent: false
     cmds:
       - cmd: composer update
+        ignore_error: false
+
+  e2e:generate:
+    desc: "Generate PHP E2E tests from fixtures using e2e-generator"
+    silent: false
+    cmds:
+      - cmd: cargo run --release -p e2e-generator -- --language php --output e2e/php
+        ignore_error: false
+
+  e2e:test:
+    desc: "Run PHP E2E tests in e2e/php directory"
+    silent: false
+    cmds:
+      - cmd: cd e2e/php && vendor/bin/phpunit tests/
         ignore_error: false
 
   clean:

@@ -17,7 +17,6 @@
 
 /* Core conversion functions */
 extern const char *html_to_markdown_version(void);
-extern char *html_to_markdown_convert_to_string(const char *html);
 extern char *html_to_markdown_convert(const char *html, const char *options_json);
 extern void html_to_markdown_free_string(char *s);
 
@@ -54,14 +53,6 @@ typedef struct {
     void *user_data;
     char _opaque_callbacks[sizeof(void *) * 80]; /* Oversized to accommodate all callback fields */
 } HtmlToMarkdownVisitorCallbacksCompat;
-
-/* ------------------------------------------------------------------ */
-/* Length-aware conversion                                            */
-/* ------------------------------------------------------------------ */
-
-extern char *html_to_markdown_convert_to_string_with_len(const char *html, uintptr_t *len_out);
-extern char *html_to_markdown_convert_to_string_bytes_with_len(const uint8_t *html, uintptr_t len,
-                                                               uintptr_t *len_out);
 
 /* ------------------------------------------------------------------ */
 /* Metadata conversion                                                */

@@ -142,14 +142,14 @@ func Test_CodeBlock(t *testing.T) {
         content = *result.Content
     }
 
-    if !strings.Contains(content, "\`\`\`python") {
-        t.Errorf("expected content to contain: \`\`\`python")
+    if !strings.Contains(content, "```python") {
+        t.Errorf("expected content to contain: ```python")
     }
     if !strings.Contains(content, "print('hello')") {
         t.Errorf("expected content to contain: print('hello')")
     }
-    if !strings.Contains(content, "\`\`\`") {
-        t.Errorf("expected content to contain: \`\`\`")
+    if !strings.Contains(content, "```") {
+        t.Errorf("expected content to contain: ```")
     }
 }
 
@@ -165,8 +165,8 @@ func Test_CodeBlockNoLanguage(t *testing.T) {
         content = *result.Content
     }
 
-    if !strings.Contains(content, "\`\`\`") {
-        t.Errorf("expected content to contain: \`\`\`")
+    if !strings.Contains(content, "```") {
+        t.Errorf("expected content to contain: ```")
     }
     if !strings.Contains(content, "plain code here") {
         t.Errorf("expected content to contain: plain code here")
@@ -185,14 +185,14 @@ func Test_CodeInlineInParagraph(t *testing.T) {
         content = *result.Content
     }
 
-    if !strings.Contains(content, "\`initialize()\`") {
-        t.Errorf("expected content to contain: \`initialize()\`")
+    if !strings.Contains(content, "`initialize()`") {
+        t.Errorf("expected content to contain: `initialize()`")
     }
 }
 
 func Test_CodeWithBackticksInContent(t *testing.T) {
     // Inline code containing backtick characters is properly escaped
-    html := `<p>Use <code>\`backtick\` here</code> carefully.</p>`
+    html := "<p>Use <code>`backtick` here</code> carefully.</p>"
     result, err := htmd.Convert(html)
     if err != nil {
         t.Fatalf("conversion failed: %v", err)
@@ -595,8 +595,8 @@ func Test_InlineCode(t *testing.T) {
         content = *result.Content
     }
 
-    if !strings.Contains(content, "\`console.log()\`") {
-        t.Errorf("expected content to contain: \`console.log()\`")
+    if !strings.Contains(content, "`console.log()`") {
+        t.Errorf("expected content to contain: `console.log()`")
     }
 }
 

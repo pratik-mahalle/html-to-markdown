@@ -25,22 +25,16 @@
 /* the test self-contained and avoids header compatibility issues.             */
 /* -------------------------------------------------------------------------- */
 
-/* Core conversion */
+/* Core conversion — returns JSON string with "content", "document",          */
+/* "metadata", "tables", and "warnings" fields.                               */
 extern const char *html_to_markdown_version(void);
-extern char *html_to_markdown_convert_to_string(const char *html);
+extern char *html_to_markdown_convert(const char *html, const char *options_json);
 extern void html_to_markdown_free_string(char *s);
 
 /* Error handling */
 extern const char *html_to_markdown_last_error(void);
 extern uint32_t html_to_markdown_last_error_code(void);
 extern const char *html_to_markdown_error_code_name(uint32_t code);
-
-/* Length-aware conversion */
-extern char *html_to_markdown_convert_to_string_with_len(const char *html,
-                                                         uintptr_t *len_out);
-extern char *html_to_markdown_convert_to_string_bytes_with_len(const uint8_t *html,
-                                                               uintptr_t len,
-                                                               uintptr_t *len_out);
 
 /* Metadata conversion */
 extern char *html_to_markdown_convert_with_metadata(const char *html,
@@ -196,7 +190,7 @@ static void test_library_info(void) {
     /* Test html_to_markdown_last_error before any error */
     {
         /* Trigger a successful conversion first to clear state */
-        char *r = html_to_markdown_convert_to_string("<p>init</p>");
+        char *r = html_to_markdown_convert("<p>init</p>", NULL);
         if (r)
             html_to_markdown_free_string(r);
 
@@ -255,25 +249,30 @@ static void test_error_codes(void) {
 /* -------------------------------------------------------------------------- */
 /* Section 3: Basic Conversion                                                */
 /* -------------------------------------------------------------------------- */
+/*                                                                            */
+/* html_to_markdown_convert() returns a JSON string of the form:             */
+/*   {"content":"...","document":...,"metadata":...,"tables":[...],...}      */
+/* We check that the JSON result contains expected text fragments.            */
+/* -------------------------------------------------------------------------- */
 
 static void test_basic_conversion(void) {
-    /* Simple HTML to Markdown */
+    /* Simple HTML to Markdown: result is JSON containing the content */
     {
         const char *html = "<h1>Hello</h1><p>World</p>";
-        char *result = html_to_markdown_convert_to_string(html);
+        char *result = html_to_markdown_convert(html, NULL);
         if (result && strstr(result, "Hello") && strstr(result, "World")) {
-            pass("convert(<h1>Hello</h1><p>World</p>) contains both words");
+            pass("convert(<h1>Hello</h1><p>World</p>) JSON contains both words");
         } else {
             fail("convert() basic test", result ? result : "NULL");
         }
         html_to_markdown_free_string(result);
     }
 
-    /* Heading produces '#' */
+    /* Heading produces '#' somewhere in the JSON content string */
     {
-        char *result = html_to_markdown_convert_to_string("<h1>Title</h1>");
-        if (result && result[0] == '#') {
-            pass("convert(<h1>Title</h1>) starts with '#'");
+        char *result = html_to_markdown_convert("<h1>Title</h1>", NULL);
+        if (result && strstr(result, "#")) {
+            pass("convert(<h1>Title</h1>) JSON contains '#'");
         } else {
             fail("heading conversion", result ? result : "NULL");
         }
@@ -282,9 +281,9 @@ static void test_basic_conversion(void) {
 
     /* Paragraph text */
     {
-        char *result = html_to_markdown_convert_to_string("<p>paragraph</p>");
+        char *result = html_to_markdown_convert("<p>paragraph</p>", NULL);
         if (result && strstr(result, "paragraph")) {
-            pass("convert(<p>paragraph</p>) contains 'paragraph'");
+            pass("convert(<p>paragraph</p>) JSON contains 'paragraph'");
         } else {
             fail("paragraph conversion", result ? result : "NULL");
         }
@@ -293,9 +292,9 @@ static void test_basic_conversion(void) {
 
     /* Bold text */
     {
-        char *result = html_to_markdown_convert_to_string("<strong>bold</strong>");
+        char *result = html_to_markdown_convert("<strong>bold</strong>", NULL);
         if (result && strstr(result, "**bold**")) {
-            pass("convert(<strong>bold</strong>) contains '**bold**'");
+            pass("convert(<strong>bold</strong>) JSON contains '**bold**'");
         } else {
             fail("bold conversion",
                  result ? result : "NULL");
@@ -305,9 +304,9 @@ static void test_basic_conversion(void) {
 
     /* Italic text */
     {
-        char *result = html_to_markdown_convert_to_string("<em>italic</em>");
+        char *result = html_to_markdown_convert("<em>italic</em>", NULL);
         if (result && strstr(result, "*italic*")) {
-            pass("convert(<em>italic</em>) contains '*italic*'");
+            pass("convert(<em>italic</em>) JSON contains '*italic*'");
         } else {
             fail("italic conversion",
                  result ? result : "NULL");
@@ -318,10 +317,10 @@ static void test_basic_conversion(void) {
     /* Link */
     {
         char *result =
-            html_to_markdown_convert_to_string("<a href=\"https://example.com\">link</a>");
+            html_to_markdown_convert("<a href=\"https://example.com\">link</a>", NULL);
         if (result && strstr(result, "https://example.com") &&
             strstr(result, "link")) {
-            pass("convert(<a>) contains URL and text");
+            pass("convert(<a>) JSON contains URL and text");
         } else {
             fail("link conversion", result ? result : "NULL");
         }
@@ -330,7 +329,7 @@ static void test_basic_conversion(void) {
 
     /* Empty input */
     {
-        char *result = html_to_markdown_convert_to_string("");
+        char *result = html_to_markdown_convert("", NULL);
         if (result != NULL) {
             pass("convert(\"\") returns non-NULL");
         } else {
@@ -343,9 +342,9 @@ static void test_basic_conversion(void) {
     {
         const char *html =
             "<div><h2>Sub</h2><ul><li>Item 1</li><li>Item 2</li></ul></div>";
-        char *result = html_to_markdown_convert_to_string(html);
+        char *result = html_to_markdown_convert(html, NULL);
         if (result && strstr(result, "Sub") && strstr(result, "Item 1")) {
-            pass("convert() handles nested HTML (headings + lists)");
+            pass("convert() JSON handles nested HTML (headings + lists)");
         } else {
             fail("nested HTML conversion", result ? result : "NULL");
         }
@@ -354,8 +353,8 @@ static void test_basic_conversion(void) {
 
     /* Unicode content */
     {
-        char *result = html_to_markdown_convert_to_string(
-            "<p>\xc3\xa9\xc3\xa0\xc3\xbc \xe4\xb8\xad\xe6\x96\x87</p>");
+        char *result = html_to_markdown_convert(
+            "<p>\xc3\xa9\xc3\xa0\xc3\xbc \xe4\xb8\xad\xe6\x96\x87</p>", NULL);
         if (result && strlen(result) > 0) {
             pass("convert() handles Unicode content");
         } else {
@@ -366,77 +365,7 @@ static void test_basic_conversion(void) {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Section 4: Length-aware Conversion                                         */
-/* -------------------------------------------------------------------------- */
-
-static void test_convert_with_len(void) {
-    /* convert_with_len basic */
-    {
-        uintptr_t len = 0;
-        char *result =
-            html_to_markdown_convert_to_string_with_len("<h1>Hello</h1>", &len);
-        if (result && len > 0 && len == strlen(result)) {
-            pass("convert_with_len() returns correct length");
-        } else {
-            fail("convert_with_len()", "length mismatch or NULL");
-        }
-        html_to_markdown_free_string(result);
-    }
-
-    /* convert_with_len empty */
-    {
-        uintptr_t len = 0;
-        char *result = html_to_markdown_convert_to_string_with_len("", &len);
-        if (result && len == strlen(result)) {
-            pass("convert_with_len(\"\") returns consistent length");
-        } else {
-            fail("convert_with_len(\"\")", "unexpected result");
-        }
-        html_to_markdown_free_string(result);
-    }
-
-    /* convert_with_len NULL input */
-    {
-        uintptr_t len = 0;
-        const char *result = html_to_markdown_convert_to_string_with_len(NULL, &len);
-        if (result == NULL) {
-            pass("convert_with_len(NULL) returns NULL");
-        } else {
-            fail("convert_with_len(NULL)", "expected NULL");
-        }
-    }
-
-    /* convert_bytes_with_len basic */
-    {
-        const char *html = "<p>Bytes</p>";
-        uintptr_t len_out = 0;
-        char *result = html_to_markdown_convert_to_string_bytes_with_len(
-            (const uint8_t *)html, strlen(html), &len_out);
-        if (result && len_out > 0 && len_out == strlen(result) &&
-            strstr(result, "Bytes")) {
-            pass("convert_bytes_with_len() works correctly");
-        } else {
-            fail("convert_bytes_with_len()", result ? result : "NULL");
-        }
-        html_to_markdown_free_string(result);
-    }
-
-    /* convert_bytes_with_len zero length */
-    {
-        uintptr_t len_out = 0;
-        char *result = html_to_markdown_convert_to_string_bytes_with_len(
-            (const uint8_t *)"ignored", 0, &len_out);
-        if (result && len_out == strlen(result)) {
-            pass("convert_bytes_with_len(len=0) handles gracefully");
-        } else {
-            fail("convert_bytes_with_len(len=0)", "unexpected result");
-        }
-        html_to_markdown_free_string(result);
-    }
-}
-
-/* -------------------------------------------------------------------------- */
-/* Section 5: Metadata Conversion                                            */
+/* Section 4: Metadata Conversion                                            */
 /* -------------------------------------------------------------------------- */
 
 static void test_metadata_conversion(void) {
@@ -517,13 +446,13 @@ static void test_metadata_conversion(void) {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Section 6: Error Handling                                                  */
+/* Section 5: Error Handling                                                  */
 /* -------------------------------------------------------------------------- */
 
 static void test_error_handling(void) {
     /* NULL input triggers error */
     {
-        const char *result = html_to_markdown_convert_to_string(NULL);
+        const char *result = html_to_markdown_convert(NULL, NULL);
         if (result == NULL) {
             pass("convert(NULL) returns NULL");
         } else {
@@ -533,7 +462,7 @@ static void test_error_handling(void) {
 
     /* Error state is set after failure */
     {
-        html_to_markdown_convert_to_string(NULL); /* trigger error */
+        html_to_markdown_convert(NULL, NULL); /* trigger error */
         const char *err = html_to_markdown_last_error();
         if (err && strlen(err) > 0) {
             pass("last_error() returns non-empty message after failure");
@@ -562,7 +491,7 @@ static void test_error_handling(void) {
 
     /* Successful conversion clears error state */
     {
-        char *result = html_to_markdown_convert_to_string("<p>ok</p>");
+        char *result = html_to_markdown_convert("<p>ok</p>", NULL);
         if (result)
             html_to_markdown_free_string(result);
         uint32_t code = html_to_markdown_last_error_code();
@@ -581,7 +510,7 @@ static void test_error_handling(void) {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Section 7: Visitor API                                                     */
+/* Section 6: Visitor API                                                     */
 /* -------------------------------------------------------------------------- */
 
 static void test_visitor_api(void) {
@@ -732,7 +661,7 @@ static void test_visitor_api(void) {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Section 8: Profiling API                                                   */
+/* Section 7: Profiling API                                                   */
 /* -------------------------------------------------------------------------- */
 
 static void test_profiling_api(void) {
@@ -761,7 +690,7 @@ static void test_profiling_api(void) {
         bool started =
             html_to_markdown_profile_start("/tmp/htm_test_profile.svg", 100);
         if (started) {
-            char *md = html_to_markdown_convert_to_string("<h1>Profile test</h1>");
+            char *md = html_to_markdown_convert("<h1>Profile test</h1>", NULL);
             if (md)
                 html_to_markdown_free_string(md);
             bool stopped = html_to_markdown_profile_stop();
@@ -778,7 +707,7 @@ static void test_profiling_api(void) {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Section 9: Memory Safety                                                   */
+/* Section 8: Memory Safety                                                   */
 /* -------------------------------------------------------------------------- */
 
 static void test_memory_safety(void) {
@@ -788,7 +717,7 @@ static void test_memory_safety(void) {
         int ok = 1;
         for (int i = 0; i < count; i++) {
             char *result =
-                html_to_markdown_convert_to_string("<p>stress test iteration</p>");
+                html_to_markdown_convert("<p>stress test iteration</p>", NULL);
             if (!result) {
                 ok = 0;
                 break;
@@ -808,8 +737,8 @@ static void test_memory_safety(void) {
     /* Alternating success/failure */
     {
         for (int i = 0; i < 10; i++) {
-            html_to_markdown_convert_to_string(NULL); /* failure */
-            char *result = html_to_markdown_convert_to_string("<p>ok</p>");
+            html_to_markdown_convert(NULL, NULL); /* failure */
+            char *result = html_to_markdown_convert("<p>ok</p>", NULL);
             if (result)
                 html_to_markdown_free_string(result);
         }
@@ -837,9 +766,6 @@ int main(void) {
 
     section("Basic Conversion");
     test_basic_conversion();
-
-    section("Length-aware Conversion");
-    test_convert_with_len();
 
     section("Metadata Conversion");
     test_metadata_conversion();
