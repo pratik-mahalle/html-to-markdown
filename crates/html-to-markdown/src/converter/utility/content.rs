@@ -142,65 +142,9 @@ pub(crate) fn normalized_tag_name(raw: Cow<'_, str>) -> Cow<'_, str> {
     }
 }
 
-/// Check if an element is inline (not block-level).
-fn is_inline_element(tag_name: &str) -> bool {
-    matches!(
-        tag_name,
-        "a" | "abbr"
-            | "b"
-            | "bdi"
-            | "bdo"
-            | "br"
-            | "cite"
-            | "code"
-            | "data"
-            | "dfn"
-            | "em"
-            | "i"
-            | "kbd"
-            | "mark"
-            | "q"
-            | "rp"
-            | "rt"
-            | "ruby"
-            | "s"
-            | "samp"
-            | "small"
-            | "span"
-            | "strong"
-            | "sub"
-            | "sup"
-            | "time"
-            | "u"
-            | "var"
-            | "wbr"
-            | "del"
-            | "ins"
-            | "img"
-            | "map"
-            | "area"
-            | "audio"
-            | "video"
-            | "picture"
-            | "source"
-            | "track"
-            | "embed"
-            | "object"
-            | "param"
-            | "input"
-            | "label"
-            | "button"
-            | "select"
-            | "textarea"
-            | "output"
-            | "progress"
-            | "meter"
-    )
-}
-
 /// Check if an element is block-level (not inline).
 pub(crate) fn is_block_level_element(tag_name: &str) -> bool {
-    is_block_level_name(tag_name, is_inline_element(tag_name))
+    is_block_level_name(tag_name, crate::converter::main_helpers::is_inline_element(tag_name))
 }
 
 /// Returns the largest valid char boundary index at or before `index`.

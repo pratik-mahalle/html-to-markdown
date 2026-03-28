@@ -292,12 +292,29 @@ fn ensure_newline(buf: &mut String) {
     }
 }
 
+/// Collapse runs of 3 or more consecutive newlines to exactly 2 in a single pass.
+fn collapse_triple_newlines(buf: &mut String) {
+    let bytes = buf.as_bytes();
+    let mut result = String::with_capacity(buf.len());
+    let mut newline_count = 0usize;
+    for &b in bytes {
+        if b == b'\n' {
+            newline_count += 1;
+            if newline_count <= 2 {
+                result.push('\n');
+            }
+        } else {
+            newline_count = 0;
+            result.push(b as char);
+        }
+    }
+    *buf = result;
+}
+
 /// Post-process: collapse 3+ newlines to 2, trim line-end whitespace, ensure single trailing newline.
 fn post_process(buf: &mut String) {
     // Collapse runs of 3+ newlines to exactly 2
-    while buf.contains("\n\n\n") {
-        *buf = buf.replace("\n\n\n", "\n\n");
-    }
+    collapse_triple_newlines(buf);
 
     // Trim trailing whitespace from each line — collect owned strings to avoid borrow conflict
     let lines: Vec<String> = buf.lines().map(|line| line.trim_end().to_string()).collect();

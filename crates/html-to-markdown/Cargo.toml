@@ -43,6 +43,7 @@ image = { version = "0.25", default-features = false, features = [
     "webp",
 ], optional = true }
 lru = "0.16"
+memchr = "2"
 once_cell.workspace = true
 regex.workspace = true
 serde = { version = "1.0", features = ["derive"], optional = true }
