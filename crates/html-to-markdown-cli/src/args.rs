@@ -241,48 +241,86 @@ pub struct Cli {
     ///
     /// When enabled, output will be JSON with "markdown" and "metadata" keys.
     /// Use --extract-document, --extract-headers, etc. to control what metadata is extracted.
+    /// Deprecated: prefer --json instead.
     #[arg(long)]
     #[arg(help_heading = "Metadata")]
     pub with_metadata: bool,
 
+    /// Output full ConversionResult as JSON instead of markdown text
+    ///
+    /// Serializes all result fields (content, metadata, tables, document tree, warnings)
+    /// as a JSON object. Use with --include-structure, --extract-inline-images, --no-content
+    /// to control which fields are populated.
+    #[arg(long)]
+    #[arg(help_heading = "JSON Output")]
+    pub json: bool,
+
+    /// Include structured document tree in output
+    ///
+    /// Requires --json. Populates the "document" field with a semantic node tree.
+    #[arg(long)]
+    #[arg(help_heading = "JSON Output")]
+    #[arg(requires = "json")]
+    pub include_structure: bool,
+
+    /// Extract inline images from data URIs and SVGs
+    ///
+    /// Requires --json. Populates the "images" field with extracted inline image data.
+    #[arg(long)]
+    #[arg(help_heading = "JSON Output")]
+    #[arg(requires = "json")]
+    pub extract_inline_images: bool,
+
+    /// Print processing warnings to stderr
+    ///
+    /// Emits each non-fatal warning to stderr in the format:
+    /// "Warning [<kind>]: <message>"
+    #[arg(long)]
+    #[arg(help_heading = "JSON Output")]
+    pub show_warnings: bool,
+
+    /// Skip text content generation, only extract metadata and structure
+    ///
+    /// Requires --json. Sets output_format to plain text extraction mode;
+    /// the "content" field in the JSON output will be empty.
+    #[arg(long)]
+    #[arg(help_heading = "JSON Output")]
+    #[arg(requires = "json")]
+    pub no_content: bool,
+
     /// Extract document-level metadata
     ///
-    /// Requires --with-metadata. Extracts title, description, charset, language, etc.
+    /// Requires --with-metadata or --json. Extracts title, description, charset, language, etc.
     #[arg(long)]
     #[arg(help_heading = "Metadata")]
-    #[arg(requires = "with_metadata")]
     pub extract_document: bool,
 
     /// Extract header elements
     ///
-    /// Requires --with-metadata. Extracts h1-h6 headers with hierarchy.
+    /// Requires --with-metadata or --json. Extracts h1-h6 headers with hierarchy.
     #[arg(long)]
     #[arg(help_heading = "Metadata")]
-    #[arg(requires = "with_metadata")]
     pub extract_headers: bool,
 
     /// Extract link elements
     ///
-    /// Requires --with-metadata. Extracts anchor tags with types (internal, external, etc.).
+    /// Requires --with-metadata or --json. Extracts anchor tags with types (internal, external, etc.).
     #[arg(long)]
     #[arg(help_heading = "Metadata")]
-    #[arg(requires = "with_metadata")]
     pub extract_links: bool,
 
-    /// Extract image elements
+    /// Extract image elements (metadata)
     ///
-    /// Requires --with-metadata. Extracts img tags with sources and metadata.
+    /// Requires --with-metadata or --json. Extracts img tags with sources and metadata.
     #[arg(long)]
     #[arg(help_heading = "Metadata")]
-    #[arg(requires = "with_metadata")]
     pub extract_images: bool,
 
     /// Extract structured data
     ///
-    /// Requires --with-metadata. Extracts JSON-LD, Microdata, and `RDFa` blocks.
+    /// Requires --with-metadata or --json. Extracts JSON-LD, Microdata, and `RDFa` blocks.
     #[arg(long)]
     #[arg(help_heading = "Metadata")]
-    #[arg(requires = "with_metadata")]
     pub extract_structured_data: bool,
 
     /// Whitespace handling mode

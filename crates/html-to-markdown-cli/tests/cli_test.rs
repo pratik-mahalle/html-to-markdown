@@ -895,13 +895,27 @@ fn test_combining_multiple_extract_flags() {
 }
 
 #[test]
-fn test_metadata_flags_require_with_metadata() {
+fn test_metadata_flags_work_without_with_metadata() {
+    // --extract-headers without --with-metadata or --json is silently ignored
+    // (the flag has no effect but does not cause an error)
     cli()
         .arg("--extract-headers")
         .write_stdin("<html><body><h1>Title</h1></body></html>")
         .assert()
-        .failure()
-        .stderr(predicate::str::contains("required"));
+        .success()
+        .stdout(predicate::str::contains("# Title"));
+}
+
+#[test]
+fn test_metadata_flags_work_with_json() {
+    // --extract-headers with --json produces JSON output
+    cli()
+        .arg("--json")
+        .arg("--extract-headers")
+        .write_stdin("<html><body><h1>Title</h1></body></html>")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\"content\""));
 }
 
 #[test]

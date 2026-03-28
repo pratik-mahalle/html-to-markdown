@@ -2,11 +2,16 @@
 
 use crate::args::Cli;
 use crate::output::output_debug_info;
+use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
 use html_to_markdown_rs::{
     ConversionOptions, MetadataConfig, OutputFormat, PreprocessingOptions, convert, convert_with_metadata,
     metadata::DEFAULT_MAX_STRUCTURED_DATA_SIZE,
 };
 use serde_json::json;
+
+fn base64_encode(data: &[u8]) -> String {
+    BASE64.encode(data)
+}
 
 pub fn build_conversion_options(cli: &Cli) -> ConversionOptions {
     let defaults = ConversionOptions::default();
@@ -54,8 +59,8 @@ pub fn build_conversion_options(cli: &Cli) -> ConversionOptions {
         strip_tags: cli.strip_tags.clone().unwrap_or(defaults.strip_tags),
         preserve_tags: Vec::new(),
         output_format: cli.output_format.map_or(OutputFormat::default(), Into::into),
-        include_document_structure: false,
-        extract_images: false,
+        include_document_structure: cli.include_structure,
+        extract_images: cli.extract_inline_images,
         max_image_size: 5_242_880,
         capture_svg: false,
         infer_dimensions: true,
@@ -68,6 +73,7 @@ pub fn perform_conversion(
     cli: &Cli,
 ) -> Result<String, Box<dyn std::error::Error>> {
     let output_content = if cli.with_metadata {
+        // Legacy --with-metadata path: kept for backward compatibility
         let metadata_config = MetadataConfig {
             extract_document: cli.extract_document,
             extract_headers: cli.extract_headers,
@@ -91,14 +97,92 @@ pub fn perform_conversion(
         });
 
         serde_json::to_string_pretty(&output).map_err(|e| format!("Error serializing JSON: {e}"))?
+    } else if cli.json {
+        // New --json path: serialize full ConversionResult fields
+        let result = convert(html, Some(options)).map_err(|e| format!("Error converting HTML: {e}"))?;
+
+        // Emit warnings to stderr if requested
+        if cli.show_warnings {
+            for warning in &result.warnings {
+                eprintln!("Warning [{:?}]: {}", warning.kind, warning.message);
+            }
+        }
+
+        output_debug_info(
+            cli,
+            &format!(
+                "Generated {} bytes of markdown (JSON mode)",
+                result.content.as_deref().unwrap_or("").len()
+            ),
+        );
+
+        // Build JSON output manually to handle feature-gated fields
+        let mut json_output = serde_json::Map::new();
+
+        // content field — null when --no-content
+        if !cli.no_content {
+            json_output.insert(
+                "content".into(),
+                serde_json::Value::String(result.content.clone().unwrap_or_default()),
+            );
+        } else {
+            json_output.insert("content".into(), serde_json::Value::Null);
+        }
+
+        // tables field — always present
+        let tables_json = serde_json::to_value(&result.tables).map_err(|e| format!("Error serializing tables: {e}"))?;
+        json_output.insert("tables".into(), tables_json);
+
+        // document field — present when --include-structure was set
+        let document_json = match &result.document {
+            Some(doc) => serde_json::to_value(doc).map_err(|e| format!("Error serializing document: {e}"))?,
+            None => serde_json::Value::Null,
+        };
+        json_output.insert("document".into(), document_json);
+
+        // metadata field — populated via the metadata feature
+        let metadata_json =
+            serde_json::to_value(&result.metadata).map_err(|e| format!("Error serializing metadata: {e}"))?;
+        json_output.insert("metadata".into(), metadata_json);
+
+        // images field — serialized manually since InlineImage doesn't derive serde
+        let images_arr: Vec<serde_json::Value> = result
+            .images
+            .iter()
+            .map(|img| {
+                json!({
+                    "format": format!("{}", img.format),
+                    "source": format!("{}", img.source),
+                    "filename": img.filename,
+                    "description": img.description,
+                    "dimensions": img.dimensions.map(|(w, h)| json!({"width": w, "height": h})),
+                    "data_base64": base64_encode(&img.data),
+                    "attributes": img.attributes,
+                })
+            })
+            .collect();
+        json_output.insert("images".into(), serde_json::Value::Array(images_arr));
+
+        // warnings field — always present
+        let warnings_json =
+            serde_json::to_value(&result.warnings).map_err(|e| format!("Error serializing warnings: {e}"))?;
+        json_output.insert("warnings".into(), warnings_json);
+
+        serde_json::to_string_pretty(&serde_json::Value::Object(json_output))
+            .map_err(|e| format!("Error serializing JSON output: {e}"))?
     } else {
-        let markdown = convert(html, Some(options))
-            .map_err(|e| format!("Error converting HTML: {e}"))?
-            .content
-            .unwrap_or_default();
+        // Plain markdown path
+        let result = convert(html, Some(options)).map_err(|e| format!("Error converting HTML: {e}"))?;
 
+        // Emit warnings to stderr if requested
+        if cli.show_warnings {
+            for warning in &result.warnings {
+                eprintln!("Warning [{:?}]: {}", warning.kind, warning.message);
+            }
+        }
+
+        let markdown = result.content.unwrap_or_default();
         output_debug_info(cli, &format!("Generated {} bytes of markdown", markdown.len()));
-
         markdown
     };
 
