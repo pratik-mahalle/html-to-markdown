@@ -66,12 +66,12 @@ async function convertStream(stream: Readable | AsyncIterable<string | Buffer>, 
 
 ### JsConversionOptions
 
-All fields are optional. Defaults match Rust defaults.
+All fields are optional. Defaults match Rust defaults. Enum values are PascalCase strings (e.g. `'Atx'`, `'Spaces'`).
 
 ```typescript
 interface JsConversionOptions {
-    headingStyle?: 'atx' | 'underlined' | 'atxClosed';
-    listIndentType?: 'spaces' | 'tabs';
+    headingStyle?: 'Atx' | 'Underlined' | 'AtxClosed';
+    listIndentType?: 'Spaces' | 'Tabs';
     listIndentWidth?: number;
     bullets?: string;
     strongEmSymbol?: string;          // '*' or '_'
@@ -83,17 +83,17 @@ interface JsConversionOptions {
     autolinks?: boolean;
     defaultTitle?: boolean;
     brInTables?: boolean;
-    highlightStyle?: 'doubleEqual' | 'html' | 'bold' | 'none';
+    highlightStyle?: 'DoubleEqual' | 'Html' | 'Bold' | 'None';
     extractMetadata?: boolean;
-    whitespaceMode?: 'normalized' | 'strict';
+    whitespaceMode?: 'Normalized' | 'Strict';
     stripNewlines?: boolean;
     wrap?: boolean;
     wrapWidth?: number;
     convertAsInline?: boolean;
     subSymbol?: string;
     supSymbol?: string;
-    newlineStyle?: 'spaces' | 'backslash';
-    codeBlockStyle?: 'indented' | 'backticks' | 'tildes';
+    newlineStyle?: 'Spaces' | 'Backslash';
+    codeBlockStyle?: 'Indented' | 'Backticks' | 'Tildes';
     keepInlineImagesIn?: string[];
     preprocessing?: JsPreprocessingOptions;
     encoding?: string;
@@ -101,16 +101,11 @@ interface JsConversionOptions {
     stripTags?: string[];
     preserveTags?: string[];
     skipImages?: boolean;
-    outputFormat?: 'markdown' | 'djot' | 'plain';
-    includeDocumentStructure?: boolean;
-    extractImages?: boolean;
-    maxImageSize?: bigint;            // BigInt! Use BigInt(5_242_880) for 5 MiB
-    captureSvg?: boolean;
-    inferDimensions?: boolean;
+    outputFormat?: 'Markdown' | 'Djot' | 'Plain';
 }
 ```
 
-**Note on `maxImageSize`:** This field is `bigint` in NAPI-RS (maps to Rust `u64`). Pass `BigInt(5_242_880)` not the number `5_242_880`.
+**Note on enum values:** NAPI-RS `const enum` values are PascalCase strings (e.g. `'Atx'` not `'atx'`, `'Spaces'` not `'spaces'`). Using lowercase will be rejected at runtime.
 
 ### JsPreprocessingOptions
 
@@ -125,14 +120,16 @@ interface JsPreprocessingOptions {
 
 ### JsMetadataConfig
 
+Fields use `snake_case` (matching the actual `.d.ts`):
+
 ```typescript
 interface JsMetadataConfig {
-    extractDocument?: boolean;
-    extractHeaders?: boolean;
-    extractLinks?: boolean;
-    extractImages?: boolean;
-    extractStructuredData?: boolean;
-    maxStructuredDataSize?: number;
+    extract_document?: boolean;
+    extract_headers?: boolean;
+    extract_links?: boolean;
+    extract_images?: boolean;
+    extract_structured_data?: boolean;
+    max_structured_data_size?: number;
 }
 ```
 
@@ -147,18 +144,18 @@ interface JsInlineImageConfig {
 }
 ```
 
-### InlineImage (in ConversionResult.images)
+### JsInlineImage (in JsHtmlExtraction.inlineImages)
 
-When `extractImages: true` is set in options, `result.images` is populated:
+Inline images are extracted via `convertWithInlineImages()`, not via `convert()`. The result is in `extraction.inlineImages`:
 
 ```typescript
 interface JsInlineImage {
     data: Buffer;
     format: string;
-    filename: string | null;
-    description: string | null;
-    dimensions: number[] | null;    // [width, height]
-    source: string;                 // "img_data_uri" | "svg_element"
+    filename?: string;
+    description?: string;
+    dimensions?: number[];    // [width, height]
+    source: string;           // "img_data_uri" | "svg_element"
     attributes: Record<string, string>;
 }
 ```
@@ -170,22 +167,12 @@ The result of `JSON.parse(convert(html))`:
 ```typescript
 interface ConversionResult {
     content: string | null;     // Markdown text
-    document: null;             // not yet wired
+    document: object | null;    // structured document tree (null unless includeDocumentStructure enabled)
     metadata: object | null;    // HtmlMetadata if metadata feature enabled
     tables: Array<{
-        grid: {
-            rows: number;
-            cols: number;
-            cells: Array<{
-                content: string;
-                row: number;
-                col: number;
-                row_span: number;
-                col_span: number;
-                is_header: boolean;
-            }>;
-        };
-        markdown: string;
+        cells: Array<Array<string>>;    // rows x columns of cell text
+        markdown: string;               // rendered table in target format
+        isHeaderRow: Array<boolean>;    // per-row flag: true if row was inside <thead>
     }>;
     warnings: Array<{
         message: string;
@@ -194,12 +181,17 @@ interface ConversionResult {
 }
 ```
 
+**Note on `tables`:** The Node.js binding uses a flat `cells: Array<Array<string>>` structure (no `grid` wrapper), plus `isHeaderRow` for header detection. This differs from the Rust `TableGrid` struct.
+
 ## Visitor Pattern
 
-The visitor is passed via options to `convert()`:
+The visitor is passed as a separate parameter to `convertWithInlineImages()` or `convertWithMetadata()` — it is **not** a field on `JsConversionOptions`. The primary `convert()` function does not accept a visitor.
 
 ```typescript
-import { convert } from '@kreuzberg/html-to-markdown-node';
+import {
+    convertWithInlineImages,
+    convertWithMetadata,
+} from '@kreuzberg/html-to-markdown-node';
 import { wrapVisitorCallbacks } from '@kreuzberg/html-to-markdown';
 
 const visitor = wrapVisitorCallbacks({
@@ -212,9 +204,9 @@ const visitor = wrapVisitorCallbacks({
     },
 });
 
-// Pass visitor via options to the single convert() function
-const json = convert(html, { ...options, visitor });
-const result = JSON.parse(json);
+// Visitor is the 4th parameter to convertWithInlineImages / convertWithMetadata
+const extraction = convertWithInlineImages(html, options, imageConfig, visitor);
+const metaExtraction = convertWithMetadata(html, options, metadataConfig, visitor);
 ```
 
 Visitor return types: `{ type: 'continue' }` | `{ type: 'skip' }` | `{ type: 'preserve_html' }` | `{ type: 'custom', output: string }` | `{ type: 'error', message: string }`.
@@ -238,21 +230,22 @@ for (const table of result3.tables) {
     console.log(table.markdown);
 }
 
-// Inline images — enabled via extractImages option, result in result.images
-const result4 = JSON.parse(convert(html, { extractImages: true }));
-for (const image of result4.images) {
+// Inline images — use convertWithInlineImages() (separate function, not via convert())
+import { convertWithInlineImages } from '@kreuzberg/html-to-markdown-node';
+const extraction = convertWithInlineImages(html, options, { captureSvg: true });
+for (const image of extraction.inlineImages) {
     console.log(image.format, image.filename);
 }
 
 // File conversion
 import { convertFile } from '@kreuzberg/html-to-markdown';
-const json = await convertFile('./page.html', { headingStyle: 'atx' });
+const json = await convertFile('./page.html', { headingStyle: 'Atx' });
 const fileResult = JSON.parse(json);
 console.log(fileResult.content);
 
 // Buffer conversion (avoids string overhead)
 import { convertBuffer } from '@kreuzberg/html-to-markdown-node';
 const html = Buffer.from('<h1>Hello</h1>', 'utf8');
-const json2 = convertBuffer(html, { headingStyle: 'atx' });
+const json2 = convertBuffer(html, { headingStyle: 'Atx' });
 const bufResult = JSON.parse(json2);
 ```

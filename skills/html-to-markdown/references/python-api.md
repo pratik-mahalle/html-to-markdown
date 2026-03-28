@@ -204,9 +204,11 @@ def create_options_handle(
 ) -> ConversionOptionsHandle:
     ...
 
-def convert_with_handle(html: str, handle: ConversionOptionsHandle) -> ExtractionResult:
+def convert_with_handle(html: str, handle: ConversionOptionsHandle) -> str:
     ...
 ```
+
+`convert_with_handle()` returns a plain `str` (the Markdown text), not an `ExtractionResult`. Use it for high-throughput scenarios where you only need the converted text and want to avoid the overhead of building the full result dict.
 
 Use handles when converting many documents with the same options — avoids re-parsing options on each call.
 

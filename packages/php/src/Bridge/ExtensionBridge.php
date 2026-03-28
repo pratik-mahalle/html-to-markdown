@@ -33,13 +33,16 @@ final class ExtensionBridge implements ExtensionBridgeContract
         }
 
         try {
-            /** @var string $result */
             $result = $callable($html, $options);
         } catch (\Throwable $exception) {
             throw ConversionFailed::withMessage($exception->getMessage());
         }
 
-        return $result;
+        if (\is_array($result)) {
+            return \is_string($result['content'] ?? null) ? $result['content'] : '';
+        }
+
+        return \is_string($result) ? $result : '';
     }
 
     /**
