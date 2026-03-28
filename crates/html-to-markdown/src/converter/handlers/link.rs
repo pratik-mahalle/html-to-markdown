@@ -15,9 +15,10 @@ use crate::converter::block::heading::{find_single_heading_child, heading_allows
 use crate::converter::dom_context::DomContext;
 use crate::converter::inline::link::append_markdown_link;
 use crate::converter::main::walk_node;
+#[cfg(feature = "visitor")]
+use crate::converter::utility::content::collect_tag_attributes;
 use crate::converter::utility::content::{
-    collect_link_label_text, collect_tag_attributes, escape_link_label, get_text_content, normalize_link_label,
-    normalized_tag_name,
+    collect_link_label_text, escape_link_label, get_text_content, normalize_link_label, normalized_tag_name,
 };
 use crate::options::ConversionOptions;
 use crate::text;

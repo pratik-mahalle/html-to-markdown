@@ -10,6 +10,7 @@ use super::utils::{
     add_list_leading_separator, add_nested_list_trailing_separator, calculate_list_nesting_depth, is_loose_list,
     process_list_children,
 };
+#[cfg(feature = "visitor")]
 use crate::converter::utility::content::collect_tag_attributes;
 use crate::options::ConversionOptions;
 #[allow(unused_imports)]

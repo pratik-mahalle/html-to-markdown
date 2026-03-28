@@ -10,6 +10,7 @@
 //! - Visitor callbacks for custom code processing
 //! - Whitespace normalization for kbd/samp elements
 
+#[cfg(feature = "visitor")]
 use crate::converter::utility::content::collect_tag_attributes;
 use crate::options::ConversionOptions;
 use crate::text;

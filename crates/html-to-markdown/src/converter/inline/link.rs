@@ -9,9 +9,9 @@
 //! - Metadata collection for links (links, URLs, titles, rel attributes)
 //! - Block-level content within links (via inline context)
 
-use crate::converter::utility::content::{
-    collect_link_label_text, collect_tag_attributes, escape_link_label, normalize_link_label,
-};
+#[cfg(feature = "visitor")]
+use crate::converter::utility::content::collect_tag_attributes;
+use crate::converter::utility::content::{collect_link_label_text, escape_link_label, normalize_link_label};
 use crate::converter::utility::preprocessing::sanitize_markdown_url;
 use crate::options::ConversionOptions;
 use std::collections::BTreeMap;
