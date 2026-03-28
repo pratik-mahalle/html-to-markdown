@@ -10,7 +10,7 @@
 #define HTML_TO_MARKDOWN_VERSION_MAJOR 3
 #define HTML_TO_MARKDOWN_VERSION_MINOR 0
 #define HTML_TO_MARKDOWN_VERSION_PATCH 0
-#define HTML_TO_MARKDOWN_VERSION "3.0.0-rc.1"
+#define HTML_TO_MARKDOWN_VERSION "3.0.0"
 
 #include <stdarg.h>
 #include <stdbool.h>

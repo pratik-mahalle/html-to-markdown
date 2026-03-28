@@ -18,14 +18,15 @@ crate-type = ["cdylib"]
 
 [features]
 default = ["full"]
-full = ["metadata", "visitor"]
+full = ["metadata", "visitor", "inline-images"]
 metadata = ["html-to-markdown-rs/metadata"]
 visitor = ["html-to-markdown-rs/visitor"]
+inline-images = ["html-to-markdown-rs/inline-images"]
 profiling = ["dep:pprof"]
 
 [dependencies]
 ext-php-rs = { workspace = true }
-html-to-markdown-bindings-common = { path = "../html-to-markdown-bindings-common", version = "3.0.0-rc.1", features = [
+html-to-markdown-bindings-common = { path = "../html-to-markdown-bindings-common", version = "3.0.0", features = [
     "metadata",
     "inline-images",
 ] }
