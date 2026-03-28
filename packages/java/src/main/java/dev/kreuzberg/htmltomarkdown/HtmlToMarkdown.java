@@ -465,10 +465,9 @@ public final class HtmlToMarkdown {
    */
   private static HtmlMetadata parseMetadata(final String jsonStr) {
     try {
-      ObjectMapper mapper = new ObjectMapper();
-      JsonNode root = mapper.readTree(jsonStr);
+      JsonNode root = MAPPER.readTree(jsonStr);
 
-      DocumentMetadata document = parseDocumentMetadata(mapper, root.get("document"));
+      DocumentMetadata document = parseDocumentMetadata(MAPPER, root.get("document"));
 
       List<HeaderMetadata> headers = parseHeaders(root.get("headers"));
 

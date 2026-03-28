@@ -67,7 +67,10 @@ pub enum NodeData {
     /// [dtd wiki]: https://en.wikipedia.org/wiki/Document_type_declaration
     Doctype {
         name: StrTendril,
+        // Fields required by html5ever's DOM model; not accessed during conversion.
+        #[allow(dead_code)]
         public_id: StrTendril,
+        #[allow(dead_code)]
         system_id: StrTendril,
     },
 

@@ -80,7 +80,12 @@ module HtmlToMarkdown
     strip_tags?: Array[String],
     preserve_tags?: Array[String],
     output_format?: output_format,
-    skip_images?: bool
+    skip_images?: bool,
+    include_document_structure?: bool,
+    extract_images?: bool,
+    max_image_size?: Integer,
+    capture_svg?: bool,
+    infer_dimensions?: bool
   }
 
   type inline_image_config = {

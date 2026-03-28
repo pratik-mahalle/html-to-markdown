@@ -5,9 +5,6 @@
 
 use std::borrow::Cow;
 
-/// Maximum allowed table columns to prevent unbounded memory usage.
-const MAX_TABLE_COLS: usize = 1000;
-
 /// Scan results for a table element.
 ///
 /// Contains metadata about table structure to determine optimal rendering:

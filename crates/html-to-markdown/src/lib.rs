@@ -33,7 +33,6 @@
     clippy::assigning_clones,
     clippy::uninlined_format_args
 )]
-#![allow(dead_code)]
 
 //! High-performance HTML to Markdown converter.
 //!

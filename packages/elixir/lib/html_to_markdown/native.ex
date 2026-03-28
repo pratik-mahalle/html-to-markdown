@@ -11,6 +11,8 @@ defmodule HtmlToMarkdown.Native do
     mode: (Mix.env() == :prod && :release) || :debug,
     features: @features
 
+  def convert_to_string(_html), do: :erlang.nif_error(:nif_not_loaded)
+  def convert_to_string(_html, _options), do: :erlang.nif_error(:nif_not_loaded)
   def convert(_html), do: :erlang.nif_error(:nif_not_loaded)
   def convert_with_options_map(_html, _options), do: :erlang.nif_error(:nif_not_loaded)
   def convert_with_handle(_html, _handle), do: :erlang.nif_error(:nif_not_loaded)
