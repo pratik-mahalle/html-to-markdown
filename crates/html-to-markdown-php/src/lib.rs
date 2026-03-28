@@ -12,8 +12,6 @@ mod build;
 mod enums;
 mod options;
 mod types;
-#[cfg(feature = "visitor")]
-mod visitor_support;
 
 use build::build_conversion_result;
 use options::parse_conversion_options;

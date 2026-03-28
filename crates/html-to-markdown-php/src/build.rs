@@ -2,34 +2,14 @@ use ext_php_rs::binary::Binary;
 use ext_php_rs::boxed::ZBox;
 use ext_php_rs::prelude::*;
 use ext_php_rs::types::ZendHashTable;
+use html_to_markdown_rs::InlineImage;
 #[cfg(feature = "metadata")]
 use html_to_markdown_rs::metadata::{
     DocumentMetadata, HeaderMetadata, HtmlMetadata, ImageMetadata, LinkMetadata, StructuredData, TextDirection,
 };
-use html_to_markdown_rs::{HtmlExtraction, InlineImage, InlineImageWarning};
 use std::collections::BTreeMap;
 
 use crate::types::table_capacity;
-
-/// Build a PHP hash table from an HtmlExtraction result.
-pub fn build_html_extraction(extraction: HtmlExtraction) -> PhpResult<ZBox<ZendHashTable>> {
-    let mut result = ZendHashTable::new();
-    result.insert("markdown", extraction.markdown)?;
-    result.insert("inline_images", build_inline_images(extraction.inline_images)?)?;
-    result.insert("warnings", build_warnings(extraction.warnings)?)?;
-    Ok(result)
-}
-
-/// Build a PHP hash table from inline images vector.
-fn build_inline_images(images: Vec<InlineImage>) -> PhpResult<ZBox<ZendHashTable>> {
-    let mut table = ZendHashTable::with_capacity(table_capacity(images.len()));
-
-    for image in images {
-        table.push(build_inline_image_entry(image)?)?;
-    }
-
-    Ok(table)
-}
 
 /// Build a PHP hash table for a single inline image entry.
 fn build_inline_image_entry(image: InlineImage) -> PhpResult<ZBox<ZendHashTable>> {
@@ -68,20 +48,6 @@ fn build_attribute_table(attributes: BTreeMap<String, String>) -> PhpResult<ZBox
 
     for (key, value) in attributes {
         table.insert(key, value)?;
-    }
-
-    Ok(table)
-}
-
-/// Build a PHP hash table from inline image warnings.
-fn build_warnings(warnings: Vec<InlineImageWarning>) -> PhpResult<ZBox<ZendHashTable>> {
-    let mut table = ZendHashTable::with_capacity(table_capacity(warnings.len()));
-
-    for warning in warnings {
-        let mut entry = ZendHashTable::new();
-        entry.insert("index", warning.index as i64)?;
-        entry.insert("message", warning.message)?;
-        table.push(entry)?;
     }
 
     Ok(table)
@@ -162,58 +128,6 @@ pub fn build_conversion_result(result: html_to_markdown_rs::ConversionResult) ->
     table.insert("warnings", warnings_array)?;
 
     Ok(table)
-}
-
-/// Build a PHP hash table from a table extraction result (requires visitor feature).
-#[cfg(feature = "visitor")]
-pub fn build_tables_extraction(result: html_to_markdown_rs::ConversionWithTables) -> PhpResult<ZBox<ZendHashTable>> {
-    let mut table = ZendHashTable::new();
-    table.insert("content", result.content)?;
-
-    // Build tables array
-    let mut tables_array = ZendHashTable::with_capacity(table_capacity(result.tables.len()));
-    for t in result.tables {
-        let mut entry = ZendHashTable::new();
-        // cells: Vec<Vec<String>> -> array of arrays
-        let mut cells_array = ZendHashTable::with_capacity(table_capacity(t.cells.len()));
-        for row in t.cells {
-            let mut row_array = ZendHashTable::with_capacity(table_capacity(row.len()));
-            for cell in row {
-                row_array.push(cell)?;
-            }
-            cells_array.push(row_array)?;
-        }
-        entry.insert("cells", cells_array)?;
-        entry.insert("markdown", t.markdown)?;
-        // is_header_row: Vec<bool> -> array of booleans
-        let mut header_array = ZendHashTable::with_capacity(table_capacity(t.is_header_row.len()));
-        for is_header in t.is_header_row {
-            header_array.push(is_header)?;
-        }
-        entry.insert("is_header_row", header_array)?;
-        tables_array.push(entry)?;
-    }
-    table.insert("tables", tables_array)?;
-
-    // metadata
-    #[cfg(feature = "metadata")]
-    match result.metadata {
-        Some(metadata) => table.insert("metadata", build_extended_metadata(metadata)?)?,
-        None => table.insert("metadata", ())?,
-    };
-    #[cfg(not(feature = "metadata"))]
-    table.insert("metadata", ())?;
-
-    Ok(table)
-}
-
-/// Build a PHP hash table from metadata extraction (requires metadata feature).
-#[cfg(feature = "metadata")]
-pub fn build_metadata_extraction(markdown: String, metadata: HtmlMetadata) -> PhpResult<ZBox<ZendHashTable>> {
-    let mut result = ZendHashTable::new();
-    result.insert("markdown", markdown)?;
-    result.insert("metadata", build_extended_metadata(metadata)?)?;
-    Ok(result)
 }
 
 #[cfg(feature = "metadata")]
