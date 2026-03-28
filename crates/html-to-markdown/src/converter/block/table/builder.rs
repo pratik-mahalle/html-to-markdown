@@ -9,6 +9,7 @@ use super::cell::{collect_table_cells, get_colspan};
 use super::cells::{append_layout_row, convert_table_row};
 use super::scanner::scan_table;
 use super::utils::{is_tag_name, normalized_tag_name};
+#[cfg(feature = "visitor")]
 use crate::converter::utility::content::collect_tag_attributes;
 
 /// Maximum allowed table columns to prevent unbounded memory usage.

@@ -6,7 +6,9 @@
 
 use std::collections::BTreeMap;
 
-use crate::converter::utility::content::{collect_tag_attributes, is_block_level_element};
+#[cfg(feature = "visitor")]
+use crate::converter::utility::content::collect_tag_attributes;
+use crate::converter::utility::content::is_block_level_element;
 use crate::visitor::{NodeContext, NodeType, VisitResult};
 
 /// Handles visitor callback for element start (before processing).

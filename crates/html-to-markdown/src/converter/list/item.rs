@@ -8,7 +8,9 @@
 
 use crate::converter::main_helpers::tag_name_eq;
 use crate::converter::main_helpers::trim_trailing_whitespace;
-use crate::converter::utility::content::{collect_tag_attributes, normalized_tag_name};
+#[cfg(feature = "visitor")]
+use crate::converter::utility::content::collect_tag_attributes;
+use crate::converter::utility::content::normalized_tag_name;
 use crate::converter::walk_node;
 use crate::options::ConversionOptions;
 use tl;

@@ -8,6 +8,7 @@
 //! - Visitor callbacks for custom emphasis processing
 //! - Bootstrap caret detection (.caret class)
 
+#[cfg(feature = "visitor")]
 use crate::converter::utility::content::collect_tag_attributes;
 use crate::options::{ConversionOptions, OutputFormat};
 #[allow(unused_imports)]
