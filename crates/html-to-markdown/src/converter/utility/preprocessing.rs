@@ -176,10 +176,13 @@ pub(crate) fn find_closing_tag_bytes(bytes: &[u8], start: usize, tag: &[u8]) -> 
     const MAX_SCAN: usize = 100_000_000; // 100MB limit per tag - prevents pathological cases
 
     while idx < len && (idx - start) < MAX_SCAN {
-        // Optimization: skip forward to next '<' quickly
+        // Optimization: skip forward to next '<' quickly using memchr
         if bytes[idx] != b'<' {
-            idx += 1;
-            continue;
+            if let Some(pos) = memchr::memchr(b'<', &bytes[idx..]) {
+                idx += pos;
+            } else {
+                break;
+            }
         }
 
         // Check for </ pattern
