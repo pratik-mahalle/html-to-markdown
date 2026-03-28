@@ -1,10 +1,6 @@
 use ext_php_rs::prelude::*;
 use ext_php_rs::types::{ZendHashTable, Zval};
-#[cfg(feature = "metadata")]
-use html_to_markdown_rs::MetadataConfig;
-#[cfg(feature = "metadata")]
-use html_to_markdown_rs::MetadataConfigUpdate;
-use html_to_markdown_rs::{ConversionOptions, ConversionOptionsUpdate, InlineImageConfig, InlineImageConfigUpdate};
+use html_to_markdown_rs::{ConversionOptions, ConversionOptionsUpdate};
 
 use crate::enums::*;
 use crate::types::*;
@@ -139,43 +135,6 @@ pub fn parse_conversion_options(table: &ZendHashTable) -> PhpResult<ConversionOp
     Ok(ConversionOptions::from(update))
 }
 
-/// Parse an InlineImageConfig table from PHP hash table.
-pub fn parse_inline_image_config(table: &ZendHashTable) -> PhpResult<InlineImageConfig> {
-    let mut update = InlineImageConfigUpdate::default();
-
-    for (key, value) in table {
-        let key_str = key_to_string(&key)?;
-
-        if value.is_null() {
-            continue;
-        }
-
-        match key_str.as_str() {
-            "max_decoded_size_bytes" => {
-                let size = read_u64(value, &key_str)?;
-                if size == 0 {
-                    return Err(PhpException::default(
-                        "max_decoded_size_bytes must be greater than zero".to_string(),
-                    ));
-                }
-                update.max_decoded_size_bytes = Some(size);
-            }
-            "filename_prefix" => {
-                update.filename_prefix = Some(read_string(value, &key_str)?);
-            }
-            "capture_svg" => {
-                update.capture_svg = Some(read_bool(value, &key_str)?);
-            }
-            "infer_dimensions" => {
-                update.infer_dimensions = Some(read_bool(value, &key_str)?);
-            }
-            _ => {}
-        }
-    }
-
-    Ok(InlineImageConfig::from_update(update))
-}
-
 /// Parse preprocessing options from a PHP hash table.
 fn parse_preprocessing_options(value: &Zval, key: &str) -> PhpResult<html_to_markdown_rs::PreprocessingOptionsUpdate> {
     let table = value
@@ -209,42 +168,4 @@ fn parse_preprocessing_options(value: &Zval, key: &str) -> PhpResult<html_to_mar
     }
 
     Ok(update)
-}
-
-/// Parse a MetadataConfig table from PHP hash table (only available with metadata feature).
-#[cfg(feature = "metadata")]
-pub fn parse_metadata_config(table: &ZendHashTable) -> PhpResult<MetadataConfig> {
-    let mut update = MetadataConfigUpdate::default();
-
-    for (key, value) in table {
-        let key_str = key_to_string(&key)?;
-
-        if value.is_null() {
-            continue;
-        }
-
-        match key_str.as_str() {
-            "extract_document" => {
-                update.extract_document = Some(read_bool(value, &key_str)?);
-            }
-            "extract_headers" => {
-                update.extract_headers = Some(read_bool(value, &key_str)?);
-            }
-            "extract_links" => {
-                update.extract_links = Some(read_bool(value, &key_str)?);
-            }
-            "extract_images" => {
-                update.extract_images = Some(read_bool(value, &key_str)?);
-            }
-            "extract_structured_data" => {
-                update.extract_structured_data = Some(read_bool(value, &key_str)?);
-            }
-            "max_structured_data_size" => {
-                update.max_structured_data_size = Some(read_usize(value, &key_str)?);
-            }
-            _ => {}
-        }
-    }
-
-    Ok(MetadataConfig::from(update))
 }
