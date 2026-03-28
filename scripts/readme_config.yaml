@@ -179,11 +179,11 @@ languages:
   go:
     name: Go
     template: language_package.md.jinja
-    output_path: "packages/go/v2/README.md"
+    output_path: "packages/go/v3/README.md"
     package_manager:
       - go
-    package_name: github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown
-    install_command: "go get github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown"
+    package_name: github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown
+    install_command: "go get github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown"
     description: |
       High-performance HTML to Markdown converter with Go bindings to the Rust core library.
       Supports automatic downloading of prebuilt FFI libraries for Linux, macOS, and Windows with customizable caching.

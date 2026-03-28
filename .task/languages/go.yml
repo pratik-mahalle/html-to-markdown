@@ -10,7 +10,7 @@ includes:
   _cfg: ../config/vars.yml
 
 vars:
-  GO_PKG: "packages/go/v2/htmltomarkdown"
+  GO_PKG: "packages/go/v3/htmltomarkdown"
   FFI_BUILD_DIR: "{{.TARGET_DIR}}/{{.OS}}-{{.ARCH}}/release"
 
 env:
