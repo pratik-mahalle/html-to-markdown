@@ -2,6 +2,7 @@
 name: Audit Trail
 priority: high
 ---
+
 Maintain audit trail of sanitization
 
 - Track what was removed and why

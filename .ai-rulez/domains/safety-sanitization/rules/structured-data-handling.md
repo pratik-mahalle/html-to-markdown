@@ -2,6 +2,7 @@
 name: Structured Data Handling
 priority: high
 ---
+
 Handle JSON-LD and Schema.org safely
 
 - Remove <script type="application/ld+json"> by default

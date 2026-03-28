@@ -2,18 +2,22 @@
 description: "List Conversion And Nesting"
 name: list-conversion-and-nesting
 ---
+
 Convert HTML lists to Markdown lists with proper nesting
 
 Key source files:
+
 - crates/html-to-markdown/src/converter.rs (convert_list)
 
 Master concepts:
+
 - Unordered vs ordered lists
 - List item processing
 - Nesting and indentation
 - Tight vs loose detection
 
 Step by step:
+
 1. Identify list type (ul or ol)
 2. Process each list item
    a. Extract item content

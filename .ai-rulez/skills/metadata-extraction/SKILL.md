@@ -1,6 +1,7 @@
 ---
 description: "Metadata Extraction for html-to-markdown"
 ---
+
 # Metadata Extraction for html-to-markdown
 
 ## Overview
@@ -29,6 +30,7 @@ let metadata = metadata_collector.finish();
 ```
 
 **Key Benefits:**
+
 - **Zero overhead when disabled**: Entire module compilable out via feature flags
 - **Single tree traversal**: No separate metadata extraction pass
 - **Memory efficient**: Pre-allocated buffers (typical: 32 headers, 64 links, 16 images)
@@ -70,20 +72,27 @@ impl Default for MetadataConfig {
 
 ### Selective Extraction
 
-Only extract specific metadata types:
+Implement a custom visitor to extract only specific metadata types:
 
 ```rust
-let config = MetadataConfig {
-    extract_document: true,
-    extract_headers: true,
-    extract_links: false,      // Skip links
-    extract_images: false,     // Skip images
-    extract_structured_data: false,
-    max_structured_data_size: 0,
-};
+// Create a visitor that collects only headers and links
+struct SelectiveMetadataVisitor {
+    headers: Vec<HeaderMetadata>,
+    links: Vec<LinkMetadata>,
+}
 
-let (markdown, metadata) = convert_with_metadata(html, None, config)?;
-// metadata.links will be empty (not extracted)
+impl HtmlVisitor for SelectiveMetadataVisitor {
+    fn visit_heading(&mut self, element: &Element, _ctx: &VisitorContext) -> VisitResult {
+        // Collect header metadata
+        // Skip link collection (visit_link not overridden)
+        VisitResult::Process
+    }
+}
+
+// Use the visitor during conversion
+let mut visitor = SelectiveMetadataVisitor::default();
+let markdown = convert(html, Some(options))?;
+// visitor now contains headers and links, but not images
 ```
 
 ## Document Metadata Extraction
@@ -147,6 +156,7 @@ pub enum TextDirection {
 ```
 
 **Extracted Result:**
+
 ```rust
 DocumentMetadata {
     title: Some("My Article"),
@@ -203,6 +213,7 @@ Headers are extracted with context about document structure:
 ```
 
 **Extracted Headers:**
+
 ```rust
 vec![
     HeaderMetadata { level: 1, text: "Main Title", id: None, hierarchy_depth: 0, position: 0 },
@@ -251,7 +262,7 @@ pub struct LinkMetadata {
 
 ### Classification Logic
 
-```
+```text
 href="#intro"                 → LinkType::Anchor
 href="/page"                  → LinkType::Internal
 href="../sibling"             → LinkType::Internal
@@ -290,6 +301,7 @@ href="javascript:void(0)"     → LinkType::Other
 ```
 
 **Extracted Links:**
+
 ```rust
 vec![
     LinkMetadata {
@@ -406,6 +418,7 @@ pub struct ImageMetadata {
 ```
 
 **Extracted Images:**
+
 ```rust
 vec![
     ImageMetadata {
@@ -498,6 +511,7 @@ pub struct StructuredData {
 ```
 
 **Extracted:**
+
 ```rust
 StructuredData {
     data_type: StructuredDataType::JsonLd,
@@ -538,67 +552,34 @@ StructuredData {
 - **Feed generation**: Use article schema for RSS/JSON feeds
 - **Knowledge graphs**: Populate semantic web data
 
-## Complete Example: convert_with_metadata
+## Integration with Conversion API
 
-From `/crates/html-to-markdown/src/lib.rs` (lines 428-462):
+Metadata extraction integrates with the standard conversion pipeline through the visitor pattern:
 
 ```rust
-pub fn convert_with_metadata(
+// Standard conversion with visitor that collects metadata
+pub fn convert(
     html: &str,
     options: Option<ConversionOptions>,
-    metadata_cfg: MetadataConfig,
-) -> Result<(String, ExtendedMetadata)> {
-    // Validate input
-    validate_input(html)?;
-    let options = options.unwrap_or_default();
-
-    // Early return if no extraction requested
-    if !metadata_cfg.any_enabled() {
-        let markdown = convert(html, Some(options))?;
-        return Ok((markdown, ExtendedMetadata::default()));
-    }
-
-    // Normalize line endings
-    let normalized_html = normalize_line_endings(html);
-
-    // Create collector for single-pass gathering
-    let metadata_collector = Rc::new(RefCell::new(
-        metadata::MetadataCollector::new(metadata_cfg)
-    ));
-
-    // Convert with metadata collection
-    let markdown = converter::convert_html_with_metadata(
-        normalized_html.as_ref(),
-        &options,
-        Rc::clone(&metadata_collector)
-    )?;
-
-    // Apply wrapping if configured
-    let markdown = if options.wrap {
-        wrapper::wrap_markdown(&markdown, &options)
-    } else {
-        markdown
-    };
-
-    // Recover metadata from collector
-    let metadata_collector = Rc::try_unwrap(metadata_collector)
-        .map_err(|_| ConversionError::Other("failed to recover metadata state".to_string()))?
-        .into_inner();
-    let metadata = metadata_collector.finish();
-
-    // Return both markdown and metadata
-    Ok((markdown, metadata))
+) -> Result<String> {
+    // Conversion with optional visitor for metadata collection
+    // See visitor pattern documentation for integration details
 }
+
+// Visitors can implement MetadataCollector functionality
+// for custom metadata extraction per application needs
 ```
 
 ## Performance Characteristics
 
 **Benchmarking:**
+
 - Single-pass collection adds < 5% overhead to conversion
 - Memory: Typical document (50 headers, 100 links, 20 images) < 50KB overhead
 - Large documents (1000+ links): Pre-allocated buffers grow as needed
 
 **Memory Safety:**
+
 - `max_structured_data_size` prevents DoS from huge JSON-LD blocks
 - Recursive metadata collection depth-limited
 - No unbounded allocations
@@ -606,44 +587,36 @@ pub fn convert_with_metadata(
 ## Implementation Location
 
 **Core Files:**
-- `/crates/html-to-markdown/src/metadata.rs` - All metadata types and collector
-- `/crates/html-to-markdown/src/lib.rs` - `convert_with_metadata()` public API (lines 310-462)
-- `/crates/html-to-markdown/src/converter.rs` - Integration with conversion pipeline
+
+- `/crates/html-to-markdown/src/lib.rs` - Core conversion API
+- `/crates/html-to-markdown/src/converter.rs` - Conversion pipeline
+- `/crates/html-to-markdown/src/visitor.rs` - Visitor pattern implementation (for custom metadata extraction)
 
 **Testing:**
+
 - `/crates/html-to-markdown/src/lib.rs` - Tests starting at line 604
 
-## API Pattern Consistency
+## Implementation via Visitor Pattern
 
-Metadata extraction follows the same pattern as inline images:
+Metadata extraction should be implemented using the visitor pattern:
 
 ```rust
-// Image extraction (inline-images feature)
-pub fn convert_with_inline_images(
+// Visitor pattern provides extensible architecture
+pub fn convert(
     html: &str,
     options: Option<ConversionOptions>,
-    image_cfg: InlineImageConfig,
-) -> Result<HtmlExtraction> { ... }
-
-// Metadata extraction (metadata feature)
-pub fn convert_with_metadata(
-    html: &str,
-    options: Option<ConversionOptions>,
-    metadata_cfg: MetadataConfig,
-) -> Result<(String, ExtendedMetadata)> { ... }
-
-// Visitor pattern (visitor feature)
-pub fn convert_with_visitor(
-    html: &str,
-    options: Option<ConversionOptions>,
-    visitor: Option<visitor::VisitorHandle>,
 ) -> Result<String> { ... }
+
+// Custom visitors can implement metadata collection
+// See visitor-pattern-usage documentation for details
 ```
 
 ## Quick Integration Guide
 
-1. Enable `metadata` feature in Cargo.toml
-2. Import: `use html_to_markdown_rs::{convert_with_metadata, MetadataConfig};`
-3. Call: `let (md, meta) = convert_with_metadata(html, None, MetadataConfig::default())?;`
-4. Access: `meta.document.title`, `meta.headers`, `meta.links`, `meta.images`
-5. Optional: Filter metadata types via `MetadataConfig` to reduce overhead
+Use the visitor pattern to implement custom metadata extraction:
+
+1. Implement a custom visitor struct
+2. Override visitor methods for elements you want to extract metadata from
+3. Accumulate metadata in the visitor's internal state
+4. After conversion, extract the collected metadata from your visitor
+5. See visitor-pattern-usage documentation for detailed examples

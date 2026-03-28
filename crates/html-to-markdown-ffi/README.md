@@ -68,6 +68,7 @@ cargo build --release -p html-to-markdown-ffi
 ```
 
 This produces:
+
 - **Dynamic library**: `target/release/libhtml_to_markdown_ffi.{so,dylib,dll}`
 - **Static library**: `target/release/libhtml_to_markdown_ffi.{a,lib}`
 - **Header file**: `crates/html-to-markdown-ffi/html_to_markdown.h` (auto-generated via cbindgen)
@@ -78,7 +79,7 @@ Pre-built packages are available from the [releases page](https://github.com/kre
 
 Each `html-to-markdown-ffi-{version}-{platform}.tar.gz` archive contains:
 
-```
+```text
 include/html_to_markdown.h
 lib/libhtml_to_markdown_ffi.{so|dylib|dll}
 lib/libhtml_to_markdown_ffi.{a|lib}
@@ -152,7 +153,7 @@ cc -o example example.c $(pkg-config --cflags --libs html-to-markdown)
 
 ### FFI Bridge Layers
 
-```
+```text
 Language-Specific Bindings
     ↓
 html-to-markdown FFI C Library (crates/html-to-markdown-ffi) ← This crate

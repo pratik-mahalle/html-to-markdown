@@ -2,6 +2,7 @@
 name: Element Whitelisting
 priority: high
 ---
+
 Only allow safe HTML elements
 
 - Always remove: script, style, iframe, object, embed, applet, form

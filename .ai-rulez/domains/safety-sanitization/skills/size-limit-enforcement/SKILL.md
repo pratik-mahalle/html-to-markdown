@@ -2,18 +2,22 @@
 description: "Size Limit Enforcement"
 name: size-limit-enforcement
 ---
+
 Enforce memory and size limits
 
 Key source files:
+
 - crates/html-to-markdown/src/lib.rs
 
 Master concepts:
+
 - Document size validation
 - Nesting depth limits
 - Output size limits
 - Graceful rejection
 
 Step by step:
+
 1. Check document size
    - Default limit 50MB
    - Configurable via SafetyConfig

@@ -2,18 +2,22 @@
 description: "Whitespace Mode Configuration"
 name: whitespace-mode-configuration
 ---
+
 Apply configurable whitespace handling strategy
 
 Key source files:
+
 - crates/html-to-markdown/src/options.rs (WhitespaceMode)
 
 Master concepts:
+
 - Preserve mode (keep all whitespace)
 - Minimal mode (trim/normalize)
 - Collapse mode (HTML5-style)
 - Mode application per element
 
 Step by step:
+
 1. Get WhitespaceMode from ConversionOptions
 2. For text extraction apply mode
    - Preserve means return text as-is

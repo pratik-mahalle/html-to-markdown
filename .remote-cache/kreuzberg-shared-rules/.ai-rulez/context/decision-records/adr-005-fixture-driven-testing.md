@@ -74,7 +74,7 @@ Example fixture structure:
 
 Fixtures are stored in `/fixtures/` with this structure:
 
-```
+```text
 fixtures/
 ├── parsing/
 │   ├── basic_rules.yaml

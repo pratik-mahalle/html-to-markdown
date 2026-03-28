@@ -29,6 +29,7 @@ The Java test app in `tests/test_apps/java` has been completely updated to:
 ### 2. Test Coverage - 95 Total Tests
 
 #### SmokeTest (14 tests)
+
 - Package and class loading validation
 - Basic HTML to Markdown conversion (paragraphs, headings, lists, links, code, blockquotes)
 - Text formatting (strong, emphasis)
@@ -37,6 +38,7 @@ The Java test app in `tests/test_apps/java` has been completely updated to:
 - Combined element conversion
 
 #### ComprehensiveTest (13 tests)
+
 - Fixture-based validation (basic-html.json)
 - Complex HTML formatting with mixed elements (articles, sections, nested content)
 - Metadata extraction with document metadata
@@ -47,6 +49,7 @@ The Java test app in `tests/test_apps/java` has been completely updated to:
 - Table, code block, and attribute preservation
 
 #### ErrorHandlingTest (13 tests)
+
 - Null input validation with proper NullPointerException
 - Empty and empty element handling
 - Malformed HTML resilience
@@ -61,6 +64,7 @@ The Java test app in `tests/test_apps/java` has been completely updated to:
 - Visitor error cases
 
 #### TypeSafetyTest (13 tests)
+
 - ConversionOptions typing validation (String, int, boolean)
 - Builder pattern type safety
 - OutputFormat enum type safety with distinct values
@@ -75,6 +79,7 @@ The Java test app in `tests/test_apps/java` has been completely updated to:
 - Metadata component type validation
 
 #### MetadataExtractionTest (18 tests)
+
 - Basic document metadata extraction
 - Markdown content extraction with metadata
 - Multiple header extraction (h1, h2, h3)
@@ -91,6 +96,7 @@ The Java test app in `tests/test_apps/java` has been completely updated to:
 - Null input validation
 
 #### VisitorFunctionalityTest (14 tests)
+
 - Basic visitor implementation
 - Element skipping functionality
 - Conditional element handling (mailto: link filtering)
@@ -107,6 +113,7 @@ The Java test app in `tests/test_apps/java` has been completely updated to:
 ## Features Tested
 
 ### Core Conversion Features
+
 - ✅ Paragraphs, headings (h1-h6), lists (ordered and unordered)
 - ✅ Links with href and title attributes
 - ✅ Images with src, alt, and title attributes
@@ -118,6 +125,7 @@ The Java test app in `tests/test_apps/java` has been completely updated to:
 - ✅ Custom elements and unknown tags
 
 ### Error Handling
+
 - ✅ Null input validation with NullPointerException
 - ✅ Empty input handling
 - ✅ Malformed HTML resilience
@@ -128,6 +136,7 @@ The Java test app in `tests/test_apps/java` has been completely updated to:
 - ✅ Script/style tag stripping
 
 ### Type Safety
+
 - ✅ Strong Java typing with generics
 - ✅ Builder pattern implementation (fluent API)
 - ✅ Enum type validation
@@ -135,6 +144,7 @@ The Java test app in `tests/test_apps/java` has been completely updated to:
 - ✅ Parameter type validation
 
 ### Advanced Features
+
 - ✅ Visitor pattern for element interception
 - ✅ Element skipping via VisitResult.Skip
 - ✅ Conditional processing based on attributes
@@ -147,12 +157,14 @@ The Java test app in `tests/test_apps/java` has been completely updated to:
 ## Test Execution
 
 ### Compilation
+
 ```bash
 cd tests/test_apps/java
 mvn clean compile
 ```
 
 ### Run Tests
+
 ```bash
 # All tests
 mvn test
@@ -167,11 +179,13 @@ mvn test -Dtest=SmokeTest#testBasicConversion
 ### Expected Results
 
 **With published Maven Central package (v2.24.1)**:
+
 - All 95 tests should PASS
 - Library loads via JNI/FFI bindings
 - Conversions execute successfully
 
 **During development (before Maven Central publication)**:
+
 - Tests compile successfully
 - Tests may fail at runtime with "Failed to convert" errors if FFI library is not available
 - This is expected behavior - the package requires pre-built native binaries
@@ -179,6 +193,7 @@ mvn test -Dtest=SmokeTest#testBasicConversion
 ## Gap Analysis - Test Coverage Limitations
 
 ### Covered Features
+
 1. ✅ Basic HTML elements
 2. ✅ Error handling and edge cases
 3. ✅ Type safety
@@ -239,18 +254,21 @@ mvn test -Dtest=SmokeTest#testBasicConversion
 ## Recommendations for Future Enhancement
 
 ### High Priority
+
 1. Populate remaining fixture files (complex-html.json, edge-cases.json, etc.)
 2. Add ConversionOptionsEffectsTest to verify options actually change output
 3. Add more Visitor method tests (currently ~15/30 visitor callbacks tested)
 4. Add thread-safety tests for concurrent conversions
 
 ### Medium Priority
+
 1. Add memory management and cleanup tests
 2. Add language-specific metadata tests
 3. Add RTL text handling tests
 4. Add performance baseline tests
 
 ### Low Priority
+
 1. Add OS-specific platform tests (covered by CI matrix testing)
 2. Add accessibility compliance tests
 3. Add HTML spec compliance tests
@@ -272,23 +290,27 @@ Current status in `tests/test_apps/fixtures/`:
 To improve test coverage, the following fixture files should be populated:
 
 **complex-html.json** - 50 test cases
+
 - Nested lists (2-5 levels)
 - Tables with various structures
 - Complex document hierarchies
 - Mixed content with multiple element types
 
 **edge-cases.json** - 30 test cases
+
 - Unusual attribute values
 - Empty elements
 - Whitespace variations
 - Entity encoding edge cases
 
 **metadata-extraction.json** - 20 test cases
+
 - Various metadata formats
 - Multiple metadata standards
 - Mixed metadata in single document
 
 **real-world.json** - 10 test cases
+
 - Actual website HTML samples
 - News articles
 - Blog posts

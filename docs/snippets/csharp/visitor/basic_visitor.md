@@ -1,4 +1,4 @@
 ```csharp
 // The visitor pattern is not yet supported in the C# binding.
-// Use Convert() or ConvertWithMetadata() instead.
+// Use Convert() with ConversionOptions instead.
 ```

@@ -2,18 +2,22 @@
 description: "Parser Performance Optimization"
 name: parser-performance-optimization
 ---
+
 Optimize parser speed and memory usage
 
 Key source files:
+
 - crates/html-to-markdown/src/converter.rs
 
 Master concepts:
+
 - Parser benchmarking
 - Memory allocation patterns
 - Hot path optimization
 - Caching strategies
 
 Step by step:
+
 1. Benchmark current parser
 2. Profile with flamegraph
 3. Identify hot paths

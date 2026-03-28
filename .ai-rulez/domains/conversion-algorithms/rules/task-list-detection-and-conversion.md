@@ -2,6 +2,7 @@
 name: Task List Detection & Conversion
 priority: high
 ---
+
 Detect and convert task list items
 
 - Detect <input type="checkbox"> in <li>

@@ -2,18 +2,22 @@
 description: "Attribute Access And Validation"
 name: attribute-access-and-validation
 ---
+
 Safely access and retrieve element attributes
 
 Key source files:
+
 - crates/html-to-markdown/src/visitor.rs (NodeContext)
 
 Master concepts:
+
 - Case-insensitive attribute lookup
 - Class and ID extraction
 - URL attributes (href, src, srcset)
 - Boolean attribute handling
 
 Step by step:
+
 1. Get attribute map from element
 2. For specific attribute lookup
    a. Lookup by name (case-insensitive)

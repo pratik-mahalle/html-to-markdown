@@ -2,6 +2,7 @@
 name: JavaScript URL Detection
 priority: high
 ---
+
 Detect and block javascript: URLs
 
 - Check for javascript prefix (case-insensitive)

@@ -56,11 +56,9 @@
   </a>
 </div>
 
-
 High-performance HTML to Markdown converter with a clean Python API (powered by a Rust core).
 The same engine also drives the Node.js, Ruby, PHP, and WebAssembly bindings, so rendered Markdown
 stays identical across runtimes. Wheels are published for Linux, macOS, and Windows.
-
 
 ## Installation
 
@@ -68,13 +66,7 @@ stays identical across runtimes. Wheels are published for Linux, macOS, and Wind
 pip install html-to-markdown
 ```
 
-
 Requires Python 3.10+. Wheels are published for Linux, macOS, and Windows on PyPI.
-
-
-
-
-
 
 ## Performance Snapshot
 
@@ -86,9 +78,7 @@ Apple M4 • Real Wikipedia documents • `convert()` (Python)
 | Tables (Countries) | 360KB | 2.02ms | 178 MB/s |
 | Mixed (Python wiki) | 656KB | 4.56ms | 144 MB/s |
 
-
-See [Performance Guide](../../examples/performance/) for detailed benchmarks.
-
+See for detailed benchmarks.
 
 ## Quick Start
 
@@ -100,8 +90,6 @@ from html_to_markdown import convert
 html = "<h1>Hello</h1><p>This is <strong>fast</strong>!</p>"
 markdown = convert(html)
 ```
-
-
 
 With conversion options:
 
@@ -115,9 +103,6 @@ options = ConversionOptions(
 )
 markdown = convert(html, options)
 ```
-
-
-
 
 With async support:
 
@@ -133,13 +118,9 @@ class AsyncVisitor:
 markdown = convert_with_async_visitor(html, visitor=AsyncVisitor())
 ```
 
-
-
-
 ## API Reference
 
 ### Core Functions
-
 
 **`convert(html: str, options?: ConversionOptions) -> str`**
 
@@ -147,11 +128,11 @@ Basic HTML-to-Markdown conversion. Fast and simple.
 
 **`convert_with_metadata(html: str, options?: ConversionOptions, metadata_config?: MetadataConfig) -> tuple[str, dict]`**
 
-Extract Markdown plus metadata (headers, links, images, structured data) in a single pass. See [Metadata Extraction Guide](../../examples/metadata-extraction/).
+Extract Markdown plus metadata (headers, links, images, structured data) in a single pass.
 
 **`convert_with_visitor(html: str, visitor: object, options?: ConversionOptions) -> str`**
 
-Customize conversion with visitor callbacks for element interception. See [Visitor Pattern Guide](../../examples/visitor-pattern/).
+Customize conversion with visitor callbacks for element interception.
 
 **`convert_with_async_visitor(html: str, visitor: object, options?: ConversionOptions) -> str`**
 
@@ -165,11 +146,10 @@ Extract base64-encoded inline images with metadata.
 
 Extract structured table data (cells, headers, rendered markdown) alongside conversion.
 
-
-
 ### Options
 
 **`ConversionOptions`** – Key configuration fields:
+
 - `heading_style`: Heading format (`"underlined"` | `"atx"` | `"atx_closed"`) — default: `"underlined"`
 - `list_indent_width`: Spaces per indent level — default: `2`
 - `bullets`: Bullet characters cycle — default: `"*+-"`
@@ -180,12 +160,12 @@ Extract structured table data (cells, headers, rendered markdown) alongside conv
 - `output_format`: Output markup format (`"markdown"` | `"djot"` | `"plain"`) — default: `"markdown"`
 
 **`MetadataConfig`** – Selective metadata extraction:
+
 - `extract_headers`: h1-h6 elements — default: `true`
 - `extract_links`: Hyperlinks — default: `true`
 - `extract_images`: Image elements — default: `true`
 - `extract_structured_data`: JSON-LD, Microdata, RDFa — default: `true`
 - `max_structured_data_size`: Size limit in bytes — default: `100KB`
-
 
 ## Djot Output Format
 
@@ -205,7 +185,6 @@ The library supports converting HTML to [Djot](https://djot.net/), a lightweight
 
 ### Example Usage
 
-
 ```python
 from html_to_markdown import convert, ConversionOptions
 
@@ -220,14 +199,11 @@ djot = convert(html, ConversionOptions(output_format="djot"))
 # Result: "This is *bold* and _italic_ text."
 ```
 
-
 Djot's extended syntax allows you to express more semantic meaning in lightweight text, making it useful for documents that require strikethrough, insertion tracking, or mathematical notation.
-
 
 ## Plain Text Output
 
 Set `output_format` to `"plain"` to strip all markup and return only visible text. This bypasses the Markdown conversion pipeline entirely for maximum speed.
-
 
 ```python
 from html_to_markdown import convert, ConversionOptions
@@ -238,16 +214,14 @@ plain = convert(html, ConversionOptions(output_format="plain"))
 # Result: "Title\n\nThis is bold and italic text."
 ```
 
-
 Plain text mode is useful for search indexing, text extraction, and feeding content to LLMs.
-
-
 
 ## Metadata Extraction
 
 The metadata extraction feature enables comprehensive document analysis during conversion. Extract document properties, headers, links, images, and structured data in a single pass.
 
 **Use Cases:**
+
 - **SEO analysis** – Extract title, description, Open Graph tags, Twitter cards
 - **Table of contents generation** – Build structured outlines from heading hierarchy
 - **Content migration** – Document all external links and resources
@@ -257,7 +231,6 @@ The metadata extraction feature enables comprehensive document analysis during c
 **Zero Overhead When Disabled:** Metadata extraction adds negligible overhead and happens during the HTML parsing pass. Disable unused metadata types in `MetadataConfig` to optimize further.
 
 ### Example: Quick Start
-
 
 ```python
 from html_to_markdown import convert_with_metadata
@@ -272,18 +245,14 @@ print(metadata["images"])                  # All images with alt text
 print(metadata["structured_data"])        # JSON-LD, Microdata, RDFa
 ```
 
-
-
-For detailed examples including SEO extraction, table-of-contents generation, link validation, and accessibility audits, see the [Metadata Extraction Guide](../../examples/metadata-extraction/).
-
-
-
+For detailed examples including SEO extraction, table-of-contents generation, link validation, and accessibility audits, see the .
 
 ## Visitor Pattern
 
 The visitor pattern enables custom HTML→Markdown conversion logic by providing callbacks for specific HTML elements during traversal. Use visitors to transform content, filter elements, validate structure, or collect analytics.
 
 **Use Cases:**
+
 - **Custom Markdown dialects** – Convert to Obsidian, Notion, or other flavors
 - **Content filtering** – Remove tracking pixels, ads, or unwanted elements
 - **URL rewriting** – Rewrite CDN URLs, add query parameters, validate links
@@ -293,7 +262,6 @@ The visitor pattern enables custom HTML→Markdown conversion logic by providing
 **Supported Visitor Methods:** 40+ callbacks for text, inline elements, links, images, headings, lists, blocks, and tables.
 
 ### Example: Quick Start
-
 
 ```python
 from html_to_markdown import convert_with_visitor
@@ -316,6 +284,7 @@ markdown = convert_with_visitor(html, visitor=MyVisitor())
 ```
 
 Async support:
+
 ```python
 import asyncio
 from html_to_markdown import convert_with_async_visitor
@@ -330,17 +299,10 @@ class AsyncVisitor:
 markdown = await convert_with_async_visitor(html, visitor=AsyncVisitor())
 ```
 
-
-
-For comprehensive examples including content filtering, link footnotes, accessibility validation, and asynchronous URL validation, see the [Visitor Pattern Guide](../../examples/visitor-pattern/).
-
-
+For comprehensive examples including content filtering, link footnotes, accessibility validation, and asynchronous URL validation, see the .
 
 ## Examples
 
-- [Visitor Pattern Guide](../../examples/visitor-pattern/)
-- [Metadata Extraction Guide](../../examples/metadata-extraction/)
-- [Performance Guide](../../examples/performance/)
 
 ## Links
 

@@ -2,18 +2,22 @@
 description: "Character Encoding Detection"
 name: character-encoding-detection
 ---
+
 Detect and convert character encodings to UTF-8
 
 Key source files:
+
 - crates/html-to-markdown/src/lib.rs
 
 Master concepts:
+
 - HTML5 charset meta tag
 - BOM detection
 - Encoding auto-detection
 - Conversion to UTF-8
 
 Step by step:
+
 1. Check for BOM (Byte Order Mark)
    - UTF-8 BOM is 0xEFBBBF
    - UTF-16LE BOM is 0xFFFE

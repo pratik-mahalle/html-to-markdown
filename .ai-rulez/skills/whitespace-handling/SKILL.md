@@ -1,6 +1,7 @@
 ---
 description: "Whitespace Handling in html-to-markdown"
 ---
+
 # Whitespace Handling in html-to-markdown
 
 ## Overview
@@ -12,6 +13,7 @@ Whitespace handling in html-to-markdown is a critical aspect of conversion fidel
 **Principle:** "Preserve exactly as it appears in HTML source"
 
 By default, html-to-markdown does NOT apply HTML5's automatic whitespace collapsing rules. Instead:
+
 - Text nodes retain original spacing (multiple spaces, tabs preserved)
 - Newlines in text content preserved exactly
 - Full control delegated to user via options
@@ -50,12 +52,14 @@ let markdown = convert(html, Some(options))?;
 ```
 
 **Rules:**
+
 1. Multiple consecutive spaces → single space
 2. Sequences of newlines/tabs → single newline
 3. Leading/trailing whitespace per element → trimmed
 4. Indentation within code blocks → preserved
 
 **Use Cases:**
+
 - Web content (where visual spacing matters, not literal spaces)
 - Content management systems (where source formatting is inconsistent)
 - User-generated content (where extra spaces are usually accidents)
@@ -75,12 +79,14 @@ let markdown = convert(html, Some(options))?;
 ```
 
 **Rules:**
+
 1. Every space preserved (even if sequential)
 2. Every newline preserved (even if multiple)
 3. Tabs kept as-is
 4. No trimming of whitespace
 
 **Use Cases:**
+
 - Poetry and verse (where line breaks matter)
 - ASCII art and diagrams
 - Code documentation (preserve source formatting)
@@ -114,17 +120,20 @@ pub enum PreprocessingPreset {
 ### Preset Definitions
 
 **Minimal:**
+
 - Minimal preprocessing
 - Preserve source structure
 - Use for critical content needing exact fidelity
 
 **Standard (Default):**
+
 - Balanced processing
 - Remove obvious junk (empty paragraphs, HTML comments)
 - Reasonable space collapsing
 - Good for general web content
 
 **Aggressive:**
+
 - Heavy preprocessing
 - Remove all empty elements
 - Unicode normalization
@@ -175,7 +184,8 @@ Line 2
 ```
 
 **Generated:**
-```
+
+```text
 Line 1  \n
 Line 2\n
 ```
@@ -183,11 +193,13 @@ Line 2\n
 **Markdown parsers recognize:** Two spaces before newline as hard line break
 
 **HTML Input:**
+
 ```html
 <p>Line 1<br>Line 2</p>
 ```
 
 **Markdown Output:**
+
 ```markdown
 Line 1
 Line 2
@@ -201,7 +213,8 @@ Line 2
 ```
 
 **Generated:**
-```
+
+```text
 Line 1\\n
 Line 2\n
 ```
@@ -209,11 +222,13 @@ Line 2\n
 **Markdown parsers recognize:** Backslash before newline as hard line break
 
 **HTML Input:**
+
 ```html
 <p>Line 1<br>Line 2</p>
 ```
 
 **Markdown Output:**
+
 ```markdown
 Line 1\
 Line 2
@@ -269,7 +284,8 @@ pub enum ListIndentType {
 ```
 
 **Generated:**
-```
+
+```text
 - Item 1\n
   - Nested 1.1\n
     - Deeply nested 1.1.1\n
@@ -278,6 +294,7 @@ pub enum ListIndentType {
 ```
 
 **Characteristics:**
+
 - 2 spaces per nesting level (configurable)
 - Clear visual hierarchy
 - Works with all Markdown parsers
@@ -287,14 +304,15 @@ pub enum ListIndentType {
 
 ```markdown
 - Item 1
-	- Nested 1.1
-		- Deeply nested 1.1.1
+  - Nested 1.1
+    - Deeply nested 1.1.1
 - Item 2
-	- Nested 2.1
+  - Nested 2.1
 ```
 
 **Generated:**
-```
+
+```text
 - Item 1\n
 \t- Nested 1.1\n
 \t\t- Deeply nested 1.1.1\n
@@ -303,6 +321,7 @@ pub enum ListIndentType {
 ```
 
 **Characteristics:**
+
 - One `\t` per nesting level
 - Compact representation
 - Variable visual width (editor-dependent)
@@ -350,12 +369,14 @@ pub fn normalize_whitespace_cow(text: &str) -> Cow<'_, str> {
 ```
 
 **Algorithm:**
+
 1. Split on whitespace (matches `\s+`)
 2. Collect non-empty tokens
 3. Join with single space
 
 **Examples:**
-```
+
+```text
 "hello    world"      → "hello world"
 "  leading/trailing  " → "leading/trailing"
 "multiple\n\nlines"   → "multiple lines"
@@ -366,7 +387,7 @@ pub fn normalize_whitespace_cow(text: &str) -> Cow<'_, str> {
 
 Text processing flow:
 
-```
+```text
 Raw HTML text
     |
     +-- Decode HTML entities: &amp; → &
@@ -381,7 +402,8 @@ Raw HTML text
 ```
 
 **Example:**
-```
+
+```text
 Input HTML:  "<p>&nbsp;&nbsp;Hello&nbsp;&nbsp;&nbsp;world&nbsp;</p>"
 After decode: "  Hello   world "
 After normalize: "Hello world"
@@ -406,6 +428,7 @@ pub struct ConversionOptions {
 ### Wrapping Behavior
 
 **Without wrapping (default):**
+
 ```rust
 let options = ConversionOptions {
     wrap: false,
@@ -416,6 +439,7 @@ let markdown = "This is a very long line that would normally wrap at 80 characte
 ```
 
 **With wrapping at 80 characters:**
+
 ```rust
 let options = ConversionOptions {
     wrap: true,
@@ -435,13 +459,15 @@ pub struct ConversionOptions {
 ```
 
 **With word preservation (true):**
-```
+
+```text
 Line with a very_long_word_that_exceeds_wrap_width...
 → "Line with a\nvery_long_word_that_exceeds_wrap_width..."
 ```
 
 **Without word preservation (false):**
-```
+
+```text
 Line with a very_long_word_that_exceeds_wrap_width...
 → "Line with a\nvery_long_word_that_exce\neds_wrap_width..."
 ```
@@ -459,6 +485,7 @@ Line with a very_long_word_that_exceeds_wrap_width...
 ```
 
 **Conversion with Strict mode:**
+
 ```rust
 let options = ConversionOptions {
     whitespace_mode: WhitespaceMode::Strict,
@@ -470,10 +497,11 @@ let markdown = convert(html, Some(options))?;
 ```
 
 **Output preserves exact spacing:**
+
 ```markdown
-     The     forest     is     dark
-          and full      of    secrets
-               sleeping   in   moonlight
+     The forest is dark
+          and full of    secrets
+               sleeping in moonlight
 ```
 
 ### Example 2: Web Content Cleanup
@@ -487,11 +515,13 @@ let markdown = convert(html, Some(options))?;
 ```
 
 **Conversion with Normalized mode (default):**
+
 ```rust
 let markdown = convert(html, None)?;  // Uses default options
 ```
 
 **Output (spaces collapsed):**
+
 ```markdown
 Welcome to our site! We have great content for you.
 ```
@@ -511,6 +541,7 @@ Welcome to our site! We have great content for you.
 ```
 
 **With Tab indentation:**
+
 ```rust
 let options = ConversionOptions {
     list_indent_type: ListIndentType::Tabs,
@@ -521,10 +552,11 @@ let markdown = convert(html, Some(options))?;
 ```
 
 **Output:**
+
 ```markdown
 - Feature 1
-	- Sub-feature 1.1
-	- Sub-feature 1.2
+  - Sub-feature 1.1
+  - Sub-feature 1.2
 - Feature 2
 ```
 
@@ -535,16 +567,19 @@ let markdown = convert(html, Some(options))?;
 ```
 
 **Without wrapping:**
+
 ```rust
 let markdown = convert(html, None)?;
 ```
 
 **Output (single line):**
+
 ```markdown
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
 ```
 
 **With wrapping at 60 chars:**
+
 ```rust
 let options = ConversionOptions {
     wrap: true,
@@ -556,6 +591,7 @@ let markdown = convert(html, Some(options))?;
 ```
 
 **Output (multiple lines):**
+
 ```markdown
 Lorem ipsum dolor sit amet, consectetur adipiscing
 elit, sed do eiusmod tempor incididunt ut labore et
@@ -564,9 +600,9 @@ dolore magna aliqua.
 
 ## Performance Impact of Whitespace Options
 
-### Benchmarking Results
+### Benchmarking Considerations
 
-From `/tools/benchmark-harness/`:
+Whitespace normalization has measurable performance characteristics:
 
 | Option | Impact | Notes |
 |--------|--------|-------|
@@ -679,6 +715,7 @@ task rust:test -- --exact "test_wrap"
 ```
 
 **Test patterns:**
+
 - Multiple spaces collapsing
 - Newline normalization
 - Tab handling in lists

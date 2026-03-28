@@ -1,4 +1,5 @@
 ```php
+use HtmlToMarkdown\Config\ConversionOptions;
 use HtmlToMarkdown\Service\Converter;
 
 $html = <<<HTML
@@ -10,9 +11,9 @@ $html = <<<HTML
 HTML;
 
 $converter = Converter::create();
-$result = $converter->convertWithTables($html);
+$result = $converter->convert($html, new ConversionOptions(extractTables: true));
 
-foreach ($result->tables as $table) {
+foreach ($result['tables'] as $table) {
     foreach ($table->cells as $i => $row) {
         $prefix = $table->isHeaderRow[$i] ? 'Header' : 'Row';
         echo "  {$prefix}: " . implode(', ', $row) . "\n";

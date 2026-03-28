@@ -2,6 +2,7 @@
 name: XSS Attack Vector Mitigation
 priority: high
 ---
+
 Prevent common XSS attack patterns
 
 - Stored XSS: Sanitize input via ammonia

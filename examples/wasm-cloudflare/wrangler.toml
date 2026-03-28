@@ -1,3 +1,0 @@
-name = "html-to-markdown-wasm-example"
-main = "src/index.ts"
-compatibility_date = "2024-12-08"

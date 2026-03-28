@@ -13,7 +13,7 @@ ______________________________________________________________________
 
 Example directory structure:
 
-```
+```text
 project/
 ├── crates/
 │   ├── core/

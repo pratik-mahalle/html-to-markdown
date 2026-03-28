@@ -1,6 +1,7 @@
 ```java
 import dev.kreuzberg.htmltomarkdown.HtmlToMarkdown;
-import dev.kreuzberg.htmltomarkdown.TableExtractionResult;
+import dev.kreuzberg.htmltomarkdown.ConversionOptions;
+import dev.kreuzberg.htmltomarkdown.ConversionResult;
 
 String html = """
 <table>
@@ -10,7 +11,10 @@ String html = """
 </table>
 """;
 
-TableExtractionResult result = HtmlToMarkdown.convertWithTables(html);
+ConversionOptions options = ConversionOptions.builder()
+    .extractTables(true)
+    .build();
+ConversionResult result = HtmlToMarkdown.convert(html, options);
 
 for (var table : result.tables()) {
     for (int i = 0; i < table.cells().size(); i++) {

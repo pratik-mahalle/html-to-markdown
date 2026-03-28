@@ -3,125 +3,53 @@ title: html-to-markdown
 description: High-performance HTML to Markdown conversion powered by Rust
 ---
 
-# html-to-markdown
+## html-to-markdown
 
-**High-performance HTML to Markdown conversion powered by Rust**
+High-performance HTML to Markdown conversion powered by Rust. A single Rust core with native bindings for 12 language ecosystems, delivering identical output across every runtime.
 
-Convert HTML to clean, readable Markdown at 150--280 MB/s. A single Rust core with native bindings for 12 language ecosystems, delivering identical output across every runtime.
-
----
-
-## Key Features
-
-| | Feature | Description |
-|---|---|---|
-| :material-lightning-bolt: | **Blazing Fast** | 150--280 MB/s throughput, 10--80x faster than pure Python alternatives |
-| :material-translate: | **Polyglot** | 12 native bindings -- Rust, Python, TypeScript, Ruby, PHP, Go, Java, C#, Elixir, R, C, WASM |
-| :material-file-document-check: | **Smart Conversion** | Nested tables, code blocks, task lists, hOCR (deprecated), and complex HTML structures |
-| :material-tag-text: | **Metadata Extraction** <span class="version-badge">v2.13.0</span> | Title, description, headers, links, images, Open Graph, JSON-LD, Microdata |
-| :material-eye: | **Visitor Pattern** <span class="version-badge new">v2.23.0</span> | Custom callbacks for content filtering, URL rewriting, and domain-specific dialects |
-| :material-shield-check: | **Secure by Default** | Built-in HTML sanitization powered by ammonia prevents malicious content |
-
----
-
-## Quick Install
-
-=== "Python"
-
-    ```bash
-    pip install html-to-markdown
-    ```
-
-=== "TypeScript"
-
-    ```bash
-    npm install @kreuzberg/html-to-markdown-node
-    ```
+### Quick Example
 
 === "Rust"
-
-    ```bash
-    cargo add html-to-markdown-rs
-    ```
-
-=== "Ruby"
-
-    ```bash
-    gem install html-to-markdown
-    ```
-
-=== "PHP"
-
-    ```bash
-    composer require kreuzberg-dev/html-to-markdown
-    ```
-
-=== "CLI"
-
-    ```bash
-    cargo install html-to-markdown-cli
-    ```
-
-    Or via Homebrew:
-
-    ```bash
-    brew install kreuzberg-dev/tap/html-to-markdown
-    ```
-
----
-
-## Quick Example
-
-=== "Python"
-
-    ```python
-    from html_to_markdown import convert
-
-    html = "<h1>Hello</h1><p>This is <strong>fast</strong>!</p>"
-    markdown = convert(html)
-    ```
-
-=== "TypeScript"
-
-    ```typescript
-    import { convert } from '@kreuzberg/html-to-markdown';
-
-    const markdown: string = convert('<h1>Hello World</h1>');
-    console.log(markdown); // # Hello World
-    ```
-
-=== "Rust"
-
     ```rust
     use html_to_markdown_rs::convert;
 
-    let html = "<h1>Hello</h1><p>This is <strong>fast</strong>!</p>";
-    let markdown = convert(html, None)?;
+    let result = convert("<h1>Hello</h1><p>This is <strong>fast</strong>!</p>", None)?;
+    println!("{}", result.content.unwrap_or_default());
+    // # Hello
+    //
+    // This is **fast**!
     ```
 
----
+=== "Python"
+    ```python
+    from html_to_markdown import convert
 
-## Live Demo
+    result = convert("<h1>Hello</h1><p>This is <strong>fast</strong>!</p>")
+    print(result["content"])
+    # # Hello
+    #
+    # This is **fast**!
+    ```
 
-Try html-to-markdown directly in your browser -- no installation required. The demo runs entirely client-side using the WebAssembly build.
+### Features
 
-[Try the Live Demo](https://kreuzberg-dev.github.io/html-to-markdown/){ .md-button .md-button--primary }
+- 150–280 MB/s throughput, 10–80x faster than pure-Python alternatives
+- 12 native language bindings: Rust, Python, TypeScript, Go, Ruby, PHP, Java, C#, Elixir, R, C, WASM
+- `convert()` returns a `ConversionResult` with `content`, `metadata`, `tables`, `images`, and `warnings`
+- Metadata extraction: title, description, Open Graph, Twitter Card, JSON-LD, links, images
+- Structured document tree extraction (`DocumentStructure`)
+- Visitor pattern for content filtering, URL rewriting, and custom dialects
+- Output formats: Markdown (CommonMark), Djot, plain text
+- Built-in HTML sanitization via [ammonia](https://github.com/rust-ammonia/ammonia)
+- CLI tool with full flag coverage
 
----
+### Get Started
 
-## Part of the Kreuzberg Ecosystem
+- [Installation](installation.md) — package manager commands for all 12 languages
+- [Usage](usage.md) — convert HTML, access result fields, extract metadata
+- [Configuration](configuration.md) — all options with types, defaults, and descriptions
+- [CLI](cli.md) — command-line reference
 
-html-to-markdown powers the HTML conversion pipeline in [kreuzberg](https://docs.kreuzberg.dev), a document intelligence library for extracting text and structured data from any document format. If you need to process PDFs, DOCX, images, or other document types, check out kreuzberg -- it uses html-to-markdown internally for all HTML-to-Markdown conversion.
+### Part of the Kreuzberg Ecosystem
 
----
-
-## Explore the Docs
-
-- **[Installation](getting-started/installation.md)** -- Package manager commands for all 12 language bindings
-- **[Quick Start](getting-started/quickstart.md)** -- Get converting in under a minute
-- **[Features](features.md)** -- Detailed overview of capabilities
-- **[Configuration](guides/configuration.md)** -- Control heading styles, code fences, list formatting, and more
-- **[Visitor Pattern](guides/visitor.md)** -- Custom callbacks for advanced conversion control
-- **[Metadata Extraction](guides/metadata.md)** -- Extract structured document metadata alongside conversion
-- **[API Reference](reference/api-python.md)** -- Language-specific API documentation
-- **[Contributing](contributing.md)** -- Development setup and contribution guidelines
+html-to-markdown powers the HTML conversion pipeline in [kreuzberg](https://docs.kreuzberg.dev), a document intelligence library for extracting text and structured data from PDFs, DOCX, images, and other document formats.

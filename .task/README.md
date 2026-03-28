@@ -14,7 +14,7 @@ The `.task/` directory structure reduces the root `Taskfile.yml` from 838 lines 
 
 ## Directory Structure
 
-```
+```text
 .task/
 ├── config/
 │   ├── vars.yml           # Global variables, version detection, paths
@@ -52,6 +52,7 @@ The `.task/` directory structure reduces the root `Taskfile.yml` from 838 lines 
 **Purpose**: Global variables shared across all task modules.
 
 **Key Variables**:
+
 ```yaml
 VERSION:           # Extracted from Cargo.toml
 BUILD_PROFILE:     # dev/release/ci (default: release)
@@ -65,6 +66,7 @@ TARGET_DIR:        # target/ directory (Rust build outputs)
 ```
 
 **Example Usage**:
+
 ```yaml
 # In any language module:
 dir: "{{.PACKAGES_DIR}}/python"
@@ -77,6 +79,7 @@ cmds:
 **Purpose**: Platform-specific detection and configuration.
 
 **Key Variables**:
+
 ```yaml
 EXE_EXT:           # .exe on Windows, empty on Unix
 LIB_EXT:           # dylib/so/dll based on OS
@@ -89,6 +92,7 @@ IS_LINUX:          # Boolean: true on Linux
 ```
 
 **Example Usage**:
+
 ```yaml
 # Cross-platform library path configuration:
 env:
@@ -158,6 +162,7 @@ tasks:
 ### Cross-Platform Patterns
 
 **DO Use** (Cross-Platform Compatible):
+
 ```yaml
 # Python for file operations:
 - cmd: |
@@ -178,6 +183,7 @@ env:
 ```
 
 **DON'T Use** (Platform-Specific):
+
 ```yaml
 # ❌ Unix-only commands:
 - rm -rf build/ dist/
@@ -276,6 +282,7 @@ tasks:
 ```
 
 **Updates**:
+
 - Cargo workspace members (crates/*/Cargo.toml)
 - Python (packages/python/pyproject.toml)
 - Node.js (packages/typescript/package.json)
@@ -462,6 +469,7 @@ tasks:
 ```
 
 Now users can run:
+
 ```bash
 task swift:build
 task swift:test
@@ -473,17 +481,20 @@ task swift:lint
 ### Internal Tasks
 
 Defined with `internal: true` at the file level:
+
 ```yaml
 version: "3"
 internal: true  # This file's tasks are not listed in `task --list`
 ```
 
 **Characteristics**:
+
 - Not visible in `task --list`
 - Only callable from other tasks
 - Used for: config files, workflow aggregators
 
 **Examples**:
+
 - `.task/config/vars.yml` (internal)
 - `.task/workflows/build.yml` (internal)
 - `.task/workflows/test.yml` (internal)
@@ -491,6 +502,7 @@ internal: true  # This file's tasks are not listed in `task --list`
 ### Public Tasks
 
 Included without `internal: true` or via root Taskfile:
+
 ```yaml
 includes:
   rust:
@@ -499,11 +511,13 @@ includes:
 ```
 
 **Characteristics**:
+
 - Visible in `task --list`
 - Directly callable by users
 - Used for: language modules, tool modules
 
 **Examples**:
+
 - `rust:build` (public)
 - `python:test` (public)
 - `version:sync` (public)
@@ -619,6 +633,7 @@ install:
 **Error**: `Task "foo:bar" not found`
 
 **Solution**: Ensure the include is in root `Taskfile.yml`:
+
 ```yaml
 includes:
   foo:
@@ -630,6 +645,7 @@ includes:
 **Error**: `template: :1:2: executing "" at <.SOME_VAR>: map has no entry for key "SOME_VAR"`
 
 **Solution**: Define variable in `.task/config/vars.yml` or include platforms:
+
 ```yaml
 includes:
   platforms: ../config/platforms.yml
@@ -640,6 +656,7 @@ includes:
 **Error**: Task works on macOS but fails on Windows
 
 **Solution**: Use conditional environment variables and cross-platform commands:
+
 ```yaml
 env:
   PATH: '{{if eq .OS "windows"}}{{.TARGET_DIR}}/release;{{end}}{{.PATH}}'
@@ -656,7 +673,7 @@ cmds:
 
 ## References
 
-- **Task Documentation**: https://taskfile.dev
+- **Task Documentation**: <https://taskfile.dev>
 - **Kreuzberg Pattern**: ../kreuzberg/ (sibling project)
 - **Root Taskfile**: ../Taskfile.yml
 - **Platform Config**: config/platforms.yml

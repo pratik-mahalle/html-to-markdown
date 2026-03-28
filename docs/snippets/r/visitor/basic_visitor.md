@@ -3,6 +3,7 @@ library(htmltomarkdown)
 
 html <- "<p>Visit <a href='https://example.com'>our site</a> for more!</p>"
 
-markdown <- convert_with_visitor(html)
-cat(markdown)
+opts <- conversion_options(extract_metadata = FALSE)
+result <- convert(html, opts)
+cat(result$content)
 ```

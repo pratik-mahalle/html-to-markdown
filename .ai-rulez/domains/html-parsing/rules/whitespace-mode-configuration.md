@@ -2,6 +2,7 @@
 name: Whitespace Mode Configuration
 priority: high
 ---
+
 Support multiple whitespace handling strategies
 
 - Implement WhitespaceMode enum: Preserve, Minimal, Collapse

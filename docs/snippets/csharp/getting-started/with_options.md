@@ -10,6 +10,6 @@ var options = new ConversionOptions
 };
 
 var html = "<h1>Hello</h1><p>This is <strong>formatted</strong> content.</p>";
-var markdown = HtmlToMarkdownConverter.Convert(html);
-Console.WriteLine(markdown);
+var result = HtmlToMarkdownConverter.Convert(html, options);
+Console.WriteLine(result.Content);
 ```

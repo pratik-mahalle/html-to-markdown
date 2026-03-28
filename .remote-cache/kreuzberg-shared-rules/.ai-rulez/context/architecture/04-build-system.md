@@ -444,7 +444,7 @@ mvn deploy -Dorg.slf4j.simpleLogger.defaultLogLevel=warn
 
 ### Build Artifact Structure
 
-```
+```text
 target/
 ├── release/
 │   ├── libmylib.a          # Static lib (Unix)

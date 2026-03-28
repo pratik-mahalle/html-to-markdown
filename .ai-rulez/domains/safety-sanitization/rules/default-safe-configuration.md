@@ -2,6 +2,7 @@
 name: Default Safe Configuration
 priority: high
 ---
+
 Defaults prioritize security over functionality
 
 - sanitize_html: true (enabled by default)

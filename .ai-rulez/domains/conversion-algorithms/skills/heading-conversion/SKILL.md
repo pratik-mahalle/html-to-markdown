@@ -2,18 +2,22 @@
 description: "Heading Conversion"
 name: heading-conversion
 ---
+
 Convert HTML heading tags to Markdown
 
 Key source files:
+
 - crates/html-to-markdown/src/converter.rs (convert_heading)
 
 Master concepts:
+
 - ATX style (#)
 - Setext style (underline)
 - HeadingStyle configuration
 - Content preservation
 
 Step by step:
+
 1. Extract heading level from h1, h2, etc.
 2. Extract heading text content
 3. Check HeadingStyle option

@@ -2,6 +2,7 @@
 name: Element Type Identification
 priority: high
 ---
+
 Accurately identify all HTML element types
 
 - Support 60+ HTML5 element types

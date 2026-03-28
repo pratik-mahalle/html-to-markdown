@@ -9,9 +9,12 @@ const char* html =
     "<tr><td>Bob</td><td>25</td></tr>"
     "</table>";
 
-/* Returns JSON: {"content":"...","metadata":...,"tables":[...]} */
-char* json = html_to_markdown_convert_with_tables(html, NULL, NULL);
+const char* options_json = "{\"extract_tables\":true}";
+
+/* Returns JSON: {"content":"...","metadata":null,"tables":[...]} */
+char* json = html_to_markdown_convert(html, options_json);
 if (json != NULL) {
+    /* Parse JSON to access tables array */
     printf("%s\n", json);
     html_to_markdown_free_string(json);
 }

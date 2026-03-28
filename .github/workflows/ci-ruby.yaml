@@ -106,3 +106,14 @@ jobs:
         working-directory: packages/ruby
         shell: pwsh
         run: ../../scripts/ci/ruby/run-rspec-windows.ps1
+
+      - name: Install Task
+        if: runner.os != 'Windows'
+        uses: go-task/setup-task@v2 # v2
+        with:
+          version: 3.46.4
+
+      - name: Run E2E tests
+        if: runner.os != 'Windows'
+        run: task ruby:e2e:test
+        shell: bash

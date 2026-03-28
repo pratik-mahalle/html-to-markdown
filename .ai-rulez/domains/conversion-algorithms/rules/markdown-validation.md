@@ -2,6 +2,7 @@
 name: Markdown Validation
 priority: high
 ---
+
 Ensure generated Markdown is valid
 
 - Validate Markdown syntax

@@ -2,6 +2,7 @@
 name: Data URI Handling
 priority: high
 ---
+
 Handle data: URIs safely
 
 - Option 1: Block all data: URIs (safest)

@@ -2,6 +2,7 @@
 name: Memory Bounds Enforcement
 priority: high
 ---
+
 Enforce strict memory limits
 
 - Enforce maximum document size

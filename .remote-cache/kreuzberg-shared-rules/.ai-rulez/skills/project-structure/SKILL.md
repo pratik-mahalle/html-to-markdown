@@ -4,7 +4,7 @@ ______________________________________________________________________
 
 # Project Structure & Conventions
 
-```
+```text
 html-to-markdown/
 ├── crates/
 │   ├── html-to-markdown/           # Core Rust library (main logic)

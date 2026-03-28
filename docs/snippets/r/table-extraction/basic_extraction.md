@@ -9,7 +9,8 @@ html <- "
 </table>
 "
 
-result <- convert_with_tables(html)
+opts <- conversion_options(extract_tables = TRUE)
+result <- convert(html, opts)
 
 for (table in result$tables) {
   for (i in seq_along(table$cells)) {

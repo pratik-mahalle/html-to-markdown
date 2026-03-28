@@ -6,5 +6,6 @@ options = ConversionOptions(
     heading_style="atx",
     list_indent_width=2,
 )
-markdown = convert(html, options)
+result = convert(html, options)
+markdown = result["content"]
 ```

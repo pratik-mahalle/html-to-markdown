@@ -2,6 +2,7 @@
 name: Event Handler Prevention
 priority: high
 ---
+
 Block JavaScript execution via event handlers
 
 - Remove all on* attributes

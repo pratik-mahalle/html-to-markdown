@@ -2,6 +2,7 @@
 name: Configuration Documentation
 priority: high
 ---
+
 Document safety configuration options
 
 - Document each SafetyConfig option

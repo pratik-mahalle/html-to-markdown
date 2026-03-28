@@ -2,6 +2,7 @@
 name: Traversal API Documentation
 priority: high
 ---
+
 Document tree navigation API
 
 - Include traversal examples

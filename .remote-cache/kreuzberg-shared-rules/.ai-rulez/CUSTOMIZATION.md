@@ -14,7 +14,7 @@ The extension system operates in three layers:
 
 Your consuming project should have a `.ai-rulez/` directory at the root:
 
-```
+```text
 your-project/
 ├── .ai-rulez/
 │   ├── config.yaml              # Project-specific configuration
@@ -291,7 +291,7 @@ Input → Processing → Output
 ↓ ↓ ↓
 Source → Logic → Result
 
-````
+````text
 
 ## Implementation Patterns
 
@@ -354,7 +354,7 @@ Explain common mistakes and why they're problematic.
 - Architecture decision records
 - Related issues/PRs
 
-````
+````text
 
 ### Example: Custom Extraction Skill
 

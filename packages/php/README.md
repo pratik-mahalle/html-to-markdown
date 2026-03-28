@@ -56,20 +56,16 @@
   </a>
 </div>
 
-
 High-performance HTML to Markdown converter with typed PHP bindings powered by a Rust core.
 Provides a type-safe API with full PHPStan level 9 support, modern PHP 8.2+ features, and comprehensive metadata extraction.
 
 Note: The package was previously published as `goldziher/html-to-markdown`, which still works for backward compatibility.
-
 
 ## Installation
 
 ```bash
 composer require kreuzberg-dev/html-to-markdown
 ```
-
-
 
 Requires PHP 8.2+. Install the native extension via PIE:
 
@@ -83,11 +79,6 @@ Or use Composer (requires ext-html_to_markdown):
 composer require goldziher/html-to-markdown
 ```
 
-
-
-
-
-
 ## Performance Snapshot
 
 Apple M4 • Real Wikipedia documents • `convert()` (PHP)
@@ -98,9 +89,7 @@ Apple M4 • Real Wikipedia documents • `convert()` (PHP)
 | Tables (Countries) | 360KB | 973 |
 | Medium (Python) | 657KB | 485 |
 
-
-See [Performance Guide](../../examples/performance/) for detailed benchmarks.
-
+See for detailed benchmarks.
 
 ## Quick Start
 
@@ -118,8 +107,6 @@ $markdown = $converter->convert('<h1>Hello</h1><p>This is <strong>fast</strong>!
 $markdown = convert('<h1>Hello</h1>');
 ```
 
-
-
 With conversion options:
 
 ```php
@@ -136,15 +123,9 @@ $options = new ConversionOptions(
 $markdown = $converter->convert('<h1>Hello</h1>', $options);
 ```
 
-
-
-
-
-
 ## API Reference
 
 ### Core Functions
-
 
 **`Converter::convert(string $html, ?ConversionOptions $options = null): string`**
 
@@ -152,11 +133,11 @@ Basic HTML-to-Markdown conversion. Fast and simple.
 
 **`Converter::convertWithMetadata(string $html, ?ConversionOptions $options = null, ?MetadataConfig $config = null): [string, array]`**
 
-Extract Markdown plus metadata (headers, links, images, structured data) in a single pass. See [Metadata Extraction Guide](../../examples/metadata-extraction/).
+Extract Markdown plus metadata (headers, links, images, structured data) in a single pass.
 
 **`Converter::convertWithVisitor(string $html, VisitorInterface $visitor, ?ConversionOptions $options = null): string`**
 
-Customize conversion with visitor callbacks for element interception. See [Visitor Pattern Guide](../../examples/visitor-pattern/).
+Customize conversion with visitor callbacks for element interception.
 
 **`Converter::convertWithInlineImages(string $html, ?InlineImageConfig $config = null): [string, array, array]`**
 
@@ -166,11 +147,10 @@ Extract base64-encoded inline images with metadata.
 
 Extract structured table data (cells, headers, rendered markdown) alongside conversion.
 
-
-
 ### Options
 
 **`ConversionOptions`** – Key configuration fields:
+
 - `heading_style`: Heading format (`"underlined"` | `"atx"` | `"atx_closed"`) — default: `"underlined"`
 - `list_indent_width`: Spaces per indent level — default: `2`
 - `bullets`: Bullet characters cycle — default: `"*+-"`
@@ -181,12 +161,12 @@ Extract structured table data (cells, headers, rendered markdown) alongside conv
 - `output_format`: Output markup format (`"markdown"` | `"djot"` | `"plain"`) — default: `"markdown"`
 
 **`MetadataConfig`** – Selective metadata extraction:
+
 - `extract_headers`: h1-h6 elements — default: `true`
 - `extract_links`: Hyperlinks — default: `true`
 - `extract_images`: Image elements — default: `true`
 - `extract_structured_data`: JSON-LD, Microdata, RDFa — default: `true`
 - `max_structured_data_size`: Size limit in bytes — default: `100KB`
-
 
 ## Djot Output Format
 
@@ -206,7 +186,6 @@ The library supports converting HTML to [Djot](https://djot.net/), a lightweight
 
 ### Example Usage
 
-
 ```php
 use HtmlToMarkdown\Converter;
 use HtmlToMarkdown\ConversionOptions;
@@ -222,14 +201,11 @@ $djot = Converter::convert($html, new ConversionOptions(outputFormat: 'djot'));
 // Result: "This is *bold* and _italic_ text."
 ```
 
-
 Djot's extended syntax allows you to express more semantic meaning in lightweight text, making it useful for documents that require strikethrough, insertion tracking, or mathematical notation.
-
 
 ## Plain Text Output
 
 Set `output_format` to `"plain"` to strip all markup and return only visible text. This bypasses the Markdown conversion pipeline entirely for maximum speed.
-
 
 ```php
 use HtmlToMarkdown\Converter;
@@ -241,16 +217,14 @@ $plain = Converter::convert($html, new ConversionOptions(outputFormat: 'plain'))
 // Result: "Title\n\nThis is bold and italic text."
 ```
 
-
 Plain text mode is useful for search indexing, text extraction, and feeding content to LLMs.
-
-
 
 ## Metadata Extraction
 
 The metadata extraction feature enables comprehensive document analysis during conversion. Extract document properties, headers, links, images, and structured data in a single pass.
 
 **Use Cases:**
+
 - **SEO analysis** – Extract title, description, Open Graph tags, Twitter cards
 - **Table of contents generation** – Build structured outlines from heading hierarchy
 - **Content migration** – Document all external links and resources
@@ -260,7 +234,6 @@ The metadata extraction feature enables comprehensive document analysis during c
 **Zero Overhead When Disabled:** Metadata extraction adds negligible overhead and happens during the HTML parsing pass. Disable unused metadata types in `MetadataConfig` to optimize further.
 
 ### Example: Quick Start
-
 
 ```php
 <?php
@@ -276,18 +249,14 @@ print_r($metadata['images']);              // All images with alt text
 print_r($metadata['structured_data']);     // JSON-LD, Microdata, RDFa
 ```
 
-
-
-For detailed examples including SEO extraction, table-of-contents generation, link validation, and accessibility audits, see the [Metadata Extraction Guide](../../examples/metadata-extraction/).
-
-
-
+For detailed examples including SEO extraction, table-of-contents generation, link validation, and accessibility audits, see the .
 
 ## Visitor Pattern
 
 The visitor pattern enables custom HTML→Markdown conversion logic by providing callbacks for specific HTML elements during traversal. Use visitors to transform content, filter elements, validate structure, or collect analytics.
 
 **Use Cases:**
+
 - **Custom Markdown dialects** – Convert to Obsidian, Notion, or other flavors
 - **Content filtering** – Remove tracking pixels, ads, or unwanted elements
 - **URL rewriting** – Rewrite CDN URLs, add query parameters, validate links
@@ -297,7 +266,6 @@ The visitor pattern enables custom HTML→Markdown conversion logic by providing
 **Supported Visitor Methods:** 40+ callbacks for text, inline elements, links, images, headings, lists, blocks, and tables.
 
 ### Example: Quick Start
-
 
 ```php
 <?php
@@ -322,17 +290,10 @@ $html = '<a href="https://old-cdn.com/file.pdf">Download</a>';
 $markdown = Converter::convertWithVisitor($html, new MyVisitor());
 ```
 
-
-
-For comprehensive examples including content filtering, link footnotes, accessibility validation, and asynchronous URL validation, see the [Visitor Pattern Guide](../../examples/visitor-pattern/).
-
-
+For comprehensive examples including content filtering, link footnotes, accessibility validation, and asynchronous URL validation, see the .
 
 ## Examples
 
-- [Visitor Pattern Guide](../../examples/visitor-pattern/)
-- [Metadata Extraction Guide](../../examples/metadata-extraction/)
-- [Performance Guide](../../examples/performance/)
 
 ## Links
 

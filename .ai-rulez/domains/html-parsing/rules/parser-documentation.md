@@ -2,6 +2,7 @@
 name: Parser Documentation
 priority: high
 ---
+
 Document parser capabilities and limitations
 
 - Document supported HTML versions (HTML5)

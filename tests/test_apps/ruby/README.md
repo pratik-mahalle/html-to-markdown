@@ -7,6 +7,7 @@ This test app validates that the html-to-markdown gem is properly installed from
 ## Features Tested
 
 ### Basic HTML Conversion
+
 - Paragraphs, headings (h1-h6)
 - Text styling (bold, italic, strikethrough)
 - Lists (ordered, unordered, nested)
@@ -15,6 +16,7 @@ This test app validates that the html-to-markdown gem is properly installed from
 - Comprehensive fixture-based tests
 
 ### Metadata Extraction (`convert_with_metadata`)
+
 - Document-level metadata (title, description, keywords, author)
 - Header hierarchy extraction
 - Link extraction and validation
@@ -22,18 +24,21 @@ This test app validates that the html-to-markdown gem is properly installed from
 - Structured data extraction (JSON-LD, Microdata, RDFa)
 
 ### Inline Images (`convert_with_inline_images`)
+
 - Base64-encoded image extraction
 - Image metadata (src, alt text, dimensions)
 - Multiple inline images handling
 - Data URL parsing and validation
 
 ### Visitor Pattern (`convert_with_visitor`)
+
 - Custom element interception
 - Visitor callback system validation
 - Element traversal and modification
 - HTML tree processing customization
 
 ### Conversion Options
+
 - Heading styles (atx, atx_closed, underlined)
 - List indentation customization
 - Code block formatting (fenced, indented)
@@ -42,6 +47,7 @@ This test app validates that the html-to-markdown gem is properly installed from
 - Output format selection (markdown, djot)
 
 ### Error Handling
+
 - Empty HTML input
 - Malformed HTML recovery
 - Large document processing (100KB+)
@@ -49,6 +55,7 @@ This test app validates that the html-to-markdown gem is properly installed from
 - Unicode and emoji support
 
 ### RBS Type Definitions
+
 - Module method availability
 - Class/type existence validation
 - Type system integration
@@ -119,6 +126,7 @@ Before release, ensure:
 The Gemfile.lock is updated after `bundle install` and should be committed to ensure reproducible builds.
 
 Current lock specifies:
+
 - html-to-markdown (2.24.1)
 - rspec (~> 3.12)
 - All transitive dependencies
@@ -126,6 +134,7 @@ Current lock specifies:
 ## Known Limitations / Gaps
 
 Currently testing:
+
 - Basic usage patterns ✓
 - All core API methods ✓
 - Common error cases ✓
@@ -134,6 +143,7 @@ Currently testing:
 - Visitor pattern ✓
 
 Future enhancements:
+
 - Integration with actual RubyGems release (once published)
 - Performance benchmarks
 - Edge cases for visitor callbacks

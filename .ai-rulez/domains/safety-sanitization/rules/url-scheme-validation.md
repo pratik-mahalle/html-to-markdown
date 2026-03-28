@@ -2,6 +2,7 @@
 name: URL Scheme Validation
 priority: high
 ---
+
 Validate URLs before including in output
 
 - Implement sanitize_url(url, whitelist) function

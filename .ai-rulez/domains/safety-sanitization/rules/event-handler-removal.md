@@ -2,6 +2,7 @@
 name: Event Handler Removal
 priority: high
 ---
+
 Remove all JavaScript event handlers
 
 - Remove all attributes matching /^on.*/i

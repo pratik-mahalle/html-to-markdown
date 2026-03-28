@@ -2,6 +2,7 @@
 name: Memory Efficiency
 priority: high
 ---
+
 Keep parser memory usage bounded
 
 - Enforce maximum document size (default 50MB)

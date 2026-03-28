@@ -40,7 +40,8 @@ fn detect_binary_magic(bytes: &[u8]) -> Option<&'static str> {
 ```
 
 **Detection Flow:**
-```
+
+```text
 Input bytes
     |
     +-- Check for known magic signatures (first 4-8 bytes)
@@ -51,6 +52,7 @@ Input bytes
 ```
 
 **Example:**
+
 ```rust
 // Gzip-compressed file
 let html = b"\x1F\x8B\x08\x00...gzipped content...".to_vec();
@@ -63,6 +65,7 @@ let result = convert(&String::from_utf8_lossy(&html), None);
 Located in `/crates/html-to-markdown/src/lib.rs` (lines 120-147):
 
 **BOM (Byte Order Mark) Detection:**
+
 ```rust
 // UTF-16LE BOM
 if bytes.starts_with(b"\xFF\xFE") {
@@ -76,6 +79,7 @@ if bytes.starts_with(b"\xFE\xFF") {
 ```
 
 **Heuristic UTF-16 Detection (without BOM):**
+
 ```rust
 const BINARY_UTF16_NULL_RATIO: f64 = 0.2;  // 20% null bytes
 
@@ -94,7 +98,7 @@ if dominant_ratio >= 0.9 {
 
 **Examples:**
 
-```
+```text
 UTF-16LE without BOM: <\0h\0t\0m\0l\0>\0
 - Nulls at even indices (2, 4, 6, 8, 10, 12)
 - Detected as UTF-16 heuristic
@@ -147,12 +151,14 @@ fn validate_input(html: &str) -> Result<()> {
 ```
 
 **Control Character Ranges:**
+
 - `0x00-0x08`: NUL, SOH, STX, ETX, EOT, ENQ, ACK, BEL, BS
 - `0x0E-0x1F`: Shift Out through Unit Separator (except TAB 0x09, LF 0x0A, CR 0x0D)
 - Threshold: If > 30% are control characters in sample, reject as binary
 
 **Examples:**
-```
+
+```text
 HTML with 35% control chars: REJECTED
 "Hello\x00\x01\x02World\x03\x04\x05..."
      ^^^^^^         ^^^^^^^ = 6/8 sample = 75% > 30%
@@ -183,6 +189,7 @@ pub enum ConversionError {
 ```
 
 **Example Error Flow:**
+
 ```rust
 let html = read_file("archive.zip");  // Binary ZIP file
 match convert(&html, None) {
@@ -245,11 +252,13 @@ markdown = html_to_markdown.convert(html)
 The converter uses two parsers with different robustness levels:
 
 **astral-tl (fast, primary):**
+
 - Works well for well-formed HTML
 - Fails gracefully on malformed markup
 - Used by default in `/crates/html-to-markdown/src/converter.rs`
 
 **html5ever (robust, fallback):**
+
 - Full HTML5 spec compliance
 - Automatic error recovery
 - Tag closure, namespace handling
@@ -271,6 +280,7 @@ The converter uses two parsers with different robustness levels:
 ```
 
 **Output:**
+
 ```markdown
 Paragraph 1
 
@@ -365,7 +375,8 @@ pub fn decode_html_entities_cow(text: &str) -> Cow<'_, str> {
 ```
 
 **Examples:**
-```
+
+```text
 &lt;script&gt;  → <script>
 &quot;test&quot; → "test"
 &#8364;         → (Euro symbol)
@@ -460,6 +471,7 @@ convert(null, None)   → Error (from binding)  // Python None → error
 The converter handles large documents efficiently:
 
 **Tested sizes:**
+
 - Typical document: 1-10 MB HTML → < 100 MB peak memory
 - Large document: 50+ MB HTML → proportional memory growth
 - Maximum: Limited by system RAM, no inherent limit
@@ -526,6 +538,7 @@ config.max_structured_data_size = 10 * 1024 * 1024;  // 10 MB limit
 ### Conversion Behavior
 
 **Single-cell table:**
+
 ```html
 <table><tr><td>Data</td></tr></table>
 → | Data |
@@ -533,6 +546,7 @@ config.max_structured_data_size = 10 * 1024 * 1024;  // 10 MB limit
 ```
 
 **Colspan expansion:**
+
 ```html
 <table>
   <tr><td colspan="3">Wide</td></tr>
@@ -545,6 +559,7 @@ config.max_structured_data_size = 10 * 1024 * 1024;  // 10 MB limit
 
 **Nested tables:**
 Converts outer table, treats inner table as cell content:
+
 ```html
 <table><tr><td>Cell with [nested table] inside</td></tr></table>
 → Outer table with nested table markdown in cell
@@ -567,7 +582,7 @@ pub struct ConversionOptions {
 
 ### Problematic Patterns
 
-```
+```text
 Input: "Price: $10 & shipping"
 escape_misc=true  → "Price: $10 \& shipping"
 

@@ -2,19 +2,23 @@
 description: "Xss Test Implementation"
 name: xss-test-implementation
 ---
+
 Create comprehensive XSS test suite
 
 Key source files:
+
 - OWASP XSS Filter Evasion
 - HTML5 Security Cheat Sheet
 
 Master concepts:
+
 - OWASP test cases
 - HTML5 attack vectors
 - Browser-specific XSS
 - Encoding/obfuscation bypasses
 
 Step by step:
+
 1. Implement OWASP XSS tests
    - Basic alerts with script tags
    - Event handlers like onerror

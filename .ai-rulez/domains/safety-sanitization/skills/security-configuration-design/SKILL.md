@@ -2,18 +2,22 @@
 description: "Security Configuration Design"
 name: security-configuration-design
 ---
+
 Design SafetyConfig for different use cases
 
 Key source files:
+
 - SafetyConfig struct definition
 
 Master concepts:
+
 - Default safe configuration
 - Strict mode options
 - Custom whitelists
 - Trade-offs
 
 Step by step:
+
 1. Define SafetyConfig struct with fields
    - sanitize_html boolean
    - max_document_size usize

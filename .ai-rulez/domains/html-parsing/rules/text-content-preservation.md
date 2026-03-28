@@ -2,6 +2,7 @@
 name: Text Content Preservation
 priority: high
 ---
+
 Extract text content preserving whitespace exactly
 
 - Implement extract_text() for full subtree content

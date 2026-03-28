@@ -2,18 +2,22 @@
 description: "Xss Payload Detection"
 name: xss-payload-detection
 ---
+
 Detect and prevent XSS attack patterns
 
 Key source files:
+
 - OWASP XSS cheat sheets
 
 Master concepts:
+
 - Event handler patterns
 - JavaScript URL detection
 - SVG attack vectors
 - CSS injection patterns
 
 Step by step:
+
 1. Detect event handlers
    - Pattern: on* attributes like onclick and onerror
    - Remove all on* attributes

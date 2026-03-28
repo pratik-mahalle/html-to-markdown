@@ -2,6 +2,7 @@
 name: Character Encoding Detection
 priority: high
 ---
+
 Automatically detect and handle multiple character encodings
 
 - Use encoding_rs for robust encoding detection

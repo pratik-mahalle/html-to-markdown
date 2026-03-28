@@ -12,6 +12,7 @@ ______________________________________________________________________
 
 - **Single entry point**: All public APIs exposed through `crates/{name}/src/lib.rs`
 - **Flat re-export strategy**: Public modules re-exported at root, not nested in use statements
+
   ```rust
   // crates/html-to-markdown/src/lib.rs
   pub use crate::converter::{HtmlToMarkdown, ConversionOptions};
@@ -21,6 +22,7 @@ ______________________________________________________________________
   mod error;
   mod sanitizer;
   ```
+
 - **Three-tier module structure**:
   1. **Public tier** (re-exported from lib.rs): Stable, versioned APIs
   1. **Semi-private tier** (pub within crate, not re-exported): Internal-facing utilities
@@ -31,6 +33,7 @@ ______________________________________________________________________
 - **One type per file** for public types: `src/converter.rs` contains `HtmlToMarkdown` only
 - **Utility modules grouped**: `src/utils/mod.rs` for multiple small types (< 100 lines each)
 - **Feature-gated modules**: Conditional compilation in `src/lib.rs` with cfg attributes
+
   ```rust
   #[cfg(feature = "serde")]
   pub mod serde;
@@ -38,6 +41,7 @@ ______________________________________________________________________
   mod parser;      // always compiled
   mod sanitizer;
   ```
+
 - **Tests co-located**: Unit tests in same file as implementation; integration tests in `tests/` directory
 - **Crate structure limit**: Max 8 top-level modules per crate (combine smaller ones into utils)
 
@@ -46,6 +50,7 @@ ______________________________________________________________________
 - **No circular dependencies**: Check with `cargo depgraph` for cycles
 - **Dependency direction**: Leaf modules (utilities) → Core modules → Root re-exports
 - **Export policies**: Document in module rustdoc what is public API vs internal
+
   ```rust
   /// Public API for HTML to Markdown conversion.
   ///
@@ -62,6 +67,7 @@ ______________________________________________________________________
 
 - **Semantic versioning**: Public APIs follow semver; private APIs can change freely
 - **Marked stability**: Add rustdoc comment to all public items:
+
   ```rust
   /// Convert HTML to Markdown.
   ///
@@ -69,7 +75,9 @@ ______________________________________________________________________
   /// Stable in 1.x; signature frozen until 2.0.
   pub fn html_to_markdown(html: &str) -> Result<String> {
   ```
+
 - **Deprecation path**: Deprecated functions marked with `#[deprecated]` + rustdoc explanation
+
   ```rust
   #[deprecated(since = "1.2.0", note = "use `html_to_markdown_v2` instead")]
   pub fn html_to_markdown_old(html: &str) -> String {
@@ -80,6 +88,7 @@ ______________________________________________________________________
 - **Principle of least privilege**: Only export types/functions required for user-facing operations
 - **Hide internals**: Mark internal types as `pub(crate)` aggressively
 - **Use builder pattern**: For complex configurations, avoid huge public structs
+
   ```rust
   pub struct ConversionOptions {
       allow_html: bool,      // public field only if truly needed
@@ -95,6 +104,7 @@ ______________________________________________________________________
 
 - **Single error type per domain**: `pub enum ConversionError { ... }` not scattered errors
 - **Exhaustive error variants**: Use `#[non_exhaustive]` to allow future additions safely
+
   ```rust
   #[non_exhaustive]
   pub enum ConversionError {
@@ -104,6 +114,7 @@ ______________________________________________________________________
       __NonExhaustive,
   }
   ```
+
 - **Error documentation**: Every variant documented with examples and recovery strategies
 
 ## Re-Export Patterns
@@ -111,6 +122,7 @@ ______________________________________________________________________
 ### Root-Level Re-Exports
 
 - **All public items re-exported in lib.rs**: Users import from crate root, not submodules
+
   ```rust
   // GOOD
   use html_to_markdown::{HtmlToMarkdown, ConversionError};
@@ -118,7 +130,9 @@ ______________________________________________________________________
   // AVOID
   use html_to_markdown::converter::HtmlToMarkdown;
   ```
+
 - **Organize re-exports by category**:
+
   ```rust
   // Core conversion API
   pub use crate::converter::{HtmlToMarkdown, ConversionOptions};
@@ -135,12 +149,15 @@ ______________________________________________________________________
 
 - **Never use glob re-exports** (`pub use module::*`) in lib.rs; explicit is better
 - **Justified only in prelude modules**:
+
   ```rust
   // src/prelude.rs
   pub use crate::{HtmlToMarkdown, ConversionOptions, ConversionError};
   // Users: use html_to_markdown::prelude::*
   ```
+
 - **Prelude re-exported from lib.rs**:
+
   ```rust
   pub mod prelude {
       pub use crate::{HtmlToMarkdown, ConversionOptions};
@@ -150,6 +167,7 @@ ______________________________________________________________________
 ### Version-Specific Re-Exports
 
 - **No version-specific public modules**: Feature gates used instead for variants
+
   ```rust
   // AVOID: pub mod v1 { ... }; pub mod v2 { ... }
 
@@ -164,6 +182,7 @@ ______________________________________________________________________
 ### Feature Definition & Hygiene
 
 - **Declare all features in Cargo.toml** with descriptions:
+
   ```toml
   [features]
   default = ["html5ever"]
@@ -171,12 +190,14 @@ ______________________________________________________________________
   serde = ["dep:serde"]
   experimental-v2-api = []
   ```
+
 - **No undocumented features**: Every feature must have a comment explaining purpose
 - **Feature combinations**: Document incompatible feature combinations
 
 ### Conditional Module Compilation
 
 - **Features control modules, not implementations**:
+
   ```rust
   // BAD: Scattered #[cfg] throughout code
   if cfg!(feature = "serde") { /* ... */ }
@@ -185,7 +206,9 @@ ______________________________________________________________________
   #[cfg(feature = "serde")]
   pub mod serde_support;
   ```
+
 - **Feature re-exports at root**:
+
   ```rust
   #[cfg(feature = "serde")]
   pub use crate::serde_support::*;
@@ -195,9 +218,11 @@ ______________________________________________________________________
 
 - **Lean default**: Default feature set should provide core functionality
 - **Optional dependencies**: Use `dep:` syntax in Cargo.toml:
+
   ```toml
   html5ever = ["dep:html5ever"]  # Empty feature, enables dependency
   ```
+
 - **Document defaults**: Clearly state what default features enable
 
 ## Cargo Public API Verification
@@ -211,12 +236,14 @@ ______________________________________________________________________
 ### API Baseline Management
 
 - **Commit baseline**: `crates/{name}/api.txt` contains previous public API baseline
-  ```
+
+  ```text
   # crates/html-to-markdown/api.txt
   pub use std::result::Result;
   pub struct html_to_markdown::HtmlToMarkdown { ... }
   pub fn html_to_markdown::HtmlToMarkdown::new(...) -> ...
   ```
+
 - **Generate baseline**: `cargo public-api --features default > crates/{name}/api.txt`
 - **Diff on changes**: `cargo public-api --features default --diff` shows changes
 - **Review requirement**: Any changes to api.txt require explicit approval

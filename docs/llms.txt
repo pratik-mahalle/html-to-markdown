@@ -1,58 +1,235 @@
 # html-to-markdown
 
-> High-performance HTML to Markdown converter built in Rust with bindings for Python, TypeScript, Ruby, Go, Java, C#, PHP, Elixir, R, WebAssembly, and C. Part of the kreuzberg.dev ecosystem.
+> High-performance HTML to Markdown conversion library with 12 native language bindings.
 
-html-to-markdown converts HTML to clean Markdown with configurable output styles, metadata extraction, visitor pattern callbacks, and table extraction. It achieves 150-280 MB/s throughput, making it 10-80x faster than pure-Python alternatives.
+## Links
 
-## Getting Started
+- GitHub: https://github.com/kreuzberg-dev/html-to-markdown
+- Organization: https://github.com/kreuzberg-dev
+- Kreuzberg (document extraction): https://github.com/kreuzberg-dev/kreuzberg
+- Kreuzberg Docs: https://docs.kreuzberg.dev
+- PyPI: https://pypi.org/project/html-to-markdown/
+- npm: https://www.npmjs.com/package/@kreuzberg/html-to-markdown
+- crates.io: https://crates.io/crates/html-to-markdown-rs
+- Docs: https://docs.html-to-markdown.kreuzberg.dev
 
-- [Installation](https://docs.html-to-markdown.kreuzberg.dev/getting-started/installation/): Install html-to-markdown for any supported language
-- [Quick Start](https://docs.html-to-markdown.kreuzberg.dev/getting-started/quickstart/): Get started with HTML to Markdown conversion
+## Capabilities
 
-## Concepts
+- Convert HTML to Markdown, Djot, or plain text
+- Extract structured document tree (DocumentStructure with headings, paragraphs, lists, tables, etc.)
+- Extract HTML metadata (title, description, Open Graph, Twitter Card, JSON-LD, links, images)
+- Extract inline images from data URIs and SVGs
+- Table extraction with cell-level data (colspan, rowspan, headers)
+- Custom visitor pattern for content filtering and transformation
+- 12 native language bindings: Rust, Python, TypeScript, Go, Ruby, PHP, Java, C#, Elixir, R, C (FFI), WebAssembly
+- CLI tool for command-line conversion
+- Processing speed: 150-280 MB/s
 
-- [Architecture](https://docs.html-to-markdown.kreuzberg.dev/concepts/architecture/): Rust core with polyglot bindings architecture
-- [Conversion Pipeline](https://docs.html-to-markdown.kreuzberg.dev/concepts/conversion-pipeline/): How the HTML to Markdown conversion works
-- [Visitor Pattern](https://docs.html-to-markdown.kreuzberg.dev/concepts/visitor-pattern/): Custom callbacks for content filtering and URL rewriting
-- [Metadata Extraction](https://docs.html-to-markdown.kreuzberg.dev/concepts/metadata-extraction/): Extract title, headers, links, images, and structured data
-- [Tag Preservation](https://docs.html-to-markdown.kreuzberg.dev/concepts/tag-preservation/): Preserve specific HTML tags during conversion
-- [Performance](https://docs.html-to-markdown.kreuzberg.dev/concepts/performance/): Performance characteristics and benchmarks
+## API (v3)
 
-## Guides
+Single entry point: `convert(html, options?) -> ConversionResult`
 
-- [Basic Conversion](https://docs.html-to-markdown.kreuzberg.dev/guides/basic-conversion/): Core conversion functionality
-- [Configuration Options](https://docs.html-to-markdown.kreuzberg.dev/guides/configuration/): Customize heading style, list indent, code blocks, and more
-- [Metadata Extraction](https://docs.html-to-markdown.kreuzberg.dev/guides/metadata/): Extract structured metadata from HTML
-- [Visitor Pattern](https://docs.html-to-markdown.kreuzberg.dev/guides/visitor/): Build custom conversion dialects with visitor callbacks
-- [CLI Usage](https://docs.html-to-markdown.kreuzberg.dev/guides/cli/): Command-line interface reference
-- [Security](https://docs.html-to-markdown.kreuzberg.dev/guides/security/): Security considerations and HTML sanitization
+ConversionResult contains:
+- content: Optional<String> — the converted text (markdown/djot/plain); null/None when output_format is "none"
+- document: Optional<DocumentStructure> — structured document tree; only populated when include_document_structure is true
+- metadata: HtmlMetadata — extracted HTML metadata (title, description, Open Graph, Twitter Card, JSON-LD, links, images)
+- tables: Vec<TableData> — extracted tables with grid data (headers, rows, colspan/rowspan)
+- images: Vec<ExtractedImage> — extracted inline images (data URIs, embedded SVGs); only populated when extract_images is true
+- warnings: Vec<ProcessingWarning> — non-fatal processing warnings
 
-## API Reference
+## Usage Examples
 
-- [Rust API](https://docs.html-to-markdown.kreuzberg.dev/reference/api-rust/): Rust core library reference
-- [Python API](https://docs.html-to-markdown.kreuzberg.dev/reference/api-python/): Python binding reference
-- [TypeScript API](https://docs.html-to-markdown.kreuzberg.dev/reference/api-typescript/): TypeScript/Node.js binding reference
-- [Ruby API](https://docs.html-to-markdown.kreuzberg.dev/reference/api-ruby/): Ruby binding reference
-- [PHP API](https://docs.html-to-markdown.kreuzberg.dev/reference/api-php/): PHP binding reference
-- [Go API](https://docs.html-to-markdown.kreuzberg.dev/reference/api-go/): Go binding reference
-- [Java API](https://docs.html-to-markdown.kreuzberg.dev/reference/api-java/): Java binding reference
-- [C# API](https://docs.html-to-markdown.kreuzberg.dev/reference/api-csharp/): C# binding reference
-- [Elixir API](https://docs.html-to-markdown.kreuzberg.dev/reference/api-elixir/): Elixir binding reference
-- [R API](https://docs.html-to-markdown.kreuzberg.dev/reference/api-r/): R binding reference
-- [C API](https://docs.html-to-markdown.kreuzberg.dev/reference/api-c/): C FFI binding reference
-- [WASM API](https://docs.html-to-markdown.kreuzberg.dev/reference/api-wasm/): WebAssembly binding reference
-- [Configuration Reference](https://docs.html-to-markdown.kreuzberg.dev/reference/configuration/): Full configuration options
-- [Types](https://docs.html-to-markdown.kreuzberg.dev/reference/types/): Type definitions
+### Rust
+```rust
+use html_to_markdown_rs::convert;
 
-## Migration Guides
+let result = convert("<h1>Hello</h1><p>World</p>", None)?;
+let markdown = result.content.unwrap_or_default();
+// "# Hello\n\nWorld"
+```
 
-- [C# v2.19.0](https://docs.html-to-markdown.kreuzberg.dev/migration/csharp-2.19.0/): C# binding migration guide
-- [Java v2.19.0](https://docs.html-to-markdown.kreuzberg.dev/migration/java-2.19.0/): Java binding migration guide
-- [TypeScript v2.19.0](https://docs.html-to-markdown.kreuzberg.dev/migration/typescript-2.19.0/): TypeScript binding migration guide
+### Python
+```python
+from html_to_markdown import convert
 
-## Optional
+result = convert("<h1>Hello</h1><p>World</p>")
+markdown = result["content"]
+# "# Hello\n\nWorld"
+```
 
-- [Features](https://docs.html-to-markdown.kreuzberg.dev/features/): Complete feature list
-- [Live Demo](https://docs.html-to-markdown.kreuzberg.dev/demo/): Try html-to-markdown in the browser
-- [Changelog](https://github.com/kreuzberg-dev/html-to-markdown/blob/main/CHANGELOG.md): Release history
-- [Contributing](https://docs.html-to-markdown.kreuzberg.dev/contributing/): Contribution guidelines
+### TypeScript
+```typescript
+import { convert } from '@kreuzberg/html-to-markdown';
+
+const result = convert('<h1>Hello</h1><p>World</p>');
+const markdown = result.content;
+// "# Hello\n\nWorld"
+```
+
+### Go
+```go
+import "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown"
+
+result, err := htmltomarkdown.Convert("<h1>Hello</h1><p>World</p>")
+if result.Content != nil {
+    fmt.Println(*result.Content)
+}
+```
+
+### Ruby
+```ruby
+require 'html_to_markdown'
+result = HtmlToMarkdown.convert("<h1>Hello</h1><p>World</p>")
+markdown = result[:content]
+```
+
+### PHP
+```php
+use function HtmlToMarkdown\convert;
+$result = convert('<h1>Hello</h1><p>World</p>');
+$markdown = $result['content'];
+```
+
+### Java
+```java
+import dev.kreuzberg.htmltomarkdown.HtmlToMarkdown;
+ConversionResult result = HtmlToMarkdown.convert("<h1>Hello</h1><p>World</p>");
+System.out.println(result.content());
+```
+
+### C#
+```csharp
+using HtmlToMarkdown;
+var result = HtmlToMarkdownConverter.Convert("<h1>Hello</h1><p>World</p>");
+Console.WriteLine(result.Content);
+```
+
+### Elixir
+```elixir
+{:ok, result} = HtmlToMarkdown.convert("<h1>Hello</h1><p>World</p>")
+IO.puts(result.content)
+```
+
+### R
+```r
+library(htmltomarkdown)
+result <- convert("<h1>Hello</h1><p>World</p>")
+cat(result$content)
+```
+
+### C (FFI)
+```c
+#include "html_to_markdown.h"
+char *json = html_to_markdown_convert("<h1>Hello</h1>", NULL);
+// json: {"content":"# Hello","metadata":null,"tables":null}
+html_to_markdown_free_string(json);
+```
+
+### WASM
+```javascript
+import init, { convert } from '@kreuzberg/html-to-markdown-wasm';
+await init();
+const result = convert('<h1>Hello</h1><p>World</p>');
+console.log(result.content);
+```
+
+## Configuration Options
+
+All options are passed to `convert()` as the second argument via a `ConversionOptions` struct/object/dict.
+
+- output_format: "markdown" | "djot" | "plain" | "none" (default: "markdown")
+- heading_style: "atx" | "underlined" | "atx_closed" (default: "atx")
+- list_indent_type: "spaces" | "tab" (default: "spaces")
+- list_indent_width: int 1-8 (default: 2)
+- bullets: string cycling through list marker chars (default: "-")
+- strong_em_symbol: "*" | "_" (default: "*")
+- newline_style: "backslash" | "spaces" (default: "backslash")
+- code_block_style: "indented" | "backticks" | "tildes" (default: "indented")
+- code_language: string default language for fenced code blocks (default: "")
+- autolinks: bool — use <url> when link text equals href (default: false)
+- default_title: bool — use href as title when none present (default: false)
+- keep_inline_images_in: list of element names to keep images as markdown (default: [])
+- br_in_tables: bool — preserve <br> in table cells (default: false)
+- highlight_style: "double-equal" | "html" | "bold" | "none" (default: "double-equal")
+- escape_asterisks: bool (default: false)
+- escape_underscores: bool (default: false)
+- escape_misc: bool (default: false)
+- escape_ascii: bool (default: false)
+- sub_symbol: string wrapper for <sub> text (default: "")
+- sup_symbol: string wrapper for <sup> text (default: "")
+- whitespace_mode: "normalized" | "strict" (default: "normalized")
+- strip_newlines: bool (default: false)
+- wrap: bool — enable line wrapping (default: false)
+- wrap_width: int 20-500 (default: 80)
+- convert_as_inline: bool (default: false)
+- strip_tags: list of tag names to strip (default: [])
+- extract_metadata: bool — populate result.metadata (default: false)
+- extract_document: bool — extract title, description, Open Graph, etc. (default: false)
+- extract_headers: bool — extract h1-h6 elements (default: false)
+- extract_links: bool — extract anchor tags (default: false)
+- extract_images: bool — extract img elements and populate result.images (default: false)
+- extract_structured_data: bool — extract JSON-LD, Microdata, RDFa (default: false)
+- max_structured_data_size: int byte limit for structured data (default: 100000)
+- include_document_structure: bool — populate result.document (default: false)
+- preprocess: bool — clean HTML before conversion (default: false)
+- preset: "minimal" | "standard" | "aggressive" preprocessing aggressiveness (default: "standard")
+- keep_navigation: bool — preserve <nav> during preprocessing (default: false)
+- keep_forms: bool — preserve forms during preprocessing (default: false)
+
+## CLI
+
+Install: `cargo install html-to-markdown-cli`
+
+```
+html-to-markdown [FILE] [OPTIONS]
+
+Input:
+  FILE                     Input file (omit or use - for stdin)
+  --url URL                Fetch from URL
+  -e, --encoding ENC       Input encoding (default: utf-8)
+
+Output:
+  -o, --output FILE        Output file (default: stdout)
+  -f, --output-format FMT  markdown | djot (default: markdown)
+
+Formatting:
+  --heading-style STYLE    atx | underlined | atx-closed
+  --list-indent-width N    Spaces per nesting level (default: 2)
+  --bullets CHARS          List marker characters
+  --code-block-style STYLE indented | backticks | tildes
+  -l, --code-language LANG Default language for fenced code blocks
+  -a, --autolinks          Use <url> when text equals href
+  -w, --wrap               Enable line wrapping
+  --wrap-width N           Wrap column (default: 80)
+
+Metadata:
+  --with-metadata          Output JSON with markdown + metadata
+  --extract-document       Extract document-level metadata
+  --extract-headers        Extract headings
+  --extract-links          Extract links
+  --extract-images         Extract images
+  --extract-structured-data Extract JSON-LD, Microdata, RDFa
+
+Preprocessing:
+  -p, --preprocess         Clean HTML before conversion
+  --preset LEVEL           minimal | standard | aggressive
+```
+
+## Installation
+
+- Rust: `cargo add html-to-markdown-rs`
+- Python: `pip install html-to-markdown`
+- TypeScript/Node.js: `npm install @kreuzberg/html-to-markdown`
+- Go: `go get github.com/kreuzberg-dev/html-to-markdown/packages/go/v3`
+- Ruby: `gem install html_to_markdown`
+- PHP: `composer require kreuzberg/html-to-markdown`
+- Java: Maven artifact `dev.kreuzberg:html-to-markdown:3.0.0`
+- C#: `dotnet add package HtmlToMarkdown`
+- Elixir: `{:html_to_markdown, "~> 3.0"}` in mix.exs
+- R: `install.packages("htmltomarkdown")`
+- C: link against `libhtml_to_markdown` (see GitHub releases)
+- WASM: `npm install @kreuzberg/html-to-markdown-wasm`
+
+## Part of kreuzberg.dev
+
+html-to-markdown is part of the kreuzberg.dev ecosystem — a suite of high-performance document processing tools built with Rust and exposed to multiple programming languages. It powers the HTML conversion pipeline in [kreuzberg](https://docs.kreuzberg.dev), a document intelligence library for extracting text and structured data from PDFs, DOCX, images, and other formats.

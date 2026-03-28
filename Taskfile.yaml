@@ -67,9 +67,10 @@ includes:
     taskfile: ./.task/workflows/lint.yml
     internal: true
 
-  # Benchmark workflow (exposed as benchmark:*)
-  benchmark:
-    taskfile: ./.task/workflows/benchmark.yml
+  # Snippet runner workflow (exposed as snippets:*)
+  snippets:
+    taskfile: ./.task/workflows/snippets.yml
+    optional: true
 
   # Version sync workflow
   version:
@@ -223,32 +224,6 @@ tasks:
     desc: "Generate coverage for all languages (Rust + Python)"
     cmds:
       - task: _test:coverage
-
-  # Benchmark tasks: performance analysis
-  bench:
-    desc: "Run benchmark harness (all frameworks)"
-    cmds:
-      - task: benchmark:harness
-
-  bench:rust:
-    desc: "Run benchmark harness for Rust only with flamegraphs"
-    cmds:
-      - task: benchmark:harness:rust
-
-  bench:memory:
-    desc: "Run benchmark harness with jemalloc memory stats"
-    cmds:
-      - task: benchmark:harness:memory
-
-  bench:index:
-    desc: "Generate flamegraph HTML index"
-    cmds:
-      - task: benchmark:harness:index
-
-  bench:consolidate:
-    desc: "Consolidate benchmark results under .benchmarks"
-    cmds:
-      - task: benchmark:harness:consolidate
 
   # E2E tests for published packages
   e2e:smoke:all:

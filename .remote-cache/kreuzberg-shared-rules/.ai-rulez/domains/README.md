@@ -6,7 +6,7 @@ The AI-Rulez domain system organizes agents, skills, and rules into cohesive fun
 
 ## Domain Architecture
 
-```
+```text
 .ai-rulez/domains/
 ├── rust-core/              # Rust core library development
 ├── ffi-bindings/           # C-compatible FFI layer

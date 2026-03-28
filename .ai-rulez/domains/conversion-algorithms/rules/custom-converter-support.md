@@ -2,6 +2,7 @@
 name: Custom Converter Support
 priority: high
 ---
+
 Allow custom conversion via visitor pattern
 
 - Users can implement HtmlVisitor trait
