@@ -20,66 +20,6 @@ Runs anywhere: Node.js, Deno, Bun, browsers, and edge runtimes.
 [![Go Reference](https://pkg.go.dev/badge/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown.svg)](https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/kreuzberg-dev/html-to-markdown/blob/main/LICENSE)
 
-## Migration Guide (v2.18.x → v2.19.0)
-
-> **⚠️ BREAKING CHANGE: Package Namespace Update**
->
-> In v2.19.0, the npm package namespace changed from `html-to-markdown-wasm` to `@kreuzberg/html-to-markdown-wasm` to reflect the new Kreuzberg.dev organization.
-
-### Install Updated Package
-
-**Before (v2.18.x):**
-
-```bash
-npm install html-to-markdown-wasm
-```
-
-**After (v2.19.0+):**
-
-```bash
-npm install @kreuzberg/html-to-markdown-wasm
-```
-
-### Update Import Statements
-
-**Before:**
-
-```typescript
-import { convert } from 'html-to-markdown-wasm';
-// or
-import { convert } from "npm:html-to-markdown-wasm";  // Deno
-```
-
-**After:**
-
-```typescript
-import { convert } from '@kreuzberg/html-to-markdown-wasm';
-// or
-import { convert } from "npm:@kreuzberg/html-to-markdown-wasm";  // Deno
-```
-
-### Update Browser ESM Imports
-
-**Before:**
-
-```javascript
-import init, { convert } from 'https://unpkg.com/html-to-markdown-wasm/dist-web/html_to_markdown_wasm.js';
-```
-
-**After:**
-
-```javascript
-import init, { convert } from 'https://unpkg.com/@kreuzberg/html-to-markdown-wasm/dist-web/html_to_markdown_wasm.js';
-```
-
-### Summary of Changes
-
-- Package renamed from `html-to-markdown-wasm` to `@kreuzberg/html-to-markdown-wasm`
-- All APIs remain identical
-- Full backward compatibility after updating package name and imports
-
----
-
 ## Performance
 
 Universal WebAssembly bindings with **excellent performance** across all JavaScript runtimes.
@@ -115,9 +55,6 @@ Numbers captured via the shared fixture harness in `tools/benchmark-harness`:
 | Medium (Python)        | 657 KB | 121            |
 | Large (Rust)           | 567 KB | 124            |
 | Small (Intro)          | 463 KB | 163            |
-| hOCR German PDF        | 44 KB  | 1,637          |
-| hOCR Invoice           | 4 KB   | 7,775          |
-| hOCR Embedded Tables   | 37 KB  | 1,667          |
 
 > Expect slightly higher numbers in long-lived browser/Deno workers once the WASM module is warm.
 
@@ -148,8 +85,8 @@ import { convert } from "npm:@kreuzberg/html-to-markdown-wasm";
 import { convert } from '@kreuzberg/html-to-markdown-wasm';
 
 const html = '<h1>Hello World</h1><p>This is <strong>fast</strong>!</p>';
-const markdown = convert(html);
-console.log(markdown);
+const result = convert(html);
+console.log(result.content);
 // # Hello World
 //
 // This is **fast**!
@@ -157,43 +94,17 @@ console.log(markdown);
 
 > **Heads up for edge runtimes:** Cloudflare Workers, Vite dev servers, and other environments that instantiate `.wasm` files asynchronously must call `await initWasm()` (or `await wasmReady`) once during startup before invoking `convert`. Traditional bundlers (Webpack, Rollup) and Deno/Node imports continue to work without manual initialization.
 
-**Working Examples:**
-
-
-### Reusing Options Handles
-
-```ts
-import {
-  convertWithOptionsHandle,
-  createConversionOptionsHandle,
-} from '@kreuzberg/html-to-markdown-wasm';
-
-const handle = createConversionOptionsHandle({ hocrSpatialTables: false });
-const markdown = convertWithOptionsHandle('<h1>Reusable</h1>', handle);
-```
-
 ### Byte-Based Input (Buffers / Uint8Array)
 
-When you already have raw bytes (e.g., `fs.readFileSync`, Fetch API responses), skip re-encoding with `TextDecoder` by calling the byte-friendly helpers:
+When you already have raw bytes (e.g., `fs.readFileSync`, Fetch API responses), skip re-encoding with `TextDecoder` by calling the byte-friendly helper:
 
 ```ts
-import {
-  convertBytes,
-  convertBytesWithOptionsHandle,
-  createConversionOptionsHandle,
-  convertBytesWithInlineImages,
-} from '@kreuzberg/html-to-markdown-wasm';
+import { convertBytes } from '@kreuzberg/html-to-markdown-wasm';
 import { readFileSync } from 'node:fs';
 
 const htmlBytes = readFileSync('input.html'); // Buffer -> Uint8Array
-const markdown = convertBytes(htmlBytes);
-
-const handle = createConversionOptionsHandle({ headingStyle: 'atx' });
-const markdownFromHandle = convertBytesWithOptionsHandle(htmlBytes, handle);
-
-const inlineExtraction = convertBytesWithInlineImages(htmlBytes, null, {
-  maxDecodedSizeBytes: 5 * 1024 * 1024,
-});
+const result = convertBytes(htmlBytes);
+console.log(result.content);
 ```
 
 ### With Options
@@ -201,7 +112,7 @@ const inlineExtraction = convertBytesWithInlineImages(htmlBytes, null, {
 ```typescript
 import { convert } from '@kreuzberg/html-to-markdown-wasm';
 
-const markdown = convert(html, {
+const result = convert(html, {
   headingStyle: 'atx',
   codeBlockStyle: 'backticks',
   listIndentWidth: 2,
@@ -209,9 +120,10 @@ const markdown = convert(html, {
   wrap: true,
   wrapWidth: 80
 });
+console.log(result.content);
 ```
 
-### Preserve Complex HTML (NEW in v2.5)
+### Preserve Complex HTML
 
 ```typescript
 import { convert } from '@kreuzberg/html-to-markdown-wasm';
@@ -224,19 +136,20 @@ const html = `
 </table>
 `;
 
-const markdown = convert(html, {
+const result = convert(html, {
   preserveTags: ['table'] // Keep tables as HTML
 });
+console.log(result.content);
 ```
 
 ### Deno
 
 ```typescript
-import { convert } from "npm:html-to-markdown-wasm";
+import { convert } from "npm:@kreuzberg/html-to-markdown-wasm";
 
 const html = await Deno.readTextFile("input.html");
-const markdown = convert(html, { headingStyle: "atx" });
-await Deno.writeTextFile("output.md", markdown);
+const result = convert(html, { headingStyle: "atx" });
+await Deno.writeTextFile("output.md", result.content ?? "");
 ```
 
 > **Performance Tip:** For Node.js/Bun, use [@kreuzberg/html-to-markdown-node](https://www.npmjs.com/package/@kreuzberg/html-to-markdown-node) for 1.17× better performance with native bindings.
@@ -305,12 +218,7 @@ export default {
 Full TypeScript support with type definitions:
 
 ```typescript
-import {
-  convert,
-  convertWithInlineImages,
-  WasmInlineImageConfig,
-  type WasmConversionOptions
-} from '@kreuzberg/html-to-markdown-wasm';
+import { convert, type WasmConversionOptions } from '@kreuzberg/html-to-markdown-wasm';
 
 const options: WasmConversionOptions = {
   headingStyle: 'atx',
@@ -320,32 +228,8 @@ const options: WasmConversionOptions = {
   wrapWidth: 80
 };
 
-const markdown = convert('<h1>Hello</h1>', options);
-```
-
-## Inline Images
-
-Extract and decode inline images (data URIs, SVG):
-
-```typescript
-import { convertWithInlineImages, WasmInlineImageConfig } from '@kreuzberg/html-to-markdown-wasm';
-
-const html = '<img src="data:image/png;base64,iVBORw0..." alt="Logo">';
-
-const config = new WasmInlineImageConfig(5 * 1024 * 1024); // 5MB max
-config.inferDimensions = true;
-config.filenamePrefix = 'img_';
-config.captureSvg = true;
-
-const result = convertWithInlineImages(html, null, config);
-
-console.log(result.markdown);
-console.log(`Extracted ${result.inlineImages.length} images`);
-
-for (const img of result.inlineImages) {
-  console.log(`${img.filename}: ${img.format}, ${img.data.length} bytes`);
-  // img.data is a Uint8Array - save to file or upload
-}
+const result = convert('<h1>Hello</h1>', options);
+console.log(result.content);
 ```
 
 ## Metadata Extraction
@@ -353,7 +237,7 @@ for (const img of result.inlineImages) {
 Extract document metadata (headers, links, images, structured data) alongside Markdown conversion:
 
 ```typescript
-import { convertWithMetadata, WasmMetadataConfig } from '@kreuzberg/html-to-markdown-wasm';
+import { convert } from '@kreuzberg/html-to-markdown-wasm';
 
 const html = `
   <html lang="en">
@@ -366,93 +250,18 @@ const html = `
   </html>
 `;
 
-const config = new WasmMetadataConfig();
-config.extractHeaders = true;
-config.extractLinks = true;
-config.extractImages = true;
-config.extractStructuredData = true;
-config.maxStructuredDataSize = 1_000_000; // 1MB limit
+const result = convert(html, {
+  extractMetadata: true,
+  extractHeaders: true,
+  extractLinks: true,
+  extractImages: true,
+});
 
-const result = convertWithMetadata(html, null, config);
-
-console.log(result.markdown);
-console.log('Document metadata:', result.metadata.document);
-// {
-//   title: 'My Article',
-//   language: 'en',
-//   ...
-// }
-
-console.log('Headers:', result.metadata.headers);
-// [
-//   { level: 1, text: 'Main Title', id: undefined, depth: 0, htmlOffset: ... }
-// ]
-
-console.log('Links:', result.metadata.links);
-// [
-//   {
-//     href: 'https://example.com',
-//     text: 'a link',
-//     linkType: 'external',
-//     rel: [],
-//     ...
-//   }
-// ]
-
-console.log('Images:', result.metadata.images);
-// [
-//   {
-//     src: 'https://example.com/image.jpg',
-//     alt: 'Example image',
-//     imageType: 'external',
-//     ...
-//   }
-// ]
-```
-
-### Metadata Configuration
-
-The `WasmMetadataConfig` class controls what metadata is extracted:
-
-```typescript
-import { WasmMetadataConfig } from '@kreuzberg/html-to-markdown-wasm';
-
-const config = new WasmMetadataConfig();
-
-// Enable/disable extraction types
-config.extractHeaders = true;              // h1-h6 elements
-config.extractLinks = true;                // <a> elements with link type classification
-config.extractImages = true;               // <img> and <svg> elements
-config.extractStructuredData = true;       // JSON-LD, Microdata, RDFa
-
-// Limit structured data size to prevent memory exhaustion
-config.maxStructuredDataSize = 1_000_000;  // 1MB default
-```
-
-### Metadata Structure
-
-The returned metadata object includes:
-
-- **document**: Document-level metadata (title, description, keywords, language, OG tags, Twitter cards, etc.)
-- **headers**: Array of header elements with level, text, id, and document position
-- **links**: Array of links with href, text, type (anchor/internal/external/email/phone), and rel attributes
-- **images**: Array of images with src, alt text, dimensions, and type classification (dataUri/external/relative/svg)
-- **structuredData**: Array of JSON-LD, Microdata, and RDFa blocks
-
-### Byte-Based Input
-
-Convert bytes directly with metadata extraction:
-
-```typescript
-import { convertBytesWithMetadata, WasmMetadataConfig } from '@kreuzberg/html-to-markdown-wasm';
-import { readFileSync } from 'node:fs';
-
-const htmlBytes = readFileSync('article.html');
-const config = new WasmMetadataConfig();
-
-const result = convertBytesWithMetadata(htmlBytes, null, config);
-console.log(result.markdown);
-console.log(result.metadata);
+console.log(result.content);
+console.log('Document metadata:', result.metadata?.document);
+console.log('Headers:', result.metadata?.headers);
+console.log('Links:', result.metadata?.links);
+console.log('Images:', result.metadata?.images);
 ```
 
 ## Build Targets
@@ -511,7 +320,7 @@ Choose one of these approaches:
 For best performance with visitor support, use the native Node.js binding:
 
 ```typescript
-import { convertWithVisitor, type Visitor } from '@kreuzberg/html-to-markdown-node';
+import { convert, type Visitor } from '@kreuzberg/html-to-markdown-node';
 
 const visitor: Visitor = {
   visitLink(ctx, href, text, title) {
@@ -520,7 +329,8 @@ const visitor: Visitor = {
   },
 };
 
-const markdown = convertWithVisitor(html, { visitor });
+const result = convert(html, undefined, visitor);
+const markdown = result.content;
 ```
 
 **Performance:** ~3× faster than WASM, full visitor pattern support.
@@ -584,7 +394,8 @@ const processedHtml = html.replace(
   'https://new-cdn.com'
 );
 
-const markdown = convert(processedHtml);
+const result = convert(processedHtml);
+const markdown = result.content ?? "";
 ```
 
 **Use when:** Only simple text replacements are needed.
@@ -596,7 +407,7 @@ Transform the output Markdown after conversion:
 ```typescript
 import { convert } from '@kreuzberg/html-to-markdown-wasm';
 
-const markdown = convert(html);
+const markdown = convert(html).content ?? "";
 
 // Post-process the markdown
 const transformed = markdown
@@ -621,7 +432,7 @@ const transformed = markdown
 | **Elixir** | ❌ No | Basic conversion only |
 | **WebAssembly** | ❌ No | Browser, Edge, Deno (see alternatives above) |
 
-For comprehensive visitor pattern documentation with examples, see .
+For comprehensive visitor pattern documentation with examples, see the [full documentation](https://docs.html-to-markdown.kreuzberg.dev).
 
 ## Configuration Options
 
@@ -632,8 +443,8 @@ See the [TypeScript definitions](./dist-node/html_to_markdown_wasm.d.ts) for all
 - List formatting (indent width, bullet characters)
 - Text escaping and formatting
 - Tag preservation (`preserveTags`) and stripping (`stripTags`)
+- Metadata extraction (extractMetadata, extractHeaders, extractLinks, extractImages)
 - Preprocessing for web scraping
-- hOCR table extraction
 - And more...
 
 ## Examples
@@ -654,35 +465,36 @@ const html = `
 <p>After table</p>
 `;
 
-const markdown = convert(html, {
+const result = convert(html, {
   preserveTags: ['table']
 });
 
-// Result includes the table as HTML
+// result.content includes the table as HTML
 ```
 
 Combine with `stripTags`:
 
 ```typescript
-const markdown = convert(html, {
+const result = convert(html, {
   preserveTags: ['table', 'form'],  // Keep as HTML
   stripTags: ['script', 'style']    // Remove entirely
 });
+console.log(result.content);
 ```
 
 ### Deno Web Server
 
 ```typescript
-import { convert } from "npm:html-to-markdown-wasm";
+import { convert } from "npm:@kreuzberg/html-to-markdown-wasm";
 
 Deno.serve((req) => {
   const url = new URL(req.url);
 
   if (url.pathname === "/convert" && req.method === "POST") {
     const html = await req.text();
-    const markdown = convert(html, { headingStyle: "atx" });
+    const result = convert(html, { headingStyle: "atx" });
 
-    return new Response(markdown, {
+    return new Response(result.content ?? "", {
       headers: { "Content-Type": "text/markdown" }
     });
   }
@@ -706,8 +518,8 @@ Deno.serve((req) => {
   window.convertFile = async () => {
     const file = document.getElementById('htmlFile').files[0];
     const html = await file.text();
-    const markdown = convert(html, { headingStyle: 'atx' });
-    document.getElementById('output').textContent = markdown;
+    const result = convert(html, { headingStyle: 'atx' });
+    document.getElementById('output').textContent = result.content ?? "";
   };
 </script>
 ```
@@ -715,23 +527,20 @@ Deno.serve((req) => {
 ### Web Scraping (Deno)
 
 ```typescript
-import { convert } from "npm:html-to-markdown-wasm";
+import { convert } from "npm:@kreuzberg/html-to-markdown-wasm";
 
 const response = await fetch("https://example.com");
 const html = await response.text();
 
-const markdown = convert(html, {
-  preprocessing: {
-    enabled: true,
-    preset: "aggressive",
-    removeNavigation: true,
-    removeForms: true
-  },
+const result = convert(html, {
+  preprocess: true,
+  preset: "aggressive",
+  keepNavigation: false,
   headingStyle: "atx",
   codeBlockStyle: "backticks"
 });
 
-console.log(markdown);
+console.log(result.content);
 ```
 
 ## Other Runtimes

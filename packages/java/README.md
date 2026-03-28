@@ -18,7 +18,7 @@
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown?label=Java&color=007ec6" alt="Java">
   </a>
   <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown">
-    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/html-to-markdown?label=Go&color=007ec6&filter=v2.29.0" alt="Go">
+    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/html-to-markdown?label=Go&color=007ec6&filter=v3.0.0" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/">
     <img src="https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown?label=C%23&color=007ec6" alt="C#">
@@ -56,8 +56,10 @@
   </a>
 </div>
 
+
 High-performance HTML to Markdown converter with Java Panama FFI bindings to the Rust core.
 Uses Foreign Function & Memory API for zero-dependency, thread-safe conversion with full metadata extraction support.
+
 
 ## Installation
 
@@ -65,11 +67,13 @@ Uses Foreign Function & Memory API for zero-dependency, thread-safe conversion w
 <dependency>
     <groupId>dev.kreuzberg</groupId>
     <artifactId>html-to-markdown</artifactId>
-    <version>2.29.0</version>
+    <version>3.0.0</version>
     <classifier>linux</classifier> <!-- or macos, windows -->
 </dependency>
 
 ```
+
+
 
 Requires Java 25+ with Panama FFI support.
 
@@ -79,15 +83,20 @@ Requires Java 25+ with Panama FFI support.
 <dependency>
     <groupId>dev.kreuzberg</groupId>
     <artifactId>html-to-markdown</artifactId>
-    <version>2.29.0</version>
+    <version>3.0.0</version>
 </dependency>
 ```
 
 **Gradle (Kotlin DSL):**
 
 ```kotlin
-implementation("dev.kreuzberg:html-to-markdown:2.29.0")
+implementation("dev.kreuzberg:html-to-markdown:3.0.0")
 ```
+
+
+
+
+
 
 ## Performance Snapshot
 
@@ -99,7 +108,8 @@ Apple M4 • Real Wikipedia documents • `convert()` (Java)
 | Tables (Countries) | 360KB | 773 | 272.0 MB/s |
 | Mixed (Python) | 656KB | 403 | 258.5 MB/s |
 
-See for detailed benchmarks.
+
+
 
 ## Quick Start
 
@@ -107,30 +117,37 @@ Basic conversion:
 
 ```java
 import dev.kreuzberg.htmltomarkdown.HtmlToMarkdown;
+import dev.kreuzberg.htmltomarkdown.ConversionResult;
 
 public class Example {
     public static void main(String[] args) {
         String html = "<h1>Hello World</h1><p>This is a <strong>test</strong>.</p>";
-        String markdown = HtmlToMarkdown.convert(html);
-        System.out.println(markdown);
+        ConversionResult result = HtmlToMarkdown.convert(html);
+        System.out.println(result.content());
     }
 }
 ```
+
+
 
 With conversion options:
 
 ```java
 import dev.kreuzberg.htmltomarkdown.HtmlToMarkdown;
-import dev.kreuzberg.htmltomarkdown.metadata.MetadataExtraction;
+import dev.kreuzberg.htmltomarkdown.ConversionOptions;
+import dev.kreuzberg.htmltomarkdown.ConversionResult;
 
 public class MetadataExample {
     public static void main(String[] args) {
         String html = "<html><head><title>My Page</title></head>"
             + "<body><h1>Welcome</h1><a href=\"https://example.com\">Link</a></body></html>";
 
-        MetadataExtraction result = HtmlToMarkdown.convertWithMetadata(html);
+        ConversionOptions options = ConversionOptions.builder()
+            .extractMetadata(true)
+            .build();
+        ConversionResult result = HtmlToMarkdown.convert(html, options);
 
-        System.out.println("Markdown: " + result.markdown());
+        System.out.println("Markdown: " + result.content());
         System.out.println("Title: " + result.metadata().document().title());
         System.out.println("Headers: " + result.metadata().headers().size());
         System.out.println("Links: " + result.metadata().links().size());
@@ -138,23 +155,27 @@ public class MetadataExample {
 }
 ```
 
+
+
+
 ## API Reference
 
-### Core Functions
+### Core Function
 
-**`convert(String html) : String`**
-**`convert(String html, ConversionOptions options) : String`**
 
-Basic HTML-to-Markdown conversion. Fast and simple.
+**`HtmlToMarkdown.convert(String html) : ConversionResult`**
+**`HtmlToMarkdown.convert(String html, ConversionOptions options) : ConversionResult`**
 
-**`convertWithMetadata(String html) : ConversionResult<MetadataResult>`**
-**`convertWithMetadata(String html, ConversionOptions options, MetadataConfig config) : ConversionResult<MetadataResult>`**
+Converts HTML to Markdown. Returns a `ConversionResult` record with all results in a single call.
 
-Extract Markdown plus metadata in a single pass.
+```java
+ConversionResult result = HtmlToMarkdown.convert(html);
+String   markdown = result.content();   // Converted Markdown string
+Metadata metadata = result.metadata();  // null unless extractMetadata(true)
+List<?>  tables   = result.tables();    // empty unless extractTables(true)
+```
 
-**`convertWithInlineImages(String html, InlineImageConfig config) : ConversionResult<InlineImagesResult>`**
 
-Extract base64-encoded inline images with metadata.
 
 ### Options
 
@@ -166,16 +187,10 @@ Extract base64-encoded inline images with metadata.
 - `wrap`: Enable text wrapping — default: `false`
 - `wrap_width`: Wrap at column — default: `80`
 - `code_language`: Default fenced code block language — default: none
-- `extract_metadata`: Embed metadata as YAML frontmatter — default: `false`
+- `extract_metadata`: Enable metadata extraction into `result.metadata` — default: `false`
+- `extract_tables`: Enable structured table extraction into `result.tables` — default: `false`
 - `output_format`: Output markup format (`"markdown"` | `"djot"` | `"plain"`) — default: `"markdown"`
 
-**`MetadataConfig`** – Selective metadata extraction:
-
-- `extract_headers`: h1-h6 elements — default: `true`
-- `extract_links`: Hyperlinks — default: `true`
-- `extract_images`: Image elements — default: `true`
-- `extract_structured_data`: JSON-LD, Microdata, RDFa — default: `true`
-- `max_structured_data_size`: Size limit in bytes — default: `100KB`
 
 ## Djot Output Format
 
@@ -195,6 +210,7 @@ The library supports converting HTML to [Djot](https://djot.net/), a lightweight
 
 ### Example Usage
 
+
 ```java
 import dev.kreuzberg.htmltomarkdown.HtmlToMarkdown;
 import dev.kreuzberg.htmltomarkdown.ConversionOptions;
@@ -212,11 +228,14 @@ String djot = HtmlToMarkdown.convert(html,
 // Result: "This is *bold* and _italic_ text."
 ```
 
+
 Djot's extended syntax allows you to express more semantic meaning in lightweight text, making it useful for documents that require strikethrough, insertion tracking, or mathematical notation.
+
 
 ## Plain Text Output
 
 Set `output_format` to `"plain"` to strip all markup and return only visible text. This bypasses the Markdown conversion pipeline entirely for maximum speed.
+
 
 ```java
 import dev.kreuzberg.htmltomarkdown.HtmlToMarkdown;
@@ -230,7 +249,13 @@ String plain = HtmlToMarkdown.convert(html,
 // Result: "Title\n\nThis is bold and italic text."
 ```
 
+
 Plain text mode is useful for search indexing, text extraction, and feeding content to LLMs.
+
+
+
+
+
 
 ## Examples
 

@@ -161,4 +161,5 @@ nav:
   - Usage: usage.md
   - Configuration: configuration.md
   - CLI: cli.md
+  - Migration Guide: migration.md
   - Changelog: https://github.com/kreuzberg-dev/html-to-markdown/blob/main/CHANGELOG.md

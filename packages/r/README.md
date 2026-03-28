@@ -18,7 +18,7 @@
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown?label=Java&color=007ec6" alt="Java">
   </a>
   <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown">
-    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/html-to-markdown?label=Go&color=007ec6&filter=v2.29.0" alt="Go">
+    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/html-to-markdown?label=Go&color=007ec6&filter=v3.0.0" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/">
     <img src="https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown?label=C%23&color=007ec6" alt="C#">
@@ -56,14 +56,18 @@
   </a>
 </div>
 
+
 High-performance HTML to Markdown converter with R bindings powered by a Rust core via extendr.
 Ship identical Markdown across every runtime while enjoying native performance with extendr bindings.
+
 
 ## Installation
 
 ```bash
 install.packages("htmltomarkdown")
 ```
+
+
 
 Requires R 4.3+ and a Rust toolchain (cargo, rustc).
 
@@ -77,6 +81,11 @@ Or install the development version from GitHub:
 devtools::install_github("kreuzberg-dev/html-to-markdown", subdir = "packages/r")
 ```
 
+
+
+
+
+
 ## Performance Snapshot
 
 Apple M4 • Real Wikipedia documents • `convert()` (R)
@@ -87,7 +96,8 @@ Apple M4 • Real Wikipedia documents • `convert()` (R)
 | Tables (Countries) | 360KB | 2.10ms | 171 MB/s |
 | Mixed (Python wiki) | 656KB | 4.75ms | 138 MB/s |
 
-See for detailed benchmarks.
+
+
 
 ## Quick Start
 
@@ -97,9 +107,12 @@ Basic conversion:
 library(htmltomarkdown)
 
 html <- "<h1>Hello</h1><p>This is <strong>fast</strong>!</p>"
-markdown <- convert(html)
+result <- convert(html)
+markdown <- result$content
 cat(markdown)
 ```
+
+
 
 With conversion options:
 
@@ -112,33 +125,30 @@ opts <- conversion_options(
   wrap_width = 80L
 )
 
-markdown <- convert_with_options("<h1>Hello</h1><p>World</p>", opts)
-cat(markdown)
+result <- convert("<h1>Hello</h1><p>World</p>", opts)
+cat(result$content)
 ```
+
+
+
 
 ## API Reference
 
-### Core Functions
+### Core Function
+
 
 **`convert(html, options = NULL)`**
 
-Basic HTML-to-Markdown conversion. Fast and simple.
+Converts HTML to Markdown. Returns a named list `ConversionResult` with all results in a single call.
 
-**`convert_with_metadata(html, options = NULL, config = NULL)`**
+```r
+result   <- convert(html)
+markdown <- result$content    # Converted Markdown string
+metadata <- result$metadata   # Metadata (when extract_metadata = TRUE)
+tables   <- result$tables     # Table data (when extract_tables = TRUE)
+```
 
-Extract Markdown plus metadata in a single pass.
 
-**`convert_with_visitor(html, visitor, options = NULL)`**
-
-Customize conversion with visitor callbacks for element interception.
-
-**`convert_with_inline_images(html, config = NULL)`**
-
-Extract base64-encoded inline images with metadata.
-
-**`convert_with_tables(html, options = NULL, config = NULL)`**
-
-Extract structured table data (cells, headers, rendered markdown) alongside conversion.
 
 ### Options
 
@@ -150,16 +160,10 @@ Extract structured table data (cells, headers, rendered markdown) alongside conv
 - `wrap`: Enable text wrapping — default: `false`
 - `wrap_width`: Wrap at column — default: `80`
 - `code_language`: Default fenced code block language — default: none
-- `extract_metadata`: Embed metadata as YAML frontmatter — default: `false`
+- `extract_metadata`: Enable metadata extraction into `result.metadata` — default: `false`
+- `extract_tables`: Enable structured table extraction into `result.tables` — default: `false`
 - `output_format`: Output markup format (`"markdown"` | `"djot"` | `"plain"`) — default: `"markdown"`
 
-**`MetadataConfig`** – Selective metadata extraction:
-
-- `extract_headers`: h1-h6 elements — default: `true`
-- `extract_links`: Hyperlinks — default: `true`
-- `extract_images`: Image elements — default: `true`
-- `extract_structured_data`: JSON-LD, Microdata, RDFa — default: `true`
-- `max_structured_data_size`: Size limit in bytes — default: `100KB`
 
 ## Djot Output Format
 
@@ -179,11 +183,15 @@ The library supports converting HTML to [Djot](https://djot.net/), a lightweight
 
 ### Example Usage
 
+
+
 Djot's extended syntax allows you to express more semantic meaning in lightweight text, making it useful for documents that require strikethrough, insertion tracking, or mathematical notation.
+
 
 ## Plain Text Output
 
 Set `output_format` to `"plain"` to strip all markup and return only visible text. This bypasses the Markdown conversion pipeline entirely for maximum speed.
+
 
 ```r
 html <- "<h1>Title</h1><p>This is <strong>bold</strong> and <em>italic</em> text.</p>"
@@ -192,11 +200,14 @@ plain <- html_to_markdown(html, output_format = "plain")
 # Result: "Title\n\nThis is bold and italic text."
 ```
 
+
 Plain text mode is useful for search indexing, text extraction, and feeding content to LLMs.
+
+
 
 ## Metadata Extraction
 
-The metadata extraction feature enables comprehensive document analysis during conversion. Extract document properties, headers, links, images, and structured data in a single pass.
+The metadata extraction feature enables comprehensive document analysis during conversion. Extract document properties, headers, links, images, and structured data in a single pass — all via the standard `convert()` function.
 
 **Use Cases:**
 
@@ -206,15 +217,34 @@ The metadata extraction feature enables comprehensive document analysis during c
 - **Accessibility audits** – Check for images without alt text, empty links, invalid heading hierarchy
 - **Link validation** – Classify and validate anchor, internal, external, email, and phone links
 
-**Zero Overhead When Disabled:** Metadata extraction adds negligible overhead and happens during the HTML parsing pass. Disable unused metadata types in `MetadataConfig` to optimize further.
+**Zero Overhead When Disabled:** Metadata extraction adds negligible overhead and happens during the HTML parsing pass. Pass `extract_metadata: true` in `ConversionOptions` to enable it; the result is available at `result.metadata`.
 
 ### Example: Quick Start
 
-For detailed examples including SEO extraction, table-of-contents generation, link validation, and accessibility audits, see the .
+
+```r
+library(htmltomarkdown)
+
+html <- '<h1>Article</h1><img src="test.jpg" alt="test">'
+opts <- conversion_options(extract_metadata = TRUE)
+result <- convert(html, opts)
+
+cat(result$content)                    # Converted Markdown
+result$metadata$document$title        # Document title
+result$metadata$headers                # All h1-h6 elements
+result$metadata$links                  # All hyperlinks
+result$metadata$images                 # All images with alt text
+```
+
+
+
+
+
+
 
 ## Visitor Pattern
 
-The visitor pattern enables custom HTML→Markdown conversion logic by providing callbacks for specific HTML elements during traversal. Use visitors to transform content, filter elements, validate structure, or collect analytics.
+The visitor pattern enables custom HTML→Markdown conversion logic by providing callbacks for specific HTML elements during traversal. Pass a visitor as the third argument to `convert()`.
 
 **Use Cases:**
 
@@ -228,7 +258,20 @@ The visitor pattern enables custom HTML→Markdown conversion logic by providing
 
 ### Example: Quick Start
 
-For comprehensive examples including content filtering, link footnotes, accessibility validation, and asynchronous URL validation, see the .
+
+```r
+library(htmltomarkdown)
+
+html <- '<a href="https://old-cdn.com/file.pdf">Download</a>'
+opts <- conversion_options(extract_metadata = FALSE)
+result <- convert(html, opts)
+cat(result$content)
+```
+
+
+
+
+
 
 ## Examples
 

@@ -1,4 +1,4 @@
-The visitor pattern enables custom HTML→Markdown conversion logic by providing callbacks for specific HTML elements during traversal. Use visitors to transform content, filter elements, validate structure, or collect analytics.
+The visitor pattern enables custom HTML→Markdown conversion logic by providing callbacks for specific HTML elements during traversal. Pass a visitor as the third argument to `convert()`.
 
 **Use Cases:**
 - **Custom Markdown dialects** – Convert to Obsidian, Notion, or other flavors
@@ -13,7 +13,7 @@ The visitor pattern enables custom HTML→Markdown conversion logic by providing
 
 {% if language == 'python' %}
 ```python
-from html_to_markdown import convert_with_visitor
+from html_to_markdown import convert
 
 class MyVisitor:
     def visit_link(self, ctx, href, text, title):
@@ -29,27 +29,13 @@ class MyVisitor:
         return {"type": "continue"}
 
 html = '<a href="https://old-cdn.com/file.pdf">Download</a>'
-markdown = convert_with_visitor(html, visitor=MyVisitor())
-```
-
-Async support:
-```python
-import asyncio
-from html_to_markdown import convert_with_async_visitor
-
-class AsyncVisitor:
-    async def visit_link(self, ctx, href, text, title):
-        is_valid = await validate_url(href)
-        if not is_valid:
-            return {"type": "error", "message": f"Broken link: {href}"}
-        return {"type": "continue"}
-
-markdown = await convert_with_async_visitor(html, visitor=AsyncVisitor())
+result = convert(html, visitor=MyVisitor())
+markdown = result["content"]
 ```
 
 {% elif language == 'typescript' %}
 ```typescript
-import { convertWithVisitor, type Visitor, type NodeContext, type VisitResult } from 'html-to-markdown';
+import { convert, type Visitor, type NodeContext, type VisitResult } from '@kreuzberg/html-to-markdown';
 
 const visitor: Visitor = {
   visitLink(ctx: NodeContext, href: string, text: string, title?: string): VisitResult {
@@ -70,21 +56,8 @@ const visitor: Visitor = {
 };
 
 const html = '<a href="https://old-cdn.com/file.pdf">Download</a>';
-const markdown = convertWithVisitor(html, { visitor });
-```
-
-Async support:
-```typescript
-import { convertWithAsyncVisitor, type AsyncVisitor } from 'html-to-markdown';
-
-const asyncVisitor: AsyncVisitor = {
-  async visitLink(ctx, href, text, title) {
-    const isValid = await validateUrl(href);
-    return isValid ? { type: 'continue' } : { type: 'error', message: `Broken link: ${href}` };
-  },
-};
-
-const markdown = await convertWithAsyncVisitor(html, { visitor: asyncVisitor });
+const result = convert(html, {}, visitor);
+const markdown = result.content;
 ```
 
 {% elif language == 'ruby' %}
@@ -107,118 +80,52 @@ class MyVisitor
 end
 
 html = '<a href="https://old-cdn.com/file.pdf">Download</a>'
-markdown = HtmlToMarkdown.convert_with_visitor(html, visitor: MyVisitor.new)
+result = HtmlToMarkdown.convert(html, visitor: MyVisitor.new)
+markdown = result[:content]
 ```
 
 {% elif language == 'php' %}
 ```php
 <?php
-use HtmlToMarkdown\Converter;
+use HtmlToMarkdown\Config\ConversionOptions;
+use HtmlToMarkdown\Service\Converter;
+use HtmlToMarkdown\Visitor\AbstractVisitor;
+use HtmlToMarkdown\Visitor\NodeContext;
+use HtmlToMarkdown\Visitor\VisitResult;
 
-readonly class MyVisitor {
-    public function visitLink(array $ctx, string $href, string $text, ?string $title): array {
+class MyVisitor extends AbstractVisitor
+{
+    public function visitLink(NodeContext $ctx, string $href, string $text, ?string $title): array
+    {
         // Rewrite CDN URLs
         if (str_starts_with($href, 'https://old-cdn.com')) {
             $href = str_replace('https://old-cdn.com', 'https://new-cdn.com', $href);
         }
-        return ['type' => 'custom', 'output' => "[{$text}]({$href})"];
+        return VisitResult::custom("[{$text}]({$href})");
     }
 
-    public function visitImage(array $ctx, string $src, ?string $alt, ?string $title): array {
+    public function visitImage(NodeContext $ctx, string $src, ?string $alt, ?string $title): array
+    {
         // Skip tracking pixels
-        return str_contains($src, 'tracking') ? ['type' => 'skip'] : ['type' => 'continue'];
+        return str_contains($src, 'tracking') ? VisitResult::skip() : VisitResult::continue();
     }
 }
 
 $html = '<a href="https://old-cdn.com/file.pdf">Download</a>';
-$markdown = Converter::convertWithVisitor($html, new MyVisitor());
-```
-
-{% elif language == 'go' %}
-```go
-package main
-
-import (
-    "fmt"
-    htm "github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown"
-)
-
-type MyVisitor struct{}
-
-func (v *MyVisitor) VisitLink(ctx *htm.NodeContext, href, text, title string) htm.VisitResult {
-    // Rewrite CDN URLs
-    if strings.HasPrefix(href, "https://old-cdn.com") {
-        href = strings.ReplaceAll(href, "https://old-cdn.com", "https://new-cdn.com")
-    }
-    return htm.Custom(fmt.Sprintf("[%s](%s)", text, href))
-}
-
-func (v *MyVisitor) VisitImage(ctx *htm.NodeContext, src, alt, title string) htm.VisitResult {
-    // Skip tracking pixels
-    if strings.Contains(src, "tracking") {
-        return htm.Skip()
-    }
-    return htm.Continue()
-}
-
-html := `<a href="https://old-cdn.com/file.pdf">Download</a>`
-markdown, _ := htm.ConvertWithVisitor(html, &MyVisitor{}, nil)
-```
-
-{% elif language == 'java' %}
-```java
-import dev.kreuzberg.htmltomarkdown.Converter;
-import dev.kreuzberg.htmltomarkdown.Visitor;
-import dev.kreuzberg.htmltomarkdown.VisitResult;
-
-public class MyVisitor implements Visitor {
-    @Override
-    public VisitResult visitLink(NodeContext ctx, String href, String text, String title) {
-        // Rewrite CDN URLs
-        if (href.startsWith("https://old-cdn.com")) {
-            href = href.replace("https://old-cdn.com", "https://new-cdn.com");
-        }
-        return VisitResult.custom(String.format("[%s](%s)", text, href));
-    }
-
-    @Override
-    public VisitResult visitImage(NodeContext ctx, String src, String alt, String title) {
-        // Skip tracking pixels
-        return src.contains("tracking") ? VisitResult.skip() : VisitResult.continue();
-    }
-}
-
-String html = "<a href=\"https://old-cdn.com/file.pdf\">Download</a>";
-String markdown = Converter.convertWithVisitor(html, new MyVisitor());
-```
-
-{% elif language == 'csharp' %}
-```csharp
-using KreuzbergDev.HtmlToMarkdown;
-
-public class MyVisitor : IVisitor {
-    public VisitResult VisitLink(NodeContext ctx, string href, string text, string? title) {
-        // Rewrite CDN URLs
-        if (href.StartsWith("https://old-cdn.com")) {
-            href = href.Replace("https://old-cdn.com", "https://new-cdn.com");
-        }
-        return VisitResult.Custom($"[{text}]({href})");
-    }
-
-    public VisitResult VisitImage(NodeContext ctx, string src, string? alt, string? title) {
-        // Skip tracking pixels
-        return src.Contains("tracking") ? VisitResult.Skip() : VisitResult.Continue();
-    }
-}
-
-var html = "<a href=\"https://old-cdn.com/file.pdf\">Download</a>";
-var markdown = Converter.ConvertWithVisitor(html, new MyVisitor());
+$result = Converter::create()->convert(
+    $html,
+    new ConversionOptions(visitor: new MyVisitor())
+);
+$markdown = $result['content'];
 ```
 
 {% elif language == 'elixir' %}
 ```elixir
 defmodule MyVisitor do
-  def visit_link(ctx, href, text, title) do
+  use HtmlToMarkdown.Visitor
+
+  @impl true
+  def handle_link(_ctx, href, text, _title) do
     # Rewrite CDN URLs
     href = if String.starts_with?(href, "https://old-cdn.com") do
       String.replace(href, "https://old-cdn.com", "https://new-cdn.com")
@@ -228,20 +135,27 @@ defmodule MyVisitor do
     {:custom, "[#{text}](#{href})"}
   end
 
-  def visit_image(ctx, src, alt, title) do
+  @impl true
+  def handle_image(_ctx, src, _alt, _title) do
     # Skip tracking pixels
-    if String.contains?(src, "tracking") do
-      :skip
-    else
-      :continue
-    end
+    if String.contains?(src, "tracking"), do: :skip, else: :continue
   end
 end
 
 html = "<a href=\"https://old-cdn.com/file.pdf\">Download</a>"
-markdown = HtmlToMarkdown.convert_with_visitor(html, visitor: MyVisitor)
+opts = %HtmlToMarkdown.Options{visitor: MyVisitor}
+{:ok, result} = HtmlToMarkdown.convert(html, opts)
+result.content
+```
+
+{% elif language == 'r' %}
+```r
+library(htmltomarkdown)
+
+html <- '<a href="https://old-cdn.com/file.pdf">Download</a>'
+opts <- conversion_options(extract_metadata = FALSE)
+result <- convert(html, opts)
+cat(result$content)
 ```
 
 {% endif %}
-
-For comprehensive examples including content filtering, link footnotes, accessibility validation, and asynchronous URL validation, see the [Visitor Pattern Guide](../../examples/visitor-pattern/).

@@ -29,11 +29,11 @@ Composer wrapper):
 ```php
 <?php
 use function HtmlToMarkdown\convert;
-use function HtmlToMarkdown\convert_with_inline_images;
+use function HtmlToMarkdown\convert;
 
 $markdown = convert('<h1>Hello</h1>');
 
-[$markdown, $images, $warnings] = convert_with_inline_images(
+$result = convert(
     '<p><img src="data:image/png;base64,..." alt="Logo" /></p>'
 );
 ```

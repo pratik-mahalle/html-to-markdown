@@ -18,7 +18,7 @@
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown?label=Java&color=007ec6" alt="Java">
   </a>
   <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown">
-    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/html-to-markdown?label=Go&color=007ec6&filter=v2.29.0" alt="Go">
+    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/html-to-markdown?label=Go&color=007ec6&filter=v3.0.0" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/">
     <img src="https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown?label=C%23&color=007ec6" alt="C#">
@@ -56,8 +56,10 @@
   </a>
 </div>
 
+
 Blazing-fast HTML to Markdown conversion for Ruby, powered by the same Rust engine used by our Python, Node.js, WebAssembly, and PHP packages.
 Ship identical Markdown across every runtime while enjoying native extension performance with Magnus bindings.
+
 
 ## Installation
 
@@ -65,7 +67,14 @@ Ship identical Markdown across every runtime while enjoying native extension per
 gem install html-to-markdown
 ```
 
+
+
 Requires Ruby 3.2+ with Magnus native extension bindings. Published for Linux, macOS.
+
+
+
+
+
 
 ## Performance Snapshot
 
@@ -77,7 +86,8 @@ Apple M4 • Real Wikipedia documents • `convert()` (Ruby)
 | Tables (Countries) | 360KB | 2.15ms | 167 MB/s |
 | Mixed (Python wiki) | 656KB | 4.89ms | 134 MB/s |
 
-See for detailed benchmarks.
+
+
 
 ## Quick Start
 
@@ -87,8 +97,11 @@ Basic conversion:
 require 'html_to_markdown'
 
 html = "<h1>Hello</h1><p>This is <strong>fast</strong>!</p>"
-markdown = HtmlToMarkdown.convert(html)
+result = HtmlToMarkdown.convert(html)
+markdown = result[:content]
 ```
+
+
 
 With conversion options:
 
@@ -96,32 +109,35 @@ With conversion options:
 require 'html_to_markdown'
 
 html = "<h1>Hello</h1><p>This is <strong>fast</strong>!</p>"
-markdown = HtmlToMarkdown.convert(html, heading_style: :atx, code_block_style: :fenced)
+result = HtmlToMarkdown.convert(html, heading_style: :atx, code_block_style: :fenced)
+markdown = result[:content]
 ```
+
+
+
 
 ## API Reference
 
-### Core Functions
+### Core Function
 
-**`convert(html, options: nil) -> String`**
 
-Basic HTML-to-Markdown conversion. Fast and simple.
+**`convert(html, options: nil, visitor: nil) -> ConversionResult`**
 
-**`convert_with_metadata(html, options: nil, config: nil) -> [String, Hash]`**
+Converts HTML to Markdown. Returns a `ConversionResult` hash with all results in a single call.
 
-Extract Markdown plus metadata (headers, links, images, structured data) in a single pass.
+```ruby
+require 'html_to_markdown'
 
-**`convert_with_visitor(html, visitor:, options: nil) -> String`**
+result = HtmlToMarkdown.convert(html)
+markdown = result[:content]       # Converted Markdown string
+metadata = result[:metadata]      # Metadata (when extract_metadata: true)
+tables   = result[:tables]        # Structured table data (when extract_tables: true)
+document = result[:document]      # Document-level info
+images   = result[:images]        # Extracted images
+warnings = result[:warnings]      # Any conversion warnings
+```
 
-Customize conversion with visitor callbacks for element interception.
 
-**`convert_with_inline_images(html, config: nil) -> [String, Array, Array]`**
-
-Extract base64-encoded inline images with metadata.
-
-**`convert_with_tables(html, options: nil, config: nil) -> ConversionWithTables`**
-
-Extract structured table data (cells, headers, rendered markdown) alongside conversion.
 
 ### Options
 
@@ -133,16 +149,10 @@ Extract structured table data (cells, headers, rendered markdown) alongside conv
 - `wrap`: Enable text wrapping — default: `false`
 - `wrap_width`: Wrap at column — default: `80`
 - `code_language`: Default fenced code block language — default: none
-- `extract_metadata`: Embed metadata as YAML frontmatter — default: `false`
+- `extract_metadata`: Enable metadata extraction into `result.metadata` — default: `false`
+- `extract_tables`: Enable structured table extraction into `result.tables` — default: `false`
 - `output_format`: Output markup format (`"markdown"` | `"djot"` | `"plain"`) — default: `"markdown"`
 
-**`MetadataConfig`** – Selective metadata extraction:
-
-- `extract_headers`: h1-h6 elements — default: `true`
-- `extract_links`: Hyperlinks — default: `true`
-- `extract_images`: Image elements — default: `true`
-- `extract_structured_data`: JSON-LD, Microdata, RDFa — default: `true`
-- `max_structured_data_size`: Size limit in bytes — default: `100KB`
 
 ## Djot Output Format
 
@@ -162,6 +172,7 @@ The library supports converting HTML to [Djot](https://djot.net/), a lightweight
 
 ### Example Usage
 
+
 ```ruby
 require 'html_to_markdown'
 
@@ -176,11 +187,14 @@ djot = HtmlToMarkdown.convert(html, output_format: 'djot')
 # Result: "This is *bold* and _italic_ text."
 ```
 
+
 Djot's extended syntax allows you to express more semantic meaning in lightweight text, making it useful for documents that require strikethrough, insertion tracking, or mathematical notation.
+
 
 ## Plain Text Output
 
 Set `output_format` to `"plain"` to strip all markup and return only visible text. This bypasses the Markdown conversion pipeline entirely for maximum speed.
+
 
 ```ruby
 require 'html_to_markdown'
@@ -191,11 +205,14 @@ plain = HtmlToMarkdown.convert(html, output_format: 'plain')
 # Result: "Title\n\nThis is bold and italic text."
 ```
 
+
 Plain text mode is useful for search indexing, text extraction, and feeding content to LLMs.
+
+
 
 ## Metadata Extraction
 
-The metadata extraction feature enables comprehensive document analysis during conversion. Extract document properties, headers, links, images, and structured data in a single pass.
+The metadata extraction feature enables comprehensive document analysis during conversion. Extract document properties, headers, links, images, and structured data in a single pass — all via the standard `convert()` function.
 
 **Use Cases:**
 
@@ -205,28 +222,34 @@ The metadata extraction feature enables comprehensive document analysis during c
 - **Accessibility audits** – Check for images without alt text, empty links, invalid heading hierarchy
 - **Link validation** – Classify and validate anchor, internal, external, email, and phone links
 
-**Zero Overhead When Disabled:** Metadata extraction adds negligible overhead and happens during the HTML parsing pass. Disable unused metadata types in `MetadataConfig` to optimize further.
+**Zero Overhead When Disabled:** Metadata extraction adds negligible overhead and happens during the HTML parsing pass. Pass `extract_metadata: true` in `ConversionOptions` to enable it; the result is available at `result.metadata`.
 
 ### Example: Quick Start
+
 
 ```ruby
 require 'html_to_markdown'
 
 html = '<h1>Article</h1><img src="test.jpg" alt="test">'
-markdown, metadata = HtmlToMarkdown.convert_with_metadata(html)
+result = HtmlToMarkdown.convert(html, extract_metadata: true)
 
-puts metadata[:document][:title]           # Document title
-puts metadata[:headers]                    # All h1-h6 elements
-puts metadata[:links]                      # All hyperlinks
-puts metadata[:images]                     # All images with alt text
-puts metadata[:structured_data]            # JSON-LD, Microdata, RDFa
+puts result[:content]                             # Converted Markdown
+puts result[:metadata][:document][:title]         # Document title
+puts result[:metadata][:headers]                  # All h1-h6 elements
+puts result[:metadata][:links]                    # All hyperlinks
+puts result[:metadata][:images]                   # All images with alt text
+puts result[:metadata][:structured_data]          # JSON-LD, Microdata, RDFa
 ```
 
-For detailed examples including SEO extraction, table-of-contents generation, link validation, and accessibility audits, see the .
+
+
+
+
+
 
 ## Visitor Pattern
 
-The visitor pattern enables custom HTML→Markdown conversion logic by providing callbacks for specific HTML elements during traversal. Use visitors to transform content, filter elements, validate structure, or collect analytics.
+The visitor pattern enables custom HTML→Markdown conversion logic by providing callbacks for specific HTML elements during traversal. Pass a visitor as the third argument to `convert()`.
 
 **Use Cases:**
 
@@ -239,6 +262,7 @@ The visitor pattern enables custom HTML→Markdown conversion logic by providing
 **Supported Visitor Methods:** 40+ callbacks for text, inline elements, links, images, headings, lists, blocks, and tables.
 
 ### Example: Quick Start
+
 
 ```ruby
 require 'html_to_markdown'
@@ -259,10 +283,14 @@ class MyVisitor
 end
 
 html = '<a href="https://old-cdn.com/file.pdf">Download</a>'
-markdown = HtmlToMarkdown.convert_with_visitor(html, visitor: MyVisitor.new)
+result = HtmlToMarkdown.convert(html, visitor: MyVisitor.new)
+markdown = result[:content]
 ```
 
-For comprehensive examples including content filtering, link footnotes, accessibility validation, and asynchronous URL validation, see the .
+
+
+
+
 
 ## Examples
 
