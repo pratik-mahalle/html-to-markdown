@@ -121,6 +121,20 @@ tasks:
       - cmd: cd {{.RUBY_PKG}} && ruby -e "require 'fileutils'; ['pkg', 'tmp'].each { |d| FileUtils.rm_rf(d) }; Dir['lib/*.{bundle,so}'].each { |f| File.delete(f) rescue nil }"
         ignore_error: true
 
+  e2e:generate:
+    desc: "Generate Ruby E2E tests from fixtures using e2e-generator"
+    silent: false
+    cmds:
+      - cmd: cargo run --release -p e2e-generator -- --language ruby --output e2e/ruby
+        ignore_error: false
+
+  e2e:test:
+    desc: "Run Ruby E2E tests in e2e/ruby directory"
+    silent: false
+    cmds:
+      - cmd: cd e2e/ruby && bundle exec rspec spec/
+        ignore_error: false
+
   package:
     desc: "Build Ruby gem package (bundle exec rake package)"
     silent: false

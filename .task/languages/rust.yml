@@ -160,6 +160,20 @@ tasks:
           cargo doc --workspace --all-features --no-deps --open
         ignore_error: false
 
+  e2e:generate:
+    desc: "Generate Rust E2E tests from fixtures using e2e-generator"
+    silent: false
+    cmds:
+      - cmd: cargo run --release -p e2e-generator -- --language rust --output e2e/rust
+        ignore_error: false
+
+  e2e:test:
+    desc: "Run Rust E2E tests in e2e/rust directory"
+    silent: false
+    cmds:
+      - cmd: cargo test --manifest-path e2e/rust/Cargo.toml
+        ignore_error: false
+
   bench:
     desc: "Run Rust benchmarks"
     silent: false

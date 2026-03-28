@@ -130,6 +130,20 @@ tasks:
           "
         ignore_error: true
 
+  e2e:generate:
+    desc: "Generate Python E2E tests from fixtures using e2e-generator"
+    silent: false
+    cmds:
+      - cmd: cargo run --release -p e2e-generator -- --language python --output e2e/python
+        ignore_error: false
+
+  e2e:test:
+    desc: "Run Python E2E tests in e2e/python directory"
+    silent: false
+    cmds:
+      - cmd: cd e2e/python && uv run pytest tests/ -v
+        ignore_error: false
+
   wheel:
     desc: "Build Python wheel distribution"
     silent: false
