@@ -11,7 +11,7 @@ from typing import Any
 
 import pytest
 
-from html_to_markdown import ConversionOptions, convert_with_async_visitor
+from html_to_markdown import ConversionOptions, ExtractionResult, convert_with_async_visitor
 
 
 class AsyncVisitorWithAllMethods:
@@ -418,7 +418,7 @@ async def test_async_visitor_with_code_options() -> None:
 async def test_async_visitor_within_async_context() -> None:
     """Test async visitor can be called from async function."""
 
-    async def async_workflow() -> str:
+    async def async_workflow() -> ExtractionResult | str:
         html = "<p>Async workflow</p>"
         visitor = AsyncVisitorOnlyAsyncMethods()
         return convert_with_async_visitor(html, visitor=visitor)
@@ -431,7 +431,7 @@ async def test_async_visitor_within_async_context() -> None:
 async def test_async_visitor_concurrent_calls() -> None:
     """Test multiple concurrent async visitor calls."""
 
-    async def convert_one(html: str) -> str:
+    async def convert_one(html: str) -> ExtractionResult | str:
         visitor = AsyncVisitorOnlyAsyncMethods()
         return convert_with_async_visitor(html, visitor=visitor)
 

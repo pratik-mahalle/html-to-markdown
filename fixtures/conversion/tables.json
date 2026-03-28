@@ -1,0 +1,8 @@
+[
+  {
+    "id": "simple_table",
+    "description": "Simple table with header",
+    "html": "<table><thead><tr><th>Name</th><th>Age</th></tr></thead><tbody><tr><td>Alice</td><td>30</td></tr></tbody></table>",
+    "assertions": { "content_contains_all": ["Name", "Age", "Alice", "30", "|", "---"] }
+  }
+]

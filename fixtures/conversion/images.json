@@ -1,0 +1,8 @@
+[
+  {
+    "id": "image_simple",
+    "description": "Image with alt text",
+    "html": "<img src=\"photo.jpg\" alt=\"A photo\">",
+    "assertions": { "content_contains_all": ["![A photo](photo.jpg)"] }
+  }
+]

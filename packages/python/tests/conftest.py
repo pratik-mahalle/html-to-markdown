@@ -101,7 +101,10 @@ def convert_v2() -> Callable[..., str]:
 
         options.encoding = source_encoding
 
-        return convert_api(html, options, preprocessing)
+        result = convert_api(html, options, preprocessing)
+        # convert() returns ExtractionResult dict with 'content' key
+        content = result.get("content")
+        return content if content is not None else ""
 
     return _convert
 
