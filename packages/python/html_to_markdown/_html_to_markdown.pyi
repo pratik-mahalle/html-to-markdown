@@ -33,7 +33,6 @@ class ConversionOptions:
     autolinks: bool
     default_title: bool
     br_in_tables: bool
-    hocr_spatial_tables: bool
     highlight_style: Literal["double-equal", "html", "bold", "none"]
     extract_metadata: bool
     whitespace_mode: Literal["normalized", "strict"]
@@ -53,6 +52,11 @@ class ConversionOptions:
     preserve_tags: list[str]
     skip_images: bool
     output_format: Literal["markdown", "djot"]
+    include_document_structure: bool
+    extract_images: bool
+    max_image_size: int
+    capture_svg: bool
+    infer_dimensions: bool
 
     def __init__(
         self,
@@ -70,7 +74,6 @@ class ConversionOptions:
         autolinks: bool = True,
         default_title: bool = False,
         br_in_tables: bool = False,
-        hocr_spatial_tables: bool = True,
         highlight_style: Literal["double-equal", "html", "bold", "none"] = "double-equal",
         extract_metadata: bool = True,
         whitespace_mode: Literal["normalized", "strict"] = "normalized",
@@ -90,6 +93,11 @@ class ConversionOptions:
         preserve_tags: list[str] = [],
         skip_images: bool = False,
         output_format: Literal["markdown", "djot"] = "markdown",
+        include_document_structure: bool = False,
+        extract_images: bool = False,
+        max_image_size: int = 5_242_880,
+        capture_svg: bool = False,
+        infer_dimensions: bool = True,
     ) -> None: ...
 
 class InlineImageConfig:

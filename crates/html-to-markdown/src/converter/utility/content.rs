@@ -131,31 +131,6 @@ pub(crate) fn normalize_link_label(label: &str) -> String {
     normalized.as_ref().trim().to_string()
 }
 
-/// Check if an inline element is considered empty (no meaningful content).
-pub(crate) fn is_empty_inline_element(node_handle: &tl::NodeHandle, parser: &tl::Parser, dom_ctx: &DomContext) -> bool {
-    const EMPTY_WHEN_NO_CONTENT_TAGS: &[&str] = &[
-        "abbr", "var", "ins", "dfn", "time", "data", "cite", "q", "mark", "small", "u",
-    ];
-
-    let tag_name: Option<Cow<'_, str>> = dom_ctx
-        .tag_info(node_handle.get_inner(), parser)
-        .map(|info| Cow::Borrowed(info.name.as_str()))
-        .or_else(|| {
-            if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
-                Some(normalized_tag_name(tag.name().as_utf8_str()))
-            } else {
-                None
-            }
-        });
-
-    if let Some(tag_name) = tag_name {
-        if EMPTY_WHEN_NO_CONTENT_TAGS.contains(&tag_name.as_ref()) {
-            return get_text_content(node_handle, parser, dom_ctx).trim().is_empty();
-        }
-    }
-    false
-}
-
 /// Normalize a tag name to lowercase, preserving borrowed input when possible.
 pub(crate) fn normalized_tag_name(raw: Cow<'_, str>) -> Cow<'_, str> {
     if raw.as_bytes().iter().any(u8::is_ascii_uppercase) {
@@ -226,22 +201,6 @@ fn is_inline_element(tag_name: &str) -> bool {
 /// Check if an element is block-level (not inline).
 pub(crate) fn is_block_level_element(tag_name: &str) -> bool {
     is_block_level_name(tag_name, is_inline_element(tag_name))
-}
-
-/// Truncate a string to a maximum length at a valid UTF-8 character boundary.
-///
-/// Ensures the string is not longer than `max_len` bytes, truncating at the last
-/// valid character boundary if necessary to preserve valid UTF-8.
-pub(crate) fn truncate_at_char_boundary(value: &mut String, max_len: usize) {
-    if value.len() <= max_len {
-        return;
-    }
-
-    let mut new_len = max_len.min(value.len());
-    while new_len > 0 && !value.is_char_boundary(new_len) {
-        new_len -= 1;
-    }
-    value.truncate(new_len);
 }
 
 /// Returns the largest valid char boundary index at or before `index`.

@@ -61,14 +61,7 @@ pub fn bytes_to_string(bytes: js_sys::Uint8Array) -> Result<String, JsValue> {
 pub fn convert_to_string(html: String, options: JsValue) -> Result<String, JsValue> {
     let rust_options = parse_wasm_options(options)?;
 
-    #[cfg(feature = "visitor")]
-    {
-        html_to_markdown_rs::safety::guard_panic(|| convert_to_string_inner(&html, rust_options)).map_err(to_js_error)
-    }
-    #[cfg(not(feature = "visitor"))]
-    {
-        html_to_markdown_rs::safety::guard_panic(|| convert_to_string_inner(&html, rust_options)).map_err(to_js_error)
-    }
+    html_to_markdown_rs::safety::guard_panic(|| convert_to_string_inner(&html, rust_options)).map_err(to_js_error)
 }
 
 #[cfg(feature = "js-bindings")]
@@ -77,14 +70,7 @@ pub fn convert_bytes(html: js_sys::Uint8Array, options: JsValue) -> Result<Strin
     let html = bytes_to_string(html)?;
     let rust_options = parse_wasm_options(options)?;
 
-    #[cfg(feature = "visitor")]
-    {
-        html_to_markdown_rs::safety::guard_panic(|| convert_to_string_inner(&html, rust_options)).map_err(to_js_error)
-    }
-    #[cfg(not(feature = "visitor"))]
-    {
-        html_to_markdown_rs::safety::guard_panic(|| convert_to_string_inner(&html, rust_options)).map_err(to_js_error)
-    }
+    html_to_markdown_rs::safety::guard_panic(|| convert_to_string_inner(&html, rust_options)).map_err(to_js_error)
 }
 
 #[cfg(feature = "js-bindings")]
@@ -101,16 +87,8 @@ pub fn convert_with_options_handle(
     html: String,
     handle: &crate::options::WasmConversionOptionsHandle,
 ) -> Result<String, JsValue> {
-    #[cfg(feature = "visitor")]
-    {
-        html_to_markdown_rs::safety::guard_panic(|| convert_to_string_inner(&html, Some(handle.inner.clone())))
-            .map_err(to_js_error)
-    }
-    #[cfg(not(feature = "visitor"))]
-    {
-        html_to_markdown_rs::safety::guard_panic(|| convert_to_string_inner(&html, Some(handle.inner.clone())))
-            .map_err(to_js_error)
-    }
+    html_to_markdown_rs::safety::guard_panic(|| convert_to_string_inner(&html, Some(handle.inner.clone())))
+        .map_err(to_js_error)
 }
 
 #[cfg(feature = "js-bindings")]
@@ -121,16 +99,8 @@ pub fn convert_bytes_with_options_handle(
 ) -> Result<String, JsValue> {
     let html = bytes_to_string(html)?;
 
-    #[cfg(feature = "visitor")]
-    {
-        html_to_markdown_rs::safety::guard_panic(|| convert_to_string_inner(&html, Some(handle.inner.clone())))
-            .map_err(to_js_error)
-    }
-    #[cfg(not(feature = "visitor"))]
-    {
-        html_to_markdown_rs::safety::guard_panic(|| convert_to_string_inner(&html, Some(handle.inner.clone())))
-            .map_err(to_js_error)
-    }
+    html_to_markdown_rs::safety::guard_panic(|| convert_to_string_inner(&html, Some(handle.inner.clone())))
+        .map_err(to_js_error)
 }
 
 /// Convert HTML to Markdown, returning a JavaScript object with structured content, metadata,
@@ -253,20 +223,9 @@ fn convert_with_inline_images_internal(
         html_to_markdown_rs::InlineImageConfig::new(html_to_markdown_rs::DEFAULT_INLINE_IMAGE_LIMIT)
     });
 
-    let extraction = {
-        #[cfg(feature = "visitor")]
-        {
-            html_to_markdown_rs::safety::guard_panic(|| {
-                html_to_markdown_rs::convert_with_inline_images(html, rust_options, rust_config, None)
-            })
-        }
-        #[cfg(not(feature = "visitor"))]
-        {
-            html_to_markdown_rs::safety::guard_panic(|| {
-                html_to_markdown_rs::convert_with_inline_images(html, rust_options, rust_config, None)
-            })
-        }
-    }
+    let extraction = html_to_markdown_rs::safety::guard_panic(|| {
+        html_to_markdown_rs::convert_with_inline_images(html, rust_options, rust_config, None)
+    })
     .map_err(to_js_error)?;
 
     Ok(extraction.into())
@@ -330,20 +289,9 @@ pub fn convert_with_metadata(
     let rust_options = parse_wasm_options(options)?;
     let rust_metadata_config = metadata_config.map(Into::into).unwrap_or_default();
 
-    let (markdown, metadata) = {
-        #[cfg(feature = "visitor")]
-        {
-            html_to_markdown_rs::safety::guard_panic(|| {
-                html_to_markdown_rs::convert_with_metadata(&html, rust_options, rust_metadata_config, None)
-            })
-        }
-        #[cfg(not(feature = "visitor"))]
-        {
-            html_to_markdown_rs::safety::guard_panic(|| {
-                html_to_markdown_rs::convert_with_metadata(&html, rust_options, rust_metadata_config, None)
-            })
-        }
-    }
+    let (markdown, metadata) = html_to_markdown_rs::safety::guard_panic(|| {
+        html_to_markdown_rs::convert_with_metadata(&html, rust_options, rust_metadata_config, None)
+    })
     .map_err(to_js_error)?;
 
     let metadata_js = serde_wasm_bindgen::to_value(&metadata).map_err(|e| JsValue::from_str(&e.to_string()))?;
