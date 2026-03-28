@@ -5,6 +5,7 @@
 
 use crate::text;
 use std::borrow::Cow;
+#[cfg(feature = "visitor")]
 use std::collections::BTreeMap;
 
 // Forward declare DomContext from parent module to avoid circular imports
@@ -14,6 +15,7 @@ pub(crate) use crate::converter::DomContext;
 ///
 /// Boolean attributes (those with `None` as the value) are skipped; only
 /// attributes that carry an explicit value are included.
+#[cfg(feature = "visitor")]
 pub(crate) fn collect_tag_attributes(tag: &tl::HTMLTag) -> BTreeMap<String, String> {
     tag.attributes()
         .iter()

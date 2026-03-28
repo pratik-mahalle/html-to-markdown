@@ -5,7 +5,9 @@
 //! - Cell layout handling with colspan/rowspan support
 //! - Layout table row conversion to list items
 
-use crate::converter::utility::content::{collect_tag_attributes, normalized_tag_name};
+#[cfg(feature = "visitor")]
+use crate::converter::utility::content::collect_tag_attributes;
+use crate::converter::utility::content::normalized_tag_name;
 use std::borrow::Cow;
 
 use super::cell::{collect_table_cells, convert_table_cell, get_colspan_rowspan};

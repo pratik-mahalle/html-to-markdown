@@ -6,6 +6,7 @@
 //! - Metadata collection (headers, IDs)
 //! - Visitor callbacks for custom heading processing
 
+#[cfg(feature = "visitor")]
 use crate::converter::utility::content::collect_tag_attributes;
 use crate::options::{ConversionOptions, HeadingStyle};
 use std::borrow::Cow;

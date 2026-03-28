@@ -7,6 +7,7 @@
 //! - Inline code formatting with backtick management
 //! - Visitor callbacks for custom code processing
 
+#[cfg(feature = "visitor")]
 use crate::converter::utility::content::collect_tag_attributes;
 use crate::options::{CodeBlockStyle, ConversionOptions, WhitespaceMode};
 #[allow(unused_imports)]

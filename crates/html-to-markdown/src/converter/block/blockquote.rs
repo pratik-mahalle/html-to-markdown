@@ -7,6 +7,7 @@
 //! - Spacing management for various contexts
 //! - Visitor callbacks for custom blockquote processing
 
+#[cfg(feature = "visitor")]
 use crate::converter::utility::content::collect_tag_attributes;
 use crate::options::ConversionOptions;
 #[allow(unused_imports)]

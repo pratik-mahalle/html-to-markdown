@@ -5,8 +5,10 @@
 //! - Strikethrough (del, s tags) with ~~ syntax
 //! - Inserted/underlined text (ins, u tags) with == syntax
 
+#[cfg(feature = "visitor")]
 use crate::converter::utility::content::collect_tag_attributes;
 use crate::options::{ConversionOptions, OutputFormat};
+#[cfg(feature = "visitor")]
 use std::collections::BTreeMap;
 use tl::{NodeHandle, Parser};
 
