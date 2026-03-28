@@ -65,18 +65,13 @@ func TestConvert(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := Convert(tt.html)
+			got, err := Convert(tt.html)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Convert() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			got := result.Content
-			if got == nil || !strings.Contains(*got, tt.contains) {
-				gotStr := ""
-				if got != nil {
-					gotStr = *got
-				}
-				t.Errorf("Convert() = %v, want to contain %v", gotStr, tt.contains)
+			if !strings.Contains(got, tt.contains) {
+				t.Errorf("Convert() = %v, want to contain %v", got, tt.contains)
 			}
 		})
 	}
@@ -86,23 +81,15 @@ func TestMustConvert(t *testing.T) {
 	t.Run("successful conversion", func(t *testing.T) {
 		html := "<h1>Test</h1>"
 		result := MustConvert(html)
-		if result.Content == nil || !strings.Contains(*result.Content, "Test") {
-			contentStr := ""
-			if result.Content != nil {
-				contentStr = *result.Content
-			}
-			t.Errorf("MustConvert() = %v, want to contain 'Test'", contentStr)
+		if !strings.Contains(result, "Test") {
+			t.Errorf("MustConvert() = %v, want to contain 'Test'", result)
 		}
 	})
 
 	t.Run("empty string", func(t *testing.T) {
 		result := MustConvert("")
-		if result.Content == nil || *result.Content != "" {
-			contentStr := ""
-			if result.Content != nil {
-				contentStr = *result.Content
-			}
-			t.Errorf("MustConvert(\"\") = %v, want empty string", contentStr)
+		if result != "" {
+			t.Errorf("MustConvert(\"\") = %v, want empty string", result)
 		}
 	})
 }
@@ -156,20 +143,16 @@ func BenchmarkConvertSimple(b *testing.B) {
 }
 
 func ExampleConvert() {
-	result, err := Convert("<h1>Hello World</h1>")
+	markdown, err := Convert("<h1>Hello World</h1>")
 	if err != nil {
 		panic(err)
 	}
-	if result.Content != nil {
-		println(*result.Content)
-	}
+	println(markdown)
 }
 
 func ExampleMustConvert() {
-	result := MustConvert("<p>This is a paragraph.</p>")
-	if result.Content != nil {
-		println(*result.Content)
-	}
+	markdown := MustConvert("<p>This is a paragraph.</p>")
+	println(markdown)
 }
 
 func ExampleVersion() {
@@ -182,7 +165,7 @@ func TestConvertWithMetadata(t *testing.T) {
 		name          string
 		html          string
 		checkMarkdown func(string) bool
-		checkMetadata func(*testing.T, HTMLMetadata)
+		checkMetadata func(*testing.T, ExtendedMetadata)
 		wantErr       bool
 	}{
 		{
@@ -191,7 +174,7 @@ func TestConvertWithMetadata(t *testing.T) {
 			checkMarkdown: func(md string) bool {
 				return strings.Contains(md, "Hello")
 			},
-			checkMetadata: func(t *testing.T, meta HTMLMetadata) {
+			checkMetadata: func(t *testing.T, meta ExtendedMetadata) {
 				if meta.Document.Title == nil || *meta.Document.Title != "Test Page" {
 					t.Errorf("Expected title 'Test Page', got %v", meta.Document.Title)
 				}
@@ -211,7 +194,7 @@ func TestConvertWithMetadata(t *testing.T) {
 			checkMarkdown: func(md string) bool {
 				return strings.Contains(md, "Main Title") && strings.Contains(md, "Subtitle")
 			},
-			checkMetadata: func(t *testing.T, meta HTMLMetadata) {
+			checkMetadata: func(t *testing.T, meta ExtendedMetadata) {
 				if len(meta.Headers) < 3 {
 					t.Errorf("Expected at least 3 headers, got %d", len(meta.Headers))
 				}
@@ -234,7 +217,7 @@ func TestConvertWithMetadata(t *testing.T) {
 			checkMarkdown: func(md string) bool {
 				return strings.Contains(md, "External Link") && strings.Contains(md, "Internal Link")
 			},
-			checkMetadata: func(t *testing.T, meta HTMLMetadata) {
+			checkMetadata: func(t *testing.T, meta ExtendedMetadata) {
 				if len(meta.Links) < 4 {
 					t.Errorf("Expected at least 4 links, got %d", len(meta.Links))
 				}
@@ -259,7 +242,7 @@ func TestConvertWithMetadata(t *testing.T) {
 			checkMarkdown: func(md string) bool {
 				return strings.Contains(md, "Example image")
 			},
-			checkMetadata: func(t *testing.T, meta HTMLMetadata) {
+			checkMetadata: func(t *testing.T, meta ExtendedMetadata) {
 				if len(meta.Images) < 2 {
 					t.Errorf("Expected at least 2 images, got %d", len(meta.Images))
 				}
@@ -286,7 +269,7 @@ func TestConvertWithMetadata(t *testing.T) {
 			checkMarkdown: func(md string) bool {
 				return strings.Contains(md, "Content")
 			},
-			checkMetadata: func(t *testing.T, meta HTMLMetadata) {
+			checkMetadata: func(t *testing.T, meta ExtendedMetadata) {
 				if meta.Document.Title == nil || *meta.Document.Title != "Meta Test" {
 					t.Errorf("Expected title 'Meta Test', got %v", meta.Document.Title)
 				}
@@ -305,7 +288,7 @@ func TestConvertWithMetadata(t *testing.T) {
 			checkMarkdown: func(md string) bool {
 				return md == ""
 			},
-			checkMetadata: func(t *testing.T, meta HTMLMetadata) {
+			checkMetadata: func(t *testing.T, meta ExtendedMetadata) {
 			},
 			wantErr: false,
 		},
@@ -331,7 +314,7 @@ func TestConvertWithMetadata(t *testing.T) {
 			checkMarkdown: func(md string) bool {
 				return strings.Contains(md, "Main Article Title") && strings.Contains(md, "Section 1")
 			},
-			checkMetadata: func(t *testing.T, meta HTMLMetadata) {
+			checkMetadata: func(t *testing.T, meta ExtendedMetadata) {
 				if meta.Document.Title == nil || *meta.Document.Title != "Complex Article" {
 					t.Errorf("Expected title, got %v", meta.Document.Title)
 				}
@@ -419,7 +402,7 @@ func TestMetadataJSONMarshaling(t *testing.T) {
 	}
 
 	// Verify round-trip unmarshaling works
-	var roundTrip HTMLMetadata
+	var roundTrip ExtendedMetadata
 	if err := json.Unmarshal(jsonData, &roundTrip); err != nil {
 		t.Fatalf("Failed to unmarshal metadata: %v", err)
 	}

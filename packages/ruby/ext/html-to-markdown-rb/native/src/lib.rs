@@ -1,50 +1,23 @@
 #![allow(clippy::all, clippy::pedantic, clippy::nursery, missing_docs)]
 
 use html_to_markdown_rs::{
-    ConversionOptions, convert as convert_rs,
-    convert_with_inline_images as convert_with_inline_images_inner, error::ConversionError, safety::guard_panic,
+    ConversionOptions, convert as convert_rs, error::ConversionError, safety::guard_panic,
 };
-
-#[cfg(feature = "visitor")]
-use html_to_markdown_rs::convert_with_tables as convert_with_tables_inner;
-
-#[cfg(feature = "metadata")]
-use html_to_markdown_rs::convert_with_metadata as convert_with_metadata_inner;
 
 mod conversion;
 mod options;
 mod profiling;
 mod types;
 
-#[cfg(feature = "visitor")]
-mod visitor;
-
-use conversion::{build_inline_image_config, extraction_to_value};
+use conversion::extraction_to_value;
 use options::build_conversion_options;
 use types::{arg_error, runtime_error};
 
 #[cfg(feature = "metadata")]
-use conversion::{build_metadata_config, extended_metadata_to_ruby};
-
-#[cfg(feature = "metadata")]
-use html_to_markdown_rs::metadata::HtmlMetadata as RustHtmlMetadata;
-
-#[cfg(feature = "visitor")]
-use conversion::tables_result_to_ruby;
-
-#[cfg(feature = "visitor")]
-use visitor::RubyVisitorWrapper;
+use conversion::extended_metadata_to_ruby;
 
 use magnus::prelude::*;
-use magnus::{Error, Ruby, TryConvert, Value, function, scan_args::scan_args};
-
-
-#[cfg(feature = "profiling")]
-use std::path::PathBuf;
-
-#[derive(Clone)]
-#[magnus::wrap(class = "HtmlToMarkdown::Options", free_immediately)]
-struct OptionsHandle(ConversionOptions);
+use magnus::{Error, Ruby, Value, function, scan_args::scan_args};
 
 fn conversion_error(err: ConversionError) -> Error {
     match err {
@@ -56,103 +29,6 @@ fn conversion_error(err: ConversionError) -> Error {
     }
 }
 
-fn options_handle_fn(ruby: &Ruby, args: &[Value]) -> Result<OptionsHandle, Error> {
-    let parsed = scan_args::<(), (Option<Value>,), (), (), (), ()>(args)?;
-    let options = build_conversion_options(ruby, parsed.optional.0)?;
-    Ok(OptionsHandle(options))
-}
-
-fn convert_with_options_handle_fn(_ruby: &Ruby, args: &[Value]) -> Result<String, Error> {
-    let parsed = scan_args::<(String, &OptionsHandle), (), (), (), (), ()>(args)?;
-    let html = parsed.required.0;
-    let handle = parsed.required.1;
-    let options = handle.0.clone();
-
-    guard_panic(|| {
-        profiling::maybe_profile(|| convert_rs(&html, Some(options)).map(|r| r.content.unwrap_or_default()))
-    })
-    .map_err(conversion_error)
-}
-
-#[cfg(feature = "inline-images")]
-fn convert_with_inline_images_fn(ruby: &Ruby, args: &[Value]) -> Result<Value, Error> {
-    let parsed = scan_args::<(String,), (Option<Value>, Option<Value>), (), (), (), ()>(args)?;
-    let html = parsed.required.0;
-    let options = build_conversion_options(ruby, parsed.optional.0)?;
-    let config = build_inline_image_config(ruby, parsed.optional.1)?;
-
-    let extraction = guard_panic(|| convert_with_inline_images_inner(&html, Some(options), config, None))
-        .map_err(conversion_error)?;
-
-    extraction_to_value(ruby, extraction)
-}
-
-#[cfg(feature = "inline-images")]
-fn convert_with_inline_images_handle_fn(ruby: &Ruby, args: &[Value]) -> Result<Value, Error> {
-    let parsed = scan_args::<(String, &OptionsHandle), (Option<Value>,), (), (), (), ()>(args)?;
-    let html = parsed.required.0;
-    let handle = parsed.required.1;
-    let options = handle.0.clone();
-    let config = build_inline_image_config(ruby, parsed.optional.0)?;
-
-    let extraction = guard_panic(|| convert_with_inline_images_inner(&html, Some(options), config, None))
-        .map_err(conversion_error)?;
-
-    extraction_to_value(ruby, extraction)
-}
-
-#[cfg(feature = "metadata")]
-fn convert_with_metadata_fn(ruby: &Ruby, args: &[Value]) -> Result<Value, Error> {
-    let parsed = scan_args::<(String,), (Option<Value>, Option<Value>, Option<Value>), (), (), (), ()>(args)?;
-    let html = parsed.required.0;
-    let options = build_conversion_options(ruby, parsed.optional.0)?;
-    let metadata_config = build_metadata_config(ruby, parsed.optional.1)?;
-    let _visitor = parsed.optional.2;
-
-    let (markdown, metadata) = guard_panic(|| convert_with_metadata_inner(&html, Some(options), metadata_config, None))
-        .map_err(conversion_error)?;
-
-    let array = ruby.ary_new();
-    array.push(markdown)?;
-    array.push(extended_metadata_to_ruby(ruby, metadata)?)?;
-
-    Ok(array.as_value())
-}
-
-#[cfg(feature = "metadata")]
-fn convert_with_metadata_handle_fn(ruby: &Ruby, args: &[Value]) -> Result<Value, Error> {
-    let parsed = scan_args::<(String, &OptionsHandle), (Option<Value>,), (), (), (), ()>(args)?;
-    let html = parsed.required.0;
-    let handle = parsed.required.1;
-    let options = handle.0.clone();
-    let metadata_config = build_metadata_config(ruby, parsed.optional.0)?;
-
-    let (markdown, metadata) = guard_panic(|| convert_with_metadata_inner(&html, Some(options), metadata_config, None))
-        .map_err(conversion_error)?;
-
-    let array = ruby.ary_new();
-    array.push(markdown)?;
-    array.push(extended_metadata_to_ruby(ruby, metadata)?)?;
-
-    Ok(array.as_value())
-}
-
-#[cfg(feature = "visitor")]
-fn convert_with_tables_fn(ruby: &Ruby, args: &[Value]) -> Result<Value, Error> {
-    let parsed = scan_args::<(String,), (Option<Value>, Option<Value>), (), (), (), ()>(args)?;
-    let html = parsed.required.0;
-    let options = build_conversion_options(ruby, parsed.optional.0)?;
-
-    #[cfg(feature = "metadata")]
-    let metadata_config = Some(build_metadata_config(ruby, parsed.optional.1)?);
-    #[cfg(not(feature = "metadata"))]
-    let metadata_config: Option<()> = None;
-
-    let result =
-        guard_panic(|| convert_with_tables_inner(&html, Some(options), metadata_config)).map_err(conversion_error)?;
-
-    tables_result_to_ruby(ruby, result)
-}
 fn convert_full_fn(ruby: &Ruby, args: &[Value]) -> Result<Value, Error> {
     let parsed = scan_args::<(String,), (Option<Value>,), (), (), (), ()>(args)?;
     let html = parsed.required.0;
@@ -249,63 +125,10 @@ fn convert_full_fn(ruby: &Ruby, args: &[Value]) -> Result<Value, Error> {
     Ok(hash.as_value())
 }
 
-#[cfg(feature = "profiling")]
-fn start_profiling_fn(_ruby: &Ruby, args: &[Value]) -> Result<bool, Error> {
-    let output = args.first().ok_or_else(|| arg_error("output_path required"))?;
-    let output: String = String::try_convert(*output)?;
-    let freq = if let Some(value) = args.get(1) {
-        i32::try_convert(*value)?
-    } else {
-        1000
-    };
-    profiling::start(PathBuf::from(output), freq).map_err(conversion_error)?;
-    Ok(true)
-}
-
-#[cfg(feature = "profiling")]
-fn stop_profiling_fn(_ruby: &Ruby, _args: &[Value]) -> Result<bool, Error> {
-    profiling::stop().map_err(conversion_error)?;
-    Ok(true)
-}
-
 #[magnus::init]
 fn init(ruby: &Ruby) -> Result<(), Error> {
     let module = ruby.define_module("HtmlToMarkdown")?;
     module.define_singleton_method("convert", function!(convert_full_fn, -1))?;
-    module.define_singleton_method("options", function!(options_handle_fn, -1))?;
-    module.define_singleton_method("convert_with_options", function!(convert_with_options_handle_fn, -1))?;
-
-    #[cfg(feature = "inline-images")]
-    {
-        module.define_singleton_method(
-            "convert_with_inline_images",
-            function!(convert_with_inline_images_fn, -1),
-        )?;
-        module.define_singleton_method(
-            "convert_with_inline_images_handle",
-            function!(convert_with_inline_images_handle_fn, -1),
-        )?;
-    }
-
-    #[cfg(feature = "metadata")]
-    {
-        module.define_singleton_method("convert_with_metadata", function!(convert_with_metadata_fn, -1))?;
-        module.define_singleton_method(
-            "convert_with_metadata_handle",
-            function!(convert_with_metadata_handle_fn, -1),
-        )?;
-    }
-
-    #[cfg(feature = "visitor")]
-    {
-        module.define_singleton_method("convert_with_tables", function!(convert_with_tables_fn, -1))?;
-    }
-
-    #[cfg(feature = "profiling")]
-    {
-        module.define_singleton_method("start_profiling", function!(start_profiling_fn, -1))?;
-        module.define_singleton_method("stop_profiling", function!(stop_profiling_fn, -1))?;
-    }
 
     Ok(())
 }

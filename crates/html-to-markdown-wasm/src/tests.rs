@@ -66,83 +66,56 @@ mod wasm_tests {
         assert!(result.is_ok());
     }
 
-    #[cfg(feature = "metadata")]
     #[wasm_bindgen_test]
-    fn test_metadata_config_new() {
-        let config = crate::options::WasmMetadataConfig::new();
-        assert!(config.extract_headers());
-        assert!(config.extract_links());
-        assert!(config.extract_images());
-        assert!(config.extract_structured_data());
-        assert_eq!(
-            config.max_structured_data_size(),
-            html_to_markdown_rs::DEFAULT_MAX_STRUCTURED_DATA_SIZE
-        );
-    }
-
-    #[cfg(feature = "metadata")]
-    #[wasm_bindgen_test]
-    fn test_metadata_config_setters() {
-        let mut config = crate::options::WasmMetadataConfig::new();
-
-        config.set_extract_headers(false);
-        assert!(!config.extract_headers());
-
-        config.set_extract_links(false);
-        assert!(!config.extract_links());
-
-        config.set_extract_images(false);
-        assert!(!config.extract_images());
-
-        config.set_extract_structured_data(false);
-        assert!(!config.extract_structured_data());
-
-        config.set_max_structured_data_size(500_000);
-        assert_eq!(config.max_structured_data_size(), 500_000);
-    }
-
-    #[cfg(feature = "metadata")]
-    #[wasm_bindgen_test]
-    fn test_convert_with_metadata_basic() {
+    fn test_convert_returns_v3_object() {
         let html = "<h1>Hello World</h1>".to_string();
-        let config = crate::options::WasmMetadataConfig::new();
 
-        let result = crate::convert::convert_with_metadata(html, JsValue::UNDEFINED, Some(config));
+        let result = crate::convert::convert(html, JsValue::UNDEFINED);
         assert!(result.is_ok());
 
         let obj = result.unwrap();
-        assert!(js_sys::Reflect::has(&obj, &JsValue::from_str("markdown")).unwrap());
+        assert!(js_sys::Reflect::has(&obj, &JsValue::from_str("content")).unwrap());
         assert!(js_sys::Reflect::has(&obj, &JsValue::from_str("metadata")).unwrap());
+        assert!(js_sys::Reflect::has(&obj, &JsValue::from_str("tables")).unwrap());
+        assert!(js_sys::Reflect::has(&obj, &JsValue::from_str("warnings")).unwrap());
+        assert!(js_sys::Reflect::has(&obj, &JsValue::from_str("document")).unwrap());
     }
 
-    #[cfg(feature = "metadata")]
     #[wasm_bindgen_test]
-    fn test_convert_with_metadata_with_headers() {
+    fn test_convert_content_includes_html_text() {
         let html = r#"<html><head><title>Test</title></head><body><h1 id="main">Main Title</h1><h2>Subsection</h2></body></html>"#
             .to_string();
-        let config = crate::options::WasmMetadataConfig::new();
 
-        let result = crate::convert::convert_with_metadata(html, JsValue::UNDEFINED, Some(config));
+        let result = crate::convert::convert(html, JsValue::UNDEFINED);
         assert!(result.is_ok());
 
         let obj = result.unwrap();
-        let markdown = js_sys::Reflect::get(&obj, &JsValue::from_str("markdown")).unwrap();
-        let markdown_str = markdown.as_string().unwrap();
-        assert!(markdown_str.contains("Main Title"));
+        let content = js_sys::Reflect::get(&obj, &JsValue::from_str("content")).unwrap();
+        let content_str = content.as_string().unwrap();
+        assert!(content_str.contains("Main Title"));
     }
 
-    #[cfg(feature = "metadata")]
     #[wasm_bindgen_test]
-    fn test_convert_bytes_with_metadata() {
-        let html_bytes = vec![60, 104, 49, 62, 72, 101, 108, 108, 111, 60, 47, 104, 49, 62];
-        let uint8 = js_sys::Uint8Array::from(&html_bytes[..]);
-        let config = crate::options::WasmMetadataConfig::new();
+    fn test_convert_tables_is_array() {
+        let html = "<p>no tables</p>".to_string();
 
-        let result = crate::convert::convert_bytes_with_metadata(uint8, JsValue::UNDEFINED, Some(config));
+        let result = crate::convert::convert(html, JsValue::UNDEFINED);
         assert!(result.is_ok());
 
         let obj = result.unwrap();
-        assert!(js_sys::Reflect::has(&obj, &JsValue::from_str("markdown")).unwrap());
-        assert!(js_sys::Reflect::has(&obj, &JsValue::from_str("metadata")).unwrap());
+        let tables = js_sys::Reflect::get(&obj, &JsValue::from_str("tables")).unwrap();
+        assert!(js_sys::Array::is_array(&tables));
+    }
+
+    #[wasm_bindgen_test]
+    fn test_convert_warnings_is_array() {
+        let html = "<p>simple</p>".to_string();
+
+        let result = crate::convert::convert(html, JsValue::UNDEFINED);
+        assert!(result.is_ok());
+
+        let obj = result.unwrap();
+        let warnings = js_sys::Reflect::get(&obj, &JsValue::from_str("warnings")).unwrap();
+        assert!(js_sys::Array::is_array(&warnings));
     }
 }

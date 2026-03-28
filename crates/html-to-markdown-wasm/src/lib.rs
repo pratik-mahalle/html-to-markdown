@@ -6,12 +6,6 @@ mod convert;
 mod enums;
 mod options;
 
-#[cfg(feature = "js-bindings")]
-pub mod inline_images;
-
-#[cfg(feature = "js-bindings")]
-pub use inline_images::{WasmHtmlExtraction, WasmInlineImage, WasmInlineImageConfig, WasmInlineImageWarning};
-
 #[cfg(feature = "wasmtime-testing")]
 mod wasmtime;
 
@@ -26,22 +20,7 @@ pub use enums::{
 pub use options::{WasmConversionOptions, WasmPreprocessingOptions};
 
 #[cfg(feature = "js-bindings")]
-pub use options::WasmConversionOptionsHandle;
-
-#[cfg(all(feature = "js-bindings", feature = "metadata"))]
-pub use options::WasmMetadataConfig;
-
-#[cfg(feature = "js-bindings")]
-pub use convert::{
-    convert, convert_bytes, convert_bytes_with_inline_images, convert_bytes_with_options_handle,
-    convert_with_inline_images, convert_with_options_handle, create_conversion_options_handle,
-};
-
-#[cfg(all(feature = "js-bindings", feature = "metadata"))]
-pub use convert::{convert_bytes_with_metadata, convert_with_metadata};
-
-#[cfg(all(feature = "js-bindings", feature = "visitor"))]
-pub use convert::convert_with_tables;
+pub use convert::convert;
 
 /// Initialize panic hook for better error messages in the browser
 #[cfg(feature = "js-bindings")]

@@ -3,10 +3,7 @@
 use crate::args::Cli;
 use crate::output::output_debug_info;
 use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
-use html_to_markdown_rs::{
-    ConversionOptions, MetadataConfig, OutputFormat, PreprocessingOptions, convert, convert_with_metadata,
-    metadata::DEFAULT_MAX_STRUCTURED_DATA_SIZE,
-};
+use html_to_markdown_rs::{ConversionOptions, OutputFormat, PreprocessingOptions, convert};
 use serde_json::json;
 
 fn base64_encode(data: &[u8]) -> String {
@@ -72,33 +69,8 @@ pub fn perform_conversion(
     options: ConversionOptions,
     cli: &Cli,
 ) -> Result<String, Box<dyn std::error::Error>> {
-    let output_content = if cli.with_metadata {
-        // Legacy --with-metadata path: kept for backward compatibility
-        let metadata_config = MetadataConfig {
-            extract_document: cli.extract_document,
-            extract_headers: cli.extract_headers,
-            extract_links: cli.extract_links,
-            extract_images: cli.extract_images,
-            extract_structured_data: cli.extract_structured_data,
-            max_structured_data_size: DEFAULT_MAX_STRUCTURED_DATA_SIZE,
-        };
-
-        let (markdown, metadata) = convert_with_metadata(html, Some(options), metadata_config, None)
-            .map_err(|e| format!("Error converting HTML with metadata: {e}"))?;
-
-        output_debug_info(
-            cli,
-            &format!("Generated {} bytes of markdown with metadata", markdown.len()),
-        );
-
-        let output = json!({
-            "markdown": markdown,
-            "metadata": metadata
-        });
-
-        serde_json::to_string_pretty(&output).map_err(|e| format!("Error serializing JSON: {e}"))?
-    } else if cli.json {
-        // New --json path: serialize full ConversionResult fields
+    let output_content = if cli.json {
+        // --json path: serialize full ConversionResult fields
         let result = convert(html, Some(options)).map_err(|e| format!("Error converting HTML: {e}"))?;
 
         // Emit warnings to stderr if requested

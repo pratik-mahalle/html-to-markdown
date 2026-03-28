@@ -198,18 +198,6 @@ class HtmlToMarkdownTest {
   }
 
   @Test
-  @DisplayName("Get library version")
-  void testGetVersion() {
-    String version = HtmlToMarkdown.getVersion();
-
-    assertNotNull(version, "Version should not be null");
-    assertFalse(version.isEmpty(), "Version should not be empty");
-    assertTrue(
-        version.matches("\\d+\\.\\d+\\.\\d+"),
-        "Version should match semver (x.y.z), got: " + version);
-  }
-
-  @Test
   @DisplayName("Multiple conversions in sequence")
   void testMultipleConversions() {
     String html1 = "<h1>First</h1>";

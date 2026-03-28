@@ -407,7 +407,7 @@ typedef struct HtmlToMarkdownVisitResult {
 
 /**
  * Convert HTML to Markdown, returning a JSON string with structured content, metadata, images,
- * and warnings in a single pass. This is the v3 primary C API entry point.
+ * and warnings in a single pass. This is the primary C API entry point.
  *
  * The returned JSON has the shape:
  * ```json
@@ -439,42 +439,6 @@ typedef struct HtmlToMarkdownVisitResult {
  * ```
  */
 HTM_EXPORT char *html_to_markdown_convert(const char *html, const char *options_json);
-
-/**
- * Convert HTML to Markdown with table extraction, returning a JSON string.
- *
- * The returned JSON has the shape:
- * ```json
- * {
- *   "content": "...",
- *   "metadata": {...} | null,
- *   "tables": [{"cells": [[...]], "markdown": "...", "is_header_row": [...]}]
- * }
- * ```
- *
- * # Safety
- *
- * - `html` must be a valid null-terminated C string
- * - `options_json` may be NULL (uses defaults) or a valid null-terminated JSON C string
- * - `metadata_config_json` may be NULL (uses defaults) or a valid null-terminated JSON C string
- * - The returned string must be freed with `html_to_markdown_free_string`
- * - Returns NULL on error (check error with `html_to_markdown_last_error`)
- *
- * # Example (C)
- *
- * ```c
- * const char* html = "<table><tr><th>Name</th></tr><tr><td>Alice</td></tr></table>";
- * char* json = html_to_markdown_convert_with_tables(html, NULL, NULL);
- * if (json != NULL) {
- *     printf("%s\n", json);
- *     html_to_markdown_free_string(json);
- * }
- * ```
- */
-HTM_EXPORT
-char *html_to_markdown_convert_with_tables(const char *html,
-                                           const char *options_json,
-                                           const char *metadata_config_json);
 
 /**
  * Free a string returned by html_to_markdown_convert.
@@ -530,72 +494,6 @@ HTM_EXPORT const char *html_to_markdown_error_code_name(uint32_t code);
  * - Returns a static string that does not need to be freed
  */
 HTM_EXPORT const char *html_to_markdown_version(void);
-
-/**
- * Convert HTML to Markdown with metadata extraction.
- *
- * # Safety
- *
- * - `html` must be a valid null-terminated C string
- * - `metadata_json_out` must be a valid pointer to a char pointer
- * - The returned markdown string must be freed with `html_to_markdown_free_string`
- * - The metadata JSON string (written to metadata_json_out) must be freed with `html_to_markdown_free_string`
- * - Returns NULL on error (check error with `html_to_markdown_last_error`)
- *
- * # Example (C)
- *
- * ```c
- * const char* html = "<html><head><title>Test</title></head><body><h1>Hello</h1></body></html>";
- * char* metadata_json = NULL;
- * char* markdown = html_to_markdown_convert_with_metadata(html, &metadata_json);
- * if (markdown != NULL && metadata_json != NULL) {
- *     printf("Markdown: %s\n", markdown);
- *     printf("Metadata: %s\n", metadata_json);
- *     html_to_markdown_free_string(markdown);
- *     html_to_markdown_free_string(metadata_json);
- * }
- * ```
- */
-HTM_EXPORT
-char *html_to_markdown_convert_with_metadata(const char *html,
-                                             char **metadata_json_out);
-
-/**
- * Convert HTML to Markdown with metadata extraction, returning output lengths.
- *
- * # Safety
- *
- * - `html` must be a valid null-terminated C string
- * - `metadata_json_out` must be a valid pointer to a char pointer
- * - `markdown_len_out` and `metadata_len_out` must be valid pointers to size_t
- * - The returned markdown string must be freed with `html_to_markdown_free_string`
- * - The metadata JSON string (written to metadata_json_out) must be freed with `html_to_markdown_free_string`
- * - Returns NULL on error (check error with `html_to_markdown_last_error`)
- */
-HTM_EXPORT
-char *html_to_markdown_convert_with_metadata_with_len(const char *html,
-                                                      char **metadata_json_out,
-                                                      uintptr_t *markdown_len_out,
-                                                      uintptr_t *metadata_len_out);
-
-/**
- * Convert UTF-8 HTML bytes to Markdown with metadata extraction and return output lengths.
- *
- * # Safety
- *
- * - `html` must point to `len` bytes of UTF-8 data
- * - `metadata_json_out` must be a valid pointer to a char pointer
- * - `markdown_len_out` and `metadata_len_out` must be valid pointers to size_t
- * - The returned markdown string must be freed with `html_to_markdown_free_string`
- * - The metadata JSON string (written to metadata_json_out) must be freed with `html_to_markdown_free_string`
- * - Returns NULL on error (check error with `html_to_markdown_last_error`)
- */
-HTM_EXPORT
-char *html_to_markdown_convert_with_metadata_bytes_with_len(const uint8_t *html,
-                                                            uintptr_t len,
-                                                            char **metadata_json_out,
-                                                            uintptr_t *markdown_len_out,
-                                                            uintptr_t *metadata_len_out);
 
 /**
  * Create a new visitor instance from a callback table.
@@ -884,27 +782,5 @@ HTM_EXPORT struct HtmlToMarkdownVisitResult html_to_markdown_visit_result_preser
  * ```
  */
 HTM_EXPORT struct HtmlToMarkdownVisitResult html_to_markdown_visit_result_error(char *message);
-
-/**
- * Start Rust-side profiling and write a flamegraph to the specified path.
- *
- * Returns 1 on success, 0 on failure. Use `html_to_markdown_last_error` to inspect failures.
- *
- * # Safety
- *
- * - `output` must be a valid, null-terminated UTF-8 C string for the duration of the call.
- */
-HTM_EXPORT bool html_to_markdown_profile_start(const char *output, int32_t frequency);
-
-/**
- * Stop Rust-side profiling and flush the flamegraph.
- *
- * Returns 1 on success, 0 on failure. Use `html_to_markdown_last_error` to inspect failures.
- *
- * # Safety
- *
- * - This must only be called after a successful `html_to_markdown_profile_start`.
- */
-HTM_EXPORT bool html_to_markdown_profile_stop(void);
 
 #endif  /* HTML_TO_MARKDOWN_H */
