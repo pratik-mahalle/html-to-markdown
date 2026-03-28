@@ -12,10 +12,6 @@ use html_to_markdown_rs::{
     convert_with_inline_images as convert_with_inline_images_inner,
 };
 
-fn convert_inner(html: &str, options: Option<ConversionOptions>) -> html_to_markdown_rs::error::Result<String> {
-    convert_rs(html, options).map(|r| r.content.unwrap_or_default())
-}
-
 mod options;
 mod profiling;
 mod types;
@@ -40,7 +36,6 @@ struct OptionsHandleResource(ConversionOptions);
 rustler::init!(
     "Elixir.HtmlToMarkdown.Native",
     [
-        convert_to_string,
         convert_with_options_map,
         convert_with_handle,
         create_options_handle,
@@ -87,21 +82,15 @@ mod atoms {
 }
 
 #[rustler::nif(schedule = "DirtyCpu")]
-fn convert_to_string<'a>(env: Env<'a>, html: String) -> NifResult<Term<'a>> {
-    match profiling::maybe_profile(|| convert_inner(&html, None)) {
-        Ok(markdown) => Ok((atoms::ok(), markdown).encode(env)),
-        Err(err) => Ok((atoms::error(), err.to_string()).encode(env)),
-    }
-}
-
-#[rustler::nif(schedule = "DirtyCpu")]
 fn convert_with_options_map<'a>(env: Env<'a>, html: String, options_term: Term<'a>) -> NifResult<Term<'a>> {
     let options = match decode_options_term(options_term) {
         Ok(options) => options,
         Err(err) => return handle_invalid_option_error(env, err),
     };
 
-    match profiling::maybe_profile(|| convert_inner(&html, Some(options.clone()))) {
+    match profiling::maybe_profile(|| {
+        convert_rs(&html, Some(options.clone())).map(|r| r.content.unwrap_or_default())
+    }) {
         Ok(markdown) => Ok((atoms::ok(), markdown).encode(env)),
         Err(err) => Ok((atoms::error(), err.to_string()).encode(env)),
     }
@@ -113,7 +102,9 @@ fn convert_with_handle<'a>(
     html: String,
     handle: ResourceArc<OptionsHandleResource>,
 ) -> NifResult<Term<'a>> {
-    match profiling::maybe_profile(|| convert_inner(&html, Some(handle.0.clone()))) {
+    match profiling::maybe_profile(|| {
+        convert_rs(&html, Some(handle.0.clone())).map(|r| r.content.unwrap_or_default())
+    }) {
         Ok(markdown) => Ok((atoms::ok(), markdown).encode(env)),
         Err(err) => Ok((atoms::error(), err.to_string()).encode(env)),
     }

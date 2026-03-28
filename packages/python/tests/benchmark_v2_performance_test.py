@@ -6,7 +6,16 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from html_to_markdown import ConversionOptions, PreprocessingOptions, convert_to_string
+from html_to_markdown import ConversionOptions, PreprocessingOptions
+from html_to_markdown import convert as _convert
+
+
+def convert_to_string(
+    html: str, options: ConversionOptions | None = None, *, preprocessing: PreprocessingOptions | None = None
+) -> str:
+    """Thin shim that returns the content string from convert()."""
+    return _convert(html, options, preprocessing)["content"] or ""
+
 
 if TYPE_CHECKING:
     from pytest_benchmark.fixture import BenchmarkFixture

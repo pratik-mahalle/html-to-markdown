@@ -21,7 +21,6 @@ package htmltomarkdown
 // #include <stdbool.h>
 // #include <stdint.h>
 //
-// char* html_to_markdown_convert_to_string_proxy(const char* html);
 // void html_to_markdown_free_string_proxy(char* s);
 // const char* html_to_markdown_version_proxy(void);
 // const char* html_to_markdown_last_error_proxy(void);
@@ -38,57 +37,6 @@ import (
 )
 
 const unknownValue = "unknown"
-
-// ConvertToString converts HTML to Markdown using default options, returning a plain string (v2 compat).
-//
-// It returns the converted Markdown string or an error if the conversion fails.
-// The function handles memory management automatically using defer.
-//
-// Example:
-//
-//	markdown, err := htmltomarkdown.ConvertToString("<h1>Title</h1>")
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
-//	fmt.Println(markdown)
-func ConvertToString(html string) (string, error) {
-	if html == "" {
-		return "", nil
-	}
-	if err := ensureFFILoaded(); err != nil {
-		return "", err
-	}
-
-	cHTML := C.CString(html)
-	defer C.free(unsafe.Pointer(cHTML))
-
-	result := C.html_to_markdown_convert_to_string_proxy(cHTML)
-	if result == nil {
-		errMsg := C.html_to_markdown_last_error_proxy()
-		if errMsg != nil {
-			return "", errors.New(C.GoString(errMsg))
-		}
-		return "", errors.New("html to markdown conversion failed")
-	}
-	defer C.html_to_markdown_free_string_proxy(result)
-
-	markdown := C.GoString(result)
-	return markdown, nil
-}
-
-// MustConvertToString is like ConvertToString but panics if an error occurs.
-//
-// Example:
-//
-//	markdown := htmltomarkdown.MustConvertToString("<h1>Title</h1>")
-//	fmt.Println(markdown)
-func MustConvertToString(html string) string {
-	markdown, err := ConvertToString(html)
-	if err != nil {
-		panic(err)
-	}
-	return markdown
-}
 
 // Version returns the version string of the underlying html-to-markdown library.
 //

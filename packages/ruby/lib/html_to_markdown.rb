@@ -10,7 +10,6 @@ module HtmlToMarkdown
   class Options; end # rubocop:disable Lint/EmptyClass
 
   class << self
-    alias native_convert_to_string convert_to_string
     alias native_convert convert
     alias native_convert_with_inline_images convert_with_inline_images
     alias native_convert_with_inline_images_handle convert_with_inline_images_handle
@@ -37,16 +36,6 @@ module HtmlToMarkdown
   # @return [Hash] conversion result
   def convert(html, options = nil, _visitor = nil)
     native_convert(html.to_s, options)
-  end
-
-  # Convert HTML to Markdown, returning a plain Markdown string (v2 compat).
-  #
-  # @param html [String] HTML string to convert
-  # @param options [Hash, nil] optional conversion options
-  # @param _visitor [Object, nil] visitor (accepted for API compatibility, ignored)
-  # @return [String] markdown string
-  def convert_to_string(html, options = nil, _visitor = nil)
-    native_convert_to_string(html.to_s, options)
   end
 
   def convert_with_options(html, options_handle)

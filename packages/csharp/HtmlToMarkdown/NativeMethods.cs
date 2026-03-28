@@ -10,38 +10,6 @@ internal static class NativeMethods
     private const string LibraryName = "html_to_markdown_ffi";
 
     /// <summary>
-    /// Convert HTML to Markdown using default options (returns plain string).
-    /// </summary>
-    /// <param name="html">Null-terminated HTML string</param>
-    /// <returns>Pointer to null-terminated Markdown string, or NULL on error</returns>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    internal static extern IntPtr html_to_markdown_convert_to_string(IntPtr html);
-
-    /// <summary>
-    /// Convert HTML to Markdown and return the output length (returns plain string).
-    /// </summary>
-    /// <param name="html">Null-terminated HTML string</param>
-    /// <param name="len_out">Output length of markdown bytes (excluding null terminator)</param>
-    /// <returns>Pointer to null-terminated Markdown string, or NULL on error</returns>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    internal static extern IntPtr html_to_markdown_convert_to_string_with_len(
-        IntPtr html,
-        out nuint len_out);
-
-    /// <summary>
-    /// Convert UTF-8 HTML bytes to Markdown and return the output length (returns plain string).
-    /// </summary>
-    /// <param name="html">Pointer to UTF-8 bytes</param>
-    /// <param name="html_len">Length of UTF-8 bytes</param>
-    /// <param name="len_out">Output length of markdown bytes (excluding null terminator)</param>
-    /// <returns>Pointer to null-terminated Markdown string, or NULL on error</returns>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    internal static extern IntPtr html_to_markdown_convert_to_string_bytes_with_len(
-        IntPtr html,
-        nuint html_len,
-        out nuint len_out);
-
-    /// <summary>
     /// Free a string returned by html_to_markdown_convert.
     /// </summary>
     /// <param name="ptr">Pointer to string to free</param>

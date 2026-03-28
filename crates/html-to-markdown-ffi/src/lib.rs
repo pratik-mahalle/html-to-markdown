@@ -28,10 +28,7 @@ mod profiling_ffi;
 mod tests;
 
 // Re-export public FFI functions for easy access
-pub use conversion::{
-    html_to_markdown_convert, html_to_markdown_convert_to_string, html_to_markdown_convert_to_string_bytes_with_len,
-    html_to_markdown_convert_to_string_with_len, html_to_markdown_free_string,
-};
+pub use conversion::{html_to_markdown_convert, html_to_markdown_free_string};
 
 #[cfg(feature = "visitor")]
 pub use conversion::html_to_markdown_convert_with_tables;

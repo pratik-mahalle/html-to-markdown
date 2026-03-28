@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import type { Readable } from "node:stream";
 
 import {
-	convertToString as convertHtml,
+	convert as convertHtml,
 	convertWithInlineImages as convertHtmlWithInlineImages,
 	convertWithMetadata as convertHtmlWithMetadata,
 	convertWithMetadataBuffer as convertHtmlWithMetadataBuffer,
