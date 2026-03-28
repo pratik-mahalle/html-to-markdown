@@ -107,21 +107,21 @@ install.packages("htmltomarkdown")
 cargo install html-to-markdown-cli
 
 # Basic usage
-htmd input.html                          # convert file to stdout
-htmd input.html -o output.md             # convert file to output file
-cat file.html | htmd                     # read from stdin
-htmd --url https://example.com           # fetch and convert URL
+html-to-markdown input.html                          # convert file to stdout
+html-to-markdown input.html -o output.md             # convert file to output file
+cat file.html | html-to-markdown                     # read from stdin
+html-to-markdown --url https://example.com           # fetch and convert URL
 
 # JSON output (ConversionResult as JSON with content, tables, metadata, images, warnings)
-htmd --json input.html
-htmd --json --include-structure input.html   # include document structure
+html-to-markdown --json input.html
+html-to-markdown --json --include-structure input.html   # include document structure
 
 # Key flags
-htmd --extract-inline-images input.html  # include inline image data in JSON output
-htmd --show-warnings input.html          # print non-fatal warnings to stderr
-htmd --no-content --json input.html      # extract only (no markdown text, just metadata/tables)
-htmd --heading-style atx input.html      # set heading style
-htmd --preprocess input.html             # preprocess HTML before converting
+html-to-markdown --extract-inline-images input.html  # include inline image data in JSON output
+html-to-markdown --show-warnings input.html          # print non-fatal warnings to stderr
+html-to-markdown --no-content --json input.html      # extract only (no markdown text, just metadata/tables)
+html-to-markdown --heading-style atx input.html      # set heading style
+html-to-markdown --preprocess input.html             # preprocess HTML before converting
 ```
 
 ### WASM
@@ -169,25 +169,25 @@ console.log(result.content);
 
 ```bash
 # From file
-htmd input.html
+html-to-markdown input.html
 
 # From file, save to output
-htmd input.html -o output.md
+html-to-markdown input.html -o output.md
 
 # From stdin
-cat file.html | htmd
+cat file.html | html-to-markdown
 
 # JSON output (ConversionResult as JSON)
-htmd --json input.html
+html-to-markdown --json input.html
 
 # JSON output with full structure (tables, metadata, images)
-htmd --json --include-structure input.html
+html-to-markdown --json --include-structure input.html
 
 # Show warnings
-htmd --show-warnings input.html
+html-to-markdown --show-warnings input.html
 
 # Fetch URL
-htmd --url https://example.com > output.md
+html-to-markdown --url https://example.com > output.md
 ```
 
 ## ConversionResult Fields
@@ -251,8 +251,8 @@ print(result["content"])
 import { convert } from '@kreuzberg/html-to-markdown';
 
 const options = {
-    headingStyle: 'atx',
-    codeBlockStyle: 'backticks',
+    headingStyle: 'Atx',
+    codeBlockStyle: 'Backticks',
     autolinks: true,
     wrap: true,
     wrapWidth: 100,
@@ -356,7 +356,7 @@ Node types include: `heading`, `paragraph`, `list`, `list_item`, `table`, `image
 6. **Python `PreprocessingOptions` is a separate parameter.** Pass it as the second argument to `convert()`, not inside `ConversionOptions`.
 7. **`include_document_structure` must be enabled explicitly.** The `document` field is `None` by default to avoid overhead.
 8. **Inline image extraction requires `extract_images=True`.** The `images` field is empty unless `ConversionOptions(extract_images=True)` is set.
-9. **CLI `--json` outputs JSON, not Markdown.** When `--json` is used, output is the full `ConversionResult` JSON. Use `htmd input.html` (without `--json`) for plain Markdown output.
+9. **CLI `--json` outputs JSON, not Markdown.** When `--json` is used, output is the full `ConversionResult` JSON. Use `html-to-markdown input.html` (without `--json`) for plain Markdown output.
 10. **Go `Convert()` returns `ExtractionResult` struct.** Access `.Content` (string) not the struct itself.
 
 ## Additional Resources

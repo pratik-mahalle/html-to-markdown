@@ -1,6 +1,6 @@
 # CLI Reference
 
-Binary name: `htmd`
+Binary name: `html-to-markdown`
 
 ## Installation
 
@@ -12,7 +12,7 @@ cargo install html-to-markdown-cli
 ## Usage
 
 ```text
-htmd [OPTIONS] [FILE]
+html-to-markdown [OPTIONS] [FILE]
 ```
 
 `FILE` is the path to an input HTML file. Use `-` or omit to read from stdin.
@@ -51,7 +51,7 @@ htmd [OPTIONS] [FILE]
 | `--escape-ascii` | flag | off | Escape all ASCII punctuation (strict CommonMark compliance). |
 | `--sub-symbol <SYMBOL>` | string | `""` | Symbol wrapping `<sub>` text. E.g. `"~"`. |
 | `--sup-symbol <SYMBOL>` | string | `""` | Symbol wrapping `<sup>` text. E.g. `"^"`. |
-| `--newline-style <STYLE>` | `backslash`, `spaces` | `backslash` | `<br>` representation: `backslash` (`\`+newline) or `spaces` (two trailing spaces). |
+| `--newline-style <STYLE>` | `backslash`, `spaces` | `spaces` | `<br>` representation: `backslash` (`\`+newline) or `spaces` (two trailing spaces). |
 
 ## Code Blocks
 
@@ -64,7 +64,7 @@ htmd [OPTIONS] [FILE]
 
 | Flag | Short | Default | Description |
 |------|-------|---------|-------------|
-| `--autolinks` | `-a` | off | Convert bare URLs to `<url>` autolinks when text equals href. |
+| `--autolinks` | `-a` | off (CLI default; Rust library default is `true`) | Convert bare URLs to `<url>` autolinks when text equals href. |
 | `--default-title` | | off | Use href as link title when no `title` attribute exists. |
 
 ## Images
@@ -202,63 +202,63 @@ When `--json` is used, stdout receives JSON:
 
 ```bash
 # Basic conversion from stdin
-echo '<h1>Title</h1><p>Content</p>' | htmd
+echo '<h1>Title</h1><p>Content</p>' | html-to-markdown
 
 # Convert file to stdout
-htmd input.html
+html-to-markdown input.html
 
 # Convert and save to file
-htmd input.html -o output.md
+html-to-markdown input.html -o output.md
 
 # Fetch URL and convert
-htmd --url https://example.com > output.md
+html-to-markdown --url https://example.com > output.md
 
 # Fetch URL with custom user agent
-htmd --url https://example.com --user-agent "MyBot/1.0"
+html-to-markdown --url https://example.com --user-agent "MyBot/1.0"
 
 # JSON output (ConversionResult with content, tables, metadata, images, warnings)
-htmd --json input.html
+html-to-markdown --json input.html
 
 # JSON output with document structure
-htmd --json --include-structure input.html
+html-to-markdown --json --include-structure input.html
 
 # JSON output with inline images extracted
-htmd --json --extract-inline-images input.html
+html-to-markdown --json --extract-inline-images input.html
 
 # Extraction-only mode (no markdown text, just metadata/tables)
-htmd --json --no-content input.html
+html-to-markdown --json --no-content input.html
 
 # Show warnings to stderr
-htmd --show-warnings input.html
+html-to-markdown --show-warnings input.html
 
 # Full metadata extraction to file
-htmd --json \
+html-to-markdown --json \
     --extract-document --extract-headers --extract-links --extract-images \
     input.html -o output.json
 
 # Web scraping with aggressive preprocessing
-htmd page.html --preprocess --preset aggressive
+html-to-markdown page.html --preprocess --preset aggressive
 
 # Custom heading and list styles
-htmd input.html \
+html-to-markdown input.html \
     --heading-style atx \
     --bullets '*' \
     --list-indent-width 2
 
 # Discord/Slack-friendly output (2-space indents, backtick code blocks)
-htmd input.html \
+html-to-markdown input.html \
     --list-indent-width 2 \
     --code-block-style backticks
 
 # Djot output format
-htmd input.html --output-format djot
+html-to-markdown input.html --output-format djot
 
 # Generate shell completions
-htmd --generate-completion bash > htmd.bash
-htmd --generate-completion zsh > _htmd
+html-to-markdown --generate-completion bash > html-to-markdown.bash
+html-to-markdown --generate-completion zsh > _html-to-markdown
 
 # Generate man page
-htmd --generate-man > htmd.1
+html-to-markdown --generate-man > html-to-markdown.1
 ```
 
 ## Exit Codes

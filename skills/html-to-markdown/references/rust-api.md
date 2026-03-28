@@ -287,21 +287,15 @@ pub struct HtmlMetadata {
 pub struct DocumentMetadata {
     pub title: Option<String>,
     pub description: Option<String>,
-    pub author: Option<String>,
-    pub language: Option<String>,
-    pub direction: Option<TextDirection>,
-    pub charset: Option<String>,
     pub keywords: Vec<String>,
-    pub open_graph: HashMap<String, String>,
-    pub twitter_card: HashMap<String, String>,
+    pub author: Option<String>,
     pub canonical_url: Option<String>,
-    pub robots: Vec<String>,
-    pub viewport: Option<String>,
-    pub generator: Option<String>,
-    pub published_time: Option<String>,
-    pub modified_time: Option<String>,
-    pub copyright: Option<String>,
-    pub theme_color: Option<String>,
+    pub base_href: Option<String>,
+    pub language: Option<String>,
+    pub text_direction: Option<TextDirection>,
+    pub open_graph: BTreeMap<String, String>,
+    pub twitter_card: BTreeMap<String, String>,
+    pub meta_tags: BTreeMap<String, String>,
 }
 
 pub struct MetadataConfig {

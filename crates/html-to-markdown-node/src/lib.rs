@@ -92,6 +92,11 @@ mod tests {
             preserve_tags: None,
             skip_images: None,
             output_format: None,
+            include_document_structure: None,
+            extract_images: None,
+            max_image_size: None,
+            capture_svg: None,
+            infer_dimensions: None,
         };
 
         let rust_opts: ConversionOptions = opts.into();
