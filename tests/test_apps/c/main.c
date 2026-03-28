@@ -27,7 +27,7 @@
 
 /* Core conversion */
 extern const char *html_to_markdown_version(void);
-extern char *html_to_markdown_convert(const char *html);
+extern char *html_to_markdown_convert_to_string(const char *html);
 extern void html_to_markdown_free_string(char *s);
 
 /* Error handling */
@@ -36,11 +36,11 @@ extern uint32_t html_to_markdown_last_error_code(void);
 extern const char *html_to_markdown_error_code_name(uint32_t code);
 
 /* Length-aware conversion */
-extern char *html_to_markdown_convert_with_len(const char *html,
-                                                uintptr_t *len_out);
-extern char *html_to_markdown_convert_bytes_with_len(const uint8_t *html,
-                                                      uintptr_t len,
-                                                      uintptr_t *len_out);
+extern char *html_to_markdown_convert_to_string_with_len(const char *html,
+                                                         uintptr_t *len_out);
+extern char *html_to_markdown_convert_to_string_bytes_with_len(const uint8_t *html,
+                                                               uintptr_t len,
+                                                               uintptr_t *len_out);
 
 /* Metadata conversion */
 extern char *html_to_markdown_convert_with_metadata(const char *html,
@@ -196,7 +196,7 @@ static void test_library_info(void) {
     /* Test html_to_markdown_last_error before any error */
     {
         /* Trigger a successful conversion first to clear state */
-        char *r = html_to_markdown_convert("<p>init</p>");
+        char *r = html_to_markdown_convert_to_string("<p>init</p>");
         if (r)
             html_to_markdown_free_string(r);
 
@@ -260,7 +260,7 @@ static void test_basic_conversion(void) {
     /* Simple HTML to Markdown */
     {
         const char *html = "<h1>Hello</h1><p>World</p>";
-        char *result = html_to_markdown_convert(html);
+        char *result = html_to_markdown_convert_to_string(html);
         if (result && strstr(result, "Hello") && strstr(result, "World")) {
             pass("convert(<h1>Hello</h1><p>World</p>) contains both words");
         } else {
@@ -271,7 +271,7 @@ static void test_basic_conversion(void) {
 
     /* Heading produces '#' */
     {
-        char *result = html_to_markdown_convert("<h1>Title</h1>");
+        char *result = html_to_markdown_convert_to_string("<h1>Title</h1>");
         if (result && result[0] == '#') {
             pass("convert(<h1>Title</h1>) starts with '#'");
         } else {
@@ -282,7 +282,7 @@ static void test_basic_conversion(void) {
 
     /* Paragraph text */
     {
-        char *result = html_to_markdown_convert("<p>paragraph</p>");
+        char *result = html_to_markdown_convert_to_string("<p>paragraph</p>");
         if (result && strstr(result, "paragraph")) {
             pass("convert(<p>paragraph</p>) contains 'paragraph'");
         } else {
@@ -293,7 +293,7 @@ static void test_basic_conversion(void) {
 
     /* Bold text */
     {
-        char *result = html_to_markdown_convert("<strong>bold</strong>");
+        char *result = html_to_markdown_convert_to_string("<strong>bold</strong>");
         if (result && strstr(result, "**bold**")) {
             pass("convert(<strong>bold</strong>) contains '**bold**'");
         } else {
@@ -305,7 +305,7 @@ static void test_basic_conversion(void) {
 
     /* Italic text */
     {
-        char *result = html_to_markdown_convert("<em>italic</em>");
+        char *result = html_to_markdown_convert_to_string("<em>italic</em>");
         if (result && strstr(result, "*italic*")) {
             pass("convert(<em>italic</em>) contains '*italic*'");
         } else {
@@ -318,7 +318,7 @@ static void test_basic_conversion(void) {
     /* Link */
     {
         char *result =
-            html_to_markdown_convert("<a href=\"https://example.com\">link</a>");
+            html_to_markdown_convert_to_string("<a href=\"https://example.com\">link</a>");
         if (result && strstr(result, "https://example.com") &&
             strstr(result, "link")) {
             pass("convert(<a>) contains URL and text");
@@ -330,7 +330,7 @@ static void test_basic_conversion(void) {
 
     /* Empty input */
     {
-        char *result = html_to_markdown_convert("");
+        char *result = html_to_markdown_convert_to_string("");
         if (result != NULL) {
             pass("convert(\"\") returns non-NULL");
         } else {
@@ -343,7 +343,7 @@ static void test_basic_conversion(void) {
     {
         const char *html =
             "<div><h2>Sub</h2><ul><li>Item 1</li><li>Item 2</li></ul></div>";
-        char *result = html_to_markdown_convert(html);
+        char *result = html_to_markdown_convert_to_string(html);
         if (result && strstr(result, "Sub") && strstr(result, "Item 1")) {
             pass("convert() handles nested HTML (headings + lists)");
         } else {
@@ -354,7 +354,7 @@ static void test_basic_conversion(void) {
 
     /* Unicode content */
     {
-        char *result = html_to_markdown_convert(
+        char *result = html_to_markdown_convert_to_string(
             "<p>\xc3\xa9\xc3\xa0\xc3\xbc \xe4\xb8\xad\xe6\x96\x87</p>");
         if (result && strlen(result) > 0) {
             pass("convert() handles Unicode content");
@@ -374,7 +374,7 @@ static void test_convert_with_len(void) {
     {
         uintptr_t len = 0;
         char *result =
-            html_to_markdown_convert_with_len("<h1>Hello</h1>", &len);
+            html_to_markdown_convert_to_string_with_len("<h1>Hello</h1>", &len);
         if (result && len > 0 && len == strlen(result)) {
             pass("convert_with_len() returns correct length");
         } else {
@@ -386,7 +386,7 @@ static void test_convert_with_len(void) {
     /* convert_with_len empty */
     {
         uintptr_t len = 0;
-        char *result = html_to_markdown_convert_with_len("", &len);
+        char *result = html_to_markdown_convert_to_string_with_len("", &len);
         if (result && len == strlen(result)) {
             pass("convert_with_len(\"\") returns consistent length");
         } else {
@@ -398,7 +398,7 @@ static void test_convert_with_len(void) {
     /* convert_with_len NULL input */
     {
         uintptr_t len = 0;
-        const char *result = html_to_markdown_convert_with_len(NULL, &len);
+        const char *result = html_to_markdown_convert_to_string_with_len(NULL, &len);
         if (result == NULL) {
             pass("convert_with_len(NULL) returns NULL");
         } else {
@@ -410,7 +410,7 @@ static void test_convert_with_len(void) {
     {
         const char *html = "<p>Bytes</p>";
         uintptr_t len_out = 0;
-        char *result = html_to_markdown_convert_bytes_with_len(
+        char *result = html_to_markdown_convert_to_string_bytes_with_len(
             (const uint8_t *)html, strlen(html), &len_out);
         if (result && len_out > 0 && len_out == strlen(result) &&
             strstr(result, "Bytes")) {
@@ -424,7 +424,7 @@ static void test_convert_with_len(void) {
     /* convert_bytes_with_len zero length */
     {
         uintptr_t len_out = 0;
-        char *result = html_to_markdown_convert_bytes_with_len(
+        char *result = html_to_markdown_convert_to_string_bytes_with_len(
             (const uint8_t *)"ignored", 0, &len_out);
         if (result && len_out == strlen(result)) {
             pass("convert_bytes_with_len(len=0) handles gracefully");
@@ -523,7 +523,7 @@ static void test_metadata_conversion(void) {
 static void test_error_handling(void) {
     /* NULL input triggers error */
     {
-        const char *result = html_to_markdown_convert(NULL);
+        const char *result = html_to_markdown_convert_to_string(NULL);
         if (result == NULL) {
             pass("convert(NULL) returns NULL");
         } else {
@@ -533,7 +533,7 @@ static void test_error_handling(void) {
 
     /* Error state is set after failure */
     {
-        html_to_markdown_convert(NULL); /* trigger error */
+        html_to_markdown_convert_to_string(NULL); /* trigger error */
         const char *err = html_to_markdown_last_error();
         if (err && strlen(err) > 0) {
             pass("last_error() returns non-empty message after failure");
@@ -562,7 +562,7 @@ static void test_error_handling(void) {
 
     /* Successful conversion clears error state */
     {
-        char *result = html_to_markdown_convert("<p>ok</p>");
+        char *result = html_to_markdown_convert_to_string("<p>ok</p>");
         if (result)
             html_to_markdown_free_string(result);
         uint32_t code = html_to_markdown_last_error_code();
@@ -761,7 +761,7 @@ static void test_profiling_api(void) {
         bool started =
             html_to_markdown_profile_start("/tmp/htm_test_profile.svg", 100);
         if (started) {
-            char *md = html_to_markdown_convert("<h1>Profile test</h1>");
+            char *md = html_to_markdown_convert_to_string("<h1>Profile test</h1>");
             if (md)
                 html_to_markdown_free_string(md);
             bool stopped = html_to_markdown_profile_stop();
@@ -788,7 +788,7 @@ static void test_memory_safety(void) {
         int ok = 1;
         for (int i = 0; i < count; i++) {
             char *result =
-                html_to_markdown_convert("<p>stress test iteration</p>");
+                html_to_markdown_convert_to_string("<p>stress test iteration</p>");
             if (!result) {
                 ok = 0;
                 break;
@@ -808,8 +808,8 @@ static void test_memory_safety(void) {
     /* Alternating success/failure */
     {
         for (int i = 0; i < 10; i++) {
-            html_to_markdown_convert(NULL); /* failure */
-            char *result = html_to_markdown_convert("<p>ok</p>");
+            html_to_markdown_convert_to_string(NULL); /* failure */
+            char *result = html_to_markdown_convert_to_string("<p>ok</p>");
             if (result)
                 html_to_markdown_free_string(result);
         }

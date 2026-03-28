@@ -36,11 +36,15 @@ mod runtime {
         let result = {
             #[cfg(feature = "visitor")]
             {
-                html_to_markdown_rs::safety::guard_panic(|| html_to_markdown_rs::convert_to_string(&html, options))
+                html_to_markdown_rs::safety::guard_panic(|| {
+                    html_to_markdown_rs::convert(&html, options).map(|r| r.content.unwrap_or_default())
+                })
             }
             #[cfg(not(feature = "visitor"))]
             {
-                html_to_markdown_rs::safety::guard_panic(|| html_to_markdown_rs::convert_to_string(&html, options))
+                html_to_markdown_rs::safety::guard_panic(|| {
+                    html_to_markdown_rs::convert(&html, options).map(|r| r.content.unwrap_or_default())
+                })
             }
         };
         match result {

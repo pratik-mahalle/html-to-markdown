@@ -4,9 +4,13 @@ use extendr_api::prelude::*;
 use html_to_markdown_rs::convert_with_metadata as convert_with_metadata_inner;
 use html_to_markdown_rs::convert_with_tables as convert_with_tables_inner;
 use html_to_markdown_rs::{
-    ConversionOptions, convert_to_string as convert_inner,
+    ConversionOptions, convert as convert_rs,
     convert_with_inline_images as convert_with_inline_images_inner,
 };
+
+fn convert_inner(html: &str, options: Option<ConversionOptions>) -> html_to_markdown_rs::error::Result<String> {
+    convert_rs(html, options).map(|r| r.content.unwrap_or_default())
+}
 use std::path::PathBuf;
 
 mod options;

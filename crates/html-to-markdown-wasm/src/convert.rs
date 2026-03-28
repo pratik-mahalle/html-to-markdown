@@ -4,6 +4,14 @@ use html_to_markdown_rs::ConversionError;
 use wasm_bindgen::prelude::*;
 
 #[cfg(feature = "js-bindings")]
+fn convert_to_string_inner(
+    html: &str,
+    options: Option<html_to_markdown_rs::ConversionOptions>,
+) -> html_to_markdown_rs::error::Result<String> {
+    html_to_markdown_rs::convert(html, options).map(|r| r.content.unwrap_or_default())
+}
+
+#[cfg(feature = "js-bindings")]
 pub fn to_js_error(err: ConversionError) -> JsValue {
     JsValue::from_str(&html_to_markdown_bindings_common::error::error_message(&err))
 }
@@ -32,7 +40,7 @@ pub fn bytes_to_string(bytes: js_sys::Uint8Array) -> Result<String, JsValue> {
     String::from_utf8(buffer).map_err(|e| JsValue::from_str(&format!("HTML must be valid UTF-8: {}", e)))
 }
 
-/// Convert HTML to Markdown
+/// Convert HTML to Markdown, returning a plain Markdown string (v2 compat).
 ///
 /// # Arguments
 ///
@@ -42,26 +50,24 @@ pub fn bytes_to_string(bytes: js_sys::Uint8Array) -> Result<String, JsValue> {
 /// # Example
 ///
 /// ```javascript
-/// import { convert } from 'html-to-markdown-wasm';
+/// import { convertToString } from 'html-to-markdown-wasm';
 ///
 /// const html = '<h1>Hello World</h1>';
-/// const markdown = convert(html);
+/// const markdown = convertToString(html);
 /// console.log(markdown); // # Hello World
 /// ```
 #[cfg(feature = "js-bindings")]
-#[wasm_bindgen]
-pub fn convert(html: String, options: JsValue) -> Result<String, JsValue> {
+#[wasm_bindgen(js_name = convertToString)]
+pub fn convert_to_string(html: String, options: JsValue) -> Result<String, JsValue> {
     let rust_options = parse_wasm_options(options)?;
 
     #[cfg(feature = "visitor")]
     {
-        html_to_markdown_rs::safety::guard_panic(|| html_to_markdown_rs::convert_to_string(&html, rust_options))
-            .map_err(to_js_error)
+        html_to_markdown_rs::safety::guard_panic(|| convert_to_string_inner(&html, rust_options)).map_err(to_js_error)
     }
     #[cfg(not(feature = "visitor"))]
     {
-        html_to_markdown_rs::safety::guard_panic(|| html_to_markdown_rs::convert_to_string(&html, rust_options))
-            .map_err(to_js_error)
+        html_to_markdown_rs::safety::guard_panic(|| convert_to_string_inner(&html, rust_options)).map_err(to_js_error)
     }
 }
 
@@ -73,13 +79,11 @@ pub fn convert_bytes(html: js_sys::Uint8Array, options: JsValue) -> Result<Strin
 
     #[cfg(feature = "visitor")]
     {
-        html_to_markdown_rs::safety::guard_panic(|| html_to_markdown_rs::convert_to_string(&html, rust_options))
-            .map_err(to_js_error)
+        html_to_markdown_rs::safety::guard_panic(|| convert_to_string_inner(&html, rust_options)).map_err(to_js_error)
     }
     #[cfg(not(feature = "visitor"))]
     {
-        html_to_markdown_rs::safety::guard_panic(|| html_to_markdown_rs::convert_to_string(&html, rust_options))
-            .map_err(to_js_error)
+        html_to_markdown_rs::safety::guard_panic(|| convert_to_string_inner(&html, rust_options)).map_err(to_js_error)
     }
 }
 
@@ -99,17 +103,13 @@ pub fn convert_with_options_handle(
 ) -> Result<String, JsValue> {
     #[cfg(feature = "visitor")]
     {
-        html_to_markdown_rs::safety::guard_panic(|| {
-            html_to_markdown_rs::convert_to_string(&html, Some(handle.inner.clone()))
-        })
-        .map_err(to_js_error)
+        html_to_markdown_rs::safety::guard_panic(|| convert_to_string_inner(&html, Some(handle.inner.clone())))
+            .map_err(to_js_error)
     }
     #[cfg(not(feature = "visitor"))]
     {
-        html_to_markdown_rs::safety::guard_panic(|| {
-            html_to_markdown_rs::convert_to_string(&html, Some(handle.inner.clone()))
-        })
-        .map_err(to_js_error)
+        html_to_markdown_rs::safety::guard_panic(|| convert_to_string_inner(&html, Some(handle.inner.clone())))
+            .map_err(to_js_error)
     }
 }
 
@@ -123,23 +123,20 @@ pub fn convert_bytes_with_options_handle(
 
     #[cfg(feature = "visitor")]
     {
-        html_to_markdown_rs::safety::guard_panic(|| {
-            html_to_markdown_rs::convert_to_string(&html, Some(handle.inner.clone()))
-        })
-        .map_err(to_js_error)
+        html_to_markdown_rs::safety::guard_panic(|| convert_to_string_inner(&html, Some(handle.inner.clone())))
+            .map_err(to_js_error)
     }
     #[cfg(not(feature = "visitor"))]
     {
-        html_to_markdown_rs::safety::guard_panic(|| {
-            html_to_markdown_rs::convert_to_string(&html, Some(handle.inner.clone()))
-        })
-        .map_err(to_js_error)
+        html_to_markdown_rs::safety::guard_panic(|| convert_to_string_inner(&html, Some(handle.inner.clone())))
+            .map_err(to_js_error)
     }
 }
 
-/// Extract structured content, metadata, and images from HTML in a single pass.
+/// Convert HTML to Markdown, returning a JavaScript object with structured content, metadata,
+/// images, and warnings in a single pass.
 ///
-/// This is the v3 API entry point. Returns a JavaScript object with:
+/// This is the v3 primary API entry point. Returns a JavaScript object with:
 /// - `content`: converted text (string or null)
 /// - `document`: structured document tree (object or null)
 /// - `metadata`: extracted HTML metadata (object or null)
@@ -154,20 +151,20 @@ pub fn convert_bytes_with_options_handle(
 /// # Example
 ///
 /// ```javascript
-/// import { extract } from 'html-to-markdown-wasm';
+/// import { convert } from 'html-to-markdown-wasm';
 ///
 /// const html = '<h1>Hello World</h1><p>Some text.</p>';
-/// const result = extract(html, null);
+/// const result = convert(html, null);
 /// console.log(result.content);   // '# Hello World\n\nSome text.'
 /// console.log(result.tables);    // []
 /// console.log(result.warnings);  // []
 /// ```
 #[cfg(feature = "js-bindings")]
 #[wasm_bindgen]
-pub fn extract(html: String, options: JsValue) -> Result<JsValue, JsValue> {
+pub fn convert(html: String, options: JsValue) -> Result<JsValue, JsValue> {
     let rust_options = parse_wasm_options(options)?;
 
-    let result = html_to_markdown_rs::safety::guard_panic(|| html_to_markdown_rs::extract(&html, rust_options))
+    let result = html_to_markdown_rs::safety::guard_panic(|| html_to_markdown_rs::convert(&html, rust_options))
         .map_err(to_js_error)?;
 
     let js_result = js_sys::Object::new();

@@ -1,11 +1,18 @@
 #![allow(missing_docs)]
 
+fn convert(
+    html: &str,
+    opts: Option<html_to_markdown_rs::ConversionOptions>,
+) -> html_to_markdown_rs::error::Result<String> {
+    html_to_markdown_rs::convert(html, opts).map(|r| r.content.unwrap_or_default())
+}
+
 use std::fs;
 use std::path::PathBuf;
 
 use html_to_markdown_rs::{
     CodeBlockStyle, ConversionOptions, HeadingStyle, HighlightStyle, ListIndentType, PreprocessingOptions,
-    PreprocessingPreset, WhitespaceMode, convert_to_string as convert,
+    PreprocessingPreset, WhitespaceMode,
 };
 
 fn fixture_path(name: &str) -> PathBuf {

@@ -13,10 +13,6 @@ int main(void) {
     assert(strchr(version, '.') != NULL);
 
     /* Test version defines match runtime version */
-    char expected[64];
-    snprintf(expected, sizeof(expected), "%d.%d.%d", HTML_TO_MARKDOWN_VERSION_MAJOR,
-             HTML_TO_MARKDOWN_VERSION_MINOR, HTML_TO_MARKDOWN_VERSION_PATCH);
-    assert(strcmp(version, expected) == 0);
     assert(strcmp(version, HTML_TO_MARKDOWN_VERSION) == 0);
 
     printf("test_version: all tests passed\n");

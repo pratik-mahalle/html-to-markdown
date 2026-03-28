@@ -1,9 +1,13 @@
 #![allow(clippy::all, clippy::pedantic, clippy::nursery, missing_docs)]
 
 use html_to_markdown_rs::{
-    ConversionOptions, convert_to_string as convert_inner,
+    ConversionOptions, convert as convert_rs,
     convert_with_inline_images as convert_with_inline_images_inner, error::ConversionError, safety::guard_panic,
 };
+
+fn convert_inner(html: &str, options: Option<ConversionOptions>) -> html_to_markdown_rs::error::Result<String> {
+    convert_rs(html, options).map(|r| r.content.unwrap_or_default())
+}
 
 #[cfg(feature = "visitor")]
 use html_to_markdown_rs::convert_with_visitor as convert_with_visitor_inner;
@@ -189,13 +193,13 @@ fn convert_with_tables_fn(ruby: &Ruby, args: &[Value]) -> Result<Value, Error> {
 
     tables_result_to_ruby(ruby, result)
 }
-fn extract_fn(ruby: &Ruby, args: &[Value]) -> Result<Value, Error> {
+fn convert_full_fn(ruby: &Ruby, args: &[Value]) -> Result<Value, Error> {
     let parsed = scan_args::<(String,), (Option<Value>,), (), (), (), ()>(args)?;
     let html = parsed.required.0;
     let options = build_conversion_options(ruby, parsed.optional.0)?;
 
     let result = guard_panic(|| {
-        profiling::maybe_profile(|| html_to_markdown_rs::extract(&html, Some(options.clone())))
+        profiling::maybe_profile(|| html_to_markdown_rs::convert(&html, Some(options.clone())))
     })
     .map_err(conversion_error)?;
 
@@ -307,8 +311,8 @@ fn stop_profiling_fn(_ruby: &Ruby, _args: &[Value]) -> Result<bool, Error> {
 #[magnus::init]
 fn init(ruby: &Ruby) -> Result<(), Error> {
     let module = ruby.define_module("HtmlToMarkdown")?;
-    module.define_singleton_method("convert", function!(convert_fn, -1))?;
-    module.define_singleton_method("extract", function!(extract_fn, -1))?;
+    module.define_singleton_method("convert_to_string", function!(convert_fn, -1))?;
+    module.define_singleton_method("convert", function!(convert_full_fn, -1))?;
     module.define_singleton_method("options", function!(options_handle_fn, -1))?;
     module.define_singleton_method("convert_with_options", function!(convert_with_options_handle_fn, -1))?;
 

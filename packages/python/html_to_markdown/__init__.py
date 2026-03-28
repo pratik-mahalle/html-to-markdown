@@ -21,6 +21,7 @@ from html_to_markdown.api import (
     TableData,
     TableExtractionResult,
     convert,
+    convert_to_string,
     convert_with_async_visitor,
     convert_with_handle,
     convert_with_inline_images,
@@ -29,7 +30,6 @@ from html_to_markdown.api import (
     convert_with_metadata_handle,
     convert_with_tables,
     create_options_handle,
-    extract,
     start_profiling,
     stop_profiling,
 )
@@ -61,6 +61,7 @@ __all__ = [
     "TableData",
     "TableExtractionResult",
     "convert",
+    "convert_to_string",
     "convert_with_async_visitor",
     "convert_with_handle",
     "convert_with_inline_images",
@@ -69,7 +70,6 @@ __all__ = [
     "convert_with_metadata_handle",
     "convert_with_tables",
     "create_options_handle",
-    "extract",
     "start_profiling",
     "stop_profiling",
 ]

@@ -90,12 +90,12 @@ if (markdown != NULL) {
 
 ---
 
-### `html_to_markdown_convert_with_len`
+### `html_to_markdown_convert_to_string_with_len`
 
-Convert HTML, also returning the output length.
+Convert HTML to plain Markdown string, also returning the output length (v2 compat).
 
 ```c
-HTM_EXPORT char *html_to_markdown_convert_with_len(
+HTM_EXPORT char *html_to_markdown_convert_to_string_with_len(
     const char *html,
     uintptr_t *len_out
 );
@@ -110,12 +110,12 @@ HTM_EXPORT char *html_to_markdown_convert_with_len(
 
 ---
 
-### `html_to_markdown_convert_bytes_with_len`
+### `html_to_markdown_convert_to_string_bytes_with_len`
 
-Convert UTF-8 HTML bytes (not null-terminated) to Markdown.
+Convert UTF-8 HTML bytes (not null-terminated) to plain Markdown string (v2 compat).
 
 ```c
-HTM_EXPORT char *html_to_markdown_convert_bytes_with_len(
+HTM_EXPORT char *html_to_markdown_convert_to_string_bytes_with_len(
     const uint8_t *html,
     uintptr_t len,
     uintptr_t *len_out

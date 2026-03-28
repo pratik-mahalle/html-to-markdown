@@ -1,12 +1,6 @@
 #![allow(missing_docs)]
 
-//! Tests for script and style tag stripping before parsing.
-//!
-//! This test suite verifies that script and style tags are completely removed
-//! from HTML before parsing, preventing the tl parser from misinterpreting
-//! HTML-like content inside scripts as actual tags.
-
-use html_to_markdown_rs::{ConversionOptions, MetadataConfig, convert_to_string as convert, convert_with_metadata};
+use html_to_markdown_rs::{ConversionOptions, MetadataConfig, convert_with_metadata};
 
 #[test]
 fn test_strip_simple_script_tag() {
@@ -404,4 +398,11 @@ fn test_inline_script_attributes_not_affected() {
         !result.contains("console.log('bad')"),
         "Should remove script tag content"
     );
+}
+
+fn convert(
+    html: &str,
+    opts: Option<html_to_markdown_rs::ConversionOptions>,
+) -> html_to_markdown_rs::error::Result<String> {
+    html_to_markdown_rs::convert(html, opts).map(|r| r.content.unwrap_or_default())
 }

@@ -8,9 +8,13 @@ use html_to_markdown_rs::metadata::{
     DocumentMetadata, HeaderMetadata, HtmlMetadata, ImageMetadata, LinkMetadata, StructuredData,
 };
 use html_to_markdown_rs::{
-    ConversionOptions, HtmlExtraction, InlineImage, convert_to_string as convert_inner,
+    ConversionOptions, HtmlExtraction, InlineImage, convert as convert_rs,
     convert_with_inline_images as convert_with_inline_images_inner,
 };
+
+fn convert_inner(html: &str, options: Option<ConversionOptions>) -> html_to_markdown_rs::error::Result<String> {
+    convert_rs(html, options).map(|r| r.content.unwrap_or_default())
+}
 
 mod options;
 mod profiling;
@@ -36,7 +40,7 @@ struct OptionsHandleResource(ConversionOptions);
 rustler::init!(
     "Elixir.HtmlToMarkdown.Native",
     [
-        convert,
+        convert_to_string,
         convert_with_options_map,
         convert_with_handle,
         create_options_handle,
@@ -46,7 +50,7 @@ rustler::init!(
         stop_profiling,
         convert_with_visitor,
         convert_with_tables,
-        extract
+        convert
     ],
     load = on_load
 );
@@ -83,7 +87,7 @@ mod atoms {
 }
 
 #[rustler::nif(schedule = "DirtyCpu")]
-fn convert<'a>(env: Env<'a>, html: String) -> NifResult<Term<'a>> {
+fn convert_to_string<'a>(env: Env<'a>, html: String) -> NifResult<Term<'a>> {
     match profiling::maybe_profile(|| convert_inner(&html, None)) {
         Ok(markdown) => Ok((atoms::ok(), markdown).encode(env)),
         Err(err) => Ok((atoms::error(), err.to_string()).encode(env)),
@@ -277,13 +281,13 @@ fn convert_with_tables<'a>(
 }
 
 #[rustler::nif(schedule = "DirtyCpu")]
-fn extract<'a>(env: Env<'a>, html: String, options_term: Term<'a>) -> NifResult<Term<'a>> {
+fn convert<'a>(env: Env<'a>, html: String, options_term: Term<'a>) -> NifResult<Term<'a>> {
     let options = match decode_options_term(options_term) {
         Ok(options) => options,
         Err(err) => return handle_invalid_option_error(env, err),
     };
 
-    match profiling::maybe_profile(|| html_to_markdown_rs::extract(&html, Some(options.clone()))) {
+    match profiling::maybe_profile(|| html_to_markdown_rs::convert(&html, Some(options.clone()))) {
         Ok(result) => {
             let tables: Vec<ExtractTableTerm> = result
                 .tables

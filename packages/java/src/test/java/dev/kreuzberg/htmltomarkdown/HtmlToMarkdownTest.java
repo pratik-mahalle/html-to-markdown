@@ -18,7 +18,7 @@ class HtmlToMarkdownTest {
   @DisplayName("Basic heading conversion")
   void testBasicHeading() {
     String html = "<h1>Hello World</h1>";
-    String markdown = HtmlToMarkdown.convert(html);
+    String markdown = HtmlToMarkdown.convert(html).content();
 
     assertTrue(markdown.contains("# Hello World"), "Expected ATX-style heading, got: " + markdown);
   }
@@ -27,7 +27,7 @@ class HtmlToMarkdownTest {
   @DisplayName("Paragraph with strong text")
   void testParagraphWithStrong() {
     String html = "<p>This is a <strong>test</strong>.</p>";
-    String markdown = HtmlToMarkdown.convert(html);
+    String markdown = HtmlToMarkdown.convert(html).content();
 
     assertTrue(
         markdown.contains("**test**"),
@@ -38,7 +38,7 @@ class HtmlToMarkdownTest {
   @DisplayName("Unordered list conversion")
   void testUnorderedList() {
     String html = "<ul><li>Item 1</li><li>Item 2</li><li>Item 3</li></ul>";
-    String markdown = HtmlToMarkdown.convert(html);
+    String markdown = HtmlToMarkdown.convert(html).content();
 
     assertTrue(
         markdown.contains("Item 1") && markdown.contains("Item 2") && markdown.contains("Item 3"),
@@ -49,7 +49,7 @@ class HtmlToMarkdownTest {
   @DisplayName("Ordered list conversion")
   void testOrderedList() {
     String html = "<ol><li>First</li><li>Second</li><li>Third</li></ol>";
-    String markdown = HtmlToMarkdown.convert(html);
+    String markdown = HtmlToMarkdown.convert(html).content();
 
     assertTrue(
         markdown.contains("First") && markdown.contains("Second") && markdown.contains("Third"),
@@ -60,7 +60,7 @@ class HtmlToMarkdownTest {
   @DisplayName("Link conversion")
   void testLink() {
     String html = "<a href=\"https://example.com\">Example</a>";
-    String markdown = HtmlToMarkdown.convert(html);
+    String markdown = HtmlToMarkdown.convert(html).content();
 
     assertTrue(
         markdown.contains("[Example]") && markdown.contains("(https://example.com)"),
@@ -71,7 +71,7 @@ class HtmlToMarkdownTest {
   @DisplayName("Code block conversion")
   void testCodeBlock() {
     String html = "<pre><code>" + "function test() { return true; }" + "</code></pre>";
-    String markdown = HtmlToMarkdown.convert(html);
+    String markdown = HtmlToMarkdown.convert(html).content();
 
     assertTrue(
         markdown.contains("function test()"), "Expected code block content, got: " + markdown);
@@ -81,7 +81,7 @@ class HtmlToMarkdownTest {
   @DisplayName("Inline code conversion")
   void testInlineCode() {
     String html = "<p>Use the <code>convert()</code> function</p>";
-    String markdown = HtmlToMarkdown.convert(html);
+    String markdown = HtmlToMarkdown.convert(html).content();
 
     assertTrue(
         markdown.contains("`convert()`"), "Expected inline code in backticks, got: " + markdown);
@@ -91,7 +91,7 @@ class HtmlToMarkdownTest {
   @DisplayName("Emphasis (em) conversion")
   void testEmphasis() {
     String html = "<p>This is <em>important</em>.</p>";
-    String markdown = HtmlToMarkdown.convert(html);
+    String markdown = HtmlToMarkdown.convert(html).content();
 
     assertTrue(
         markdown.contains("*important*") || markdown.contains("_important_"),
@@ -102,7 +102,7 @@ class HtmlToMarkdownTest {
   @DisplayName("Blockquote conversion")
   void testBlockquote() {
     String html = "<blockquote>This is a quote</blockquote>";
-    String markdown = HtmlToMarkdown.convert(html);
+    String markdown = HtmlToMarkdown.convert(html).content();
 
     assertTrue(
         markdown.contains("> ") && markdown.contains("This is a quote"),
@@ -117,7 +117,7 @@ class HtmlToMarkdownTest {
             + "<p>Text with <strong>bold</strong> "
             + "and <em>italic</em>.</p>"
             + "<ul><li>Item 1</li><li>Item 2</li></ul></div>";
-    String markdown = HtmlToMarkdown.convert(html);
+    String markdown = HtmlToMarkdown.convert(html).content();
 
     assertTrue(
         markdown.contains("## Section")
@@ -131,7 +131,7 @@ class HtmlToMarkdownTest {
   @DisplayName("Empty string handling")
   void testEmptyString() {
     String html = "";
-    String markdown = HtmlToMarkdown.convert(html);
+    String markdown = HtmlToMarkdown.convert(html).content();
 
     assertNotNull(markdown, "Result should not be null");
   }
@@ -151,7 +151,7 @@ class HtmlToMarkdownTest {
   @DisplayName("Plain text (no HTML tags)")
   void testPlainText() {
     String html = "Just plain text";
-    String markdown = HtmlToMarkdown.convert(html);
+    String markdown = HtmlToMarkdown.convert(html).content();
 
     assertEquals("Just plain text", markdown.trim(), "Plain text should pass through unchanged");
   }
@@ -163,7 +163,7 @@ class HtmlToMarkdownTest {
         "<table><tr><th>Name</th><th>Age</th></tr>"
             + "<tr><td>Alice</td><td>30</td></tr>"
             + "<tr><td>Bob</td><td>25</td></tr></table>";
-    String markdown = HtmlToMarkdown.convert(html);
+    String markdown = HtmlToMarkdown.convert(html).content();
 
     assertTrue(
         markdown.contains("Name")
@@ -177,7 +177,7 @@ class HtmlToMarkdownTest {
   @DisplayName("Image conversion")
   void testImage() {
     String html = "<img src=\"image.png\" alt=\"Test Image\">";
-    String markdown = HtmlToMarkdown.convert(html);
+    String markdown = HtmlToMarkdown.convert(html).content();
 
     assertTrue(
         markdown.contains("![Test Image]") && markdown.contains("(image.png)"),
@@ -188,7 +188,7 @@ class HtmlToMarkdownTest {
   @DisplayName("Horizontal rule conversion")
   void testHorizontalRule() {
     String html = "<p>Before</p><hr><p>After</p>";
-    String markdown = HtmlToMarkdown.convert(html);
+    String markdown = HtmlToMarkdown.convert(html).content();
 
     assertTrue(
         markdown.contains("Before")
@@ -216,9 +216,9 @@ class HtmlToMarkdownTest {
     String html2 = "<h2>Second</h2>";
     String html3 = "<h3>Third</h3>";
 
-    String md1 = HtmlToMarkdown.convert(html1);
-    String md2 = HtmlToMarkdown.convert(html2);
-    String md3 = HtmlToMarkdown.convert(html3);
+    String md1 = HtmlToMarkdown.convert(html1).content();
+    String md2 = HtmlToMarkdown.convert(html2).content();
+    String md3 = HtmlToMarkdown.convert(html3).content();
 
     assertTrue(md1.contains("# First"), "First conversion failed");
     assertTrue(md2.contains("## Second"), "Second conversion failed");
@@ -239,7 +239,7 @@ class HtmlToMarkdownTest {
     }
     html.append("</article>");
 
-    String markdown = HtmlToMarkdown.convert(html.toString());
+    String markdown = HtmlToMarkdown.convert(html.toString()).content();
 
     assertNotNull(markdown, "Markdown should not be null");
     assertTrue(markdown.contains("## Section 1"), "Should contain first section");
@@ -252,7 +252,7 @@ class HtmlToMarkdownTest {
   @DisplayName("Special characters in text")
   void testSpecialCharacters() {
     String html = "<p>Characters: &lt; &gt; &amp; &quot; &#39;</p>";
-    String markdown = HtmlToMarkdown.convert(html);
+    String markdown = HtmlToMarkdown.convert(html).content();
 
     assertTrue(
         markdown.contains("<") || markdown.contains("&lt;"),
@@ -264,7 +264,7 @@ class HtmlToMarkdownTest {
   void testNestedLists() {
     String html =
         "<ul><li>Level 1<ul><li>Level 2" + "<ul><li>Level 3</li></ul></li></ul></li></ul>";
-    String markdown = HtmlToMarkdown.convert(html);
+    String markdown = HtmlToMarkdown.convert(html).content();
 
     assertTrue(
         markdown.contains("Level 1")
