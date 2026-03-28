@@ -85,6 +85,7 @@ repos:
           "--exclude=html-to-markdown-wasm",
           "--exclude=benchmark-harness",
           "--exclude=html-to-markdown-wasm-wasmtime-tests",
+          "--exclude=html-to-markdown-e2e-rust",
           "--all-features",
           "--all-targets",
           "--",
@@ -96,6 +97,7 @@ repos:
     rev: v0.9.1
     hooks:
       - id: cargo-machete
+        exclude: ^e2e/
 
   - repo: https://github.com/EmbarkStudios/cargo-deny
     rev: 0.19.0
@@ -115,7 +117,7 @@ repos:
     hooks:
       - id: oxlint
         args: ["--fix"]
-        exclude: ^docs/html_to_markdown_wasm\.js$
+        exclude: ^docs/html_to_markdown_wasm\.js$|^e2e/
 
   # C/C++: formatting and linting
   - repo: https://github.com/pocc/pre-commit-hooks
@@ -157,10 +159,10 @@ repos:
     rev: v0.6.36
     hooks:
       - id: cpd
-        exclude: ^\.mvn/wrapper/
+        exclude: ^\.mvn/wrapper/|^e2e/
       - id: checkstyle
         args: ["-c", "packages/java/checkstyle.xml", "-p", "packages/java/checkstyle.properties"]
-        exclude: ^\.mvn/wrapper/
+        exclude: ^\.mvn/wrapper/|^e2e/
 
   # Local hooks for language toolchains
   - repo: local
