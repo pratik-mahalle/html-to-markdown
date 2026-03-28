@@ -204,53 +204,6 @@ pub fn convert(html: &str, options: Option<ConversionOptions>) -> Result<Convers
     })
 }
 
-/// Convert HTML to Markdown, returning a plain `String` (v2 compatibility shim).
-///
-/// Calls [`convert`] and extracts the `content` field. Use [`convert`] or [`extract`] directly
-/// in new code so you have access to metadata, images, and warnings.
-///
-/// # Arguments
-///
-/// * `html` - The HTML string to convert
-/// * `options` - Optional conversion options (defaults to `ConversionOptions::default()`)
-///
-/// # Errors
-///
-/// Returns an error if HTML parsing fails or if the input contains invalid UTF-8.
-pub fn convert_to_string(html: &str, options: Option<ConversionOptions>) -> Result<String> {
-    let result = convert(html, options)?;
-    Ok(result.content.unwrap_or_default())
-}
-
-/// Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images,
-/// and warnings.
-///
-/// This is the v3 API entry point. It is identical to [`convert`] and exists as a more
-/// semantically descriptive alias — "extract" captures that the function does more than
-/// convert: it extracts structured content, metadata, and image assets in a single pass.
-///
-/// # Arguments
-///
-/// * `html` - The HTML string to convert
-/// * `options` - Optional conversion options (defaults to `ConversionOptions::default()`)
-///
-/// # Example
-///
-/// ```
-/// use html_to_markdown_rs::{extract, ConversionOptions};
-///
-/// let html = "<h1>Hello World</h1><p>Some text.</p>";
-/// let result = extract(html, None).unwrap();
-/// assert!(result.content.as_deref().unwrap_or("").contains("Hello World"));
-/// ```
-///
-/// # Errors
-///
-/// Returns an error if HTML parsing fails or if the input contains invalid UTF-8.
-pub fn extract(html: &str, options: Option<ConversionOptions>) -> Result<ConversionResult> {
-    convert(html, options)
-}
-
 /// Convert HTML to Markdown while collecting inline image assets (requires the `inline-images` feature).
 ///
 /// Extracts inline image data URIs and inline `<svg>` elements alongside Markdown conversion.

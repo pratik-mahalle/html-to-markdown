@@ -12,9 +12,6 @@ from html_to_markdown._html_to_markdown import (
     InlineImageConfig,
     MetadataConfig,
 )
-from html_to_markdown._html_to_markdown import (
-    extract as _rust_extract,
-)
 from html_to_markdown.options import ConversionOptions, PreprocessingOptions
 
 if TYPE_CHECKING:
@@ -213,16 +210,16 @@ def _build_metadata_config(config: MetadataConfig | dict[str, object] | None) ->
     )
 
 
-def convert(
+def convert_to_string(
     html: str,
     options: ConversionOptions | None = None,
     preprocessing: PreprocessingOptions | None = None,
 ) -> str:
-    """Convert HTML to Markdown using the Rust backend."""
+    """Convert HTML to Markdown, returning a plain Markdown string (v2 compat)."""
     rust_options = _rust_options(options, preprocessing)
     if rust_options is None:
-        return _rust.convert(html, None)
-    return _rust.convert(html, rust_options)
+        return _rust.convert_to_string(html, None)
+    return _rust.convert_to_string(html, rust_options)
 
 
 def convert_with_inline_images(
@@ -345,12 +342,12 @@ def convert_with_tables(
     return _rust.convert_with_tables(html, rust_options, metadata_config)
 
 
-def extract(
+def convert(
     html: str,
     options: ConversionOptions | None = None,
     preprocessing: PreprocessingOptions | None = None,
 ) -> ExtractionResult:
-    """Extract structured data from HTML using the new ConversionResult API.
+    """Convert HTML to Markdown using the v3 primary API.
 
     Returns a dict containing the converted content alongside all extracted
     metadata, tables, images, and processing warnings in a single pass.
@@ -370,7 +367,7 @@ def extract(
             - warnings (list[dict]): Non-fatal processing warnings
     """
     rust_options = _rust_options(options, preprocessing)
-    return cast("ExtractionResult", _rust_extract(html, rust_options))
+    return cast("ExtractionResult", _rust.convert(html, rust_options))
 
 
 def convert_with_async_visitor(
@@ -378,7 +375,7 @@ def convert_with_async_visitor(
     options: ConversionOptions | None = None,
     preprocessing: PreprocessingOptions | None = None,
     visitor: object | None = None,
-) -> str:
+) -> ExtractionResult | str:
     """Convert HTML with an async visitor pattern.
 
     This function enables custom processing of HTML elements during conversion
@@ -424,6 +421,7 @@ __all__ = [
     "TableExtractionResult",
     "TableGrid",
     "convert",
+    "convert_to_string",
     "convert_with_async_visitor",
     "convert_with_handle",
     "convert_with_inline_images",
@@ -432,7 +430,6 @@ __all__ = [
     "convert_with_metadata_handle",
     "convert_with_tables",
     "create_options_handle",
-    "extract",
     "start_profiling",
     "stop_profiling",
 ]

@@ -6,7 +6,7 @@
 int main(void) {
     /* Test basic HTML to markdown conversion */
     const char *html = "<h1>Hello</h1><p>World</p>";
-    char *result = html_to_markdown_convert(html);
+    char *result = html_to_markdown_convert(html, NULL);
     assert(result != NULL);
     assert(strlen(result) > 0);
     /* Should contain "Hello" and "World" */
@@ -15,12 +15,12 @@ int main(void) {
     html_to_markdown_free_string(result);
 
     /* Test empty input */
-    result = html_to_markdown_convert("");
+    result = html_to_markdown_convert("", NULL);
     assert(result != NULL);
     html_to_markdown_free_string(result);
 
     /* Test NULL input returns NULL and sets error */
-    result = html_to_markdown_convert(NULL);
+    result = html_to_markdown_convert(NULL, NULL);
     assert(result == NULL);
 
     /* Test free_string with NULL is safe */

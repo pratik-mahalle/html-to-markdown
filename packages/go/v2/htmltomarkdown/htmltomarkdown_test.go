@@ -65,13 +65,18 @@ func TestConvert(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := Convert(tt.html)
+			result, err := Convert(tt.html)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Convert() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !strings.Contains(got, tt.contains) {
-				t.Errorf("Convert() = %v, want to contain %v", got, tt.contains)
+			got := result.Content
+			if got == nil || !strings.Contains(*got, tt.contains) {
+				gotStr := ""
+				if got != nil {
+					gotStr = *got
+				}
+				t.Errorf("Convert() = %v, want to contain %v", gotStr, tt.contains)
 			}
 		})
 	}
@@ -81,15 +86,23 @@ func TestMustConvert(t *testing.T) {
 	t.Run("successful conversion", func(t *testing.T) {
 		html := "<h1>Test</h1>"
 		result := MustConvert(html)
-		if !strings.Contains(result, "Test") {
-			t.Errorf("MustConvert() = %v, want to contain 'Test'", result)
+		if result.Content == nil || !strings.Contains(*result.Content, "Test") {
+			contentStr := ""
+			if result.Content != nil {
+				contentStr = *result.Content
+			}
+			t.Errorf("MustConvert() = %v, want to contain 'Test'", contentStr)
 		}
 	})
 
 	t.Run("empty string", func(t *testing.T) {
 		result := MustConvert("")
-		if result != "" {
-			t.Errorf("MustConvert(\"\") = %v, want empty string", result)
+		if result.Content == nil || *result.Content != "" {
+			contentStr := ""
+			if result.Content != nil {
+				contentStr = *result.Content
+			}
+			t.Errorf("MustConvert(\"\") = %v, want empty string", contentStr)
 		}
 	})
 }
@@ -143,16 +156,20 @@ func BenchmarkConvertSimple(b *testing.B) {
 }
 
 func ExampleConvert() {
-	markdown, err := Convert("<h1>Hello World</h1>")
+	result, err := Convert("<h1>Hello World</h1>")
 	if err != nil {
 		panic(err)
 	}
-	println(markdown)
+	if result.Content != nil {
+		println(*result.Content)
+	}
 }
 
 func ExampleMustConvert() {
-	markdown := MustConvert("<p>This is a paragraph.</p>")
-	println(markdown)
+	result := MustConvert("<p>This is a paragraph.</p>")
+	if result.Content != nil {
+		println(*result.Content)
+	}
 }
 
 func ExampleVersion() {

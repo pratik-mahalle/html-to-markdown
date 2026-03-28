@@ -28,9 +28,9 @@ use options::parse_metadata_config;
 use options::{parse_conversion_options, parse_inline_image_config};
 use types::to_php_exception;
 
-// Convert HTML to Markdown
+// Convert HTML to Markdown, returning a plain Markdown string (v2 compat)
 #[php_function]
-#[php(name = "html_to_markdown_convert")]
+#[php(name = "html_to_markdown_convert_to_string")]
 pub fn convert_html(html: String, options: Option<&ZendHashTable>, _visitor: Option<&Zval>) -> PhpResult<String> {
     let rust_options = match options {
         Some(table) => Some(parse_conversion_options(table)?),
@@ -42,17 +42,17 @@ pub fn convert_html(html: String, options: Option<&ZendHashTable>, _visitor: Opt
     convert_impl(&html, rust_options)
 }
 
-// Extract structured content from HTML, returning an associative array with:
+// Convert HTML to Markdown, returning an associative array with:
 // content, document, metadata, tables, images, warnings
 #[php_function]
-#[php(name = "html_to_markdown_extract")]
-pub fn extract_html(html: String, options: Option<&ZendHashTable>) -> PhpResult<ZBox<ZendHashTable>> {
+#[php(name = "html_to_markdown_convert")]
+pub fn convert_html_full(html: String, options: Option<&ZendHashTable>) -> PhpResult<ZBox<ZendHashTable>> {
     let rust_options = match options {
         Some(table) => Some(parse_conversion_options(table)?),
         None => None,
     };
 
-    let result = guard_panic(|| profiling::maybe_profile(|| html_to_markdown_rs::extract(&html, rust_options.clone())))
+    let result = guard_panic(|| profiling::maybe_profile(|| html_to_markdown_rs::convert(&html, rust_options.clone())))
         .map_err(to_php_exception)?;
 
     build_conversion_result(result)
@@ -212,7 +212,7 @@ pub fn module(module: ModuleBuilder) -> ModuleBuilder {
         .name("html_to_markdown")
         .version(env!("CARGO_PKG_VERSION"))
         .function(wrap_function!(convert_html))
-        .function(wrap_function!(extract_html))
+        .function(wrap_function!(convert_html_full))
         .function(wrap_function!(convert_html_with_inline_images))
         .function(wrap_function!(profile_start))
         .function(wrap_function!(profile_stop));
@@ -236,8 +236,12 @@ pub fn module(module: ModuleBuilder) -> ModuleBuilder {
 
 #[inline]
 fn convert_impl(html: &str, options: Option<html_to_markdown_rs::ConversionOptions>) -> PhpResult<String> {
-    guard_panic(|| profiling::maybe_profile(|| html_to_markdown_rs::convert_to_string(html, options.clone())))
-        .map_err(to_php_exception)
+    guard_panic(|| {
+        profiling::maybe_profile(|| {
+            html_to_markdown_rs::convert(html, options.clone()).map(|r| r.content.unwrap_or_default())
+        })
+    })
+    .map_err(to_php_exception)
 }
 
 #[inline]

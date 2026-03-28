@@ -10,8 +10,8 @@ module HtmlToMarkdown
   class Options; end # rubocop:disable Lint/EmptyClass
 
   class << self
+    alias native_convert_to_string convert_to_string
     alias native_convert convert
-    alias native_extract extract
     alias native_convert_with_inline_images convert_with_inline_images
     alias native_convert_with_inline_images_handle convert_with_inline_images_handle
     alias native_options options
@@ -23,13 +23,7 @@ module HtmlToMarkdown
 
   module_function
 
-  def convert(html, options = nil, _visitor = nil)
-    # NOTE: visitor parameter is accepted for API compatibility but not used in standard convert mode
-    # The native binding currently does not support visitor pattern
-    native_convert(html.to_s, options)
-  end
-
-  # Extract structured content from HTML, returning a Hash with:
+  # Convert HTML to Markdown, returning a Hash with:
   #   - :content [String, nil] the converted Markdown output
   #   - :document [nil] document structure (not yet exposed)
   #   - :metadata [Hash, nil] extracted HTML metadata
@@ -39,9 +33,20 @@ module HtmlToMarkdown
   #
   # @param html [String] HTML string to convert
   # @param options [Hash, nil] optional conversion options
-  # @return [Hash] extraction result
-  def extract(html, options = nil)
-    native_extract(html.to_s, options)
+  # @param _visitor [Object, nil] visitor (accepted for API compatibility, ignored)
+  # @return [Hash] conversion result
+  def convert(html, options = nil, _visitor = nil)
+    native_convert(html.to_s, options)
+  end
+
+  # Convert HTML to Markdown, returning a plain Markdown string (v2 compat).
+  #
+  # @param html [String] HTML string to convert
+  # @param options [Hash, nil] optional conversion options
+  # @param _visitor [Object, nil] visitor (accepted for API compatibility, ignored)
+  # @return [String] markdown string
+  def convert_to_string(html, options = nil, _visitor = nil)
+    native_convert_to_string(html.to_s, options)
   end
 
   def convert_with_options(html, options_handle)

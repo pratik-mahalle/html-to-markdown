@@ -15,7 +15,7 @@ int main(void) {
 
     /* Test that NULL input triggers an error and sets error state */
     {
-        const char *result = html_to_markdown_convert(NULL);
+        const char *result = html_to_markdown_convert(NULL, NULL);
         assert(result == NULL);
 
         /* last_error should return a non-NULL, non-empty message */
@@ -36,7 +36,7 @@ int main(void) {
 
     /* Test that a successful conversion clears the error state */
     {
-        char *result = html_to_markdown_convert("<p>hello</p>");
+        char *result = html_to_markdown_convert("<p>hello</p>", NULL);
         assert(result != NULL);
         html_to_markdown_free_string(result);
 

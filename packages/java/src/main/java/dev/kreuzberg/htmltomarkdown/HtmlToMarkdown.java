@@ -64,7 +64,7 @@ public final class HtmlToMarkdown {
               false);
 
   /**
-   * Convert HTML to Markdown using default options.
+   * Convert HTML to Markdown using default options, returning a plain Markdown string (v2 compat).
    *
    * <p>This method uses CommonMark-compliant defaults:
    *
@@ -80,7 +80,7 @@ public final class HtmlToMarkdown {
    * @throws NullPointerException if html is null
    * @throws ConversionException if the conversion fails
    */
-  public static String convert(final String html) {
+  public static String convertToString(final String html) {
     if (html == null) {
       throw new NullPointerException("HTML cannot be null");
     }
@@ -89,7 +89,7 @@ public final class HtmlToMarkdown {
       MemorySegment htmlSegment = HtmlToMarkdownFFI.toCString(arena, html);
 
       MemorySegment resultSegment =
-          (MemorySegment) HtmlToMarkdownFFI.html_to_markdown_convert.invoke(htmlSegment);
+          (MemorySegment) HtmlToMarkdownFFI.html_to_markdown_convert_to_string.invoke(htmlSegment);
 
       if (resultSegment == null || resultSegment.address() == 0) {
         String error = getLastError();
@@ -392,7 +392,7 @@ public final class HtmlToMarkdown {
   }
 
   /**
-   * Extract structured content from HTML in a single pass.
+   * Convert HTML to Markdown in a single pass, returning a full {@code ConversionResult}.
    *
    * <p>Returns a {@code ConversionResult} containing:
    * <ul>
@@ -406,9 +406,9 @@ public final class HtmlToMarkdown {
    * @return a {@code ConversionResult} with content and all extracted data
    * @throws NullPointerException if html is null
    * @throws ConversionException if the conversion or JSON parsing fails
-   * @since 2.30.0
+   * @since 3.0.0
    */
-  public static ConversionResult extract(final String html) {
+  public static ConversionResult convert(final String html) {
     if (html == null) {
       throw new NullPointerException("HTML cannot be null");
     }
@@ -424,15 +424,15 @@ public final class HtmlToMarkdown {
       try {
         resultSegment =
             (MemorySegment)
-                HtmlToMarkdownFFI.html_to_markdown_extract.invoke(
+                HtmlToMarkdownFFI.html_to_markdown_convert.invoke(
                     htmlSegment, MemorySegment.NULL);
       } catch (Throwable e) {
-        throw new ConversionException("FFI call to extract failed: " + e.getMessage(), e);
+        throw new ConversionException("FFI call to convert failed: " + e.getMessage(), e);
       }
 
       if (resultSegment == null || resultSegment.address() == 0) {
         String errorMsg = getLastError();
-        throw new ConversionException(errorMsg != null ? errorMsg : "extract failed");
+        throw new ConversionException(errorMsg != null ? errorMsg : "convert failed");
       }
 
       try {
@@ -442,7 +442,7 @@ public final class HtmlToMarkdown {
         throw e;
       } catch (Exception e) {
         throw new ConversionException(
-            "failed to parse extraction JSON: " + e.getMessage(), e);
+            "failed to parse conversion JSON: " + e.getMessage(), e);
       } finally {
         try {
           HtmlToMarkdownFFI.html_to_markdown_free_string.invoke(resultSegment);
@@ -452,7 +452,7 @@ public final class HtmlToMarkdown {
     } catch (ConversionException e) {
       throw e;
     } catch (Throwable e) {
-      throw new ConversionException("Failed to extract HTML content", e);
+      throw new ConversionException("Failed to convert HTML content", e);
     }
   }
 

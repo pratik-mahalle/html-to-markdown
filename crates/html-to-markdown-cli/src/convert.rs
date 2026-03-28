@@ -3,7 +3,7 @@
 use crate::args::Cli;
 use crate::output::output_debug_info;
 use html_to_markdown_rs::{
-    ConversionOptions, MetadataConfig, OutputFormat, PreprocessingOptions, convert_to_string, convert_with_metadata,
+    ConversionOptions, MetadataConfig, OutputFormat, PreprocessingOptions, convert, convert_with_metadata,
     metadata::DEFAULT_MAX_STRUCTURED_DATA_SIZE,
 };
 use serde_json::json;
@@ -92,7 +92,10 @@ pub fn perform_conversion(
 
         serde_json::to_string_pretty(&output).map_err(|e| format!("Error serializing JSON: {e}"))?
     } else {
-        let markdown = convert_to_string(html, Some(options)).map_err(|e| format!("Error converting HTML: {e}"))?;
+        let markdown = convert(html, Some(options))
+            .map_err(|e| format!("Error converting HTML: {e}"))?
+            .content
+            .unwrap_or_default();
 
         output_debug_info(cli, &format!("Generated {} bytes of markdown", markdown.len()));
 

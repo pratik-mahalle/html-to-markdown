@@ -1,11 +1,6 @@
 #![allow(missing_docs)]
 
-//! Integration tests for HTML to Markdown conversion.
-//!
-//! These tests verify end-to-end conversion of various HTML elements
-//! to ensure correct Markdown output.
-
-use html_to_markdown_rs::{ConversionOptions, convert_to_string as convert};
+use html_to_markdown_rs::ConversionOptions;
 
 #[test]
 fn test_basic_paragraph() {
@@ -579,4 +574,11 @@ fn test_nested_bold_issue_111() {
     let html = "<b>bold<b>er</b></b>";
     let result = convert(html, None).unwrap();
     assert_eq!(result, "**bolder**\n");
+}
+
+fn convert(
+    html: &str,
+    opts: Option<html_to_markdown_rs::ConversionOptions>,
+) -> html_to_markdown_rs::error::Result<String> {
+    html_to_markdown_rs::convert(html, opts).map(|r| r.content.unwrap_or_default())
 }

@@ -8,7 +8,12 @@ use std::os::raw::c_char;
 use std::ptr;
 use std::slice;
 
-use html_to_markdown_rs::convert_to_string as convert;
+fn convert(
+    html: &str,
+    options: Option<html_to_markdown_rs::ConversionOptions>,
+) -> html_to_markdown_rs::error::Result<String> {
+    html_to_markdown_rs::convert(html, options).map(|r| r.content.unwrap_or_default())
+}
 use html_to_markdown_rs::safety::guard_panic;
 
 fn serialize_conversion_result(result: html_to_markdown_rs::ConversionResult) -> Result<String, String> {
@@ -40,7 +45,7 @@ use crate::error::{HtmlToMarkdownErrorCode, capture_error, set_last_error, set_l
 use crate::profiling;
 use crate::strings::string_to_c_string;
 
-/// Convert HTML to Markdown using default options.
+/// Convert HTML to Markdown using default options, returning a plain Markdown string (v2 compat).
 ///
 /// # Safety
 ///
@@ -52,14 +57,14 @@ use crate::strings::string_to_c_string;
 ///
 /// ```c
 /// const char* html = "<h1>Hello</h1>";
-/// char* markdown = html_to_markdown_convert(html);
+/// char* markdown = html_to_markdown_convert_to_string(html);
 /// if (markdown != NULL) {
 ///     printf("%s\n", markdown);
 ///     html_to_markdown_free_string(markdown);
 /// }
 /// ```
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn html_to_markdown_convert(html: *const c_char) -> *mut c_char {
+pub unsafe extern "C" fn html_to_markdown_convert_to_string(html: *const c_char) -> *mut c_char {
     if html.is_null() {
         set_last_error(Some("html pointer was null".to_string()));
         set_last_error_code(HtmlToMarkdownErrorCode::Internal);
@@ -95,7 +100,7 @@ pub unsafe extern "C" fn html_to_markdown_convert(html: *const c_char) -> *mut c
     }
 }
 
-/// Convert HTML to Markdown using default options, returning the output length.
+/// Convert HTML to Markdown using default options, returning the output length (plain string).
 ///
 /// # Safety
 ///
@@ -104,7 +109,10 @@ pub unsafe extern "C" fn html_to_markdown_convert(html: *const c_char) -> *mut c
 /// - The returned string must be freed with `html_to_markdown_free_string`
 /// - Returns NULL on error
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn html_to_markdown_convert_with_len(html: *const c_char, len_out: *mut usize) -> *mut c_char {
+pub unsafe extern "C" fn html_to_markdown_convert_to_string_with_len(
+    html: *const c_char,
+    len_out: *mut usize,
+) -> *mut c_char {
     if html.is_null() {
         set_last_error(Some("html pointer was null".to_string()));
         set_last_error_code(HtmlToMarkdownErrorCode::Internal);
@@ -151,7 +159,7 @@ pub unsafe extern "C" fn html_to_markdown_convert_with_len(html: *const c_char, 
     }
 }
 
-/// Convert UTF-8 HTML bytes to Markdown and return the output length.
+/// Convert UTF-8 HTML bytes to Markdown and return the output length (plain string).
 ///
 /// # Safety
 ///
@@ -160,7 +168,7 @@ pub unsafe extern "C" fn html_to_markdown_convert_with_len(html: *const c_char, 
 /// - The returned string must be freed with `html_to_markdown_free_string`
 /// - Returns NULL on error
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn html_to_markdown_convert_bytes_with_len(
+pub unsafe extern "C" fn html_to_markdown_convert_to_string_bytes_with_len(
     html: *const u8,
     len: usize,
     len_out: *mut usize,
@@ -212,7 +220,8 @@ pub unsafe extern "C" fn html_to_markdown_convert_bytes_with_len(
     }
 }
 
-/// Extract structured content, metadata, and images from HTML, returning a JSON string.
+/// Convert HTML to Markdown, returning a JSON string with structured content, metadata, images,
+/// and warnings in a single pass. This is the v3 primary C API entry point.
 ///
 /// The returned JSON has the shape:
 /// ```json
@@ -236,14 +245,14 @@ pub unsafe extern "C" fn html_to_markdown_convert_bytes_with_len(
 ///
 /// ```c
 /// const char* html = "<h1>Hello</h1><p>World</p>";
-/// char* json = html_to_markdown_extract(html, NULL);
+/// char* json = html_to_markdown_convert(html, NULL);
 /// if (json != NULL) {
 ///     printf("%s\n", json);
 ///     html_to_markdown_free_string(json);
 /// }
 /// ```
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn html_to_markdown_extract(html: *const c_char, options_json: *const c_char) -> *mut c_char {
+pub unsafe extern "C" fn html_to_markdown_convert(html: *const c_char, options_json: *const c_char) -> *mut c_char {
     if html.is_null() {
         set_last_error(Some("html pointer was null".to_string()));
         set_last_error_code(HtmlToMarkdownErrorCode::Internal);
@@ -280,7 +289,7 @@ pub unsafe extern "C" fn html_to_markdown_extract(html: *const c_char, options_j
         }
     };
 
-    match guard_panic(|| profiling::maybe_profile(|| html_to_markdown_rs::extract(html_str, options.clone()))) {
+    match guard_panic(|| profiling::maybe_profile(|| html_to_markdown_rs::convert(html_str, options.clone()))) {
         Ok(result) => {
             set_last_error(None);
             set_last_error_code(HtmlToMarkdownErrorCode::Ok);
@@ -294,10 +303,10 @@ pub unsafe extern "C" fn html_to_markdown_extract(html: *const c_char, options_j
                 }
             };
 
-            match string_to_c_string(json, "extract JSON result") {
+            match string_to_c_string(json, "convert JSON result") {
                 Ok(c_string) => c_string.into_raw(),
                 Err(err) => {
-                    set_last_error(Some(format!("failed to build CString for extract JSON result: {err}")));
+                    set_last_error(Some(format!("failed to build CString for convert JSON result: {err}")));
                     set_last_error_code(HtmlToMarkdownErrorCode::Internal);
                     ptr::null_mut()
                 }

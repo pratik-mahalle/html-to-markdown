@@ -18,7 +18,11 @@
 //! - Support visitor VisitResult types (:continue, {:custom, md}, :skip, etc.)
 //! - Requires: async/await in NIF, "visitor" feature in html-to-markdown-rs
 
-use html_to_markdown_rs::{ConversionOptions, Result, convert as convert_inner};
+use html_to_markdown_rs::{ConversionOptions, Result, convert};
+
+fn convert_inner(html: &str, options: Option<ConversionOptions>) -> Result<String> {
+    convert(html, options).map(|r| r.content.unwrap_or_default())
+}
 use rustler::{Env, Term};
 
 /// Convert HTML to Markdown with a visitor.
