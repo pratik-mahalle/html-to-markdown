@@ -158,12 +158,6 @@ fn non_empty_trimmed(value: &str) -> Option<String> {
     }
 }
 
-/// Encode SVG to base64 data URI.
-pub(crate) fn encode_svg_to_data_uri(svg_html: &str) -> String {
-    use base64::{Engine as _, engine::general_purpose::STANDARD};
-    STANDARD.encode(svg_html.as_bytes())
-}
-
 /// Handle SVG element conversion to Markdown.
 ///
 /// Extracts title from child elements, handles inline image collection,

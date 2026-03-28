@@ -145,6 +145,21 @@ class ConversionOptions:
     debug: bool = False
     """Enable debug mode with diagnostic warnings about unhandled elements and hOCR processing."""
 
+    include_document_structure: bool = False
+    """Include document structure in conversion output."""
+
+    extract_images: bool = False
+    """Extract images during conversion."""
+
+    max_image_size: int = 5_242_880
+    """Maximum image size in bytes (default 5 MiB)."""
+
+    capture_svg: bool = False
+    """Capture SVG elements as images."""
+
+    infer_dimensions: bool = True
+    """Infer image dimensions from data URIs."""
+
 
 @dataclass
 class PreprocessingOptions:

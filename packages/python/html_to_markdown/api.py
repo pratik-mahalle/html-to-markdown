@@ -124,7 +124,7 @@ def _rust_options(
     if preprocessing is None:
         preprocessing = PreprocessingOptions()
 
-    return _rust.ConversionOptions(
+    rust_opts = _rust.ConversionOptions(
         heading_style=options.heading_style,
         list_indent_type=options.list_indent_type,
         list_indent_width=options.list_indent_width,
@@ -158,6 +158,17 @@ def _rust_options(
         skip_images=options.skip_images,
         output_format=options.output_format,
     )
+    if options.include_document_structure:
+        rust_opts.include_document_structure = options.include_document_structure
+    if options.extract_images:
+        rust_opts.extract_images = options.extract_images
+    if options.max_image_size != 5_242_880:
+        rust_opts.max_image_size = options.max_image_size
+    if options.capture_svg:
+        rust_opts.capture_svg = options.capture_svg
+    if not options.infer_dimensions:
+        rust_opts.infer_dimensions = options.infer_dimensions
+    return rust_opts
 
 
 def _build_inline_image_config(config: InlineImageConfig | dict[str, object] | None) -> InlineImageConfig:

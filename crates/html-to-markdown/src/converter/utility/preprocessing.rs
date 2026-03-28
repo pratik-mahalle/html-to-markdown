@@ -291,7 +291,11 @@ pub(crate) fn preprocess_html(input: &str) -> Cow<'_, str> {
                             out.push_str(&input[last..idx]);
                             out.push_str(&input[idx..open_end]);
                             out.push_str("</");
-                            out.push_str(str::from_utf8(tag).unwrap());
+                            // `TAGS` contains only ASCII byte literals (`b"script"`, `b"style"`),
+                            // which are always valid UTF-8; `from_utf8` cannot fail here.
+                            if let Ok(tag_str) = str::from_utf8(tag) {
+                                out.push_str(tag_str);
+                            }
                             out.push('>');
 
                             last = remove_end;

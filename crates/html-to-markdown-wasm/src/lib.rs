@@ -1,7 +1,5 @@
 #![allow(clippy::all, clippy::pedantic, clippy::nursery, missing_docs)]
 #![deny(clippy::correctness, clippy::suspicious)]
-#![warn(clippy::all)]
-#![allow(clippy::all, clippy::pedantic, clippy::nursery)]
 
 // Module declarations
 mod convert;

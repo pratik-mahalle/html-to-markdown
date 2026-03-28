@@ -145,8 +145,8 @@ pub fn extract_head_metadata(
                 if let Some(tl::Node::Tag(child_tag)) = child_handle.get(parser) {
                     // Look for meta tags
                     if child_tag.name().as_utf8_str().eq_ignore_ascii_case("meta")
-                        && !options.strip_tags.contains(&"meta".to_string())
-                        && !options.preserve_tags.contains(&"meta".to_string())
+                        && !options.strip_tags.iter().any(|t| t == "meta")
+                        && !options.preserve_tags.iter().any(|t| t == "meta")
                     {
                         if let (Some(name), Some(content)) = (
                             child_tag.attributes().get("name").flatten(),
@@ -168,8 +168,8 @@ pub fn extract_head_metadata(
                     }
                     // Look for title tag
                     if child_tag.name().as_utf8_str().eq_ignore_ascii_case("title")
-                        && !options.strip_tags.contains(&"title".to_string())
-                        && !options.preserve_tags.contains(&"title".to_string())
+                        && !options.strip_tags.iter().any(|t| t == "title")
+                        && !options.preserve_tags.iter().any(|t| t == "title")
                     {
                         // Extract text content from title tag
                         let mut title_content = String::new();

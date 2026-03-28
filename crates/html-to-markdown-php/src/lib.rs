@@ -1,6 +1,6 @@
-#![allow(clippy::all, clippy::pedantic, clippy::nursery, missing_docs)]
+#![allow(clippy::pedantic, clippy::nursery, missing_docs)]
 #![cfg_attr(windows, feature(abi_vectorcall))]
-#![deny(clippy::all)]
+#![deny(clippy::correctness, clippy::suspicious)]
 
 use ext_php_rs::boxed::ZBox;
 use ext_php_rs::prelude::*;

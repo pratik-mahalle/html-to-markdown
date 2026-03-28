@@ -29,7 +29,7 @@ use crate::options::validation::{
 )]
 #[cfg_attr(
     any(feature = "serde", feature = "metadata"),
-    serde(rename_all = "camelCase", default)
+    serde(rename_all = "camelCase", default, deny_unknown_fields)
 )]
 pub struct ConversionOptions {
     /// Heading style to use in Markdown output (ATX `#` or Setext underline).
@@ -152,162 +152,11 @@ impl Default for ConversionOptions {
     }
 }
 
-// ── Public getters ──────────────────────────────────────────────────────────
-
 impl ConversionOptions {
     /// Create a new builder with default values.
     #[must_use]
     pub fn builder() -> ConversionOptionsBuilder {
         ConversionOptionsBuilder(Self::default())
-    }
-
-    /// Get the heading style option.
-    pub fn heading_style(&self) -> HeadingStyle {
-        self.heading_style
-    }
-    /// Get the list indent type option.
-    pub fn list_indent_type(&self) -> ListIndentType {
-        self.list_indent_type
-    }
-    /// Get the list indent width option.
-    pub fn list_indent_width(&self) -> usize {
-        self.list_indent_width
-    }
-    /// Get the bullet characters option.
-    pub fn bullets(&self) -> &str {
-        &self.bullets
-    }
-    /// Get the strong/emphasis symbol option.
-    pub fn strong_em_symbol(&self) -> char {
-        self.strong_em_symbol
-    }
-    /// Get the escape asterisks option.
-    pub fn escape_asterisks(&self) -> bool {
-        self.escape_asterisks
-    }
-    /// Get the escape underscores option.
-    pub fn escape_underscores(&self) -> bool {
-        self.escape_underscores
-    }
-    /// Get the escape misc option.
-    pub fn escape_misc(&self) -> bool {
-        self.escape_misc
-    }
-    /// Get the escape ASCII option.
-    pub fn escape_ascii(&self) -> bool {
-        self.escape_ascii
-    }
-    /// Get the default code language option.
-    pub fn code_language(&self) -> &str {
-        &self.code_language
-    }
-    /// Get the autolinks option.
-    pub fn autolinks(&self) -> bool {
-        self.autolinks
-    }
-    /// Get the default title option.
-    pub fn default_title(&self) -> bool {
-        self.default_title
-    }
-    /// Get the br-in-tables option.
-    pub fn br_in_tables(&self) -> bool {
-        self.br_in_tables
-    }
-    /// Get the highlight style option.
-    pub fn highlight_style(&self) -> HighlightStyle {
-        self.highlight_style
-    }
-    /// Get the extract metadata option.
-    pub fn extract_metadata(&self) -> bool {
-        self.extract_metadata
-    }
-    /// Get the whitespace mode option.
-    pub fn whitespace_mode(&self) -> WhitespaceMode {
-        self.whitespace_mode
-    }
-    /// Get the strip newlines option.
-    pub fn strip_newlines(&self) -> bool {
-        self.strip_newlines
-    }
-    /// Get the wrap option.
-    pub fn wrap(&self) -> bool {
-        self.wrap
-    }
-    /// Get the wrap width option.
-    pub fn wrap_width(&self) -> usize {
-        self.wrap_width
-    }
-    /// Get the convert-as-inline option.
-    pub fn convert_as_inline(&self) -> bool {
-        self.convert_as_inline
-    }
-    /// Get the subscript symbol option.
-    pub fn sub_symbol(&self) -> &str {
-        &self.sub_symbol
-    }
-    /// Get the superscript symbol option.
-    pub fn sup_symbol(&self) -> &str {
-        &self.sup_symbol
-    }
-    /// Get the newline style option.
-    pub fn newline_style(&self) -> NewlineStyle {
-        self.newline_style
-    }
-    /// Get the code block style option.
-    pub fn code_block_style(&self) -> CodeBlockStyle {
-        self.code_block_style
-    }
-    /// Get the keep-inline-images-in tag list option.
-    pub fn keep_inline_images_in(&self) -> &[String] {
-        &self.keep_inline_images_in
-    }
-    /// Get the preprocessing options.
-    pub fn preprocessing(&self) -> &PreprocessingOptions {
-        &self.preprocessing
-    }
-    /// Get the encoding option.
-    pub fn encoding(&self) -> &str {
-        &self.encoding
-    }
-    /// Get the debug option.
-    pub fn debug(&self) -> bool {
-        self.debug
-    }
-    /// Get the strip tags list option.
-    pub fn strip_tags(&self) -> &[String] {
-        &self.strip_tags
-    }
-    /// Get the preserve tags list option.
-    pub fn preserve_tags(&self) -> &[String] {
-        &self.preserve_tags
-    }
-    /// Get the skip images option.
-    pub fn skip_images(&self) -> bool {
-        self.skip_images
-    }
-    /// Get the output format option.
-    pub fn output_format(&self) -> OutputFormat {
-        self.output_format
-    }
-    /// Get the include document structure option.
-    pub fn include_document_structure(&self) -> bool {
-        self.include_document_structure
-    }
-    /// Get the extract images option.
-    pub fn extract_images(&self) -> bool {
-        self.extract_images
-    }
-    /// Get the maximum image size option.
-    pub fn max_image_size(&self) -> u64 {
-        self.max_image_size
-    }
-    /// Get the capture SVG option.
-    pub fn capture_svg(&self) -> bool {
-        self.capture_svg
-    }
-    /// Get the infer dimensions option.
-    pub fn infer_dimensions(&self) -> bool {
-        self.infer_dimensions
     }
 }
 
@@ -440,7 +289,10 @@ use crate::options::preprocessing::PreprocessingOptionsUpdate;
     any(feature = "serde", feature = "metadata"),
     derive(serde::Serialize, serde::Deserialize)
 )]
-#[cfg_attr(any(feature = "serde", feature = "metadata"), serde(rename_all = "camelCase"))]
+#[cfg_attr(
+    any(feature = "serde", feature = "metadata"),
+    serde(rename_all = "camelCase", deny_unknown_fields)
+)]
 pub struct ConversionOptionsUpdate {
     /// Optional override for [`ConversionOptions::heading_style`].
     pub heading_style: Option<HeadingStyle>,
@@ -639,10 +491,10 @@ mod tests {
             .extract_images(true)
             .build();
 
-        assert_eq!(options.heading_style(), HeadingStyle::Underlined);
-        assert!(options.wrap());
-        assert_eq!(options.wrap_width(), 100);
-        assert!(options.include_document_structure());
-        assert!(options.extract_images());
+        assert_eq!(options.heading_style, HeadingStyle::Underlined);
+        assert!(options.wrap);
+        assert_eq!(options.wrap_width, 100);
+        assert!(options.include_document_structure);
+        assert!(options.extract_images);
     }
 }

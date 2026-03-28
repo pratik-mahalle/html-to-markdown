@@ -26,18 +26,14 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: All elements
     /// Frequency: high
     fn visit_element_start(&self, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.element_start.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.element_start else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
-        let result = unsafe { (self.callbacks.element_start.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx)) };
+        let result = unsafe { cb(self.callbacks.user_data, ptr::addr_of!(c_ctx)) };
         // Convert C result back to Rust VisitResult
         convert_c_visit_result(result)
     }
@@ -47,18 +43,14 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <br>, <br/>
     /// Frequency: medium
     fn visit_line_break(&self, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.line_break.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.line_break else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
-        let result = unsafe { (self.callbacks.line_break.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx)) };
+        let result = unsafe { cb(self.callbacks.user_data, ptr::addr_of!(c_ctx)) };
         // Convert C result back to Rust VisitResult
         convert_c_visit_result(result)
     }
@@ -68,19 +60,15 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <hr>, <hr/>
     /// Frequency: low
     fn visit_horizontal_rule(&self, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.horizontal_rule.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.horizontal_rule else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result =
-            unsafe { (self.callbacks.horizontal_rule.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx)) };
+            unsafe { cb(self.callbacks.user_data, ptr::addr_of!(c_ctx)) };
         // Convert C result back to Rust VisitResult
         convert_c_visit_result(result)
     }
@@ -90,18 +78,14 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <table>
     /// Frequency: low
     fn visit_table_start(&self, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.table_start.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.table_start else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
-        let result = unsafe { (self.callbacks.table_start.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx)) };
+        let result = unsafe { cb(self.callbacks.user_data, ptr::addr_of!(c_ctx)) };
         // Convert C result back to Rust VisitResult
         convert_c_visit_result(result)
     }
@@ -111,19 +95,15 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <dl>
     /// Frequency: low
     fn visit_definition_list_start(&self, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.definition_list_start.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.definition_list_start else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result =
-            unsafe { (self.callbacks.definition_list_start.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx)) };
+            unsafe { cb(self.callbacks.user_data, ptr::addr_of!(c_ctx)) };
         // Convert C result back to Rust VisitResult
         convert_c_visit_result(result)
     }
@@ -133,18 +113,14 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <figure>
     /// Frequency: low
     fn visit_figure_start(&self, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.figure_start.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.figure_start else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
-        let result = unsafe { (self.callbacks.figure_start.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx)) };
+        let result = unsafe { cb(self.callbacks.user_data, ptr::addr_of!(c_ctx)) };
         // Convert C result back to Rust VisitResult
         convert_c_visit_result(result)
     }
@@ -154,10 +130,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: Text nodes
     /// Frequency: very_high
     fn visit_text(&self, text: &str, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.text.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.text else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -170,8 +143,7 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
-        let result = unsafe { (self.callbacks.text.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_text) };
+        let result = unsafe { cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_text) };
         // Free allocated string
         // SAFETY: Pointer was allocated by CString::into_raw above
         unsafe {
@@ -186,10 +158,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <strong>, <b>
     /// Frequency: medium
     fn visit_strong(&self, text: &str, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.strong.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.strong else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -202,9 +171,8 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result =
-            unsafe { (self.callbacks.strong.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_text) };
+            unsafe { cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_text) };
         // Free allocated string
         // SAFETY: Pointer was allocated by CString::into_raw above
         unsafe {
@@ -219,10 +187,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <em>, <i>
     /// Frequency: medium
     fn visit_emphasis(&self, text: &str, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.emphasis.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.emphasis else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -235,9 +200,8 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result =
-            unsafe { (self.callbacks.emphasis.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_text) };
+            unsafe { cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_text) };
         // Free allocated string
         // SAFETY: Pointer was allocated by CString::into_raw above
         unsafe {
@@ -252,10 +216,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <s>, <del>, <strike>
     /// Frequency: low
     fn visit_strikethrough(&self, text: &str, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.strikethrough.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.strikethrough else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -268,9 +229,8 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result =
-            unsafe { (self.callbacks.strikethrough.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_text) };
+            unsafe { cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_text) };
         // Free allocated string
         // SAFETY: Pointer was allocated by CString::into_raw above
         unsafe {
@@ -285,10 +245,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <u>, <ins>
     /// Frequency: low
     fn visit_underline(&self, text: &str, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.underline.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.underline else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -301,9 +258,8 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result =
-            unsafe { (self.callbacks.underline.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_text) };
+            unsafe { cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_text) };
         // Free allocated string
         // SAFETY: Pointer was allocated by CString::into_raw above
         unsafe {
@@ -318,10 +274,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <sub>
     /// Frequency: low
     fn visit_subscript(&self, text: &str, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.subscript.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.subscript else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -334,9 +287,8 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result =
-            unsafe { (self.callbacks.subscript.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_text) };
+            unsafe { cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_text) };
         // Free allocated string
         // SAFETY: Pointer was allocated by CString::into_raw above
         unsafe {
@@ -351,10 +303,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <sup>
     /// Frequency: low
     fn visit_superscript(&self, text: &str, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.superscript.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.superscript else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -367,9 +316,8 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result =
-            unsafe { (self.callbacks.superscript.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_text) };
+            unsafe { cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_text) };
         // Free allocated string
         // SAFETY: Pointer was allocated by CString::into_raw above
         unsafe {
@@ -384,10 +332,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <mark>
     /// Frequency: low
     fn visit_mark(&self, text: &str, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.mark.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.mark else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -400,8 +345,7 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
-        let result = unsafe { (self.callbacks.mark.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_text) };
+        let result = unsafe { cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_text) };
         // Free allocated string
         // SAFETY: Pointer was allocated by CString::into_raw above
         unsafe {
@@ -416,10 +360,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <code>
     /// Frequency: medium
     fn visit_code_inline(&self, code: &str, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.code_inline.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.code_inline else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -432,9 +373,8 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result =
-            unsafe { (self.callbacks.code_inline.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_code) };
+            unsafe { cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_code) };
         // Free allocated string
         // SAFETY: Pointer was allocated by CString::into_raw above
         unsafe {
@@ -449,10 +389,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: All elements
     /// Frequency: high
     fn visit_element_end(&self, output: &str, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.element_end.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.element_end else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -465,9 +402,8 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result =
-            unsafe { (self.callbacks.element_end.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_output) };
+            unsafe { cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_output) };
         // Free allocated string
         // SAFETY: Pointer was allocated by CString::into_raw above
         unsafe {
@@ -482,10 +418,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: </table>
     /// Frequency: low
     fn visit_table_end(&self, output: &str, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.table_end.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.table_end else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -498,9 +431,8 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result =
-            unsafe { (self.callbacks.table_end.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_output) };
+            unsafe { cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_output) };
         // Free allocated string
         // SAFETY: Pointer was allocated by CString::into_raw above
         unsafe {
@@ -515,10 +447,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <dt>
     /// Frequency: low
     fn visit_definition_term(&self, text: &str, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.definition_term.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.definition_term else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -531,9 +460,8 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result = unsafe {
-            (self.callbacks.definition_term.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_text)
+            cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_text)
         };
         // Free allocated string
         // SAFETY: Pointer was allocated by CString::into_raw above
@@ -549,10 +477,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <dd>
     /// Frequency: low
     fn visit_definition_description(&self, text: &str, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.definition_description.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.definition_description else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -565,9 +490,8 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result = unsafe {
-            (self.callbacks.definition_description.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_text)
+            cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_text)
         };
         // Free allocated string
         // SAFETY: Pointer was allocated by CString::into_raw above
@@ -583,10 +507,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: </dl>
     /// Frequency: low
     fn visit_definition_list_end(&self, output: &str, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.definition_list_end.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.definition_list_end else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -599,9 +520,8 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result = unsafe {
-            (self.callbacks.definition_list_end.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_output)
+            cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_output)
         };
         // Free allocated string
         // SAFETY: Pointer was allocated by CString::into_raw above
@@ -617,10 +537,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <summary>
     /// Frequency: low
     fn visit_summary(&self, text: &str, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.summary.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.summary else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -633,9 +550,8 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result =
-            unsafe { (self.callbacks.summary.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_text) };
+            unsafe { cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_text) };
         // Free allocated string
         // SAFETY: Pointer was allocated by CString::into_raw above
         unsafe {
@@ -650,10 +566,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <figcaption>
     /// Frequency: low
     fn visit_figcaption(&self, text: &str, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.figcaption.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.figcaption else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -666,9 +579,8 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result =
-            unsafe { (self.callbacks.figcaption.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_text) };
+            unsafe { cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_text) };
         // Free allocated string
         // SAFETY: Pointer was allocated by CString::into_raw above
         unsafe {
@@ -683,10 +595,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <a href="...">
     /// Frequency: high
     fn visit_link(&self, href: &str, text: &str, title: &Option<String>, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.link.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.link else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -713,9 +622,8 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result = unsafe {
-            (self.callbacks.link.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_href, c_text, c_title)
+            cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_href, c_text, c_title)
         };
         // Free allocated string
         // SAFETY: Pointer was allocated by CString::into_raw above
@@ -743,10 +651,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <img src="..." alt="...">
     /// Frequency: medium
     fn visit_image(&self, src: &str, alt: &str, title: &Option<String>, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.image.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.image else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -773,9 +678,8 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result = unsafe {
-            (self.callbacks.image.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_src, c_alt, c_title)
+            cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_src, c_alt, c_title)
         };
         // Free allocated string
         // SAFETY: Pointer was allocated by CString::into_raw above
@@ -803,10 +707,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <pre><code>
     /// Frequency: medium
     fn visit_code_block(&self, lang: &Option<String>, code: &str, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.code_block.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.code_block else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -827,9 +728,8 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result = unsafe {
-            (self.callbacks.code_block.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_lang, c_code)
+            cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_lang, c_code)
         };
         // Free nullable string if it was allocated
         if !c_lang.is_null() {
@@ -852,10 +752,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <li>
     /// Frequency: medium
     fn visit_list_item(&self, ordered: bool, marker: &str, text: &str, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.list_item.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.list_item else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -874,9 +771,8 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result = unsafe {
-            (self.callbacks.list_item.unwrap())(
+            cb(
                 self.callbacks.user_data,
                 ptr::addr_of!(c_ctx),
                 ordered,
@@ -903,10 +799,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: </ul>, </ol>
     /// Frequency: medium
     fn visit_list_end(&self, ordered: bool, output: &str, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.list_end.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.list_end else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -919,9 +812,8 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result = unsafe {
-            (self.callbacks.list_end.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), ordered, c_output)
+            cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), ordered, c_output)
         };
         // Free allocated string
         // SAFETY: Pointer was allocated by CString::into_raw above
@@ -937,10 +829,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <blockquote>
     /// Frequency: medium
     fn visit_blockquote(&self, content: &str, depth: usize, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.blockquote.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.blockquote else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -953,9 +842,8 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result = unsafe {
-            (self.callbacks.blockquote.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_content, depth)
+            cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_content, depth)
         };
         // Free allocated string
         // SAFETY: Pointer was allocated by CString::into_raw above
@@ -971,10 +859,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: Unknown elements
     /// Frequency: low
     fn visit_custom_element(&self, tag_name: &str, content: &str, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.custom_element.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.custom_element else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -993,9 +878,8 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result = unsafe {
-            (self.callbacks.custom_element.unwrap())(
+            cb(
                 self.callbacks.user_data,
                 ptr::addr_of!(c_ctx),
                 c_tag_name,
@@ -1021,10 +905,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <form>
     /// Frequency: low
     fn visit_form(&self, action: &Option<String>, method: &Option<String>, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.form.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.form else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -1047,9 +928,8 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result = unsafe {
-            (self.callbacks.form.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_action, c_method)
+            cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_action, c_method)
         };
         // Free nullable string if it was allocated
         if !c_action.is_null() {
@@ -1080,10 +960,7 @@ impl HtmlVisitor for CVisitorWrapper {
         value: &Option<String>,
         ctx: &NodeContext,
     ) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.input.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.input else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -1114,9 +991,8 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result = unsafe {
-            (self.callbacks.input.unwrap())(
+            cb(
                 self.callbacks.user_data,
                 ptr::addr_of!(c_ctx),
                 c_input_type,
@@ -1154,10 +1030,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <button>
     /// Frequency: low
     fn visit_button(&self, text: &str, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.button.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.button else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -1170,9 +1043,8 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result =
-            unsafe { (self.callbacks.button.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_text) };
+            unsafe { cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_text) };
         // Free allocated string
         // SAFETY: Pointer was allocated by CString::into_raw above
         unsafe {
@@ -1187,10 +1059,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <audio>
     /// Frequency: low
     fn visit_audio(&self, src: &Option<String>, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.audio.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.audio else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -1205,8 +1074,7 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
-        let result = unsafe { (self.callbacks.audio.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_src) };
+        let result = unsafe { cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_src) };
         // Free nullable string if it was allocated
         if !c_src.is_null() {
             // SAFETY: Pointer was allocated by CString::into_raw above
@@ -1223,10 +1091,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <video>
     /// Frequency: low
     fn visit_video(&self, src: &Option<String>, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.video.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.video else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -1241,8 +1106,7 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
-        let result = unsafe { (self.callbacks.video.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_src) };
+        let result = unsafe { cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_src) };
         // Free nullable string if it was allocated
         if !c_src.is_null() {
             // SAFETY: Pointer was allocated by CString::into_raw above
@@ -1259,10 +1123,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <iframe>
     /// Frequency: low
     fn visit_iframe(&self, src: &Option<String>, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.iframe.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.iframe else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -1277,8 +1138,7 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
-        let result = unsafe { (self.callbacks.iframe.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_src) };
+        let result = unsafe { cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_src) };
         // Free nullable string if it was allocated
         if !c_src.is_null() {
             // SAFETY: Pointer was allocated by CString::into_raw above
@@ -1295,10 +1155,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <h1> through <h6>
     /// Frequency: medium
     fn visit_heading(&self, level: u32, text: &str, id: &Option<String>, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.heading.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.heading else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -1319,9 +1176,8 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result = unsafe {
-            (self.callbacks.heading.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), level, c_text, c_id)
+            cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), level, c_text, c_id)
         };
         // Free allocated string
         // SAFETY: Pointer was allocated by CString::into_raw above
@@ -1344,19 +1200,15 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <ul>, <ol>
     /// Frequency: medium
     fn visit_list_start(&self, ordered: bool, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.list_start.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.list_start else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result =
-            unsafe { (self.callbacks.list_start.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), ordered) };
+            unsafe { cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), ordered) };
         // Convert C result back to Rust VisitResult
         convert_c_visit_result(result)
     }
@@ -1366,10 +1218,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <tr>
     /// Frequency: low
     fn visit_table_row(&self, cells: &[String], is_header: bool, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.table_row.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.table_row else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -1389,9 +1238,8 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result = unsafe {
-            (self.callbacks.table_row.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_cells, is_header)
+            cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_cells, is_header)
         };
         // Free string array elements (excluding null terminator)
         for ptr in c_cells_vec.iter().take(cells.len()) {
@@ -1409,18 +1257,14 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: <details>
     /// Frequency: low
     fn visit_details(&self, open: bool, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.details.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.details else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
-        let result = unsafe { (self.callbacks.details.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), open) };
+        let result = unsafe { cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), open) };
         // Convert C result back to Rust VisitResult
         convert_c_visit_result(result)
     }
@@ -1430,10 +1274,7 @@ impl HtmlVisitor for CVisitorWrapper {
     /// HTML elements: </figure>
     /// Frequency: low
     fn visit_figure_end(&self, output: &str, ctx: &NodeContext) -> VisitResult {
-        // Check if callback is registered
-        if self.callbacks.figure_end.is_none() {
-            return VisitResult::Continue;
-        }
+        let Some(cb) = self.callbacks.figure_end else { return VisitResult::Continue; };
 
         // Convert NodeContext to C-compatible format
         let c_ctx = HtmlToMarkdownNodeContext::from_node_context(ctx);
@@ -1446,9 +1287,8 @@ impl HtmlVisitor for CVisitorWrapper {
         // Call the C callback
         // SAFETY: Callback function pointer is validated at registration time.
         // All pointer arguments are properly allocated and valid for the callback duration.
-        #[allow(clippy::unwrap_used)]
         let result =
-            unsafe { (self.callbacks.figure_end.unwrap())(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_output) };
+            unsafe { cb(self.callbacks.user_data, ptr::addr_of!(c_ctx), c_output) };
         // Free allocated string
         // SAFETY: Pointer was allocated by CString::into_raw above
         unsafe {
