@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from html_to_markdown import ConversionOptions, PreprocessingOptions, convert
+from html_to_markdown import ConversionOptions, PreprocessingOptions, convert_to_string
 
 if TYPE_CHECKING:
     from pytest_benchmark.fixture import BenchmarkFixture
@@ -21,19 +21,19 @@ class TestBenchmarkCore:
     @pytest.mark.benchmark(group="conversion_v2")
     def test_benchmark_small_document(self, benchmark: BenchmarkFixture) -> None:
         html = generate_complex_html(size_factor=5)
-        result = benchmark(convert, html)
+        result = benchmark(convert_to_string, html)
         assert len(result) > 0
 
     @pytest.mark.benchmark(group="conversion_v2")
     def test_benchmark_medium_document(self, benchmark: BenchmarkFixture) -> None:
         html = generate_complex_html(size_factor=25)
-        result = benchmark(convert, html)
+        result = benchmark(convert_to_string, html)
         assert len(result) > 0
 
     @pytest.mark.benchmark(group="conversion_v2")
     def test_benchmark_large_document(self, benchmark: BenchmarkFixture) -> None:
         html = generate_complex_html(size_factor=100)
-        result = benchmark(convert, html)
+        result = benchmark(convert_to_string, html)
         assert len(result) > 0
 
 
@@ -58,7 +58,7 @@ class TestBenchmarkFeatures:
         """
         )
 
-        result = benchmark(convert, html)
+        result = benchmark(convert_to_string, html)
         assert "| Col1 |" in result
 
     @pytest.mark.benchmark(group="features_v2")
@@ -76,7 +76,7 @@ class TestBenchmarkFeatures:
             + "</body></html>"
         )
 
-        result = benchmark(convert, html)
+        result = benchmark(convert_to_string, html)
         assert "* List item" in result or "- List item" in result
 
     @pytest.mark.benchmark(group="features_v2")
@@ -93,7 +93,7 @@ class TestBenchmarkFeatures:
             + "</body></html>"
         )
 
-        result = benchmark(convert, html)
+        result = benchmark(convert_to_string, html)
         assert "**bold**" in result
 
 
@@ -103,7 +103,7 @@ class TestBenchmarkConfiguration:
         html = generate_complex_html(size_factor=20)
         options = ConversionOptions(whitespace_mode="normalized")
 
-        result = benchmark(convert, html, options)
+        result = benchmark(convert_to_string, html, options)
         assert len(result) > 0
 
     @pytest.mark.benchmark(group="config_v2")
@@ -111,7 +111,7 @@ class TestBenchmarkConfiguration:
         html = generate_complex_html(size_factor=20)
         preprocessing = PreprocessingOptions(enabled=True, preset="aggressive")
 
-        result = benchmark(convert, html, preprocessing=preprocessing)
+        result = benchmark(convert_to_string, html, preprocessing=preprocessing)
         assert len(result) > 0
 
 
@@ -119,7 +119,7 @@ class TestBenchmarkConfiguration:
 @pytest.mark.parametrize("size_factor", [5, 10, 25, 50, 100])
 def test_benchmark_scalability(benchmark: BenchmarkFixture, size_factor: int) -> None:
     html = generate_complex_html(size_factor=size_factor)
-    result = benchmark(convert, html)
+    result = benchmark(convert_to_string, html)
     assert len(result) > 0
 
     input_size_mb = len(html) / (1024 * 1024)
