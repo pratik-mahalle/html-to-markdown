@@ -174,7 +174,7 @@ pub fn validate_strong_em_symbol(s: &str) -> Result<char, String> {
     if s.len() != 1 {
         return Err("strong_em_symbol must be exactly one character".to_string());
     }
-    let c = s.chars().next().unwrap();
+    let c = s.chars().next().expect("length already validated");
     if c != '*' && c != '_' {
         return Err("strong_em_symbol must be '*' or '_'".to_string());
     }

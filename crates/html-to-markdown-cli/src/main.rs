@@ -51,7 +51,11 @@ fn read_input(cli: &Cli) -> Result<String, Box<dyn std::error::Error>> {
     let html = match cli.input.as_deref() {
         _ if cli.url.is_some() => {
             let user_agent = cli.user_agent.as_deref().unwrap_or(DEFAULT_USER_AGENT);
-            let fetched = fetch_url(cli.url.as_deref().unwrap(), user_agent, &cli.encoding)?;
+            let fetched = fetch_url(
+                cli.url.as_deref().expect("url already checked"),
+                user_agent,
+                &cli.encoding,
+            )?;
             output_debug_info(cli, &format!("Fetched {} bytes from URL", fetched.len()));
             fetched
         }

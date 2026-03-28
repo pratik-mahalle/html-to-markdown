@@ -10,9 +10,9 @@ use std::env;
 use std::path::PathBuf;
 
 fn main() {
-    let crate_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-    let out_dir = env::var("OUT_DIR").unwrap();
-    let version = env::var("CARGO_PKG_VERSION").unwrap();
+    let crate_dir = env::var("CARGO_MANIFEST_DIR").expect("env var: CARGO_MANIFEST_DIR");
+    let out_dir = env::var("OUT_DIR").expect("env var: OUT_DIR");
+    let version = env::var("CARGO_PKG_VERSION").expect("env var: CARGO_PKG_VERSION");
     let output_file = PathBuf::from(&crate_dir).join("html_to_markdown.h");
 
     // ── cbindgen: generate C header ──────────────────────────────────
@@ -21,7 +21,7 @@ fn main() {
         .write_to_file(&output_file);
 
     // ── Phase 2: inject version defines into the generated header ────
-    let header_content = std::fs::read_to_string(&output_file).unwrap();
+    let header_content = std::fs::read_to_string(&output_file).expect("failed to read generated C header file");
     let parts: Vec<&str> = version.split('.').collect();
     let major = parts.first().unwrap_or(&"0");
     let minor = parts.get(1).unwrap_or(&"0");
@@ -46,7 +46,7 @@ fn main() {
         injected.contains("HTML_TO_MARKDOWN_VERSION_MAJOR"),
         "Version injection failed: cbindgen autogen_warning marker not found in generated header"
     );
-    std::fs::write(&output_file, injected).unwrap();
+    std::fs::write(&output_file, injected).expect("failed to write C header with version defines");
 
     // ── pkg-config: generate .pc files ───────────────────────────────
     generate_pkg_config(&crate_dir, &out_dir, &version);
@@ -76,7 +76,7 @@ fn generate_pkg_config(crate_dir: &str, out_dir: &str, version: &str) {
     // OUT_DIR is something like target/debug/build/<crate>/out
     // We need to walk up to target/<profile>/
     let out_path = PathBuf::from(out_dir);
-    let target_dir = out_path.ancestors().nth(3).unwrap_or(out_path.as_path()).to_path_buf();
+    let target_dir = out_path.ancestors().nth(3).unwrap_or(out_path.as_path()).to_path_buf(); // nth(3) may be absent in unusual build setups; fallback to out_path
 
     // ── Development .pc (points to build artifacts) ──────────────────
     let target_dir_display = target_dir.display();
@@ -97,7 +97,7 @@ Cflags: -I${{includedir}}
     );
 
     let dev_pc_path = PathBuf::from(out_dir).join("html-to-markdown-ffi.pc");
-    std::fs::write(&dev_pc_path, dev_pc).unwrap();
+    std::fs::write(&dev_pc_path, dev_pc).expect("failed to write development pkg-config .pc file");
 
     // ── Install .pc (from .pc.in template with /usr/local prefix) ────
     let template_path = PathBuf::from(crate_dir).join("html-to-markdown-ffi.pc.in");

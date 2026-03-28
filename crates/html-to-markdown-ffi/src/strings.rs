@@ -19,8 +19,7 @@ use std::ffi::CString;
 /// # Safety
 ///
 /// This function checks for interior null bytes and will fail if any are found.
-#[allow(dead_code)]
-pub fn bytes_to_c_string(bytes: Vec<u8>, context: &str) -> Result<CString, String> {
+pub(crate) fn bytes_to_c_string(bytes: Vec<u8>, context: &str) -> Result<CString, String> {
     if bytes.contains(&0) {
         return Err(format!("{context} contained an interior null byte"));
     }
@@ -38,8 +37,7 @@ pub fn bytes_to_c_string(bytes: Vec<u8>, context: &str) -> Result<CString, Strin
 /// # Returns
 ///
 /// `Ok(CString)` if successful, `Err(String)` if the string contains interior null bytes
-#[allow(dead_code)]
-pub fn string_to_c_string(value: String, context: &str) -> Result<CString, String> {
+pub(crate) fn string_to_c_string(value: String, context: &str) -> Result<CString, String> {
     bytes_to_c_string(value.into_bytes(), context)
 }
 

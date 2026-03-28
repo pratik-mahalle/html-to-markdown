@@ -7,7 +7,6 @@ mod escaping;
 mod normalization;
 mod processing;
 
-pub use crate::converter::main_helpers::trim_trailing_whitespace;
 pub use escaping::{escape_link_label, escape_malformed_angle_brackets};
 pub use normalization::{normalize_heading_text, trim_line_end_whitespace, truncate_at_char_boundary};
 pub use processing::dedent_code_block;
