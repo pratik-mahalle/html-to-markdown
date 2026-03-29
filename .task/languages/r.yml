@@ -128,6 +128,8 @@ tasks:
   e2e:test:
     desc: "Run R E2E tests in e2e/r directory"
     silent: false
+    deps:
+      - build
     cmds:
       - cmd: cd e2e/r && Rscript tests/testthat.R
         ignore_error: false
