@@ -22,5 +22,3 @@ pub use crate::options::{
     NewlineStyle, OutputFormat, PreprocessingOptions, PreprocessingOptionsUpdate, PreprocessingPreset, WhitespaceMode,
 };
 
-#[cfg(feature = "async-visitor")]
-pub use crate::visitor_helpers::AsyncVisitorHandle;
