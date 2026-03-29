@@ -29,47 +29,81 @@ package htmltomarkdown
 // bool html_to_markdown_profile_stop_proxy(void);
 import "C"
 import (
+	"encoding/json"
 	"errors"
 	"unsafe"
 )
 
 const unknownValue = "unknown"
 
+// Warning represents a warning emitted during HTML to Markdown conversion.
+type Warning struct {
+	Message string `json:"message"`
+	Kind    string `json:"kind"`
+}
+
+// TableData represents a table extracted during conversion.
+type TableData struct {
+	Cells      [][]string `json:"cells"`
+	Markdown   string     `json:"markdown"`
+	IsHeaderRow []bool    `json:"is_header_row"`
+}
+
+// ConversionResult holds the structured output from HTML to Markdown conversion.
+type ConversionResult struct {
+	Content  *string           `json:"content"`
+	Document json.RawMessage   `json:"document"`
+	Metadata json.RawMessage   `json:"metadata"`
+	Tables   []TableData       `json:"tables"`
+	Images   []json.RawMessage `json:"images"`
+	Warnings []Warning         `json:"warnings"`
+}
+
 // Convert converts HTML to Markdown using default options.
 //
-// It returns the converted Markdown string or an error if the conversion fails.
+// It returns a ConversionResult containing the converted Markdown string,
+// metadata, tables, images, and warnings, or an error if the conversion fails.
 // The function handles memory management automatically using defer.
 //
 // Example:
 //
-//	markdown, err := htmltomarkdown.Convert("<h1>Title</h1>")
+//	result, err := htmltomarkdown.Convert("<h1>Title</h1>")
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
-//	fmt.Println(markdown)
-func Convert(html string) (string, error) {
+//	if result.Content != nil {
+//	    fmt.Println(*result.Content)
+//	}
+func Convert(html string) (*ConversionResult, error) {
 	if html == "" {
-		return "", nil
+		empty := ""
+		return &ConversionResult{Content: &empty}, nil
 	}
 	if err := ensureFFILoaded(); err != nil {
-		return "", err
+		return nil, err
 	}
 
 	cHTML := C.CString(html)
 	defer C.free(unsafe.Pointer(cHTML))
 
-	result := C.html_to_markdown_convert_proxy(cHTML)
-	if result == nil {
+	cResult := C.html_to_markdown_convert_proxy(cHTML)
+	if cResult == nil {
 		errMsg := C.html_to_markdown_last_error_proxy()
 		if errMsg != nil {
-			return "", errors.New(C.GoString(errMsg))
+			return nil, errors.New(C.GoString(errMsg))
 		}
-		return "", errors.New("html to markdown conversion failed")
+		return nil, errors.New("html to markdown conversion failed")
 	}
-	defer C.html_to_markdown_free_string_proxy(result)
+	defer C.html_to_markdown_free_string_proxy(cResult)
 
-	markdown := C.GoString(result)
-	return markdown, nil
+	jsonStr := C.GoString(cResult)
+
+	var result ConversionResult
+	if err := json.Unmarshal([]byte(jsonStr), &result); err != nil {
+		return nil, errors.New("failed to parse conversion result JSON: " + err.Error())
+	}
+
+	return &result, nil
 }
 
 // MustConvert is like Convert but panics if an error occurs.
@@ -79,14 +113,16 @@ func Convert(html string) (string, error) {
 //
 // Example:
 //
-//	markdown := htmltomarkdown.MustConvert("<h1>Title</h1>")
-//	fmt.Println(markdown)
-func MustConvert(html string) string {
-	markdown, err := Convert(html)
+//	result := htmltomarkdown.MustConvert("<h1>Title</h1>")
+//	if result.Content != nil {
+//	    fmt.Println(*result.Content)
+//	}
+func MustConvert(html string) *ConversionResult {
+	result, err := Convert(html)
 	if err != nil {
 		panic(err)
 	}
-	return markdown
+	return result
 }
 
 // Version returns the version string of the underlying html-to-markdown library.

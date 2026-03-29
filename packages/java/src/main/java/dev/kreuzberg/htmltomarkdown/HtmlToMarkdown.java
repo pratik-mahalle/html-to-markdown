@@ -64,7 +64,7 @@ public final class HtmlToMarkdown {
     }
 
     if (html.isEmpty()) {
-      return new ConversionResult("", null, java.util.List.of(), java.util.List.of());
+      return new ConversionResult("", null, java.util.List.of(), null, java.util.List.of(), java.util.List.of());
     }
 
     try (Arena arena = Arena.ofConfined()) {

@@ -1,3 +1,4 @@
+pub mod inline_image;
 pub mod result;
 
 pub use result::{

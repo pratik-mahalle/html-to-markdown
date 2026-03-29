@@ -19,6 +19,7 @@ html-to-markdown-rs = { path = "vendor/html-to-markdown-rs", features = [
   "visitor",
 ] }
 extendr-api = "0.8"
+serde_json = "1"
 
 [features]
 default = ["metadata"]

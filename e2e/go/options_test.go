@@ -13,9 +13,13 @@ import (
 func Test_OptionsCodeBlockBackticks(t *testing.T) {
 	// Backticks code block style uses triple backtick fences
 	html := `<pre><code class="language-js">console.log('hi');</code></pre>`
-	content, err := htmd.Convert(html)
+	result, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
+	}
+	content := ""
+	if result != nil && result.Content != nil {
+		content = *result.Content
 	}
 
 	if !strings.Contains(content, "```") {
@@ -29,9 +33,13 @@ func Test_OptionsCodeBlockBackticks(t *testing.T) {
 func Test_OptionsCodeBlockTildes(t *testing.T) {
 	// Tildes code block style uses triple tilde fences
 	html := `<pre><code>some code</code></pre>`
-	content, err := htmd.Convert(html)
+	result, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
+	}
+	content := ""
+	if result != nil && result.Content != nil {
+		content = *result.Content
 	}
 
 	if !strings.Contains(content, "~~~") {
@@ -45,9 +53,13 @@ func Test_OptionsCodeBlockTildes(t *testing.T) {
 func Test_OptionsEscapeAsterisks(t *testing.T) {
 	// escape_asterisks option escapes asterisks in plain text
 	html := `<p>Use 2*3 = 6 in math.</p>`
-	content, err := htmd.Convert(html)
+	result, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
+	}
+	content := ""
+	if result != nil && result.Content != nil {
+		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -67,9 +79,13 @@ func Test_OptionsEscapeAsterisks(t *testing.T) {
 func Test_OptionsEscapeMisc(t *testing.T) {
 	// escape_misc option escapes miscellaneous markdown characters
 	html := `<p>Use # and | and ~ in text.</p>`
-	content, err := htmd.Convert(html)
+	result, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
+	}
+	content := ""
+	if result != nil && result.Content != nil {
+		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -89,9 +105,13 @@ func Test_OptionsEscapeMisc(t *testing.T) {
 func Test_OptionsEscapeUnderscores(t *testing.T) {
 	// escape_underscores option escapes underscores in plain text
 	html := `<p>The variable_name is defined.</p>`
-	content, err := htmd.Convert(html)
+	result, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
+	}
+	content := ""
+	if result != nil && result.Content != nil {
+		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -111,9 +131,13 @@ func Test_OptionsEscapeUnderscores(t *testing.T) {
 func Test_OptionsHeadingStyleAtx(t *testing.T) {
 	// ATX heading style produces hash-prefixed headings
 	html := `<h1>Title</h1><h2>Subtitle</h2>`
-	content, err := htmd.Convert(html)
+	result, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
+	}
+	content := ""
+	if result != nil && result.Content != nil {
+		content = *result.Content
 	}
 
 	if !strings.Contains(content, "# Title") {
@@ -127,9 +151,13 @@ func Test_OptionsHeadingStyleAtx(t *testing.T) {
 func Test_OptionsHeadingStyleAtxClosed(t *testing.T) {
 	// ATX closed heading style adds closing hashes
 	html := `<h1>Closed Heading</h1>`
-	content, err := htmd.Convert(html)
+	result, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
+	}
+	content := ""
+	if result != nil && result.Content != nil {
+		content = *result.Content
 	}
 
 	if !strings.Contains(content, "# Closed Heading #") {
@@ -140,9 +168,13 @@ func Test_OptionsHeadingStyleAtxClosed(t *testing.T) {
 func Test_OptionsHeadingStyleUnderlined(t *testing.T) {
 	// Underlined heading style produces setext-style headings for h1 and h2
 	html := `<h1>Main Title</h1>`
-	content, err := htmd.Convert(html)
+	result, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
+	}
+	content := ""
+	if result != nil && result.Content != nil {
+		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -156,9 +188,13 @@ func Test_OptionsHeadingStyleUnderlined(t *testing.T) {
 func Test_OptionsListCustomBullets(t *testing.T) {
 	// Custom bullet character for unordered lists
 	html := `<ul><li>Item A</li><li>Item B</li></ul>`
-	content, err := htmd.Convert(html)
+	result, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
+	}
+	content := ""
+	if result != nil && result.Content != nil {
+		content = *result.Content
 	}
 
 	if !strings.Contains(content, "* Item A") {
@@ -172,9 +208,13 @@ func Test_OptionsListCustomBullets(t *testing.T) {
 func Test_OptionsListIndentTabs(t *testing.T) {
 	// Tab indentation type for nested list items
 	html := `<ul><li>Parent<ul><li>Child</li></ul></li></ul>`
-	content, err := htmd.Convert(html)
+	result, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
+	}
+	content := ""
+	if result != nil && result.Content != nil {
+		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -191,9 +231,13 @@ func Test_OptionsListIndentTabs(t *testing.T) {
 func Test_OptionsOutputFormatDjot(t *testing.T) {
 	// Djot output format produces djot-compatible markup
 	html := `<p>Simple paragraph.</p>`
-	content, err := htmd.Convert(html)
+	result, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
+	}
+	content := ""
+	if result != nil && result.Content != nil {
+		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -207,9 +251,13 @@ func Test_OptionsOutputFormatDjot(t *testing.T) {
 func Test_OptionsOutputFormatMarkdown(t *testing.T) {
 	// Default markdown output format produces standard markdown
 	html := `<h1>Title</h1><p>Some text.</p>`
-	content, err := htmd.Convert(html)
+	result, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
+	}
+	content := ""
+	if result != nil && result.Content != nil {
+		content = *result.Content
 	}
 
 	if !strings.Contains(content, "# Title") {
@@ -223,9 +271,13 @@ func Test_OptionsOutputFormatMarkdown(t *testing.T) {
 func Test_OptionsOutputFormatPlain(t *testing.T) {
 	// Plain text output format strips markdown syntax
 	html := `<h1>Title</h1><p>Some <strong>bold</strong> text.</p>`
-	content, err := htmd.Convert(html)
+	result, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
+	}
+	content := ""
+	if result != nil && result.Content != nil {
+		content = *result.Content
 	}
 
 	if !strings.Contains(content, "Title") {
@@ -248,9 +300,13 @@ func Test_OptionsOutputFormatPlain(t *testing.T) {
 func Test_OptionsWhitespaceNormalized(t *testing.T) {
 	// Normalized whitespace mode collapses multiple spaces
 	html := `<p>Text   with    extra   spaces.</p>`
-	content, err := htmd.Convert(html)
+	result, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
+	}
+	content := ""
+	if result != nil && result.Content != nil {
+		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -273,9 +329,13 @@ func Test_OptionsWhitespaceNormalized(t *testing.T) {
 func Test_OptionsWhitespaceStrict(t *testing.T) {
 	// Strict whitespace mode preserves whitespace as-is
 	html := `<p>Preserved   spacing.</p>`
-	content, err := htmd.Convert(html)
+	result, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
+	}
+	content := ""
+	if result != nil && result.Content != nil {
+		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -292,9 +352,13 @@ func Test_OptionsWhitespaceStrict(t *testing.T) {
 func Test_OptionsWrapDisabled(t *testing.T) {
 	// Wrap option disabled preserves long lines without breaking
 	html := `<p>This is a long paragraph that should not be wrapped at all because wrapping is disabled.</p>`
-	content, err := htmd.Convert(html)
+	result, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
+	}
+	content := ""
+	if result != nil && result.Content != nil {
+		content = *result.Content
 	}
 
 	if !strings.Contains(content, "This is a long paragraph that should not be wrapped at all because wrapping is disabled.") {
@@ -305,9 +369,13 @@ func Test_OptionsWrapDisabled(t *testing.T) {
 func Test_OptionsWrapEnabled(t *testing.T) {
 	// Wrap option enabled with custom width wraps long lines
 	html := `<p>This is a long paragraph that should be wrapped at the specified column width when the wrap option is enabled.</p>`
-	content, err := htmd.Convert(html)
+	result, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
+	}
+	content := ""
+	if result != nil && result.Content != nil {
+		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {

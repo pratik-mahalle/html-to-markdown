@@ -12,6 +12,7 @@ namespace HtmlToMarkdown.Serialization;
 [JsonSerializable(typeof(TableGrid))]
 [JsonSerializable(typeof(GridCell))]
 [JsonSerializable(typeof(ProcessingWarning))]
+[JsonSerializable(typeof(InlineImage))]
 internal partial class MetadataJsonContext : JsonSerializerContext
 {
 }

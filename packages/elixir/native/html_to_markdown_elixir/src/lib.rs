@@ -13,7 +13,7 @@ use options::{
 };
 use types::{
     ConversionResultTerm, DocumentMetadataTerm, ExtendedMetadataTerm, ExtractTableTerm, GridCellTerm,
-    HeaderMetadataTerm, ImageMetadataTerm, LinkMetadataTerm,
+    HeaderMetadataTerm, ImageMetadataTerm, InlineImageTerm, LinkMetadataTerm,
     StructuredDataTerm, WarningTerm,
 };
 
@@ -115,10 +115,30 @@ fn convert<'a>(env: Env<'a>, html: String, options_term: Term<'a>) -> NifResult<
                 })
                 .collect();
 
+            let document = result.document.and_then(|doc| {
+                serde_json::to_string(&doc).ok()
+            });
+
+            let images: Vec<InlineImageTerm> = result
+                .images
+                .into_iter()
+                .map(|img| InlineImageTerm {
+                    data: img.data,
+                    format: img.format.to_string(),
+                    filename: img.filename,
+                    description: img.description,
+                    dimensions: img.dimensions,
+                    source: img.source.to_string(),
+                    attributes: img.attributes.into_iter().collect(),
+                })
+                .collect();
+
             let term = ConversionResultTerm {
                 content: result.content,
+                document,
                 metadata: build_metadata(result.metadata),
                 tables,
+                images,
                 warnings,
             };
 
