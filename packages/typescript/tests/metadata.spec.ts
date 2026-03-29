@@ -1,13 +1,7 @@
 import { rm, writeFile } from "node:fs/promises";
 import { Readable } from "node:stream";
 import { describe, expect, it } from "vitest";
-import {
-	convertWithMetadata,
-	convertWithMetadataBuffer,
-	convertFileWithMetadata,
-	convertStreamWithMetadata,
-	type JsMetadataConfig,
-} from "../src/index";
+import { convert, convertFile, convertStream } from "../src/index";
 
 const BASIC_HTML = `
 <html lang="en">
@@ -35,12 +29,12 @@ const BASIC_HTML = `
 
 describe("html-to-markdown metadata extraction (TypeScript)", () => {
 	it("extracts document metadata", () => {
-		const result = convertWithMetadata(BASIC_HTML);
+		const result = convert(BASIC_HTML, { extractMetadata: true });
 
-		expect(result).toHaveProperty("markdown");
+		expect(result).toHaveProperty("content");
 		expect(result).toHaveProperty("metadata");
 
-		const metadata = result.metadata;
+		const metadata = JSON.parse(result.metadata!);
 		expect(metadata.document.title).toBe("Test Article");
 		expect(metadata.document.description).toBe("A test article about markdown");
 		expect(metadata.document.author).toBe("Test Author");
@@ -58,138 +52,116 @@ describe("html-to-markdown metadata extraction (TypeScript)", () => {
 	});
 
 	it("extracts header metadata with hierarchy", () => {
-		const result = convertWithMetadata(BASIC_HTML);
-		const headers = result.metadata.headers;
+		const result = convert(BASIC_HTML, { extractMetadata: true });
+		const metadata = JSON.parse(result.metadata!);
+		const headers = metadata.headers;
 
 		expect(headers.length).toBeGreaterThanOrEqual(3);
 
-		const h1 = headers.find((h) => h.level === 1);
+		const h1 = headers.find((h: { level: number }) => h.level === 1);
 		expect(h1).toBeDefined();
 		expect(h1?.text).toBe("Main Title");
 		expect(h1?.id).toBe("main-title");
 
-		const h2 = headers.find((h) => h.level === 2);
+		const h2 = headers.find((h: { level: number }) => h.level === 2);
 		expect(h2).toBeDefined();
 		expect(h2?.text).toBe("Section 1");
 
-		const h3 = headers.find((h) => h.level === 3);
+		const h3 = headers.find((h: { level: number }) => h.level === 3);
 		expect(h3).toBeDefined();
 		expect(h3?.text).toBe("Subsection");
 	});
 
 	it("extracts and classifies links", () => {
-		const result = convertWithMetadata(BASIC_HTML);
-		const links = result.metadata.links;
+		const result = convert(BASIC_HTML, { extractMetadata: true });
+		const metadata = JSON.parse(result.metadata!);
+		const links = metadata.links;
 
 		expect(links.length).toBeGreaterThanOrEqual(4);
 
-		const internalLink = links.find((l) => l.href === "/page");
+		const internalLink = links.find((l: { href: string }) => l.href === "/page");
 		expect(internalLink).toBeDefined();
 		expect(internalLink?.link_type).toBe("internal");
 		expect(internalLink?.text).toBe("internal link");
 
-		const externalLink = links.find((l) => l.href === "https://example.com");
+		const externalLink = links.find((l: { href: string }) => l.href === "https://example.com");
 		expect(externalLink).toBeDefined();
 		expect(externalLink?.link_type).toBe("external");
 
-		const emailLink = links.find((l) => l.href === "mailto:test@example.com");
+		const emailLink = links.find((l: { href: string }) => l.href === "mailto:test@example.com");
 		expect(emailLink).toBeDefined();
 		expect(emailLink?.link_type).toBe("email");
 		expect(emailLink?.text).toBe("email link");
 
-		const anchorLink = links.find((l) => l.href === "#section");
+		const anchorLink = links.find((l: { href: string }) => l.href === "#section");
 		expect(anchorLink).toBeDefined();
 		expect(anchorLink?.link_type).toBe("anchor");
 	});
 
 	it("extracts image metadata with types", () => {
-		const result = convertWithMetadata(BASIC_HTML);
-		const images = result.metadata.images;
+		const result = convert(BASIC_HTML, { extractMetadata: true });
+		const metadata = JSON.parse(result.metadata!);
+		const images = metadata.images;
 
 		expect(images.length).toBeGreaterThanOrEqual(2);
 
-		const externalImg = images.find((i) => i.src === "https://example.com/image.jpg");
+		const externalImg = images.find((i: { src: string }) => i.src === "https://example.com/image.jpg");
 		expect(externalImg).toBeDefined();
 		expect(externalImg?.image_type).toBe("external");
 		expect(externalImg?.alt).toBe("Test Image");
 		expect(externalImg?.title).toBe("Test Title");
 
-		const dataUriImg = images.find((i) => i.src.startsWith("data:image"));
+		const dataUriImg = images.find((i: { src: string }) => i.src.startsWith("data:image"));
 		expect(dataUriImg).toBeDefined();
 		expect(dataUriImg?.image_type).toBe("data_uri");
 		expect(dataUriImg?.alt).toBe("Embedded Image");
 	});
 
-	it("respects metadata extraction config flags", () => {
-		const config: JsMetadataConfig = {
-			extract_headers: false,
-			extract_links: false,
-			extract_images: false,
-			extract_structured_data: true,
-			max_structured_data_size: 1_000_000,
-		};
-
-		const result = convertWithMetadata(BASIC_HTML, undefined, config);
-		const metadata = result.metadata;
-
-		expect(metadata.document.title).toBe("Test Article");
-
-		expect(metadata.headers).toHaveLength(0);
-		expect(metadata.links).toHaveLength(0);
-		expect(metadata.images).toHaveLength(0);
-	});
-
-	it("converts from Buffer without string allocation", () => {
-		const buffer = Buffer.from(BASIC_HTML, "utf8");
-		const result = convertWithMetadataBuffer(buffer);
-
-		expect(result.markdown).toBeTruthy();
-		expect(result.metadata.document.title).toBe("Test Article");
-		expect(result.metadata.headers.length).toBeGreaterThan(0);
-	});
-
-	it("converts from file", async () => {
+	it("converts from file with metadata", async () => {
 		const path = "tmp-metadata-test.html";
 		await writeFile(path, BASIC_HTML, "utf8");
 
 		try {
-			const result = await convertFileWithMetadata(path);
+			const result = await convertFile(path, { extractMetadata: true });
 
-			expect(result.markdown).toContain("Main Title");
-			expect(result.metadata.document.title).toBe("Test Article");
-			expect(result.metadata.document.author).toBe("Test Author");
+			expect(result.content).toContain("Main Title");
+			const metadata = JSON.parse(result.metadata!);
+			expect(metadata.document.title).toBe("Test Article");
+			expect(metadata.document.author).toBe("Test Author");
 		} finally {
 			await rm(path, { force: true });
 		}
 	});
 
-	it("converts from stream", async () => {
+	it("converts from stream with metadata", async () => {
 		const stream = Readable.from([BASIC_HTML]);
-		const result = await convertStreamWithMetadata(stream);
+		const result = await convertStream(stream, { extractMetadata: true });
 
-		expect(result.markdown).toContain("Main Title");
-		expect(result.metadata.document.title).toBe("Test Article");
-		expect(result.metadata.headers.length).toBeGreaterThan(0);
+		expect(result.content).toContain("Main Title");
+		const metadata = JSON.parse(result.metadata!);
+		expect(metadata.document.title).toBe("Test Article");
+		expect(metadata.headers.length).toBeGreaterThan(0);
 	});
 
 	it("handles HTML with minimal metadata", () => {
 		const minimalHtml = "<h1>Title</h1><p>Content</p>";
-		const result = convertWithMetadata(minimalHtml);
+		const result = convert(minimalHtml, { extractMetadata: true });
 
-		expect(result.metadata.document.title).toBeUndefined();
-		expect(result.metadata.document.description).toBeUndefined();
+		const metadata = JSON.parse(result.metadata!);
+		expect(metadata.document.title).toBeUndefined();
+		expect(metadata.document.description).toBeUndefined();
 
-		expect(result.metadata.headers.length).toBe(1);
-		expect(result.metadata.headers[0].text).toBe("Title");
+		expect(metadata.headers.length).toBe(1);
+		expect(metadata.headers[0].text).toBe("Title");
 	});
 
 	it("extracts markdown with metadata", () => {
-		const result = convertWithMetadata(BASIC_HTML);
+		const result = convert(BASIC_HTML, { extractMetadata: true });
 
-		expect(result.markdown).toContain("Main Title");
-		expect(result.markdown).toContain("Section 1");
-		expect(result.markdown).toContain("Subsection");
-		expect(result.markdown).toContain("internal link");
+		expect(result.content).toContain("Main Title");
+		expect(result.content).toContain("Section 1");
+		expect(result.content).toContain("Subsection");
+		expect(result.content).toContain("internal link");
 	});
 
 	it("handles structured data size limits", () => {
@@ -204,17 +176,10 @@ describe("html-to-markdown metadata extraction (TypeScript)", () => {
 		</html>
 		`;
 
-		const result1 = convertWithMetadata(htmlWithLargeJson);
+		const result1 = convert(htmlWithLargeJson, { extractMetadata: true });
 		expect(result1).toHaveProperty("metadata");
 
-		const config: JsMetadataConfig = {
-			extract_headers: true,
-			extract_links: true,
-			extract_images: true,
-			extract_structured_data: true,
-			max_structured_data_size: 100,
-		};
-		const result2 = convertWithMetadata(htmlWithLargeJson, undefined, config);
+		const result2 = convert(htmlWithLargeJson, { extractMetadata: true });
 		expect(result2).toHaveProperty("metadata");
 	});
 
@@ -232,10 +197,11 @@ describe("html-to-markdown metadata extraction (TypeScript)", () => {
 		</html>
 		`;
 
-		const result = convertWithMetadata(specialHtml);
+		const result = convert(specialHtml, { extractMetadata: true });
+		const metadata = JSON.parse(result.metadata!);
 
-		expect(result.metadata.document.title).toBe("Café & Restaurant");
-		expect(result.metadata.document.language).toBe("fr");
-		expect(result.metadata.headers[0].text).toBe("Délicieux!");
+		expect(metadata.document.title).toBe("Café & Restaurant");
+		expect(metadata.document.language).toBe("fr");
+		expect(metadata.headers[0].text).toBe("Délicieux!");
 	});
 });

@@ -1,16 +1,12 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import type { JsConversionOptions } from '@kreuzberg/html-to-markdown';
+import type { JsConversionOptions, JsConversionResult } from '@kreuzberg/html-to-markdown';
 
 describe('html-to-markdown smoke tests', () => {
-  let convert: (html: string, options?: JsConversionOptions | null) => string;
-  let convertWithMetadata: (html: string, options?: JsConversionOptions | null, metadataConfig?: any | null) => any;
-  let hasMetadataSupport: () => boolean;
+  let convert: (html: string, options?: JsConversionOptions | null) => JsConversionResult;
 
   beforeAll(async () => {
     const module = await import('@kreuzberg/html-to-markdown');
     convert = module.convert;
-    convertWithMetadata = module.convertWithMetadata;
-    hasMetadataSupport = module.hasMetadataSupport;
   });
 
   describe('Package imports and basic functionality', () => {
@@ -23,26 +19,26 @@ describe('html-to-markdown smoke tests', () => {
     it('should convert basic HTML to Markdown', () => {
       const html = '<p>Hello World</p>';
       const result = convert(html);
-      expect(result).toContain('Hello World');
-      expect(typeof result).toBe('string');
+      expect(result.content).toContain('Hello World');
+      expect(typeof result.content).toBe('string');
     });
 
     it('should handle heading conversion', () => {
       const html = '<h1>Title</h1>';
       const result = convert(html);
-      expect(result).toMatch(/^#\s+Title/);
+      expect(result.content).toMatch(/^#\s+Title/);
     });
 
     it('should handle empty input gracefully', () => {
       const result = convert('');
-      expect(result).toBe('');
+      expect(result.content).toBe('');
     });
 
     it('should preserve text content through conversion', () => {
       const html = '<div><p>Line 1</p><p>Line 2</p></div>';
       const result = convert(html);
-      expect(result).toContain('Line 1');
-      expect(result).toContain('Line 2');
+      expect(result.content).toContain('Line 1');
+      expect(result.content).toContain('Line 2');
     });
   });
 
@@ -51,25 +47,30 @@ describe('html-to-markdown smoke tests', () => {
       const html = '<p>Unclosed paragraph';
       expect(() => convert(html)).not.toThrow();
       const result = convert(html);
-      expect(typeof result).toBe('string');
+      expect(typeof result.content).toBe('string');
     });
 
     it('should handle HTML with special characters', () => {
       const html = '<p>&lt;script&gt;alert("test")&lt;/script&gt;</p>';
       expect(() => convert(html)).not.toThrow();
       const result = convert(html);
-      expect(result).toContain('script');
+      expect(result.content).toContain('script');
     });
   });
 
-  describe('Feature detection', () => {
-    it('should detect metadata support', () => {
-      const supported = hasMetadataSupport();
-      expect(typeof supported).toBe('boolean');
+  describe('Result structure', () => {
+    it('should return a result with content field', () => {
+      const html = '<p>Test</p>';
+      const result = convert(html);
+      expect(result).toBeDefined();
+      expect(result.content).toBeDefined();
+      expect(typeof result.content).toBe('string');
     });
 
-    it('should have convertWithMetadata function available', () => {
-      expect(typeof convertWithMetadata).toBe('function');
+    it('should return a result with warnings field', () => {
+      const html = '<p>Test</p>';
+      const result = convert(html);
+      expect(result.warnings).toBeDefined();
     });
   });
 
@@ -79,21 +80,21 @@ describe('html-to-markdown smoke tests', () => {
       const options: JsConversionOptions = { hardBreaks: true };
       expect(() => convert(html, options)).not.toThrow();
       const result = convert(html, options);
-      expect(typeof result).toBe('string');
+      expect(typeof result.content).toBe('string');
     });
 
     it('should handle null options', () => {
       const html = '<p>Test</p>';
       expect(() => convert(html, null)).not.toThrow();
       const result = convert(html, null);
-      expect(typeof result).toBe('string');
+      expect(typeof result.content).toBe('string');
     });
 
     it('should handle undefined options', () => {
       const html = '<p>Test</p>';
       expect(() => convert(html, undefined)).not.toThrow();
       const result = convert(html, undefined);
-      expect(typeof result).toBe('string');
+      expect(typeof result.content).toBe('string');
     });
   });
 });

@@ -9,7 +9,6 @@
 // Core modules
 pub mod conversion;
 pub mod error;
-pub mod metadata;
 pub mod strings;
 pub mod version;
 
@@ -23,8 +22,4 @@ mod tests;
 // Re-export public FFI functions for easy access
 pub use conversion::{html_to_markdown_convert, html_to_markdown_free_string};
 pub use error::{html_to_markdown_error_code_name, html_to_markdown_last_error, html_to_markdown_last_error_code};
-pub use metadata::{
-    html_to_markdown_convert_with_metadata, html_to_markdown_convert_with_metadata_bytes_with_len,
-    html_to_markdown_convert_with_metadata_with_len,
-};
 pub use version::html_to_markdown_version;

@@ -2,33 +2,24 @@
 import { promises as fs } from "node:fs";
 import { stderr, stdin, stdout } from "node:process";
 
-import {
-	convert as convertHtml,
-	convertWithInlineImages as convertHtmlWithInlineImages,
-	type JsConversionOptions,
-	type JsInlineImageConfig,
-} from "@kreuzberg/html-to-markdown-node";
+import { convert as convertHtml, type JsConversionOptions } from "@kreuzberg/html-to-markdown-node";
 
-import { convertStream, convertStreamWithInlineImages } from "./index";
+import { convertStream } from "./index";
 
 interface CliOptions {
 	input?: string;
 	output?: string;
 	options?: JsConversionOptions;
-	inlineImages?: boolean;
-	inlineImageConfig?: JsInlineImageConfig;
 }
 
 function printUsage(): void {
 	stdout.write(`html-to-markdown CLI\n\n`);
 	stdout.write(`Usage:\n`);
-	stdout.write(`  html-to-markdown [--input <file>] [--output <file>] [--options '{...}'] [--inline-images]\n\n`);
+	stdout.write(`  html-to-markdown [--input <file>] [--output <file>] [--options '{...}']\n\n`);
 	stdout.write(`Options:\n`);
 	stdout.write(`  --input <file>           Read HTML from a file instead of stdin\n`);
 	stdout.write(`  --output <file>          Write Markdown to a file instead of stdout\n`);
 	stdout.write(`  --options <json>         JSON encoded conversion options\n`);
-	stdout.write(`  --inline-images          Collect inline images (writes JSON to <output>.images.json)\n`);
-	stdout.write(`  --inline-image-config    JSON encoded inline image extraction options\n`);
 	stdout.write(`  -h, --help               Show this help message\n`);
 	stdout.write(`  -v, --version            Print the package version\n`);
 }
@@ -76,16 +67,6 @@ async function parseArgs(): Promise<CliOptions | "help" | "version"> {
 				opts.options = await loadJson<JsConversionOptions>(getNextArg(args, index, "--options"), "--options");
 				index += 1;
 				break;
-			case "--inline-images":
-				opts.inlineImages = true;
-				break;
-			case "--inline-image-config":
-				opts.inlineImageConfig = await loadJson<JsInlineImageConfig>(
-					getNextArg(args, index, "--inline-image-config"),
-					"--inline-image-config",
-				);
-				index += 1;
-				break;
 			default:
 				throw new Error(`Unknown argument: ${arg}`);
 		}
@@ -116,32 +97,6 @@ async function writeOutput(content: string, path?: string): Promise<void> {
 	await fs.writeFile(path, content, "utf8");
 }
 
-async function writeInlineImages(
-	extractionPath: string,
-	inlineData: Awaited<ReturnType<typeof convertHtmlWithInlineImages>>,
-): Promise<void> {
-	const payload = {
-		markdown: inlineData.markdown,
-		inlineImages: inlineData.inlineImages,
-		warnings: inlineData.warnings,
-	};
-
-	await fs.writeFile(extractionPath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
-}
-
-function normalizeInlineImageConfig(config?: JsInlineImageConfig): JsInlineImageConfig | undefined {
-	if (!config) {
-		return config;
-	}
-
-	const maxDecodedSizeBytes = config.maxDecodedSizeBytes;
-	if (typeof maxDecodedSizeBytes === "number") {
-		return { ...config, maxDecodedSizeBytes: BigInt(maxDecodedSizeBytes) };
-	}
-
-	return config;
-}
-
 async function main(): Promise<void> {
 	try {
 		const parsed = await parseArgs();
@@ -157,31 +112,10 @@ async function main(): Promise<void> {
 			return;
 		}
 
-		const { input, output, options, inlineImages, inlineImageConfig } = parsed;
+		const { input, output, options } = parsed;
 		const inputContent = await readInput(input);
-		const normalizedInlineImageConfig = normalizeInlineImageConfig(inlineImageConfig);
 
-		if (inlineImages) {
-			const inlineResult =
-				typeof inputContent === "string"
-					? convertHtmlWithInlineImages(inputContent, options, normalizedInlineImageConfig)
-					: await convertStreamWithInlineImages(inputContent, options, normalizedInlineImageConfig);
-
-			if (output) {
-				await writeOutput(inlineResult.markdown, output);
-				const imagePath = `${output}.images.json`;
-				await writeInlineImages(imagePath, inlineResult);
-				stdout.write(`Inline images written to ${imagePath}\n`);
-			} else {
-				stdout.write(inlineResult.markdown);
-				if (!inlineResult.markdown.endsWith("\n")) {
-					stdout.write("\n");
-				}
-				stdout.write(
-					`${JSON.stringify({ inlineImages: inlineResult.inlineImages, warnings: inlineResult.warnings }, null, 2)}\n`,
-				);
-			}
-		} else if (typeof inputContent === "string") {
+		if (typeof inputContent === "string") {
 			const result = convertHtml(inputContent, options);
 			await writeOutput(result.content ?? "", output);
 		} else {
