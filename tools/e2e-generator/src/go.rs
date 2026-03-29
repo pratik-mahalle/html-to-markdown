@@ -234,8 +234,8 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
     }
 
     // ---- Metadata / Table / Warning assertions ----
-    // Go's Convert() currently returns (string, error) — only content is available.
-    // Structured result assertions will be added in Stage 2.
+    // Go's Convert() returns (string, error) — only content is available.
+    // Use ConvertWithMetadata() for metadata assertions and ConvertWithTables() for table assertions.
     let has_non_content_assertion = a.metadata_title.is_some()
         || a.metadata_description.is_some()
         || a.metadata_author.is_some()
@@ -267,7 +267,7 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
     if has_non_content_assertion {
         let _ = writeln!(
             out,
-            "    // TODO(v3-parity): metadata/table/warning assertions require ConversionResult return type"
+            "    // TODO(v3-parity): metadata/table/warning assertions require ConvertWithMetadata/ConvertWithTables"
         );
     }
 

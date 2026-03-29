@@ -25,7 +25,7 @@ func Test_MetadataAuthorMeta(t *testing.T) {
 	if strings.TrimSpace(content) == "" {
 		t.Errorf("expected non-empty content")
 	}
-	// TODO(v3-parity): metadata/table/warning assertions require ConversionResult return type
+	// TODO(v3-parity): metadata/table/warning assertions require ConvertWithMetadata/ConvertWithTables
 }
 
 func Test_MetadataCanonicalUrl(t *testing.T) {
@@ -43,7 +43,7 @@ func Test_MetadataCanonicalUrl(t *testing.T) {
 	if strings.TrimSpace(content) == "" {
 		t.Errorf("expected non-empty content")
 	}
-	// TODO(v3-parity): metadata/table/warning assertions require ConversionResult return type
+	// TODO(v3-parity): metadata/table/warning assertions require ConvertWithMetadata/ConvertWithTables
 }
 
 func Test_MetadataDescriptionMeta(t *testing.T) {
@@ -61,7 +61,7 @@ func Test_MetadataDescriptionMeta(t *testing.T) {
 	if strings.TrimSpace(content) == "" {
 		t.Errorf("expected non-empty content")
 	}
-	// TODO(v3-parity): metadata/table/warning assertions require ConversionResult return type
+	// TODO(v3-parity): metadata/table/warning assertions require ConvertWithMetadata/ConvertWithTables
 }
 
 func Test_MetadataExtractAllImages(t *testing.T) {
@@ -79,7 +79,7 @@ func Test_MetadataExtractAllImages(t *testing.T) {
 	if strings.TrimSpace(content) == "" {
 		t.Errorf("expected non-empty content")
 	}
-	// TODO(v3-parity): metadata/table/warning assertions require ConversionResult return type
+	// TODO(v3-parity): metadata/table/warning assertions require ConvertWithMetadata/ConvertWithTables
 }
 
 func Test_MetadataExtractAllLinks(t *testing.T) {
@@ -97,7 +97,7 @@ func Test_MetadataExtractAllLinks(t *testing.T) {
 	if strings.TrimSpace(content) == "" {
 		t.Errorf("expected non-empty content")
 	}
-	// TODO(v3-parity): metadata/table/warning assertions require ConversionResult return type
+	// TODO(v3-parity): metadata/table/warning assertions require ConvertWithMetadata/ConvertWithTables
 }
 
 func Test_MetadataHeadersHierarchy(t *testing.T) {
@@ -115,7 +115,7 @@ func Test_MetadataHeadersHierarchy(t *testing.T) {
 	if strings.TrimSpace(content) == "" {
 		t.Errorf("expected non-empty content")
 	}
-	// TODO(v3-parity): metadata/table/warning assertions require ConversionResult return type
+	// TODO(v3-parity): metadata/table/warning assertions require ConvertWithMetadata/ConvertWithTables
 }
 
 func Test_MetadataKeywordsMeta(t *testing.T) {
@@ -133,7 +133,7 @@ func Test_MetadataKeywordsMeta(t *testing.T) {
 	if strings.TrimSpace(content) == "" {
 		t.Errorf("expected non-empty content")
 	}
-	// TODO(v3-parity): metadata/table/warning assertions require ConversionResult return type
+	// TODO(v3-parity): metadata/table/warning assertions require ConvertWithMetadata/ConvertWithTables
 }
 
 func Test_MetadataTitleTag(t *testing.T) {
@@ -151,7 +151,7 @@ func Test_MetadataTitleTag(t *testing.T) {
 	if strings.TrimSpace(content) == "" {
 		t.Errorf("expected non-empty content")
 	}
-	// TODO(v3-parity): metadata/table/warning assertions require ConversionResult return type
+	// TODO(v3-parity): metadata/table/warning assertions require ConvertWithMetadata/ConvertWithTables
 }
 
 func Test_OgBasicTags(t *testing.T) {
@@ -169,7 +169,7 @@ func Test_OgBasicTags(t *testing.T) {
 	if strings.TrimSpace(content) == "" {
 		t.Errorf("expected non-empty content")
 	}
-	// TODO(v3-parity): metadata/table/warning assertions require ConversionResult return type
+	// TODO(v3-parity): metadata/table/warning assertions require ConvertWithMetadata/ConvertWithTables
 }
 
 func Test_OgMultipleTags(t *testing.T) {
@@ -187,7 +187,7 @@ func Test_OgMultipleTags(t *testing.T) {
 	if strings.TrimSpace(content) == "" {
 		t.Errorf("expected non-empty content")
 	}
-	// TODO(v3-parity): metadata/table/warning assertions require ConversionResult return type
+	// TODO(v3-parity): metadata/table/warning assertions require ConvertWithMetadata/ConvertWithTables
 }
 
 func Test_StructuredDataJsonLd(t *testing.T) {
@@ -263,5 +263,5 @@ func Test_TwitterCardTags(t *testing.T) {
 	if strings.TrimSpace(content) == "" {
 		t.Errorf("expected non-empty content")
 	}
-	// TODO(v3-parity): metadata/table/warning assertions require ConversionResult return type
+	// TODO(v3-parity): metadata/table/warning assertions require ConvertWithMetadata/ConvertWithTables
 }

@@ -59,11 +59,11 @@ type ConversionResult struct {
 	Warnings []Warning         `json:"warnings"`
 }
 
+// MetadataResult holds the markdown content and extended metadata from conversion.
 // Convert converts HTML to Markdown using default options.
 //
-// It returns a ConversionResult containing the converted Markdown string,
-// metadata, tables, images, and warnings, or an error if the conversion fails.
-// The function handles memory management automatically using defer.
+// It returns a ConversionResult containing the converted content, metadata,
+// tables, images, and warnings. All fields are available in a single call.
 //
 // Example:
 //
@@ -108,15 +108,10 @@ func Convert(html string) (*ConversionResult, error) {
 
 // MustConvert is like Convert but panics if an error occurs.
 //
-// This is useful in situations where conversion errors are unexpected
-// and should cause the program to terminate.
-//
 // Example:
 //
 //	result := htmltomarkdown.MustConvert("<h1>Title</h1>")
-//	if result.Content != nil {
-//	    fmt.Println(*result.Content)
-//	}
+//	fmt.Println(*result.Content)
 func MustConvert(html string) *ConversionResult {
 	result, err := Convert(html)
 	if err != nil {
