@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { convert } from "@kreuzberg/html-to-markdown-node";
 
-/// Helper to extract content from convert result (which returns JSON string)
+/// Helper to extract content from convert result
 function convertToMarkdown(html: string): string {
-	const resultJson = convert(html);
-	return JSON.parse(resultJson).content || "";
+	const result = convert(html);
+	return result.content ?? "";
 }
 
 /**

@@ -19,8 +19,7 @@ html-to-markdown-rs = { path = "vendor/html-to-markdown-rs", features = [
   "visitor",
 ] }
 extendr-api = "0.8"
-pprof = { version = "0.15", features = ["flamegraph"], optional = true }
 
 [features]
-default = []
-profiling = ["dep:pprof"]
+default = ["metadata"]
+metadata = []

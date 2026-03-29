@@ -1,25 +1,7 @@
 //! NIF map type definitions for Elixir bindings.
 
 use rustler::NifMap;
-use rustler::types::binary::Binary;
 use std::collections::HashMap;
-
-#[derive(NifMap)]
-pub struct InlineImageWarningTerm {
-    pub index: i64,
-    pub message: String,
-}
-
-#[derive(NifMap)]
-pub struct InlineImageTerm<'a> {
-    pub data: Binary<'a>,
-    pub format: String,
-    pub filename: Option<String>,
-    pub description: Option<String>,
-    pub dimensions: Option<(u32, u32)>,
-    pub source: String,
-    pub attributes: HashMap<String, String>,
-}
 
 #[derive(NifMap)]
 pub struct DocumentMetadataTerm {
@@ -79,20 +61,6 @@ pub struct ExtendedMetadataTerm {
     pub links: Vec<LinkMetadataTerm>,
     pub images: Vec<ImageMetadataTerm>,
     pub structured_data: Vec<StructuredDataTerm>,
-}
-
-#[derive(NifMap)]
-pub struct TableDataTerm {
-    pub cells: Vec<Vec<String>>,
-    pub markdown: String,
-    pub is_header_row: Vec<bool>,
-}
-
-#[derive(NifMap)]
-pub struct TableExtractionTerm {
-    pub content: String,
-    pub metadata: Option<ExtendedMetadataTerm>,
-    pub tables: Vec<TableDataTerm>,
 }
 
 #[derive(NifMap)]

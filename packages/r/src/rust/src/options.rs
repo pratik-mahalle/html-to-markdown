@@ -1,10 +1,9 @@
 //! Option parsing for R bindings.
 
 use extendr_api::prelude::*;
-use html_to_markdown_rs::metadata::MetadataConfig;
 use html_to_markdown_rs::{
-    CodeBlockStyle, ConversionOptions, ConversionOptionsUpdate, DEFAULT_INLINE_IMAGE_LIMIT, HeadingStyle,
-    HighlightStyle, InlineImageConfig, InlineImageConfigUpdate, ListIndentType, MetadataConfigUpdate, NewlineStyle,
+    CodeBlockStyle, ConversionOptions, ConversionOptionsUpdate, HeadingStyle,
+    HighlightStyle, ListIndentType, NewlineStyle,
     PreprocessingOptionsUpdate, PreprocessingPreset, WhitespaceMode,
 };
 
@@ -19,74 +18,6 @@ pub fn decode_options(options: Robj) -> std::result::Result<ConversionOptions, S
         .ok_or_else(|| "options must be a named list".to_string())?;
 
     apply_options(&list)
-}
-
-/// Decode an R list into MetadataConfig.
-pub fn decode_metadata_config(config: Robj) -> std::result::Result<MetadataConfig, String> {
-    if config.is_null() {
-        return Ok(MetadataConfig::default());
-    }
-
-    let list = config
-        .as_list()
-        .ok_or_else(|| "metadata_config must be a named list".to_string())?;
-
-    let mut update = MetadataConfigUpdate::default();
-
-    for (key, value) in list.iter() {
-        match key {
-            "extract_document" => update.extract_document = Some(decode_bool(&value, "extract_document")?),
-            "extract_headers" => update.extract_headers = Some(decode_bool(&value, "extract_headers")?),
-            "extract_links" => update.extract_links = Some(decode_bool(&value, "extract_links")?),
-            "extract_images" => update.extract_images = Some(decode_bool(&value, "extract_images")?),
-            "extract_structured_data" => {
-                update.extract_structured_data = Some(decode_bool(&value, "extract_structured_data")?)
-            }
-            "max_structured_data_size" => {
-                update.max_structured_data_size = Some(decode_positive_integer(&value, "max_structured_data_size")?)
-            }
-            _ => {}
-        }
-    }
-
-    Ok(MetadataConfig::from(update))
-}
-
-/// Decode an R list into InlineImageConfig.
-pub fn decode_inline_image_config(config: Robj) -> std::result::Result<InlineImageConfig, String> {
-    if config.is_null() {
-        return Ok(InlineImageConfig::new(DEFAULT_INLINE_IMAGE_LIMIT));
-    }
-
-    let list = config
-        .as_list()
-        .ok_or_else(|| "inline_image_config must be a named list".to_string())?;
-
-    let mut update = InlineImageConfigUpdate::default();
-
-    for (key, value) in list.iter() {
-        match key {
-            "max_decoded_size_bytes" => {
-                let v = decode_positive_integer(&value, "max_decoded_size_bytes")?;
-                update.max_decoded_size_bytes = Some(v as u64);
-            }
-            "filename_prefix" => {
-                let prefix = decode_string(&value, "filename_prefix")?;
-                if !prefix.trim().is_empty() {
-                    update.filename_prefix = Some(prefix);
-                }
-            }
-            "capture_svg" => {
-                update.capture_svg = Some(decode_bool(&value, "capture_svg")?);
-            }
-            "infer_dimensions" => {
-                update.infer_dimensions = Some(decode_bool(&value, "infer_dimensions")?);
-            }
-            _ => {}
-        }
-    }
-
-    Ok(InlineImageConfig::from_update(update))
 }
 
 fn apply_options(list: &List) -> std::result::Result<ConversionOptions, String> {

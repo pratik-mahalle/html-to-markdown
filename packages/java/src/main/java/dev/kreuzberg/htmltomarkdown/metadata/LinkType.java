@@ -48,6 +48,7 @@ public enum LinkType {
    * @return the {@code LinkType}
    * @throws IllegalArgumentException if the string is null or unknown
    */
+  @com.fasterxml.jackson.annotation.JsonCreator
   public static LinkType parse(String s) {
     if (s == null) {
       throw new IllegalArgumentException("LinkType string cannot be null");

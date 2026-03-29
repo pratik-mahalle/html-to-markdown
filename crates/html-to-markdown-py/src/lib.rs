@@ -11,7 +11,7 @@ pub mod visitor;
 // Re-exports from modules for public API
 pub use options::{ConversionOptions, PreprocessingOptions};
 
-use helpers::{run_with_guard_and_profile, to_py_err};
+use helpers::{run_with_guard, to_py_err};
 #[cfg(feature = "visitor")]
 use html_to_markdown_rs::visitor::HtmlVisitor;
 use pyo3::prelude::*;
@@ -67,7 +67,7 @@ fn convert<'py>(
     let result = if let Some(visitor_py) = visitor {
         let visitor_handle = std::sync::Arc::new(std::sync::Mutex::new(visitor_py));
         py.detach(move || {
-            run_with_guard_and_profile(|| {
+            run_with_guard(|| {
                 let rc_visitor: Rc<RefCell<dyn HtmlVisitor>> = {
                     Python::attach(|py| {
                         let guard = visitor_handle.lock().unwrap();
@@ -85,7 +85,7 @@ fn convert<'py>(
         })
         .map_err(to_py_err)?
     } else {
-        py.detach(move || run_with_guard_and_profile(|| html_to_markdown_rs::convert(&html, rust_options.clone())))
+        py.detach(move || run_with_guard(|| html_to_markdown_rs::convert(&html, rust_options.clone())))
             .map_err(to_py_err)?
     };
 
@@ -184,7 +184,7 @@ fn convert<'py>(py: Python<'py>, html: &str, options: Option<ConversionOptions>)
     let rust_options = options.map(|opts| opts.to_rust());
 
     let result = py
-        .detach(move || run_with_guard_and_profile(|| html_to_markdown_rs::convert(&html, rust_options.clone())))
+        .detach(move || run_with_guard(|| html_to_markdown_rs::convert(&html, rust_options.clone())))
         .map_err(to_py_err)?;
 
     let dict = PyDict::new(py);
