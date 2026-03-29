@@ -148,8 +148,8 @@ describe("html-to-markdown metadata extraction (TypeScript)", () => {
 		const result = convert(minimalHtml, { extractMetadata: true });
 
 		const metadata = JSON.parse(result.metadata!);
-		expect(metadata.document.title).toBeUndefined();
-		expect(metadata.document.description).toBeUndefined();
+		expect(metadata.document.title).toBeNull();
+		expect(metadata.document.description).toBeNull();
 
 		expect(metadata.headers.length).toBe(1);
 		expect(metadata.headers[0].text).toBe("Title");
