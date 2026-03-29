@@ -666,7 +666,11 @@ defmodule HtmlToMarkdown.Visitor do
           options :: map() | nil
         ) :: {:ok, String.t()} | {:error, String.t()}
   def convert_with_visitor(html, visitor, options \\ nil) when is_binary(html) do
-    native_options = HtmlToMarkdown.options(options)
+    native_options =
+      case options do
+        nil -> %{}
+        _ -> options |> HtmlToMarkdown.Options.new() |> HtmlToMarkdown.Options.to_map()
+      end
 
     case HtmlToMarkdown.Native.convert_with_visitor(html, native_options, visitor) do
       {:ok, markdown} -> {:ok, markdown}

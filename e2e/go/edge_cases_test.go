@@ -13,13 +13,9 @@ import (
 func Test_EmptyHtml(t *testing.T) {
 	// Empty HTML document
 	html := `<html><head></head><body></body></html>`
-	result, err := htmd.Convert(html)
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) != "" {
@@ -30,13 +26,9 @@ func Test_EmptyHtml(t *testing.T) {
 func Test_EncodingCjkCharacters(t *testing.T) {
 	// CJK (Chinese, Japanese, Korean) characters are preserved
 	html := `<p>中文内容</p><p>日本語テキスト</p><p>한국어 텍스트</p>`
-	result, err := htmd.Convert(html)
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -56,13 +48,9 @@ func Test_EncodingCjkCharacters(t *testing.T) {
 func Test_EncodingHtmlEntities(t *testing.T) {
 	// Common HTML entities are decoded in output
 	html := `<p>&amp; &lt; &gt; &nbsp; &quot; &apos;</p>`
-	result, err := htmd.Convert(html)
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -82,13 +70,9 @@ func Test_EncodingHtmlEntities(t *testing.T) {
 func Test_EncodingNamedEntities(t *testing.T) {
 	// Named HTML entities like &mdash; and &hellip; are decoded
 	html := `<p>Em dash&mdash;used for parenthetical remarks&mdash;is common. Ellipsis&hellip; indicates omission. Non-breaking&nbsp;space.</p>`
-	result, err := htmd.Convert(html)
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -105,13 +89,9 @@ func Test_EncodingNamedEntities(t *testing.T) {
 func Test_EncodingNumericEntities(t *testing.T) {
 	// Numeric HTML entities (decimal and hex) are decoded
 	html := `<p>Copyright: &#169; Trade: &#174; Euro: &#8364; Hex: &#x00A9;</p>`
-	result, err := htmd.Convert(html)
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -131,13 +111,9 @@ func Test_EncodingNumericEntities(t *testing.T) {
 func Test_EncodingUnicodeEmoji(t *testing.T) {
 	// Emoji and Unicode characters are preserved
 	html := `<p>Hello 🌍 World 🚀</p><p>Stars: ⭐ ✨</p>`
-	result, err := htmd.Convert(html)
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -157,13 +133,9 @@ func Test_EncodingUnicodeEmoji(t *testing.T) {
 func Test_HtmlCommentsOnly(t *testing.T) {
 	// Document containing only HTML comments produces empty output
 	html := `<!-- This is a comment --><!-- Another comment -->`
-	result, err := htmd.Convert(html)
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) != "" {
@@ -174,13 +146,9 @@ func Test_HtmlCommentsOnly(t *testing.T) {
 func Test_JustWhitespaceInput(t *testing.T) {
 	// Input that is only whitespace characters (spaces, tabs, newlines) produces empty output
 	html := `   `
-	result, err := htmd.Convert(html)
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) != "" {
@@ -191,13 +159,9 @@ func Test_JustWhitespaceInput(t *testing.T) {
 func Test_MalformedDeeplyNestedElements(t *testing.T) {
 	// Deeply nested elements (100 levels) are handled without stack overflow
 	html := `<div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><p>Deeply nested content</p></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div>`
-	result, err := htmd.Convert(html)
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -211,13 +175,9 @@ func Test_MalformedDeeplyNestedElements(t *testing.T) {
 func Test_MalformedMissingBlockClosingTags(t *testing.T) {
 	// Missing closing tags on block elements are auto-closed by parser
 	html := `<div><h1>Title<p>First paragraph<p>Second paragraph</div>`
-	result, err := htmd.Convert(html)
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -237,13 +197,9 @@ func Test_MalformedMissingBlockClosingTags(t *testing.T) {
 func Test_MalformedOverlappingTags(t *testing.T) {
 	// Overlapping bold/italic tags are recovered by the HTML parser without panic
 	html := `<p><b><i>bold and italic</b></i></p>`
-	result, err := htmd.Convert(html)
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -257,13 +213,9 @@ func Test_MalformedOverlappingTags(t *testing.T) {
 func Test_MalformedUnclosedParagraph(t *testing.T) {
 	// Unclosed <p> tag is recovered gracefully and content is preserved
 	html := `<p>This paragraph is never closed`
-	result, err := htmd.Convert(html)
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -277,13 +229,9 @@ func Test_MalformedUnclosedParagraph(t *testing.T) {
 func Test_ScriptTagsOnly(t *testing.T) {
 	// Document with only script tags produces empty output (scripts are stripped)
 	html := `<html><head><script>alert('xss')</script></head><body><script>document.write('hello')</script></body></html>`
-	result, err := htmd.Convert(html)
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) != "" {
@@ -294,13 +242,9 @@ func Test_ScriptTagsOnly(t *testing.T) {
 func Test_StyleTagsOnly(t *testing.T) {
 	// Document with only style tags produces empty output (styles are stripped)
 	html := `<html><head><style>body { color: red; }</style></head><body><style>.foo { margin: 0; }</style></body></html>`
-	result, err := htmd.Convert(html)
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) != "" {
@@ -311,13 +255,9 @@ func Test_StyleTagsOnly(t *testing.T) {
 func Test_WhitespaceOnly(t *testing.T) {
 	// Whitespace-only content
 	html := `<p>   </p>`
-	result, err := htmd.Convert(html)
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) != "" {
@@ -327,14 +267,10 @@ func Test_WhitespaceOnly(t *testing.T) {
 
 func Test_XssJavascriptUrlBlocked(t *testing.T) {
 	// javascript: URLs in href attributes are blocked and not included in output
-	html := `<p><a href=\"javascript:alert('xss')\">Click me</a></p>`
-	result, err := htmd.Convert(html)
+	html := `<p><a href="javascript:alert('xss')">Click me</a></p>`
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -353,14 +289,10 @@ func Test_XssJavascriptUrlBlocked(t *testing.T) {
 
 func Test_XssOnclickHandlerRemoved(t *testing.T) {
 	// onclick and other on* event handlers are removed from elements
-	html := `<p><a href=\"https://example.com\" onclick=\"alert('xss')\">Click me</a></p><button onmouseover=\"steal_data()\">Hover me</button>`
-	result, err := htmd.Convert(html)
+	html := `<p><a href="https://example.com" onclick="alert('xss')">Click me</a></p><button onmouseover="steal_data()">Hover me</button>`
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -386,13 +318,9 @@ func Test_XssOnclickHandlerRemoved(t *testing.T) {
 func Test_XssScriptTagStripped(t *testing.T) {
 	// Script tag content is stripped and does not appear in output
 	html := `<p>Safe content.</p><script>alert('xss')</script><p>More safe content.</p>`
-	result, err := htmd.Convert(html)
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -417,14 +345,10 @@ func Test_XssScriptTagStripped(t *testing.T) {
 
 func Test_XssSvgNestedScriptStripped(t *testing.T) {
 	// Script tags nested inside SVG are stripped
-	html := `<p>Before SVG.</p><svg xmlns=\"http://www.w3.org/2000/svg\"><script>alert('svg-xss')</script><text>SVG text</text></svg><p>After SVG.</p>`
-	result, err := htmd.Convert(html)
+	html := `<p>Before SVG.</p><svg xmlns="http://www.w3.org/2000/svg"><script>alert('svg-xss')</script><text>SVG text</text></svg><p>After SVG.</p>`
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
