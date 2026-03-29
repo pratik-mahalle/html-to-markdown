@@ -251,42 +251,42 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
             let escaped = escape_string(og_title);
             let _ = writeln!(
                 out,
-                "    expect(metadata.document.open_graph['og:title']).toBe('{escaped}');"
+                "    expect(metadata.document.open_graph['title']).toBe('{escaped}');"
             );
         }
         if let Some(og_description) = &a.metadata_og_description {
             let escaped = escape_string(og_description);
             let _ = writeln!(
                 out,
-                "    expect(metadata.document.open_graph['og:description']).toBe('{escaped}');"
+                "    expect(metadata.document.open_graph['description']).toBe('{escaped}');"
             );
         }
         if let Some(og_image) = &a.metadata_og_image {
             let escaped = escape_string(og_image);
             let _ = writeln!(
                 out,
-                "    expect(metadata.document.open_graph['og:image']).toBe('{escaped}');"
+                "    expect(metadata.document.open_graph['image']).toBe('{escaped}');"
             );
         }
         if let Some(og_type) = &a.metadata_og_type {
             let escaped = escape_string(og_type);
             let _ = writeln!(
                 out,
-                "    expect(metadata.document.open_graph['og:type']).toBe('{escaped}');"
+                "    expect(metadata.document.open_graph['type']).toBe('{escaped}');"
             );
         }
         if let Some(og_url) = &a.metadata_og_url {
             let escaped = escape_string(og_url);
             let _ = writeln!(
                 out,
-                "    expect(metadata.document.open_graph['og:url']).toBe('{escaped}');"
+                "    expect(metadata.document.open_graph['url']).toBe('{escaped}');"
             );
         }
         if let Some(og_site_name) = &a.metadata_og_site_name {
             let escaped = escape_string(og_site_name);
             let _ = writeln!(
                 out,
-                "    expect(metadata.document.open_graph['og:site_name']).toBe('{escaped}');"
+                "    expect(metadata.document.open_graph['site_name']).toBe('{escaped}');"
             );
         }
 
@@ -295,21 +295,21 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
             let escaped = escape_string(twitter_card);
             let _ = writeln!(
                 out,
-                "    expect(metadata.document.twitter_card['twitter:card']).toBe('{escaped}');"
+                "    expect(metadata.document.twitter_card['card']).toBe('{escaped}');"
             );
         }
         if let Some(twitter_title) = &a.metadata_twitter_title {
             let escaped = escape_string(twitter_title);
             let _ = writeln!(
                 out,
-                "    expect(metadata.document.twitter_card['twitter:title']).toBe('{escaped}');"
+                "    expect(metadata.document.twitter_card['title']).toBe('{escaped}');"
             );
         }
         if let Some(twitter_description) = &a.metadata_twitter_description {
             let escaped = escape_string(twitter_description);
             let _ = writeln!(
                 out,
-                "    expect(metadata.document.twitter_card['twitter:description']).toBe('{escaped}');"
+                "    expect(metadata.document.twitter_card['description']).toBe('{escaped}');"
             );
         }
 

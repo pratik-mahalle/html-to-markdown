@@ -183,7 +183,7 @@ fn test_og_basic_tags() {
 
     assert!(!content.trim().is_empty(), "expected non-empty content");
     assert_eq!(
-        result.metadata.document.open_graph.get("og:title").map(|s| s.as_str()),
+        result.metadata.document.open_graph.get("title").map(|s| s.as_str()),
         Some("OG Title"),
         "metadata_og_title mismatch"
     );
@@ -192,13 +192,13 @@ fn test_og_basic_tags() {
             .metadata
             .document
             .open_graph
-            .get("og:description")
+            .get("description")
             .map(|s| s.as_str()),
         Some("OG description text."),
         "metadata_og_description mismatch"
     );
     assert_eq!(
-        result.metadata.document.open_graph.get("og:image").map(|s| s.as_str()),
+        result.metadata.document.open_graph.get("image").map(|s| s.as_str()),
         Some("https://example.com/image.jpg"),
         "metadata_og_image mismatch"
     );
@@ -213,27 +213,22 @@ fn test_og_multiple_tags() {
 
     assert!(!content.trim().is_empty(), "expected non-empty content");
     assert_eq!(
-        result.metadata.document.open_graph.get("og:title").map(|s| s.as_str()),
+        result.metadata.document.open_graph.get("title").map(|s| s.as_str()),
         Some("Article Title"),
         "metadata_og_title mismatch"
     );
     assert_eq!(
-        result.metadata.document.open_graph.get("og:type").map(|s| s.as_str()),
+        result.metadata.document.open_graph.get("type").map(|s| s.as_str()),
         Some("article"),
         "metadata_og_type mismatch"
     );
     assert_eq!(
-        result.metadata.document.open_graph.get("og:url").map(|s| s.as_str()),
+        result.metadata.document.open_graph.get("url").map(|s| s.as_str()),
         Some("https://example.com/article"),
         "metadata_og_url mismatch"
     );
     assert_eq!(
-        result
-            .metadata
-            .document
-            .open_graph
-            .get("og:site_name")
-            .map(|s| s.as_str()),
+        result.metadata.document.open_graph.get("site_name").map(|s| s.as_str()),
         Some("Example Site"),
         "metadata_og_site_name mismatch"
     );
@@ -297,22 +292,12 @@ fn test_twitter_card_tags() {
 
     assert!(!content.trim().is_empty(), "expected non-empty content");
     assert_eq!(
-        result
-            .metadata
-            .document
-            .twitter_card
-            .get("twitter:card")
-            .map(|s| s.as_str()),
+        result.metadata.document.twitter_card.get("card").map(|s| s.as_str()),
         Some("summary_large_image"),
         "metadata_twitter_card mismatch"
     );
     assert_eq!(
-        result
-            .metadata
-            .document
-            .twitter_card
-            .get("twitter:title")
-            .map(|s| s.as_str()),
+        result.metadata.document.twitter_card.get("title").map(|s| s.as_str()),
         Some("Twitter Card Title"),
         "metadata_twitter_title mismatch"
     );
@@ -321,7 +306,7 @@ fn test_twitter_card_tags() {
             .metadata
             .document
             .twitter_card
-            .get("twitter:description")
+            .get("description")
             .map(|s| s.as_str()),
         Some("Twitter card description."),
         "metadata_twitter_description mismatch"
