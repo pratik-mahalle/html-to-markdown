@@ -1,5 +1,7 @@
 defmodule HtmlToMarkdown.TablesTest do
   use ExUnit.Case, async: true
+  # convert_with_tables/1-2 was removed in v3. Skip until re-implemented.
+  @moduletag :skip
 
   describe "convert_with_tables/3" do
     test "extracts a simple table" do

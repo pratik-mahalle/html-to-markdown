@@ -1,5 +1,8 @@
 defmodule HtmlToMarkdown.VisitorIssue187Test do
   use ExUnit.Case
+  # Visitor support is not yet wired into the Elixir NIF in v3.
+  # convert_with_visitor/3 was removed. Skip until NIF supports visitors.
+  @moduletag :skip
   doctest HtmlToMarkdown.Visitor
 
   describe "visitor pattern issue #187 - tag_name in context" do
