@@ -5,7 +5,7 @@ defmodule HtmlToMarkdownTest do
 
   test "convert/1 returns markdown" do
     assert {:ok, result} = HtmlToMarkdown.convert("<h1>Hello</h1>")
-    assert result["content"] =~ "# Hello"
+    assert result[:content] =~ "# Hello"
   end
 
   test "convert!/2 raises on invalid options" do
@@ -27,7 +27,7 @@ defmodule HtmlToMarkdownTest do
                preprocessing: %{enabled: true, preset: :minimal}
              )
 
-    assert result["content"] =~ "Example"
+    assert result[:content] =~ "Example"
   end
 
   test "convert/2 rejects invalid boolean options" do
@@ -44,7 +44,7 @@ defmodule HtmlToMarkdownTest do
     """
 
     assert {:ok, result} = HtmlToMarkdown.convert(html)
-    assert result["content"] =~ "Example"
+    assert result[:content] =~ "Example"
   end
 
   test "convert/2 extracts metadata (document, headers, links, images)" do
@@ -64,8 +64,8 @@ defmodule HtmlToMarkdownTest do
     """
 
     assert {:ok, result} = HtmlToMarkdown.convert(html)
-    assert is_binary(result["content"])
-    assert result["content"] =~ "Welcome"
+    assert is_binary(result[:content])
+    assert result[:content] =~ "Welcome"
   end
 
   test "convert/2 accepts output_format option as atom" do
@@ -73,11 +73,11 @@ defmodule HtmlToMarkdownTest do
 
     # Test with default markdown format
     assert {:ok, markdown_result} = HtmlToMarkdown.convert(html, output_format: :markdown)
-    assert is_binary(markdown_result["content"])
+    assert is_binary(markdown_result[:content])
 
     # Test with djot format
     assert {:ok, djot_result} = HtmlToMarkdown.convert(html, output_format: :djot)
-    assert is_binary(djot_result["content"])
+    assert is_binary(djot_result[:content])
   end
 
   test "convert/2 accepts output_format option as string" do
