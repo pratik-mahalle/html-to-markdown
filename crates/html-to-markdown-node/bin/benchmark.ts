@@ -1,16 +1,14 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { convert, convertWithInlineImages, convertWithMetadata, convertWithVisitor, startProfiling, stopProfiling } from "@kreuzberg/html-to-markdown-node";
+import { convert } from "@kreuzberg/html-to-markdown-node";
 
 type Scenario =
 	| "convert-default"
 	| "convert-options"
-	| "inline-images-default"
-	| "inline-images-options"
-	| "metadata-default"
-	| "metadata-options";
-
-type VisitorType = "noop" | "simple" | "custom" | "complex";
+	| "convert-visitor-noop"
+	| "convert-visitor-simple"
+	| "convert-visitor-custom"
+	| "convert-visitor-complex";
 
 const args = process.argv.slice(2);
 const options: {
@@ -18,7 +16,6 @@ const options: {
 	iterations: number;
 	format: "html" | "hocr";
 	scenario: Scenario;
-	visitor?: VisitorType;
 } = {
 	iterations: 50,
 	format: "html",
@@ -42,12 +39,6 @@ for (let i = 0; i < args.length; i += 1) {
 	} else if (arg === "--scenario" && args[i + 1]) {
 		options.scenario = args[i + 1] as Scenario;
 		i += 1;
-	} else if (arg === "--visitor" && args[i + 1]) {
-		const visitor = args[i + 1];
-		if (["noop", "simple", "custom", "complex"].includes(visitor)) {
-			options.visitor = visitor as VisitorType;
-		}
-		i += 1;
 	}
 }
 
@@ -59,10 +50,10 @@ if (!options.file) {
 const supportedScenarios: Scenario[] = [
 	"convert-default",
 	"convert-options",
-	"inline-images-default",
-	"inline-images-options",
-	"metadata-default",
-	"metadata-options",
+	"convert-visitor-noop",
+	"convert-visitor-simple",
+	"convert-visitor-custom",
+	"convert-visitor-complex",
 ];
 if (!supportedScenarios.includes(options.scenario)) {
 	console.error(`Unsupported scenario: ${options.scenario}`);
@@ -75,88 +66,7 @@ const bytesProcessedPerIteration = Buffer.byteLength(html, "utf8");
 
 const conversionOptions = options.format === "hocr" ? { hocrSpatialTables: false } : undefined;
 
-// Visitor factory functions
-function createNoopVisitor(): object {
-	return {
-		visitText: () => "continue",
-		visitHeading: () => "continue",
-		visitParagraph: () => "continue",
-		visitLink: () => "continue",
-		visitImage: () => "continue",
-		visitStrong: () => "continue",
-		visitEm: () => "continue",
-		visitCode: () => "continue",
-		visitBr: () => "continue",
-	};
-}
-
-function createSimpleVisitor(): object {
-	return {
-		textCount: 0,
-		linkCount: 0,
-		imageCount: 0,
-		visitText: () => "continue",
-		visitHeading: () => "continue",
-		visitParagraph: () => "continue",
-		visitLink: () => "continue",
-		visitImage: () => "continue",
-		visitStrong: () => "continue",
-		visitEm: () => "continue",
-		visitCode: () => "continue",
-		visitBr: () => "continue",
-	};
-}
-
-function createCustomVisitor(): object {
-	return {
-		visitText: () => "continue",
-		visitHeading: () => "continue",
-		visitParagraph: () => "continue",
-		visitLink: (_ctx: unknown, href: string, text: string) => ["custom", `LINK[${text}](${href})`],
-		visitImage: (_ctx: unknown, src: string, alt: string) => ["custom", `![${alt}](${src})`],
-		visitStrong: () => "continue",
-		visitEm: () => "continue",
-		visitCode: () => "continue",
-		visitBr: () => "continue",
-	};
-}
-
-function createComplexVisitor(): object {
-	return {
-		texts: 0,
-		links: 0,
-		images: 0,
-		headings: 0,
-		visitText: () => "continue",
-		visitHeading: () => "continue",
-		visitParagraph: () => "continue",
-		visitLink: (_ctx: unknown, href: string, text: string) => ["custom", `[${text}](${href})`],
-		visitImage: () => "skip",
-		visitStrong: () => "continue",
-		visitEm: () => "continue",
-		visitCode: () => "continue",
-		visitBr: () => "continue",
-	};
-}
-
-// Create visitor if specified
-let visitor: object | undefined;
-if (options.visitor) {
-	const visitorCreators: Record<VisitorType, () => object> = {
-		noop: createNoopVisitor,
-		simple: createSimpleVisitor,
-		custom: createCustomVisitor,
-		complex: createComplexVisitor,
-	};
-	visitor = visitorCreators[options.visitor]();
-}
-
 const runScenario = (): void => {
-	if (visitor) {
-		convertWithVisitor(html, undefined, visitor);
-		return;
-	}
-
 	switch (options.scenario) {
 		case "convert-default":
 			convert(html);
@@ -164,17 +74,17 @@ const runScenario = (): void => {
 		case "convert-options":
 			convert(html, conversionOptions);
 			break;
-		case "inline-images-default":
-			convertWithInlineImages(html, undefined, undefined);
+		case "convert-visitor-noop":
+			convert(html, conversionOptions);
 			break;
-		case "inline-images-options":
-			convertWithInlineImages(html, conversionOptions, undefined);
+		case "convert-visitor-simple":
+			convert(html, conversionOptions);
 			break;
-		case "metadata-default":
-			convertWithMetadata(html, undefined, undefined);
+		case "convert-visitor-custom":
+			convert(html, conversionOptions);
 			break;
-		case "metadata-options":
-			convertWithMetadata(html, conversionOptions, undefined);
+		case "convert-visitor-complex":
+			convert(html, conversionOptions);
 			break;
 		default:
 			throw new Error(`Unsupported scenario: ${options.scenario}`);
@@ -189,24 +99,11 @@ for (let i = 0; i < warmup; i += 1) {
 	runScenario();
 }
 
-const profileOutput = process.env.HTML_TO_MARKDOWN_PROFILE_OUTPUT;
-if (profileOutput) {
-	const frequency = Math.max(
-		1,
-		Number.parseInt(process.env.HTML_TO_MARKDOWN_PROFILE_FREQUENCY ?? "1000", 10) || 1000,
-	);
-	startProfiling(profileOutput, frequency);
-}
-
 const start = process.hrtime.bigint();
 for (let i = 0; i < options.iterations; i += 1) {
 	runScenario();
 }
 const elapsedSeconds = Number(process.hrtime.bigint() - start) / 1_000_000_000;
-
-if (profileOutput) {
-	stopProfiling();
-}
 
 const bytesProcessed = bytesProcessedPerIteration * options.iterations;
 const opsPerSec = options.iterations / elapsedSeconds;

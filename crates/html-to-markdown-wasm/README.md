@@ -17,7 +17,7 @@ Runs anywhere: Node.js, Deno, Bun, browsers, and edge runtimes.
 [![RubyGems](https://badge.fury.io/rb/html-to-markdown.svg)](https://rubygems.org/gems/html-to-markdown)
 [![NuGet](https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown.svg)](https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/)
 [![Maven Central](https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown.svg)](https://central.sonatype.com/artifact/dev.kreuzberg/html-to-markdown)
-[![Go Reference](https://pkg.go.dev/badge/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown.svg)](https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown)
+[![Go Reference](https://pkg.go.dev/badge/github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown.svg)](https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/kreuzberg-dev/html-to-markdown/blob/main/LICENSE)
 
 ## Performance
@@ -40,8 +40,8 @@ Universal WebAssembly bindings with **excellent performance** across all JavaScr
 
 ### Comparison
 
-- **vs Native NAPI**: ~1.17× slower (WASM has minimal overhead)
-- **vs Python**: ~6.3× faster (no FFI overhead)
+- **vs Native NAPI**: ~1.17x slower (WASM has minimal overhead)
+- **vs Python**: ~6.3x faster (no FFI overhead)
 - **Best for**: Universal deployment (browsers, Deno, edge runtimes, cross-platform apps)
 
 ### Benchmark Fixtures (Apple M4)
@@ -93,6 +93,23 @@ console.log(result.content);
 ```
 
 > **Heads up for edge runtimes:** Cloudflare Workers, Vite dev servers, and other environments that instantiate `.wasm` files asynchronously must call `await initWasm()` (or `await wasmReady`) once during startup before invoking `convert`. Traditional bundlers (Webpack, Rollup) and Deno/Node imports continue to work without manual initialization.
+
+### WasmConversionResult Fields
+
+Every call to `convert()` returns a `WasmConversionResult` object with six fields:
+
+```typescript
+import { convert } from '@kreuzberg/html-to-markdown-wasm';
+
+const result = convert(html);
+
+result.content;   // string | null  -- converted Markdown (or djot/plain text)
+result.document;  // string | null  -- structured document tree as JSON
+result.metadata;  // string | null  -- extracted HTML metadata as JSON
+result.tables;    // Array          -- all tables found in document order
+result.images;    // Array          -- extracted inline images (data URIs, SVGs)
+result.warnings;  // Array          -- non-fatal processing warnings
+```
 
 ### Byte-Based Input (Buffers / Uint8Array)
 
@@ -152,7 +169,7 @@ const result = convert(html, { headingStyle: "atx" });
 await Deno.writeTextFile("output.md", result.content ?? "");
 ```
 
-> **Performance Tip:** For Node.js/Bun, use [@kreuzberg/html-to-markdown-node](https://www.npmjs.com/package/@kreuzberg/html-to-markdown-node) for 1.17× better performance with native bindings.
+> **Performance Tip:** For Node.js/Bun, use [@kreuzberg/html-to-markdown-node](https://www.npmjs.com/package/@kreuzberg/html-to-markdown-node) for 1.17x better performance with native bindings.
 
 ### Browser (ESM)
 
@@ -170,10 +187,10 @@ await Deno.writeTextFile("output.md", result.content ?? "");
     await init();
 
     const html = '<h1>Hello World</h1><p>This runs in the <strong>browser</strong>!</p>';
-    const markdown = convert(html, { headingStyle: 'atx' });
+    const result = convert(html, { headingStyle: 'atx' });
 
-    console.log(markdown);
-    document.body.innerHTML = `<pre>${markdown}</pre>`;
+    console.log(result.content);
+    document.body.innerHTML = `<pre>${result.content}</pre>`;
   </script>
 </body>
 </html>
@@ -184,10 +201,11 @@ await Deno.writeTextFile("output.md", result.content ?? "");
 ```typescript
 import { convert } from '@kreuzberg/html-to-markdown-wasm';
 
-const markdown = convert('<h1>Hello</h1>', {
+const result = convert('<h1>Hello</h1>', {
   headingStyle: 'atx',
   codeBlockStyle: 'backticks'
 });
+console.log(result.content);
 ```
 
 ### Cloudflare Workers
@@ -203,9 +221,9 @@ export default {
   async fetch(request: Request): Promise<Response> {
     await ready;
     const html = await request.text();
-    const markdown = convert(html, { headingStyle: 'atx' });
+    const result = convert(html, { headingStyle: 'atx' });
 
-    return new Response(markdown, {
+    return new Response(result.content ?? "", {
       headers: { 'Content-Type': 'text/markdown' }
     });
   }
@@ -232,9 +250,9 @@ const result = convert('<h1>Hello</h1>', options);
 console.log(result.content);
 ```
 
-## Metadata Extraction
+## Metadata and Tables
 
-Extract document metadata (headers, links, images, structured data) alongside Markdown conversion:
+Extract document metadata and structured tables from the conversion result:
 
 ```typescript
 import { convert } from '@kreuzberg/html-to-markdown-wasm';
@@ -246,22 +264,23 @@ const html = `
       <h1>Main Title</h1>
       <p>Content with <a href="https://example.com">a link</a></p>
       <img src="https://example.com/image.jpg" alt="Example image">
+      <table>
+        <tr><th>Name</th><th>Value</th></tr>
+        <tr><td>Foo</td><td>42</td></tr>
+      </table>
     </body>
   </html>
 `;
 
 const result = convert(html, {
   extractMetadata: true,
-  extractHeaders: true,
-  extractLinks: true,
-  extractImages: true,
 });
 
-console.log(result.content);
-console.log('Document metadata:', result.metadata?.document);
-console.log('Headers:', result.metadata?.headers);
-console.log('Links:', result.metadata?.links);
-console.log('Images:', result.metadata?.images);
+console.log(result.content);            // Markdown output
+console.log(result.metadata);           // JSON string with title, links, headers, etc.
+console.log(result.tables.length);      // Number of tables found
+console.log(result.images.length);      // Number of inline images extracted
+console.log(result.warnings);           // Any processing warnings
 ```
 
 ## Build Targets
@@ -278,33 +297,33 @@ Three build targets are provided for different environments:
 
 | Runtime                   | Support                      | Package        |
 | ------------------------- | ---------------------------- | -------------- |
-| ✅ **Node.js** 18+        | Full support                 | `dist-node`    |
-| ✅ **Deno**               | Full support                 | npm: specifier |
-| ✅ **Bun**                | Full support (prefer native) | Default export |
-| ✅ **Browsers**           | Full support                 | `dist-web`     |
-| ✅ **Cloudflare Workers** | Full support                 | Default export |
-| ✅ **Deno Deploy**        | Full support                 | npm: specifier |
+| **Node.js** 18+           | Full support                 | `dist-node`    |
+| **Deno**                  | Full support                 | npm: specifier |
+| **Bun**                   | Full support (prefer native) | Default export |
+| **Browsers**              | Full support                 | `dist-web`     |
+| **Cloudflare Workers**    | Full support                 | Default export |
+| **Deno Deploy**           | Full support                 | npm: specifier |
 
 ## When to Use
 
 Choose `@kreuzberg/html-to-markdown-wasm` when:
 
-- 🌐 Running in browsers or edge runtimes
-- 🦕 Using Deno
-- ☁️ Deploying to Cloudflare Workers, Deno Deploy
-- 📦 Building universal libraries
-- 🔄 Need consistent behavior across all platforms
+- Running in browsers or edge runtimes
+- Using Deno
+- Deploying to Cloudflare Workers, Deno Deploy
+- Building universal libraries
+- Need consistent behavior across all platforms
 
 Use [@kreuzberg/html-to-markdown-node](https://www.npmjs.com/package/@kreuzberg/html-to-markdown-node) for:
 
-- ⚡ Maximum performance in Node.js/Bun (~3× faster)
-- 🖥️ Server-side only applications
+- Maximum performance in Node.js/Bun (~3x faster)
+- Server-side only applications
 
 ## Visitor Pattern Support
 
 **The WebAssembly binding does not support the visitor pattern.** The visitor pattern requires callbacks and stateful execution across the WebAssembly/JavaScript boundary, which has fundamental limitations:
 
-### Why WASM Doesn't Support Visitors
+### Why WASM Does Not Support Visitors
 
 1. **Memory safety across FFI boundary**: The WASM/JS boundary cannot safely pass mutable function callbacks that maintain state across multiple invocations
 2. **Single-threaded execution model**: WASM runs on a single thread with no equivalent to Node.js's `ThreadsafeFunction` FFI primitive
@@ -330,10 +349,10 @@ const visitor: Visitor = {
 };
 
 const result = convert(html, undefined, visitor);
-const markdown = result.content;
+console.log(result.content);
 ```
 
-**Performance:** ~3× faster than WASM, full visitor pattern support.
+**Performance:** ~3x faster than WASM, full visitor pattern support.
 **Use when:** Running on Node.js or Bun server-side.
 
 #### 2. Use Server-Side Bindings
@@ -395,7 +414,7 @@ const processedHtml = html.replace(
 );
 
 const result = convert(processedHtml);
-const markdown = result.content ?? "";
+console.log(result.content);
 ```
 
 **Use when:** Only simple text replacements are needed.
@@ -421,16 +440,16 @@ const transformed = markdown
 
 | Binding | Visitor Support | Best For |
 |---------|-----------------|----------|
-| **Rust** | ✅ Yes | Core library, performance-critical code |
-| **Python** | ✅ Yes (sync & async) | Server-side, bulk processing |
-| **TypeScript/Node.js** | ✅ Yes (sync & async) | Server-side Node.js/Bun, best performance |
-| **Ruby** | ✅ Yes | Server-side Ruby on Rails, Sinatra |
-| **PHP** | ✅ Yes | Server-side PHP, content management |
-| **Go** | ❌ No | Basic conversion only |
-| **Java** | ❌ No | Basic conversion only |
-| **C#** | ❌ No | Basic conversion only |
-| **Elixir** | ❌ No | Basic conversion only |
-| **WebAssembly** | ❌ No | Browser, Edge, Deno (see alternatives above) |
+| **Rust** | Yes | Core library, performance-critical code |
+| **Python** | Yes (sync and async) | Server-side, bulk processing |
+| **TypeScript/Node.js** | Yes (sync and async) | Server-side Node.js/Bun, best performance |
+| **Ruby** | Yes | Server-side Ruby on Rails, Sinatra |
+| **PHP** | Yes | Server-side PHP, content management |
+| **Go** | No | Basic conversion only |
+| **Java** | No | Basic conversion only |
+| **C#** | No | Basic conversion only |
+| **Elixir** | No | Basic conversion only |
+| **WebAssembly** | No | Browser, Edge, Deno (see alternatives above) |
 
 For comprehensive visitor pattern documentation with examples, see the [full documentation](https://docs.html-to-markdown.kreuzberg.dev).
 
@@ -443,7 +462,7 @@ See the [TypeScript definitions](./dist-node/html_to_markdown_wasm.d.ts) for all
 - List formatting (indent width, bullet characters)
 - Text escaping and formatting
 - Tag preservation (`preserveTags`) and stripping (`stripTags`)
-- Metadata extraction (extractMetadata, extractHeaders, extractLinks, extractImages)
+- Metadata extraction (`extractMetadata`)
 - Preprocessing for web scraping
 - And more...
 
@@ -487,7 +506,7 @@ console.log(result.content);
 ```typescript
 import { convert } from "npm:@kreuzberg/html-to-markdown-wasm";
 
-Deno.serve((req) => {
+Deno.serve(async (req) => {
   const url = new URL(req.url);
 
   if (url.pathname === "/convert" && req.method === "POST") {
@@ -547,19 +566,19 @@ console.log(result.content);
 
 The same Rust engine ships as native bindings for other ecosystems:
 
-- 🖥️ Node.js / Bun: [`html-to-markdown-node`](https://www.npmjs.com/package/html-to-markdown-node)
-- 🐍 Python: [`html-to-markdown`](https://pypi.org/project/html-to-markdown/)
-- 💎 Ruby: [`html-to-markdown`](https://rubygems.org/gems/html-to-markdown)
-- 🐘 PHP: [`kreuzberg-dev/html-to-markdown`](https://packagist.org/packages/kreuzberg-dev/html-to-markdown)
-- 🦀 Rust crate & CLI: [`html-to-markdown-rs`](https://crates.io/crates/html-to-markdown-rs)
+- Node.js / Bun: [`@kreuzberg/html-to-markdown-node`](https://www.npmjs.com/package/@kreuzberg/html-to-markdown-node)
+- Python: [`html-to-markdown`](https://pypi.org/project/html-to-markdown/)
+- Ruby: [`html-to-markdown`](https://rubygems.org/gems/html-to-markdown)
+- PHP: [`kreuzberg-dev/html-to-markdown`](https://packagist.org/packages/kreuzberg-dev/html-to-markdown)
+- Rust crate and CLI: [`html-to-markdown-rs`](https://crates.io/crates/html-to-markdown-rs)
 
 ## Links
 
 - [GitHub Repository](https://github.com/kreuzberg-dev/html-to-markdown)
 - [Full Documentation](https://github.com/kreuzberg-dev/html-to-markdown/blob/main/README.md)
-- [Native Node Package](https://www.npmjs.com/package/html-to-markdown-node)
+- [Native Node Package](https://www.npmjs.com/package/@kreuzberg/html-to-markdown-node)
 - [Python Package](https://pypi.org/project/html-to-markdown/)
-- [PHP Extension & Helpers](https://packagist.org/packages/kreuzberg-dev/html-to-markdown)
+- [PHP Extension and Helpers](https://packagist.org/packages/kreuzberg-dev/html-to-markdown)
 - [Rust Crate](https://crates.io/crates/html-to-markdown-rs)
 
 ## License

@@ -293,9 +293,9 @@ class ReadmeGenerator:
         if "output_path" in lang_config:
             return self.project_root / lang_config["output_path"]
 
-        # Special case: Go uses v2 subdirectory
+        # Special case: Go uses v3 subdirectory
         if lang_code == "go":
-            return self.packages_dir / "go" / "v2" / "README.md"
+            return self.packages_dir / "go" / "v3" / "README.md"
 
         # Standard pattern: packages/{language}/README.md
         return self.packages_dir / lang_code / "README.md"

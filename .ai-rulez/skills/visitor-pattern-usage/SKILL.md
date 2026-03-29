@@ -272,7 +272,7 @@ impl HtmlVisitor for PlainTextLinkVisitor {
 // Usage
 let html = r#"<p>Visit <a href="https://example.com">our site</a></p>"#;
 let mut visitor = PlainTextLinkVisitor;
-let markdown = convert_with_visitor(html, None, Some(&mut visitor))?;
+let markdown = convert(html, None, Some(&mut visitor))?;
 // Output: Visit our site (https://example.com)
 ```
 
@@ -346,7 +346,7 @@ let html = r#"
 <pre><code class="language-rust">fn main() {}</code></pre>
 "#;
 let mut visitor = HighlightingVisitor;
-let markdown = convert_with_visitor(html, None, Some(&mut visitor))?;
+let markdown = convert(html, None, Some(&mut visitor))?;
 ```
 
 ## Filtering by Node Type
@@ -383,7 +383,7 @@ impl HtmlVisitor for ImageOnlyVisitor {
 
 // Usage
 let mut visitor = ImageOnlyVisitor { image_count: 0 };
-let markdown = convert_with_visitor(html, None, Some(&mut visitor))?;
+let markdown = convert(html, None, Some(&mut visitor))?;
 println!("Found {} images", visitor.image_count);
 ```
 
@@ -431,7 +431,7 @@ impl HtmlVisitor for DepthTrackingVisitor {
 
 // Usage
 let mut visitor = DepthTrackingVisitor { current_depth: 0 };
-let markdown = convert_with_visitor(html, None, Some(&mut visitor))?;
+let markdown = convert(html, None, Some(&mut visitor))?;
 ```
 
 ## Attribute-Based Routing
@@ -491,16 +491,18 @@ let html = r#"
 <p data-featured="true">Important paragraph</p>
 "#;
 let mut visitor = AttributeRoutingVisitor;
-let markdown = convert_with_visitor(html, None, Some(&mut visitor))?;
+let markdown = convert(html, None, Some(&mut visitor))?;
 ```
 
 ## Async Visitor Support
 
 For languages with native async/await (Python, TypeScript, Elixir):
 
+The async visitor is passed as the third argument to `convert()` in async-enabled bindings:
+
 ```rust
 #[cfg(feature = "async-visitor")]
-pub async fn convert_with_async_visitor(
+pub async fn convert(
     html: &str,
     options: Option<ConversionOptions>,
     visitor: Option<AsyncVisitorHandle>,
@@ -528,7 +530,7 @@ class AsyncSyntaxHighlighter:
             return f"~~[{text}]({href})~~ (broken)"
 
 # Usage
-markdown = await html_to_markdown.convert_with_async_visitor(
+markdown = await html_to_markdown.convert(
     html,
     None,
     AsyncSyntaxHighlighter()
@@ -538,7 +540,7 @@ markdown = await html_to_markdown.convert_with_async_visitor(
 ### TypeScript Async Example (NAPI-RS)
 
 ```typescript
-import { convertWithAsyncVisitor } from 'html-to-markdown';
+import { convert } from 'html-to-markdown';
 
 class AsyncContentProcessor {
     async visitLink(ctx, href, text, title) {
@@ -554,7 +556,7 @@ class AsyncContentProcessor {
     }
 }
 
-const markdown = await convertWithAsyncVisitor(html, undefined, new AsyncContentProcessor());
+const markdown = await convert(html, undefined, new AsyncContentProcessor());
 ```
 
 ## State Management in Visitors
@@ -599,7 +601,7 @@ let mut visitor = LinkCollectorVisitor {
     internal_links: HashSet::new(),
 };
 
-let markdown = convert_with_visitor(html, None, Some(&mut visitor))?;
+let markdown = convert(html, None, Some(&mut visitor))?;
 
 println!("External: {:?}", visitor.external_links);
 println!("Email: {:?}", visitor.email_links);
@@ -661,7 +663,7 @@ let options = ConversionOptions {
 
 // Visitor can override specific behaviors
 let mut visitor = CustomVisitor;
-let markdown = convert_with_visitor(html, Some(options), Some(&mut visitor))?;
+let markdown = convert(html, Some(options), Some(&mut visitor))?;
 ```
 
 **Priority:** Visitor always takes precedence. If visitor returns `Custom` or `Skip`, conversion options are bypassed for that element.
@@ -721,20 +723,20 @@ task ruby:test  # packages/ruby/spec/visitor_spec.rb
 ## API Pattern
 
 ```rust
-// Simple visitor (sync)
-pub fn convert_with_visitor(
+// Primary API -- visitor is an optional third argument
+pub fn convert(
     html: &str,
     options: Option<ConversionOptions>,
     visitor: Option<visitor::VisitorHandle>,
-) -> Result<String>
+) -> Result<ConversionResult>
 
-// Async visitor (for languages with native async)
+// Async variant (for languages with native async)
 #[cfg(feature = "async-visitor")]
-pub async fn convert_with_async_visitor(
+pub async fn convert(
     html: &str,
     options: Option<ConversionOptions>,
     visitor: Option<AsyncVisitorHandle>,
-) -> Result<String>
+) -> Result<ConversionResult>
 ```
 
 ## Quick Reference: Common Visitor Patterns
