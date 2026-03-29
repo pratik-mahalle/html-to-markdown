@@ -42,6 +42,21 @@ public final class HtmlToMarkdown {
               false);
 
   /**
+   * Convert HTML to Markdown in a single pass using default options.
+   *
+   * <p>Equivalent to calling {@link #convert(String, String)} with {@code null} options.
+   *
+   * @param html the HTML string to convert
+   * @return a {@code ConversionResult} with content and all extracted data
+   * @throws NullPointerException if html is null
+   * @throws ConversionException if the conversion or JSON parsing fails
+   * @since 3.0.0
+   */
+  public static ConversionResult convert(final String html) {
+    return convert(html, null);
+  }
+
+  /**
    * Convert HTML to Markdown in a single pass, returning a full {@code ConversionResult}.
    *
    * <p>Returns a {@code ConversionResult} containing:
@@ -53,12 +68,13 @@ public final class HtmlToMarkdown {
    * </ul>
    *
    * @param html the HTML string to convert
+   * @param optionsJson optional JSON string for conversion options, or {@code null} for defaults
    * @return a {@code ConversionResult} with content and all extracted data
    * @throws NullPointerException if html is null
    * @throws ConversionException if the conversion or JSON parsing fails
    * @since 3.0.0
    */
-  public static ConversionResult convert(final String html) {
+  public static ConversionResult convert(final String html, final String optionsJson) {
     if (html == null) {
       throw new NullPointerException("HTML cannot be null");
     }
@@ -69,13 +85,16 @@ public final class HtmlToMarkdown {
 
     try (Arena arena = Arena.ofConfined()) {
       MemorySegment htmlSegment = HtmlToMarkdownFFI.toCString(arena, html);
+      MemorySegment optionsSegment = (optionsJson != null)
+          ? HtmlToMarkdownFFI.toCString(arena, optionsJson)
+          : MemorySegment.NULL;
 
       MemorySegment resultSegment;
       try {
         resultSegment =
             (MemorySegment)
                 HtmlToMarkdownFFI.html_to_markdown_convert.invoke(
-                    htmlSegment, MemorySegment.NULL);
+                    htmlSegment, optionsSegment);
       } catch (Throwable e) {
         throw new ConversionException("FFI call to convert failed: " + e.getMessage(), e);
       }

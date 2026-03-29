@@ -10,7 +10,8 @@
 void test_options_code_block_backticks(void) {
     /* Backticks code block style uses triple backtick fences */
     const char *html = "<pre><code class=\"language-js\">console.log('hi');</code></pre>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"codeBlockStyle\":\"backticks\"}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_contains_all */
@@ -22,7 +23,8 @@ void test_options_code_block_backticks(void) {
 void test_options_code_block_tildes(void) {
     /* Tildes code block style uses triple tilde fences */
     const char *html = "<pre><code>some code</code></pre>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"codeBlockStyle\":\"tildes\"}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_contains_all */
@@ -34,7 +36,8 @@ void test_options_code_block_tildes(void) {
 void test_options_escape_asterisks(void) {
     /* escape_asterisks option escapes asterisks in plain text */
     const char *html = "<p>Use 2*3 = 6 in math.</p>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"escapeAsterisks\":true}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_not_empty */
@@ -49,7 +52,8 @@ void test_options_escape_asterisks(void) {
 void test_options_escape_misc(void) {
     /* escape_misc option escapes miscellaneous markdown characters */
     const char *html = "<p>Use # and | and ~ in text.</p>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"escapeMisc\":true}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_not_empty */
@@ -64,7 +68,8 @@ void test_options_escape_misc(void) {
 void test_options_escape_underscores(void) {
     /* escape_underscores option escapes underscores in plain text */
     const char *html = "<p>The variable_name is defined.</p>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"escapeUnderscores\":true}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_not_empty */
@@ -79,7 +84,8 @@ void test_options_escape_underscores(void) {
 void test_options_heading_style_atx(void) {
     /* ATX heading style produces hash-prefixed headings */
     const char *html = "<h1>Title</h1><h2>Subtitle</h2>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"headingStyle\":\"atx\"}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_contains_all */
@@ -91,7 +97,8 @@ void test_options_heading_style_atx(void) {
 void test_options_heading_style_atx_closed(void) {
     /* ATX closed heading style adds closing hashes */
     const char *html = "<h1>Closed Heading</h1>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"headingStyle\":\"atxClosed\"}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_contains_all */
@@ -102,7 +109,8 @@ void test_options_heading_style_atx_closed(void) {
 void test_options_heading_style_underlined(void) {
     /* Underlined heading style produces setext-style headings for h1 and h2 */
     const char *html = "<h1>Main Title</h1>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"headingStyle\":\"underlined\"}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_not_empty */
@@ -115,7 +123,8 @@ void test_options_heading_style_underlined(void) {
 void test_options_list_custom_bullets(void) {
     /* Custom bullet character for unordered lists */
     const char *html = "<ul><li>Item A</li><li>Item B</li></ul>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"bullets\":\"*\"}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_contains_all */
@@ -127,7 +136,8 @@ void test_options_list_custom_bullets(void) {
 void test_options_list_indent_tabs(void) {
     /* Tab indentation type for nested list items */
     const char *html = "<ul><li>Parent<ul><li>Child</li></ul></li></ul>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"listIndentType\":\"tabs\"}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_not_empty */
@@ -141,7 +151,8 @@ void test_options_list_indent_tabs(void) {
 void test_options_output_format_djot(void) {
     /* Djot output format produces djot-compatible markup */
     const char *html = "<p>Simple paragraph.</p>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"outputFormat\":\"djot\"}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_not_empty */
@@ -154,7 +165,8 @@ void test_options_output_format_djot(void) {
 void test_options_output_format_markdown(void) {
     /* Default markdown output format produces standard markdown */
     const char *html = "<h1>Title</h1><p>Some text.</p>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"outputFormat\":\"markdown\"}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_contains_all */
@@ -166,7 +178,8 @@ void test_options_output_format_markdown(void) {
 void test_options_output_format_plain(void) {
     /* Plain text output format strips markdown syntax */
     const char *html = "<h1>Title</h1><p>Some <strong>bold</strong> text.</p>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"outputFormat\":\"plain\"}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_contains_all */
@@ -182,7 +195,8 @@ void test_options_output_format_plain(void) {
 void test_options_whitespace_normalized(void) {
     /* Normalized whitespace mode collapses multiple spaces */
     const char *html = "<p>Text   with    extra   spaces.</p>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"whitespaceMode\":\"normalized\"}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_not_empty */
@@ -198,7 +212,8 @@ void test_options_whitespace_normalized(void) {
 void test_options_whitespace_strict(void) {
     /* Strict whitespace mode preserves whitespace as-is */
     const char *html = "<p>Preserved   spacing.</p>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"whitespaceMode\":\"strict\"}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_not_empty */
@@ -213,7 +228,8 @@ void test_options_wrap_disabled(void) {
     /* Wrap option disabled preserves long lines without breaking */
     const char *html = "<p>This is a long paragraph that should not be wrapped at all because "
                        "wrapping is disabled.</p>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"wrap\":false}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_contains_all */
@@ -226,7 +242,8 @@ void test_options_wrap_enabled(void) {
     /* Wrap option enabled with custom width wraps long lines */
     const char *html = "<p>This is a long paragraph that should be wrapped at the specified column "
                        "width when the wrap option is enabled.</p>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"wrap\":true,\"wrapWidth\":40}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_not_empty */

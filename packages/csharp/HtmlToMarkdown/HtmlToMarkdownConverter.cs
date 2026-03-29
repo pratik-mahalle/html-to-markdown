@@ -14,13 +14,14 @@ public static class HtmlToMarkdownConverter
     /// Converts HTML and returns full structured content in a single pass.
     /// </summary>
     /// <param name="html">The HTML string to convert</param>
+    /// <param name="optionsJson">Optional JSON string for conversion options, or null for defaults</param>
     /// <returns>
     /// A <see cref="Metadata.ConversionResult"/> containing the converted Markdown, extracted
     /// metadata (title, links, images, etc.), structured table data, and any processing warnings.
     /// </returns>
     /// <exception cref="ArgumentNullException">Thrown when html is null</exception>
     /// <exception cref="HtmlToMarkdownException">Thrown when conversion or JSON parsing fails</exception>
-    public static Metadata.ConversionResult Convert(string html)
+    public static Metadata.ConversionResult Convert(string html, string? optionsJson = null)
     {
         if (html == null)
         {
@@ -33,13 +34,18 @@ public static class HtmlToMarkdownConverter
         }
 
         IntPtr htmlPtr = IntPtr.Zero;
+        IntPtr optionsPtr = IntPtr.Zero;
         IntPtr resultPtr = IntPtr.Zero;
 
         try
         {
             htmlPtr = StringToUtf8Ptr(html);
+            if (optionsJson != null)
+            {
+                optionsPtr = StringToUtf8Ptr(optionsJson);
+            }
 
-            resultPtr = NativeMethods.html_to_markdown_convert(htmlPtr, IntPtr.Zero);
+            resultPtr = NativeMethods.html_to_markdown_convert(htmlPtr, optionsPtr);
 
             if (resultPtr == IntPtr.Zero)
             {
@@ -66,6 +72,11 @@ public static class HtmlToMarkdownConverter
             if (htmlPtr != IntPtr.Zero)
             {
                 Marshal.FreeCoTaskMem(htmlPtr);
+            }
+
+            if (optionsPtr != IntPtr.Zero)
+            {
+                Marshal.FreeCoTaskMem(optionsPtr);
             }
 
             if (resultPtr != IntPtr.Zero)

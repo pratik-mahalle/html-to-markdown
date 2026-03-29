@@ -175,23 +175,47 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
 
     let escaped_html = escape_java_string(html);
 
+    // Build options JSON if specified.
+    let options_arg = if let Some(opts) = &fixture.options {
+        let json = serde_json::to_string(opts).expect("fixture options must serialize");
+        let escaped_json = escape_java_string(&json);
+        Some(escaped_json)
+    } else {
+        None
+    };
+
     // Conversion call + error handling.
     if fixture.assertions.expect_error == Some(true) {
         let _ = writeln!(out, "    @Test");
         let _ = writeln!(out, "    void test{fn_name}() {{");
         let _ = writeln!(out, "        // {description}");
         let _ = writeln!(out, "        var html = \"{escaped_html}\";");
-        let _ = writeln!(
-            out,
-            "        assertThrows(Exception.class, () -> HtmlToMarkdown.convert(html));"
-        );
-        if let Some(contains) = &fixture.assertions.error_contains {
-            let escaped = escape_java_string(contains);
+        if let Some(opts_escaped) = &options_arg {
             let _ = writeln!(
                 out,
-                "        var ex = assertThrows(Exception.class, () -> HtmlToMarkdown.convert(html));"
+                "        assertThrows(Exception.class, () -> HtmlToMarkdown.convert(html, \"{opts_escaped}\"));"
             );
-            let _ = writeln!(out, "        assertTrue(ex.getMessage().contains(\"{escaped}\"));");
+            if let Some(contains) = &fixture.assertions.error_contains {
+                let escaped = escape_java_string(contains);
+                let _ = writeln!(
+                    out,
+                    "        var ex = assertThrows(Exception.class, () -> HtmlToMarkdown.convert(html, \"{opts_escaped}\"));"
+                );
+                let _ = writeln!(out, "        assertTrue(ex.getMessage().contains(\"{escaped}\"));");
+            }
+        } else {
+            let _ = writeln!(
+                out,
+                "        assertThrows(Exception.class, () -> HtmlToMarkdown.convert(html));"
+            );
+            if let Some(contains) = &fixture.assertions.error_contains {
+                let escaped = escape_java_string(contains);
+                let _ = writeln!(
+                    out,
+                    "        var ex = assertThrows(Exception.class, () -> HtmlToMarkdown.convert(html));"
+                );
+                let _ = writeln!(out, "        assertTrue(ex.getMessage().contains(\"{escaped}\"));");
+            }
         }
         let _ = writeln!(out, "    }}");
         return;
@@ -201,7 +225,14 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
     let _ = writeln!(out, "    void test{fn_name}() {{");
     let _ = writeln!(out, "        // {description}");
     let _ = writeln!(out, "        var html = \"{escaped_html}\";");
-    let _ = writeln!(out, "        var result = HtmlToMarkdown.convert(html);");
+    if let Some(opts_escaped) = &options_arg {
+        let _ = writeln!(
+            out,
+            "        var result = HtmlToMarkdown.convert(html, \"{opts_escaped}\");"
+        );
+    } else {
+        let _ = writeln!(out, "        var result = HtmlToMarkdown.convert(html);");
+    }
     let _ = writeln!(
         out,
         "        var content = result.content() != null ? result.content() : \"\";"

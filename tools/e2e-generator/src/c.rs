@@ -187,9 +187,23 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
         }
     }
 
+    // Build options JSON if specified.
+    let options_expr = if let Some(opts) = &fixture.options {
+        let json = serde_json::to_string(opts).expect("fixture options must serialize");
+        let escaped_json = escape_c_string(&json);
+        let _ = writeln!(out, "    const char *options = \"{}\";", escaped_json);
+        "options"
+    } else {
+        "NULL"
+    };
+
     // Conversion call
     if fixture.assertions.expect_error == Some(true) {
-        let _ = writeln!(out, "    char *result = html_to_markdown_convert(html, NULL);");
+        let _ = writeln!(
+            out,
+            "    char *result = html_to_markdown_convert(html, {});",
+            options_expr
+        );
         let _ = writeln!(out, "    assert(result == NULL && \"expected conversion to fail\");");
         if let Some(contains) = &fixture.assertions.error_contains {
             // Note: error message checking would require additional API
@@ -203,7 +217,11 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
         return;
     }
 
-    let _ = writeln!(out, "    char *result = html_to_markdown_convert(html, NULL);");
+    let _ = writeln!(
+        out,
+        "    char *result = html_to_markdown_convert(html, {});",
+        options_expr
+    );
     let _ = writeln!(out, "    assert(result != NULL && \"conversion should succeed\");");
     let _ = writeln!(out);
 

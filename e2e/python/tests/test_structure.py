@@ -9,7 +9,8 @@ from html_to_markdown import convert
 def test_structure_code_block() -> None:
     """Fenced code block produces Code node."""
     html = '<p>Example code:</p><pre><code class="language-rust">fn main() { println!("Hello"); }</code></pre>'
-    result = convert(html)
+    opts = {"include_document_structure": True}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"
@@ -18,7 +19,8 @@ def test_structure_code_block() -> None:
 def test_structure_deep_nesting_h1_h2_h3() -> None:
     """H1 > H2 > H3 creates three levels of heading nesting."""
     html = "<h1>Top Level</h1><p>Top intro.</p><h2>Mid Level</h2><p>Mid content.</p><h3>Deep Level</h3><p>Deep content.</p>"
-    result = convert(html)
+    opts = {"include_document_structure": True}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"
@@ -27,7 +29,8 @@ def test_structure_deep_nesting_h1_h2_h3() -> None:
 def test_structure_h1_h2_nested_group() -> None:
     """H1 followed by H2 creates a nested group under the H1."""
     html = "<h1>Chapter One</h1><p>Chapter intro.</p><h2>Section One</h2><p>Section content.</p>"
-    result = convert(html)
+    opts = {"include_document_structure": True}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"
@@ -36,7 +39,8 @@ def test_structure_h1_h2_nested_group() -> None:
 def test_structure_heading_paragraph() -> None:
     """Simple heading followed by paragraph produces Heading and Paragraph nodes."""
     html = "<h1>Title</h1><p>A paragraph of text.</p>"
-    result = convert(html)
+    opts = {"include_document_structure": True}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"
@@ -45,7 +49,8 @@ def test_structure_heading_paragraph() -> None:
 def test_structure_list() -> None:
     """Unordered list produces List and ListItem nodes."""
     html = "<p>Items:</p><ul><li>Alpha</li><li>Beta</li><li>Gamma</li></ul>"
-    result = convert(html)
+    opts = {"include_document_structure": True}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"
@@ -54,7 +59,8 @@ def test_structure_list() -> None:
 def test_structure_multiple_headings() -> None:
     """Multiple headings create multiple Heading nodes with correct levels."""
     html = "<h1>Main Title</h1><h2>Section One</h2><p>Section one content.</p><h2>Section Two</h2><p>Section two content.</p>"
-    result = convert(html)
+    opts = {"include_document_structure": True}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"
@@ -63,7 +69,8 @@ def test_structure_multiple_headings() -> None:
 def test_structure_sibling_h1_groups() -> None:
     """H1, H2, then another H1 creates two sibling top-level groups."""
     html = "<h1>Chapter One</h1><h2>Section A</h2><p>Section A content.</p><h1>Chapter Two</h1><h2>Section B</h2><p>Section B content.</p>"
-    result = convert(html)
+    opts = {"include_document_structure": True}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"

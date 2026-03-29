@@ -85,7 +85,7 @@ package htmltomarkdown
 //
 // static const char* html_to_markdown_ffi_error = "html-to-markdown FFI library not loaded";
 //
-// typedef char* (*convert_fn)(const char*);
+// typedef char* (*convert_fn)(const char*, const char*);
 // typedef void (*free_string_fn)(char*);
 // typedef const char* (*version_fn)(void);
 // typedef const char* (*last_error_fn)(void);
@@ -95,11 +95,11 @@ package htmltomarkdown
 // typedef void* (*visitor_create_fn)(const void*);
 // typedef void (*visitor_free_fn)(void*);
 //
-// char* html_to_markdown_convert_proxy(const char* html) {
+// char* html_to_markdown_convert_proxy(const char* html, const char* options_json) {
 // 	if (!html_to_markdown_convert_ptr) {
 // 		return NULL;
 // 	}
-// 	return ((convert_fn)html_to_markdown_convert_ptr)(html);
+// 	return ((convert_fn)html_to_markdown_convert_ptr)(html, options_json);
 // }
 //
 // void html_to_markdown_free_string_proxy(char* s) {

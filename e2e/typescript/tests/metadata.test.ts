@@ -8,7 +8,7 @@ import { convert } from '@kreuzberg/html-to-markdown';
 describe('metadata', () => {
   it('metadata_author_meta: Extract author from <meta name='author'> tag', () => {
     const html = `<html><head><title>Page</title><meta name="author" content="Jane Doe"></head><body><p>Content</p></body></html>`;
-    const result = convert(html);
+    const result = convert(html, { extract_metadata: true });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
@@ -21,7 +21,7 @@ describe('metadata', () => {
 
   it('metadata_canonical_url: Extract canonical URL from <link rel='canonical'> tag', () => {
     const html = `<html><head><title>Page</title><link rel="canonical" href="https://example.com/canonical-page"></head><body><p>Content</p></body></html>`;
-    const result = convert(html);
+    const result = convert(html, { extract_metadata: true });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
@@ -34,7 +34,7 @@ describe('metadata', () => {
 
   it('metadata_description_meta: Extract description from <meta name='description'> tag', () => {
     const html = `<html><head><title>Page</title><meta name="description" content="This is the page description."></head><body><p>Content</p></body></html>`;
-    const result = convert(html);
+    const result = convert(html, { extract_metadata: true });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
@@ -47,7 +47,7 @@ describe('metadata', () => {
 
   it('metadata_extract_all_images: Extract all images from a document into metadata', () => {
     const html = `<html><head><title>Gallery</title></head><body><img src="https://example.com/photo1.jpg" alt="Photo 1"><img src="https://example.com/photo2.png" alt="Photo 2"><img src="/local/image.webp" alt="Local image"></body></html>`;
-    const result = convert(html);
+    const result = convert(html, { extract_metadata: true });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
@@ -63,7 +63,7 @@ describe('metadata', () => {
 
   it('metadata_extract_all_links: Extract all links from a document into metadata', () => {
     const html = `<html><head><title>Links Page</title></head><body><p>Visit <a href="https://example.com">Example</a> or <a href="https://docs.example.com">Docs</a>.</p><p>Also see <a href="/relative/path">relative link</a> and <a href="mailto:hello@example.com">email us</a>.</p></body></html>`;
-    const result = convert(html);
+    const result = convert(html, { extract_metadata: true });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
@@ -79,7 +79,7 @@ describe('metadata', () => {
 
   it('metadata_headers_hierarchy: Extract heading hierarchy from document into metadata', () => {
     const html = `<html><head><title>Docs</title></head><body><h1>Introduction</h1><h2>Getting Started</h2><h3>Installation</h3><h3>Configuration</h3><h2>Advanced Usage</h2><h3>Custom Options</h3></body></html>`;
-    const result = convert(html);
+    const result = convert(html, { extract_metadata: true });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
@@ -96,7 +96,7 @@ describe('metadata', () => {
 
   it('metadata_keywords_meta: Extract keywords from <meta name='keywords'> tag', () => {
     const html = `<html><head><title>Page</title><meta name="keywords" content="rust, markdown, html, converter"></head><body><p>Content</p></body></html>`;
-    const result = convert(html);
+    const result = convert(html, { extract_metadata: true });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
@@ -112,7 +112,7 @@ describe('metadata', () => {
 
   it('metadata_title_tag: Extract title from <title> tag', () => {
     const html = `<html><head><title>My Page</title></head><body><p>Content</p></body></html>`;
-    const result = convert(html);
+    const result = convert(html, { extract_metadata: true });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
@@ -125,7 +125,7 @@ describe('metadata', () => {
 
   it('og_basic_tags: Extract og:title, og:description, and og:image from Open Graph meta tags', () => {
     const html = `<html><head><title>Fallback Title</title><meta property="og:title" content="OG Title"><meta property="og:description" content="OG description text."><meta property="og:image" content="https://example.com/image.jpg"></head><body><p>Content</p></body></html>`;
-    const result = convert(html);
+    const result = convert(html, { extract_metadata: true });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
@@ -140,7 +140,7 @@ describe('metadata', () => {
 
   it('og_multiple_tags: Extract multiple Open Graph tags including type, url, and site_name', () => {
     const html = `<html><head><meta property="og:title" content="Article Title"><meta property="og:type" content="article"><meta property="og:url" content="https://example.com/article"><meta property="og:site_name" content="Example Site"><meta property="og:description" content="An interesting article."><meta property="og:image" content="https://example.com/article.jpg"></head><body><article><p>Article content here.</p></article></body></html>`;
-    const result = convert(html);
+    const result = convert(html, { extract_metadata: true });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
@@ -156,7 +156,7 @@ describe('metadata', () => {
 
   it('structured_data_json_ld: JSON-LD script tag is stripped from output (security) but metadata may be extracted', () => {
     const html = `<html><head><title>Article</title><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"My Article","author":{"@type":"Person","name":"Jane Doe"},"datePublished":"2024-01-15"}</script></head><body><h1>My Article</h1><p>Article body text.</p></body></html>`;
-    const result = convert(html);
+    const result = convert(html, { extract_metadata: true });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
@@ -168,7 +168,7 @@ describe('metadata', () => {
 
   it('structured_data_multiple_json_ld: Multiple JSON-LD blocks are all stripped from output', () => {
     const html = `<html><head><title>Shop Page</title><script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"Widget","price":"9.99"}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home"}]}</script></head><body><h1>Widget</h1><p>A great widget for all purposes.</p></body></html>`;
-    const result = convert(html);
+    const result = convert(html, { extract_metadata: true });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
@@ -180,7 +180,7 @@ describe('metadata', () => {
 
   it('twitter_card_tags: Extract Twitter card meta tags', () => {
     const html = `<html><head><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@examplesite"><meta name="twitter:title" content="Twitter Card Title"><meta name="twitter:description" content="Twitter card description."><meta name="twitter:image" content="https://example.com/twitter-image.jpg"></head><body><p>Content</p></body></html>`;
-    const result = convert(html);
+    const result = convert(html, { extract_metadata: true });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
