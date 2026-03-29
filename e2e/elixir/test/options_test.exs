@@ -6,7 +6,8 @@ defmodule HtmlToMarkdown.OptionsTest do
 
   test "options_code_block_backticks: Backticks code block style uses triple backtick fences" do
     html = "<pre><code class=\"language-js\">console.log('hi');</code></pre>"
-    {:ok, result} = HtmlToMarkdown.convert(html)
+    opts = %{"code_block_style" => "backticks"}
+    {:ok, result} = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ""
 
     assert String.contains?(content, "```")
@@ -15,7 +16,8 @@ defmodule HtmlToMarkdown.OptionsTest do
 
   test "options_code_block_tildes: Tildes code block style uses triple tilde fences" do
     html = "<pre><code>some code</code></pre>"
-    {:ok, result} = HtmlToMarkdown.convert(html)
+    opts = %{"code_block_style" => "tildes"}
+    {:ok, result} = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ""
 
     assert String.contains?(content, "~~~")
@@ -24,7 +26,8 @@ defmodule HtmlToMarkdown.OptionsTest do
 
   test "options_escape_asterisks: escape_asterisks option escapes asterisks in plain text" do
     html = "<p>Use 2*3 = 6 in math.</p>"
-    {:ok, result} = HtmlToMarkdown.convert(html)
+    opts = %{"escape_asterisks" => true}
+    {:ok, result} = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ""
 
     assert String.trim(content) != ""
@@ -35,7 +38,8 @@ defmodule HtmlToMarkdown.OptionsTest do
 
   test "options_escape_misc: escape_misc option escapes miscellaneous markdown characters" do
     html = "<p>Use \# and | and ~ in text.</p>"
-    {:ok, result} = HtmlToMarkdown.convert(html)
+    opts = %{"escape_misc" => true}
+    {:ok, result} = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ""
 
     assert String.trim(content) != ""
@@ -46,7 +50,8 @@ defmodule HtmlToMarkdown.OptionsTest do
 
   test "options_escape_underscores: escape_underscores option escapes underscores in plain text" do
     html = "<p>The variable_name is defined.</p>"
-    {:ok, result} = HtmlToMarkdown.convert(html)
+    opts = %{"escape_underscores" => true}
+    {:ok, result} = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ""
 
     assert String.trim(content) != ""
@@ -57,7 +62,8 @@ defmodule HtmlToMarkdown.OptionsTest do
 
   test "options_heading_style_atx: ATX heading style produces hash-prefixed headings" do
     html = "<h1>Title</h1><h2>Subtitle</h2>"
-    {:ok, result} = HtmlToMarkdown.convert(html)
+    opts = %{"heading_style" => "atx"}
+    {:ok, result} = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ""
 
     assert String.contains?(content, "\# Title")
@@ -66,7 +72,8 @@ defmodule HtmlToMarkdown.OptionsTest do
 
   test "options_heading_style_atx_closed: ATX closed heading style adds closing hashes" do
     html = "<h1>Closed Heading</h1>"
-    {:ok, result} = HtmlToMarkdown.convert(html)
+    opts = %{"heading_style" => "atxClosed"}
+    {:ok, result} = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ""
 
     assert String.contains?(content, "\# Closed Heading \#")
@@ -74,7 +81,8 @@ defmodule HtmlToMarkdown.OptionsTest do
 
   test "options_heading_style_underlined: Underlined heading style produces setext-style headings for h1 and h2" do
     html = "<h1>Main Title</h1>"
-    {:ok, result} = HtmlToMarkdown.convert(html)
+    opts = %{"heading_style" => "underlined"}
+    {:ok, result} = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ""
 
     assert String.trim(content) != ""
@@ -83,7 +91,8 @@ defmodule HtmlToMarkdown.OptionsTest do
 
   test "options_list_custom_bullets: Custom bullet character for unordered lists" do
     html = "<ul><li>Item A</li><li>Item B</li></ul>"
-    {:ok, result} = HtmlToMarkdown.convert(html)
+    opts = %{"bullets" => "*"}
+    {:ok, result} = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ""
 
     assert String.contains?(content, "* Item A")
@@ -92,7 +101,8 @@ defmodule HtmlToMarkdown.OptionsTest do
 
   test "options_list_indent_tabs: Tab indentation type for nested list items" do
     html = "<ul><li>Parent<ul><li>Child</li></ul></li></ul>"
-    {:ok, result} = HtmlToMarkdown.convert(html)
+    opts = %{"list_indent_type" => "tabs"}
+    {:ok, result} = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ""
 
     assert String.trim(content) != ""
@@ -102,7 +112,8 @@ defmodule HtmlToMarkdown.OptionsTest do
 
   test "options_output_format_djot: Djot output format produces djot-compatible markup" do
     html = "<p>Simple paragraph.</p>"
-    {:ok, result} = HtmlToMarkdown.convert(html)
+    opts = %{"output_format" => "djot"}
+    {:ok, result} = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ""
 
     assert String.trim(content) != ""
@@ -111,7 +122,8 @@ defmodule HtmlToMarkdown.OptionsTest do
 
   test "options_output_format_markdown: Default markdown output format produces standard markdown" do
     html = "<h1>Title</h1><p>Some text.</p>"
-    {:ok, result} = HtmlToMarkdown.convert(html)
+    opts = %{"output_format" => "markdown"}
+    {:ok, result} = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ""
 
     assert String.contains?(content, "\# Title")
@@ -120,7 +132,8 @@ defmodule HtmlToMarkdown.OptionsTest do
 
   test "options_output_format_plain: Plain text output format strips markdown syntax" do
     html = "<h1>Title</h1><p>Some <strong>bold</strong> text.</p>"
-    {:ok, result} = HtmlToMarkdown.convert(html)
+    opts = %{"output_format" => "plain"}
+    {:ok, result} = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ""
 
     assert String.contains?(content, "Title")
@@ -132,7 +145,8 @@ defmodule HtmlToMarkdown.OptionsTest do
 
   test "options_whitespace_normalized: Normalized whitespace mode collapses multiple spaces" do
     html = "<p>Text   with    extra   spaces.</p>"
-    {:ok, result} = HtmlToMarkdown.convert(html)
+    opts = %{"whitespace_mode" => "normalized"}
+    {:ok, result} = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ""
 
     assert String.trim(content) != ""
@@ -144,7 +158,8 @@ defmodule HtmlToMarkdown.OptionsTest do
 
   test "options_whitespace_strict: Strict whitespace mode preserves whitespace as-is" do
     html = "<p>Preserved   spacing.</p>"
-    {:ok, result} = HtmlToMarkdown.convert(html)
+    opts = %{"whitespace_mode" => "strict"}
+    {:ok, result} = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ""
 
     assert String.trim(content) != ""
@@ -156,7 +171,8 @@ defmodule HtmlToMarkdown.OptionsTest do
     html =
       "<p>This is a long paragraph that should not be wrapped at all because wrapping is disabled.</p>"
 
-    {:ok, result} = HtmlToMarkdown.convert(html)
+    opts = %{"wrap" => false}
+    {:ok, result} = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ""
 
     assert String.contains?(
@@ -169,7 +185,8 @@ defmodule HtmlToMarkdown.OptionsTest do
     html =
       "<p>This is a long paragraph that should be wrapped at the specified column width when the wrap option is enabled.</p>"
 
-    {:ok, result} = HtmlToMarkdown.convert(html)
+    opts = %{"wrap" => true, "wrap_width" => 40}
+    {:ok, result} = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ""
 
     assert String.trim(content) != ""
