@@ -148,6 +148,8 @@ tasks:
     desc: "Run Elixir E2E tests in e2e/elixir directory"
     silent: false
     cmds:
+      - cmd: cd e2e/elixir && mix local.hex --force && mix local.rebar --force && mix deps.get
+        ignore_error: false
       - cmd: cd e2e/elixir && mix test test/
         ignore_error: false
 

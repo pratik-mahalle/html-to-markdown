@@ -114,6 +114,8 @@ tasks:
     desc: "Run PHP E2E tests in e2e/php directory"
     silent: false
     cmds:
+      - cmd: cd e2e/php && composer install --no-progress --prefer-dist
+        ignore_error: false
       - cmd: cd e2e/php && vendor/bin/phpunit tests/
         ignore_error: false
 
