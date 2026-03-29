@@ -133,9 +133,9 @@ describe('metadata', () => {
     // Metadata assertions
     expect(result.metadata).not.toBeNull();
     const metadata = JSON.parse(result.metadata!);
-    expect(metadata.document.open_graph['og:title']).toBe('OG Title');
-    expect(metadata.document.open_graph['og:description']).toBe('OG description text.');
-    expect(metadata.document.open_graph['og:image']).toBe('https://example.com/image.jpg');
+    expect(metadata.document.open_graph['title']).toBe('OG Title');
+    expect(metadata.document.open_graph['description']).toBe('OG description text.');
+    expect(metadata.document.open_graph['image']).toBe('https://example.com/image.jpg');
   });
 
   it('og_multiple_tags: Extract multiple Open Graph tags including type, url, and site_name', () => {
@@ -148,10 +148,10 @@ describe('metadata', () => {
     // Metadata assertions
     expect(result.metadata).not.toBeNull();
     const metadata = JSON.parse(result.metadata!);
-    expect(metadata.document.open_graph['og:title']).toBe('Article Title');
-    expect(metadata.document.open_graph['og:type']).toBe('article');
-    expect(metadata.document.open_graph['og:url']).toBe('https://example.com/article');
-    expect(metadata.document.open_graph['og:site_name']).toBe('Example Site');
+    expect(metadata.document.open_graph['title']).toBe('Article Title');
+    expect(metadata.document.open_graph['type']).toBe('article');
+    expect(metadata.document.open_graph['url']).toBe('https://example.com/article');
+    expect(metadata.document.open_graph['site_name']).toBe('Example Site');
   });
 
   it('structured_data_json_ld: JSON-LD script tag is stripped from output (security) but metadata may be extracted', () => {
@@ -188,9 +188,9 @@ describe('metadata', () => {
     // Metadata assertions
     expect(result.metadata).not.toBeNull();
     const metadata = JSON.parse(result.metadata!);
-    expect(metadata.document.twitter_card['twitter:card']).toBe('summary_large_image');
-    expect(metadata.document.twitter_card['twitter:title']).toBe('Twitter Card Title');
-    expect(metadata.document.twitter_card['twitter:description']).toBe('Twitter card description.');
+    expect(metadata.document.twitter_card['card']).toBe('summary_large_image');
+    expect(metadata.document.twitter_card['title']).toBe('Twitter Card Title');
+    expect(metadata.document.twitter_card['description']).toBe('Twitter card description.');
   });
 
 });
