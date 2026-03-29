@@ -1,12 +1,15 @@
 //! R list type conversions for binding results.
 
 use extendr_api::prelude::*;
+
+#[cfg(feature = "metadata")]
 use html_to_markdown_rs::metadata::{
     DocumentMetadata, HeaderMetadata, HtmlMetadata, ImageMetadata, LinkMetadata, StructuredData,
 };
-use html_to_markdown_rs::{ConversionWithTables, InlineImage, TableData};
+#[cfg(feature = "metadata")]
 use std::collections::HashMap;
 
+#[cfg(feature = "metadata")]
 /// Convert HtmlMetadata into an R list.
 pub fn metadata_to_robj(metadata: HtmlMetadata) -> Robj {
     list!(
@@ -19,6 +22,7 @@ pub fn metadata_to_robj(metadata: HtmlMetadata) -> Robj {
     .into()
 }
 
+#[cfg(feature = "metadata")]
 fn document_metadata_to_robj(doc: DocumentMetadata) -> Robj {
     list!(
         title = option_to_robj(doc.title),
@@ -36,6 +40,7 @@ fn document_metadata_to_robj(doc: DocumentMetadata) -> Robj {
     .into()
 }
 
+#[cfg(feature = "metadata")]
 fn header_metadata_to_robj(header: HeaderMetadata) -> Robj {
     list!(
         level = header.level as i32,
@@ -47,6 +52,7 @@ fn header_metadata_to_robj(header: HeaderMetadata) -> Robj {
     .into()
 }
 
+#[cfg(feature = "metadata")]
 fn link_metadata_to_robj(link: LinkMetadata) -> Robj {
     list!(
         href = link.href,
@@ -59,6 +65,7 @@ fn link_metadata_to_robj(link: LinkMetadata) -> Robj {
     .into()
 }
 
+#[cfg(feature = "metadata")]
 fn image_metadata_to_robj(image: ImageMetadata) -> Robj {
     list!(
         src = image.src,
@@ -74,6 +81,7 @@ fn image_metadata_to_robj(image: ImageMetadata) -> Robj {
     .into()
 }
 
+#[cfg(feature = "metadata")]
 fn structured_data_to_robj(data: StructuredData) -> Robj {
     list!(
         data_type = data.data_type.to_string(),
@@ -83,28 +91,7 @@ fn structured_data_to_robj(data: StructuredData) -> Robj {
     .into()
 }
 
-/// Convert an InlineImage into an R list.
-pub fn inline_image_to_robj(image: InlineImage) -> Robj {
-    list!(
-        data = image.data,
-        format = image.format.to_string(),
-        filename = option_to_robj(image.filename),
-        description = option_to_robj(image.description),
-        dimensions = match image.dimensions {
-            Some((w, h)) => Robj::from(list!(width = w as i32, height = h as i32)),
-            None => ().into(),
-        },
-        source = image.source.to_string(),
-        attributes = hashmap_to_robj(image.attributes.into_iter().collect())
-    )
-    .into()
-}
-
-/// Convert an inline image warning into an R list.
-pub fn inline_image_warning_to_robj(index: usize, message: String) -> Robj {
-    Robj::from(list!(index = index as i32, message = message))
-}
-
+#[cfg(feature = "metadata")]
 fn option_to_robj(opt: Option<String>) -> Robj {
     match opt {
         Some(s) => s.into(),
@@ -112,24 +99,13 @@ fn option_to_robj(opt: Option<String>) -> Robj {
     }
 }
 
+#[cfg(feature = "metadata")]
 fn hashmap_to_robj(map: HashMap<String, String>) -> Robj {
     let names: Vec<&str> = map.keys().map(|k| k.as_str()).collect();
     let values: Vec<Robj> = map.values().map(|v| v.into_robj()).collect();
     let mut list = List::from_values(values);
     let _ = list.set_names(names);
     list.into()
-}
-
-/// Convert a TableData into an R list.
-pub fn table_data_to_robj(table: TableData) -> Robj {
-    let cells: Vec<Robj> = table.cells.into_iter().map(|row| Robj::from(row)).collect();
-
-    list!(
-        cells = List::from_values(cells),
-        markdown = table.markdown,
-        is_header_row = table.is_header_row
-    )
-    .into()
 }
 
 /// Convert a ConversionResult into an R list.
@@ -198,23 +174,6 @@ pub fn conversion_result_to_robj(result: html_to_markdown_rs::ConversionResult) 
         metadata = metadata_robj,
         tables = List::from_values(tables),
         warnings = List::from_values(warnings)
-    )
-    .into()
-}
-
-/// Convert a ConversionWithTables into an R list.
-pub fn table_extraction_to_robj(result: ConversionWithTables) -> Robj {
-    let tables: Vec<Robj> = result.tables.into_iter().map(table_data_to_robj).collect();
-
-    let metadata_robj = match result.metadata {
-        Some(meta) => metadata_to_robj(meta),
-        None => ().into(),
-    };
-
-    list!(
-        content = result.content,
-        metadata = metadata_robj,
-        tables = List::from_values(tables)
     )
     .into()
 }

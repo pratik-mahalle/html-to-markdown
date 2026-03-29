@@ -182,11 +182,11 @@ async function main(): Promise<void> {
 				);
 			}
 		} else if (typeof inputContent === "string") {
-			const markdown = convertHtml(inputContent, options);
-			await writeOutput(markdown, output);
+			const result = convertHtml(inputContent, options);
+			await writeOutput(result.content ?? "", output);
 		} else {
-			const markdown = await convertStream(inputContent, options);
-			await writeOutput(markdown, output);
+			const result = await convertStream(inputContent, options);
+			await writeOutput(result.content ?? "", output);
 		}
 	} catch (error) {
 		stderr.write(`Error: ${(error as Error).message}\n`);

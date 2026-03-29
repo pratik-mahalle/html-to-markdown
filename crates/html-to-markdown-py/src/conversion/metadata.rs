@@ -10,7 +10,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::handles::ConversionOptionsHandle;
-use crate::helpers::{run_with_guard_and_profile, to_py_err};
+use crate::helpers::{run_with_guard, to_py_err};
 use crate::options::ConversionOptions;
 use crate::types::{MetadataConfig, extended_metadata_to_py};
 #[cfg(feature = "visitor")]
@@ -197,7 +197,7 @@ pub fn convert_with_metadata<'py>(
         let bridge = visitor::PyVisitorBridge::new(visitor_py);
         let visitor_handle = std::sync::Arc::new(std::sync::Mutex::new(bridge));
         py.detach(move || {
-            run_with_guard_and_profile(|| {
+            run_with_guard(|| {
                 let rc_visitor: Rc<RefCell<dyn HtmlVisitor>> = {
                     Python::attach(|py| {
                         let guard = visitor_handle.lock().unwrap();
@@ -216,7 +216,7 @@ pub fn convert_with_metadata<'py>(
         .map_err(to_py_err)?
     } else {
         py.detach(move || {
-            run_with_guard_and_profile(|| {
+            run_with_guard(|| {
                 html_to_markdown_rs::convert_with_metadata(&html, rust_options.clone(), rust_cfg.clone(), None)
             })
         })
@@ -250,7 +250,7 @@ pub fn convert_with_metadata<'py>(
     let rust_cfg = cfg.to_rust();
     let result = py
         .detach(move || {
-            run_with_guard_and_profile(|| {
+            run_with_guard(|| {
                 html_to_markdown_rs::convert_with_metadata(&html, rust_options.clone(), rust_cfg.clone(), None)
             })
         })
@@ -277,7 +277,7 @@ pub fn convert_with_metadata_handle<'py>(
     let rust_cfg = cfg.to_rust();
     let result = py
         .detach(move || {
-            run_with_guard_and_profile(|| {
+            run_with_guard(|| {
                 html_to_markdown_rs::convert_with_metadata(&html, rust_options.clone(), rust_cfg.clone(), None)
             })
         })

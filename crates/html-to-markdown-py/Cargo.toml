@@ -20,11 +20,12 @@ doctest = false
 
 [features]
 default = ["full"]
-full = ["metadata", "visitor", "inline-images"]
+full = ["metadata", "visitor", "inline-images", "async-visitor"]
 extension-module = ["pyo3/extension-module"]
 inline-images = ["html-to-markdown-rs/inline-images"]
 metadata = ["html-to-markdown-rs/metadata"]
 visitor = ["html-to-markdown-rs/visitor"]
+async-visitor = ["visitor", "html-to-markdown-rs/async-visitor"]
 
 [dependencies]
 html-to-markdown-bindings-common = { path = "../html-to-markdown-bindings-common", version = "3.0.0", features = [

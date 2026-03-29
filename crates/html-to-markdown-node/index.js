@@ -601,5 +601,3 @@ module.exports.JsNewlineStyle = nativeBinding.JsNewlineStyle
 module.exports.JsOutputFormat = nativeBinding.JsOutputFormat
 module.exports.JsPreprocessingPreset = nativeBinding.JsPreprocessingPreset
 module.exports.JsWhitespaceMode = nativeBinding.JsWhitespaceMode
-module.exports.startProfiling = nativeBinding.startProfiling
-module.exports.stopProfiling = nativeBinding.stopProfiling

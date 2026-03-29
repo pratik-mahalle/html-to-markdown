@@ -3,12 +3,8 @@
 use html_to_markdown_rs::metadata::{
     DocumentMetadata, HeaderMetadata, HtmlMetadata, ImageMetadata, LinkMetadata, StructuredData,
 };
-use html_to_markdown_rs::{
-    ConversionOptions, convert as convert_rs,
-};
 
 mod options;
-mod profiling;
 mod types;
 
 use options::{
@@ -67,7 +63,7 @@ fn convert<'a>(env: Env<'a>, html: String, options_term: Term<'a>) -> NifResult<
         Err(err) => return handle_invalid_option_error(env, err),
     };
 
-    match profiling::maybe_profile(|| html_to_markdown_rs::convert(&html, Some(options.clone()))) {
+    match html_to_markdown_rs::convert(&html, Some(options.clone())) {
         Ok(result) => {
             let tables: Vec<ExtractTableTerm> = result
                 .tables

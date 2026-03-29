@@ -42,6 +42,7 @@ public enum ImageType {
    * @return the {@code ImageType}
    * @throws IllegalArgumentException if the string is null or unknown
    */
+  @com.fasterxml.jackson.annotation.JsonCreator
   public static ImageType parse(String s) {
     if (s == null) {
       throw new IllegalArgumentException("ImageType string cannot be null");

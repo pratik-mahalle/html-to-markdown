@@ -19,9 +19,7 @@ html-to-markdown-rs = { path = "vendor/html-to-markdown-rs", features = [
   "visitor",
 ] }
 rustler = { version = "0.37" }
-pprof = { version = "0.15", features = ["flamegraph"], optional = true }
 
 [features]
 default = ["full"]
 full = []
-profiling = ["dep:pprof"]
