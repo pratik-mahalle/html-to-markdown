@@ -229,8 +229,15 @@ defmodule HtmlToMarkdown.Options do
       |> String.downcase()
       |> String.replace("-", "_")
 
+    # Also create an alphanumeric-only variant (like the core's normalize_token)
+    # to handle camelCase values (e.g., "atxClosed" -> "atxclosed" matches "atx_closed")
+    alphanumeric = String.replace(normalized, ~r/[^a-z0-9]/, "")
+
     Enum.find_value(allowed, fn atom ->
-      if Atom.to_string(atom) == normalized, do: atom, else: nil
+      atom_str = Atom.to_string(atom)
+      atom_alphanumeric = String.replace(atom_str, "_", "")
+
+      if atom_str == normalized or atom_alphanumeric == alphanumeric, do: atom, else: nil
     end) || :invalid
   end
 

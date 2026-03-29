@@ -36,7 +36,6 @@ ahash = { version = "0.8", default-features = false, features = [
     "std",
     "compile-time-rng",
 ] }
-async-trait = "0.1"
 base64 = "0.22"
 clap = { version = "4.6", features = ["derive"] }
 clap_complete = "4.6"

@@ -774,8 +774,7 @@ fn test_visitor_and_metadata_both_work() {
 
     // Verify visitor callbacks fire via convert_with_visitor
     let visitor = Rc::new(RefCell::new(MetadataAwareVisitor::default()));
-    let markdown = convert_with_visitor(html, None, Some(visitor.clone()))
-        .expect("convert_with_visitor should work");
+    let markdown = convert_with_visitor(html, None, Some(visitor.clone())).expect("convert_with_visitor should work");
 
     let borrowed = visitor.borrow();
     assert!(
@@ -792,8 +791,7 @@ fn test_visitor_and_metadata_both_work() {
     drop(borrowed);
 
     // Verify metadata extraction via convert()
-    let result = html_to_markdown_rs::convert(html, None)
-        .expect("convert should work");
+    let result = html_to_markdown_rs::convert(html, None).expect("convert should work");
     let metadata = result.metadata;
 
     assert_eq!(
