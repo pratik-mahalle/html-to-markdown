@@ -15,9 +15,13 @@ func Test_RealWorldBlogPost(t *testing.T) {
 	html := `<article><h1>Getting Started with Rust</h1><p>Rust is a systems programming language focused on <strong>safety</strong>, <em>performance</em>, and concurrency. It was created by <a href="https://www.mozilla.org">Mozilla</a> and has grown significantly in popularity.</p><h2>Installation</h2><p>Install Rust using the official installer:</p><pre><code class="language-bash">curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh</code></pre><h2>Hello World</h2><p>Create your first Rust program:</p><pre><code class="language-rust">fn main() {
     println!("Hello, world!");
 }</code></pre><p>Run it with <code>cargo run</code> from your project directory.</p><h2>Key Concepts</h2><ul><li>Ownership and borrowing</li><li>Lifetimes</li><li>Traits and generics</li><li>Pattern matching</li></ul><p>For more information, visit the <a href="https://doc.rust-lang.org/book/">Rust Book</a>.</p></article>`
-	content, err := htmd.Convert(html)
+	result, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
+	}
+	content := ""
+	if result != nil && result.Content != nil {
+		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -56,9 +60,13 @@ assert_eq!(markdown, "# Hello");</code></pre><h2>ConversionOptions</h2><p>Config
     .heading_style(HeadingStyle::ATX)
     .code_block_style(CodeBlockStyle::Fenced)
     .build();</code></pre><blockquote><p>See the <a href="/docs/options">options reference</a> for a full list of configuration values.</p></blockquote></div>`
-	content, err := htmd.Convert(html)
+	result, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
+	}
+	content := ""
+	if result != nil && result.Content != nil {
+		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -102,9 +110,13 @@ assert_eq!(markdown, "# Hello");</code></pre><h2>ConversionOptions</h2><p>Config
 func Test_RealWorldProductPage(t *testing.T) {
 	// Product page with table, images, and lists converts correctly
 	html := `<div class="product"><h1>Wireless Keyboard Pro</h1><img src="https://example.com/keyboard.jpg" alt="Wireless Keyboard Pro"><p>The ultimate wireless keyboard for professionals. Features a comfortable layout with <strong>backlit keys</strong> and <em>ultra-long battery life</em>.</p><h2>Specifications</h2><table><thead><tr><th>Feature</th><th>Details</th></tr></thead><tbody><tr><td>Battery Life</td><td>Up to 12 months</td></tr><tr><td>Connectivity</td><td>Bluetooth 5.0</td></tr><tr><td>Key Travel</td><td>2mm</td></tr><tr><td>Weight</td><td>750g</td></tr></tbody></table><h2>What's in the Box</h2><ul><li>Wireless Keyboard Pro</li><li>USB-C charging cable</li><li>USB receiver dongle</li><li>Quick start guide</li></ul><h2>Compatibility</h2><p>Compatible with <strong>Windows</strong>, <strong>macOS</strong>, <strong>Linux</strong>, <strong>iOS</strong>, and <strong>Android</strong>.</p></div>`
-	content, err := htmd.Convert(html)
+	result, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
+	}
+	content := ""
+	if result != nil && result.Content != nil {
+		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {

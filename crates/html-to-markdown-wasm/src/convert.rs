@@ -100,6 +100,66 @@ pub fn convert(html: String, options: JsValue) -> Result<JsValue, JsValue> {
     js_sys::Reflect::set(&js_result, &JsValue::from_str("tables"), &tables_arr)
         .map_err(|_| JsValue::from_str("failed to set tables"))?;
 
+    // images
+    let images_arr = js_sys::Array::new();
+    for image in result.images {
+        let img_obj = js_sys::Object::new();
+
+        // data as Uint8Array
+        let data = js_sys::Uint8Array::from(image.data.as_slice());
+        js_sys::Reflect::set(&img_obj, &JsValue::from_str("data"), &data)
+            .map_err(|_| JsValue::from_str("failed to set image data"))?;
+
+        js_sys::Reflect::set(
+            &img_obj,
+            &JsValue::from_str("format"),
+            &JsValue::from_str(&image.format.to_string()),
+        )
+        .map_err(|_| JsValue::from_str("failed to set image format"))?;
+
+        let filename_val = match image.filename {
+            Some(ref s) => JsValue::from_str(s),
+            None => JsValue::NULL,
+        };
+        js_sys::Reflect::set(&img_obj, &JsValue::from_str("filename"), &filename_val)
+            .map_err(|_| JsValue::from_str("failed to set image filename"))?;
+
+        let desc_val = match image.description {
+            Some(ref s) => JsValue::from_str(s),
+            None => JsValue::NULL,
+        };
+        js_sys::Reflect::set(&img_obj, &JsValue::from_str("description"), &desc_val)
+            .map_err(|_| JsValue::from_str("failed to set image description"))?;
+
+        let (width_val, height_val) = match image.dimensions {
+            Some((w, h)) => (JsValue::from_f64(f64::from(w)), JsValue::from_f64(f64::from(h))),
+            None => (JsValue::NULL, JsValue::NULL),
+        };
+        js_sys::Reflect::set(&img_obj, &JsValue::from_str("width"), &width_val)
+            .map_err(|_| JsValue::from_str("failed to set image width"))?;
+        js_sys::Reflect::set(&img_obj, &JsValue::from_str("height"), &height_val)
+            .map_err(|_| JsValue::from_str("failed to set image height"))?;
+
+        js_sys::Reflect::set(
+            &img_obj,
+            &JsValue::from_str("source"),
+            &JsValue::from_str(&image.source.to_string()),
+        )
+        .map_err(|_| JsValue::from_str("failed to set image source"))?;
+
+        let attrs_obj = js_sys::Object::new();
+        for (key, value) in &image.attributes {
+            js_sys::Reflect::set(&attrs_obj, &JsValue::from_str(key), &JsValue::from_str(value))
+                .map_err(|_| JsValue::from_str("failed to set image attribute"))?;
+        }
+        js_sys::Reflect::set(&img_obj, &JsValue::from_str("attributes"), &attrs_obj)
+            .map_err(|_| JsValue::from_str("failed to set image attributes"))?;
+
+        images_arr.push(&img_obj);
+    }
+    js_sys::Reflect::set(&js_result, &JsValue::from_str("images"), &images_arr)
+        .map_err(|_| JsValue::from_str("failed to set images"))?;
+
     // warnings
     let warnings_arr = js_sys::Array::new();
     for warning in result.warnings {

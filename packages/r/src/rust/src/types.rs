@@ -169,10 +169,54 @@ pub fn conversion_result_to_robj(result: html_to_markdown_rs::ConversionResult) 
         })
         .collect();
 
+    let document_robj: Robj = match result.document {
+        Some(doc) => match serde_json::to_string(&doc) {
+            Ok(s) => s.into(),
+            Err(_) => ().into(),
+        },
+        None => ().into(),
+    };
+
+    let images_robj: Robj = {
+        let image_list: Vec<Robj> = result
+            .images
+            .into_iter()
+            .map(|img| {
+                let dimensions_robj: Robj = match img.dimensions {
+                    Some((w, h)) => Robj::from(list!(width = w as i32, height = h as i32)),
+                    None => ().into(),
+                };
+                let attr_names: Vec<&str> = img.attributes.keys().map(|k| k.as_str()).collect();
+                let attr_values: Vec<Robj> = img.attributes.values().map(|v| v.into_robj()).collect();
+                let mut attr_list = List::from_values(attr_values);
+                let _ = attr_list.set_names(attr_names);
+                list!(
+                    data = img.data,
+                    format = img.format.to_string(),
+                    filename = match img.filename {
+                        Some(s) => Robj::from(s),
+                        None => ().into(),
+                    },
+                    description = match img.description {
+                        Some(s) => Robj::from(s),
+                        None => ().into(),
+                    },
+                    dimensions = dimensions_robj,
+                    source = img.source.to_string(),
+                    attributes = attr_list
+                )
+                .into()
+            })
+            .collect();
+        List::from_values(image_list).into()
+    };
+
     list!(
         content = content_robj,
+        document = document_robj,
         metadata = metadata_robj,
         tables = List::from_values(tables),
+        images = images_robj,
         warnings = List::from_values(warnings)
     )
     .into()
