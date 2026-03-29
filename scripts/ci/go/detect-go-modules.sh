@@ -1,7 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-mapfile -t modules < <(git ls-files -- '*/go.mod' | sort)
+mapfile -t all_modules < <(git ls-files -- '*/go.mod' | sort)
+if [[ "${#all_modules[@]}" -eq 0 ]]; then
+  echo "modules=[]" >>"$GITHUB_OUTPUT"
+  exit 0
+fi
+
+# Filter out test-only modules (directories with only _test.go files and no
+# non-test .go files). golangci-lint cannot analyse these and would fail with
+# "no go files to analyze".
+modules=()
+for mod in "${all_modules[@]}"; do
+  dir=$(dirname "$mod")
+  if git ls-files -- "${dir}/"'*.go' | grep -qv '_test\.go$'; then
+    modules+=("$mod")
+  fi
+done
+
 if [[ "${#modules[@]}" -eq 0 ]]; then
   echo "modules=[]" >>"$GITHUB_OUTPUT"
   exit 0

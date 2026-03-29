@@ -41,8 +41,6 @@ end
 
 html = File.read!(file)
 options_map = if(format == "hocr", do: [hocr_spatial_tables: false], else: [])
-inline_config = HtmlToMarkdown.InlineImageConfig.new(nil)
-metadata_config = HtmlToMarkdown.MetadataConfig.new(nil)
 
 profile_output = System.get_env("HTML_TO_MARKDOWN_PROFILE_OUTPUT")
 profile_frequency = System.get_env("HTML_TO_MARKDOWN_PROFILE_FREQUENCY")
@@ -65,16 +63,16 @@ run_scenario = fn ->
       HtmlToMarkdown.convert(html, options_map)
 
     "inline-images-default" ->
-      HtmlToMarkdown.convert_with_inline_images(html, nil, inline_config)
+      HtmlToMarkdown.convert(html)
 
     "inline-images-options" ->
-      HtmlToMarkdown.convert_with_inline_images(html, options_map, inline_config)
+      HtmlToMarkdown.convert(html, options_map)
 
     "metadata-default" ->
-      HtmlToMarkdown.convert_with_metadata(html, nil, metadata_config)
+      HtmlToMarkdown.convert(html)
 
     "metadata-options" ->
-      HtmlToMarkdown.convert_with_metadata(html, options_map, metadata_config)
+      HtmlToMarkdown.convert(html, options_map)
   end
 end
 

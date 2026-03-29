@@ -11,7 +11,7 @@ vars:
 
   # Toolchain versions
   GOLANGCI_LINT_VERSION: "latest"
-  GO_TOOLCHAIN: "go1.25.5"
+  GO_TOOLCHAIN: "go1.26"
   BUNDLER_VERSION: "4.0.0"
   RUBY_BIN:
     sh: |

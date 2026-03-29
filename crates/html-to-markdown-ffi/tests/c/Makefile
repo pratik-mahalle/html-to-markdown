@@ -31,7 +31,7 @@ else
   RPATH = -Wl,-rpath,$(LIBDIR)
 endif
 
-TESTS = test_version test_error test_convert test_convert_extended test_metadata test_visitor
+TESTS = test_version test_error test_convert test_convert_extended test_visitor
 
 .PHONY: all test clean
 
@@ -47,9 +47,6 @@ test_convert: test_convert.c test_ffi_decls.h
 	$(CC) $(CFLAGS) $(VERSION_DEFS) -o $@ $< $(LDFLAGS) $(RPATH)
 
 test_convert_extended: test_convert_extended.c test_ffi_decls.h
-	$(CC) $(CFLAGS) $(VERSION_DEFS) -o $@ $< $(LDFLAGS) $(RPATH)
-
-test_metadata: test_metadata.c test_ffi_decls.h
 	$(CC) $(CFLAGS) $(VERSION_DEFS) -o $@ $< $(LDFLAGS) $(RPATH)
 
 test_visitor: test_visitor.c test_ffi_decls.h

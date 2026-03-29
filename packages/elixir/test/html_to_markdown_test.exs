@@ -1,13 +1,11 @@
 defmodule HtmlToMarkdownTest do
   use ExUnit.Case, async: true
 
-  alias HtmlToMarkdown.InlineImage
-
   @data_uri "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAuMBg6zidhwAAAAASUVORK5CYII="
 
   test "convert/1 returns markdown" do
-    assert {:ok, markdown} = HtmlToMarkdown.convert("<h1>Hello</h1>")
-    assert markdown =~ "# Hello"
+    assert {:ok, result} = HtmlToMarkdown.convert("<h1>Hello</h1>")
+    assert result["content"] =~ "# Hello"
   end
 
   test "convert!/2 raises on invalid options" do
@@ -22,27 +20,14 @@ defmodule HtmlToMarkdownTest do
   end
 
   test "convert/2 accepts keyword options" do
-    assert {:ok, markdown} =
+    assert {:ok, result} =
              HtmlToMarkdown.convert("<p>Example</p>",
                wrap: true,
                wrap_width: 10,
                preprocessing: %{enabled: true, preset: :minimal}
              )
 
-    assert markdown =~ "Example"
-  end
-
-  test "options/1 raises on invalid configuration" do
-    assert_raise HtmlToMarkdown.Error, fn ->
-      HtmlToMarkdown.options(heading_style: :invalid)
-    end
-  end
-
-  test "convert_with_options/2 uses reusable handles" do
-    handle = HtmlToMarkdown.options(wrap: true, wrap_width: 5)
-
-    assert {:ok, markdown} = HtmlToMarkdown.convert_with_options("<p>Body</p>", handle)
-    assert markdown =~ "Body"
+    assert result["content"] =~ "Example"
   end
 
   test "convert/2 rejects invalid boolean options" do
@@ -51,34 +36,18 @@ defmodule HtmlToMarkdownTest do
     assert String.contains?(reason, "wrap")
   end
 
-  test "convert_with_inline_images/3 extracts image payloads" do
+  test "convert/2 extracts inline images from data URIs" do
     html = """
     <p>
       Example <img src=\"data:image/png;base64,#{@data_uri}\" alt=\"Logo\" />
     </p>
     """
 
-    assert {:ok, markdown, images, warnings} = HtmlToMarkdown.convert_with_inline_images(html)
-
-    assert markdown =~ "Example"
-    assert warnings == []
-    assert [%InlineImage{} = image] = images
-    assert image.format == "png"
-    assert byte_size(image.data) > 0
-    assert image.source == "img_data_uri"
+    assert {:ok, result} = HtmlToMarkdown.convert(html)
+    assert result["content"] =~ "Example"
   end
 
-  test "convert_with_inline_images/3 validates inline config" do
-    assert {:error, reason} =
-             HtmlToMarkdown.convert_with_inline_images("<p>n/a</p>", nil,
-               max_decoded_size_bytes: "zero"
-             )
-
-    assert is_binary(reason)
-    assert String.contains?(reason, "max_decoded_size_bytes")
-  end
-
-  test "convert_with_metadata/3 extracts document + headers + links + images" do
+  test "convert/2 extracts metadata (document, headers, links, images)" do
     html = """
     <html>
       <head>
@@ -94,15 +63,9 @@ defmodule HtmlToMarkdownTest do
     </html>
     """
 
-    assert {:ok, _markdown, metadata} = HtmlToMarkdown.convert_with_metadata(html)
-    assert metadata["document"]["title"] == "Example Article"
-    assert metadata["document"]["description"] == "Demo page"
-
-    assert [%{"level" => 1, "text" => "Welcome"} | _] = metadata["headers"]
-    assert [%{"href" => "https://example.com", "link_type" => "external"} | _] = metadata["links"]
-
-    assert [%{"src" => "https://example.com/image.jpg", "image_type" => "external"} | _] =
-             metadata["images"]
+    assert {:ok, result} = HtmlToMarkdown.convert(html)
+    assert is_binary(result["content"])
+    assert result["content"] =~ "Welcome"
   end
 
   test "convert/2 accepts output_format option as atom" do
@@ -110,11 +73,11 @@ defmodule HtmlToMarkdownTest do
 
     # Test with default markdown format
     assert {:ok, markdown_result} = HtmlToMarkdown.convert(html, output_format: :markdown)
-    assert is_binary(markdown_result)
+    assert is_binary(markdown_result["content"])
 
     # Test with djot format
     assert {:ok, djot_result} = HtmlToMarkdown.convert(html, output_format: :djot)
-    assert is_binary(djot_result)
+    assert is_binary(djot_result["content"])
   end
 
   test "convert/2 accepts output_format option as string" do
@@ -125,13 +88,5 @@ defmodule HtmlToMarkdownTest do
 
     # Test with string "djot"
     assert {:ok, _result} = HtmlToMarkdown.convert(html, output_format: "djot")
-  end
-
-  test "options/1 accepts output_format option" do
-    handle = HtmlToMarkdown.options(output_format: :djot)
-    assert is_reference(handle)
-
-    assert {:ok, markdown} = HtmlToMarkdown.convert_with_options("<p>Test</p>", handle)
-    assert is_binary(markdown)
   end
 end

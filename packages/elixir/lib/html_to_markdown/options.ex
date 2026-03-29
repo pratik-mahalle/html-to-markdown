@@ -4,7 +4,7 @@ defmodule HtmlToMarkdown.Options do
 
   Use `new/1` to build options from a map or keyword list, or construct
   the struct directly. Pass the struct to `HtmlToMarkdown.convert/2`,
-  `HtmlToMarkdown.options/1`, or `HtmlToMarkdown.convert_with_inline_images/3`.
+  `HtmlToMarkdown.convert/2`.
   """
 
   alias HtmlToMarkdown.PreprocessingOptions
