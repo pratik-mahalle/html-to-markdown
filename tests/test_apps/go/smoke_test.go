@@ -2,7 +2,7 @@ package main
 
 import (
 	"testing"
-	htmltomarkdown "github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown"
+	htmltomarkdown "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown"
 )
 
 func TestSmokePackageImports(t *testing.T) {
@@ -16,8 +16,12 @@ func TestSmokeBasicConversion(t *testing.T) {
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
 	}
-	if !contains(result, "Hello World") {
-		t.Errorf("expected result to contain 'Hello World', got: %s", result)
+	content := ""
+	if result != nil && result.Content != nil {
+		content = *result.Content
+	}
+	if !contains(content, "Hello World") {
+		t.Errorf("expected result to contain 'Hello World', got: %s", content)
 	}
 }
 
@@ -27,8 +31,12 @@ func TestSmokeHeadingConversion(t *testing.T) {
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
 	}
-	if result[0] != '#' {
-		t.Errorf("expected result to start with '#', got: %s", result)
+	content := ""
+	if result != nil && result.Content != nil {
+		content = *result.Content
+	}
+	if len(content) == 0 || content[0] != '#' {
+		t.Errorf("expected result to start with '#', got: %s", content)
 	}
 }
 
@@ -37,8 +45,12 @@ func TestSmokeEmptyInput(t *testing.T) {
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
 	}
-	if result != "" {
-		t.Errorf("expected empty result, got: %s", result)
+	content := ""
+	if result != nil && result.Content != nil {
+		content = *result.Content
+	}
+	if content != "" {
+		t.Errorf("expected empty result, got: %s", content)
 	}
 }
 

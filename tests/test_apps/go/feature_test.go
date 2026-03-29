@@ -1,10 +1,31 @@
 package main
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
-	htmltomarkdown "github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown"
+	htmltomarkdown "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown"
 )
+
+// getContent extracts the content string from a ConversionResult.
+func getContent(result *htmltomarkdown.ConversionResult) string {
+	if result != nil && result.Content != nil {
+		return *result.Content
+	}
+	return ""
+}
+
+// getMetadata extracts ExtendedMetadata from a ConversionResult's raw Metadata JSON.
+func getMetadata(t *testing.T, result *htmltomarkdown.ConversionResult) htmltomarkdown.ExtendedMetadata {
+	t.Helper()
+	var meta htmltomarkdown.ExtendedMetadata
+	if result != nil && result.Metadata != nil {
+		if err := json.Unmarshal(result.Metadata, &meta); err != nil {
+			t.Fatalf("failed to parse metadata JSON: %v", err)
+		}
+	}
+	return meta
+}
 
 // TestVersion verifies that the version API works correctly.
 func TestVersion(t *testing.T) {
@@ -33,21 +54,24 @@ func TestConvertWithMetadata(t *testing.T) {
 	</html>
 	`
 
-	result, err := htmltomarkdown.ConvertWithMetadata(html)
+	result, err := htmltomarkdown.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion with metadata failed: %v", err)
 	}
 
-	if result.Markdown == "" {
-		t.Errorf("expected non-empty markdown, got: %s", result.Markdown)
+	content := getContent(result)
+	if content == "" {
+		t.Errorf("expected non-empty markdown, got empty")
 	}
 
+	meta := getMetadata(t, result)
+
 	// Check that title was extracted
-	if result.Metadata.Document.Title == nil {
+	if meta.Document.Title == nil {
 		t.Errorf("expected title to be extracted")
 	}
-	if result.Metadata.Document.Title != nil && *result.Metadata.Document.Title != "Test Page" {
-		t.Errorf("expected title 'Test Page', got: %s", *result.Metadata.Document.Title)
+	if meta.Document.Title != nil && *meta.Document.Title != "Test Page" {
+		t.Errorf("expected title 'Test Page', got: %s", *meta.Document.Title)
 	}
 }
 
@@ -107,8 +131,9 @@ func TestConvertComplexHTML(t *testing.T) {
 				t.Fatalf("conversion failed: %v", err)
 			}
 
-			if !strings.Contains(result, test.expectedSubstr) {
-				t.Errorf("expected result to contain '%s', got: %s", test.expectedSubstr, result)
+			content := getContent(result)
+			if !strings.Contains(content, test.expectedSubstr) {
+				t.Errorf("expected result to contain '%s', got: %s", test.expectedSubstr, content)
 			}
 		})
 	}
@@ -148,7 +173,7 @@ func TestErrorHandling(t *testing.T) {
 			result, err := htmltomarkdown.Convert(test.html)
 
 			if test.shouldError && err == nil {
-				t.Errorf("expected error but got none, result: %s", result)
+				t.Errorf("expected error but got none, result: %s", getContent(result))
 			}
 			if !test.shouldError && err != nil {
 				t.Errorf("expected no error but got: %v", err)
@@ -161,27 +186,16 @@ func TestErrorHandling(t *testing.T) {
 func TestMustConvert(t *testing.T) {
 	// Valid HTML should not panic
 	result := htmltomarkdown.MustConvert("<p>Test</p>")
-	if result == "" {
+	content := getContent(result)
+	if content == "" {
 		t.Errorf("expected non-empty result")
 	}
 
 	// Empty string should not panic (no error)
 	result = htmltomarkdown.MustConvert("")
-	if result != "" {
+	content = getContent(result)
+	if content != "" {
 		t.Errorf("expected empty result for empty input")
-	}
-}
-
-// TestMustConvertWithMetadata verifies the MustConvertWithMetadata function.
-func TestMustConvertWithMetadata(t *testing.T) {
-	html := "<h1>Title</h1><p>Content</p>"
-	result := htmltomarkdown.MustConvertWithMetadata(html)
-
-	if result.Markdown == "" {
-		t.Errorf("expected non-empty markdown")
-	}
-	if !strings.Contains(result.Markdown, "Title") {
-		t.Errorf("expected markdown to contain 'Title', got: %s", result.Markdown)
 	}
 }
 
@@ -216,7 +230,8 @@ func TestSpecialCharacters(t *testing.T) {
 				t.Fatalf("conversion failed: %v", err)
 			}
 
-			if result == "" {
+			content := getContent(result)
+			if content == "" {
 				t.Errorf("expected non-empty result for special characters")
 			}
 		})
@@ -240,7 +255,8 @@ func TestMemorySafety(t *testing.T) {
 			if err != nil {
 				t.Fatalf("conversion %d failed: %v", i, err)
 			}
-			if html != "" && result == "" {
+			content := getContent(result)
+			if html != "" && content == "" {
 				t.Errorf("expected non-empty result for non-empty input at iteration %d", i)
 			}
 		}
@@ -265,12 +281,13 @@ func TestLargeHTML(t *testing.T) {
 		t.Fatalf("conversion of large HTML failed: %v", err)
 	}
 
-	if result == "" {
+	content := getContent(result)
+	if content == "" {
 		t.Errorf("expected non-empty result for large HTML")
 	}
 
 	// Verify content is preserved
-	if !strings.Contains(result, "Paragraph") {
+	if !strings.Contains(content, "Paragraph") {
 		t.Errorf("expected result to contain 'Paragraph'")
 	}
 }
@@ -289,8 +306,10 @@ func TestConsistentOutput(t *testing.T) {
 		t.Fatalf("second conversion failed: %v", err2)
 	}
 
-	if result1 != result2 {
-		t.Errorf("inconsistent results:\nFirst:  %s\nSecond: %s", result1, result2)
+	content1 := getContent(result1)
+	content2 := getContent(result2)
+	if content1 != content2 {
+		t.Errorf("inconsistent results:\nFirst:  %s\nSecond: %s", content1, content2)
 	}
 }
 
@@ -312,7 +331,8 @@ func TestSequentialConversions(t *testing.T) {
 		if err != nil {
 			t.Fatalf("conversion of %s failed: %v", conv.name, err)
 		}
-		if result == "" && conv.html != "" {
+		content := getContent(result)
+		if content == "" && conv.html != "" {
 			t.Errorf("expected non-empty result for %s", conv.name)
 		}
 	}
@@ -329,18 +349,20 @@ func TestMetadataHeaders(t *testing.T) {
 	<p>More content</p>
 	`
 
-	result, err := htmltomarkdown.ConvertWithMetadata(html)
+	result, err := htmltomarkdown.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
 	}
 
-	if len(result.Metadata.Headers) == 0 {
+	meta := getMetadata(t, result)
+
+	if len(meta.Headers) == 0 {
 		t.Errorf("expected headers to be extracted")
 	}
 
 	// Verify headers are in order and have correct levels
-	if len(result.Metadata.Headers) >= 1 && result.Metadata.Headers[0].Level != 1 {
-		t.Errorf("expected first header level 1, got %d", result.Metadata.Headers[0].Level)
+	if len(meta.Headers) >= 1 && meta.Headers[0].Level != 1 {
+		t.Errorf("expected first header level 1, got %d", meta.Headers[0].Level)
 	}
 }
 
@@ -353,18 +375,20 @@ func TestMetadataLinks(t *testing.T) {
 	<p><a href="#anchor">Anchor</a></p>
 	`
 
-	result, err := htmltomarkdown.ConvertWithMetadata(html)
+	result, err := htmltomarkdown.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
 	}
 
-	if len(result.Metadata.Links) == 0 {
+	meta := getMetadata(t, result)
+
+	if len(meta.Links) == 0 {
 		t.Errorf("expected links to be extracted")
 	}
 
 	// Verify at least one link was captured
 	foundLink := false
-	for _, link := range result.Metadata.Links {
+	for _, link := range meta.Links {
 		if strings.Contains(link.Text, "Link") {
 			foundLink = true
 			break
@@ -383,17 +407,19 @@ func TestMetadataImages(t *testing.T) {
 	<img src="data:image/png;base64,..." alt="Data URI Image">
 	`
 
-	result, err := htmltomarkdown.ConvertWithMetadata(html)
+	result, err := htmltomarkdown.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
 	}
 
-	if len(result.Metadata.Images) == 0 {
+	meta := getMetadata(t, result)
+
+	if len(meta.Images) == 0 {
 		t.Errorf("expected images to be extracted")
 	}
 
 	// Verify at least one image was captured
-	for _, img := range result.Metadata.Images {
+	for _, img := range meta.Images {
 		if img.Alt != nil && *img.Alt != "" {
 			return // Found an image with alt text
 		}
@@ -412,29 +438,31 @@ func TestMetadataDescriptionAndKeywords(t *testing.T) {
 	</body>
 	`
 
-	result, err := htmltomarkdown.ConvertWithMetadata(html)
+	result, err := htmltomarkdown.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
 	}
 
+	meta := getMetadata(t, result)
+
 	// Description might be extracted
-	if result.Metadata.Document.Description != nil {
-		if !strings.Contains(*result.Metadata.Document.Description, "test") {
+	if meta.Document.Description != nil {
+		if !strings.Contains(*meta.Document.Description, "test") {
 			t.Errorf("expected description to contain 'test'")
 		}
 	}
 
 	// Keywords might be extracted
-	if len(result.Metadata.Document.Keywords) > 0 {
+	if len(meta.Document.Keywords) > 0 {
 		hasTest := false
-		for _, kw := range result.Metadata.Document.Keywords {
+		for _, kw := range meta.Document.Keywords {
 			if strings.Contains(kw, "test") {
 				hasTest = true
 				break
 			}
 		}
 		if !hasTest {
-			t.Logf("keywords found but none contain 'test': %v", result.Metadata.Document.Keywords)
+			t.Logf("keywords found but none contain 'test': %v", meta.Document.Keywords)
 		}
 	}
 }
@@ -488,9 +516,10 @@ func TestRegressionHTMLPreservation(t *testing.T) {
 				t.Fatalf("conversion failed: %v", err)
 			}
 
+			content := getContent(result)
 			for _, expected := range tc.expectedIncludes {
-				if !strings.Contains(result, expected) {
-					t.Errorf("expected result to contain '%s', got: %s", expected, result)
+				if !strings.Contains(content, expected) {
+					t.Errorf("expected result to contain '%s', got: %s", expected, content)
 				}
 			}
 		})

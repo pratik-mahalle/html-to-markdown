@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	htmltomarkdown "github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown"
+	htmltomarkdown "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown"
 )
 
 type TestCase struct {
@@ -41,8 +41,13 @@ func TestBasicHTMLConversions(t *testing.T) {
 				t.Fatalf("conversion failed: %v", err)
 			}
 
-			if strings.TrimSpace(result) != strings.TrimSpace(tc.ExpectedMarkdown) {
-				t.Errorf("expected: %q, got: %q", tc.ExpectedMarkdown, result)
+			content := ""
+			if result != nil && result.Content != nil {
+				content = *result.Content
+			}
+
+			if strings.TrimSpace(content) != strings.TrimSpace(tc.ExpectedMarkdown) {
+				t.Errorf("expected: %q, got: %q", tc.ExpectedMarkdown, content)
 			}
 		})
 	}

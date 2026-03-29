@@ -35,6 +35,9 @@ pub fn generate(fixtures: &[Fixture], output_dir: &Utf8Path) -> Result<usize> {
     let mix_exs = render_mix_exs();
     std::fs::write(elixir_dir.join("mix.exs"), mix_exs)?;
 
+    // Generate test/test_helper.exs (required by ExUnit).
+    std::fs::write(test_dir.join("test_helper.exs"), "ExUnit.start()\n")?;
+
     Ok(total)
 }
 
