@@ -23,8 +23,8 @@ pub struct TableScan {
     pub has_header: bool,
     /// Whether the table has a caption element
     pub has_caption: bool,
-    /// Whether the table contains nested tables
-    pub has_nested_table: bool,
+    /// Number of nested tables found inside this table
+    pub nested_table_count: usize,
     /// Count of anchor elements in the table
     pub link_count: usize,
     /// Whether the table contains text content (not empty)
@@ -109,7 +109,7 @@ fn scan_table_node(
                             }
                         }
                     }
-                    "table" if !is_root => scan.has_nested_table = true,
+                    "table" if !is_root => scan.nested_table_count += 1,
                     "tr" | "row" => {
                         let mut cell_count = 0;
                         for child in tag.children().top().iter() {

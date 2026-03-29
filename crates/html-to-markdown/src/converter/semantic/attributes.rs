@@ -222,14 +222,9 @@ pub fn handle_q(
 
         let trimmed = content.trim();
         if !trimmed.is_empty() {
-            if ctx.convert_as_inline {
-                output.push_str(trimmed);
-            } else {
-                output.push('"');
-                let escaped = trimmed.replace('\\', r"\\").replace('"', r#"\""#);
-                output.push_str(&escaped);
-                output.push('"');
-            }
+            output.push('"');
+            output.push_str(trimmed);
+            output.push('"');
         }
     }
 }
