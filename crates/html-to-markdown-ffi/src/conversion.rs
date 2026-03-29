@@ -23,7 +23,23 @@ fn serialize_conversion_result(result: html_to_markdown_rs::ConversionResult) ->
     let metadata = serde_json::Value::Null;
 
     #[cfg(feature = "inline-images")]
-    let images = serde_json::to_value(&result.images).map_err(|e| e.to_string())?;
+    let images = {
+        let arr: Vec<serde_json::Value> = result
+            .images
+            .iter()
+            .map(|img| {
+                serde_json::json!({
+                    "format": img.format.to_string(),
+                    "filename": img.filename,
+                    "description": img.description,
+                    "dimensions": img.dimensions.map(|(w, h)| vec![w, h]),
+                    "source": img.source.to_string(),
+                    "data_len": img.data.len(),
+                })
+            })
+            .collect();
+        serde_json::Value::Array(arr)
+    };
     #[cfg(not(feature = "inline-images"))]
     let images = serde_json::Value::Array(vec![]);
 
