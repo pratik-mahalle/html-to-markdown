@@ -155,8 +155,16 @@ tasks:
     desc: "Run Java E2E tests in e2e/java directory"
     silent: false
     cmds:
+      - cmd: cargo build --release -p html-to-markdown-ffi
+        ignore_error: false
+      - cmd: cd {{.JAVA_PKG}} && "{{.MAVEN_CMD}}" install -DskipTests
+        ignore_error: false
       - cmd: cd e2e/java && "{{.MAVEN_CMD}}" test
         ignore_error: false
+    env:
+      LD_LIBRARY_PATH: '{{if ne .OS "windows"}}{{.TASKFILE_DIR}}/target/release{{if .LD_LIBRARY_PATH}}:{{.LD_LIBRARY_PATH}}{{end}}{{end}}'
+      DYLD_LIBRARY_PATH: '{{if eq .OS "darwin"}}{{.TASKFILE_DIR}}/target/release{{if .DYLD_LIBRARY_PATH}}:{{.DYLD_LIBRARY_PATH}}{{end}}{{end}}'
+      PATH: '{{if eq .OS "windows"}}{{.TASKFILE_DIR}}/target/release;{{end}}{{.PATH}}'
 
   clean:
     desc: "Clean Maven build artifacts and target directory"
