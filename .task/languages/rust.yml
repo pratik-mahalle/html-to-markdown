@@ -173,11 +173,3 @@ tasks:
     cmds:
       - cmd: cargo test --manifest-path e2e/rust/Cargo.toml
         ignore_error: false
-
-  bench:
-    desc: "Run Rust benchmarks"
-    silent: false
-    cmds:
-      - cmd: |
-          cargo bench --workspace -j {{.NUM_CPUS}}
-        ignore_error: false
