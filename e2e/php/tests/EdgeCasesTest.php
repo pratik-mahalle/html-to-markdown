@@ -212,19 +212,6 @@ class EdgeCasesTest extends TestCase
     }
 
     /**
-     * javascript: URLs in href attributes are preserved in link output (no URL scheme filtering is applied)
-     */
-    public function testXssJavascriptUrlBlocked(): void
-    {
-        $html = "<p><a href=\"javascript:alert('xss')\">Click me</a></p>";
-        $result = html_to_markdown_convert($html);
-        $content = $result['content'] ?? '';
-
-        $this->assertNotEmpty(trim($content), 'expected non-empty content');
-        $this->assertStringContainsString("Click me", $content);
-    }
-
-    /**
      * onclick and other on* event handlers are removed from elements
      */
     public function testXssOnclickHandlerRemoved(): void

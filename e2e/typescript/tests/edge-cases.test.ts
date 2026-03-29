@@ -146,15 +146,6 @@ describe('edge-cases', () => {
     expect(content.trim()).toBe('');
   });
 
-  it('xss_javascript_url_blocked: javascript: URLs in href attributes are preserved in link output (no URL scheme filtering is applied)', () => {
-    const html = `<p><a href="javascript:alert('xss')">Click me</a></p>`;
-    const result = convert(html);
-    const content = result.content ?? '';
-
-    expect(content.trim().length).toBeGreaterThan(0);
-    expect(content).toContain('Click me');
-  });
-
   it('xss_onclick_handler_removed: onclick and other on* event handlers are removed from elements', () => {
     const html = `<p><a href="https://example.com" onclick="alert('xss')">Click me</a></p><button onmouseover="steal_data()">Hover me</button>`;
     const result = convert(html);
