@@ -576,6 +576,25 @@ fn test_nested_bold_issue_111() {
     assert_eq!(result, "**bolder**\n");
 }
 
+#[test]
+fn hidden_elements_stripped() {
+    let html = "<p>visible</p><div hidden>secret</div><p>also visible</p>";
+    let result = convert(html, None).unwrap();
+    assert!(!result.contains("secret"));
+    assert!(result.contains("visible"));
+}
+
+#[test]
+fn q_element_produces_quotes() {
+    let html = "<p>He said <q>hello</q> to me</p>";
+    let result = convert(html, None).unwrap();
+    assert!(
+        result.contains(r#""hello""#),
+        "q element should add quotes: {}",
+        result
+    );
+}
+
 fn convert(
     html: &str,
     opts: Option<html_to_markdown_rs::ConversionOptions>,

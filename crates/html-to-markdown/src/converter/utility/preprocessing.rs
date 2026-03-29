@@ -580,6 +580,108 @@ pub(crate) fn sanitize_markdown_url(url: &str) -> Cow<'_, str> {
     Cow::Owned(url[paren_start..paren_end].to_string())
 }
 
+/// Strip elements with the `hidden` attribute from HTML.
+///
+/// Scans for opening tags containing the `hidden` attribute, finds their
+/// matching closing tag, and removes the entire element (tag + content).
+/// Self-closing tags with `hidden` are also removed.
+pub(crate) fn strip_hidden_elements(input: &str) -> Cow<'_, str> {
+    let bytes = input.as_bytes();
+    let len = bytes.len();
+
+    if len == 0 || !bytes.contains(&b'<') {
+        return Cow::Borrowed(input);
+    }
+
+    let mut idx = 0;
+    let mut last = 0;
+    let mut output: Option<String> = None;
+
+    while idx < len {
+        if bytes[idx] == b'<' && idx + 1 < len && bytes[idx + 1] != b'/' && bytes[idx + 1] != b'!' {
+            // Find the end of this opening tag
+            if let Some(tag_end) = find_tag_end(bytes, idx + 1) {
+                let tag_slice = &input[idx..tag_end];
+                if tag_has_hidden_attribute(tag_slice) {
+                    // Extract the tag name
+                    let name_start = idx + 1;
+                    let mut name_end = name_start;
+                    while name_end < len
+                        && !bytes[name_end].is_ascii_whitespace()
+                        && bytes[name_end] != b'>'
+                        && bytes[name_end] != b'/'
+                    {
+                        name_end += 1;
+                    }
+                    let tag_name = &bytes[name_start..name_end];
+
+                    // Check if it's a self-closing tag (e.g., <br hidden> or <br hidden/>)
+                    let is_self_closing = tag_slice.ends_with("/>")
+                        || tag_name.eq_ignore_ascii_case(b"br")
+                        || tag_name.eq_ignore_ascii_case(b"hr")
+                        || tag_name.eq_ignore_ascii_case(b"img")
+                        || tag_name.eq_ignore_ascii_case(b"input");
+
+                    let remove_end = if is_self_closing {
+                        tag_end
+                    } else {
+                        // Find the closing tag
+                        find_closing_tag_bytes(bytes, tag_end, tag_name).unwrap_or(tag_end)
+                    };
+
+                    let out = output.get_or_insert_with(|| String::with_capacity(len));
+                    out.push_str(&input[last..idx]);
+                    last = remove_end;
+                    idx = remove_end;
+                    continue;
+                }
+            }
+        }
+        idx += 1;
+    }
+
+    if let Some(mut out) = output {
+        if last < len {
+            out.push_str(&input[last..]);
+        }
+        Cow::Owned(out)
+    } else {
+        Cow::Borrowed(input)
+    }
+}
+
+/// Check if an opening tag string contains the `hidden` attribute.
+///
+/// Handles: `hidden`, `hidden=""`, `hidden="hidden"`, `hidden="true"`.
+/// Does NOT match attributes like `data-hidden` or `aria-hidden`.
+fn tag_has_hidden_attribute(tag: &str) -> bool {
+    let bytes = tag.as_bytes();
+    let len = bytes.len();
+    let needle = b"hidden";
+    let nlen = needle.len();
+
+    let mut i = 0;
+    // Skip past the tag name
+    while i < len && bytes[i] != b' ' && bytes[i] != b'\t' && bytes[i] != b'\n' && bytes[i] != b'>' {
+        i += 1;
+    }
+
+    while i + nlen <= len {
+        if bytes[i..i + nlen].eq_ignore_ascii_case(needle) {
+            // Check that the character before is whitespace (attribute boundary)
+            let before_ok = i == 0 || bytes[i - 1].is_ascii_whitespace();
+            // Check that the character after is whitespace, '>', '=', or '/'
+            let after = bytes.get(i + nlen).copied();
+            let after_ok = matches!(after, None | Some(b' ') | Some(b'\t') | Some(b'\n') | Some(b'\r') | Some(b'>') | Some(b'=') | Some(b'/'));
+            if before_ok && after_ok {
+                return true;
+            }
+        }
+        i += 1;
+    }
+    false
+}
+
 #[cfg(test)]
 mod tests {
     use super::sanitize_markdown_url;

@@ -158,7 +158,7 @@ pub fn handle_table(
             .get("border")
             .is_some_and(|v| v.as_ref().is_some_and(|b| b.as_utf8_str() == "0"));
         let looks_like_layout =
-            table_scan.has_nested_table || distinct_counts.len() > 1 || (table_scan.has_span && has_border_zero);
+            table_scan.nested_table_count > 1 || distinct_counts.len() > 1 || (table_scan.has_span && has_border_zero);
         let link_count = table_scan.link_count;
         let is_blank_table = !table_scan.has_text;
 
@@ -392,5 +392,16 @@ pub fn handle_table(
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn single_nested_table_stays_as_table() {
+        let html = r#"<table><tr><td>Label</td><td><table><tr><td>A</td><td>B</td></tr></table></td></tr></table>"#;
+        let result = crate::convert(html, None).unwrap();
+        let content = result.content.unwrap_or_default();
+        assert!(content.contains("|"), "should produce pipe table, not list");
     }
 }
