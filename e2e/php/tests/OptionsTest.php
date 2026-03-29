@@ -9,8 +9,6 @@ namespace HtmlToMarkdown\Tests;
 
 use PHPUnit\Framework\TestCase;
 
-use function HtmlToMarkdown\convert;
-
 class OptionsTest extends TestCase
 {
     /**
@@ -19,7 +17,7 @@ class OptionsTest extends TestCase
     public function testOptionsCodeBlockBackticks(): void
     {
         $html = "<pre><code class=\"language-js\">console.log('hi');</code></pre>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertStringContainsString("```", $content);
@@ -32,7 +30,7 @@ class OptionsTest extends TestCase
     public function testOptionsCodeBlockTildes(): void
     {
         $html = "<pre><code>some code</code></pre>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertStringContainsString("~~~", $content);
@@ -45,7 +43,7 @@ class OptionsTest extends TestCase
     public function testOptionsEscapeAsterisks(): void
     {
         $html = "<p>Use 2*3 = 6 in math.</p>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');
@@ -60,7 +58,7 @@ class OptionsTest extends TestCase
     public function testOptionsEscapeMisc(): void
     {
         $html = "<p>Use # and | and ~ in text.</p>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');
@@ -75,7 +73,7 @@ class OptionsTest extends TestCase
     public function testOptionsEscapeUnderscores(): void
     {
         $html = "<p>The variable_name is defined.</p>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');
@@ -90,7 +88,7 @@ class OptionsTest extends TestCase
     public function testOptionsHeadingStyleAtx(): void
     {
         $html = "<h1>Title</h1><h2>Subtitle</h2>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertStringContainsString("# Title", $content);
@@ -103,7 +101,7 @@ class OptionsTest extends TestCase
     public function testOptionsHeadingStyleAtxClosed(): void
     {
         $html = "<h1>Closed Heading</h1>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertStringContainsString("# Closed Heading #", $content);
@@ -115,7 +113,7 @@ class OptionsTest extends TestCase
     public function testOptionsHeadingStyleUnderlined(): void
     {
         $html = "<h1>Main Title</h1>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');
@@ -128,7 +126,7 @@ class OptionsTest extends TestCase
     public function testOptionsListCustomBullets(): void
     {
         $html = "<ul><li>Item A</li><li>Item B</li></ul>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertStringContainsString("* Item A", $content);
@@ -141,7 +139,7 @@ class OptionsTest extends TestCase
     public function testOptionsListIndentTabs(): void
     {
         $html = "<ul><li>Parent<ul><li>Child</li></ul></li></ul>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');
@@ -155,7 +153,7 @@ class OptionsTest extends TestCase
     public function testOptionsOutputFormatDjot(): void
     {
         $html = "<p>Simple paragraph.</p>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');
@@ -168,7 +166,7 @@ class OptionsTest extends TestCase
     public function testOptionsOutputFormatMarkdown(): void
     {
         $html = "<h1>Title</h1><p>Some text.</p>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertStringContainsString("# Title", $content);
@@ -181,7 +179,7 @@ class OptionsTest extends TestCase
     public function testOptionsOutputFormatPlain(): void
     {
         $html = "<h1>Title</h1><p>Some <strong>bold</strong> text.</p>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertStringContainsString("Title", $content);
@@ -197,7 +195,7 @@ class OptionsTest extends TestCase
     public function testOptionsWhitespaceNormalized(): void
     {
         $html = "<p>Text   with    extra   spaces.</p>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');
@@ -213,7 +211,7 @@ class OptionsTest extends TestCase
     public function testOptionsWhitespaceStrict(): void
     {
         $html = "<p>Preserved   spacing.</p>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');
@@ -227,7 +225,7 @@ class OptionsTest extends TestCase
     public function testOptionsWrapDisabled(): void
     {
         $html = "<p>This is a long paragraph that should not be wrapped at all because wrapping is disabled.</p>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertStringContainsString("This is a long paragraph that should not be wrapped at all because wrapping is disabled.", $content);
@@ -239,7 +237,7 @@ class OptionsTest extends TestCase
     public function testOptionsWrapEnabled(): void
     {
         $html = "<p>This is a long paragraph that should be wrapped at the specified column width when the wrap option is enabled.</p>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');

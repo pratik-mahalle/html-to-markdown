@@ -66,7 +66,6 @@ fn render_test_file(category: &str, class_name: &str, fixtures: &[&Fixture]) -> 
     let _ = writeln!(out, "namespace HtmlToMarkdown\\Tests;");
     let _ = writeln!(out);
     let _ = writeln!(out, "use PHPUnit\\Framework\\TestCase;");
-    let _ = writeln!(out, "use function HtmlToMarkdown\\convert;");
     let _ = writeln!(out);
     let _ = writeln!(out, "class {class_name}Test extends TestCase {{");
     let _ = writeln!(out);
@@ -111,12 +110,12 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
             let escaped = escape_php_string(contains);
             let _ = writeln!(out, "        $this->expectExceptionMessageMatches('/{escaped}/');");
         }
-        let _ = writeln!(out, "        convert($html);");
+        let _ = writeln!(out, "        html_to_markdown_convert($html);");
         let _ = writeln!(out, "    }}");
         return;
     }
 
-    let _ = writeln!(out, "        $result = convert($html);");
+    let _ = writeln!(out, "        $result = html_to_markdown_convert($html);");
     let _ = writeln!(out, "        $content = $result['content'] ?? '';");
     let _ = writeln!(out);
 

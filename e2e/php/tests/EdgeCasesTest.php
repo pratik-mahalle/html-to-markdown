@@ -9,8 +9,6 @@ namespace HtmlToMarkdown\Tests;
 
 use PHPUnit\Framework\TestCase;
 
-use function HtmlToMarkdown\convert;
-
 class EdgeCasesTest extends TestCase
 {
     /**
@@ -19,7 +17,7 @@ class EdgeCasesTest extends TestCase
     public function testEmptyHtml(): void
     {
         $html = "<html><head></head><body></body></html>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertSame("", trim($content));
@@ -31,7 +29,7 @@ class EdgeCasesTest extends TestCase
     public function testEncodingCjkCharacters(): void
     {
         $html = "<p>中文内容</p><p>日本語テキスト</p><p>한국어 텍스트</p>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');
@@ -46,7 +44,7 @@ class EdgeCasesTest extends TestCase
     public function testEncodingHtmlEntities(): void
     {
         $html = "<p>&amp; &lt; &gt; &nbsp; &quot; &apos;</p>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');
@@ -61,7 +59,7 @@ class EdgeCasesTest extends TestCase
     public function testEncodingNamedEntities(): void
     {
         $html = "<p>Em dash&mdash;used for parenthetical remarks&mdash;is common. Ellipsis&hellip; indicates omission. Non-breaking&nbsp;space.</p>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');
@@ -75,7 +73,7 @@ class EdgeCasesTest extends TestCase
     public function testEncodingNumericEntities(): void
     {
         $html = "<p>Copyright: &#169; Trade: &#174; Euro: &#8364; Hex: &#x00A9;</p>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');
@@ -90,7 +88,7 @@ class EdgeCasesTest extends TestCase
     public function testEncodingUnicodeEmoji(): void
     {
         $html = "<p>Hello 🌍 World 🚀</p><p>Stars: ⭐ ✨</p>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');
@@ -105,7 +103,7 @@ class EdgeCasesTest extends TestCase
     public function testHtmlCommentsOnly(): void
     {
         $html = "<!-- This is a comment --><!-- Another comment -->";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertSame("", trim($content));
@@ -117,7 +115,7 @@ class EdgeCasesTest extends TestCase
     public function testJustWhitespaceInput(): void
     {
         $html = "   ";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertSame("", trim($content));
@@ -129,7 +127,7 @@ class EdgeCasesTest extends TestCase
     public function testMalformedDeeplyNestedElements(): void
     {
         $html = "<div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><p>Deeply nested content</p></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');
@@ -142,7 +140,7 @@ class EdgeCasesTest extends TestCase
     public function testMalformedMissingBlockClosingTags(): void
     {
         $html = "<div><h1>Title<p>First paragraph<p>Second paragraph</div>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');
@@ -157,7 +155,7 @@ class EdgeCasesTest extends TestCase
     public function testMalformedOverlappingTags(): void
     {
         $html = "<p><b><i>bold and italic</b></i></p>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');
@@ -170,7 +168,7 @@ class EdgeCasesTest extends TestCase
     public function testMalformedUnclosedParagraph(): void
     {
         $html = "<p>This paragraph is never closed";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');
@@ -183,7 +181,7 @@ class EdgeCasesTest extends TestCase
     public function testScriptTagsOnly(): void
     {
         $html = "<html><head><script>alert('xss')</script></head><body><script>document.write('hello')</script></body></html>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertSame("", trim($content));
@@ -195,7 +193,7 @@ class EdgeCasesTest extends TestCase
     public function testStyleTagsOnly(): void
     {
         $html = "<html><head><style>body { color: red; }</style></head><body><style>.foo { margin: 0; }</style></body></html>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertSame("", trim($content));
@@ -207,7 +205,7 @@ class EdgeCasesTest extends TestCase
     public function testWhitespaceOnly(): void
     {
         $html = "<p>   </p>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertSame("", trim($content));
@@ -219,7 +217,7 @@ class EdgeCasesTest extends TestCase
     public function testXssJavascriptUrlBlocked(): void
     {
         $html = "<p><a href=\"javascript:alert('xss')\">Click me</a></p>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');
@@ -234,7 +232,7 @@ class EdgeCasesTest extends TestCase
     public function testXssOnclickHandlerRemoved(): void
     {
         $html = "<p><a href=\"https://example.com\" onclick=\"alert('xss')\">Click me</a></p><button onmouseover=\"steal_data()\">Hover me</button>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');
@@ -251,7 +249,7 @@ class EdgeCasesTest extends TestCase
     public function testXssScriptTagStripped(): void
     {
         $html = "<p>Safe content.</p><script>alert('xss')</script><p>More safe content.</p>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');
@@ -268,7 +266,7 @@ class EdgeCasesTest extends TestCase
     public function testXssSvgNestedScriptStripped(): void
     {
         $html = "<p>Before SVG.</p><svg xmlns=\"http://www.w3.org/2000/svg\"><script>alert('svg-xss')</script><text>SVG text</text></svg><p>After SVG.</p>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');

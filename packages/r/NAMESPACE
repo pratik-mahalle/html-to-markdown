@@ -2,13 +2,4 @@
 
 export(conversion_options)
 export(convert)
-export(convert_with_inline_images)
-export(convert_with_metadata)
-export(convert_with_options)
-export(convert_with_options_handle)
-export(convert_with_visitor)
-export(create_options_handle)
-export(start_profiling)
-export(stop_profiling)
-export(version)
 useDynLib(htmltomarkdown, .registration = TRUE)

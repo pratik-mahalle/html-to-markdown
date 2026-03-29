@@ -9,8 +9,6 @@ namespace HtmlToMarkdown\Tests;
 
 use PHPUnit\Framework\TestCase;
 
-use function HtmlToMarkdown\convert;
-
 class StructureTest extends TestCase
 {
     /**
@@ -19,7 +17,7 @@ class StructureTest extends TestCase
     public function testStructureCodeBlock(): void
     {
         $html = "<p>Example code:</p><pre><code class=\"language-rust\">fn main() { println!(\"Hello\"); }</code></pre>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');
@@ -31,7 +29,7 @@ class StructureTest extends TestCase
     public function testStructureDeepNestingH1H2H3(): void
     {
         $html = "<h1>Top Level</h1><p>Top intro.</p><h2>Mid Level</h2><p>Mid content.</p><h3>Deep Level</h3><p>Deep content.</p>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');
@@ -43,7 +41,7 @@ class StructureTest extends TestCase
     public function testStructureH1H2NestedGroup(): void
     {
         $html = "<h1>Chapter One</h1><p>Chapter intro.</p><h2>Section One</h2><p>Section content.</p>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');
@@ -55,7 +53,7 @@ class StructureTest extends TestCase
     public function testStructureHeadingParagraph(): void
     {
         $html = "<h1>Title</h1><p>A paragraph of text.</p>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');
@@ -67,7 +65,7 @@ class StructureTest extends TestCase
     public function testStructureList(): void
     {
         $html = "<p>Items:</p><ul><li>Alpha</li><li>Beta</li><li>Gamma</li></ul>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');
@@ -79,7 +77,7 @@ class StructureTest extends TestCase
     public function testStructureMultipleHeadings(): void
     {
         $html = "<h1>Main Title</h1><h2>Section One</h2><p>Section one content.</p><h2>Section Two</h2><p>Section two content.</p>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');
@@ -91,7 +89,7 @@ class StructureTest extends TestCase
     public function testStructureSiblingH1Groups(): void
     {
         $html = "<h1>Chapter One</h1><h2>Section A</h2><p>Section A content.</p><h1>Chapter Two</h1><h2>Section B</h2><p>Section B content.</p>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertNotEmpty(trim($content), 'expected non-empty content');

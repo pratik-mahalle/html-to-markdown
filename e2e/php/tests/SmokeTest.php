@@ -9,8 +9,6 @@ namespace HtmlToMarkdown\Tests;
 
 use PHPUnit\Framework\TestCase;
 
-use function HtmlToMarkdown\convert;
-
 class SmokeTest extends TestCase
 {
     /**
@@ -19,7 +17,7 @@ class SmokeTest extends TestCase
     public function testSmokeEmptyString(): void
     {
         $html = "";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertSame("", trim($content));
@@ -31,7 +29,7 @@ class SmokeTest extends TestCase
     public function testSmokeSimpleHeading(): void
     {
         $html = "<h1>Title</h1>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertStringContainsString("# Title", $content);
@@ -43,7 +41,7 @@ class SmokeTest extends TestCase
     public function testSmokeSimpleParagraph(): void
     {
         $html = "<p>Hello World</p>";
-        $result = convert($html);
+        $result = html_to_markdown_convert($html);
         $content = $result['content'] ?? '';
 
         $this->assertSame("Hello World", trim($content));
