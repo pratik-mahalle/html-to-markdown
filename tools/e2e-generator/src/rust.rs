@@ -275,7 +275,7 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
         let escaped = escape_string(expected);
         let _ = writeln!(
             out,
-            "    assert_eq!(result.metadata.document.open_graph.get(\"og:title\").map(|s| s.as_str()), Some(\"{escaped}\"), \"metadata_og_title mismatch\");"
+            "    assert_eq!(result.metadata.document.open_graph.get(\"title\").map(|s| s.as_str()), Some(\"{escaped}\"), \"metadata_og_title mismatch\");"
         );
     }
 
@@ -284,7 +284,7 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
         let escaped = escape_string(expected);
         let _ = writeln!(
             out,
-            "    assert_eq!(result.metadata.document.open_graph.get(\"og:description\").map(|s| s.as_str()), Some(\"{escaped}\"), \"metadata_og_description mismatch\");"
+            "    assert_eq!(result.metadata.document.open_graph.get(\"description\").map(|s| s.as_str()), Some(\"{escaped}\"), \"metadata_og_description mismatch\");"
         );
     }
 
@@ -293,7 +293,7 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
         let escaped = escape_string(expected);
         let _ = writeln!(
             out,
-            "    assert_eq!(result.metadata.document.open_graph.get(\"og:image\").map(|s| s.as_str()), Some(\"{escaped}\"), \"metadata_og_image mismatch\");"
+            "    assert_eq!(result.metadata.document.open_graph.get(\"image\").map(|s| s.as_str()), Some(\"{escaped}\"), \"metadata_og_image mismatch\");"
         );
     }
 
@@ -302,7 +302,7 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
         let escaped = escape_string(expected);
         let _ = writeln!(
             out,
-            "    assert_eq!(result.metadata.document.open_graph.get(\"og:type\").map(|s| s.as_str()), Some(\"{escaped}\"), \"metadata_og_type mismatch\");"
+            "    assert_eq!(result.metadata.document.open_graph.get(\"type\").map(|s| s.as_str()), Some(\"{escaped}\"), \"metadata_og_type mismatch\");"
         );
     }
 
@@ -311,7 +311,7 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
         let escaped = escape_string(expected);
         let _ = writeln!(
             out,
-            "    assert_eq!(result.metadata.document.open_graph.get(\"og:url\").map(|s| s.as_str()), Some(\"{escaped}\"), \"metadata_og_url mismatch\");"
+            "    assert_eq!(result.metadata.document.open_graph.get(\"url\").map(|s| s.as_str()), Some(\"{escaped}\"), \"metadata_og_url mismatch\");"
         );
     }
 
@@ -320,7 +320,7 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
         let escaped = escape_string(expected);
         let _ = writeln!(
             out,
-            "    assert_eq!(result.metadata.document.open_graph.get(\"og:site_name\").map(|s| s.as_str()), Some(\"{escaped}\"), \"metadata_og_site_name mismatch\");"
+            "    assert_eq!(result.metadata.document.open_graph.get(\"site_name\").map(|s| s.as_str()), Some(\"{escaped}\"), \"metadata_og_site_name mismatch\");"
         );
     }
 
@@ -329,7 +329,7 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
         let escaped = escape_string(expected);
         let _ = writeln!(
             out,
-            "    assert_eq!(result.metadata.document.twitter_card.get(\"twitter:card\").map(|s| s.as_str()), Some(\"{escaped}\"), \"metadata_twitter_card mismatch\");"
+            "    assert_eq!(result.metadata.document.twitter_card.get(\"card\").map(|s| s.as_str()), Some(\"{escaped}\"), \"metadata_twitter_card mismatch\");"
         );
     }
 
@@ -338,7 +338,7 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
         let escaped = escape_string(expected);
         let _ = writeln!(
             out,
-            "    assert_eq!(result.metadata.document.twitter_card.get(\"twitter:title\").map(|s| s.as_str()), Some(\"{escaped}\"), \"metadata_twitter_title mismatch\");"
+            "    assert_eq!(result.metadata.document.twitter_card.get(\"title\").map(|s| s.as_str()), Some(\"{escaped}\"), \"metadata_twitter_title mismatch\");"
         );
     }
 
@@ -347,7 +347,7 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
         let escaped = escape_string(expected);
         let _ = writeln!(
             out,
-            "    assert_eq!(result.metadata.document.twitter_card.get(\"twitter:description\").map(|s| s.as_str()), Some(\"{escaped}\"), \"metadata_twitter_description mismatch\");"
+            "    assert_eq!(result.metadata.document.twitter_card.get(\"description\").map(|s| s.as_str()), Some(\"{escaped}\"), \"metadata_twitter_description mismatch\");"
         );
     }
 
