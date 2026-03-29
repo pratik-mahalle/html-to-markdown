@@ -45,23 +45,4 @@ defmodule HtmlToMarkdown do
     |> Options.new()
     |> Options.to_map()
   end
-
-  defp normalize_metadata(value) when is_list(value), do: Enum.map(value, &normalize_metadata/1)
-
-  defp normalize_metadata(value) when is_map(value) do
-    value
-    |> Enum.map(fn {k, v} ->
-      key =
-        cond do
-          is_atom(k) -> Atom.to_string(k)
-          is_binary(k) -> k
-          true -> to_string(k)
-        end
-
-      {key, normalize_metadata(v)}
-    end)
-    |> Map.new()
-  end
-
-  defp normalize_metadata(value), do: value
 end
