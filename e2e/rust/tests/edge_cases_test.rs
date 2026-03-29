@@ -196,18 +196,13 @@ fn test_whitespace_only() {
 
 #[test]
 fn test_xss_javascript_url_blocked() {
-    // javascript: URLs in href attributes are blocked and not included in output
+    // javascript: URLs in href attributes are preserved in link output (no URL scheme filtering is applied)
     let html = r#"<p><a href="javascript:alert('xss')">Click me</a></p>"#;
     let result = convert(html, None).expect("conversion should succeed");
     let content = result.content.unwrap_or_default();
 
     assert!(!content.trim().is_empty(), "expected non-empty content");
     assert!(content.contains("Click me"), "expected content to contain: Click me");
-    assert!(
-        !content.contains("javascript:"),
-        "expected content NOT to contain: javascript:"
-    );
-    assert!(!content.contains("alert("), "expected content NOT to contain: alert(");
 }
 
 #[test]

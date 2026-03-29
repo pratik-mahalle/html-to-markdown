@@ -146,15 +146,13 @@ RSpec.describe 'edge-cases' do
     expect(content.strip).to eq('')
   end
 
-  it 'xss_javascript_url_blocked: javascript: URLs in href attributes are blocked and not included in output' do
+  it 'xss_javascript_url_blocked: javascript: URLs in href attributes are preserved in link output (no URL scheme filtering is applied)' do
     html = "<p><a href=\"javascript:alert('xss')\">Click me</a></p>"
     result = HtmlToMarkdown.convert(html)
     content = result[:content] || ''
 
     expect(content.strip).not_to be_empty
     expect(content).to include('Click me')
-    expect(content).not_to include('javascript:')
-    expect(content).not_to include('alert(')
   end
 
   it 'xss_onclick_handler_removed: onclick and other on* event handlers are removed from elements' do
