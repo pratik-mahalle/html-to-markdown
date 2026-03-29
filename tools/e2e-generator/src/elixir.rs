@@ -112,10 +112,30 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
     let escaped_html = escape_elixir_string(html);
     let _ = writeln!(out, "    html = \"{escaped_html}\"");
 
+    // Build options map if specified.
+    if let Some(opts) = &fixture.options {
+        let entries: Vec<String> = opts
+            .iter()
+            .map(|(k, v)| {
+                let snake_key = camel_to_snake(k);
+                let elixir_val = json_value_to_elixir(v);
+                format!("\"{snake_key}\" => {elixir_val}")
+            })
+            .collect();
+        let map_literal = entries.join(", ");
+        let _ = writeln!(out, "    opts = %{{{map_literal}}}");
+    }
+
+    let convert_call = if fixture.options.is_some() {
+        "HtmlToMarkdown.convert(html, opts)"
+    } else {
+        "HtmlToMarkdown.convert(html)"
+    };
+
     // Conversion call + error handling.
     if fixture.assertions.expect_error == Some(true) {
         let _ = writeln!(out, "    assert_raise(FunctionClauseError, fn ->");
-        let _ = writeln!(out, "      HtmlToMarkdown.convert(html)");
+        let _ = writeln!(out, "      {convert_call}");
         let _ = writeln!(out, "    end)");
         if let Some(contains) = &fixture.assertions.error_contains {
             let escaped = escape_elixir_string(contains);
@@ -125,7 +145,7 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
         return;
     }
 
-    let _ = writeln!(out, "    {{:ok, result}} = HtmlToMarkdown.convert(html)");
+    let _ = writeln!(out, "    {{:ok, result}} = {convert_call}");
     let _ = writeln!(out, "    content = result[:content] || \"\"");
     let _ = writeln!(out);
 
@@ -230,6 +250,33 @@ fn category_to_module_name(s: &str) -> String {
     }
 
     out
+}
+
+/// Convert a camelCase string to snake_case.
+fn camel_to_snake(s: &str) -> String {
+    let mut out = String::with_capacity(s.len() + 4);
+    for (i, ch) in s.chars().enumerate() {
+        if ch.is_ascii_uppercase() {
+            if i > 0 {
+                out.push('_');
+            }
+            out.push(ch.to_ascii_lowercase());
+        } else {
+            out.push(ch);
+        }
+    }
+    out
+}
+
+/// Format a `serde_json::Value` as an Elixir literal.
+fn json_value_to_elixir(v: &serde_json::Value) -> String {
+    match v {
+        serde_json::Value::String(s) => format!("\"{}\"", escape_elixir_string(s)),
+        serde_json::Value::Bool(b) => b.to_string(),
+        serde_json::Value::Number(n) => n.to_string(),
+        serde_json::Value::Null => "nil".to_string(),
+        other => format!("\"{}\"", escape_elixir_string(&other.to_string())),
+    }
 }
 
 /// Escape a string for use inside an Elixir `"..."` string literal.
