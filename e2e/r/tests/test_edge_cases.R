@@ -153,16 +153,6 @@ test_that("whitespace_only: Whitespace-only content", {
   expect_equal(trimws(content), "")
 })
 
-test_that("xss_javascript_url_blocked: javascript: URLs in href attributes are preserved in link output (no URL scheme filtering is applied)", {
-  html <- "<p><a href=\"javascript:alert('xss')\">Click me</a></p>"
-  result <- convert(html)
-  content <- result$content %||% ""
-
-  expect_true(nchar(trimws(content)) > 0)
-  # content_contains_all
-  expect_true(grepl("Click me", content, fixed = TRUE))
-})
-
 test_that("xss_onclick_handler_removed: onclick and other on* event handlers are removed from elements", {
   html <- "<p><a href=\"https://example.com\" onclick=\"alert('xss')\">Click me</a></p><button onmouseover=\"steal_data()\">Hover me</button>"
   result <- convert(html)

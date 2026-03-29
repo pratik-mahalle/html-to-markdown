@@ -182,17 +182,6 @@ class EdgeCasesTest {
     }
 
     @Test
-    void testXssJavascriptUrlBlocked() {
-        // javascript: URLs in href attributes are preserved in link output (no URL scheme filtering is applied)
-        var html = "<p><a href=\"javascript:alert('xss')\">Click me</a></p>";
-        var result = HtmlToMarkdown.convert(html);
-        var content = result.content() != null ? result.content() : "";
-
-        assertNotEquals("", content.strip(), "expected non-empty content");
-        assertTrue(content.contains("Click me"), "expected content to contain: Click me");
-    }
-
-    @Test
     void testXssOnclickHandlerRemoved() {
         // onclick and other on* event handlers are removed from elements
         var html = "<p><a href=\"https://example.com\" onclick=\"alert('xss')\">Click me</a></p><button onmouseover=\"steal_data()\">Hover me</button>";

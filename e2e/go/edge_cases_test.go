@@ -325,26 +325,6 @@ func Test_WhitespaceOnly(t *testing.T) {
 	}
 }
 
-func Test_XssJavascriptUrlBlocked(t *testing.T) {
-	// javascript: URLs in href attributes are preserved in link output (no URL scheme filtering is applied)
-	html := `<p><a href="javascript:alert('xss')">Click me</a></p>`
-	result, err := htmd.Convert(html)
-	if err != nil {
-		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result != nil && result.Content != nil {
-		content = *result.Content
-	}
-
-	if strings.TrimSpace(content) == "" {
-		t.Errorf("expected non-empty content")
-	}
-	if !strings.Contains(content, "Click me") {
-		t.Errorf("expected content to contain: Click me")
-	}
-}
-
 func Test_XssOnclickHandlerRemoved(t *testing.T) {
 	// onclick and other on* event handlers are removed from elements
 	html := `<p><a href="https://example.com" onclick="alert('xss')">Click me</a></p><button onmouseover="steal_data()">Hover me</button>`

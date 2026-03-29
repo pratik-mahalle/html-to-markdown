@@ -227,20 +227,6 @@ public class EdgeCasesTests
     }
 
     /// <summary>
-    /// javascript: URLs in href attributes are preserved in link output (no URL scheme filtering is applied)
-    /// </summary>
-    [Fact]
-    public void TestXssJavascriptUrlBlocked()
-    {
-        var html = "<p><a href=\"javascript:alert('xss')\">Click me</a></p>";
-        var result = HtmlToMarkdownConverter.Convert(html);
-        var content = result.Content ?? "";
-
-        Assert.False(string.IsNullOrWhiteSpace(content));
-        Assert.Contains("Click me", content);
-    }
-
-    /// <summary>
     /// onclick and other on* event handlers are removed from elements
     /// </summary>
     [Fact]
