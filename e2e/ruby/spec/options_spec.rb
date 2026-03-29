@@ -8,7 +8,8 @@ require 'html_to_markdown'
 RSpec.describe 'options' do
   it 'options_code_block_backticks: Backticks code block style uses triple backtick fences' do
     html = "<pre><code class=\"language-js\">console.log('hi');</code></pre>"
-    result = HtmlToMarkdown.convert(html)
+    opts = { 'code_block_style' => 'backticks' }
+    result = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ''
 
     expect(content).to include('```')
@@ -17,7 +18,8 @@ RSpec.describe 'options' do
 
   it 'options_code_block_tildes: Tildes code block style uses triple tilde fences' do
     html = '<pre><code>some code</code></pre>'
-    result = HtmlToMarkdown.convert(html)
+    opts = { 'code_block_style' => 'tildes' }
+    result = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ''
 
     expect(content).to include('~~~')
@@ -26,7 +28,8 @@ RSpec.describe 'options' do
 
   it 'options_escape_asterisks: escape_asterisks option escapes asterisks in plain text' do
     html = '<p>Use 2*3 = 6 in math.</p>'
-    result = HtmlToMarkdown.convert(html)
+    opts = { 'escape_asterisks' => true }
+    result = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ''
 
     expect(content.strip).not_to be_empty
@@ -37,7 +40,8 @@ RSpec.describe 'options' do
 
   it 'options_escape_misc: escape_misc option escapes miscellaneous markdown characters' do
     html = '<p>Use # and | and ~ in text.</p>'
-    result = HtmlToMarkdown.convert(html)
+    opts = { 'escape_misc' => true }
+    result = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ''
 
     expect(content.strip).not_to be_empty
@@ -48,7 +52,8 @@ RSpec.describe 'options' do
 
   it 'options_escape_underscores: escape_underscores option escapes underscores in plain text' do
     html = '<p>The variable_name is defined.</p>'
-    result = HtmlToMarkdown.convert(html)
+    opts = { 'escape_underscores' => true }
+    result = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ''
 
     expect(content.strip).not_to be_empty
@@ -59,7 +64,8 @@ RSpec.describe 'options' do
 
   it 'options_heading_style_atx: ATX heading style produces hash-prefixed headings' do
     html = '<h1>Title</h1><h2>Subtitle</h2>'
-    result = HtmlToMarkdown.convert(html)
+    opts = { 'heading_style' => 'atx' }
+    result = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ''
 
     expect(content).to include('# Title')
@@ -68,7 +74,8 @@ RSpec.describe 'options' do
 
   it 'options_heading_style_atx_closed: ATX closed heading style adds closing hashes' do
     html = '<h1>Closed Heading</h1>'
-    result = HtmlToMarkdown.convert(html)
+    opts = { 'heading_style' => 'atxclosed' }
+    result = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ''
 
     expect(content).to include('# Closed Heading #')
@@ -76,7 +83,8 @@ RSpec.describe 'options' do
 
   it 'options_heading_style_underlined: Underlined heading style produces setext-style headings for h1 and h2' do
     html = '<h1>Main Title</h1>'
-    result = HtmlToMarkdown.convert(html)
+    opts = { 'heading_style' => 'underlined' }
+    result = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ''
 
     expect(content.strip).not_to be_empty
@@ -85,7 +93,8 @@ RSpec.describe 'options' do
 
   it 'options_list_custom_bullets: Custom bullet character for unordered lists' do
     html = '<ul><li>Item A</li><li>Item B</li></ul>'
-    result = HtmlToMarkdown.convert(html)
+    opts = { 'bullets' => '*' }
+    result = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ''
 
     expect(content).to include('* Item A')
@@ -94,7 +103,8 @@ RSpec.describe 'options' do
 
   it 'options_list_indent_tabs: Tab indentation type for nested list items' do
     html = '<ul><li>Parent<ul><li>Child</li></ul></li></ul>'
-    result = HtmlToMarkdown.convert(html)
+    opts = { 'list_indent_type' => 'tabs' }
+    result = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ''
 
     expect(content.strip).not_to be_empty
@@ -104,7 +114,8 @@ RSpec.describe 'options' do
 
   it 'options_output_format_djot: Djot output format produces djot-compatible markup' do
     html = '<p>Simple paragraph.</p>'
-    result = HtmlToMarkdown.convert(html)
+    opts = { 'output_format' => 'djot' }
+    result = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ''
 
     expect(content.strip).not_to be_empty
@@ -113,7 +124,8 @@ RSpec.describe 'options' do
 
   it 'options_output_format_markdown: Default markdown output format produces standard markdown' do
     html = '<h1>Title</h1><p>Some text.</p>'
-    result = HtmlToMarkdown.convert(html)
+    opts = { 'output_format' => 'markdown' }
+    result = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ''
 
     expect(content).to include('# Title')
@@ -122,7 +134,8 @@ RSpec.describe 'options' do
 
   it 'options_output_format_plain: Plain text output format strips markdown syntax' do
     html = '<h1>Title</h1><p>Some <strong>bold</strong> text.</p>'
-    result = HtmlToMarkdown.convert(html)
+    opts = { 'output_format' => 'plain' }
+    result = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ''
 
     expect(content).to include('Title')
@@ -134,7 +147,8 @@ RSpec.describe 'options' do
 
   it 'options_whitespace_normalized: Normalized whitespace mode collapses multiple spaces' do
     html = '<p>Text   with    extra   spaces.</p>'
-    result = HtmlToMarkdown.convert(html)
+    opts = { 'whitespace_mode' => 'normalized' }
+    result = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ''
 
     expect(content.strip).not_to be_empty
@@ -146,7 +160,8 @@ RSpec.describe 'options' do
 
   it 'options_whitespace_strict: Strict whitespace mode preserves whitespace as-is' do
     html = '<p>Preserved   spacing.</p>'
-    result = HtmlToMarkdown.convert(html)
+    opts = { 'whitespace_mode' => 'strict' }
+    result = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ''
 
     expect(content.strip).not_to be_empty
@@ -156,7 +171,8 @@ RSpec.describe 'options' do
 
   it 'options_wrap_disabled: Wrap option disabled preserves long lines without breaking' do
     html = '<p>This is a long paragraph that should not be wrapped at all because wrapping is disabled.</p>'
-    result = HtmlToMarkdown.convert(html)
+    opts = { 'wrap' => false }
+    result = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ''
 
     expect(content).to include('This is a long paragraph that should not be wrapped at all because wrapping is disabled.')
@@ -164,7 +180,8 @@ RSpec.describe 'options' do
 
   it 'options_wrap_enabled: Wrap option enabled with custom width wraps long lines' do
     html = '<p>This is a long paragraph that should be wrapped at the specified column width when the wrap option is enabled.</p>'
-    result = HtmlToMarkdown.convert(html)
+    opts = { 'wrap' => true, 'wrap_width' => 40 }
+    result = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ''
 
     expect(content.strip).not_to be_empty

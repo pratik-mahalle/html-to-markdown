@@ -15,7 +15,7 @@ class OptionsTest {
     void testOptionsCodeBlockBackticks() {
         // Backticks code block style uses triple backtick fences
         var html = "<pre><code class=\"language-js\">console.log('hi');</code></pre>";
-        var result = HtmlToMarkdown.convert(html);
+        var result = HtmlToMarkdown.convert(html, "{\"codeBlockStyle\":\"backticks\"}");
         var content = result.content() != null ? result.content() : "";
 
         assertTrue(content.contains("```"), "expected content to contain: ```");
@@ -26,7 +26,7 @@ class OptionsTest {
     void testOptionsCodeBlockTildes() {
         // Tildes code block style uses triple tilde fences
         var html = "<pre><code>some code</code></pre>";
-        var result = HtmlToMarkdown.convert(html);
+        var result = HtmlToMarkdown.convert(html, "{\"codeBlockStyle\":\"tildes\"}");
         var content = result.content() != null ? result.content() : "";
 
         assertTrue(content.contains("~~~"), "expected content to contain: ~~~");
@@ -37,7 +37,7 @@ class OptionsTest {
     void testOptionsEscapeAsterisks() {
         // escape_asterisks option escapes asterisks in plain text
         var html = "<p>Use 2*3 = 6 in math.</p>";
-        var result = HtmlToMarkdown.convert(html);
+        var result = HtmlToMarkdown.convert(html, "{\"escapeAsterisks\":true}");
         var content = result.content() != null ? result.content() : "";
 
         assertNotEquals("", content.strip(), "expected non-empty content");
@@ -50,7 +50,7 @@ class OptionsTest {
     void testOptionsEscapeMisc() {
         // escape_misc option escapes miscellaneous markdown characters
         var html = "<p>Use # and | and ~ in text.</p>";
-        var result = HtmlToMarkdown.convert(html);
+        var result = HtmlToMarkdown.convert(html, "{\"escapeMisc\":true}");
         var content = result.content() != null ? result.content() : "";
 
         assertNotEquals("", content.strip(), "expected non-empty content");
@@ -63,7 +63,7 @@ class OptionsTest {
     void testOptionsEscapeUnderscores() {
         // escape_underscores option escapes underscores in plain text
         var html = "<p>The variable_name is defined.</p>";
-        var result = HtmlToMarkdown.convert(html);
+        var result = HtmlToMarkdown.convert(html, "{\"escapeUnderscores\":true}");
         var content = result.content() != null ? result.content() : "";
 
         assertNotEquals("", content.strip(), "expected non-empty content");
@@ -76,7 +76,7 @@ class OptionsTest {
     void testOptionsHeadingStyleAtx() {
         // ATX heading style produces hash-prefixed headings
         var html = "<h1>Title</h1><h2>Subtitle</h2>";
-        var result = HtmlToMarkdown.convert(html);
+        var result = HtmlToMarkdown.convert(html, "{\"headingStyle\":\"atx\"}");
         var content = result.content() != null ? result.content() : "";
 
         assertTrue(content.contains("# Title"), "expected content to contain: # Title");
@@ -87,7 +87,7 @@ class OptionsTest {
     void testOptionsHeadingStyleAtxClosed() {
         // ATX closed heading style adds closing hashes
         var html = "<h1>Closed Heading</h1>";
-        var result = HtmlToMarkdown.convert(html);
+        var result = HtmlToMarkdown.convert(html, "{\"headingStyle\":\"atxClosed\"}");
         var content = result.content() != null ? result.content() : "";
 
         assertTrue(content.contains("# Closed Heading #"), "expected content to contain: # Closed Heading #");
@@ -97,7 +97,7 @@ class OptionsTest {
     void testOptionsHeadingStyleUnderlined() {
         // Underlined heading style produces setext-style headings for h1 and h2
         var html = "<h1>Main Title</h1>";
-        var result = HtmlToMarkdown.convert(html);
+        var result = HtmlToMarkdown.convert(html, "{\"headingStyle\":\"underlined\"}");
         var content = result.content() != null ? result.content() : "";
 
         assertNotEquals("", content.strip(), "expected non-empty content");
@@ -108,7 +108,7 @@ class OptionsTest {
     void testOptionsListCustomBullets() {
         // Custom bullet character for unordered lists
         var html = "<ul><li>Item A</li><li>Item B</li></ul>";
-        var result = HtmlToMarkdown.convert(html);
+        var result = HtmlToMarkdown.convert(html, "{\"bullets\":\"*\"}");
         var content = result.content() != null ? result.content() : "";
 
         assertTrue(content.contains("* Item A"), "expected content to contain: * Item A");
@@ -119,7 +119,7 @@ class OptionsTest {
     void testOptionsListIndentTabs() {
         // Tab indentation type for nested list items
         var html = "<ul><li>Parent<ul><li>Child</li></ul></li></ul>";
-        var result = HtmlToMarkdown.convert(html);
+        var result = HtmlToMarkdown.convert(html, "{\"listIndentType\":\"tabs\"}");
         var content = result.content() != null ? result.content() : "";
 
         assertNotEquals("", content.strip(), "expected non-empty content");
@@ -131,7 +131,7 @@ class OptionsTest {
     void testOptionsOutputFormatDjot() {
         // Djot output format produces djot-compatible markup
         var html = "<p>Simple paragraph.</p>";
-        var result = HtmlToMarkdown.convert(html);
+        var result = HtmlToMarkdown.convert(html, "{\"outputFormat\":\"djot\"}");
         var content = result.content() != null ? result.content() : "";
 
         assertNotEquals("", content.strip(), "expected non-empty content");
@@ -142,7 +142,7 @@ class OptionsTest {
     void testOptionsOutputFormatMarkdown() {
         // Default markdown output format produces standard markdown
         var html = "<h1>Title</h1><p>Some text.</p>";
-        var result = HtmlToMarkdown.convert(html);
+        var result = HtmlToMarkdown.convert(html, "{\"outputFormat\":\"markdown\"}");
         var content = result.content() != null ? result.content() : "";
 
         assertTrue(content.contains("# Title"), "expected content to contain: # Title");
@@ -153,7 +153,7 @@ class OptionsTest {
     void testOptionsOutputFormatPlain() {
         // Plain text output format strips markdown syntax
         var html = "<h1>Title</h1><p>Some <strong>bold</strong> text.</p>";
-        var result = HtmlToMarkdown.convert(html);
+        var result = HtmlToMarkdown.convert(html, "{\"outputFormat\":\"plain\"}");
         var content = result.content() != null ? result.content() : "";
 
         assertTrue(content.contains("Title"), "expected content to contain: Title");
@@ -167,7 +167,7 @@ class OptionsTest {
     void testOptionsWhitespaceNormalized() {
         // Normalized whitespace mode collapses multiple spaces
         var html = "<p>Text   with    extra   spaces.</p>";
-        var result = HtmlToMarkdown.convert(html);
+        var result = HtmlToMarkdown.convert(html, "{\"whitespaceMode\":\"normalized\"}");
         var content = result.content() != null ? result.content() : "";
 
         assertNotEquals("", content.strip(), "expected non-empty content");
@@ -181,7 +181,7 @@ class OptionsTest {
     void testOptionsWhitespaceStrict() {
         // Strict whitespace mode preserves whitespace as-is
         var html = "<p>Preserved   spacing.</p>";
-        var result = HtmlToMarkdown.convert(html);
+        var result = HtmlToMarkdown.convert(html, "{\"whitespaceMode\":\"strict\"}");
         var content = result.content() != null ? result.content() : "";
 
         assertNotEquals("", content.strip(), "expected non-empty content");
@@ -193,7 +193,7 @@ class OptionsTest {
     void testOptionsWrapDisabled() {
         // Wrap option disabled preserves long lines without breaking
         var html = "<p>This is a long paragraph that should not be wrapped at all because wrapping is disabled.</p>";
-        var result = HtmlToMarkdown.convert(html);
+        var result = HtmlToMarkdown.convert(html, "{\"wrap\":false}");
         var content = result.content() != null ? result.content() : "";
 
         assertTrue(content.contains("This is a long paragraph that should not be wrapped at all because wrapping is disabled."), "expected content to contain: This is a long paragraph that should not be wrapped at all because wrapping is disabled.");
@@ -203,7 +203,7 @@ class OptionsTest {
     void testOptionsWrapEnabled() {
         // Wrap option enabled with custom width wraps long lines
         var html = "<p>This is a long paragraph that should be wrapped at the specified column width when the wrap option is enabled.</p>";
-        var result = HtmlToMarkdown.convert(html);
+        var result = HtmlToMarkdown.convert(html, "{\"wrap\":true,\"wrapWidth\":40}");
         var content = result.content() != null ? result.content() : "";
 
         assertNotEquals("", content.strip(), "expected non-empty content");

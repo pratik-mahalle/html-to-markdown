@@ -100,15 +100,33 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
 
     let escaped_html = escape_template_string(html);
 
+    // Build options literal if specified.
+    let options_literal = fixture.options.as_ref().map(|opts| {
+        let entries: Vec<String> = opts
+            .iter()
+            .map(|(k, v)| {
+                let js_val = json_value_to_js(v);
+                format!("{k}: {js_val}")
+            })
+            .collect();
+        format!("{{ {} }}", entries.join(", "))
+    });
+
+    let convert_arg = if let Some(ref lit) = options_literal {
+        format!("html, {lit}")
+    } else {
+        "html".to_string()
+    };
+
     // Conversion call + error handling.
     if fixture.assertions.expect_error == Some(true) {
         let _ = writeln!(out, "  it('{fn_name}: {description}', () => {{");
         let _ = writeln!(out, "    const html = `{escaped_html}`;");
-        let _ = writeln!(out, "    expect(() => convert(html)).toThrow();");
+        let _ = writeln!(out, "    expect(() => convert({convert_arg})).toThrow();");
         if let Some(contains) = &fixture.assertions.error_contains {
             let escaped = escape_string(contains);
             let _ = writeln!(out, "    try {{");
-            let _ = writeln!(out, "      convert(html);");
+            let _ = writeln!(out, "      convert({convert_arg});");
             let _ = writeln!(out, "      expect.fail('Expected an error');");
             let _ = writeln!(out, "    }} catch (err) {{");
             let _ = writeln!(out, "      expect((err as Error).message).toContain('{escaped}');");
@@ -120,7 +138,7 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
 
     let _ = writeln!(out, "  it('{fn_name}: {description}', () => {{");
     let _ = writeln!(out, "    const html = `{escaped_html}`;");
-    let _ = writeln!(out, "    const result = convert(html);");
+    let _ = writeln!(out, "    const result = convert({convert_arg});");
     let _ = writeln!(out, "    const content = result.content ?? '';");
     let _ = writeln!(out);
 
@@ -430,6 +448,17 @@ fn sanitize_test_name(s: &str) -> String {
 /// Escape a string for use inside a JavaScript template literal (`...`).
 fn escape_template_string(s: &str) -> String {
     s.replace('\\', "\\\\").replace('`', "\\`").replace("${", "\\${")
+}
+
+/// Format a `serde_json::Value` as a JavaScript literal.
+fn json_value_to_js(v: &serde_json::Value) -> String {
+    match v {
+        serde_json::Value::String(s) => format!("'{}'", escape_string(s)),
+        serde_json::Value::Bool(b) => b.to_string(),
+        serde_json::Value::Number(n) => n.to_string(),
+        serde_json::Value::Null => "null".to_string(),
+        other => format!("'{}'", escape_string(&other.to_string())),
+    }
 }
 
 /// Escape a string for use inside a JavaScript string literal.

@@ -11,7 +11,8 @@ void test_metadata_author_meta(void) {
     /* Extract author from <meta name='author'> tag */
     const char *html = "<html><head><title>Page</title><meta name=\"author\" content=\"Jane "
                        "Doe\"></head><body><p>Content</p></body></html>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"extract_metadata\":true}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_not_empty */
@@ -24,7 +25,8 @@ void test_metadata_canonical_url(void) {
     const char *html =
         "<html><head><title>Page</title><link rel=\"canonical\" "
         "href=\"https://example.com/canonical-page\"></head><body><p>Content</p></body></html>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"extract_metadata\":true}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_not_empty */
@@ -36,7 +38,8 @@ void test_metadata_description_meta(void) {
     /* Extract description from <meta name='description'> tag */
     const char *html = "<html><head><title>Page</title><meta name=\"description\" content=\"This "
                        "is the page description.\"></head><body><p>Content</p></body></html>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"extract_metadata\":true}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_not_empty */
@@ -50,7 +53,8 @@ void test_metadata_extract_all_images(void) {
                        "src=\"https://example.com/photo1.jpg\" alt=\"Photo 1\"><img "
                        "src=\"https://example.com/photo2.png\" alt=\"Photo 2\"><img "
                        "src=\"/local/image.webp\" alt=\"Local image\"></body></html>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"extract_metadata\":true}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_not_empty */
@@ -65,7 +69,8 @@ void test_metadata_extract_all_links(void) {
                        "href=\"https://docs.example.com\">Docs</a>.</p><p>Also see <a "
                        "href=\"/relative/path\">relative link</a> and <a "
                        "href=\"mailto:hello@example.com\">email us</a>.</p></body></html>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"extract_metadata\":true}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_not_empty */
@@ -79,7 +84,8 @@ void test_metadata_headers_hierarchy(void) {
         "<html><head><title>Docs</title></head><body><h1>Introduction</h1><h2>Getting "
         "Started</h2><h3>Installation</h3><h3>Configuration</h3><h2>Advanced Usage</h2><h3>Custom "
         "Options</h3></body></html>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"extract_metadata\":true}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_not_empty */
@@ -91,7 +97,8 @@ void test_metadata_keywords_meta(void) {
     /* Extract keywords from <meta name='keywords'> tag */
     const char *html = "<html><head><title>Page</title><meta name=\"keywords\" content=\"rust, "
                        "markdown, html, converter\"></head><body><p>Content</p></body></html>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"extract_metadata\":true}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_not_empty */
@@ -103,7 +110,8 @@ void test_metadata_title_tag(void) {
     /* Extract title from <title> tag */
     const char *html =
         "<html><head><title>My Page</title></head><body><p>Content</p></body></html>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"extract_metadata\":true}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_not_empty */
@@ -118,7 +126,8 @@ void test_og_basic_tags(void) {
         "Title\"><meta property=\"og:description\" content=\"OG description text.\"><meta "
         "property=\"og:image\" "
         "content=\"https://example.com/image.jpg\"></head><body><p>Content</p></body></html>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"extract_metadata\":true}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_not_empty */
@@ -135,7 +144,8 @@ void test_og_multiple_tags(void) {
                        "interesting article.\"><meta property=\"og:image\" "
                        "content=\"https://example.com/article.jpg\"></"
                        "head><body><article><p>Article content here.</p></article></body></html>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"extract_metadata\":true}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_not_empty */
@@ -151,7 +161,8 @@ void test_structured_data_json_ld(void) {
                        "Article\",\"author\":{\"@type\":\"Person\",\"name\":\"Jane "
                        "Doe\"},\"datePublished\":\"2024-01-15\"}</script></head><body><h1>My "
                        "Article</h1><p>Article body text.</p></body></html>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"extract_metadata\":true}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_not_empty */
@@ -176,7 +187,8 @@ void test_structured_data_multiple_json_ld(void) {
         "schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\","
         "\"position\":1,\"name\":\"Home\"}]}</script></head><body><h1>Widget</h1><p>A great widget "
         "for all purposes.</p></body></html>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"extract_metadata\":true}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_not_empty */
@@ -199,7 +211,8 @@ void test_twitter_card_tags(void) {
         "description.\"><meta name=\"twitter:image\" "
         "content=\"https://example.com/twitter-image.jpg\"></head><body><p>Content</p></body></"
         "html>";
-    char *result = html_to_markdown_convert(html, NULL);
+    const char *options = "{\"extract_metadata\":true}";
+    char *result = html_to_markdown_convert(html, options);
     assert(result != NULL && "conversion should succeed");
 
     /* content_not_empty */

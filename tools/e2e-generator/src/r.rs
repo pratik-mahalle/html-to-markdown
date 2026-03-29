@@ -96,9 +96,29 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
         }
     }
 
+    // Build options list if specified.
+    if let Some(opts) = &fixture.options {
+        let entries: Vec<String> = opts
+            .iter()
+            .map(|(k, v)| {
+                let snake_key = camel_to_snake(k);
+                let r_val = json_value_to_r(v);
+                format!("{snake_key} = {r_val}")
+            })
+            .collect();
+        let list_literal = entries.join(", ");
+        let _ = writeln!(out, "  opts <- list({})", list_literal);
+    }
+
+    let convert_call = if fixture.options.is_some() {
+        "convert(html, options = opts)"
+    } else {
+        "convert(html)"
+    };
+
     // Conversion call
     if fixture.assertions.expect_error == Some(true) {
-        let _ = writeln!(out, "  expect_error(convert(html))");
+        let _ = writeln!(out, "  expect_error({})", convert_call);
         if let Some(contains) = &fixture.assertions.error_contains {
             let escaped = escape_r_string(contains);
             let _ = writeln!(out, "  # Error should contain: {}", escaped);
@@ -107,7 +127,7 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
         return;
     }
 
-    let _ = writeln!(out, "  result <- convert(html)");
+    let _ = writeln!(out, "  result <- {}", convert_call);
     let _ = writeln!(out, "  content <- result$content %||% \"\"");
     let _ = writeln!(out);
 
@@ -198,6 +218,37 @@ fn sanitize_name(s: &str) -> String {
         out.insert(0, '_');
     }
     out
+}
+
+/// Convert a camelCase string to snake_case.
+fn camel_to_snake(s: &str) -> String {
+    let mut out = String::with_capacity(s.len() + 4);
+    for (i, ch) in s.chars().enumerate() {
+        if ch.is_ascii_uppercase() {
+            if i > 0 {
+                out.push('_');
+            }
+            out.push(ch.to_ascii_lowercase());
+        } else {
+            out.push(ch);
+        }
+    }
+    out
+}
+
+/// Format a `serde_json::Value` as an R literal.
+fn json_value_to_r(v: &serde_json::Value) -> String {
+    match v {
+        serde_json::Value::String(s) => {
+            let lower = s.to_lowercase();
+            format!("\"{}\"", escape_r_string(&lower))
+        }
+        serde_json::Value::Bool(true) => "TRUE".to_string(),
+        serde_json::Value::Bool(false) => "FALSE".to_string(),
+        serde_json::Value::Number(n) => n.to_string(),
+        serde_json::Value::Null => "NULL".to_string(),
+        other => format!("\"{}\"", escape_r_string(&other.to_string())),
+    }
 }
 
 /// Escape a string for use inside an R `"..."` string literal.

@@ -96,10 +96,30 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
     let escaped_html = escape_python_string(html);
     let _ = writeln!(out, "    html = \"{escaped_html}\"");
 
+    // Build options dict if specified.
+    if let Some(opts) = &fixture.options {
+        let entries: Vec<String> = opts
+            .iter()
+            .map(|(k, v)| {
+                let snake_key = camel_to_snake(k);
+                let py_val = json_value_to_python(v);
+                format!("\"{snake_key}\": {py_val}")
+            })
+            .collect();
+        let dict_literal = entries.join(", ");
+        let _ = writeln!(out, "    opts = {{{dict_literal}}}");
+    }
+
+    let convert_call = if fixture.options.is_some() {
+        "convert(html, opts)"
+    } else {
+        "convert(html)"
+    };
+
     // Conversion call + error handling.
     if fixture.assertions.expect_error == Some(true) {
         let _ = writeln!(out, "    with pytest.raises(Exception) as exc_info:");
-        let _ = writeln!(out, "        convert(html)");
+        let _ = writeln!(out, "        {convert_call}");
         if let Some(contains) = &fixture.assertions.error_contains {
             let escaped = escape_python_string(contains);
             let _ = writeln!(out, "    assert \"{escaped}\" in str(exc_info.value)");
@@ -107,7 +127,7 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
         return;
     }
 
-    let _ = writeln!(out, "    result = convert(html)");
+    let _ = writeln!(out, "    result = {convert_call}");
 
     let a = &fixture.assertions;
 
@@ -233,6 +253,37 @@ fn sanitize_module_name(s: &str) -> String {
 /// Convert a fixture id to a valid Python identifier.
 fn sanitize_ident(s: &str) -> String {
     sanitize_module_name(s)
+}
+
+/// Convert a camelCase string to snake_case.
+fn camel_to_snake(s: &str) -> String {
+    let mut out = String::with_capacity(s.len() + 4);
+    for (i, ch) in s.chars().enumerate() {
+        if ch.is_ascii_uppercase() {
+            if i > 0 {
+                out.push('_');
+            }
+            out.push(ch.to_ascii_lowercase());
+        } else {
+            out.push(ch);
+        }
+    }
+    out
+}
+
+/// Format a `serde_json::Value` as a Python literal.
+fn json_value_to_python(v: &serde_json::Value) -> String {
+    match v {
+        serde_json::Value::String(s) => {
+            let lower = s.to_lowercase();
+            format!("\"{}\"", escape_python_string(&lower))
+        }
+        serde_json::Value::Bool(true) => "True".to_string(),
+        serde_json::Value::Bool(false) => "False".to_string(),
+        serde_json::Value::Number(n) => n.to_string(),
+        serde_json::Value::Null => "None".to_string(),
+        other => format!("\"{}\"", escape_python_string(&other.to_string())),
+    }
 }
 
 /// Escape a string for use inside a Python `"..."` string literal.

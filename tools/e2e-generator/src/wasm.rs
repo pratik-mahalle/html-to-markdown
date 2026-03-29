@@ -84,9 +84,27 @@ fn render_test_function(out: &mut String, fixture: &Fixture, indent: usize) {
         }
     }
 
+    // Build options literal if specified.
+    let options_literal = fixture.options.as_ref().map(|opts| {
+        let entries: Vec<String> = opts
+            .iter()
+            .map(|(k, v)| {
+                let js_val = json_value_to_js(v);
+                format!("{k}: {js_val}")
+            })
+            .collect();
+        format!("{{ {} }}", entries.join(", "))
+    });
+
+    let convert_arg = if let Some(ref lit) = options_literal {
+        format!("html, {lit}")
+    } else {
+        "html".to_string()
+    };
+
     // Conversion call
     if fixture.assertions.expect_error == Some(true) {
-        let _ = writeln!(out, "{}expect(() => convert(html)).toThrow();", ind2);
+        let _ = writeln!(out, "{}expect(() => convert({})).toThrow();", ind2, convert_arg);
         if let Some(contains) = &fixture.assertions.error_contains {
             let escaped = escape_typescript_string(contains);
             let _ = writeln!(out, "{}// Error should contain: {}", ind2, escaped);
@@ -95,7 +113,7 @@ fn render_test_function(out: &mut String, fixture: &Fixture, indent: usize) {
         return;
     }
 
-    let _ = writeln!(out, "{}const result = convert(html);", ind2);
+    let _ = writeln!(out, "{}const result = convert({});", ind2, convert_arg);
     let _ = writeln!(out, "{}const content = result.content ?? '';", ind2);
     let _ = writeln!(out);
 
@@ -194,6 +212,26 @@ fn sanitize_name(s: &str) -> String {
         out.insert(0, '_');
     }
     out
+}
+
+/// Format a `serde_json::Value` as a JavaScript literal.
+fn json_value_to_js(v: &serde_json::Value) -> String {
+    match v {
+        serde_json::Value::String(s) => format!("'{}'", escape_js_string(s)),
+        serde_json::Value::Bool(b) => b.to_string(),
+        serde_json::Value::Number(n) => n.to_string(),
+        serde_json::Value::Null => "null".to_string(),
+        other => format!("'{}'", escape_js_string(&other.to_string())),
+    }
+}
+
+/// Escape a string for use inside a JavaScript `'...'` string literal.
+fn escape_js_string(s: &str) -> String {
+    s.replace('\\', "\\\\")
+        .replace('\'', "\\'")
+        .replace('\n', "\\n")
+        .replace('\r', "\\r")
+        .replace('\t', "\\t")
 }
 
 /// Escape a string for use inside a TypeScript template literal `` `...` ``.

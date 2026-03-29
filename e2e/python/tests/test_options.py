@@ -9,7 +9,8 @@ from html_to_markdown import convert
 def test_options_code_block_backticks() -> None:
     """Backticks code block style uses triple backtick fences."""
     html = "<pre><code class=\"language-js\">console.log('hi');</code></pre>"
-    result = convert(html)
+    opts = {"code_block_style": "backticks"}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert "```" in content
@@ -19,7 +20,8 @@ def test_options_code_block_backticks() -> None:
 def test_options_code_block_tildes() -> None:
     """Tildes code block style uses triple tilde fences."""
     html = "<pre><code>some code</code></pre>"
-    result = convert(html)
+    opts = {"code_block_style": "tildes"}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert "~~~" in content
@@ -29,7 +31,8 @@ def test_options_code_block_tildes() -> None:
 def test_options_escape_asterisks() -> None:
     """escape_asterisks option escapes asterisks in plain text."""
     html = "<p>Use 2*3 = 6 in math.</p>"
-    result = convert(html)
+    opts = {"escape_asterisks": True}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"
@@ -41,7 +44,8 @@ def test_options_escape_asterisks() -> None:
 def test_options_escape_misc() -> None:
     """escape_misc option escapes miscellaneous markdown characters."""
     html = "<p>Use # and | and ~ in text.</p>"
-    result = convert(html)
+    opts = {"escape_misc": True}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"
@@ -53,7 +57,8 @@ def test_options_escape_misc() -> None:
 def test_options_escape_underscores() -> None:
     """escape_underscores option escapes underscores in plain text."""
     html = "<p>The variable_name is defined.</p>"
-    result = convert(html)
+    opts = {"escape_underscores": True}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"
@@ -65,7 +70,8 @@ def test_options_escape_underscores() -> None:
 def test_options_heading_style_atx() -> None:
     """ATX heading style produces hash-prefixed headings."""
     html = "<h1>Title</h1><h2>Subtitle</h2>"
-    result = convert(html)
+    opts = {"heading_style": "atx"}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert "# Title" in content
@@ -75,7 +81,8 @@ def test_options_heading_style_atx() -> None:
 def test_options_heading_style_atx_closed() -> None:
     """ATX closed heading style adds closing hashes."""
     html = "<h1>Closed Heading</h1>"
-    result = convert(html)
+    opts = {"heading_style": "atxclosed"}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert "# Closed Heading #" in content
@@ -84,7 +91,8 @@ def test_options_heading_style_atx_closed() -> None:
 def test_options_heading_style_underlined() -> None:
     """Underlined heading style produces setext-style headings for h1 and h2."""
     html = "<h1>Main Title</h1>"
-    result = convert(html)
+    opts = {"heading_style": "underlined"}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"
@@ -94,7 +102,8 @@ def test_options_heading_style_underlined() -> None:
 def test_options_list_custom_bullets() -> None:
     """Custom bullet character for unordered lists."""
     html = "<ul><li>Item A</li><li>Item B</li></ul>"
-    result = convert(html)
+    opts = {"bullets": "*"}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert "* Item A" in content
@@ -104,7 +113,8 @@ def test_options_list_custom_bullets() -> None:
 def test_options_list_indent_tabs() -> None:
     """Tab indentation type for nested list items."""
     html = "<ul><li>Parent<ul><li>Child</li></ul></li></ul>"
-    result = convert(html)
+    opts = {"list_indent_type": "tabs"}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"
@@ -115,7 +125,8 @@ def test_options_list_indent_tabs() -> None:
 def test_options_output_format_djot() -> None:
     """Djot output format produces djot-compatible markup."""
     html = "<p>Simple paragraph.</p>"
-    result = convert(html)
+    opts = {"output_format": "djot"}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"
@@ -125,7 +136,8 @@ def test_options_output_format_djot() -> None:
 def test_options_output_format_markdown() -> None:
     """Default markdown output format produces standard markdown."""
     html = "<h1>Title</h1><p>Some text.</p>"
-    result = convert(html)
+    opts = {"output_format": "markdown"}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert "# Title" in content
@@ -135,7 +147,8 @@ def test_options_output_format_markdown() -> None:
 def test_options_output_format_plain() -> None:
     """Plain text output format strips markdown syntax."""
     html = "<h1>Title</h1><p>Some <strong>bold</strong> text.</p>"
-    result = convert(html)
+    opts = {"output_format": "plain"}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert "Title" in content
@@ -148,7 +161,8 @@ def test_options_output_format_plain() -> None:
 def test_options_whitespace_normalized() -> None:
     """Normalized whitespace mode collapses multiple spaces."""
     html = "<p>Text   with    extra   spaces.</p>"
-    result = convert(html)
+    opts = {"whitespace_mode": "normalized"}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"
@@ -161,7 +175,8 @@ def test_options_whitespace_normalized() -> None:
 def test_options_whitespace_strict() -> None:
     """Strict whitespace mode preserves whitespace as-is."""
     html = "<p>Preserved   spacing.</p>"
-    result = convert(html)
+    opts = {"whitespace_mode": "strict"}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"
@@ -172,7 +187,8 @@ def test_options_whitespace_strict() -> None:
 def test_options_wrap_disabled() -> None:
     """Wrap option disabled preserves long lines without breaking."""
     html = "<p>This is a long paragraph that should not be wrapped at all because wrapping is disabled.</p>"
-    result = convert(html)
+    opts = {"wrap": False}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert "This is a long paragraph that should not be wrapped at all because wrapping is disabled." in content
@@ -181,7 +197,8 @@ def test_options_wrap_disabled() -> None:
 def test_options_wrap_enabled() -> None:
     """Wrap option enabled with custom width wraps long lines."""
     html = "<p>This is a long paragraph that should be wrapped at the specified column width when the wrap option is enabled.</p>"
-    result = convert(html)
+    opts = {"wrap": True, "wrap_width": 40}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"

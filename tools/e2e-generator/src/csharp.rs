@@ -87,12 +87,28 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
     let escaped_html = escape_csharp_string(html);
     let _ = writeln!(out, "        var html = \"{escaped_html}\";");
 
+    // Build options JSON if specified.
+    let options_arg = if let Some(opts) = &fixture.options {
+        let json = serde_json::to_string(opts).expect("fixture options must serialize");
+        let escaped_json = escape_csharp_string(&json);
+        Some(escaped_json)
+    } else {
+        None
+    };
+
     // Conversion call + error handling.
     if fixture.assertions.expect_error == Some(true) {
-        let _ = writeln!(
-            out,
-            "        var exception = Assert.Throws<Exception>(() => HtmlToMarkdownConverter.Convert(html));"
-        );
+        if let Some(opts_escaped) = &options_arg {
+            let _ = writeln!(
+                out,
+                "        var exception = Assert.Throws<Exception>(() => HtmlToMarkdownConverter.Convert(html, \"{opts_escaped}\"));"
+            );
+        } else {
+            let _ = writeln!(
+                out,
+                "        var exception = Assert.Throws<Exception>(() => HtmlToMarkdownConverter.Convert(html));"
+            );
+        }
         if let Some(contains) = &fixture.assertions.error_contains {
             let escaped = escape_csharp_string(contains);
             let _ = writeln!(out, "        Assert.Contains(\"{escaped}\", exception.Message);");
@@ -101,7 +117,14 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
         return;
     }
 
-    let _ = writeln!(out, "        var result = HtmlToMarkdownConverter.Convert(html);");
+    if let Some(opts_escaped) = &options_arg {
+        let _ = writeln!(
+            out,
+            "        var result = HtmlToMarkdownConverter.Convert(html, \"{opts_escaped}\");"
+        );
+    } else {
+        let _ = writeln!(out, "        var result = HtmlToMarkdownConverter.Convert(html);");
+    }
     let _ = writeln!(out, "        var content = result.Content ?? \"\";");
     let _ = writeln!(out);
 
