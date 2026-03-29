@@ -9,7 +9,7 @@ import { convert } from '@kreuzberg/html-to-markdown-wasm';
 describe('structure', () => {
   it('structure_code_block: Fenced code block produces Code node', () => {
     const html = `<p>Example code:</p><pre><code class="language-rust">fn main() { println!("Hello"); }</code></pre>`;
-    const result = convert(html);
+    const result = convert(html, { include_document_structure: true });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
@@ -17,7 +17,7 @@ describe('structure', () => {
 
   it('structure_deep_nesting_h1_h2_h3: H1 > H2 > H3 creates three levels of heading nesting', () => {
     const html = `<h1>Top Level</h1><p>Top intro.</p><h2>Mid Level</h2><p>Mid content.</p><h3>Deep Level</h3><p>Deep content.</p>`;
-    const result = convert(html);
+    const result = convert(html, { include_document_structure: true });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
@@ -25,7 +25,7 @@ describe('structure', () => {
 
   it('structure_h1_h2_nested_group: H1 followed by H2 creates a nested group under the H1', () => {
     const html = `<h1>Chapter One</h1><p>Chapter intro.</p><h2>Section One</h2><p>Section content.</p>`;
-    const result = convert(html);
+    const result = convert(html, { include_document_structure: true });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
@@ -33,7 +33,7 @@ describe('structure', () => {
 
   it('structure_heading_paragraph: Simple heading followed by paragraph produces Heading and Paragraph nodes', () => {
     const html = `<h1>Title</h1><p>A paragraph of text.</p>`;
-    const result = convert(html);
+    const result = convert(html, { include_document_structure: true });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
@@ -41,7 +41,7 @@ describe('structure', () => {
 
   it('structure_list: Unordered list produces List and ListItem nodes', () => {
     const html = `<p>Items:</p><ul><li>Alpha</li><li>Beta</li><li>Gamma</li></ul>`;
-    const result = convert(html);
+    const result = convert(html, { include_document_structure: true });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
@@ -49,7 +49,7 @@ describe('structure', () => {
 
   it('structure_multiple_headings: Multiple headings create multiple Heading nodes with correct levels', () => {
     const html = `<h1>Main Title</h1><h2>Section One</h2><p>Section one content.</p><h2>Section Two</h2><p>Section two content.</p>`;
-    const result = convert(html);
+    const result = convert(html, { include_document_structure: true });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
@@ -57,7 +57,7 @@ describe('structure', () => {
 
   it('structure_sibling_h1_groups: H1, H2, then another H1 creates two sibling top-level groups', () => {
     const html = `<h1>Chapter One</h1><h2>Section A</h2><p>Section A content.</p><h1>Chapter Two</h1><h2>Section B</h2><p>Section B content.</p>`;
-    const result = convert(html);
+    const result = convert(html, { include_document_structure: true });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);

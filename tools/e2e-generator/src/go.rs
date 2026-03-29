@@ -101,12 +101,24 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
 
     let html_literal = go_string_literal(html);
 
+    // Build options JSON if specified.
+    let options_arg = if let Some(opts) = &fixture.options {
+        let json = serde_json::to_string(opts).expect("fixture options must serialize");
+        Some(go_string_literal(&json))
+    } else {
+        None
+    };
+
     // Conversion call + error handling.
     if fixture.assertions.expect_error == Some(true) {
         let _ = writeln!(out, "func Test_{fn_name}(t *testing.T) {{");
         let _ = writeln!(out, "    // {description}");
         let _ = writeln!(out, "    html := {html_literal}");
-        let _ = writeln!(out, "    _, err := htmd.Convert(html)");
+        if let Some(opts_literal) = &options_arg {
+            let _ = writeln!(out, "    _, err := htmd.Convert(html, {opts_literal})");
+        } else {
+            let _ = writeln!(out, "    _, err := htmd.Convert(html)");
+        }
         let _ = writeln!(out, "    if err == nil {{");
         let _ = writeln!(
             out,
@@ -126,7 +138,11 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
     let _ = writeln!(out, "func Test_{fn_name}(t *testing.T) {{");
     let _ = writeln!(out, "    // {description}");
     let _ = writeln!(out, "    html := {html_literal}");
-    let _ = writeln!(out, "    result, err := htmd.Convert(html)");
+    if let Some(opts_literal) = &options_arg {
+        let _ = writeln!(out, "    result, err := htmd.Convert(html, {opts_literal})");
+    } else {
+        let _ = writeln!(out, "    result, err := htmd.Convert(html)");
+    }
     let _ = writeln!(out, "    if err != nil {{");
     let _ = writeln!(out, "        t.Fatalf(\"conversion failed: %v\", err)");
     let _ = writeln!(out, "    }}");

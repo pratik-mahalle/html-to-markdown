@@ -6,7 +6,8 @@ library(htmltomarkdown)
 
 test_that("options_code_block_backticks: Backticks code block style uses triple backtick fences", {
   html <- "<pre><code class=\"language-js\">console.log('hi');</code></pre>"
-  result <- convert(html)
+  opts <- list(code_block_style = "backticks")
+  result <- convert(html, options = opts)
   content <- result$content %||% ""
 
   # content_contains_all
@@ -16,7 +17,8 @@ test_that("options_code_block_backticks: Backticks code block style uses triple 
 
 test_that("options_code_block_tildes: Tildes code block style uses triple tilde fences", {
   html <- "<pre><code>some code</code></pre>"
-  result <- convert(html)
+  opts <- list(code_block_style = "tildes")
+  result <- convert(html, options = opts)
   content <- result$content %||% ""
 
   # content_contains_all
@@ -26,7 +28,8 @@ test_that("options_code_block_tildes: Tildes code block style uses triple tilde 
 
 test_that("options_escape_asterisks: escape_asterisks option escapes asterisks in plain text", {
   html <- "<p>Use 2*3 = 6 in math.</p>"
-  result <- convert(html)
+  opts <- list(escape_asterisks = TRUE)
+  result <- convert(html, options = opts)
   content <- result$content %||% ""
 
   expect_true(nchar(trimws(content)) > 0)
@@ -38,7 +41,8 @@ test_that("options_escape_asterisks: escape_asterisks option escapes asterisks i
 
 test_that("options_escape_misc: escape_misc option escapes miscellaneous markdown characters", {
   html <- "<p>Use # and | and ~ in text.</p>"
-  result <- convert(html)
+  opts <- list(escape_misc = TRUE)
+  result <- convert(html, options = opts)
   content <- result$content %||% ""
 
   expect_true(nchar(trimws(content)) > 0)
@@ -50,7 +54,8 @@ test_that("options_escape_misc: escape_misc option escapes miscellaneous markdow
 
 test_that("options_escape_underscores: escape_underscores option escapes underscores in plain text", {
   html <- "<p>The variable_name is defined.</p>"
-  result <- convert(html)
+  opts <- list(escape_underscores = TRUE)
+  result <- convert(html, options = opts)
   content <- result$content %||% ""
 
   expect_true(nchar(trimws(content)) > 0)
@@ -62,7 +67,8 @@ test_that("options_escape_underscores: escape_underscores option escapes undersc
 
 test_that("options_heading_style_atx: ATX heading style produces hash-prefixed headings", {
   html <- "<h1>Title</h1><h2>Subtitle</h2>"
-  result <- convert(html)
+  opts <- list(heading_style = "atx")
+  result <- convert(html, options = opts)
   content <- result$content %||% ""
 
   # content_contains_all
@@ -72,7 +78,8 @@ test_that("options_heading_style_atx: ATX heading style produces hash-prefixed h
 
 test_that("options_heading_style_atx_closed: ATX closed heading style adds closing hashes", {
   html <- "<h1>Closed Heading</h1>"
-  result <- convert(html)
+  opts <- list(heading_style = "atxclosed")
+  result <- convert(html, options = opts)
   content <- result$content %||% ""
 
   # content_contains_all
@@ -81,7 +88,8 @@ test_that("options_heading_style_atx_closed: ATX closed heading style adds closi
 
 test_that("options_heading_style_underlined: Underlined heading style produces setext-style headings for h1 and h2", {
   html <- "<h1>Main Title</h1>"
-  result <- convert(html)
+  opts <- list(heading_style = "underlined")
+  result <- convert(html, options = opts)
   content <- result$content %||% ""
 
   expect_true(nchar(trimws(content)) > 0)
@@ -91,7 +99,8 @@ test_that("options_heading_style_underlined: Underlined heading style produces s
 
 test_that("options_list_custom_bullets: Custom bullet character for unordered lists", {
   html <- "<ul><li>Item A</li><li>Item B</li></ul>"
-  result <- convert(html)
+  opts <- list(bullets = "*")
+  result <- convert(html, options = opts)
   content <- result$content %||% ""
 
   # content_contains_all
@@ -101,7 +110,8 @@ test_that("options_list_custom_bullets: Custom bullet character for unordered li
 
 test_that("options_list_indent_tabs: Tab indentation type for nested list items", {
   html <- "<ul><li>Parent<ul><li>Child</li></ul></li></ul>"
-  result <- convert(html)
+  opts <- list(list_indent_type = "tabs")
+  result <- convert(html, options = opts)
   content <- result$content %||% ""
 
   expect_true(nchar(trimws(content)) > 0)
@@ -112,7 +122,8 @@ test_that("options_list_indent_tabs: Tab indentation type for nested list items"
 
 test_that("options_output_format_djot: Djot output format produces djot-compatible markup", {
   html <- "<p>Simple paragraph.</p>"
-  result <- convert(html)
+  opts <- list(output_format = "djot")
+  result <- convert(html, options = opts)
   content <- result$content %||% ""
 
   expect_true(nchar(trimws(content)) > 0)
@@ -122,7 +133,8 @@ test_that("options_output_format_djot: Djot output format produces djot-compatib
 
 test_that("options_output_format_markdown: Default markdown output format produces standard markdown", {
   html <- "<h1>Title</h1><p>Some text.</p>"
-  result <- convert(html)
+  opts <- list(output_format = "markdown")
+  result <- convert(html, options = opts)
   content <- result$content %||% ""
 
   # content_contains_all
@@ -132,7 +144,8 @@ test_that("options_output_format_markdown: Default markdown output format produc
 
 test_that("options_output_format_plain: Plain text output format strips markdown syntax", {
   html <- "<h1>Title</h1><p>Some <strong>bold</strong> text.</p>"
-  result <- convert(html)
+  opts <- list(output_format = "plain")
+  result <- convert(html, options = opts)
   content <- result$content %||% ""
 
   # content_contains_all
@@ -146,7 +159,8 @@ test_that("options_output_format_plain: Plain text output format strips markdown
 
 test_that("options_whitespace_normalized: Normalized whitespace mode collapses multiple spaces", {
   html <- "<p>Text   with    extra   spaces.</p>"
-  result <- convert(html)
+  opts <- list(whitespace_mode = "normalized")
+  result <- convert(html, options = opts)
   content <- result$content %||% ""
 
   expect_true(nchar(trimws(content)) > 0)
@@ -159,7 +173,8 @@ test_that("options_whitespace_normalized: Normalized whitespace mode collapses m
 
 test_that("options_whitespace_strict: Strict whitespace mode preserves whitespace as-is", {
   html <- "<p>Preserved   spacing.</p>"
-  result <- convert(html)
+  opts <- list(whitespace_mode = "strict")
+  result <- convert(html, options = opts)
   content <- result$content %||% ""
 
   expect_true(nchar(trimws(content)) > 0)
@@ -170,7 +185,8 @@ test_that("options_whitespace_strict: Strict whitespace mode preserves whitespac
 
 test_that("options_wrap_disabled: Wrap option disabled preserves long lines without breaking", {
   html <- "<p>This is a long paragraph that should not be wrapped at all because wrapping is disabled.</p>"
-  result <- convert(html)
+  opts <- list(wrap = FALSE)
+  result <- convert(html, options = opts)
   content <- result$content %||% ""
 
   # content_contains_all
@@ -179,7 +195,8 @@ test_that("options_wrap_disabled: Wrap option disabled preserves long lines with
 
 test_that("options_wrap_enabled: Wrap option enabled with custom width wraps long lines", {
   html <- "<p>This is a long paragraph that should be wrapped at the specified column width when the wrap option is enabled.</p>"
-  result <- convert(html)
+  opts <- list(wrap = TRUE, wrap_width = 40)
+  result <- convert(html, options = opts)
   content <- result$content %||% ""
 
   expect_true(nchar(trimws(content)) > 0)

@@ -103,6 +103,16 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
     let escaped_html = escape_php_string(html);
     let _ = writeln!(out, "        $html = \"{escaped_html}\";");
 
+    // Build options if specified.
+    let has_options = if let Some(opts) = &fixture.options {
+        let json = serde_json::to_string(opts).expect("fixture options must serialize");
+        let escaped_json = escape_php_string(&json);
+        let _ = writeln!(out, "        $options = json_decode(\"{escaped_json}\", true);");
+        true
+    } else {
+        false
+    };
+
     // Conversion call + error handling.
     if fixture.assertions.expect_error == Some(true) {
         let _ = writeln!(out, "        $this->expectException(\\Exception::class);");
@@ -110,12 +120,20 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
             let escaped = escape_php_string(contains);
             let _ = writeln!(out, "        $this->expectExceptionMessageMatches('/{escaped}/');");
         }
-        let _ = writeln!(out, "        html_to_markdown_convert($html);");
+        if has_options {
+            let _ = writeln!(out, "        html_to_markdown_convert($html, $options);");
+        } else {
+            let _ = writeln!(out, "        html_to_markdown_convert($html);");
+        }
         let _ = writeln!(out, "    }}");
         return;
     }
 
-    let _ = writeln!(out, "        $result = html_to_markdown_convert($html);");
+    if has_options {
+        let _ = writeln!(out, "        $result = html_to_markdown_convert($html, $options);");
+    } else {
+        let _ = writeln!(out, "        $result = html_to_markdown_convert($html);");
+    }
     let _ = writeln!(out, "        $content = $result['content'] ?? '';");
     let _ = writeln!(out);
 

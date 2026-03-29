@@ -18,7 +18,7 @@ public class OptionsTests
     public void TestOptionsCodeBlockBackticks()
     {
         var html = "<pre><code class=\"language-js\">console.log('hi');</code></pre>";
-        var result = HtmlToMarkdownConverter.Convert(html);
+        var result = HtmlToMarkdownConverter.Convert(html, "{\"codeBlockStyle\":\"backticks\"}");
         var content = result.Content ?? "";
 
         Assert.Contains("```", content);
@@ -32,7 +32,7 @@ public class OptionsTests
     public void TestOptionsCodeBlockTildes()
     {
         var html = "<pre><code>some code</code></pre>";
-        var result = HtmlToMarkdownConverter.Convert(html);
+        var result = HtmlToMarkdownConverter.Convert(html, "{\"codeBlockStyle\":\"tildes\"}");
         var content = result.Content ?? "";
 
         Assert.Contains("~~~", content);
@@ -46,7 +46,7 @@ public class OptionsTests
     public void TestOptionsEscapeAsterisks()
     {
         var html = "<p>Use 2*3 = 6 in math.</p>";
-        var result = HtmlToMarkdownConverter.Convert(html);
+        var result = HtmlToMarkdownConverter.Convert(html, "{\"escapeAsterisks\":true}");
         var content = result.Content ?? "";
 
         Assert.False(string.IsNullOrWhiteSpace(content));
@@ -62,7 +62,7 @@ public class OptionsTests
     public void TestOptionsEscapeMisc()
     {
         var html = "<p>Use # and | and ~ in text.</p>";
-        var result = HtmlToMarkdownConverter.Convert(html);
+        var result = HtmlToMarkdownConverter.Convert(html, "{\"escapeMisc\":true}");
         var content = result.Content ?? "";
 
         Assert.False(string.IsNullOrWhiteSpace(content));
@@ -78,7 +78,7 @@ public class OptionsTests
     public void TestOptionsEscapeUnderscores()
     {
         var html = "<p>The variable_name is defined.</p>";
-        var result = HtmlToMarkdownConverter.Convert(html);
+        var result = HtmlToMarkdownConverter.Convert(html, "{\"escapeUnderscores\":true}");
         var content = result.Content ?? "";
 
         Assert.False(string.IsNullOrWhiteSpace(content));
@@ -94,7 +94,7 @@ public class OptionsTests
     public void TestOptionsHeadingStyleAtx()
     {
         var html = "<h1>Title</h1><h2>Subtitle</h2>";
-        var result = HtmlToMarkdownConverter.Convert(html);
+        var result = HtmlToMarkdownConverter.Convert(html, "{\"headingStyle\":\"atx\"}");
         var content = result.Content ?? "";
 
         Assert.Contains("# Title", content);
@@ -108,7 +108,7 @@ public class OptionsTests
     public void TestOptionsHeadingStyleAtxClosed()
     {
         var html = "<h1>Closed Heading</h1>";
-        var result = HtmlToMarkdownConverter.Convert(html);
+        var result = HtmlToMarkdownConverter.Convert(html, "{\"headingStyle\":\"atxClosed\"}");
         var content = result.Content ?? "";
 
         Assert.Contains("# Closed Heading #", content);
@@ -121,7 +121,7 @@ public class OptionsTests
     public void TestOptionsHeadingStyleUnderlined()
     {
         var html = "<h1>Main Title</h1>";
-        var result = HtmlToMarkdownConverter.Convert(html);
+        var result = HtmlToMarkdownConverter.Convert(html, "{\"headingStyle\":\"underlined\"}");
         var content = result.Content ?? "";
 
         Assert.False(string.IsNullOrWhiteSpace(content));
@@ -135,7 +135,7 @@ public class OptionsTests
     public void TestOptionsListCustomBullets()
     {
         var html = "<ul><li>Item A</li><li>Item B</li></ul>";
-        var result = HtmlToMarkdownConverter.Convert(html);
+        var result = HtmlToMarkdownConverter.Convert(html, "{\"bullets\":\"*\"}");
         var content = result.Content ?? "";
 
         Assert.Contains("* Item A", content);
@@ -149,7 +149,7 @@ public class OptionsTests
     public void TestOptionsListIndentTabs()
     {
         var html = "<ul><li>Parent<ul><li>Child</li></ul></li></ul>";
-        var result = HtmlToMarkdownConverter.Convert(html);
+        var result = HtmlToMarkdownConverter.Convert(html, "{\"listIndentType\":\"tabs\"}");
         var content = result.Content ?? "";
 
         Assert.False(string.IsNullOrWhiteSpace(content));
@@ -164,7 +164,7 @@ public class OptionsTests
     public void TestOptionsOutputFormatDjot()
     {
         var html = "<p>Simple paragraph.</p>";
-        var result = HtmlToMarkdownConverter.Convert(html);
+        var result = HtmlToMarkdownConverter.Convert(html, "{\"outputFormat\":\"djot\"}");
         var content = result.Content ?? "";
 
         Assert.False(string.IsNullOrWhiteSpace(content));
@@ -178,7 +178,7 @@ public class OptionsTests
     public void TestOptionsOutputFormatMarkdown()
     {
         var html = "<h1>Title</h1><p>Some text.</p>";
-        var result = HtmlToMarkdownConverter.Convert(html);
+        var result = HtmlToMarkdownConverter.Convert(html, "{\"outputFormat\":\"markdown\"}");
         var content = result.Content ?? "";
 
         Assert.Contains("# Title", content);
@@ -192,7 +192,7 @@ public class OptionsTests
     public void TestOptionsOutputFormatPlain()
     {
         var html = "<h1>Title</h1><p>Some <strong>bold</strong> text.</p>";
-        var result = HtmlToMarkdownConverter.Convert(html);
+        var result = HtmlToMarkdownConverter.Convert(html, "{\"outputFormat\":\"plain\"}");
         var content = result.Content ?? "";
 
         Assert.Contains("Title", content);
@@ -209,7 +209,7 @@ public class OptionsTests
     public void TestOptionsWhitespaceNormalized()
     {
         var html = "<p>Text   with    extra   spaces.</p>";
-        var result = HtmlToMarkdownConverter.Convert(html);
+        var result = HtmlToMarkdownConverter.Convert(html, "{\"whitespaceMode\":\"normalized\"}");
         var content = result.Content ?? "";
 
         Assert.False(string.IsNullOrWhiteSpace(content));
@@ -226,7 +226,7 @@ public class OptionsTests
     public void TestOptionsWhitespaceStrict()
     {
         var html = "<p>Preserved   spacing.</p>";
-        var result = HtmlToMarkdownConverter.Convert(html);
+        var result = HtmlToMarkdownConverter.Convert(html, "{\"whitespaceMode\":\"strict\"}");
         var content = result.Content ?? "";
 
         Assert.False(string.IsNullOrWhiteSpace(content));
@@ -241,7 +241,7 @@ public class OptionsTests
     public void TestOptionsWrapDisabled()
     {
         var html = "<p>This is a long paragraph that should not be wrapped at all because wrapping is disabled.</p>";
-        var result = HtmlToMarkdownConverter.Convert(html);
+        var result = HtmlToMarkdownConverter.Convert(html, "{\"wrap\":false}");
         var content = result.Content ?? "";
 
         Assert.Contains("This is a long paragraph that should not be wrapped at all because wrapping is disabled.", content);
@@ -254,7 +254,7 @@ public class OptionsTests
     public void TestOptionsWrapEnabled()
     {
         var html = "<p>This is a long paragraph that should be wrapped at the specified column width when the wrap option is enabled.</p>";
-        var result = HtmlToMarkdownConverter.Convert(html);
+        var result = HtmlToMarkdownConverter.Convert(html, "{\"wrap\":true,\"wrapWidth\":40}");
         var content = result.Content ?? "";
 
         Assert.False(string.IsNullOrWhiteSpace(content));

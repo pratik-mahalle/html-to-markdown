@@ -8,7 +8,7 @@ import { convert } from '@kreuzberg/html-to-markdown';
 describe('options', () => {
   it('options_code_block_backticks: Backticks code block style uses triple backtick fences', () => {
     const html = `<pre><code class="language-js">console.log('hi');</code></pre>`;
-    const result = convert(html);
+    const result = convert(html, { codeBlockStyle: 'backticks' });
     const content = result.content ?? '';
 
     expect(content).toContain('```');
@@ -17,7 +17,7 @@ describe('options', () => {
 
   it('options_code_block_tildes: Tildes code block style uses triple tilde fences', () => {
     const html = `<pre><code>some code</code></pre>`;
-    const result = convert(html);
+    const result = convert(html, { codeBlockStyle: 'tildes' });
     const content = result.content ?? '';
 
     expect(content).toContain('~~~');
@@ -26,7 +26,7 @@ describe('options', () => {
 
   it('options_escape_asterisks: escape_asterisks option escapes asterisks in plain text', () => {
     const html = `<p>Use 2*3 = 6 in math.</p>`;
-    const result = convert(html);
+    const result = convert(html, { escapeAsterisks: true });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
@@ -37,7 +37,7 @@ describe('options', () => {
 
   it('options_escape_misc: escape_misc option escapes miscellaneous markdown characters', () => {
     const html = `<p>Use # and | and ~ in text.</p>`;
-    const result = convert(html);
+    const result = convert(html, { escapeMisc: true });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
@@ -48,7 +48,7 @@ describe('options', () => {
 
   it('options_escape_underscores: escape_underscores option escapes underscores in plain text', () => {
     const html = `<p>The variable_name is defined.</p>`;
-    const result = convert(html);
+    const result = convert(html, { escapeUnderscores: true });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
@@ -59,7 +59,7 @@ describe('options', () => {
 
   it('options_heading_style_atx: ATX heading style produces hash-prefixed headings', () => {
     const html = `<h1>Title</h1><h2>Subtitle</h2>`;
-    const result = convert(html);
+    const result = convert(html, { headingStyle: 'atx' });
     const content = result.content ?? '';
 
     expect(content).toContain('# Title');
@@ -68,7 +68,7 @@ describe('options', () => {
 
   it('options_heading_style_atx_closed: ATX closed heading style adds closing hashes', () => {
     const html = `<h1>Closed Heading</h1>`;
-    const result = convert(html);
+    const result = convert(html, { headingStyle: 'atxClosed' });
     const content = result.content ?? '';
 
     expect(content).toContain('# Closed Heading #');
@@ -76,7 +76,7 @@ describe('options', () => {
 
   it('options_heading_style_underlined: Underlined heading style produces setext-style headings for h1 and h2', () => {
     const html = `<h1>Main Title</h1>`;
-    const result = convert(html);
+    const result = convert(html, { headingStyle: 'underlined' });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
@@ -85,7 +85,7 @@ describe('options', () => {
 
   it('options_list_custom_bullets: Custom bullet character for unordered lists', () => {
     const html = `<ul><li>Item A</li><li>Item B</li></ul>`;
-    const result = convert(html);
+    const result = convert(html, { bullets: '*' });
     const content = result.content ?? '';
 
     expect(content).toContain('* Item A');
@@ -94,7 +94,7 @@ describe('options', () => {
 
   it('options_list_indent_tabs: Tab indentation type for nested list items', () => {
     const html = `<ul><li>Parent<ul><li>Child</li></ul></li></ul>`;
-    const result = convert(html);
+    const result = convert(html, { listIndentType: 'tabs' });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
@@ -104,7 +104,7 @@ describe('options', () => {
 
   it('options_output_format_djot: Djot output format produces djot-compatible markup', () => {
     const html = `<p>Simple paragraph.</p>`;
-    const result = convert(html);
+    const result = convert(html, { outputFormat: 'djot' });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
@@ -113,7 +113,7 @@ describe('options', () => {
 
   it('options_output_format_markdown: Default markdown output format produces standard markdown', () => {
     const html = `<h1>Title</h1><p>Some text.</p>`;
-    const result = convert(html);
+    const result = convert(html, { outputFormat: 'markdown' });
     const content = result.content ?? '';
 
     expect(content).toContain('# Title');
@@ -122,7 +122,7 @@ describe('options', () => {
 
   it('options_output_format_plain: Plain text output format strips markdown syntax', () => {
     const html = `<h1>Title</h1><p>Some <strong>bold</strong> text.</p>`;
-    const result = convert(html);
+    const result = convert(html, { outputFormat: 'plain' });
     const content = result.content ?? '';
 
     expect(content).toContain('Title');
@@ -134,7 +134,7 @@ describe('options', () => {
 
   it('options_whitespace_normalized: Normalized whitespace mode collapses multiple spaces', () => {
     const html = `<p>Text   with    extra   spaces.</p>`;
-    const result = convert(html);
+    const result = convert(html, { whitespaceMode: 'normalized' });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
@@ -146,7 +146,7 @@ describe('options', () => {
 
   it('options_whitespace_strict: Strict whitespace mode preserves whitespace as-is', () => {
     const html = `<p>Preserved   spacing.</p>`;
-    const result = convert(html);
+    const result = convert(html, { whitespaceMode: 'strict' });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
@@ -156,7 +156,7 @@ describe('options', () => {
 
   it('options_wrap_disabled: Wrap option disabled preserves long lines without breaking', () => {
     const html = `<p>This is a long paragraph that should not be wrapped at all because wrapping is disabled.</p>`;
-    const result = convert(html);
+    const result = convert(html, { wrap: false });
     const content = result.content ?? '';
 
     expect(content).toContain('This is a long paragraph that should not be wrapped at all because wrapping is disabled.');
@@ -164,7 +164,7 @@ describe('options', () => {
 
   it('options_wrap_enabled: Wrap option enabled with custom width wraps long lines', () => {
     const html = `<p>This is a long paragraph that should be wrapped at the specified column width when the wrap option is enabled.</p>`;
-    const result = convert(html);
+    const result = convert(html, { wrap: true, wrapWidth: 40 });
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);

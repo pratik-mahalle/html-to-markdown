@@ -9,7 +9,8 @@ from html_to_markdown import convert
 def test_metadata_author_meta() -> None:
     """Extract author from <meta name='author'> tag."""
     html = '<html><head><title>Page</title><meta name="author" content="Jane Doe"></head><body><p>Content</p></body></html>'
-    result = convert(html)
+    opts = {"extract_metadata": True}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"
@@ -18,7 +19,8 @@ def test_metadata_author_meta() -> None:
 def test_metadata_canonical_url() -> None:
     """Extract canonical URL from <link rel='canonical'> tag."""
     html = '<html><head><title>Page</title><link rel="canonical" href="https://example.com/canonical-page"></head><body><p>Content</p></body></html>'
-    result = convert(html)
+    opts = {"extract_metadata": True}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"
@@ -27,7 +29,8 @@ def test_metadata_canonical_url() -> None:
 def test_metadata_description_meta() -> None:
     """Extract description from <meta name='description'> tag."""
     html = '<html><head><title>Page</title><meta name="description" content="This is the page description."></head><body><p>Content</p></body></html>'
-    result = convert(html)
+    opts = {"extract_metadata": True}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"
@@ -36,7 +39,8 @@ def test_metadata_description_meta() -> None:
 def test_metadata_extract_all_images() -> None:
     """Extract all images from a document into metadata."""
     html = '<html><head><title>Gallery</title></head><body><img src="https://example.com/photo1.jpg" alt="Photo 1"><img src="https://example.com/photo2.png" alt="Photo 2"><img src="/local/image.webp" alt="Local image"></body></html>'
-    result = convert(html)
+    opts = {"extract_metadata": True}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"
@@ -45,7 +49,8 @@ def test_metadata_extract_all_images() -> None:
 def test_metadata_extract_all_links() -> None:
     """Extract all links from a document into metadata."""
     html = '<html><head><title>Links Page</title></head><body><p>Visit <a href="https://example.com">Example</a> or <a href="https://docs.example.com">Docs</a>.</p><p>Also see <a href="/relative/path">relative link</a> and <a href="mailto:hello@example.com">email us</a>.</p></body></html>'
-    result = convert(html)
+    opts = {"extract_metadata": True}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"
@@ -54,7 +59,8 @@ def test_metadata_extract_all_links() -> None:
 def test_metadata_headers_hierarchy() -> None:
     """Extract heading hierarchy from document into metadata."""
     html = "<html><head><title>Docs</title></head><body><h1>Introduction</h1><h2>Getting Started</h2><h3>Installation</h3><h3>Configuration</h3><h2>Advanced Usage</h2><h3>Custom Options</h3></body></html>"
-    result = convert(html)
+    opts = {"extract_metadata": True}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"
@@ -63,7 +69,8 @@ def test_metadata_headers_hierarchy() -> None:
 def test_metadata_keywords_meta() -> None:
     """Extract keywords from <meta name='keywords'> tag."""
     html = '<html><head><title>Page</title><meta name="keywords" content="rust, markdown, html, converter"></head><body><p>Content</p></body></html>'
-    result = convert(html)
+    opts = {"extract_metadata": True}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"
@@ -72,7 +79,8 @@ def test_metadata_keywords_meta() -> None:
 def test_metadata_title_tag() -> None:
     """Extract title from <title> tag."""
     html = "<html><head><title>My Page</title></head><body><p>Content</p></body></html>"
-    result = convert(html)
+    opts = {"extract_metadata": True}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"
@@ -81,7 +89,8 @@ def test_metadata_title_tag() -> None:
 def test_og_basic_tags() -> None:
     """Extract og:title, og:description, and og:image from Open Graph meta tags."""
     html = '<html><head><title>Fallback Title</title><meta property="og:title" content="OG Title"><meta property="og:description" content="OG description text."><meta property="og:image" content="https://example.com/image.jpg"></head><body><p>Content</p></body></html>'
-    result = convert(html)
+    opts = {"extract_metadata": True}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"
@@ -90,7 +99,8 @@ def test_og_basic_tags() -> None:
 def test_og_multiple_tags() -> None:
     """Extract multiple Open Graph tags including type, url, and site_name."""
     html = '<html><head><meta property="og:title" content="Article Title"><meta property="og:type" content="article"><meta property="og:url" content="https://example.com/article"><meta property="og:site_name" content="Example Site"><meta property="og:description" content="An interesting article."><meta property="og:image" content="https://example.com/article.jpg"></head><body><article><p>Article content here.</p></article></body></html>'
-    result = convert(html)
+    opts = {"extract_metadata": True}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"
@@ -99,7 +109,8 @@ def test_og_multiple_tags() -> None:
 def test_structured_data_json_ld() -> None:
     """JSON-LD script tag is stripped from output (security) but metadata may be extracted."""
     html = '<html><head><title>Article</title><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"My Article","author":{"@type":"Person","name":"Jane Doe"},"datePublished":"2024-01-15"}</script></head><body><h1>My Article</h1><p>Article body text.</p></body></html>'
-    result = convert(html)
+    opts = {"extract_metadata": True}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"
@@ -112,7 +123,8 @@ def test_structured_data_json_ld() -> None:
 def test_structured_data_multiple_json_ld() -> None:
     """Multiple JSON-LD blocks are all stripped from output."""
     html = '<html><head><title>Shop Page</title><script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"Widget","price":"9.99"}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home"}]}</script></head><body><h1>Widget</h1><p>A great widget for all purposes.</p></body></html>'
-    result = convert(html)
+    opts = {"extract_metadata": True}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"
@@ -125,7 +137,8 @@ def test_structured_data_multiple_json_ld() -> None:
 def test_twitter_card_tags() -> None:
     """Extract Twitter card meta tags."""
     html = '<html><head><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@examplesite"><meta name="twitter:title" content="Twitter Card Title"><meta name="twitter:description" content="Twitter card description."><meta name="twitter:image" content="https://example.com/twitter-image.jpg"></head><body><p>Content</p></body></html>'
-    result = convert(html)
+    opts = {"extract_metadata": True}
+    result = convert(html, opts)
     content = result if isinstance(result, str) else (result.get("content") or "")
 
     assert content.strip() != "", "expected non-empty content"

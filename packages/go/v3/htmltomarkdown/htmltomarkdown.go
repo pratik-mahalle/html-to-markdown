@@ -21,7 +21,7 @@ package htmltomarkdown
 // #include <stdbool.h>
 // #include <stdint.h>
 //
-// char* html_to_markdown_convert_proxy(const char* html);
+// char* html_to_markdown_convert_proxy(const char* html, const char* options_json);
 // void html_to_markdown_free_string_proxy(char* s);
 // const char* html_to_markdown_version_proxy(void);
 // const char* html_to_markdown_last_error_proxy(void);
@@ -60,10 +60,13 @@ type ConversionResult struct {
 }
 
 // MetadataResult holds the markdown content and extended metadata from conversion.
-// Convert converts HTML to Markdown using default options.
+// Convert converts HTML to Markdown.
 //
 // It returns a ConversionResult containing the converted content, metadata,
 // tables, images, and warnings. All fields are available in a single call.
+//
+// An optional JSON options string can be passed to configure conversion behavior.
+// When omitted, default options are used.
 //
 // Example:
 //
@@ -74,7 +77,12 @@ type ConversionResult struct {
 //	if result.Content != nil {
 //	    fmt.Println(*result.Content)
 //	}
-func Convert(html string) (*ConversionResult, error) {
+//
+// With options:
+//
+//	opts := `{"heading_style":"setext"}`
+//	result, err := htmltomarkdown.Convert("<h1>Title</h1>", opts)
+func Convert(html string, optionsJSON ...string) (*ConversionResult, error) {
 	if html == "" {
 		empty := ""
 		return &ConversionResult{Content: &empty}, nil
@@ -86,7 +94,13 @@ func Convert(html string) (*ConversionResult, error) {
 	cHTML := C.CString(html)
 	defer C.free(unsafe.Pointer(cHTML))
 
-	cResult := C.html_to_markdown_convert_proxy(cHTML)
+	var cOptions *C.char
+	if len(optionsJSON) > 0 && optionsJSON[0] != "" {
+		cOptions = C.CString(optionsJSON[0])
+		defer C.free(unsafe.Pointer(cOptions))
+	}
+
+	cResult := C.html_to_markdown_convert_proxy(cHTML, cOptions)
 	if cResult == nil {
 		errMsg := C.html_to_markdown_last_error_proxy()
 		if errMsg != nil {
@@ -108,12 +122,14 @@ func Convert(html string) (*ConversionResult, error) {
 
 // MustConvert is like Convert but panics if an error occurs.
 //
+// An optional JSON options string can be passed to configure conversion behavior.
+//
 // Example:
 //
 //	result := htmltomarkdown.MustConvert("<h1>Title</h1>")
 //	fmt.Println(*result.Content)
-func MustConvert(html string) *ConversionResult {
-	result, err := Convert(html)
+func MustConvert(html string, optionsJSON ...string) *ConversionResult {
+	result, err := Convert(html, optionsJSON...)
 	if err != nil {
 		panic(err)
 	}
