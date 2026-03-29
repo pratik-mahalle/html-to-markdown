@@ -53,19 +53,6 @@ pub fn convert_html_with_visitor(
     convert_html_impl(html, options, None, None, visitor, None).map(|(md, _)| md)
 }
 
-/// Converts HTML to Markdown with an async visitor for callbacks during traversal.
-///
-/// Async variant with async visitor callbacks for Promise-based bindings.
-#[cfg(feature = "async-visitor")]
-#[allow(clippy::future_not_send)]
-pub async fn convert_html_with_visitor_async(
-    html: &str,
-    options: &ConversionOptions,
-    visitor: Option<crate::visitor_helpers::AsyncVisitorHandle>,
-) -> Result<String> {
-    convert_html_impl_async(html, options, None, None, visitor).await
-}
-
 /// Internal implementation of HTML to Markdown conversion.
 ///
 /// Returns `(markdown, Option<DocumentStructure>)`.  The structure is populated when
@@ -627,25 +614,4 @@ pub(crate) fn walk_node(
 
         tl::Node::Comment(_) => {}
     }
-}
-/// Async equivalent of `convert_html_impl` for Promise-based visitor callbacks.
-#[cfg(feature = "async-visitor")]
-#[allow(clippy::future_not_send)]
-pub(crate) async fn convert_html_impl_async(
-    html: &str,
-    options: &ConversionOptions,
-    _inline_collector: Option<InlineCollectorHandle>,
-    #[cfg(feature = "metadata")] _metadata_collector: Option<crate::metadata::MetadataCollectorHandle>,
-    #[cfg(not(feature = "metadata"))] _metadata_collector: Option<()>,
-    visitor: Option<crate::visitor_helpers::AsyncVisitorHandle>,
-) -> Result<String> {
-    if visitor.is_some() {
-        return Err(crate::error::ConversionError::ParseError(
-            "Async visitor not yet implemented. Use AsyncToSyncVisitorBridge.".to_string(),
-        ));
-    }
-    #[cfg(feature = "visitor")]
-    return convert_html_impl(html, options, _inline_collector, _metadata_collector, None, None).map(|(md, _)| md);
-    #[cfg(not(feature = "visitor"))]
-    return convert_html_impl(html, options, _inline_collector, _metadata_collector, (), None).map(|(md, _)| md);
 }

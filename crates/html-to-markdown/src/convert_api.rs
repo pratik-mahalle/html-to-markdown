@@ -210,8 +210,7 @@ pub fn convert_with_visitor(
 ) -> Result<String> {
     let options = options.unwrap_or_default();
     let normalized_html = normalize_input(html)?;
-    let markdown =
-        crate::converter::convert_html_with_visitor(normalized_html.as_ref(), &options, visitor)?;
+    let markdown = crate::converter::convert_html_with_visitor(normalized_html.as_ref(), &options, visitor)?;
     if options.wrap {
         Ok(crate::wrapper::wrap_markdown(&markdown, &options))
     } else {
@@ -454,4 +453,3 @@ pub fn metadata_config_from_json(json: &str) -> Result<MetadataConfig> {
     let update: crate::MetadataConfigUpdate = parse_json(json)?;
     Ok(MetadataConfig::from(update))
 }
-
