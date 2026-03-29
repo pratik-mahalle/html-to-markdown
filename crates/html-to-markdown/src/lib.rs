@@ -96,7 +96,6 @@ pub use convert_api::metadata_config_from_json;
 #[cfg(feature = "inline-images")]
 pub use convert_api::inline_image_config_from_json;
 
-// Internal: used by FFI visitor lifecycle (will be removed when convert() accepts visitor directly)
 #[cfg(feature = "visitor")]
 #[doc(hidden)]
 pub use convert_api::convert_with_visitor;
