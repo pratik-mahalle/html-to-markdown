@@ -17,7 +17,7 @@
   <a href="https://central.sonatype.com/artifact/dev.kreuzberg/html-to-markdown">
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown?label=Java&color=007ec6" alt="Java">
   </a>
-  <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown">
+  <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown">
     <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/html-to-markdown?label=Go&color=007ec6&filter=v3.0.0" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/">
@@ -86,7 +86,7 @@ Alternatively, you can manually set `CGO_CFLAGS` and `CGO_LDFLAGS` environment v
 
 ## Performance Snapshot
 
-Apple M4 • Real Wikipedia documents • `Convert()` (Go)
+Apple M4 -- Real Wikipedia documents -- `Convert()` (Go)
 
 | Document | Size | Latency | Throughput |
 | -------- | ---- | ------- | ---------- |
@@ -127,7 +127,7 @@ func main() {
 
 
 
-With conversion options:
+Accessing all result fields:
 
 ```go
 package main
@@ -144,16 +144,30 @@ func main() {
     version := htmltomarkdown.Version()
     fmt.Printf("html-to-markdown version: %s\n", version)
 
-    html := "<h1>Hello</h1><p>Welcome</p>"
+    html := `<html><head><title>My Page</title></head><body>
+        <h1>Hello</h1>
+        <table><tr><th>A</th></tr><tr><td>1</td></tr></table>
+        <p>Welcome</p>
+    </body></html>`
 
-    // Convert with error handling
     result, err := htmltomarkdown.Convert(html)
     if err != nil {
         log.Fatalf("Conversion failed: %v", err)
     }
 
+    // Markdown content
     if result.Content != nil {
         fmt.Println(*result.Content)
+    }
+
+    // Structured tables
+    for i, table := range result.Tables {
+        fmt.Printf("Table %d: %s\n", i, table.Markdown)
+    }
+
+    // Warnings
+    for _, w := range result.Warnings {
+        fmt.Printf("Warning [%s]: %s\n", w.Kind, w.Message)
     }
 }
 ```
@@ -166,32 +180,51 @@ func main() {
 ### Core Function
 
 
-**`Convert(html string, options ...ConversionOptions) (ConversionResult, error)`**
+**`Convert(html string) (*ConversionResult, error)`**
 
-Converts HTML to Markdown. Returns a `ConversionResult` struct with all results in a single call.
+Converts HTML to Markdown. Returns a `*ConversionResult` struct with all 6 fields in a single call.
 
 ```go
 result, err := htmltomarkdown.Convert(html)
-markdown  := result.Content    // *string — converted Markdown
-metadata  := result.Metadata   // *Metadata — when ExtractMetadata: true
-tables    := result.Tables     // []TableData — when ExtractTables: true
+if err != nil {
+    log.Fatal(err)
+}
+
+content   := result.Content    // *string          -- converted Markdown
+document  := result.Document   // json.RawMessage  -- structured document tree
+metadata  := result.Metadata   // json.RawMessage  -- extracted HTML metadata
+tables    := result.Tables     // []TableData      -- all tables in document order
+images    := result.Images     // []json.RawMessage -- inline images
+warnings  := result.Warnings   // []Warning        -- non-fatal warnings
 ```
 
+**`MustConvert(html string) *ConversionResult`**
 
+Like `Convert` but panics on error.
 
-### Options
+```go
+result := htmltomarkdown.MustConvert("<h1>Title</h1>")
+if result.Content != nil {
+    fmt.Println(*result.Content)
+}
+```
 
-**`ConversionOptions`** – Key configuration fields:
+**`Version() string`**
 
-- `heading_style`: Heading format (`"underlined"` | `"atx"` | `"atx_closed"`) — default: `"underlined"`
-- `list_indent_width`: Spaces per indent level — default: `2`
-- `bullets`: Bullet characters cycle — default: `"*+-"`
-- `wrap`: Enable text wrapping — default: `false`
-- `wrap_width`: Wrap at column — default: `80`
-- `code_language`: Default fenced code block language — default: none
-- `extract_metadata`: Enable metadata extraction into `result.metadata` — default: `false`
-- `extract_tables`: Enable structured table extraction into `result.tables` — default: `false`
-- `output_format`: Output markup format (`"markdown"` | `"djot"` | `"plain"`) — default: `"markdown"`
+Returns the version string of the underlying html-to-markdown library.
+
+### ConversionResult Fields
+
+```go
+type ConversionResult struct {
+    Content  *string           `json:"content"`    // Markdown output (nil when suppressed)
+    Document json.RawMessage   `json:"document"`   // Structured document tree
+    Metadata json.RawMessage   `json:"metadata"`   // HTML metadata (title, links, etc.)
+    Tables   []TableData       `json:"tables"`     // Tables in document order
+    Images   []json.RawMessage `json:"images"`     // Inline images (data URIs, SVGs)
+    Warnings []Warning         `json:"warnings"`   // Non-fatal warnings
+}
+```
 
 
 ## Djot Output Format
@@ -214,13 +247,16 @@ The library supports converting HTML to [Djot](https://djot.net/), a lightweight
 
 
 ```go
-import "github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown"
+import "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown"
 
 html := "<p>This is <strong>bold</strong> and <em>italic</em> text.</p>"
 
 // Default Markdown output
-markdown, _ := htmltomarkdown.Convert(html)
-// Result: "This is **bold** and *italic* text."
+result, _ := htmltomarkdown.Convert(html)
+if result.Content != nil {
+    fmt.Println(*result.Content)
+    // Result: "This is **bold** and *italic* text."
+}
 
 // Note: Djot output format configuration is not yet supported in Go bindings
 ```
@@ -235,12 +271,16 @@ Set `output_format` to `"plain"` to strip all markup and return only visible tex
 
 
 ```go
-import "github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown"
+import "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown"
 
 html := "<h1>Title</h1><p>This is <strong>bold</strong> and <em>italic</em> text.</p>"
 
-plain, _ := htmltomarkdown.Convert(html, htmltomarkdown.WithOutputFormat("plain"))
-// Result: "Title\n\nThis is bold and italic text."
+result, _ := htmltomarkdown.Convert(html)
+if result.Content != nil {
+    fmt.Println(*result.Content)
+}
+
+// Note: Plain text output format configuration is not yet supported in Go bindings
 ```
 
 
@@ -258,7 +298,7 @@ Plain text mode is useful for search indexing, text extraction, and feeding cont
 
 - **GitHub:** [github.com/kreuzberg-dev/html-to-markdown](https://github.com/kreuzberg-dev/html-to-markdown)
 
-- **Go Packages:** [pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2](https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2)
+- **Go Packages:** [pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v3](https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v3)
 
 - **Kreuzberg Ecosystem:** [kreuzberg.dev](https://kreuzberg.dev)
 - **Discord:** [discord.gg/pXxagNK2zN](https://discord.gg/pXxagNK2zN)
@@ -280,7 +320,7 @@ All contributions must follow our code quality standards (enforced via pre-commi
 
 ## License
 
-MIT License – see [LICENSE](https://github.com/kreuzberg-dev/html-to-markdown/blob/main/LICENSE).
+MIT License -- see [LICENSE](https://github.com/kreuzberg-dev/html-to-markdown/blob/main/LICENSE).
 
 ## Support
 
