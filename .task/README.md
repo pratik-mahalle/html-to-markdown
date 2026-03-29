@@ -36,8 +36,7 @@ The `.task/` directory structure reduces the root `Taskfile.yml` from 838 lines 
 ├── workflows/            # Aggregated workflow tasks (internal)
 │   ├── build.yml        # Build all languages with profile support
 │   ├── test.yml         # Test all languages (parallel/sequential)
-│   ├── lint.yml         # Lint all languages with auto-fix
-│   └── benchmark.yml    # Benchmark harness orchestration
+│   └── lint.yml         # Lint all languages with auto-fix
 │
 └── tools/               # Utility and automation tasks
     ├── version-sync.yml # Version synchronization across manifests
