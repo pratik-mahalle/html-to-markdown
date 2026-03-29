@@ -284,7 +284,11 @@ mod tests {
         Python::attach(|py| -> PyResult<()> {
             let html = "<h1>Hello</h1>";
             let result = convert(py, html, None, None)?;
-            let content: String = result.bind(py).get_item("content").unwrap().extract().unwrap();
+            let content: String = result
+                .bind(py)
+                .get_item("content")?
+                .expect("content key must exist")
+                .extract()?;
             assert!(content.contains("Hello"));
             Ok(())
         })
@@ -307,11 +311,10 @@ mod tests {
             true,
             false,
             false,
-            false,
             "double-equal".to_string(),
-            true,
-            "normalized".to_string(),
             false,
+            "normalized".to_string(),
+            true,
             false,
             80,
             false,
