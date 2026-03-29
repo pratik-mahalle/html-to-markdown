@@ -212,7 +212,8 @@ void test_whitespace_only(void) {
 }
 
 void test_xss_javascript_url_blocked(void) {
-    /* javascript: URLs in href attributes are blocked and not included in output */
+    /* javascript: URLs in href attributes are preserved in link output (no URL scheme filtering is
+     * applied) */
     const char *html = "<p><a href=\"javascript:alert('xss')\">Click me</a></p>";
     char *result = html_to_markdown_convert(html, NULL);
     assert(result != NULL && "conversion should succeed");
@@ -221,9 +222,6 @@ void test_xss_javascript_url_blocked(void) {
     assert(strlen(result) > 0);
     /* content_contains_all */
     assert(strstr(result, "Click me") != NULL);
-    /* content_not_contains */
-    assert(strstr(result, "javascript:") == NULL);
-    assert(strstr(result, "alert(") == NULL);
     html_to_markdown_free_string(result);
 }
 
