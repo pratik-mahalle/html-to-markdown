@@ -1,106 +1,151 @@
-import init, { convert } from "./html_to_markdown_wasm.js";
+import init, { convert } from "https://cdn.jsdelivr.net/npm/@kreuzberg/html-to-markdown-wasm@latest/dist-web/html_to_markdown_wasm.js";
 
 let wasmInitialized = false;
 
 const htmlInput = document.getElementById("htmlInput");
-const markdownOutput = document.getElementById("markdownOutput");
-const convertBtn = document.getElementById("convertBtn");
+const outputMarkdown = document.getElementById("outputMarkdown");
+const outputJson = document.getElementById("outputJson");
 const copyBtn = document.getElementById("copyBtn");
 const clearBtn = document.getElementById("clearBtn");
 const statusEl = document.getElementById("status");
-const wasmStatusEl = document.getElementById("wasmStatus");
+const tabMarkdown = document.getElementById("tabMarkdown");
+const tabJson = document.getElementById("tabJson");
+const tabIndicator = document.getElementById("tabIndicator");
+
+let activeTab = "markdown";
 
 async function initWasm() {
   try {
     await init();
     wasmInitialized = true;
-    wasmStatusEl.textContent = "✓ WASM module loaded";
-    wasmStatusEl.classList.add("loaded");
-    statusEl.textContent = "Ready to convert!";
-    statusEl.classList.add("success");
-
+    statusEl.textContent = "Ready";
+    statusEl.className = "status-text success";
     performConversion();
   } catch (error) {
     console.error("Failed to initialize WASM:", error);
-    wasmStatusEl.textContent = "✗ Failed to load WASM";
-    wasmStatusEl.classList.add("error");
-    statusEl.textContent = "Error: Failed to load WASM module";
-    statusEl.classList.add("error");
-    convertBtn.disabled = true;
+    statusEl.textContent = "Failed to load WASM module";
+    statusEl.className = "status-text error";
   }
+}
+
+function highlightJson(obj) {
+  const raw = JSON.stringify(obj, null, 2);
+  return raw.replace(
+    /("[^"]*"\s*:)|("[^"]*")|(-?\d+\.?\d*(?:[eE][+-]?\d+)?)|(true|false)|(null)/g,
+    (match, key, str, num, bool, nil) => {
+      if (key) return `<span class="json-key">${key}</span>`;
+      if (str) return `<span class="json-string">${str}</span>`;
+      if (num) return `<span class="json-number">${num}</span>`;
+      if (bool) return `<span class="json-bool">${bool}</span>`;
+      if (nil) return `<span class="json-null">${nil}</span>`;
+      return match;
+    }
+  );
 }
 
 function performConversion() {
   if (!wasmInitialized) {
     statusEl.textContent = "WASM module not initialized yet...";
-    statusEl.className = "status";
+    statusEl.className = "status-text";
     return;
   }
 
   const html = htmlInput.value.trim();
 
   if (!html) {
-    markdownOutput.textContent = "";
-    statusEl.textContent = "Please enter some HTML to convert";
-    statusEl.className = "status";
+    outputMarkdown.textContent = "";
+    outputJson.innerHTML = "";
+    statusEl.textContent = "Enter some HTML to convert";
+    statusEl.className = "status-text";
     return;
   }
 
   try {
     const startTime = performance.now();
+    const result = convert(html, null);
+    const duration = (performance.now() - startTime).toFixed(2);
 
-    const markdown = convert(html, null);
+    outputMarkdown.textContent = result.content ?? "";
 
-    const endTime = performance.now();
-    const duration = (endTime - startTime).toFixed(2);
+    const jsonData = {
+      content: result.content ?? null,
+      metadata: result.metadata ?? null,
+      tables: result.tables ?? [],
+      images: (result.images ?? []).map((img) => ({
+        format: img.format,
+        filename: img.filename ?? null,
+        description: img.description ?? null,
+        width: img.width ?? null,
+        height: img.height ?? null,
+        source: img.source,
+      })),
+      warnings: result.warnings ?? [],
+    };
+    outputJson.innerHTML = highlightJson(jsonData);
 
-    markdownOutput.textContent = markdown;
-    statusEl.textContent = `✓ Converted in ${duration}ms`;
-    statusEl.className = "status success";
-
+    statusEl.textContent = `Converted in ${duration}ms`;
+    statusEl.className = "status-text success";
     copyBtn.classList.remove("copied");
+    copyBtn.textContent = "Copy";
   } catch (error) {
     console.error("Conversion error:", error);
-    markdownOutput.textContent = "";
-    statusEl.textContent = `Error: ${error.message}`;
-    statusEl.className = "status error";
+    outputMarkdown.textContent = "";
+    outputJson.innerHTML = "";
+    statusEl.textContent = `Error: ${error.message || error}`;
+    statusEl.className = "status-text error";
   }
 }
 
-async function copyToClipboard() {
-  const markdown = markdownOutput.textContent;
+function switchTab(tab) {
+  activeTab = tab;
+  const isMd = tab === "markdown";
+  tabIndicator.classList.toggle("json", !isMd);
+  tabMarkdown.classList.toggle("active", isMd);
+  tabJson.classList.toggle("active", !isMd);
+  outputMarkdown.classList.toggle("hidden", !isMd);
+  outputJson.classList.toggle("hidden", isMd);
+}
 
-  if (!markdown) {
+async function copyToClipboard() {
+  const text =
+    activeTab === "markdown"
+      ? outputMarkdown.textContent
+      : outputJson.innerText;
+
+  if (!text) {
     statusEl.textContent = "Nothing to copy";
-    statusEl.className = "status";
+    statusEl.className = "status-text";
     return;
   }
 
   try {
-    await navigator.clipboard.writeText(markdown);
+    await navigator.clipboard.writeText(text);
     copyBtn.classList.add("copied");
-    statusEl.textContent = "✓ Copied to clipboard!";
-    statusEl.className = "status success";
-
+    copyBtn.textContent = "Copied!";
+    statusEl.textContent = "Copied to clipboard";
+    statusEl.className = "status-text success";
     setTimeout(() => {
       copyBtn.classList.remove("copied");
+      copyBtn.textContent = "Copy";
     }, 2000);
   } catch (error) {
     console.error("Failed to copy:", error);
     statusEl.textContent = "Failed to copy to clipboard";
-    statusEl.className = "status error";
+    statusEl.className = "status-text error";
   }
 }
 
 function clearInput() {
   htmlInput.value = "";
-  markdownOutput.textContent = "";
+  outputMarkdown.textContent = "";
+  outputJson.innerHTML = "";
   statusEl.textContent = "Input cleared";
-  statusEl.className = "status";
+  statusEl.className = "status-text";
   htmlInput.focus();
 }
 
-convertBtn.addEventListener("click", performConversion);
+tabMarkdown.addEventListener("click", () => switchTab("markdown"));
+tabJson.addEventListener("click", () => switchTab("json"));
 copyBtn.addEventListener("click", copyToClipboard);
 clearBtn.addEventListener("click", clearInput);
 
@@ -118,7 +163,7 @@ htmlInput.addEventListener("input", () => {
     if (wasmInitialized && htmlInput.value.trim()) {
       performConversion();
     }
-  }, 500);
+  }, 300);
 });
 
 initWasm();

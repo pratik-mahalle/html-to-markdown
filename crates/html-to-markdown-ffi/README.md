@@ -17,8 +17,8 @@
   <a href="https://central.sonatype.com/artifact/dev.kreuzberg/html-to-markdown">
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown?label=Java&color=007ec6" alt="Java">
   </a>
-  <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown">
-    <img src="https://img.shields.io/badge/Go-v2.28.1-007ec6" alt="Go">
+  <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown">
+    <img src="https://img.shields.io/badge/Go-v3-007ec6" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/">
     <img src="https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown?label=C%23&color=007ec6" alt="C#">
@@ -94,7 +94,7 @@ Platforms: `linux-x64`, `linux-arm64`, `darwin-arm64`, `windows-x64`
 Installation:
 
 ```bash
-tar -xzf html-to-markdown-ffi-2.25.2-linux-x64.tar.gz
+tar -xzf html-to-markdown-ffi-3.0.0-linux-x64.tar.gz
 
 sudo cp include/html_to_markdown.h /usr/local/include/
 sudo cp lib/libhtml_to_markdown_ffi.* /usr/local/lib/
@@ -127,11 +127,15 @@ target_link_libraries(my_app PRIVATE html-to-markdown-ffi::html-to-markdown-ffi)
 
 ## Quick Start
 
+The primary API is `html_to_markdown_convert()`, which returns a JSON string containing all conversion results: content, document tree, metadata, tables, images, and warnings.
+
 ```c
 #include <stdio.h>
 #include <html_to_markdown.h>
 
 int main(void) {
+    // Returns a JSON string with all 6 result fields:
+    // content, document, metadata, tables, images, warnings
     char *json = html_to_markdown_convert("<h1>Hello</h1><p>World</p>", NULL);
     if (json) {
         printf("%s\n", json);
@@ -149,15 +153,48 @@ Compile:
 cc -o example example.c $(pkg-config --cflags --libs html-to-markdown)
 ```
 
+### JSON Result Format
+
+The JSON returned by `html_to_markdown_convert()` has this structure:
+
+```json
+{
+  "content": "# Hello\n\nWorld",
+  "document": null,
+  "metadata": null,
+  "tables": [],
+  "images": [],
+  "warnings": []
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `content` | `string \| null` | Converted Markdown (or djot/plain text) |
+| `document` | `object \| null` | Structured document tree |
+| `metadata` | `object \| null` | Extracted HTML metadata (title, description, links, etc.) |
+| `tables` | `array` | All tables found in document order |
+| `images` | `array` | Extracted inline images (data URIs, SVGs) |
+| `warnings` | `array` | Non-fatal processing warnings |
+
+### Conversion with Options
+
+Pass a JSON string as the second argument to configure conversion behavior:
+
+```c
+const char *options = "{\"heading_style\":\"atx\",\"extract_metadata\":true}";
+char *json = html_to_markdown_convert(html, options);
+```
+
 ## Architecture
 
 ### FFI Bridge Layers
 
 ```text
 Language-Specific Bindings
-    ↓
-html-to-markdown FFI C Library (crates/html-to-markdown-ffi) ← This crate
-    ↓
+    |
+html-to-markdown FFI C Library (crates/html-to-markdown-ffi) -- This crate
+    |
 Rust Core Library (crates/html-to-markdown)
 ```
 
@@ -172,36 +209,18 @@ Rust Core Library (crates/html-to-markdown)
 
 ### Key Components
 
-- **Core conversion** -- HTML→Markdown via null-terminated strings or byte buffers
-- **Metadata extraction** -- Title, description, language, OpenGraph data as JSON
+- **Core conversion** -- HTML to Markdown via `html_to_markdown_convert()` returning JSON with all 6 result fields
 - **Visitor pattern** -- Per-element callbacks for custom conversion logic
 - **Error handling** -- Thread-local error storage with typed error codes
-- **Profiling** -- Flamegraph generation for performance analysis
 
 ## API Reference
 
 ### Core Conversion
 
 ```c
-// v3 primary API: full conversion result as JSON (content, document, metadata, tables, warnings)
+// v3 primary API: returns JSON string with content, document, metadata, tables, images, warnings.
+// Pass NULL for options_json to use defaults.
 char *html_to_markdown_convert(const char *html, const char *options_json);
-```
-
-### Metadata Extraction (3 functions)
-
-```c
-// Convert with metadata -- metadata_json_out receives a JSON string
-char *html_to_markdown_convert_with_metadata(const char *html, char **metadata_json_out);
-
-// Convert with metadata and output lengths
-char *html_to_markdown_convert_with_metadata_with_len(
-    const char *html, char **metadata_json_out,
-    size_t *markdown_len_out, size_t *metadata_len_out);
-
-// Convert bytes with metadata and output lengths
-char *html_to_markdown_convert_with_metadata_bytes_with_len(
-    const uint8_t *html, size_t len, char **metadata_json_out,
-    size_t *markdown_len_out, size_t *metadata_len_out);
 ```
 
 ### Visitor Pattern (4 functions)
@@ -306,41 +325,6 @@ int main(void) {
 }
 ```
 
-## Metadata Extraction Example
-
-Metadata extraction returns a JSON string containing document metadata (title, description, language, OpenGraph tags, etc.) alongside the converted markdown.
-
-```c
-#include <stdio.h>
-#include <html_to_markdown.h>
-
-int main(void) {
-    const char *html =
-        "<html><head>"
-        "<title>My Page</title>"
-        "<meta name=\"description\" content=\"A sample page\">"
-        "<meta property=\"og:title\" content=\"OG Title\">"
-        "</head><body><h1>Hello</h1><p>World</p></body></html>";
-
-    char *metadata_json = NULL;
-    size_t md_len = 0, meta_len = 0;
-
-    char *md = html_to_markdown_convert_with_metadata_with_len(
-        html, &metadata_json, &md_len, &meta_len);
-
-    if (md && metadata_json) {
-        printf("Markdown (%zu bytes):\n%s\n", md_len, md);
-        printf("Metadata (%zu bytes):\n%s\n", meta_len, metadata_json);
-        html_to_markdown_free_string(md);
-        html_to_markdown_free_string(metadata_json);
-    } else {
-        fprintf(stderr, "Error: %s\n", html_to_markdown_last_error());
-    }
-
-    return 0;
-}
-```
-
 ## Type Definitions
 
 ### Enums
@@ -408,7 +392,6 @@ typedef void *HtmlToMarkdownVisitor;  // Opaque visitor handle
 - Strings returned by `html_to_markdown_convert()` and variants must be freed with `html_to_markdown_free_string()`.
 - Passing `NULL` to `html_to_markdown_free_string()` is safe (no-op).
 - Error strings from `html_to_markdown_last_error()` are thread-local and must NOT be freed.
-- Metadata JSON strings from `html_to_markdown_convert_with_metadata()` must be freed with `html_to_markdown_free_string()`.
 - Visitor handles from `html_to_markdown_visitor_create()` must be freed with `html_to_markdown_visitor_free()`.
 - Custom output and error message strings passed to visit result constructors must be `malloc()`'d -- the FFI layer takes ownership and frees them.
 
@@ -438,19 +421,6 @@ if (!result) {
 All conversion functions are thread-safe. Error state is stored in thread-local storage, so concurrent calls from different threads do not interfere with each other.
 
 Visitor handles are NOT thread-safe -- each thread must create its own visitor via `html_to_markdown_visitor_create()`.
-
-## Version Constants
-
-The generated header includes compile-time version constants:
-
-```c
-#define HTML_TO_MARKDOWN_VERSION_MAJOR 2
-#define HTML_TO_MARKDOWN_VERSION_MINOR 25
-#define HTML_TO_MARKDOWN_VERSION_PATCH 2
-#define HTML_TO_MARKDOWN_VERSION "2.25.2"
-```
-
-Runtime version: `html_to_markdown_version()` returns a static string.
 
 ## Building from C
 
