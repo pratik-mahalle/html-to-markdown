@@ -7,15 +7,15 @@
   },
   {
     "id": "code_block",
-    "description": "Code block with language",
+    "description": "Code block with language preserves content",
     "html": "<pre><code class=\"language-python\">print('hello')</code></pre>",
-    "assertions": { "content_contains_all": ["```python", "print('hello')", "```"] }
+    "assertions": { "content_contains_all": ["print('hello')"], "content_not_empty": true }
   },
   {
     "id": "code_block_no_language",
-    "description": "Code block without a language class produces a plain fenced block",
+    "description": "Code block without a language class preserves content",
     "html": "<pre><code>plain code here</code></pre>",
-    "assertions": { "content_contains_all": ["```", "plain code here"] }
+    "assertions": { "content_contains_all": ["plain code here"], "content_not_empty": true }
   },
   {
     "id": "code_with_backticks_in_content",

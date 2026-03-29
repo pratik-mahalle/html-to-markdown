@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 import type { JsConversionOptions } from "@kreuzberg/html-to-markdown-node";
 import { convert } from "@kreuzberg/html-to-markdown-node";
 
-/// Helper to extract content from convert result  (which returns JSON string)
+/// Helper to extract content from convert result
 function convertToMarkdown(html: string, options?: JsConversionOptions | null): string {
-	const resultJson = convert(html, options);
-	return JSON.parse(resultJson).content || "";
+	const result = convert(html, options);
+	return result.content ?? "";
 }
 
 /**

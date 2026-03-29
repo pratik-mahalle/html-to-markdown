@@ -22,7 +22,6 @@ full = ["metadata", "visitor", "inline-images"]
 metadata = ["html-to-markdown-rs/metadata"]
 visitor = ["html-to-markdown-rs/visitor"]
 inline-images = ["html-to-markdown-rs/inline-images"]
-profiling = ["dep:pprof"]
 
 [dependencies]
 ext-php-rs = { workspace = true }
@@ -35,7 +34,6 @@ html-to-markdown-rs = { workspace = true, features = [
     "metadata",
     "visitor",
 ] }
-pprof = { version = "0.15", features = ["flamegraph"], optional = true }
 
 [lints]
 workspace = true

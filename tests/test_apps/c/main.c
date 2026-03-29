@@ -96,7 +96,8 @@ extern HtmlToMarkdownVisitResult
 html_to_markdown_visit_result_error(char *message);
 
 /* Profiling */
-                                            int32_t frequency);
+extern bool html_to_markdown_profile_start(const char *output, int32_t frequency);
+extern bool html_to_markdown_profile_stop(void);
 
 /* -------------------------------------------------------------------------- */
 /* Test runner                                                                */
@@ -663,8 +664,11 @@ static void test_visitor_api(void) {
 /* -------------------------------------------------------------------------- */
 
 static void test_profiling_api(void) {
+    /* profile_stop without start should return false (no active profiler) */
     {
+        bool stopped = html_to_markdown_profile_stop();
         if (!stopped) {
+            pass("profile_stop() without start returns false");
         } else {
             fail("profile_stop() without start", "returned true");
         }
@@ -672,20 +676,24 @@ static void test_profiling_api(void) {
 
     /* profile_start with NULL path should return false */
     {
+        bool started = html_to_markdown_profile_start(NULL, 100);
         if (!started) {
             pass("profile_start(NULL) returns false");
         } else {
             fail("profile_start(NULL)", "returned true");
+            /* stop it if it somehow started */
+            html_to_markdown_profile_stop();
         }
     }
 
     /* profile_start + convert + profile_stop (platform-dependent) */
     {
-        bool started =
+        bool started = html_to_markdown_profile_start("/tmp/htm_profile_test.svg", 100);
         if (started) {
             char *md = html_to_markdown_convert("<h1>Profile test</h1>", NULL);
             if (md)
                 html_to_markdown_free_string(md);
+            bool stopped = html_to_markdown_profile_stop();
             if (stopped) {
                 pass("profile start/stop cycle completed successfully");
             } else {

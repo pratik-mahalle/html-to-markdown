@@ -13,7 +13,6 @@ use html_to_markdown_rs::safety::guard_panic;
 use html_to_markdown_rs::{MetadataConfig, convert_with_metadata};
 
 use crate::error::{HtmlToMarkdownErrorCode, capture_error, set_last_error, set_last_error_code};
-use crate::profiling;
 use crate::strings::{bytes_to_c_string, string_to_c_string};
 
 /// Convert HTML to Markdown with metadata extraction.
@@ -72,8 +71,7 @@ pub unsafe extern "C" fn html_to_markdown_convert_with_metadata(
         max_structured_data_size: DEFAULT_MAX_STRUCTURED_DATA_SIZE,
     };
 
-    match guard_panic(|| profiling::maybe_profile(|| convert_with_metadata(html_str, None, metadata_cfg.clone(), None)))
-    {
+    match guard_panic(|| convert_with_metadata(html_str, None, metadata_cfg.clone(), None)) {
         Ok((markdown, metadata)) => {
             set_last_error(None);
 
@@ -168,8 +166,7 @@ pub unsafe extern "C" fn html_to_markdown_convert_with_metadata_with_len(
         max_structured_data_size: DEFAULT_MAX_STRUCTURED_DATA_SIZE,
     };
 
-    match guard_panic(|| profiling::maybe_profile(|| convert_with_metadata(html_str, None, metadata_cfg.clone(), None)))
-    {
+    match guard_panic(|| convert_with_metadata(html_str, None, metadata_cfg.clone(), None)) {
         Ok((markdown, metadata)) => {
             set_last_error(None);
 
@@ -275,8 +272,7 @@ pub unsafe extern "C" fn html_to_markdown_convert_with_metadata_bytes_with_len(
         max_structured_data_size: DEFAULT_MAX_STRUCTURED_DATA_SIZE,
     };
 
-    match guard_panic(|| profiling::maybe_profile(|| convert_with_metadata(html_str, None, metadata_cfg.clone(), None)))
-    {
+    match guard_panic(|| convert_with_metadata(html_str, None, metadata_cfg.clone(), None)) {
         Ok((markdown, metadata)) => {
             set_last_error(None);
 

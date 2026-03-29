@@ -487,6 +487,72 @@ HTM_EXPORT uint32_t html_to_markdown_last_error_code(void);
 HTM_EXPORT const char *html_to_markdown_error_code_name(uint32_t code);
 
 /**
+ * Convert HTML to Markdown with metadata extraction.
+ *
+ * # Safety
+ *
+ * - `html` must be a valid null-terminated C string
+ * - `metadata_json_out` must be a valid pointer to a char pointer
+ * - The returned markdown string must be freed with `html_to_markdown_free_string`
+ * - The metadata JSON string (written to metadata_json_out) must be freed with `html_to_markdown_free_string`
+ * - Returns NULL on error (check error with `html_to_markdown_last_error`)
+ *
+ * # Example (C)
+ *
+ * ```c
+ * const char* html = "<html><head><title>Test</title></head><body><h1>Hello</h1></body></html>";
+ * char* metadata_json = NULL;
+ * char* markdown = html_to_markdown_convert_with_metadata(html, &metadata_json);
+ * if (markdown != NULL && metadata_json != NULL) {
+ *     printf("Markdown: %s\n", markdown);
+ *     printf("Metadata: %s\n", metadata_json);
+ *     html_to_markdown_free_string(markdown);
+ *     html_to_markdown_free_string(metadata_json);
+ * }
+ * ```
+ */
+HTM_EXPORT
+char *html_to_markdown_convert_with_metadata(const char *html,
+                                             char **metadata_json_out);
+
+/**
+ * Convert HTML to Markdown with metadata extraction, returning output lengths.
+ *
+ * # Safety
+ *
+ * - `html` must be a valid null-terminated C string
+ * - `metadata_json_out` must be a valid pointer to a char pointer
+ * - `markdown_len_out` and `metadata_len_out` must be valid pointers to size_t
+ * - The returned markdown string must be freed with `html_to_markdown_free_string`
+ * - The metadata JSON string (written to metadata_json_out) must be freed with `html_to_markdown_free_string`
+ * - Returns NULL on error (check error with `html_to_markdown_last_error`)
+ */
+HTM_EXPORT
+char *html_to_markdown_convert_with_metadata_with_len(const char *html,
+                                                      char **metadata_json_out,
+                                                      uintptr_t *markdown_len_out,
+                                                      uintptr_t *metadata_len_out);
+
+/**
+ * Convert UTF-8 HTML bytes to Markdown with metadata extraction and return output lengths.
+ *
+ * # Safety
+ *
+ * - `html` must point to `len` bytes of UTF-8 data
+ * - `metadata_json_out` must be a valid pointer to a char pointer
+ * - `markdown_len_out` and `metadata_len_out` must be valid pointers to size_t
+ * - The returned markdown string must be freed with `html_to_markdown_free_string`
+ * - The metadata JSON string (written to metadata_json_out) must be freed with `html_to_markdown_free_string`
+ * - Returns NULL on error (check error with `html_to_markdown_last_error`)
+ */
+HTM_EXPORT
+char *html_to_markdown_convert_with_metadata_bytes_with_len(const uint8_t *html,
+                                                            uintptr_t len,
+                                                            char **metadata_json_out,
+                                                            uintptr_t *markdown_len_out,
+                                                            uintptr_t *metadata_len_out);
+
+/**
  * Get the library version string.
  *
  * # Safety

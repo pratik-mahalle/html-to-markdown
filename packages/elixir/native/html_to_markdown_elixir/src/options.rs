@@ -3,10 +3,9 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 
-use html_to_markdown_rs::metadata::MetadataConfig;
 use html_to_markdown_rs::{
-    CodeBlockStyle, ConversionOptions, ConversionOptionsUpdate, DEFAULT_INLINE_IMAGE_LIMIT, HeadingStyle,
-    HighlightStyle, InlineImageConfig, InlineImageConfigUpdate, ListIndentType, MetadataConfigUpdate, NewlineStyle,
+    CodeBlockStyle, ConversionOptions, ConversionOptionsUpdate, HeadingStyle,
+    HighlightStyle, ListIndentType, NewlineStyle,
     PreprocessingOptionsUpdate, PreprocessingPreset, WhitespaceMode,
 };
 use rustler::{Error, NifResult, Term};
@@ -46,36 +45,6 @@ pub fn decode_options_term(term: Term) -> NifResult<ConversionOptions> {
         .decode()
         .map_err(|_| bad_option_msg("options", "must be provided as a map"))?;
     apply_options(map)
-}
-
-pub fn decode_metadata_config(term: Term) -> NifResult<MetadataConfig> {
-    if matches!(term.atom_to_string(), Ok(name) if name == "nil") {
-        return Ok(MetadataConfig::default());
-    }
-
-    let map: HashMap<String, Term> = term
-        .decode()
-        .map_err(|_| bad_option_msg("metadata_config", "must be provided as a map"))?;
-
-    let mut update = MetadataConfigUpdate::default();
-
-    for (key, value) in map.into_iter() {
-        match key.as_str() {
-            "extract_document" => update.extract_document = Some(decode_bool(value, "extract_document")?),
-            "extract_headers" => update.extract_headers = Some(decode_bool(value, "extract_headers")?),
-            "extract_links" => update.extract_links = Some(decode_bool(value, "extract_links")?),
-            "extract_images" => update.extract_images = Some(decode_bool(value, "extract_images")?),
-            "extract_structured_data" => {
-                update.extract_structured_data = Some(decode_bool(value, "extract_structured_data")?)
-            }
-            "max_structured_data_size" => {
-                update.max_structured_data_size = Some(decode_positive_integer(value, "max_structured_data_size")?)
-            }
-            _ => {}
-        }
-    }
-
-    Ok(MetadataConfig::from(update))
 }
 
 fn apply_options(map: HashMap<String, Term>) -> NifResult<ConversionOptions> {
@@ -149,64 +118,6 @@ fn decode_preprocessing(term: Term) -> NifResult<PreprocessingOptionsUpdate> {
     }
 
     Ok(update)
-}
-
-pub fn decode_inline_image_config(term: Term) -> NifResult<InlineImageConfig> {
-    if matches!(term.atom_to_string(), Ok(name) if name == "nil") {
-        return Ok(InlineImageConfig::new(DEFAULT_INLINE_IMAGE_LIMIT));
-    }
-
-    let map: HashMap<String, Term> = term
-        .decode()
-        .map_err(|_| bad_option_msg("inline_image_config", "must be provided as a map"))?;
-
-    let max_bytes = match map.get("max_decoded_size_bytes") {
-        Some(value) => match value.decode::<i64>().map_err(|_| {
-            bad_option_msg(
-                "inline_image_config.max_decoded_size_bytes",
-                "must be a positive integer",
-            )
-        })? {
-            v if v > 0 => v as u64,
-            _ => {
-                return Err(bad_option_msg(
-                    "max_decoded_size_bytes",
-                    "max_decoded_size_bytes must be greater than zero",
-                ));
-            }
-        },
-        None => DEFAULT_INLINE_IMAGE_LIMIT,
-    };
-
-    let mut update = InlineImageConfigUpdate::default();
-    update.max_decoded_size_bytes = Some(max_bytes);
-
-    if let Some(value) = map.get("filename_prefix") {
-        let prefix = value
-            .decode::<String>()
-            .map_err(|_| bad_option_msg("inline_image_config.filename_prefix", "must be a string"))?;
-        if !prefix.trim().is_empty() {
-            update.filename_prefix = Some(prefix);
-        }
-    }
-
-    if let Some(value) = map.get("capture_svg") {
-        update.capture_svg = Some(
-            value
-                .decode::<bool>()
-                .map_err(|_| bad_option_msg("inline_image_config.capture_svg", "must be a boolean"))?,
-        );
-    }
-
-    if let Some(value) = map.get("infer_dimensions") {
-        update.infer_dimensions = Some(
-            value
-                .decode::<bool>()
-                .map_err(|_| bad_option_msg("inline_image_config.infer_dimensions", "must be a boolean"))?,
-        );
-    }
-
-    Ok(InlineImageConfig::from_update(update))
 }
 
 fn decode_string_list(term: Term, field: &'static str) -> NifResult<Vec<String>> {

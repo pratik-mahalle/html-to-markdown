@@ -25,6 +25,18 @@ extern const char *html_to_markdown_last_error(void);
 extern uint32_t html_to_markdown_last_error_code(void);
 extern const char *html_to_markdown_error_code_name(uint32_t code);
 
+/* Metadata conversion */
+extern char *html_to_markdown_convert_with_metadata(const char *html, char **metadata_json_out);
+extern char *html_to_markdown_convert_with_metadata_with_len(const char *html,
+                                                             char **metadata_json_out,
+                                                             uintptr_t *markdown_len_out,
+                                                             uintptr_t *metadata_len_out);
+extern char *html_to_markdown_convert_with_metadata_bytes_with_len(const uint8_t *html,
+                                                                   uintptr_t len,
+                                                                   char **metadata_json_out,
+                                                                   uintptr_t *markdown_len_out,
+                                                                   uintptr_t *metadata_len_out);
+
 /* ------------------------------------------------------------------ */
 /* Forward declarations for visitor types                             */
 /* ------------------------------------------------------------------ */

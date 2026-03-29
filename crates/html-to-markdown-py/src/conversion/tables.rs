@@ -6,7 +6,7 @@
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
 
-use crate::helpers::{run_with_guard_and_profile, to_py_err};
+use crate::helpers::{run_with_guard, to_py_err};
 use crate::options::ConversionOptions;
 #[cfg(feature = "metadata")]
 use crate::types::{MetadataConfig, extended_metadata_to_py};
@@ -45,7 +45,7 @@ pub fn convert_with_tables<'py>(
 
     let result = py
         .detach(move || {
-            run_with_guard_and_profile(|| {
+            run_with_guard(|| {
                 html_to_markdown_rs::convert_with_tables(&html, rust_options.clone(), rust_metadata_cfg.clone())
             })
         })
@@ -99,7 +99,7 @@ pub fn convert_with_tables<'py>(
 
     let result = py
         .detach(move || {
-            run_with_guard_and_profile(|| html_to_markdown_rs::convert_with_tables(&html, rust_options.clone(), None))
+            run_with_guard(|| html_to_markdown_rs::convert_with_tables(&html, rust_options.clone(), None))
         })
         .map_err(to_py_err)?;
 

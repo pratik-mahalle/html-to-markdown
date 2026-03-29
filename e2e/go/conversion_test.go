@@ -7,7 +7,7 @@ import (
     "strings"
     "testing"
 
-    htmd "github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown"
+    htmd "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown"
 )
 
 func Test_BlockquoteMultipleParagraphs(t *testing.T) {

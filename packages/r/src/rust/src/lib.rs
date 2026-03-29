@@ -1,16 +1,12 @@
 #![allow(clippy::let_unit_value, deprecated)]
 
 use extendr_api::prelude::*;
-use html_to_markdown_rs::ConversionOptions;
 
 mod options;
-mod profiling;
 mod types;
 
 use options::decode_options;
 use types::conversion_result_to_robj;
-
-struct OptionsHandle(ConversionOptions);
 
 /// Convert HTML to Markdown, returning a named list with:
 ///   content, metadata, tables, warnings.
@@ -21,16 +17,12 @@ struct OptionsHandle(ConversionOptions);
 #[extendr]
 fn convert(html: &str, options: Robj) -> Result<Robj> {
     let opts = decode_options(options).map_err(|e| Error::Other(e))?;
-    let result = profiling::maybe_profile(|| html_to_markdown_rs::convert(html, Some(opts.clone())))
+    let result = html_to_markdown_rs::convert(html, Some(opts.clone()))
         .map_err(|e| Error::Other(e.to_string()))?;
     Ok(conversion_result_to_robj(result))
 }
 
-#[extendr]
-impl OptionsHandle {}
-
 extendr_module! {
     mod htmltomarkdown;
     fn convert;
-    impl OptionsHandle;
 }

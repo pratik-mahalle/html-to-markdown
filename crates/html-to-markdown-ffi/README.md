@@ -256,16 +256,6 @@ const char *html_to_markdown_version(void);
 void html_to_markdown_free_string(char *s);
 ```
 
-### Profiling (2 functions)
-
-```c
-// Start flamegraph profiling to the given file path
-bool html_to_markdown_profile_start(const char *output, int32_t frequency);
-
-// Stop profiling and flush the flamegraph
-bool html_to_markdown_profile_stop(void);
-```
-
 ## Visitor Pattern Example
 
 The visitor pattern lets you intercept individual HTML elements during conversion and provide custom markdown output, skip elements, preserve raw HTML, or abort with an error.

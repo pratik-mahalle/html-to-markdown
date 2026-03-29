@@ -26,8 +26,6 @@ html-to-markdown-rs = { path = "../../../vendor/html-to-markdown-rs", features =
 magnus = { git = "https://github.com/matsadler/magnus", rev = "f6db11769efb517427bf7f121f9c32e18b059b38", features = [
   "rb-sys",
 ] }
-pprof = { version = "0.15", features = ["flamegraph"], optional = true }
-
 [dev-dependencies]
 pretty_assertions = "1.4"
 
@@ -36,7 +34,6 @@ default = ["inline-images", "metadata", "visitor"]
 inline-images = ["html-to-markdown-rs/inline-images"]
 metadata = ["html-to-markdown-rs/metadata"]
 visitor = ["html-to-markdown-rs/visitor"]
-profiling = ["dep:pprof"]
 
 [lints.rust]
 unsafe_code = "forbid"
