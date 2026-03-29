@@ -96,19 +96,99 @@ pub struct Assertions {
 
     // ---- Metadata assertions ----
     /// The metadata title must equal this string.
+    #[serde(default)]
     pub metadata_title: Option<String>,
 
+    /// The metadata description must equal this string.
+    #[serde(default)]
+    pub metadata_description: Option<String>,
+
+    /// The metadata author must equal this string.
+    #[serde(default)]
+    pub metadata_author: Option<String>,
+
+    /// The metadata keywords must contain all of these strings.
+    #[serde(default)]
+    pub metadata_keywords: Option<String>,
+
+    /// The metadata canonical URL must equal this string.
+    #[serde(default)]
+    pub metadata_canonical_url: Option<String>,
+
+    // ---- Metadata Open Graph assertions ----
+    /// The Open Graph title must equal this string.
+    #[serde(default)]
+    pub metadata_og_title: Option<String>,
+
+    /// The Open Graph description must equal this string.
+    #[serde(default)]
+    pub metadata_og_description: Option<String>,
+
+    /// The Open Graph image URL must equal this string.
+    #[serde(default)]
+    pub metadata_og_image: Option<String>,
+
+    /// The Open Graph type must equal this string.
+    #[serde(default)]
+    pub metadata_og_type: Option<String>,
+
+    /// The Open Graph URL must equal this string.
+    #[serde(default)]
+    pub metadata_og_url: Option<String>,
+
+    /// The Open Graph site name must equal this string.
+    #[serde(default)]
+    pub metadata_og_site_name: Option<String>,
+
+    // ---- Metadata Twitter assertions ----
+    /// The Twitter card type must equal this string.
+    #[serde(default)]
+    pub metadata_twitter_card: Option<String>,
+
+    /// The Twitter title must equal this string.
+    #[serde(default)]
+    pub metadata_twitter_title: Option<String>,
+
+    /// The Twitter description must equal this string.
+    #[serde(default)]
+    pub metadata_twitter_description: Option<String>,
+
+    // ---- Metadata collection assertions ----
     /// The metadata must include extracted links (when `true`).
     pub metadata_has_links: Option<bool>,
 
     /// The metadata must have at least this many links.
     pub metadata_link_count_min: Option<usize>,
 
+    /// The metadata links must contain all of these URLs.
+    #[serde(default)]
+    pub metadata_links_include_urls: Option<Vec<String>>,
+
+    /// The metadata must have at least this many links.
+    #[serde(default)]
+    pub metadata_links_count_min: Option<usize>,
+
     /// The metadata must include extracted headers (when `true`).
     pub metadata_has_headers: Option<bool>,
 
     /// The metadata must have at least this many headers.
     pub metadata_header_count_min: Option<usize>,
+
+    /// The metadata must have at least this many images.
+    #[serde(default)]
+    pub metadata_images_count_min: Option<usize>,
+
+    /// The metadata images must contain all of these src URLs.
+    #[serde(default)]
+    pub metadata_images_include_srcs: Option<Vec<String>>,
+
+    /// The metadata must have at least this many headings.
+    #[serde(default)]
+    pub metadata_headings_count_min: Option<usize>,
+
+    /// The metadata headings must contain all of these heading texts.
+    #[serde(default)]
+    pub metadata_headings_include: Option<Vec<String>>,
 
     // ---- Table assertions ----
     /// The result must include at least this many tables.

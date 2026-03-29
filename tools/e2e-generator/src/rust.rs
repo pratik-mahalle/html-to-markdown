@@ -221,6 +221,246 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
         );
     }
 
+    // ---- Metadata assertions ----
+
+    // metadata_title
+    if let Some(expected) = &a.metadata_title {
+        let escaped = escape_string(expected);
+        let _ = writeln!(
+            out,
+            "    assert_eq!(result.metadata.document.title.as_deref(), Some(\"{escaped}\"), \"metadata_title mismatch\");"
+        );
+    }
+
+    // metadata_description
+    if let Some(expected) = &a.metadata_description {
+        let escaped = escape_string(expected);
+        let _ = writeln!(
+            out,
+            "    assert_eq!(result.metadata.document.description.as_deref(), Some(\"{escaped}\"), \"metadata_description mismatch\");"
+        );
+    }
+
+    // metadata_author
+    if let Some(expected) = &a.metadata_author {
+        let escaped = escape_string(expected);
+        let _ = writeln!(
+            out,
+            "    assert_eq!(result.metadata.document.author.as_deref(), Some(\"{escaped}\"), \"metadata_author mismatch\");"
+        );
+    }
+
+    // metadata_keywords (comma-separated string)
+    if let Some(keywords_str) = &a.metadata_keywords {
+        for kw in keywords_str.split(',').map(|s| s.trim()) {
+            let escaped = escape_string(kw);
+            let _ = writeln!(
+                out,
+                "    assert!(result.metadata.document.keywords.iter().any(|k| k == \"{escaped}\"), \"expected keyword: {escaped}\");"
+            );
+        }
+    }
+
+    // metadata_canonical_url
+    if let Some(expected) = &a.metadata_canonical_url {
+        let escaped = escape_string(expected);
+        let _ = writeln!(
+            out,
+            "    assert_eq!(result.metadata.document.canonical_url.as_deref(), Some(\"{escaped}\"), \"metadata_canonical_url mismatch\");"
+        );
+    }
+
+    // metadata_og_title
+    if let Some(expected) = &a.metadata_og_title {
+        let escaped = escape_string(expected);
+        let _ = writeln!(
+            out,
+            "    assert_eq!(result.metadata.document.open_graph.get(\"og:title\").map(|s| s.as_str()), Some(\"{escaped}\"), \"metadata_og_title mismatch\");"
+        );
+    }
+
+    // metadata_og_description
+    if let Some(expected) = &a.metadata_og_description {
+        let escaped = escape_string(expected);
+        let _ = writeln!(
+            out,
+            "    assert_eq!(result.metadata.document.open_graph.get(\"og:description\").map(|s| s.as_str()), Some(\"{escaped}\"), \"metadata_og_description mismatch\");"
+        );
+    }
+
+    // metadata_og_image
+    if let Some(expected) = &a.metadata_og_image {
+        let escaped = escape_string(expected);
+        let _ = writeln!(
+            out,
+            "    assert_eq!(result.metadata.document.open_graph.get(\"og:image\").map(|s| s.as_str()), Some(\"{escaped}\"), \"metadata_og_image mismatch\");"
+        );
+    }
+
+    // metadata_og_type
+    if let Some(expected) = &a.metadata_og_type {
+        let escaped = escape_string(expected);
+        let _ = writeln!(
+            out,
+            "    assert_eq!(result.metadata.document.open_graph.get(\"og:type\").map(|s| s.as_str()), Some(\"{escaped}\"), \"metadata_og_type mismatch\");"
+        );
+    }
+
+    // metadata_og_url
+    if let Some(expected) = &a.metadata_og_url {
+        let escaped = escape_string(expected);
+        let _ = writeln!(
+            out,
+            "    assert_eq!(result.metadata.document.open_graph.get(\"og:url\").map(|s| s.as_str()), Some(\"{escaped}\"), \"metadata_og_url mismatch\");"
+        );
+    }
+
+    // metadata_og_site_name
+    if let Some(expected) = &a.metadata_og_site_name {
+        let escaped = escape_string(expected);
+        let _ = writeln!(
+            out,
+            "    assert_eq!(result.metadata.document.open_graph.get(\"og:site_name\").map(|s| s.as_str()), Some(\"{escaped}\"), \"metadata_og_site_name mismatch\");"
+        );
+    }
+
+    // metadata_twitter_card
+    if let Some(expected) = &a.metadata_twitter_card {
+        let escaped = escape_string(expected);
+        let _ = writeln!(
+            out,
+            "    assert_eq!(result.metadata.document.twitter_card.get(\"twitter:card\").map(|s| s.as_str()), Some(\"{escaped}\"), \"metadata_twitter_card mismatch\");"
+        );
+    }
+
+    // metadata_twitter_title
+    if let Some(expected) = &a.metadata_twitter_title {
+        let escaped = escape_string(expected);
+        let _ = writeln!(
+            out,
+            "    assert_eq!(result.metadata.document.twitter_card.get(\"twitter:title\").map(|s| s.as_str()), Some(\"{escaped}\"), \"metadata_twitter_title mismatch\");"
+        );
+    }
+
+    // metadata_twitter_description
+    if let Some(expected) = &a.metadata_twitter_description {
+        let escaped = escape_string(expected);
+        let _ = writeln!(
+            out,
+            "    assert_eq!(result.metadata.document.twitter_card.get(\"twitter:description\").map(|s| s.as_str()), Some(\"{escaped}\"), \"metadata_twitter_description mismatch\");"
+        );
+    }
+
+    // metadata_has_links
+    if a.metadata_has_links == Some(true) {
+        let _ = writeln!(
+            out,
+            "    assert!(!result.metadata.links.is_empty(), \"expected metadata to include links\");"
+        );
+    }
+
+    // metadata_link_count_min
+    if let Some(min) = a.metadata_link_count_min {
+        let _ = writeln!(
+            out,
+            "    assert!(result.metadata.links.len() >= {min}, \"expected at least {min} links, got {{}}\", result.metadata.links.len());"
+        );
+    }
+
+    // metadata_links_count_min
+    if let Some(min) = a.metadata_links_count_min {
+        let _ = writeln!(
+            out,
+            "    assert!(result.metadata.links.len() >= {min}, \"expected at least {min} links, got {{}}\", result.metadata.links.len());"
+        );
+    }
+
+    // metadata_links_include_urls
+    if let Some(urls) = &a.metadata_links_include_urls {
+        for url in urls {
+            let escaped = escape_string(url);
+            let _ = writeln!(
+                out,
+                "    assert!(result.metadata.links.iter().any(|l| l.href == \"{escaped}\"), \"expected links to include URL: {escaped}\");"
+            );
+        }
+    }
+
+    // metadata_has_headers
+    if a.metadata_has_headers == Some(true) {
+        let _ = writeln!(
+            out,
+            "    assert!(!result.metadata.headers.is_empty(), \"expected metadata to include headers\");"
+        );
+    }
+
+    // metadata_header_count_min
+    if let Some(min) = a.metadata_header_count_min {
+        let _ = writeln!(
+            out,
+            "    assert!(result.metadata.headers.len() >= {min}, \"expected at least {min} headers, got {{}}\", result.metadata.headers.len());"
+        );
+    }
+
+    // metadata_headings_count_min
+    if let Some(min) = a.metadata_headings_count_min {
+        let _ = writeln!(
+            out,
+            "    assert!(result.metadata.headers.len() >= {min}, \"expected at least {min} headings, got {{}}\", result.metadata.headers.len());"
+        );
+    }
+
+    // metadata_headings_include
+    if let Some(headings) = &a.metadata_headings_include {
+        for heading in headings {
+            let escaped = escape_string(heading);
+            let _ = writeln!(
+                out,
+                "    assert!(result.metadata.headers.iter().any(|h| h.text == \"{escaped}\"), \"expected headings to include: {escaped}\");"
+            );
+        }
+    }
+
+    // metadata_images_count_min
+    if let Some(min) = a.metadata_images_count_min {
+        let _ = writeln!(
+            out,
+            "    assert!(result.metadata.images.len() >= {min}, \"expected at least {min} images, got {{}}\", result.metadata.images.len());"
+        );
+    }
+
+    // metadata_images_include_srcs
+    if let Some(srcs) = &a.metadata_images_include_srcs {
+        for src in srcs {
+            let escaped = escape_string(src);
+            let _ = writeln!(
+                out,
+                "    assert!(result.metadata.images.iter().any(|i| i.src == \"{escaped}\"), \"expected images to include src: {escaped}\");"
+            );
+        }
+    }
+
+    // ---- Table assertions ----
+
+    // table_count_min
+    if let Some(min) = a.table_count_min {
+        let _ = writeln!(
+            out,
+            "    assert!(result.tables.len() >= {min}, \"expected at least {min} tables, got {{}}\", result.tables.len());"
+        );
+    }
+
+    // table_contains_cell
+    if let Some(cell) = &a.table_contains_cell {
+        let escaped = escape_string(cell);
+        let _ = writeln!(
+            out,
+            "    assert!(result.tables.iter().any(|t| t.rows.iter().any(|r| r.cells.iter().any(|c| c.content.contains(\"{escaped}\")))), \"expected a table cell to contain: {escaped}\");"
+        );
+    }
+
+    // ---- Warning assertions ----
+
     // warnings_empty
     if a.warnings_empty == Some(true) {
         let _ = writeln!(

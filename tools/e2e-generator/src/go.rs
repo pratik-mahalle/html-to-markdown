@@ -229,6 +229,44 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
         let _ = writeln!(out, "    }}");
     }
 
+    // ---- Metadata / Table / Warning assertions ----
+    // Go's Convert() currently returns (string, error) — only content is available.
+    // Structured result assertions will be added in Stage 2.
+    let has_non_content_assertion = a.metadata_title.is_some()
+        || a.metadata_description.is_some()
+        || a.metadata_author.is_some()
+        || a.metadata_keywords.is_some()
+        || a.metadata_canonical_url.is_some()
+        || a.metadata_og_title.is_some()
+        || a.metadata_og_description.is_some()
+        || a.metadata_og_image.is_some()
+        || a.metadata_og_type.is_some()
+        || a.metadata_og_url.is_some()
+        || a.metadata_og_site_name.is_some()
+        || a.metadata_twitter_card.is_some()
+        || a.metadata_twitter_title.is_some()
+        || a.metadata_twitter_description.is_some()
+        || a.metadata_has_links.is_some()
+        || a.metadata_link_count_min.is_some()
+        || a.metadata_links_include_urls.is_some()
+        || a.metadata_links_count_min.is_some()
+        || a.metadata_has_headers.is_some()
+        || a.metadata_header_count_min.is_some()
+        || a.metadata_images_count_min.is_some()
+        || a.metadata_images_include_srcs.is_some()
+        || a.metadata_headings_count_min.is_some()
+        || a.metadata_headings_include.is_some()
+        || a.table_count_min.is_some()
+        || a.table_contains_cell.is_some()
+        || a.warnings_empty.is_some();
+
+    if has_non_content_assertion {
+        let _ = writeln!(
+            out,
+            "    // TODO(v3-parity): metadata/table/warning assertions require ConversionResult return type"
+        );
+    }
+
     let _ = writeln!(out, "}}");
 }
 
