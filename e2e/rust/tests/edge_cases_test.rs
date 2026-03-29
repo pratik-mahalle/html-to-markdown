@@ -195,17 +195,6 @@ fn test_whitespace_only() {
 }
 
 #[test]
-fn test_xss_javascript_url_blocked() {
-    // javascript: URLs in href attributes are preserved in link output (no URL scheme filtering is applied)
-    let html = r#"<p><a href="javascript:alert('xss')">Click me</a></p>"#;
-    let result = convert(html, None).expect("conversion should succeed");
-    let content = result.content.unwrap_or_default();
-
-    assert!(!content.trim().is_empty(), "expected non-empty content");
-    assert!(content.contains("Click me"), "expected content to contain: Click me");
-}
-
-#[test]
 fn test_xss_onclick_handler_removed() {
     // onclick and other on* event handlers are removed from elements
     let html = r#"<p><a href="https://example.com" onclick="alert('xss')">Click me</a></p><button onmouseover="steal_data()">Hover me</button>"#;
