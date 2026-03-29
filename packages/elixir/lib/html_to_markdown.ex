@@ -40,6 +40,11 @@ defmodule HtmlToMarkdown do
 
   defp normalize_options(nil), do: nil
 
+  defp normalize_options(%{} = options) when not is_struct(options) do
+    # Plain maps are passed directly to the NIF (it handles string keys)
+    options
+  end
+
   defp normalize_options(options) do
     options
     |> Options.new()
