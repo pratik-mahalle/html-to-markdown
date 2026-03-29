@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 
-use html_to_markdown_rs::{ConversionOptions, MetadataConfig, convert_with_metadata};
+use html_to_markdown_rs::ConversionOptions;
 
 #[test]
 fn test_strip_simple_script_tag() {
@@ -111,13 +111,9 @@ fn test_preserve_json_ld_script() {
 </body>
 </html>"#;
 
-    let options = ConversionOptions {
-        extract_metadata: true,
-        ..Default::default()
-    };
-
-    let (markdown, metadata) =
-        convert_with_metadata(html, Some(options), MetadataConfig::default(), None).expect("Failed to convert");
+    let result = html_to_markdown_rs::convert(html, None).expect("Failed to convert");
+    let metadata = result.metadata;
+    let markdown = result.content.unwrap_or_default();
 
     println!("Markdown:\n{markdown}");
     println!("Metadata: {:?}", metadata.document.title);
@@ -168,13 +164,9 @@ fn test_multiple_script_tags() {
 </body>
 </html>"#;
 
-    let options = ConversionOptions {
-        extract_metadata: true,
-        ..Default::default()
-    };
-
-    let (markdown, metadata) =
-        convert_with_metadata(html, Some(options), MetadataConfig::default(), None).expect("Failed to convert");
+    let result = html_to_markdown_rs::convert(html, None).expect("Failed to convert");
+    let metadata = result.metadata;
+    let markdown = result.content.unwrap_or_default();
 
     println!("Markdown:\n{markdown}");
 
@@ -229,13 +221,9 @@ fn test_reuters_like_structure() {
 </body>
 </html>"#;
 
-    let options = ConversionOptions {
-        extract_metadata: true,
-        ..Default::default()
-    };
-
-    let (markdown, metadata) =
-        convert_with_metadata(html, Some(options), MetadataConfig::default(), None).expect("Failed to convert");
+    let result = html_to_markdown_rs::convert(html, None).expect("Failed to convert");
+    let metadata = result.metadata;
+    let markdown = result.content.unwrap_or_default();
 
     println!("Markdown output:\n{markdown}");
     println!("Metadata title: {:?}", metadata.document.title);

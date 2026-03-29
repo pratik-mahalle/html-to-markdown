@@ -734,12 +734,14 @@ fn test_convert_with_inline_images_accepts_visitor() {
     assert!(!result.markdown.is_empty(), "Should produce markdown output");
 }
 
-/// Test visitor + metadata feature combination
+/// Test visitor + metadata: visitor callbacks fire and metadata is collected.
+///
+/// In v3, `convert()` always extracts metadata into `ConversionResult.metadata`,
+/// and `convert_with_visitor()` handles visitor callbacks. We verify both paths
+/// work on the same HTML.
 #[cfg(feature = "metadata")]
 #[test]
-fn test_convert_with_metadata_accepts_visitor() {
-    use html_to_markdown_rs::convert_with_metadata;
-
+fn test_visitor_and_metadata_both_work() {
     #[derive(Debug, Default)]
     struct MetadataAwareVisitor {
         heading_count: usize,
@@ -770,14 +772,11 @@ fn test_convert_with_metadata_accepts_visitor() {
         </html>
     "#;
 
+    // Verify visitor callbacks fire via convert_with_visitor
     let visitor = Rc::new(RefCell::new(MetadataAwareVisitor::default()));
+    let markdown = convert_with_visitor(html, None, Some(visitor.clone()))
+        .expect("convert_with_visitor should work");
 
-    // Test convert_with_metadata with visitor
-    let metadata_cfg = html_to_markdown_rs::MetadataConfig::default();
-    let (markdown, metadata) = convert_with_metadata(html, None, metadata_cfg, Some(visitor.clone()))
-        .expect("convert_with_metadata with visitor should work");
-
-    // Verify visitor was invoked
     let borrowed = visitor.borrow();
     assert!(
         borrowed.heading_count >= 2,
@@ -789,8 +788,14 @@ fn test_convert_with_metadata_accepts_visitor() {
         "Visitor should see 2 links, got {}",
         borrowed.link_count
     );
+    assert!(!markdown.is_empty(), "Should produce markdown output");
+    drop(borrowed);
 
-    // Verify metadata was also collected
+    // Verify metadata extraction via convert()
+    let result = html_to_markdown_rs::convert(html, None)
+        .expect("convert should work");
+    let metadata = result.metadata;
+
     assert_eq!(
         metadata.document.title,
         Some("Test Page".to_string()),
@@ -807,9 +812,6 @@ fn test_convert_with_metadata_accepts_visitor() {
         "Metadata should extract 2 links, got {}",
         metadata.links.len()
     );
-
-    // Verify markdown was produced
-    assert!(!markdown.is_empty(), "Should produce markdown output");
 }
 
 /// Test visitor + both `inline_images` and `metadata` features together
