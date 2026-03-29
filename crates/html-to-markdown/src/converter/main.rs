@@ -22,7 +22,7 @@ use crate::converter::plain_text::extract_plain_text;
 use crate::converter::preprocessing_helpers::{has_inline_block_misnest, should_drop_for_preprocessing};
 use crate::converter::utility::caching::build_dom_context;
 use crate::converter::utility::content::normalized_tag_name;
-use crate::converter::utility::preprocessing::{preprocess_html, strip_script_and_style_tags};
+use crate::converter::utility::preprocessing::{preprocess_html, strip_hidden_elements, strip_script_and_style_tags};
 use crate::converter::utility::serialization::serialize_tag_to_html;
 use crate::options::OutputFormat;
 
@@ -88,6 +88,8 @@ pub(crate) fn convert_html_impl(
     // Strip script and style tags completely to prevent parser confusion from HTML-like content
     // inside script/style elements. This preserves JSON-LD for metadata extraction.
     let stripped = strip_script_and_style_tags(html);
+    // Strip elements with the `hidden` attribute before parsing.
+    let stripped = strip_hidden_elements(&stripped);
     let mut preprocessed = preprocess_html(&stripped).into_owned();
     let mut preprocessed_len = preprocessed.len();
 
@@ -493,6 +495,34 @@ pub(crate) fn walk_node(
                         &tag_name,
                         node_handle,
                         tag,
+                        parser,
+                        output,
+                        options,
+                        ctx,
+                        depth,
+                        dom_ctx,
+                    );
+                }
+
+                // Quote element routed to semantic dispatcher
+                "q" => {
+                    crate::converter::semantic::dispatch_semantic_handler(
+                        &tag_name,
+                        node_handle,
+                        parser,
+                        output,
+                        options,
+                        ctx,
+                        depth,
+                        dom_ctx,
+                    );
+                }
+
+                // Figure elements routed to semantic dispatcher
+                "figure" | "figcaption" => {
+                    crate::converter::semantic::dispatch_semantic_handler(
+                        &tag_name,
+                        node_handle,
                         parser,
                         output,
                         options,
