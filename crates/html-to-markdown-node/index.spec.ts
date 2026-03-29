@@ -6,8 +6,6 @@ import {
 	convert,
 	convertBuffer,
 	convertBufferWithOptionsHandle,
-	convertInlineImagesBuffer,
-	convertWithInlineImages,
 	convertWithOptionsHandle,
 	createConversionOptionsHandle,
 	JsCodeBlockStyle,
@@ -497,91 +495,6 @@ describe("html-to-markdown-node - NAPI-RS Bindings", () => {
 				extractMetadata: true,
 			});
 			expect(markdown.length).toBeGreaterThan(0);
-		});
-	});
-
-	describe("Inline Images", () => {
-		it("should extract inline images", () => {
-			const png =
-				"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==";
-			const html = `<img src="data:image/png;base64,${png}" alt="Red Pixel">`;
-
-			const result = convertWithInlineImages(html, undefined, {
-				maxDecodedSizeBytes: 1024n,
-				inferDimensions: true,
-			});
-
-			expect(result.markdown).toContain("Red Pixel");
-			expect(result.inlineImages).toHaveLength(1);
-			expect(result.inlineImages[0].format).toBe("png");
-			expect(result.inlineImages[0].data).toBeInstanceOf(Buffer);
-			expect(result.warnings).toHaveLength(0);
-		});
-
-		it("should handle invalid base64", () => {
-			const html = '<img src="data:image/png;base64,invalid!!!" alt="Broken">';
-			const result = convertWithInlineImages(html);
-			expect(result.markdown).toContain("Broken");
-			expect(result.inlineImages).toHaveLength(0);
-			expect(result.warnings.length).toBeGreaterThan(0);
-		});
-
-		it("should extract SVG elements", () => {
-			const html = '<svg><circle cx="10" cy="10" r="5"/></svg>';
-			const result = convertWithInlineImages(html, undefined, {
-				captureSvg: true,
-			});
-			const hasSvg = result.inlineImages.some((img) => img.format === "svg");
-			expect(hasSvg).toBe(true);
-		});
-
-		it("should respect maxDecodedSizeBytes", () => {
-			const png =
-				"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==";
-			const html = `<img src="data:image/png;base64,${png}" alt="img">`;
-			const result = convertWithInlineImages(html, undefined, {
-				maxDecodedSizeBytes: 1n,
-			});
-			expect(result.warnings.length > 0 || result.inlineImages.length === 0).toBe(true);
-		});
-
-		it("should use filename prefix", () => {
-			const png =
-				"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==";
-			const html = `<img src="data:image/png;base64,${png}">`;
-			const result = convertWithInlineImages(html, undefined, {
-				filenamePrefix: "test_",
-			});
-			if (result.inlineImages.length > 0 && result.inlineImages[0].filename) {
-				expect(result.inlineImages[0].filename).toMatch(/^test_/);
-			}
-		});
-
-		it("should capture SVG when enabled", () => {
-			const html = '<svg><rect width="10" height="10"/></svg>';
-			const result = convertWithInlineImages(html, undefined, {
-				captureSvg: true,
-			});
-			expect(result.inlineImages.some((img) => img.format === "svg")).toBe(true);
-		});
-
-		it("should not capture SVG when disabled", () => {
-			const html = '<svg><rect width="10" height="10"/></svg>';
-			const result = convertWithInlineImages(html, undefined, {
-				captureSvg: false,
-			});
-			expect(result.inlineImages.some((img) => img.format === "svg")).toBe(false);
-		});
-
-		it("should support buffer inputs for inline images", () => {
-			const png =
-				"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==";
-			const html = Buffer.from(`<img src="data:image/png;base64,${png}" alt="buf">`);
-			const result = convertInlineImagesBuffer(html, undefined, {
-				maxDecodedSizeBytes: 2048n,
-			});
-			expect(result.markdown).toContain("buf");
-			expect(result.inlineImages).toHaveLength(1);
 		});
 	});
 

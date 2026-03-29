@@ -1,12 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import {
-	convert,
-	convertBytesWithInlineImages,
-	convertWithInlineImages,
-	WasmInlineImageConfig,
-} from "./dist-node/html_to_markdown_wasm.js";
+import { convert } from "./dist-node/html_to_markdown_wasm.js";
 
 const loadTestDoc = (path: string): string => {
 	const fullPath = join(__dirname, "../../test_documents", path);
@@ -52,18 +47,6 @@ describe("html-to-markdown-wasm - WebAssembly Bindings", () => {
 			expect(result).toHaveProperty("document");
 			expect(Array.isArray(result.tables)).toBe(true);
 			expect(Array.isArray(result.warnings)).toBe(true);
-		});
-	});
-
-	describe("Byte-based Conversion", () => {
-		it("should convert bytes with inline images", () => {
-			const encoder = new TextEncoder();
-			const png =
-				"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==";
-			const html = encoder.encode(`<img src="data:image/png;base64,${png}" alt="buffered">`);
-			const config = new WasmInlineImageConfig(4096);
-			const result = convertBytesWithInlineImages(html, undefined, config);
-			expect(result.markdown).toContain("buffered");
 		});
 	});
 
@@ -386,64 +369,6 @@ describe("html-to-markdown-wasm - WebAssembly Bindings", () => {
 			const html = "<p>Keep this</p><script>Remove this</script>";
 			const markdown = convertContent(html, { stripTags: ["script"] });
 			expect(markdown).toContain("Keep this");
-		});
-	});
-
-	describe("Inline Images", () => {
-		it("should convert with inline images", () => {
-			const html =
-				'<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" alt="test">';
-			const result = convertWithInlineImages(html, null);
-			expect(result.markdown).toBeTruthy();
-			expect(result.inlineImages).toHaveLength(1);
-		});
-
-		it("should extract inline image data", () => {
-			const html =
-				'<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" alt="test">';
-			const result = convertWithInlineImages(html, null);
-			expect(result.inlineImages[0].format).toBe("png");
-			expect(result.inlineImages[0].description).toBe("test");
-		});
-
-		it("should use inline image config", () => {
-			const html =
-				'<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" alt="test">';
-			const config = new WasmInlineImageConfig(1024 * 1024);
-			config.inferDimensions = true;
-			const result = convertWithInlineImages(html, null, config);
-			expect(result.inlineImages).toHaveLength(1);
-		});
-
-		it("should capture SVG elements", () => {
-			const html = '<svg width="10" height="10"><circle cx="5" cy="5" r="4"/></svg>';
-			const config = new WasmInlineImageConfig();
-			config.captureSvg = true;
-			const result = convertWithInlineImages(html, null, config);
-			expect(result.markdown).toBeTruthy();
-		});
-
-		it("should use filename prefix", () => {
-			const html =
-				'<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" alt="test">';
-			const config = new WasmInlineImageConfig();
-			config.filenamePrefix = "image_";
-			const result = convertWithInlineImages(html, null, config);
-			expect(result.inlineImages[0].filename).toMatch(/^image_/);
-		});
-
-		it("should return warnings when appropriate", () => {
-			const html = '<img src="data:image/png;base64,invalid" alt="test">';
-			const result = convertWithInlineImages(html, null);
-			expect(result.warnings).toBeDefined();
-		});
-
-		it("should handle options with inline images", () => {
-			const html =
-				'<h1>Title</h1><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" alt="test">';
-			const result = convertWithInlineImages(html, { headingStyle: "atx" }, null);
-			expect(result.markdown).toMatch(/^#\s+Title/m);
-			expect(result.inlineImages).toHaveLength(1);
 		});
 	});
 
