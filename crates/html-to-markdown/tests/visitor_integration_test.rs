@@ -719,8 +719,7 @@ fn test_convert_with_inline_images_accepts_visitor() {
 
     // Verify visitor callbacks fire via convert_with_visitor
     let visitor = Rc::new(RefCell::new(ImageTrackingVisitor::default()));
-    let markdown = convert_with_visitor(html, None, Some(visitor.clone()))
-        .expect("convert_with_visitor should work");
+    let markdown = convert_with_visitor(html, None, Some(visitor.clone())).expect("convert_with_visitor should work");
 
     assert_eq!(
         visitor.borrow().images_seen,
@@ -857,8 +856,7 @@ fn test_convert_with_all_features_and_visitor() {
 
     // Verify visitor callbacks fire via convert_with_visitor
     let visitor = Rc::new(RefCell::new(ComprehensiveVisitor::default()));
-    let markdown = convert_with_visitor(html, None, Some(visitor.clone()))
-        .expect("convert_with_visitor should work");
+    let markdown = convert_with_visitor(html, None, Some(visitor.clone())).expect("convert_with_visitor should work");
 
     // Verify all visitor callbacks were invoked
     let borrowed = visitor.borrow();
