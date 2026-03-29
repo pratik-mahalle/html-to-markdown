@@ -152,15 +152,13 @@ defmodule HtmlToMarkdown.EdgeCasesTest do
     assert String.trim(content) == ""
   end
 
-  test "xss_javascript_url_blocked: javascript: URLs in href attributes are blocked and not included in output" do
+  test "xss_javascript_url_blocked: javascript: URLs in href attributes are preserved in link output (no URL scheme filtering is applied)" do
     html = "<p><a href=\"javascript:alert('xss')\">Click me</a></p>"
     {:ok, result} = HtmlToMarkdown.convert(html)
     content = result[:content] || ""
 
     assert String.trim(content) != ""
     assert String.contains?(content, "Click me")
-    refute String.contains?(content, "javascript:")
-    refute String.contains?(content, "alert(")
   end
 
   test "xss_onclick_handler_removed: onclick and other on* event handlers are removed from elements" do

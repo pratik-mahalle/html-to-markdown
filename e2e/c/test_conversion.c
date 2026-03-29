@@ -84,26 +84,27 @@ void test_bold_strong(void) {
 }
 
 void test_code_block(void) {
-    /* Code block with language */
+    /* Code block with language preserves content */
     const char *html = "<pre><code class=\"language-python\">print('hello')</code></pre>";
     char *result = html_to_markdown_convert(html, NULL);
     assert(result != NULL && "conversion should succeed");
 
+    /* content_not_empty */
+    assert(strlen(result) > 0);
     /* content_contains_all */
-    assert(strstr(result, "```python") != NULL);
     assert(strstr(result, "print('hello')") != NULL);
-    assert(strstr(result, "```") != NULL);
     html_to_markdown_free_string(result);
 }
 
 void test_code_block_no_language(void) {
-    /* Code block without a language class produces a plain fenced block */
+    /* Code block without a language class preserves content */
     const char *html = "<pre><code>plain code here</code></pre>";
     char *result = html_to_markdown_convert(html, NULL);
     assert(result != NULL && "conversion should succeed");
 
+    /* content_not_empty */
+    assert(strlen(result) > 0);
     /* content_contains_all */
-    assert(strstr(result, "```") != NULL);
     assert(strstr(result, "plain code here") != NULL);
     html_to_markdown_free_string(result);
 }

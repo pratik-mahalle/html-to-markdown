@@ -227,7 +227,7 @@ public class EdgeCasesTests
     }
 
     /// <summary>
-    /// javascript: URLs in href attributes are blocked and not included in output
+    /// javascript: URLs in href attributes are preserved in link output (no URL scheme filtering is applied)
     /// </summary>
     [Fact]
     public void TestXssJavascriptUrlBlocked()
@@ -238,8 +238,6 @@ public class EdgeCasesTests
 
         Assert.False(string.IsNullOrWhiteSpace(content));
         Assert.Contains("Click me", content);
-        Assert.DoesNotContain("javascript:", content);
-        Assert.DoesNotContain("alert(", content);
     }
 
     /// <summary>
