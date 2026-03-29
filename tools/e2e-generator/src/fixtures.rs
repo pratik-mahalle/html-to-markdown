@@ -31,9 +31,7 @@ pub struct Fixture {
     pub _html_file: Option<String>,
 
     /// Conversion options to apply (map of option name -> value).
-    /// TODO: wire options into each generator's conversion call.
-    #[serde(rename = "options")]
-    pub _options: Option<BTreeMap<String, serde_json::Value>>,
+    pub options: Option<BTreeMap<String, serde_json::Value>>,
 
     /// Assertions to verify on the conversion result.
     #[serde(default)]
