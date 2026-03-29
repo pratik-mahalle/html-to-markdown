@@ -399,9 +399,9 @@ pub fn handle_table(
 mod tests {
     #[test]
     fn single_nested_table_stays_as_table() {
-        let html = r#"<table><tr><td>Label</td><td><table><tr><td>A</td><td>B</td></tr></table></td></tr></table>"#;
+        let html = r"<table><tr><td>Label</td><td><table><tr><td>A</td><td>B</td></tr></table></td></tr></table>";
         let result = crate::convert(html, None).unwrap();
         let content = result.content.unwrap_or_default();
-        assert!(content.contains("|"), "should produce pipe table, not list");
+        assert!(content.contains('|'), "should produce pipe table, not list");
     }
 }
