@@ -12,14 +12,10 @@ import (
 
 func Test_StructureCodeBlock(t *testing.T) {
 	// Fenced code block produces Code node
-	html := `<p>Example code:</p><pre><code class=\"language-rust\">fn main() { println!(\"Hello\"); }</code></pre>`
-	result, err := htmd.Convert(html)
+	html := `<p>Example code:</p><pre><code class="language-rust">fn main() { println!("Hello"); }</code></pre>`
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -30,13 +26,9 @@ func Test_StructureCodeBlock(t *testing.T) {
 func Test_StructureDeepNestingH1H2H3(t *testing.T) {
 	// H1 > H2 > H3 creates three levels of heading nesting
 	html := `<h1>Top Level</h1><p>Top intro.</p><h2>Mid Level</h2><p>Mid content.</p><h3>Deep Level</h3><p>Deep content.</p>`
-	result, err := htmd.Convert(html)
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -47,13 +39,9 @@ func Test_StructureDeepNestingH1H2H3(t *testing.T) {
 func Test_StructureH1H2NestedGroup(t *testing.T) {
 	// H1 followed by H2 creates a nested group under the H1
 	html := `<h1>Chapter One</h1><p>Chapter intro.</p><h2>Section One</h2><p>Section content.</p>`
-	result, err := htmd.Convert(html)
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -64,13 +52,9 @@ func Test_StructureH1H2NestedGroup(t *testing.T) {
 func Test_StructureHeadingParagraph(t *testing.T) {
 	// Simple heading followed by paragraph produces Heading and Paragraph nodes
 	html := `<h1>Title</h1><p>A paragraph of text.</p>`
-	result, err := htmd.Convert(html)
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -81,13 +65,9 @@ func Test_StructureHeadingParagraph(t *testing.T) {
 func Test_StructureList(t *testing.T) {
 	// Unordered list produces List and ListItem nodes
 	html := `<p>Items:</p><ul><li>Alpha</li><li>Beta</li><li>Gamma</li></ul>`
-	result, err := htmd.Convert(html)
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -98,13 +78,9 @@ func Test_StructureList(t *testing.T) {
 func Test_StructureMultipleHeadings(t *testing.T) {
 	// Multiple headings create multiple Heading nodes with correct levels
 	html := `<h1>Main Title</h1><h2>Section One</h2><p>Section one content.</p><h2>Section Two</h2><p>Section two content.</p>`
-	result, err := htmd.Convert(html)
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {
@@ -115,13 +91,9 @@ func Test_StructureMultipleHeadings(t *testing.T) {
 func Test_StructureSiblingH1Groups(t *testing.T) {
 	// H1, H2, then another H1 creates two sibling top-level groups
 	html := `<h1>Chapter One</h1><h2>Section A</h2><p>Section A content.</p><h1>Chapter Two</h1><h2>Section B</h2><p>Section B content.</p>`
-	result, err := htmd.Convert(html)
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) == "" {

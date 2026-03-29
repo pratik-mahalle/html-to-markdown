@@ -4,1451 +4,1172 @@
 package e2e_test
 
 import (
-    "strings"
-    "testing"
+	"strings"
+	"testing"
 
-    htmd "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown"
+	htmd "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown"
 )
 
 func Test_BlockquoteMultipleParagraphs(t *testing.T) {
-    // Blockquote with multiple paragraphs has each paragraph prefixed
-    html := `<blockquote><p>First paragraph.</p><p>Second paragraph.</p></blockquote>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Blockquote with multiple paragraphs has each paragraph prefixed
+	html := `<blockquote><p>First paragraph.</p><p>Second paragraph.</p></blockquote>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "> First paragraph.") {
-        t.Errorf("expected content to contain: > First paragraph.")
-    }
-    if !strings.Contains(content, "> Second paragraph.") {
-        t.Errorf("expected content to contain: > Second paragraph.")
-    }
+	if !strings.Contains(content, "> First paragraph.") {
+		t.Errorf("expected content to contain: > First paragraph.")
+	}
+	if !strings.Contains(content, "> Second paragraph.") {
+		t.Errorf("expected content to contain: > Second paragraph.")
+	}
 }
 
 func Test_BlockquoteNested(t *testing.T) {
-    // Nested blockquote produces double-prefixed lines
-    html := `<blockquote><p>Outer quote.</p><blockquote><p>Inner quote.</p></blockquote></blockquote>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Nested blockquote produces double-prefixed lines
+	html := `<blockquote><p>Outer quote.</p><blockquote><p>Inner quote.</p></blockquote></blockquote>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "Outer quote.") {
-        t.Errorf("expected content to contain: Outer quote.")
-    }
-    if !strings.Contains(content, "Inner quote.") {
-        t.Errorf("expected content to contain: Inner quote.")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "Outer quote.") {
+		t.Errorf("expected content to contain: Outer quote.")
+	}
+	if !strings.Contains(content, "Inner quote.") {
+		t.Errorf("expected content to contain: Inner quote.")
+	}
 }
 
 func Test_BlockquoteSimple(t *testing.T) {
-    // Simple blockquote
-    html := `<blockquote><p>Quote text</p></blockquote>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Simple blockquote
+	html := `<blockquote><p>Quote text</p></blockquote>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "> Quote text") {
-        t.Errorf("expected content to contain: > Quote text")
-    }
+	if !strings.Contains(content, "> Quote text") {
+		t.Errorf("expected content to contain: > Quote text")
+	}
 }
 
 func Test_BlockquoteWithList(t *testing.T) {
-    // Blockquote containing a list preserves list items inside quote
-    html := `<blockquote><p>Quote intro:</p><ul><li>Point one</li><li>Point two</li></ul></blockquote>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Blockquote containing a list preserves list items inside quote
+	html := `<blockquote><p>Quote intro:</p><ul><li>Point one</li><li>Point two</li></ul></blockquote>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "Quote intro:") {
-        t.Errorf("expected content to contain: Quote intro:")
-    }
-    if !strings.Contains(content, "Point one") {
-        t.Errorf("expected content to contain: Point one")
-    }
-    if !strings.Contains(content, "Point two") {
-        t.Errorf("expected content to contain: Point two")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "Quote intro:") {
+		t.Errorf("expected content to contain: Quote intro:")
+	}
+	if !strings.Contains(content, "Point one") {
+		t.Errorf("expected content to contain: Point one")
+	}
+	if !strings.Contains(content, "Point two") {
+		t.Errorf("expected content to contain: Point two")
+	}
 }
 
 func Test_BoldAndItalic(t *testing.T) {
-    // Nested bold and italic
-    html := `<p><strong><em>both</em></strong></p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Nested bold and italic
+	html := `<p><strong><em>both</em></strong></p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "***both***") {
-        t.Errorf("expected content to contain: ***both***")
-    }
+	if !strings.Contains(content, "***both***") {
+		t.Errorf("expected content to contain: ***both***")
+	}
 }
 
 func Test_BoldStrong(t *testing.T) {
-    // Strong tag converts to bold
-    html := `<p><strong>bold</strong></p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Strong tag converts to bold
+	html := `<p><strong>bold</strong></p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "**bold**") {
-        t.Errorf("expected content to contain: **bold**")
-    }
+	if !strings.Contains(content, "**bold**") {
+		t.Errorf("expected content to contain: **bold**")
+	}
 }
 
 func Test_CodeBlock(t *testing.T) {
-    // Code block with language
-    html := `<pre><code class=\"language-python\">print('hello')</code></pre>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Code block with language preserves content
+	html := `<pre><code class="language-python">print('hello')</code></pre>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "```python") {
-        t.Errorf("expected content to contain: ```python")
-    }
-    if !strings.Contains(content, "print('hello')") {
-        t.Errorf("expected content to contain: print('hello')")
-    }
-    if !strings.Contains(content, "```") {
-        t.Errorf("expected content to contain: ```")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "print('hello')") {
+		t.Errorf("expected content to contain: print('hello')")
+	}
 }
 
 func Test_CodeBlockNoLanguage(t *testing.T) {
-    // Code block without a language class produces a plain fenced block
-    html := `<pre><code>plain code here</code></pre>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Code block without a language class preserves content
+	html := `<pre><code>plain code here</code></pre>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "```") {
-        t.Errorf("expected content to contain: ```")
-    }
-    if !strings.Contains(content, "plain code here") {
-        t.Errorf("expected content to contain: plain code here")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "plain code here") {
+		t.Errorf("expected content to contain: plain code here")
+	}
 }
 
 func Test_CodeInlineInParagraph(t *testing.T) {
-    // Inline code element nested inside a paragraph
-    html := `<p>Call the <code>initialize()</code> method first.</p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Inline code element nested inside a paragraph
+	html := `<p>Call the <code>initialize()</code> method first.</p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "`initialize()`") {
-        t.Errorf("expected content to contain: `initialize()`")
-    }
+	if !strings.Contains(content, "`initialize()`") {
+		t.Errorf("expected content to contain: `initialize()`")
+	}
 }
 
 func Test_CodeWithBackticksInContent(t *testing.T) {
-    // Inline code containing backtick characters is properly escaped
-    html := "<p>Use <code>`backtick` here</code> carefully.</p>"
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Inline code containing backtick characters is properly escaped
+	html := "<p>Use <code>`backtick` here</code> carefully.</p>"
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "backtick") {
-        t.Errorf("expected content to contain: backtick")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "backtick") {
+		t.Errorf("expected content to contain: backtick")
+	}
 }
 
 func Test_EmphasisMarkHighlight(t *testing.T) {
-    // mark tag produces highlighted output
-    html := `<p><mark>highlighted</mark></p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// mark tag produces highlighted output
+	html := `<p><mark>highlighted</mark></p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "highlighted") {
-        t.Errorf("expected content to contain: highlighted")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "highlighted") {
+		t.Errorf("expected content to contain: highlighted")
+	}
 }
 
 func Test_EmphasisStrikethroughDel(t *testing.T) {
-    // del tag converts to GFM strikethrough
-    html := `<p><del>deleted text</del></p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// del tag converts to GFM strikethrough
+	html := `<p><del>deleted text</del></p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "~~deleted text~~") {
-        t.Errorf("expected content to contain: ~~deleted text~~")
-    }
+	if !strings.Contains(content, "~~deleted text~~") {
+		t.Errorf("expected content to contain: ~~deleted text~~")
+	}
 }
 
 func Test_EmphasisStrikethroughS(t *testing.T) {
-    // s tag converts to GFM strikethrough
-    html := `<p><s>strikethrough</s></p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// s tag converts to GFM strikethrough
+	html := `<p><s>strikethrough</s></p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "~~strikethrough~~") {
-        t.Errorf("expected content to contain: ~~strikethrough~~")
-    }
+	if !strings.Contains(content, "~~strikethrough~~") {
+		t.Errorf("expected content to contain: ~~strikethrough~~")
+	}
 }
 
 func Test_EmphasisSubscript(t *testing.T) {
-    // sub tag content is preserved
-    html := `<p>H<sub>2</sub>O</p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// sub tag content is preserved
+	html := `<p>H<sub>2</sub>O</p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "H") {
-        t.Errorf("expected content to contain: H")
-    }
-    if !strings.Contains(content, "2") {
-        t.Errorf("expected content to contain: 2")
-    }
-    if !strings.Contains(content, "O") {
-        t.Errorf("expected content to contain: O")
-    }
+	if !strings.Contains(content, "H") {
+		t.Errorf("expected content to contain: H")
+	}
+	if !strings.Contains(content, "2") {
+		t.Errorf("expected content to contain: 2")
+	}
+	if !strings.Contains(content, "O") {
+		t.Errorf("expected content to contain: O")
+	}
 }
 
 func Test_EmphasisSuperscript(t *testing.T) {
-    // sup tag content is preserved
-    html := `<p>x<sup>2</sup></p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// sup tag content is preserved
+	html := `<p>x<sup>2</sup></p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "x") {
-        t.Errorf("expected content to contain: x")
-    }
-    if !strings.Contains(content, "2") {
-        t.Errorf("expected content to contain: 2")
-    }
+	if !strings.Contains(content, "x") {
+		t.Errorf("expected content to contain: x")
+	}
+	if !strings.Contains(content, "2") {
+		t.Errorf("expected content to contain: 2")
+	}
 }
 
 func Test_EmphasisUnderlineU(t *testing.T) {
-    // u tag content is preserved in output
-    html := `<p><u>underlined</u></p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// u tag content is preserved in output
+	html := `<p><u>underlined</u></p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "underlined") {
-        t.Errorf("expected content to contain: underlined")
-    }
+	if !strings.Contains(content, "underlined") {
+		t.Errorf("expected content to contain: underlined")
+	}
 }
 
 func Test_FormInputElements(t *testing.T) {
-    // Form input elements produce readable output without form mechanics
-    html := `<form><label for=\"name\">Name:</label><input type=\"text\" id=\"name\" placeholder=\"Enter name\"></form>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Form input elements produce readable output without form mechanics
+	html := `<form><label for="name">Name:</label><input type="text" id="name" placeholder="Enter name"></form>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "Name") {
-        t.Errorf("expected content to contain: Name")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "Name") {
+		t.Errorf("expected content to contain: Name")
+	}
 }
 
 func Test_FormSelectOptions(t *testing.T) {
-    // Select element with options produces readable output
-    html := `<form><label>Color:</label><select><option value=\"red\">Red</option><option value=\"blue\" selected>Blue</option><option value=\"green\">Green</option></select></form>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Select element with options produces readable output
+	html := `<form><label>Color:</label><select><option value="red">Red</option><option value="blue" selected>Blue</option><option value="green">Green</option></select></form>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "Color") {
-        t.Errorf("expected content to contain: Color")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "Color") {
+		t.Errorf("expected content to contain: Color")
+	}
 }
 
 func Test_FormTextarea(t *testing.T) {
-    // Textarea element produces readable output
-    html := `<form><label>Message:</label><textarea>Default text content</textarea></form>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Textarea element produces readable output
+	html := `<form><label>Message:</label><textarea>Default text content</textarea></form>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "Message") {
-        t.Errorf("expected content to contain: Message")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "Message") {
+		t.Errorf("expected content to contain: Message")
+	}
 }
 
 func Test_HeadingH1(t *testing.T) {
-    // H1 heading
-    html := `<h1>Heading 1</h1>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// H1 heading
+	html := `<h1>Heading 1</h1>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) != "# Heading 1" {
-        t.Errorf("content_equals mismatch: got %q", content)
-    }
+	if strings.TrimSpace(content) != "# Heading 1" {
+		t.Errorf("content_equals mismatch: got %q", content)
+	}
 }
 
 func Test_HeadingH2(t *testing.T) {
-    // H2 heading
-    html := `<h2>Heading 2</h2>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// H2 heading
+	html := `<h2>Heading 2</h2>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) != "## Heading 2" {
-        t.Errorf("content_equals mismatch: got %q", content)
-    }
+	if strings.TrimSpace(content) != "## Heading 2" {
+		t.Errorf("content_equals mismatch: got %q", content)
+	}
 }
 
 func Test_HeadingH3(t *testing.T) {
-    // H3 heading
-    html := `<h3>Heading 3</h3>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// H3 heading
+	html := `<h3>Heading 3</h3>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) != "### Heading 3" {
-        t.Errorf("content_equals mismatch: got %q", content)
-    }
+	if strings.TrimSpace(content) != "### Heading 3" {
+		t.Errorf("content_equals mismatch: got %q", content)
+	}
 }
 
 func Test_HeadingH4(t *testing.T) {
-    // H4 heading
-    html := `<h4>Heading 4</h4>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// H4 heading
+	html := `<h4>Heading 4</h4>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) != "#### Heading 4" {
-        t.Errorf("content_equals mismatch: got %q", content)
-    }
+	if strings.TrimSpace(content) != "#### Heading 4" {
+		t.Errorf("content_equals mismatch: got %q", content)
+	}
 }
 
 func Test_HeadingH5(t *testing.T) {
-    // H5 heading
-    html := `<h5>Heading 5</h5>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// H5 heading
+	html := `<h5>Heading 5</h5>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) != "##### Heading 5" {
-        t.Errorf("content_equals mismatch: got %q", content)
-    }
+	if strings.TrimSpace(content) != "##### Heading 5" {
+		t.Errorf("content_equals mismatch: got %q", content)
+	}
 }
 
 func Test_HeadingH6(t *testing.T) {
-    // H6 heading
-    html := `<h6>Heading 6</h6>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// H6 heading
+	html := `<h6>Heading 6</h6>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) != "###### Heading 6" {
-        t.Errorf("content_equals mismatch: got %q", content)
-    }
+	if strings.TrimSpace(content) != "###### Heading 6" {
+		t.Errorf("content_equals mismatch: got %q", content)
+	}
 }
 
 func Test_ImageFigureFigcaption(t *testing.T) {
-    // Figure with figcaption preserves both image and caption
-    html := `<figure><img src=\"sunset.jpg\" alt=\"A sunset\"><figcaption>Beautiful sunset over the ocean</figcaption></figure>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Figure with figcaption preserves both image and caption
+	html := `<figure><img src="sunset.jpg" alt="A sunset"><figcaption>Beautiful sunset over the ocean</figcaption></figure>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "![A sunset](sunset.jpg)") {
-        t.Errorf("expected content to contain: ![A sunset](sunset.jpg)")
-    }
-    if !strings.Contains(content, "Beautiful sunset over the ocean") {
-        t.Errorf("expected content to contain: Beautiful sunset over the ocean")
-    }
+	if !strings.Contains(content, "![A sunset](sunset.jpg)") {
+		t.Errorf("expected content to contain: ![A sunset](sunset.jpg)")
+	}
+	if !strings.Contains(content, "Beautiful sunset over the ocean") {
+		t.Errorf("expected content to contain: Beautiful sunset over the ocean")
+	}
 }
 
 func Test_ImageLinked(t *testing.T) {
-    // Image inside an anchor produces a linked image
-    html := `<a href=\"https://example.com\"><img src=\"icon.png\" alt=\"Icon\"></a>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Image inside an anchor produces a linked image
+	html := `<a href="https://example.com"><img src="icon.png" alt="Icon"></a>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "![Icon](icon.png)") {
-        t.Errorf("expected content to contain: ![Icon](icon.png)")
-    }
-    if !strings.Contains(content, "https://example.com") {
-        t.Errorf("expected content to contain: https://example.com")
-    }
+	if !strings.Contains(content, "![Icon](icon.png)") {
+		t.Errorf("expected content to contain: ![Icon](icon.png)")
+	}
+	if !strings.Contains(content, "https://example.com") {
+		t.Errorf("expected content to contain: https://example.com")
+	}
 }
 
 func Test_ImageNoAlt(t *testing.T) {
-    // Image without alt text produces image markdown
-    html := `<img src=\"banner.jpg\">`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Image without alt text produces image markdown
+	html := `<img src="banner.jpg">`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "banner.jpg") {
-        t.Errorf("expected content to contain: banner.jpg")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "banner.jpg") {
+		t.Errorf("expected content to contain: banner.jpg")
+	}
 }
 
 func Test_ImageSimple(t *testing.T) {
-    // Image with alt text
-    html := `<img src=\"photo.jpg\" alt=\"A photo\">`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Image with alt text
+	html := `<img src="photo.jpg" alt="A photo">`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "![A photo](photo.jpg)") {
-        t.Errorf("expected content to contain: ![A photo](photo.jpg)")
-    }
+	if !strings.Contains(content, "![A photo](photo.jpg)") {
+		t.Errorf("expected content to contain: ![A photo](photo.jpg)")
+	}
 }
 
 func Test_ImageWithTitle(t *testing.T) {
-    // Image with title attribute includes title in output
-    html := `<img src=\"chart.png\" alt=\"Sales chart\" title=\"Q3 Sales\">`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Image with title attribute includes title in output
+	html := `<img src="chart.png" alt="Sales chart" title="Q3 Sales">`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "![Sales chart](chart.png") {
-        t.Errorf("expected content to contain: ![Sales chart](chart.png")
-    }
-    if !strings.Contains(content, "Q3 Sales") {
-        t.Errorf("expected content to contain: Q3 Sales")
-    }
+	if !strings.Contains(content, "![Sales chart](chart.png") {
+		t.Errorf("expected content to contain: ![Sales chart](chart.png")
+	}
+	if !strings.Contains(content, "Q3 Sales") {
+		t.Errorf("expected content to contain: Q3 Sales")
+	}
 }
 
 func Test_InlineCode(t *testing.T) {
-    // Inline code
-    html := `<p>Use <code>console.log()</code> to debug</p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Inline code
+	html := `<p>Use <code>console.log()</code> to debug</p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "`console.log()`") {
-        t.Errorf("expected content to contain: `console.log()`")
-    }
+	if !strings.Contains(content, "`console.log()`") {
+		t.Errorf("expected content to contain: `console.log()`")
+	}
 }
 
 func Test_ItalicEm(t *testing.T) {
-    // Em tag converts to italic
-    html := `<p><em>italic</em></p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Em tag converts to italic
+	html := `<p><em>italic</em></p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "*italic*") {
-        t.Errorf("expected content to contain: *italic*")
-    }
+	if !strings.Contains(content, "*italic*") {
+		t.Errorf("expected content to contain: *italic*")
+	}
 }
 
 func Test_LineBreakBrTag(t *testing.T) {
-    // Single br tag produces a line break in output
-    html := `<p>First line.<br>Second line.</p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Single br tag produces a line break in output
+	html := `<p>First line.<br>Second line.</p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "First line.") {
-        t.Errorf("expected content to contain: First line.")
-    }
-    if !strings.Contains(content, "Second line.") {
-        t.Errorf("expected content to contain: Second line.")
-    }
+	if !strings.Contains(content, "First line.") {
+		t.Errorf("expected content to contain: First line.")
+	}
+	if !strings.Contains(content, "Second line.") {
+		t.Errorf("expected content to contain: Second line.")
+	}
 }
 
 func Test_LineBreakHrTag(t *testing.T) {
-    // hr tag produces a horizontal separator between content
-    html := `<p>Before rule.</p><hr><p>After rule.</p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// hr tag produces a horizontal separator between content
+	html := `<p>Before rule.</p><hr><p>After rule.</p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "Before rule.") {
-        t.Errorf("expected content to contain: Before rule.")
-    }
-    if !strings.Contains(content, "After rule.") {
-        t.Errorf("expected content to contain: After rule.")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "Before rule.") {
+		t.Errorf("expected content to contain: Before rule.")
+	}
+	if !strings.Contains(content, "After rule.") {
+		t.Errorf("expected content to contain: After rule.")
+	}
 }
 
 func Test_LineBreakMultipleBr(t *testing.T) {
-    // Multiple consecutive br tags in sequence
-    html := `<p>Start.<br><br>End.</p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Multiple consecutive br tags in sequence
+	html := `<p>Start.<br><br>End.</p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "Start.") {
-        t.Errorf("expected content to contain: Start.")
-    }
-    if !strings.Contains(content, "End.") {
-        t.Errorf("expected content to contain: End.")
-    }
+	if !strings.Contains(content, "Start.") {
+		t.Errorf("expected content to contain: Start.")
+	}
+	if !strings.Contains(content, "End.") {
+		t.Errorf("expected content to contain: End.")
+	}
 }
 
 func Test_LinkAnchorFragment(t *testing.T) {
-    // Fragment-only anchor link is preserved
-    html := `<a href=\"#section\">Jump to section</a>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Fragment-only anchor link is preserved
+	html := `<a href="#section">Jump to section</a>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "[Jump to section](#section)") {
-        t.Errorf("expected content to contain: [Jump to section](#section)")
-    }
+	if !strings.Contains(content, "[Jump to section](#section)") {
+		t.Errorf("expected content to contain: [Jump to section](#section)")
+	}
 }
 
 func Test_LinkEmptyHref(t *testing.T) {
-    // Link with empty href produces output with the link text
-    html := `<a href=\"\">No destination</a>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Link with empty href produces output with the link text
+	html := `<a href="">No destination</a>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "No destination") {
-        t.Errorf("expected content to contain: No destination")
-    }
+	if !strings.Contains(content, "No destination") {
+		t.Errorf("expected content to contain: No destination")
+	}
 }
 
 func Test_LinkImageInside(t *testing.T) {
-    // Image inside a link produces a linked image
-    html := `<a href=\"https://example.com\"><img src=\"logo.png\" alt=\"Logo\"></a>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Image inside a link produces a linked image
+	html := `<a href="https://example.com"><img src="logo.png" alt="Logo"></a>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "![Logo](logo.png)") {
-        t.Errorf("expected content to contain: ![Logo](logo.png)")
-    }
-    if !strings.Contains(content, "https://example.com") {
-        t.Errorf("expected content to contain: https://example.com")
-    }
+	if !strings.Contains(content, "![Logo](logo.png)") {
+		t.Errorf("expected content to contain: ![Logo](logo.png)")
+	}
+	if !strings.Contains(content, "https://example.com") {
+		t.Errorf("expected content to contain: https://example.com")
+	}
 }
 
 func Test_LinkMailto(t *testing.T) {
-    // Mailto link is preserved with mailto: scheme
-    html := `<a href=\"mailto:user@example.com\">Email us</a>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Mailto link is preserved with mailto: scheme
+	html := `<a href="mailto:user@example.com">Email us</a>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "mailto:user@example.com") {
-        t.Errorf("expected content to contain: mailto:user@example.com")
-    }
+	if !strings.Contains(content, "mailto:user@example.com") {
+		t.Errorf("expected content to contain: mailto:user@example.com")
+	}
 }
 
 func Test_LinkSimple(t *testing.T) {
-    // Simple link
-    html := `<a href=\"https://example.com\">Example</a>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Simple link
+	html := `<a href="https://example.com">Example</a>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "[Example](https://example.com)") {
-        t.Errorf("expected content to contain: [Example](https://example.com)")
-    }
+	if !strings.Contains(content, "[Example](https://example.com)") {
+		t.Errorf("expected content to contain: [Example](https://example.com)")
+	}
 }
 
 func Test_LinkWithBoldText(t *testing.T) {
-    // Link containing bold text preserves formatting
-    html := `<a href=\"https://example.com\"><strong>Bold link</strong></a>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Link containing bold text preserves formatting
+	html := `<a href="https://example.com"><strong>Bold link</strong></a>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "**Bold link**") {
-        t.Errorf("expected content to contain: **Bold link**")
-    }
-    if !strings.Contains(content, "https://example.com") {
-        t.Errorf("expected content to contain: https://example.com")
-    }
+	if !strings.Contains(content, "**Bold link**") {
+		t.Errorf("expected content to contain: **Bold link**")
+	}
+	if !strings.Contains(content, "https://example.com") {
+		t.Errorf("expected content to contain: https://example.com")
+	}
 }
 
 func Test_LinkWithTitle(t *testing.T) {
-    // Link with title attribute
-    html := `<a href=\"https://example.com\" title=\"Example Site\">Example</a>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Link with title attribute
+	html := `<a href="https://example.com" title="Example Site">Example</a>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "[Example](https://example.com") {
-        t.Errorf("expected content to contain: [Example](https://example.com")
-    }
-    if !strings.Contains(content, "Example Site") {
-        t.Errorf("expected content to contain: Example Site")
-    }
+	if !strings.Contains(content, "[Example](https://example.com") {
+		t.Errorf("expected content to contain: [Example](https://example.com")
+	}
+	if !strings.Contains(content, "Example Site") {
+		t.Errorf("expected content to contain: Example Site")
+	}
 }
 
 func Test_ListDefinitionDl(t *testing.T) {
-    // Definition list with dt and dd elements
-    html := `<dl><dt>Term One</dt><dd>Definition of term one.</dd><dt>Term Two</dt><dd>Definition of term two.</dd></dl>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Definition list with dt and dd elements
+	html := `<dl><dt>Term One</dt><dd>Definition of term one.</dd><dt>Term Two</dt><dd>Definition of term two.</dd></dl>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "Term One") {
-        t.Errorf("expected content to contain: Term One")
-    }
-    if !strings.Contains(content, "Definition of term one.") {
-        t.Errorf("expected content to contain: Definition of term one.")
-    }
-    if !strings.Contains(content, "Term Two") {
-        t.Errorf("expected content to contain: Term Two")
-    }
-    if !strings.Contains(content, "Definition of term two.") {
-        t.Errorf("expected content to contain: Definition of term two.")
-    }
+	if !strings.Contains(content, "Term One") {
+		t.Errorf("expected content to contain: Term One")
+	}
+	if !strings.Contains(content, "Definition of term one.") {
+		t.Errorf("expected content to contain: Definition of term one.")
+	}
+	if !strings.Contains(content, "Term Two") {
+		t.Errorf("expected content to contain: Term Two")
+	}
+	if !strings.Contains(content, "Definition of term two.") {
+		t.Errorf("expected content to contain: Definition of term two.")
+	}
 }
 
 func Test_ListItemMultipleParagraphs(t *testing.T) {
-    // List item containing multiple paragraphs
-    html := `<ul><li><p>First paragraph in item.</p><p>Second paragraph in item.</p></li><li>Simple item</li></ul>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// List item containing multiple paragraphs
+	html := `<ul><li><p>First paragraph in item.</p><p>Second paragraph in item.</p></li><li>Simple item</li></ul>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "First paragraph in item.") {
-        t.Errorf("expected content to contain: First paragraph in item.")
-    }
-    if !strings.Contains(content, "Second paragraph in item.") {
-        t.Errorf("expected content to contain: Second paragraph in item.")
-    }
-    if !strings.Contains(content, "Simple item") {
-        t.Errorf("expected content to contain: Simple item")
-    }
+	if !strings.Contains(content, "First paragraph in item.") {
+		t.Errorf("expected content to contain: First paragraph in item.")
+	}
+	if !strings.Contains(content, "Second paragraph in item.") {
+		t.Errorf("expected content to contain: Second paragraph in item.")
+	}
+	if !strings.Contains(content, "Simple item") {
+		t.Errorf("expected content to contain: Simple item")
+	}
 }
 
 func Test_ListMixedNested(t *testing.T) {
-    // Mixed list: ordered list nested inside unordered list
-    html := `<ul><li>Item A<ol><li>Sub 1</li><li>Sub 2</li></ol></li><li>Item B</li></ul>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Mixed list: ordered list nested inside unordered list
+	html := `<ul><li>Item A<ol><li>Sub 1</li><li>Sub 2</li></ol></li><li>Item B</li></ul>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "Item A") {
-        t.Errorf("expected content to contain: Item A")
-    }
-    if !strings.Contains(content, "Sub 1") {
-        t.Errorf("expected content to contain: Sub 1")
-    }
-    if !strings.Contains(content, "Sub 2") {
-        t.Errorf("expected content to contain: Sub 2")
-    }
-    if !strings.Contains(content, "Item B") {
-        t.Errorf("expected content to contain: Item B")
-    }
+	if !strings.Contains(content, "Item A") {
+		t.Errorf("expected content to contain: Item A")
+	}
+	if !strings.Contains(content, "Sub 1") {
+		t.Errorf("expected content to contain: Sub 1")
+	}
+	if !strings.Contains(content, "Sub 2") {
+		t.Errorf("expected content to contain: Sub 2")
+	}
+	if !strings.Contains(content, "Item B") {
+		t.Errorf("expected content to contain: Item B")
+	}
 }
 
 func Test_ListNestedOrdered(t *testing.T) {
-    // Nested ordered list with two levels of depth
-    html := `<ol><li>Step 1<ol><li>Step 1a</li><li>Step 1b</li></ol></li><li>Step 2</li></ol>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Nested ordered list with two levels of depth
+	html := `<ol><li>Step 1<ol><li>Step 1a</li><li>Step 1b</li></ol></li><li>Step 2</li></ol>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "Step 1") {
-        t.Errorf("expected content to contain: Step 1")
-    }
-    if !strings.Contains(content, "Step 1a") {
-        t.Errorf("expected content to contain: Step 1a")
-    }
-    if !strings.Contains(content, "Step 1b") {
-        t.Errorf("expected content to contain: Step 1b")
-    }
-    if !strings.Contains(content, "Step 2") {
-        t.Errorf("expected content to contain: Step 2")
-    }
+	if !strings.Contains(content, "Step 1") {
+		t.Errorf("expected content to contain: Step 1")
+	}
+	if !strings.Contains(content, "Step 1a") {
+		t.Errorf("expected content to contain: Step 1a")
+	}
+	if !strings.Contains(content, "Step 1b") {
+		t.Errorf("expected content to contain: Step 1b")
+	}
+	if !strings.Contains(content, "Step 2") {
+		t.Errorf("expected content to contain: Step 2")
+	}
 }
 
 func Test_ListNestedUnordered(t *testing.T) {
-    // Nested unordered list with two levels of depth
-    html := `<ul><li>Parent A<ul><li>Child A1</li><li>Child A2</li></ul></li><li>Parent B</li></ul>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Nested unordered list with two levels of depth
+	html := `<ul><li>Parent A<ul><li>Child A1</li><li>Child A2</li></ul></li><li>Parent B</li></ul>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "Parent A") {
-        t.Errorf("expected content to contain: Parent A")
-    }
-    if !strings.Contains(content, "Child A1") {
-        t.Errorf("expected content to contain: Child A1")
-    }
-    if !strings.Contains(content, "Child A2") {
-        t.Errorf("expected content to contain: Child A2")
-    }
-    if !strings.Contains(content, "Parent B") {
-        t.Errorf("expected content to contain: Parent B")
-    }
+	if !strings.Contains(content, "Parent A") {
+		t.Errorf("expected content to contain: Parent A")
+	}
+	if !strings.Contains(content, "Child A1") {
+		t.Errorf("expected content to contain: Child A1")
+	}
+	if !strings.Contains(content, "Child A2") {
+		t.Errorf("expected content to contain: Child A2")
+	}
+	if !strings.Contains(content, "Parent B") {
+		t.Errorf("expected content to contain: Parent B")
+	}
 }
 
 func Test_ListTaskCheckboxes(t *testing.T) {
-    // Task list with checked and unchecked checkboxes
-    html := `<ul><li><input type=\"checkbox\" checked> Done task</li><li><input type=\"checkbox\"> Pending task</li></ul>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Task list with checked and unchecked checkboxes
+	html := `<ul><li><input type="checkbox" checked> Done task</li><li><input type="checkbox"> Pending task</li></ul>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "Done task") {
-        t.Errorf("expected content to contain: Done task")
-    }
-    if !strings.Contains(content, "Pending task") {
-        t.Errorf("expected content to contain: Pending task")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "Done task") {
+		t.Errorf("expected content to contain: Done task")
+	}
+	if !strings.Contains(content, "Pending task") {
+		t.Errorf("expected content to contain: Pending task")
+	}
 }
 
 func Test_OrderedList(t *testing.T) {
-    // Ordered list
-    html := `<ol><li>First</li><li>Second</li><li>Third</li></ol>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Ordered list
+	html := `<ol><li>First</li><li>Second</li><li>Third</li></ol>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "1. First") {
-        t.Errorf("expected content to contain: 1. First")
-    }
-    if !strings.Contains(content, "2. Second") {
-        t.Errorf("expected content to contain: 2. Second")
-    }
-    if !strings.Contains(content, "3. Third") {
-        t.Errorf("expected content to contain: 3. Third")
-    }
+	if !strings.Contains(content, "1. First") {
+		t.Errorf("expected content to contain: 1. First")
+	}
+	if !strings.Contains(content, "2. Second") {
+		t.Errorf("expected content to contain: 2. Second")
+	}
+	if !strings.Contains(content, "3. Third") {
+		t.Errorf("expected content to contain: 3. Third")
+	}
 }
 
 func Test_ParagraphMultiple(t *testing.T) {
-    // Multiple paragraphs are separated by a blank line
-    html := `<p>First paragraph.</p><p>Second paragraph.</p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Multiple paragraphs are separated by a blank line
+	html := `<p>First paragraph.</p><p>Second paragraph.</p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "First paragraph.") {
-        t.Errorf("expected content to contain: First paragraph.")
-    }
-    if !strings.Contains(content, "Second paragraph.") {
-        t.Errorf("expected content to contain: Second paragraph.")
-    }
+	if !strings.Contains(content, "First paragraph.") {
+		t.Errorf("expected content to contain: First paragraph.")
+	}
+	if !strings.Contains(content, "Second paragraph.") {
+		t.Errorf("expected content to contain: Second paragraph.")
+	}
 }
 
 func Test_ParagraphNestedDivs(t *testing.T) {
-    // Text nested inside divs is extracted correctly
-    html := `<div><div><p>Nested text</p></div></div>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Text nested inside divs is extracted correctly
+	html := `<div><div><p>Nested text</p></div></div>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "Nested text") {
-        t.Errorf("expected content to contain: Nested text")
-    }
+	if !strings.Contains(content, "Nested text") {
+		t.Errorf("expected content to contain: Nested text")
+	}
 }
 
 func Test_ParagraphSimple(t *testing.T) {
-    // Simple paragraph converts to plain text
-    html := `<p>Hello World</p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Simple paragraph converts to plain text
+	html := `<p>Hello World</p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) != "Hello World" {
-        t.Errorf("content_equals mismatch: got %q", content)
-    }
+	if strings.TrimSpace(content) != "Hello World" {
+		t.Errorf("content_equals mismatch: got %q", content)
+	}
 }
 
 func Test_ParagraphWithInlineFormatting(t *testing.T) {
-    // Paragraph with bold, italic, and a link
-    html := `<p>This has <strong>bold</strong>, <em>italic</em>, and a <a href=\"https://example.com\">link</a>.</p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Paragraph with bold, italic, and a link
+	html := `<p>This has <strong>bold</strong>, <em>italic</em>, and a <a href="https://example.com">link</a>.</p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "**bold**") {
-        t.Errorf("expected content to contain: **bold**")
-    }
-    if !strings.Contains(content, "*italic*") {
-        t.Errorf("expected content to contain: *italic*")
-    }
-    if !strings.Contains(content, "[link](https://example.com)") {
-        t.Errorf("expected content to contain: [link](https://example.com)")
-    }
+	if !strings.Contains(content, "**bold**") {
+		t.Errorf("expected content to contain: **bold**")
+	}
+	if !strings.Contains(content, "*italic*") {
+		t.Errorf("expected content to contain: *italic*")
+	}
+	if !strings.Contains(content, "[link](https://example.com)") {
+		t.Errorf("expected content to contain: [link](https://example.com)")
+	}
 }
 
 func Test_ParagraphWithLineBreaks(t *testing.T) {
-    // Paragraph with br tags produces line breaks in output
-    html := `<p>Line one.<br>Line two.<br>Line three.</p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Paragraph with br tags produces line breaks in output
+	html := `<p>Line one.<br>Line two.<br>Line three.</p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "Line one.") {
-        t.Errorf("expected content to contain: Line one.")
-    }
-    if !strings.Contains(content, "Line two.") {
-        t.Errorf("expected content to contain: Line two.")
-    }
-    if !strings.Contains(content, "Line three.") {
-        t.Errorf("expected content to contain: Line three.")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "Line one.") {
+		t.Errorf("expected content to contain: Line one.")
+	}
+	if !strings.Contains(content, "Line two.") {
+		t.Errorf("expected content to contain: Line two.")
+	}
+	if !strings.Contains(content, "Line three.") {
+		t.Errorf("expected content to contain: Line three.")
+	}
 }
 
 func Test_SemanticAbbr(t *testing.T) {
-    // Abbreviation element text is preserved
-    html := `<p>The <abbr title=\"World Wide Web\">WWW</abbr> is global.</p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Abbreviation element text is preserved
+	html := `<p>The <abbr title="World Wide Web">WWW</abbr> is global.</p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "WWW") {
-        t.Errorf("expected content to contain: WWW")
-    }
+	if !strings.Contains(content, "WWW") {
+		t.Errorf("expected content to contain: WWW")
+	}
 }
 
 func Test_SemanticArticle(t *testing.T) {
-    // Article element wrapping content preserves inner content
-    html := `<article><h2>Article Title</h2><p>Article body.</p></article>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Article element wrapping content preserves inner content
+	html := `<article><h2>Article Title</h2><p>Article body.</p></article>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "Article Title") {
-        t.Errorf("expected content to contain: Article Title")
-    }
-    if !strings.Contains(content, "Article body.") {
-        t.Errorf("expected content to contain: Article body.")
-    }
+	if !strings.Contains(content, "Article Title") {
+		t.Errorf("expected content to contain: Article Title")
+	}
+	if !strings.Contains(content, "Article body.") {
+		t.Errorf("expected content to contain: Article body.")
+	}
 }
 
 func Test_SemanticDefinitionList(t *testing.T) {
-    // Definition list with term and description
-    html := `<dl><dt>HTML</dt><dd>HyperText Markup Language</dd><dt>CSS</dt><dd>Cascading Style Sheets</dd></dl>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Definition list with term and description
+	html := `<dl><dt>HTML</dt><dd>HyperText Markup Language</dd><dt>CSS</dt><dd>Cascading Style Sheets</dd></dl>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "HTML") {
-        t.Errorf("expected content to contain: HTML")
-    }
-    if !strings.Contains(content, "HyperText Markup Language") {
-        t.Errorf("expected content to contain: HyperText Markup Language")
-    }
-    if !strings.Contains(content, "CSS") {
-        t.Errorf("expected content to contain: CSS")
-    }
-    if !strings.Contains(content, "Cascading Style Sheets") {
-        t.Errorf("expected content to contain: Cascading Style Sheets")
-    }
+	if !strings.Contains(content, "HTML") {
+		t.Errorf("expected content to contain: HTML")
+	}
+	if !strings.Contains(content, "HyperText Markup Language") {
+		t.Errorf("expected content to contain: HyperText Markup Language")
+	}
+	if !strings.Contains(content, "CSS") {
+		t.Errorf("expected content to contain: CSS")
+	}
+	if !strings.Contains(content, "Cascading Style Sheets") {
+		t.Errorf("expected content to contain: Cascading Style Sheets")
+	}
 }
 
 func Test_SemanticDetailsSummary(t *testing.T) {
-    // Details and summary elements produce readable output
-    html := `<details><summary>Click to expand</summary><p>Hidden content here.</p></details>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Details and summary elements produce readable output
+	html := `<details><summary>Click to expand</summary><p>Hidden content here.</p></details>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "Click to expand") {
-        t.Errorf("expected content to contain: Click to expand")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "Click to expand") {
+		t.Errorf("expected content to contain: Click to expand")
+	}
 }
 
 func Test_SemanticHr(t *testing.T) {
-    // Horizontal rule produces a separator in output
-    html := `<p>Above</p><hr><p>Below</p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Horizontal rule produces a separator in output
+	html := `<p>Above</p><hr><p>Below</p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "Above") {
-        t.Errorf("expected content to contain: Above")
-    }
-    if !strings.Contains(content, "Below") {
-        t.Errorf("expected content to contain: Below")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "Above") {
+		t.Errorf("expected content to contain: Above")
+	}
+	if !strings.Contains(content, "Below") {
+		t.Errorf("expected content to contain: Below")
+	}
 }
 
 func Test_SemanticMarkHighlight(t *testing.T) {
-    // Mark tag produces highlighted output
-    html := `<p>This is <mark>highlighted text</mark> in a sentence.</p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Mark tag produces highlighted output
+	html := `<p>This is <mark>highlighted text</mark> in a sentence.</p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "highlighted text") {
-        t.Errorf("expected content to contain: highlighted text")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "highlighted text") {
+		t.Errorf("expected content to contain: highlighted text")
+	}
 }
 
 func Test_SemanticSectionWithHeading(t *testing.T) {
-    // Section element with heading preserves structure
-    html := `<section><h3>Section Heading</h3><p>Section content.</p></section>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Section element with heading preserves structure
+	html := `<section><h3>Section Heading</h3><p>Section content.</p></section>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "Section Heading") {
-        t.Errorf("expected content to contain: Section Heading")
-    }
-    if !strings.Contains(content, "Section content.") {
-        t.Errorf("expected content to contain: Section content.")
-    }
+	if !strings.Contains(content, "Section Heading") {
+		t.Errorf("expected content to contain: Section Heading")
+	}
+	if !strings.Contains(content, "Section content.") {
+		t.Errorf("expected content to contain: Section content.")
+	}
 }
 
 func Test_SemanticSubSuperscript(t *testing.T) {
-    // Subscript and superscript elements are preserved in output
-    html := `<p>H<sub>2</sub>O and E=mc<sup>2</sup></p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Subscript and superscript elements are preserved in output
+	html := `<p>H<sub>2</sub>O and E=mc<sup>2</sup></p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "H") {
-        t.Errorf("expected content to contain: H")
-    }
-    if !strings.Contains(content, "2") {
-        t.Errorf("expected content to contain: 2")
-    }
-    if !strings.Contains(content, "O") {
-        t.Errorf("expected content to contain: O")
-    }
-    if !strings.Contains(content, "E=mc") {
-        t.Errorf("expected content to contain: E=mc")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "H") {
+		t.Errorf("expected content to contain: H")
+	}
+	if !strings.Contains(content, "2") {
+		t.Errorf("expected content to contain: 2")
+	}
+	if !strings.Contains(content, "O") {
+		t.Errorf("expected content to contain: O")
+	}
+	if !strings.Contains(content, "E=mc") {
+		t.Errorf("expected content to contain: E=mc")
+	}
 }
 
 func Test_SimpleTable(t *testing.T) {
-    // Simple table with header
-    html := `<table><thead><tr><th>Name</th><th>Age</th></tr></thead><tbody><tr><td>Alice</td><td>30</td></tr></tbody></table>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Simple table with header
+	html := `<table><thead><tr><th>Name</th><th>Age</th></tr></thead><tbody><tr><td>Alice</td><td>30</td></tr></tbody></table>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "Name") {
-        t.Errorf("expected content to contain: Name")
-    }
-    if !strings.Contains(content, "Age") {
-        t.Errorf("expected content to contain: Age")
-    }
-    if !strings.Contains(content, "Alice") {
-        t.Errorf("expected content to contain: Alice")
-    }
-    if !strings.Contains(content, "30") {
-        t.Errorf("expected content to contain: 30")
-    }
-    if !strings.Contains(content, "|") {
-        t.Errorf("expected content to contain: |")
-    }
-    if !strings.Contains(content, "---") {
-        t.Errorf("expected content to contain: ---")
-    }
+	if !strings.Contains(content, "Name") {
+		t.Errorf("expected content to contain: Name")
+	}
+	if !strings.Contains(content, "Age") {
+		t.Errorf("expected content to contain: Age")
+	}
+	if !strings.Contains(content, "Alice") {
+		t.Errorf("expected content to contain: Alice")
+	}
+	if !strings.Contains(content, "30") {
+		t.Errorf("expected content to contain: 30")
+	}
+	if !strings.Contains(content, "|") {
+		t.Errorf("expected content to contain: |")
+	}
+	if !strings.Contains(content, "---") {
+		t.Errorf("expected content to contain: ---")
+	}
 }
 
 func Test_TableEmpty(t *testing.T) {
-    // Empty table produces no output or minimal output
-    html := `<table></table>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Empty table produces no output or minimal output
+	html := `<table></table>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) != "" {
-        t.Errorf("content_equals mismatch: got %q", content)
-    }
+	if strings.TrimSpace(content) != "" {
+		t.Errorf("content_equals mismatch: got %q", content)
+	}
 }
 
 func Test_TableNoThead(t *testing.T) {
-    // Table without thead uses first row as implied header
-    html := `<table><tr><td>Product</td><td>Price</td></tr><tr><td>Apple</td><td>1.00</td></tr></table>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Table without thead uses first row as implied header
+	html := `<table><tr><td>Product</td><td>Price</td></tr><tr><td>Apple</td><td>1.00</td></tr></table>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "Product") {
-        t.Errorf("expected content to contain: Product")
-    }
-    if !strings.Contains(content, "Price") {
-        t.Errorf("expected content to contain: Price")
-    }
-    if !strings.Contains(content, "Apple") {
-        t.Errorf("expected content to contain: Apple")
-    }
-    if !strings.Contains(content, "1.00") {
-        t.Errorf("expected content to contain: 1.00")
-    }
-    if !strings.Contains(content, "|") {
-        t.Errorf("expected content to contain: |")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "Product") {
+		t.Errorf("expected content to contain: Product")
+	}
+	if !strings.Contains(content, "Price") {
+		t.Errorf("expected content to contain: Price")
+	}
+	if !strings.Contains(content, "Apple") {
+		t.Errorf("expected content to contain: Apple")
+	}
+	if !strings.Contains(content, "1.00") {
+		t.Errorf("expected content to contain: 1.00")
+	}
+	if !strings.Contains(content, "|") {
+		t.Errorf("expected content to contain: |")
+	}
 }
 
 func Test_TablePipeCharsInContent(t *testing.T) {
-    // Table cells containing pipe characters are escaped in output
-    html := `<table><thead><tr><th>Expression</th><th>Result</th></tr></thead><tbody><tr><td>a | b</td><td>true</td></tr></tbody></table>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Table cells containing pipe characters are escaped in output
+	html := `<table><thead><tr><th>Expression</th><th>Result</th></tr></thead><tbody><tr><td>a | b</td><td>true</td></tr></tbody></table>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "Expression") {
-        t.Errorf("expected content to contain: Expression")
-    }
-    if !strings.Contains(content, "Result") {
-        t.Errorf("expected content to contain: Result")
-    }
-    if !strings.Contains(content, "true") {
-        t.Errorf("expected content to contain: true")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "Expression") {
+		t.Errorf("expected content to contain: Expression")
+	}
+	if !strings.Contains(content, "Result") {
+		t.Errorf("expected content to contain: Result")
+	}
+	if !strings.Contains(content, "true") {
+		t.Errorf("expected content to contain: true")
+	}
 }
 
 func Test_TableWithAlignment(t *testing.T) {
-    // Table with column alignment attributes
-    html := `<table><thead><tr><th align=\"left\">Left</th><th align=\"center\">Center</th><th align=\"right\">Right</th></tr></thead><tbody><tr><td>L</td><td>C</td><td>R</td></tr></tbody></table>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Table with column alignment attributes
+	html := `<table><thead><tr><th align="left">Left</th><th align="center">Center</th><th align="right">Right</th></tr></thead><tbody><tr><td>L</td><td>C</td><td>R</td></tr></tbody></table>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "Left") {
-        t.Errorf("expected content to contain: Left")
-    }
-    if !strings.Contains(content, "Center") {
-        t.Errorf("expected content to contain: Center")
-    }
-    if !strings.Contains(content, "Right") {
-        t.Errorf("expected content to contain: Right")
-    }
-    if !strings.Contains(content, "L") {
-        t.Errorf("expected content to contain: L")
-    }
-    if !strings.Contains(content, "C") {
-        t.Errorf("expected content to contain: C")
-    }
-    if !strings.Contains(content, "R") {
-        t.Errorf("expected content to contain: R")
-    }
-    if !strings.Contains(content, "|") {
-        t.Errorf("expected content to contain: |")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "Left") {
+		t.Errorf("expected content to contain: Left")
+	}
+	if !strings.Contains(content, "Center") {
+		t.Errorf("expected content to contain: Center")
+	}
+	if !strings.Contains(content, "Right") {
+		t.Errorf("expected content to contain: Right")
+	}
+	if !strings.Contains(content, "L") {
+		t.Errorf("expected content to contain: L")
+	}
+	if !strings.Contains(content, "C") {
+		t.Errorf("expected content to contain: C")
+	}
+	if !strings.Contains(content, "R") {
+		t.Errorf("expected content to contain: R")
+	}
+	if !strings.Contains(content, "|") {
+		t.Errorf("expected content to contain: |")
+	}
 }
 
 func Test_TableWithColspan(t *testing.T) {
-    // Table with colspan attribute in a header cell
-    html := `<table><thead><tr><th colspan=\"2\">Full Name</th></tr></thead><tbody><tr><td>John</td><td>Doe</td></tr></tbody></table>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Table with colspan attribute in a header cell
+	html := `<table><thead><tr><th colspan="2">Full Name</th></tr></thead><tbody><tr><td>John</td><td>Doe</td></tr></tbody></table>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "Full Name") {
-        t.Errorf("expected content to contain: Full Name")
-    }
-    if !strings.Contains(content, "John") {
-        t.Errorf("expected content to contain: John")
-    }
-    if !strings.Contains(content, "Doe") {
-        t.Errorf("expected content to contain: Doe")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "Full Name") {
+		t.Errorf("expected content to contain: Full Name")
+	}
+	if !strings.Contains(content, "John") {
+		t.Errorf("expected content to contain: John")
+	}
+	if !strings.Contains(content, "Doe") {
+		t.Errorf("expected content to contain: Doe")
+	}
 }
 
 func Test_UnorderedList(t *testing.T) {
-    // Unordered list
-    html := `<ul><li>Item 1</li><li>Item 2</li><li>Item 3</li></ul>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Unordered list
+	html := `<ul><li>Item 1</li><li>Item 2</li><li>Item 3</li></ul>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "- Item 1") {
-        t.Errorf("expected content to contain: - Item 1")
-    }
-    if !strings.Contains(content, "- Item 2") {
-        t.Errorf("expected content to contain: - Item 2")
-    }
-    if !strings.Contains(content, "- Item 3") {
-        t.Errorf("expected content to contain: - Item 3")
-    }
+	if !strings.Contains(content, "- Item 1") {
+		t.Errorf("expected content to contain: - Item 1")
+	}
+	if !strings.Contains(content, "- Item 2") {
+		t.Errorf("expected content to contain: - Item 2")
+	}
+	if !strings.Contains(content, "- Item 3") {
+		t.Errorf("expected content to contain: - Item 3")
+	}
 }

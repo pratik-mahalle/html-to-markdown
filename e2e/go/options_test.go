@@ -4,384 +4,316 @@
 package e2e_test
 
 import (
-    "strings"
-    "testing"
+	"strings"
+	"testing"
 
-    htmd "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown"
+	htmd "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown"
 )
 
 func Test_OptionsCodeBlockBackticks(t *testing.T) {
-    // Backticks code block style uses triple backtick fences
-    html := `<pre><code class=\"language-js\">console.log('hi');</code></pre>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Backticks code block style uses triple backtick fences
+	html := `<pre><code class="language-js">console.log('hi');</code></pre>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "```") {
-        t.Errorf("expected content to contain: ```")
-    }
-    if !strings.Contains(content, "console.log('hi');") {
-        t.Errorf("expected content to contain: console.log('hi');")
-    }
+	if !strings.Contains(content, "```") {
+		t.Errorf("expected content to contain: ```")
+	}
+	if !strings.Contains(content, "console.log('hi');") {
+		t.Errorf("expected content to contain: console.log('hi');")
+	}
 }
 
 func Test_OptionsCodeBlockTildes(t *testing.T) {
-    // Tildes code block style uses triple tilde fences
-    html := `<pre><code>some code</code></pre>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Tildes code block style uses triple tilde fences
+	html := `<pre><code>some code</code></pre>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "~~~") {
-        t.Errorf("expected content to contain: ~~~")
-    }
-    if !strings.Contains(content, "some code") {
-        t.Errorf("expected content to contain: some code")
-    }
+	if !strings.Contains(content, "~~~") {
+		t.Errorf("expected content to contain: ~~~")
+	}
+	if !strings.Contains(content, "some code") {
+		t.Errorf("expected content to contain: some code")
+	}
 }
 
 func Test_OptionsEscapeAsterisks(t *testing.T) {
-    // escape_asterisks option escapes asterisks in plain text
-    html := `<p>Use 2*3 = 6 in math.</p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// escape_asterisks option escapes asterisks in plain text
+	html := `<p>Use 2*3 = 6 in math.</p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "2") {
-        t.Errorf("expected content to contain: 2")
-    }
-    if !strings.Contains(content, "3") {
-        t.Errorf("expected content to contain: 3")
-    }
-    if !strings.Contains(content, "6") {
-        t.Errorf("expected content to contain: 6")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "2") {
+		t.Errorf("expected content to contain: 2")
+	}
+	if !strings.Contains(content, "3") {
+		t.Errorf("expected content to contain: 3")
+	}
+	if !strings.Contains(content, "6") {
+		t.Errorf("expected content to contain: 6")
+	}
 }
 
 func Test_OptionsEscapeMisc(t *testing.T) {
-    // escape_misc option escapes miscellaneous markdown characters
-    html := `<p>Use # and | and ~ in text.</p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// escape_misc option escapes miscellaneous markdown characters
+	html := `<p>Use # and | and ~ in text.</p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "Use") {
-        t.Errorf("expected content to contain: Use")
-    }
-    if !strings.Contains(content, "and") {
-        t.Errorf("expected content to contain: and")
-    }
-    if !strings.Contains(content, "in text.") {
-        t.Errorf("expected content to contain: in text.")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "Use") {
+		t.Errorf("expected content to contain: Use")
+	}
+	if !strings.Contains(content, "and") {
+		t.Errorf("expected content to contain: and")
+	}
+	if !strings.Contains(content, "in text.") {
+		t.Errorf("expected content to contain: in text.")
+	}
 }
 
 func Test_OptionsEscapeUnderscores(t *testing.T) {
-    // escape_underscores option escapes underscores in plain text
-    html := `<p>The variable_name is defined.</p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// escape_underscores option escapes underscores in plain text
+	html := `<p>The variable_name is defined.</p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "variable") {
-        t.Errorf("expected content to contain: variable")
-    }
-    if !strings.Contains(content, "name") {
-        t.Errorf("expected content to contain: name")
-    }
-    if !strings.Contains(content, "defined.") {
-        t.Errorf("expected content to contain: defined.")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "variable") {
+		t.Errorf("expected content to contain: variable")
+	}
+	if !strings.Contains(content, "name") {
+		t.Errorf("expected content to contain: name")
+	}
+	if !strings.Contains(content, "defined.") {
+		t.Errorf("expected content to contain: defined.")
+	}
 }
 
 func Test_OptionsHeadingStyleAtx(t *testing.T) {
-    // ATX heading style produces hash-prefixed headings
-    html := `<h1>Title</h1><h2>Subtitle</h2>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// ATX heading style produces hash-prefixed headings
+	html := `<h1>Title</h1><h2>Subtitle</h2>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "# Title") {
-        t.Errorf("expected content to contain: # Title")
-    }
-    if !strings.Contains(content, "## Subtitle") {
-        t.Errorf("expected content to contain: ## Subtitle")
-    }
+	if !strings.Contains(content, "# Title") {
+		t.Errorf("expected content to contain: # Title")
+	}
+	if !strings.Contains(content, "## Subtitle") {
+		t.Errorf("expected content to contain: ## Subtitle")
+	}
 }
 
 func Test_OptionsHeadingStyleAtxClosed(t *testing.T) {
-    // ATX closed heading style adds closing hashes
-    html := `<h1>Closed Heading</h1>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// ATX closed heading style adds closing hashes
+	html := `<h1>Closed Heading</h1>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "# Closed Heading #") {
-        t.Errorf("expected content to contain: # Closed Heading #")
-    }
+	if !strings.Contains(content, "# Closed Heading #") {
+		t.Errorf("expected content to contain: # Closed Heading #")
+	}
 }
 
 func Test_OptionsHeadingStyleUnderlined(t *testing.T) {
-    // Underlined heading style produces setext-style headings for h1 and h2
-    html := `<h1>Main Title</h1>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Underlined heading style produces setext-style headings for h1 and h2
+	html := `<h1>Main Title</h1>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "Main Title") {
-        t.Errorf("expected content to contain: Main Title")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "Main Title") {
+		t.Errorf("expected content to contain: Main Title")
+	}
 }
 
 func Test_OptionsListCustomBullets(t *testing.T) {
-    // Custom bullet character for unordered lists
-    html := `<ul><li>Item A</li><li>Item B</li></ul>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Custom bullet character for unordered lists
+	html := `<ul><li>Item A</li><li>Item B</li></ul>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "* Item A") {
-        t.Errorf("expected content to contain: * Item A")
-    }
-    if !strings.Contains(content, "* Item B") {
-        t.Errorf("expected content to contain: * Item B")
-    }
+	if !strings.Contains(content, "* Item A") {
+		t.Errorf("expected content to contain: * Item A")
+	}
+	if !strings.Contains(content, "* Item B") {
+		t.Errorf("expected content to contain: * Item B")
+	}
 }
 
 func Test_OptionsListIndentTabs(t *testing.T) {
-    // Tab indentation type for nested list items
-    html := `<ul><li>Parent<ul><li>Child</li></ul></li></ul>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Tab indentation type for nested list items
+	html := `<ul><li>Parent<ul><li>Child</li></ul></li></ul>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "Parent") {
-        t.Errorf("expected content to contain: Parent")
-    }
-    if !strings.Contains(content, "Child") {
-        t.Errorf("expected content to contain: Child")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "Parent") {
+		t.Errorf("expected content to contain: Parent")
+	}
+	if !strings.Contains(content, "Child") {
+		t.Errorf("expected content to contain: Child")
+	}
 }
 
 func Test_OptionsOutputFormatDjot(t *testing.T) {
-    // Djot output format produces djot-compatible markup
-    html := `<p>Simple paragraph.</p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Djot output format produces djot-compatible markup
+	html := `<p>Simple paragraph.</p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "Simple paragraph.") {
-        t.Errorf("expected content to contain: Simple paragraph.")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "Simple paragraph.") {
+		t.Errorf("expected content to contain: Simple paragraph.")
+	}
 }
 
 func Test_OptionsOutputFormatMarkdown(t *testing.T) {
-    // Default markdown output format produces standard markdown
-    html := `<h1>Title</h1><p>Some text.</p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Default markdown output format produces standard markdown
+	html := `<h1>Title</h1><p>Some text.</p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "# Title") {
-        t.Errorf("expected content to contain: # Title")
-    }
-    if !strings.Contains(content, "Some text.") {
-        t.Errorf("expected content to contain: Some text.")
-    }
+	if !strings.Contains(content, "# Title") {
+		t.Errorf("expected content to contain: # Title")
+	}
+	if !strings.Contains(content, "Some text.") {
+		t.Errorf("expected content to contain: Some text.")
+	}
 }
 
 func Test_OptionsOutputFormatPlain(t *testing.T) {
-    // Plain text output format strips markdown syntax
-    html := `<h1>Title</h1><p>Some <strong>bold</strong> text.</p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Plain text output format strips markdown syntax
+	html := `<h1>Title</h1><p>Some <strong>bold</strong> text.</p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "Title") {
-        t.Errorf("expected content to contain: Title")
-    }
-    if !strings.Contains(content, "bold") {
-        t.Errorf("expected content to contain: bold")
-    }
-    if !strings.Contains(content, "text.") {
-        t.Errorf("expected content to contain: text.")
-    }
-    if strings.Contains(content, "**bold**") {
-        t.Errorf("expected content NOT to contain: **bold**")
-    }
-    if strings.Contains(content, "# Title") {
-        t.Errorf("expected content NOT to contain: # Title")
-    }
+	if !strings.Contains(content, "Title") {
+		t.Errorf("expected content to contain: Title")
+	}
+	if !strings.Contains(content, "bold") {
+		t.Errorf("expected content to contain: bold")
+	}
+	if !strings.Contains(content, "text.") {
+		t.Errorf("expected content to contain: text.")
+	}
+	if strings.Contains(content, "**bold**") {
+		t.Errorf("expected content NOT to contain: **bold**")
+	}
+	if strings.Contains(content, "# Title") {
+		t.Errorf("expected content NOT to contain: # Title")
+	}
 }
 
 func Test_OptionsWhitespaceNormalized(t *testing.T) {
-    // Normalized whitespace mode collapses multiple spaces
-    html := `<p>Text   with    extra   spaces.</p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Normalized whitespace mode collapses multiple spaces
+	html := `<p>Text   with    extra   spaces.</p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "Text") {
-        t.Errorf("expected content to contain: Text")
-    }
-    if !strings.Contains(content, "with") {
-        t.Errorf("expected content to contain: with")
-    }
-    if !strings.Contains(content, "extra") {
-        t.Errorf("expected content to contain: extra")
-    }
-    if !strings.Contains(content, "spaces.") {
-        t.Errorf("expected content to contain: spaces.")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "Text") {
+		t.Errorf("expected content to contain: Text")
+	}
+	if !strings.Contains(content, "with") {
+		t.Errorf("expected content to contain: with")
+	}
+	if !strings.Contains(content, "extra") {
+		t.Errorf("expected content to contain: extra")
+	}
+	if !strings.Contains(content, "spaces.") {
+		t.Errorf("expected content to contain: spaces.")
+	}
 }
 
 func Test_OptionsWhitespaceStrict(t *testing.T) {
-    // Strict whitespace mode preserves whitespace as-is
-    html := `<p>Preserved   spacing.</p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Strict whitespace mode preserves whitespace as-is
+	html := `<p>Preserved   spacing.</p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "Preserved") {
-        t.Errorf("expected content to contain: Preserved")
-    }
-    if !strings.Contains(content, "spacing.") {
-        t.Errorf("expected content to contain: spacing.")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "Preserved") {
+		t.Errorf("expected content to contain: Preserved")
+	}
+	if !strings.Contains(content, "spacing.") {
+		t.Errorf("expected content to contain: spacing.")
+	}
 }
 
 func Test_OptionsWrapDisabled(t *testing.T) {
-    // Wrap option disabled preserves long lines without breaking
-    html := `<p>This is a long paragraph that should not be wrapped at all because wrapping is disabled.</p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Wrap option disabled preserves long lines without breaking
+	html := `<p>This is a long paragraph that should not be wrapped at all because wrapping is disabled.</p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if !strings.Contains(content, "This is a long paragraph that should not be wrapped at all because wrapping is disabled.") {
-        t.Errorf("expected content to contain: This is a long paragraph that should not be wrapped at all because wrapping is disabled.")
-    }
+	if !strings.Contains(content, "This is a long paragraph that should not be wrapped at all because wrapping is disabled.") {
+		t.Errorf("expected content to contain: This is a long paragraph that should not be wrapped at all because wrapping is disabled.")
+	}
 }
 
 func Test_OptionsWrapEnabled(t *testing.T) {
-    // Wrap option enabled with custom width wraps long lines
-    html := `<p>This is a long paragraph that should be wrapped at the specified column width when the wrap option is enabled.</p>`
-    result, err := htmd.Convert(html)
-    if err != nil {
-        t.Fatalf("conversion failed: %v", err)
-    }
-    content := ""
-    if result.Content != nil {
-        content = *result.Content
-    }
+	// Wrap option enabled with custom width wraps long lines
+	html := `<p>This is a long paragraph that should be wrapped at the specified column width when the wrap option is enabled.</p>`
+	content, err := htmd.Convert(html)
+	if err != nil {
+		t.Fatalf("conversion failed: %v", err)
+	}
 
-    if strings.TrimSpace(content) == "" {
-        t.Errorf("expected non-empty content")
-    }
-    if !strings.Contains(content, "This is a long paragraph") {
-        t.Errorf("expected content to contain: This is a long paragraph")
-    }
+	if strings.TrimSpace(content) == "" {
+		t.Errorf("expected non-empty content")
+	}
+	if !strings.Contains(content, "This is a long paragraph") {
+		t.Errorf("expected content to contain: This is a long paragraph")
+	}
 }
