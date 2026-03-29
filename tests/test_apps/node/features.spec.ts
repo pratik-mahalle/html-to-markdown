@@ -1,51 +1,19 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import type {
   JsConversionOptions,
-  JsMetadataConfig,
-  JsInlineImageConfig,
-  JsMetadataExtraction,
-  JsHtmlExtraction,
+  JsConversionResult,
 } from '@kreuzberg/html-to-markdown';
 
 describe('html-to-markdown feature tests', () => {
-  let convert: (html: string, options?: JsConversionOptions | null) => string;
-  let convertWithMetadata: (
-    html: string,
-    options?: JsConversionOptions | null,
-    metadataConfig?: JsMetadataConfig | null
-  ) => JsMetadataExtraction;
-  let convertWithMetadataBuffer: (
-    buffer: Buffer | Uint8Array,
-    options?: JsConversionOptions | null,
-    metadataConfig?: JsMetadataConfig | null
-  ) => JsMetadataExtraction;
-  let convertFileWithInlineImages: (
-    filePath: string,
-    options?: JsConversionOptions | null,
-    imageConfig?: JsInlineImageConfig | null
-  ) => Promise<JsHtmlExtraction>;
-  let hasMetadataSupport: () => boolean;
-  let hasFileInlineImageSupport: boolean = false;
+  let convert: (html: string, options?: JsConversionOptions | null) => JsConversionResult;
 
   beforeAll(async () => {
     const module = await import('@kreuzberg/html-to-markdown');
     convert = module.convert;
-    convertWithMetadata = module.convertWithMetadata;
-    convertWithMetadataBuffer = module.convertWithMetadataBuffer;
-    convertFileWithInlineImages = module.convertFileWithInlineImages;
-    hasMetadataSupport = module.hasMetadataSupport;
-
-    // Check if file-based inline image support is available
-    hasFileInlineImageSupport = typeof module.convertFileWithInlineImages === 'function';
   });
 
   describe('Metadata extraction', () => {
-    it('should extract metadata when supported', () => {
-      if (!hasMetadataSupport()) {
-        expect(true).toBe(true);
-        return;
-      }
-
+    it('should extract metadata from convert result', () => {
       const html = `
         <html lang="en">
           <head>
@@ -60,19 +28,14 @@ describe('html-to-markdown feature tests', () => {
         </html>
       `;
 
-      const result = convertWithMetadata(html);
+      const result = convert(html);
       expect(result).toBeDefined();
-      expect(result.markdown).toBeDefined();
-      expect(typeof result.markdown).toBe('string');
+      expect(result.content).toBeDefined();
+      expect(typeof result.content).toBe('string');
       expect(result.metadata).toBeDefined();
     });
 
-    it('should handle metadata config options', () => {
-      if (!hasMetadataSupport()) {
-        expect(true).toBe(true);
-        return;
-      }
-
+    it('should include metadata as JSON string', () => {
       const html = `
         <html>
           <head><title>Test</title></head>
@@ -84,80 +47,19 @@ describe('html-to-markdown feature tests', () => {
         </html>
       `;
 
-      const metadataConfig: JsMetadataConfig = {
-        extractHeaders: true,
-        extractLinks: true,
-        extractImages: false,
-      };
-
-      const result = convertWithMetadata(html, undefined, metadataConfig);
+      const result = convert(html);
       expect(result).toBeDefined();
-      expect(result.markdown).toBeDefined();
+      expect(result.content).toBeDefined();
+      if (result.metadata) {
+        expect(typeof result.metadata).toBe('string');
+      }
     });
 
-    it('should extract metadata from buffer input', () => {
-      if (!hasMetadataSupport()) {
-        expect(true).toBe(true);
-        return;
-      }
-
-      const html = '<html><head><title>Buffer Test</title></head><body><p>Content</p></body></html>';
-      const buffer = Buffer.from(html, 'utf-8');
-
-      const result = convertWithMetadataBuffer(buffer);
-      expect(result).toBeDefined();
-      expect(result.markdown).toBeDefined();
-      expect(typeof result.markdown).toBe('string');
-    });
-
-    it('should handle empty metadata extraction config', () => {
-      if (!hasMetadataSupport()) {
-        expect(true).toBe(true);
-        return;
-      }
-
+    it('should handle simple HTML metadata extraction', () => {
       const html = '<p>Test</p>';
-      const result = convertWithMetadata(html, undefined, null);
+      const result = convert(html);
       expect(result).toBeDefined();
-      expect(result.markdown).toBeDefined();
-    });
-  });
-
-  describe('Inline image extraction (file-based)', () => {
-    it('should detect file-based inline image support', () => {
-      expect(typeof hasFileInlineImageSupport).toBe('boolean');
-    });
-
-    it('should have convertFileWithInlineImages function', () => {
-      expect(typeof convertFileWithInlineImages).toBe('function');
-    });
-
-    it('should handle inline image config options', () => {
-      if (!hasFileInlineImageSupport) {
-        expect(true).toBe(true);
-        return;
-      }
-
-      const imageConfig: JsInlineImageConfig = {
-        downloadImages: false,
-        imageDirectory: './images',
-        preserveAlt: true,
-      };
-
-      // Function is available for use with file paths
-      expect(typeof convertFileWithInlineImages).toBe('function');
-    });
-
-    it('should accept properly typed image config in conversion options', () => {
-      const html = '<img src="test.jpg">';
-      const imageConfig: JsInlineImageConfig = {
-        downloadImages: false,
-        preserveAlt: true,
-      };
-
-      // Verify types are accepted (not testing async file operations)
-      expect(imageConfig).toBeDefined();
-      expect(typeof imageConfig.downloadImages).toBe('boolean');
+      expect(result.content).toBeDefined();
     });
   });
 
@@ -166,8 +68,8 @@ describe('html-to-markdown feature tests', () => {
       const html = '<p>Line 1<br>Line 2</p>';
       const options: JsConversionOptions = { hardBreaks: true };
       const result = convert(html, options);
-      expect(typeof result).toBe('string');
-      expect(result.length > 0).toBe(true);
+      expect(typeof result.content).toBe('string');
+      expect(result.content!.length > 0).toBe(true);
     });
 
     it('should apply heading style options', () => {
@@ -175,7 +77,7 @@ describe('html-to-markdown feature tests', () => {
       const options: JsConversionOptions = {};
       const result = convert(html, options);
       expect(result).toBeDefined();
-      expect(typeof result).toBe('string');
+      expect(typeof result.content).toBe('string');
     });
 
     it('should apply list style options', () => {
@@ -183,8 +85,8 @@ describe('html-to-markdown feature tests', () => {
       const options: JsConversionOptions = {};
       const result = convert(html, options);
       expect(result).toBeDefined();
-      expect(result).toContain('Item 1');
-      expect(result).toContain('Item 2');
+      expect(result.content).toContain('Item 1');
+      expect(result.content).toContain('Item 2');
     });
 
     it('should handle code block conversion', () => {
@@ -192,7 +94,7 @@ describe('html-to-markdown feature tests', () => {
       const options: JsConversionOptions = {};
       const result = convert(html, options);
       expect(result).toBeDefined();
-      expect(result).toContain('console.log');
+      expect(result.content).toContain('console.log');
     });
   });
 
@@ -211,8 +113,8 @@ describe('html-to-markdown feature tests', () => {
       `;
 
       const result = convert(html);
-      expect(result).toContain('Item 1');
-      expect(result).toContain('Nested 1');
+      expect(result.content).toContain('Item 1');
+      expect(result.content).toContain('Nested 1');
     });
 
     it('should handle tables', () => {
@@ -231,7 +133,7 @@ describe('html-to-markdown feature tests', () => {
 
       expect(() => convert(html)).not.toThrow();
       const result = convert(html);
-      expect(typeof result).toBe('string');
+      expect(typeof result.content).toBe('string');
     });
 
     it('should handle blockquotes', () => {
@@ -243,8 +145,8 @@ describe('html-to-markdown feature tests', () => {
       `;
 
       const result = convert(html);
-      expect(result).toContain('quote');
-      expect(result).toContain('>');
+      expect(result.content).toContain('quote');
+      expect(result.content).toContain('>');
     });
 
     it('should handle inline formatting', () => {
@@ -259,9 +161,9 @@ describe('html-to-markdown feature tests', () => {
       `;
 
       const result = convert(html);
-      expect(result).toContain('Bold');
-      expect(result).toContain('Italic');
-      expect(result).toContain('inline code');
+      expect(result.content).toContain('Bold');
+      expect(result.content).toContain('Italic');
+      expect(result.content).toContain('inline code');
     });
 
     it('should handle links with various attributes', () => {
@@ -272,8 +174,8 @@ describe('html-to-markdown feature tests', () => {
       `;
 
       const result = convert(html);
-      expect(result).toContain('Simple Link');
-      expect(result).toContain('https://example.com');
+      expect(result.content).toContain('Simple Link');
+      expect(result.content).toContain('https://example.com');
     });
 
     it('should handle mixed content', () => {
@@ -290,9 +192,9 @@ describe('html-to-markdown feature tests', () => {
 
       expect(() => convert(html)).not.toThrow();
       const result = convert(html);
-      expect(result).toContain('Title');
-      expect(result).toContain('Point 1');
-      expect(result).toContain('quote');
+      expect(result.content).toContain('Title');
+      expect(result.content).toContain('Point 1');
+      expect(result.content).toContain('quote');
     });
   });
 
@@ -307,33 +209,12 @@ describe('html-to-markdown feature tests', () => {
       expect(result).toBeDefined();
     });
 
-    it('should accept properly typed metadata config', () => {
-      if (!hasMetadataSupport()) {
-        expect(true).toBe(true);
-        return;
-      }
-
+    it('should return JsConversionResult with expected fields', () => {
       const html = '<p>Test</p>';
-      const metadataConfig: JsMetadataConfig = {
-        extractHeaders: true,
-        extractLinks: false,
-      };
-
-      const result = convertWithMetadata(html, undefined, metadataConfig);
+      const result = convert(html);
       expect(result).toBeDefined();
-    });
-
-    it('should accept properly typed image config', () => {
-      const html = '<img src="test.jpg">';
-      const imageConfig: JsInlineImageConfig = {
-        downloadImages: false,
-        preserveAlt: true,
-      };
-
-      // Verify config types are properly typed
-      expect(imageConfig).toBeDefined();
-      expect(typeof imageConfig.downloadImages).toBe('boolean');
-      expect(typeof imageConfig.preserveAlt).toBe('boolean');
+      expect(result.content).toBeDefined();
+      expect(result.warnings).toBeDefined();
     });
   });
 
@@ -347,7 +228,7 @@ describe('html-to-markdown feature tests', () => {
 
       expect(() => convert(html)).not.toThrow();
       const result = convert(html);
-      expect(result.length > 0).toBe(true);
+      expect(result.content!.length > 0).toBe(true);
     });
 
     it('should handle deeply nested HTML', () => {
@@ -359,7 +240,7 @@ describe('html-to-markdown feature tests', () => {
 
       expect(() => convert(html)).not.toThrow();
       const result = convert(html);
-      expect(typeof result).toBe('string');
+      expect(typeof result.content).toBe('string');
     });
 
     it('should handle HTML with various encodings', () => {
@@ -373,7 +254,7 @@ describe('html-to-markdown feature tests', () => {
       htmls.forEach((html) => {
         expect(() => convert(html)).not.toThrow();
         const result = convert(html);
-        expect(typeof result).toBe('string');
+        expect(typeof result.content).toBe('string');
       });
     });
 
@@ -385,8 +266,8 @@ describe('html-to-markdown feature tests', () => {
       `;
 
       const result = convert(html);
-      expect(result).toContain('Visible');
-      expect(result).not.toContain('comment');
+      expect(result.content).toContain('Visible');
+      expect(result.content).not.toContain('comment');
     });
 
     it('should handle scripts and styles safely', () => {
@@ -399,9 +280,9 @@ describe('html-to-markdown feature tests', () => {
 
       expect(() => convert(html)).not.toThrow();
       const result = convert(html);
-      expect(result).toContain('Content');
-      expect(result).not.toContain('alert');
-      expect(result).not.toContain('color: red');
+      expect(result.content).toContain('Content');
+      expect(result.content).not.toContain('alert');
+      expect(result.content).not.toContain('color: red');
     });
   });
 });
