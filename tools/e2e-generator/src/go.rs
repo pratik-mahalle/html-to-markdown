@@ -99,13 +99,13 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
         }
     };
 
-    let escaped_html = escape_string(html);
+    let html_literal = go_string_literal(html);
 
     // Conversion call + error handling.
     if fixture.assertions.expect_error == Some(true) {
         let _ = writeln!(out, "func Test_{fn_name}(t *testing.T) {{");
         let _ = writeln!(out, "    // {description}");
-        let _ = writeln!(out, "    html := `{escaped_html}`");
+        let _ = writeln!(out, "    html := {html_literal}");
         let _ = writeln!(out, "    _, err := htmd.Convert(html)");
         let _ = writeln!(out, "    if err == nil {{");
         let _ = writeln!(
@@ -125,14 +125,10 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
 
     let _ = writeln!(out, "func Test_{fn_name}(t *testing.T) {{");
     let _ = writeln!(out, "    // {description}");
-    let _ = writeln!(out, "    html := `{escaped_html}`");
-    let _ = writeln!(out, "    result, err := htmd.Convert(html)");
+    let _ = writeln!(out, "    html := {html_literal}");
+    let _ = writeln!(out, "    content, err := htmd.Convert(html)");
     let _ = writeln!(out, "    if err != nil {{");
     let _ = writeln!(out, "        t.Fatalf(\"conversion failed: %v\", err)");
-    let _ = writeln!(out, "    }}");
-    let _ = writeln!(out, "    content := \"\"");
-    let _ = writeln!(out, "    if result.Content != nil {{");
-    let _ = writeln!(out, "        content = *result.Content");
     let _ = writeln!(out, "    }}");
     let _ = writeln!(out);
 
@@ -270,10 +266,22 @@ fn sanitize_func_name(s: &str) -> String {
     out
 }
 
-/// Escape a string for use inside a Go raw string literal.
+/// Escape a string for use inside a Go double-quoted string literal.
 fn escape_string(s: &str) -> String {
     s.replace('\\', "\\\\")
-        .replace('`', "\\`")
         .replace('"', "\\\"")
-        .replace('\r', "")
+        .replace('\n', "\\n")
+        .replace('\r', "\\r")
+        .replace('\t', "\\t")
+}
+
+/// Format a Go string literal for the given content.
+/// Uses raw strings (backticks) when possible, falls back to double-quoted strings.
+fn go_string_literal(s: &str) -> String {
+    if s.contains('`') {
+        format!("\"{}\"", escape_string(s))
+    } else {
+        let clean = s.replace('\r', "");
+        format!("`{clean}`")
+    }
 }

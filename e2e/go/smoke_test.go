@@ -13,13 +13,9 @@ import (
 func Test_SmokeEmptyString(t *testing.T) {
 	// Empty string produces empty output
 	html := ``
-	result, err := htmd.Convert(html)
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) != "" {
@@ -30,13 +26,9 @@ func Test_SmokeEmptyString(t *testing.T) {
 func Test_SmokeSimpleHeading(t *testing.T) {
 	// H1 heading converts to ATX markdown
 	html := `<h1>Title</h1>`
-	result, err := htmd.Convert(html)
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if !strings.Contains(content, "# Title") {
@@ -47,13 +39,9 @@ func Test_SmokeSimpleHeading(t *testing.T) {
 func Test_SmokeSimpleParagraph(t *testing.T) {
 	// Simple paragraph converts correctly
 	html := `<p>Hello World</p>`
-	result, err := htmd.Convert(html)
+	content, err := htmd.Convert(html)
 	if err != nil {
 		t.Fatalf("conversion failed: %v", err)
-	}
-	content := ""
-	if result.Content != nil {
-		content = *result.Content
 	}
 
 	if strings.TrimSpace(content) != "Hello World" {
