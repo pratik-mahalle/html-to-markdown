@@ -32,7 +32,24 @@ pub fn generate(fixtures: &[Fixture], output_dir: &Utf8Path) -> Result<usize> {
         total += category_fixtures.len();
     }
 
+    // Generate composer.json.
+    let composer_json = render_composer_json();
+    std::fs::write(php_dir.join("composer.json"), composer_json)?;
+
     Ok(total)
+}
+
+fn render_composer_json() -> String {
+    r#"{
+    "require-dev": {
+        "phpunit/phpunit": "^11.0"
+    },
+    "autoload": {
+        "files": []
+    }
+}
+"#
+    .to_string()
 }
 
 fn render_test_file(category: &str, class_name: &str, fixtures: &[&Fixture]) -> String {

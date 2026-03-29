@@ -31,7 +31,39 @@ pub fn generate(fixtures: &[Fixture], output_dir: &Utf8Path) -> Result<usize> {
         total += category_fixtures.len();
     }
 
+    // Generate mix.exs.
+    let mix_exs = render_mix_exs();
+    std::fs::write(elixir_dir.join("mix.exs"), mix_exs)?;
+
     Ok(total)
+}
+
+fn render_mix_exs() -> String {
+    r#"defmodule HtmlToMarkdownE2e.MixProject do
+  use Mix.Project
+
+  def project do
+    [
+      app: :html_to_markdown_e2e,
+      version: "0.1.0",
+      elixir: "~> 1.19",
+      start_permanent: false,
+      deps: deps()
+    ]
+  end
+
+  def application do
+    [extra_applications: [:logger]]
+  end
+
+  defp deps do
+    [
+      {:html_to_markdown, path: "../../packages/elixir"}
+    ]
+  end
+end
+"#
+    .to_string()
 }
 
 fn render_test_file(category: &str, fixtures: &[&Fixture]) -> String {
