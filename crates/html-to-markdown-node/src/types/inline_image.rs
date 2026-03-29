@@ -20,23 +20,3 @@ pub struct JsInlineImage {
     /// HTML attributes from the source element
     pub attributes: HashMap<String, String>,
 }
-
-/// Warning about inline image processing
-#[napi(object)]
-pub struct JsInlineImageWarning {
-    /// Index of the image that caused the warning
-    pub index: u32,
-    /// Warning message
-    pub message: String,
-}
-
-/// Result of HTML extraction with inline images
-#[napi(object)]
-pub struct JsHtmlExtraction {
-    /// Converted markdown
-    pub markdown: String,
-    /// Extracted inline images
-    pub inline_images: Vec<JsInlineImage>,
-    /// Warnings encountered during extraction
-    pub warnings: Vec<JsInlineImageWarning>,
-}
