@@ -1,7 +1,7 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Method HtmlToMarkdown\\Bridge\\ExtensionBridge\:\:convert\(\) should return array\<string, mixed\> but returns string\.$#'
+			message: '#^Method HtmlToMarkdown\\Bridge\\ExtensionBridge\:\:convert\(\) should return array\<string, mixed\> but returns (string|mixed)\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Bridge/ExtensionBridge.php
