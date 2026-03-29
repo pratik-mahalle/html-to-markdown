@@ -1,6 +1,8 @@
 use napi::bindgen_prelude::*;
 use napi_derive::napi;
 
+use super::inline_image::JsInlineImage;
+
 /// A single cell in a structured table grid.
 #[napi(object)]
 pub struct JsGridCell {
@@ -47,6 +49,8 @@ pub struct JsConversionResult {
     pub metadata: Option<String>,
     /// All tables found in the HTML, in document order.
     pub tables: Vec<JsConversionTable>,
+    /// Extracted inline images (data URIs and SVGs).
+    pub images: Vec<JsInlineImage>,
     /// Non-fatal processing warnings.
     pub warnings: Vec<JsConversionWarning>,
 }
@@ -95,6 +99,20 @@ pub fn build_conversion_result(result: html_to_markdown_rs::ConversionResult) ->
         })
         .collect();
 
+    let images = result
+        .images
+        .into_iter()
+        .map(|img| JsInlineImage {
+            data: Buffer::from(img.data),
+            format: img.format.to_string(),
+            filename: img.filename,
+            description: img.description,
+            dimensions: img.dimensions.map(|(w, h)| vec![w, h]),
+            source: img.source.to_string(),
+            attributes: img.attributes.into_iter().collect(),
+        })
+        .collect();
+
     let warnings = result
         .warnings
         .into_iter()
@@ -109,6 +127,7 @@ pub fn build_conversion_result(result: html_to_markdown_rs::ConversionResult) ->
         document,
         metadata,
         tables,
+        images,
         warnings,
     })
 }

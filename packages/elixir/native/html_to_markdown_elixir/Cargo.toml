@@ -19,6 +19,7 @@ html-to-markdown-rs = { path = "vendor/html-to-markdown-rs", features = [
   "visitor",
 ] }
 rustler = { version = "0.37" }
+serde_json = "1"
 
 [features]
 default = ["full"]

@@ -93,9 +93,22 @@ pub struct WarningTerm {
 }
 
 #[derive(NifMap)]
+pub struct InlineImageTerm {
+    pub data: Vec<u8>,
+    pub format: String,
+    pub filename: Option<String>,
+    pub description: Option<String>,
+    pub dimensions: Option<(u32, u32)>,
+    pub source: String,
+    pub attributes: HashMap<String, String>,
+}
+
+#[derive(NifMap)]
 pub struct ConversionResultTerm {
     pub content: Option<String>,
+    pub document: Option<String>,
     pub metadata: ExtendedMetadataTerm,
     pub tables: Vec<ExtractTableTerm>,
+    pub images: Vec<InlineImageTerm>,
     pub warnings: Vec<WarningTerm>,
 }

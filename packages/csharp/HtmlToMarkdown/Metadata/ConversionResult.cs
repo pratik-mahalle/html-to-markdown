@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace HtmlToMarkdown.Metadata;
@@ -25,6 +26,18 @@ public record ConversionResult
     /// </summary>
     [JsonPropertyName("tables")]
     public List<ExtractTable> Tables { get; init; } = [];
+
+    /// <summary>
+    /// Structured document tree (raw JSON), or <c>null</c> if not requested.
+    /// </summary>
+    [JsonPropertyName("document")]
+    public JsonElement? Document { get; init; }
+
+    /// <summary>
+    /// Extracted inline images (data URIs and SVGs).
+    /// </summary>
+    [JsonPropertyName("images")]
+    public List<InlineImage> Images { get; init; } = [];
 
     /// <summary>
     /// Non-fatal processing warnings.
