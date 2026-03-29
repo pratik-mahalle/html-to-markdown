@@ -190,6 +190,210 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
         let _ = writeln!(out, "    expect(content).toMatch(/{}$/);", regex_escape(&escaped));
     }
 
+    // ---- Metadata assertions ----
+    let has_metadata_assertion = a.metadata_title.is_some()
+        || a.metadata_description.is_some()
+        || a.metadata_author.is_some()
+        || a.metadata_keywords.is_some()
+        || a.metadata_canonical_url.is_some()
+        || a.metadata_og_title.is_some()
+        || a.metadata_og_description.is_some()
+        || a.metadata_og_image.is_some()
+        || a.metadata_og_type.is_some()
+        || a.metadata_og_url.is_some()
+        || a.metadata_og_site_name.is_some()
+        || a.metadata_twitter_card.is_some()
+        || a.metadata_twitter_title.is_some()
+        || a.metadata_twitter_description.is_some()
+        || a.metadata_has_links.is_some()
+        || a.metadata_link_count_min.is_some()
+        || a.metadata_links_include_urls.is_some()
+        || a.metadata_links_count_min.is_some()
+        || a.metadata_has_headers.is_some()
+        || a.metadata_header_count_min.is_some()
+        || a.metadata_images_count_min.is_some()
+        || a.metadata_images_include_srcs.is_some()
+        || a.metadata_headings_count_min.is_some()
+        || a.metadata_headings_include.is_some();
+
+    if has_metadata_assertion {
+        let _ = writeln!(out);
+        let _ = writeln!(out, "    // Metadata assertions");
+        let _ = writeln!(out, "    expect(result.metadata).not.toBeNull();");
+        let _ = writeln!(out, "    const metadata = JSON.parse(result.metadata!);");
+
+        // Document-level metadata
+        if let Some(title) = &a.metadata_title {
+            let escaped = escape_string(title);
+            let _ = writeln!(out, "    expect(metadata.document.title).toBe('{escaped}');");
+        }
+        if let Some(description) = &a.metadata_description {
+            let escaped = escape_string(description);
+            let _ = writeln!(out, "    expect(metadata.document.description).toBe('{escaped}');");
+        }
+        if let Some(author) = &a.metadata_author {
+            let escaped = escape_string(author);
+            let _ = writeln!(out, "    expect(metadata.document.author).toBe('{escaped}');");
+        }
+        if let Some(keywords_str) = &a.metadata_keywords {
+            for kw in keywords_str.split(',').map(|s| s.trim()) {
+                let escaped = escape_string(kw);
+                let _ = writeln!(out, "    expect(metadata.document.keywords).toContain('{escaped}');");
+            }
+        }
+        if let Some(canonical_url) = &a.metadata_canonical_url {
+            let escaped = escape_string(canonical_url);
+            let _ = writeln!(out, "    expect(metadata.document.canonical_url).toBe('{escaped}');");
+        }
+
+        // Open Graph metadata
+        if let Some(og_title) = &a.metadata_og_title {
+            let escaped = escape_string(og_title);
+            let _ = writeln!(
+                out,
+                "    expect(metadata.document.open_graph['og:title']).toBe('{escaped}');"
+            );
+        }
+        if let Some(og_description) = &a.metadata_og_description {
+            let escaped = escape_string(og_description);
+            let _ = writeln!(
+                out,
+                "    expect(metadata.document.open_graph['og:description']).toBe('{escaped}');"
+            );
+        }
+        if let Some(og_image) = &a.metadata_og_image {
+            let escaped = escape_string(og_image);
+            let _ = writeln!(
+                out,
+                "    expect(metadata.document.open_graph['og:image']).toBe('{escaped}');"
+            );
+        }
+        if let Some(og_type) = &a.metadata_og_type {
+            let escaped = escape_string(og_type);
+            let _ = writeln!(
+                out,
+                "    expect(metadata.document.open_graph['og:type']).toBe('{escaped}');"
+            );
+        }
+        if let Some(og_url) = &a.metadata_og_url {
+            let escaped = escape_string(og_url);
+            let _ = writeln!(
+                out,
+                "    expect(metadata.document.open_graph['og:url']).toBe('{escaped}');"
+            );
+        }
+        if let Some(og_site_name) = &a.metadata_og_site_name {
+            let escaped = escape_string(og_site_name);
+            let _ = writeln!(
+                out,
+                "    expect(metadata.document.open_graph['og:site_name']).toBe('{escaped}');"
+            );
+        }
+
+        // Twitter metadata
+        if let Some(twitter_card) = &a.metadata_twitter_card {
+            let escaped = escape_string(twitter_card);
+            let _ = writeln!(
+                out,
+                "    expect(metadata.document.twitter_card['twitter:card']).toBe('{escaped}');"
+            );
+        }
+        if let Some(twitter_title) = &a.metadata_twitter_title {
+            let escaped = escape_string(twitter_title);
+            let _ = writeln!(
+                out,
+                "    expect(metadata.document.twitter_card['twitter:title']).toBe('{escaped}');"
+            );
+        }
+        if let Some(twitter_description) = &a.metadata_twitter_description {
+            let escaped = escape_string(twitter_description);
+            let _ = writeln!(
+                out,
+                "    expect(metadata.document.twitter_card['twitter:description']).toBe('{escaped}');"
+            );
+        }
+
+        // Collection assertions: links
+        if a.metadata_has_links == Some(true) {
+            let _ = writeln!(out, "    expect(metadata.links.length).toBeGreaterThan(0);");
+        }
+        if let Some(min) = a.metadata_link_count_min {
+            let _ = writeln!(out, "    expect(metadata.links.length).toBeGreaterThanOrEqual({min});");
+        }
+        if let Some(min) = a.metadata_links_count_min {
+            let _ = writeln!(out, "    expect(metadata.links.length).toBeGreaterThanOrEqual({min});");
+        }
+        if let Some(urls) = &a.metadata_links_include_urls {
+            let _ = writeln!(out, "    const linkHrefs = metadata.links.map((l: any) => l.href);");
+            for url in urls {
+                let escaped = escape_string(url);
+                let _ = writeln!(out, "    expect(linkHrefs).toContain('{escaped}');");
+            }
+        }
+
+        // Collection assertions: headers
+        if a.metadata_has_headers == Some(true) {
+            let _ = writeln!(out, "    expect(metadata.headers.length).toBeGreaterThan(0);");
+        }
+        if let Some(min) = a.metadata_header_count_min {
+            let _ = writeln!(
+                out,
+                "    expect(metadata.headers.length).toBeGreaterThanOrEqual({min});"
+            );
+        }
+
+        // Collection assertions: images
+        if let Some(min) = a.metadata_images_count_min {
+            let _ = writeln!(out, "    expect(metadata.images.length).toBeGreaterThanOrEqual({min});");
+        }
+        if let Some(srcs) = &a.metadata_images_include_srcs {
+            let _ = writeln!(out, "    const imageSrcs = metadata.images.map((i: any) => i.src);");
+            for src in srcs {
+                let escaped = escape_string(src);
+                let _ = writeln!(out, "    expect(imageSrcs).toContain('{escaped}');");
+            }
+        }
+
+        // Collection assertions: headings
+        if let Some(min) = a.metadata_headings_count_min {
+            let _ = writeln!(
+                out,
+                "    expect(metadata.headers.length).toBeGreaterThanOrEqual({min});"
+            );
+        }
+        if let Some(texts) = &a.metadata_headings_include {
+            let _ = writeln!(
+                out,
+                "    const headingTexts = metadata.headers.map((h: any) => h.text);"
+            );
+            for text in texts {
+                let escaped = escape_string(text);
+                let _ = writeln!(out, "    expect(headingTexts).toContain('{escaped}');");
+            }
+        }
+    }
+
+    // ---- Table assertions ----
+    if let Some(min) = a.table_count_min {
+        let _ = writeln!(out);
+        let _ = writeln!(out, "    // Table assertions");
+        let _ = writeln!(out, "    expect(result.tables.length).toBeGreaterThanOrEqual({min});");
+    }
+    if let Some(cell_text) = &a.table_contains_cell {
+        let escaped = escape_string(cell_text);
+        let _ = writeln!(
+            out,
+            "    expect(result.tables.some((t) => t.grid.cells.some((c) => c.content.includes('{escaped}')))).toBe(true);"
+        );
+    }
+
+    // ---- Warning assertions ----
+    if a.warnings_empty == Some(true) {
+        let _ = writeln!(out);
+        let _ = writeln!(out, "    // Warning assertions");
+        let _ = writeln!(out, "    expect(result.warnings).toHaveLength(0);");
+    }
+
     let _ = writeln!(out, "  }});");
 }
 

@@ -12,6 +12,11 @@ describe('metadata', () => {
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
+
+    // Metadata assertions
+    expect(result.metadata).not.toBeNull();
+    const metadata = JSON.parse(result.metadata!);
+    expect(metadata.document.author).toBe('Jane Doe');
   });
 
   it('metadata_canonical_url: Extract canonical URL from <link rel='canonical'> tag', () => {
@@ -20,6 +25,11 @@ describe('metadata', () => {
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
+
+    // Metadata assertions
+    expect(result.metadata).not.toBeNull();
+    const metadata = JSON.parse(result.metadata!);
+    expect(metadata.document.canonical_url).toBe('https://example.com/canonical-page');
   });
 
   it('metadata_description_meta: Extract description from <meta name='description'> tag', () => {
@@ -28,6 +38,11 @@ describe('metadata', () => {
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
+
+    // Metadata assertions
+    expect(result.metadata).not.toBeNull();
+    const metadata = JSON.parse(result.metadata!);
+    expect(metadata.document.description).toBe('This is the page description.');
   });
 
   it('metadata_extract_all_images: Extract all images from a document into metadata', () => {
@@ -36,6 +51,14 @@ describe('metadata', () => {
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
+
+    // Metadata assertions
+    expect(result.metadata).not.toBeNull();
+    const metadata = JSON.parse(result.metadata!);
+    expect(metadata.images.length).toBeGreaterThanOrEqual(2);
+    const imageSrcs = metadata.images.map((i: any) => i.src);
+    expect(imageSrcs).toContain('https://example.com/photo1.jpg');
+    expect(imageSrcs).toContain('https://example.com/photo2.png');
   });
 
   it('metadata_extract_all_links: Extract all links from a document into metadata', () => {
@@ -44,6 +67,14 @@ describe('metadata', () => {
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
+
+    // Metadata assertions
+    expect(result.metadata).not.toBeNull();
+    const metadata = JSON.parse(result.metadata!);
+    expect(metadata.links.length).toBeGreaterThanOrEqual(3);
+    const linkHrefs = metadata.links.map((l: any) => l.href);
+    expect(linkHrefs).toContain('https://example.com');
+    expect(linkHrefs).toContain('https://docs.example.com');
   });
 
   it('metadata_headers_hierarchy: Extract heading hierarchy from document into metadata', () => {
@@ -52,6 +83,15 @@ describe('metadata', () => {
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
+
+    // Metadata assertions
+    expect(result.metadata).not.toBeNull();
+    const metadata = JSON.parse(result.metadata!);
+    expect(metadata.headers.length).toBeGreaterThanOrEqual(5);
+    const headingTexts = metadata.headers.map((h: any) => h.text);
+    expect(headingTexts).toContain('Introduction');
+    expect(headingTexts).toContain('Getting Started');
+    expect(headingTexts).toContain('Installation');
   });
 
   it('metadata_keywords_meta: Extract keywords from <meta name='keywords'> tag', () => {
@@ -60,6 +100,14 @@ describe('metadata', () => {
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
+
+    // Metadata assertions
+    expect(result.metadata).not.toBeNull();
+    const metadata = JSON.parse(result.metadata!);
+    expect(metadata.document.keywords).toContain('rust');
+    expect(metadata.document.keywords).toContain('markdown');
+    expect(metadata.document.keywords).toContain('html');
+    expect(metadata.document.keywords).toContain('converter');
   });
 
   it('metadata_title_tag: Extract title from <title> tag', () => {
@@ -68,6 +116,11 @@ describe('metadata', () => {
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
+
+    // Metadata assertions
+    expect(result.metadata).not.toBeNull();
+    const metadata = JSON.parse(result.metadata!);
+    expect(metadata.document.title).toBe('My Page');
   });
 
   it('og_basic_tags: Extract og:title, og:description, and og:image from Open Graph meta tags', () => {
@@ -76,6 +129,13 @@ describe('metadata', () => {
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
+
+    // Metadata assertions
+    expect(result.metadata).not.toBeNull();
+    const metadata = JSON.parse(result.metadata!);
+    expect(metadata.document.open_graph['og:title']).toBe('OG Title');
+    expect(metadata.document.open_graph['og:description']).toBe('OG description text.');
+    expect(metadata.document.open_graph['og:image']).toBe('https://example.com/image.jpg');
   });
 
   it('og_multiple_tags: Extract multiple Open Graph tags including type, url, and site_name', () => {
@@ -84,6 +144,14 @@ describe('metadata', () => {
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
+
+    // Metadata assertions
+    expect(result.metadata).not.toBeNull();
+    const metadata = JSON.parse(result.metadata!);
+    expect(metadata.document.open_graph['og:title']).toBe('Article Title');
+    expect(metadata.document.open_graph['og:type']).toBe('article');
+    expect(metadata.document.open_graph['og:url']).toBe('https://example.com/article');
+    expect(metadata.document.open_graph['og:site_name']).toBe('Example Site');
   });
 
   it('structured_data_json_ld: JSON-LD script tag is stripped from output (security) but metadata may be extracted', () => {
@@ -116,6 +184,13 @@ describe('metadata', () => {
     const content = result.content ?? '';
 
     expect(content.trim().length).toBeGreaterThan(0);
+
+    // Metadata assertions
+    expect(result.metadata).not.toBeNull();
+    const metadata = JSON.parse(result.metadata!);
+    expect(metadata.document.twitter_card['twitter:card']).toBe('summary_large_image');
+    expect(metadata.document.twitter_card['twitter:title']).toBe('Twitter Card Title');
+    expect(metadata.document.twitter_card['twitter:description']).toBe('Twitter card description.');
   });
 
 });

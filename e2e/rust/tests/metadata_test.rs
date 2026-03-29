@@ -11,6 +11,11 @@ fn test_metadata_author_meta() {
     let content = result.content.unwrap_or_default();
 
     assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert_eq!(
+        result.metadata.document.author.as_deref(),
+        Some("Jane Doe"),
+        "metadata_author mismatch"
+    );
 }
 
 #[test]
@@ -21,6 +26,11 @@ fn test_metadata_canonical_url() {
     let content = result.content.unwrap_or_default();
 
     assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert_eq!(
+        result.metadata.document.canonical_url.as_deref(),
+        Some("https://example.com/canonical-page"),
+        "metadata_canonical_url mismatch"
+    );
 }
 
 #[test]
@@ -31,6 +41,11 @@ fn test_metadata_description_meta() {
     let content = result.content.unwrap_or_default();
 
     assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert_eq!(
+        result.metadata.document.description.as_deref(),
+        Some("This is the page description."),
+        "metadata_description mismatch"
+    );
 }
 
 #[test]
@@ -41,6 +56,27 @@ fn test_metadata_extract_all_images() {
     let content = result.content.unwrap_or_default();
 
     assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert!(
+        result.metadata.images.len() >= 2,
+        "expected at least 2 images, got {}",
+        result.metadata.images.len()
+    );
+    assert!(
+        result
+            .metadata
+            .images
+            .iter()
+            .any(|i| i.src == "https://example.com/photo1.jpg"),
+        "expected images to include src: https://example.com/photo1.jpg"
+    );
+    assert!(
+        result
+            .metadata
+            .images
+            .iter()
+            .any(|i| i.src == "https://example.com/photo2.png"),
+        "expected images to include src: https://example.com/photo2.png"
+    );
 }
 
 #[test]
@@ -51,6 +87,23 @@ fn test_metadata_extract_all_links() {
     let content = result.content.unwrap_or_default();
 
     assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert!(
+        result.metadata.links.len() >= 3,
+        "expected at least 3 links, got {}",
+        result.metadata.links.len()
+    );
+    assert!(
+        result.metadata.links.iter().any(|l| l.href == "https://example.com"),
+        "expected links to include URL: https://example.com"
+    );
+    assert!(
+        result
+            .metadata
+            .links
+            .iter()
+            .any(|l| l.href == "https://docs.example.com"),
+        "expected links to include URL: https://docs.example.com"
+    );
 }
 
 #[test]
@@ -61,6 +114,23 @@ fn test_metadata_headers_hierarchy() {
     let content = result.content.unwrap_or_default();
 
     assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert!(
+        result.metadata.headers.len() >= 5,
+        "expected at least 5 headings, got {}",
+        result.metadata.headers.len()
+    );
+    assert!(
+        result.metadata.headers.iter().any(|h| h.text == "Introduction"),
+        "expected headings to include: Introduction"
+    );
+    assert!(
+        result.metadata.headers.iter().any(|h| h.text == "Getting Started"),
+        "expected headings to include: Getting Started"
+    );
+    assert!(
+        result.metadata.headers.iter().any(|h| h.text == "Installation"),
+        "expected headings to include: Installation"
+    );
 }
 
 #[test]
@@ -71,6 +141,22 @@ fn test_metadata_keywords_meta() {
     let content = result.content.unwrap_or_default();
 
     assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert!(
+        result.metadata.document.keywords.iter().any(|k| k == "rust"),
+        "expected keyword: rust"
+    );
+    assert!(
+        result.metadata.document.keywords.iter().any(|k| k == "markdown"),
+        "expected keyword: markdown"
+    );
+    assert!(
+        result.metadata.document.keywords.iter().any(|k| k == "html"),
+        "expected keyword: html"
+    );
+    assert!(
+        result.metadata.document.keywords.iter().any(|k| k == "converter"),
+        "expected keyword: converter"
+    );
 }
 
 #[test]
@@ -81,6 +167,11 @@ fn test_metadata_title_tag() {
     let content = result.content.unwrap_or_default();
 
     assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert_eq!(
+        result.metadata.document.title.as_deref(),
+        Some("My Page"),
+        "metadata_title mismatch"
+    );
 }
 
 #[test]
@@ -91,6 +182,26 @@ fn test_og_basic_tags() {
     let content = result.content.unwrap_or_default();
 
     assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert_eq!(
+        result.metadata.document.open_graph.get("og:title").map(|s| s.as_str()),
+        Some("OG Title"),
+        "metadata_og_title mismatch"
+    );
+    assert_eq!(
+        result
+            .metadata
+            .document
+            .open_graph
+            .get("og:description")
+            .map(|s| s.as_str()),
+        Some("OG description text."),
+        "metadata_og_description mismatch"
+    );
+    assert_eq!(
+        result.metadata.document.open_graph.get("og:image").map(|s| s.as_str()),
+        Some("https://example.com/image.jpg"),
+        "metadata_og_image mismatch"
+    );
 }
 
 #[test]
@@ -101,6 +212,31 @@ fn test_og_multiple_tags() {
     let content = result.content.unwrap_or_default();
 
     assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert_eq!(
+        result.metadata.document.open_graph.get("og:title").map(|s| s.as_str()),
+        Some("Article Title"),
+        "metadata_og_title mismatch"
+    );
+    assert_eq!(
+        result.metadata.document.open_graph.get("og:type").map(|s| s.as_str()),
+        Some("article"),
+        "metadata_og_type mismatch"
+    );
+    assert_eq!(
+        result.metadata.document.open_graph.get("og:url").map(|s| s.as_str()),
+        Some("https://example.com/article"),
+        "metadata_og_url mismatch"
+    );
+    assert_eq!(
+        result
+            .metadata
+            .document
+            .open_graph
+            .get("og:site_name")
+            .map(|s| s.as_str()),
+        Some("Example Site"),
+        "metadata_og_site_name mismatch"
+    );
 }
 
 #[test]
@@ -160,4 +296,34 @@ fn test_twitter_card_tags() {
     let content = result.content.unwrap_or_default();
 
     assert!(!content.trim().is_empty(), "expected non-empty content");
+    assert_eq!(
+        result
+            .metadata
+            .document
+            .twitter_card
+            .get("twitter:card")
+            .map(|s| s.as_str()),
+        Some("summary_large_image"),
+        "metadata_twitter_card mismatch"
+    );
+    assert_eq!(
+        result
+            .metadata
+            .document
+            .twitter_card
+            .get("twitter:title")
+            .map(|s| s.as_str()),
+        Some("Twitter Card Title"),
+        "metadata_twitter_title mismatch"
+    );
+    assert_eq!(
+        result
+            .metadata
+            .document
+            .twitter_card
+            .get("twitter:description")
+            .map(|s| s.as_str()),
+        Some("Twitter card description."),
+        "metadata_twitter_description mismatch"
+    );
 }
