@@ -5,7 +5,7 @@ use std::collections::HashMap;
 
 use html_to_markdown_rs::{
     CodeBlockStyle, ConversionOptions, ConversionOptionsUpdate, HeadingStyle,
-    HighlightStyle, ListIndentType, NewlineStyle,
+    HighlightStyle, ListIndentType, NewlineStyle, OutputFormat,
     PreprocessingOptionsUpdate, PreprocessingPreset, WhitespaceMode,
 };
 use rustler::{Error, NifResult, Term};
@@ -89,6 +89,8 @@ fn apply_options(map: HashMap<String, Term>) -> NifResult<ConversionOptions> {
             "sup_symbol" => update.sup_symbol = Some(decode_string(value, "sup_symbol")?),
             "newline_style" => update.newline_style = Some(parse_newline_style(value)?),
             "code_block_style" => update.code_block_style = Some(parse_code_block_style(value)?),
+            "output_format" => update.output_format = Some(parse_output_format(value)?),
+            "skip_images" => update.skip_images = Some(decode_bool(value, "skip_images")?),
             "preprocessing" => update.preprocessing = Some(decode_preprocessing(value)?),
             "debug" => update.debug = Some(decode_bool(value, "debug")?),
             _ => {}
@@ -149,7 +151,7 @@ fn parse_heading_style(term: Term) -> NifResult<HeadingStyle> {
     let value = decode_atom_or_string(term)?;
     match value.as_str() {
         "atx" => Ok(HeadingStyle::Atx),
-        "atx_closed" => Ok(HeadingStyle::AtxClosed),
+        "atx_closed" | "atxclosed" => Ok(HeadingStyle::AtxClosed),
         "underlined" => Ok(HeadingStyle::Underlined),
         _ => Err(bad_option_msg("heading_style", format!("invalid value: {value}"))),
     }
@@ -167,7 +169,7 @@ fn parse_list_indent_type(term: Term) -> NifResult<ListIndentType> {
 fn parse_highlight_style(term: Term) -> NifResult<HighlightStyle> {
     let value = decode_atom_or_string(term)?.replace('-', "_");
     match value.as_str() {
-        "double_equal" => Ok(HighlightStyle::DoubleEqual),
+        "double_equal" | "doubleequal" => Ok(HighlightStyle::DoubleEqual),
         "html" => Ok(HighlightStyle::Html),
         "bold" => Ok(HighlightStyle::Bold),
         "none" => Ok(HighlightStyle::None),
@@ -200,6 +202,16 @@ fn parse_code_block_style(term: Term) -> NifResult<CodeBlockStyle> {
         "backticks" => Ok(CodeBlockStyle::Backticks),
         "tildes" => Ok(CodeBlockStyle::Tildes),
         _ => Err(bad_option_msg("code_block_style", format!("invalid value: {value}"))),
+    }
+}
+
+fn parse_output_format(term: Term) -> NifResult<OutputFormat> {
+    let value = decode_atom_or_string(term)?;
+    match value.as_str() {
+        "markdown" => Ok(OutputFormat::Markdown),
+        "djot" => Ok(OutputFormat::Djot),
+        "plain" | "plaintext" | "text" => Ok(OutputFormat::Plain),
+        _ => Err(bad_option_msg("output_format", format!("invalid value: {value}"))),
     }
 }
 

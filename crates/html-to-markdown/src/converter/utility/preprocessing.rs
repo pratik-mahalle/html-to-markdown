@@ -672,7 +672,10 @@ fn tag_has_hidden_attribute(tag: &str) -> bool {
             let before_ok = i == 0 || bytes[i - 1].is_ascii_whitespace();
             // Check that the character after is whitespace, '>', '=', or '/'
             let after = bytes.get(i + nlen).copied();
-            let after_ok = matches!(after, None | Some(b' ') | Some(b'\t') | Some(b'\n') | Some(b'\r') | Some(b'>') | Some(b'=') | Some(b'/'));
+            let after_ok = matches!(
+                after,
+                None | Some(b' ') | Some(b'\t') | Some(b'\n') | Some(b'\r') | Some(b'>') | Some(b'=') | Some(b'/')
+            );
             if before_ok && after_ok {
                 return true;
             }

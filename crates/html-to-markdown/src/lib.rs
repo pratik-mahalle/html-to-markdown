@@ -103,7 +103,6 @@ pub use convert_api::convert_with_visitor;
 // Tests
 // ============================================================================
 
-
 #[cfg(test)]
 mod basic_tests {
     use super::*;

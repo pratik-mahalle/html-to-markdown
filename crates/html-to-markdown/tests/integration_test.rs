@@ -588,11 +588,7 @@ fn hidden_elements_stripped() {
 fn q_element_produces_quotes() {
     let html = "<p>He said <q>hello</q> to me</p>";
     let result = convert(html, None).unwrap();
-    assert!(
-        result.contains(r#""hello""#),
-        "q element should add quotes: {}",
-        result
-    );
+    assert!(result.contains(r#""hello""#), "q element should add quotes: {}", result);
 }
 
 fn convert(
