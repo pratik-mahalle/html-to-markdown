@@ -21,4 +21,4 @@ public record ConversionResult(
     @JsonProperty("tables") List<ExtractTable> tables,
     @JsonProperty("document") JsonNode document,
     @JsonProperty("images") List<InlineImage> images,
-    @JsonProperty("warnings") List<ProcessingWarning> warnings) { }
+    @JsonProperty("warnings") List<ProcessingWarning> warnings) {}
