@@ -8,11 +8,11 @@ import (
 // This test addresses issue #187 which tracks tagName accuracy across language bindings.
 func TestVisitorTagNameContext(t *testing.T) {
 	tests := []struct {
-		name               string
-		html               string
-		expectedTagNames   []string
-		callbackSetup      func(*Visitor) func(*NodeContext)
-		expectedCalls      int
+		name             string
+		html             string
+		expectedTagNames []string
+		callbackSetup    func(*Visitor) func(*NodeContext)
+		expectedCalls    int
 	}{
 		{
 			name:             "div element tag name",
@@ -260,10 +260,10 @@ func TestVisitorDivClassFiltering(t *testing.T) {
 // (not empty or incorrect) for div, script, style, and p elements.
 func TestVisitorIssue187_TagNameAccuracy(t *testing.T) {
 	tests := []struct {
-		name           string
-		html           string
-		expectedTag    string
-		shouldFindTag  bool
+		name          string
+		html          string
+		expectedTag   string
+		shouldFindTag bool
 	}{
 		{
 			name:          "issue187_div",

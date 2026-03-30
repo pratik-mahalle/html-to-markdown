@@ -9,5 +9,4 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @param kind the warning category (e.g., "malformed_html", "encoding_fallback")
  */
 public record ProcessingWarning(
-    @JsonProperty("message") String message,
-    @JsonProperty("kind") String kind) { }
+    @JsonProperty("message") String message, @JsonProperty("kind") String kind) { }
