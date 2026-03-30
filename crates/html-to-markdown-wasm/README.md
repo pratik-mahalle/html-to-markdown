@@ -455,7 +455,7 @@ For comprehensive visitor pattern documentation with examples, see the [full doc
 
 ## Configuration Options
 
-See the [TypeScript definitions](./dist-node/html_to_markdown_wasm.d.ts) for all available options:
+Available options:
 
 - Heading styles (atx, underlined, atxClosed)
 - Code block styles (indented, backticks, tildes)
