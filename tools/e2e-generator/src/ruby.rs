@@ -76,7 +76,7 @@ fn render_test_file(category: &str, fixtures: &[&Fixture]) -> String {
 
 fn render_test_function(out: &mut String, fixture: &Fixture) {
     let test_name = &fixture.id;
-    let description = &fixture.description;
+    let description = fixture.description.replace('\'', "\\'");
 
     let _ = writeln!(out, "  it '{test_name}: {description}' do");
 
