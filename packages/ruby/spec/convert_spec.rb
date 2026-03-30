@@ -16,23 +16,11 @@ RSpec.describe HtmlToMarkdown do
       )
       expect(result).to include('Hello')
     end
-  end
 
-  describe '.convert_with_inline_images' do
-    it 'returns inline images metadata' do
+    it 'converts inline images' do
       html = '<p><img src="data:image/png;base64,ZmFrZQ==" alt="fake"></p>'
-      extraction = described_class.convert_with_inline_images(html)
-      expect(extraction).to include(:markdown, :inline_images, :warnings)
-      expect(extraction[:inline_images].first[:description]).to eq('fake')
-    end
-  end
-
-  describe '.options' do
-    it 'returns a reusable options handle' do
-      handle = described_class.options(heading_style: :atx_closed)
-      expect(handle).to be_a(HtmlToMarkdown::Options)
-      result = described_class.convert_with_options('<h1>Hello</h1>', handle)
-      expect(result).to include('# Hello #')
+      result = described_class.convert(html)
+      expect(result).to be_a(String)
     end
   end
 
@@ -49,25 +37,12 @@ RSpec.describe HtmlToMarkdown do
         end
       end
 
-      it 'catches panics in convert_with_options method' do
+      it 'catches panics in convert with options' do
         malformed_html = "#{'<' * 100_000}div#{'>' * 100_000}"
-        handle = described_class.options(heading_style: :atx)
 
         begin
-          result = described_class.convert_with_options(malformed_html, handle)
+          result = described_class.convert(malformed_html, heading_style: :atx)
           expect(result).to be_a(String)
-        rescue RuntimeError => e
-          expect(e.message).to match(/html-to-markdown panic during conversion/)
-        end
-      end
-
-      it 'catches panics in convert_with_inline_images method' do
-        malformed_html = "#{'<' * 100_000}div#{'>' * 100_000}"
-
-        begin
-          result = described_class.convert_with_inline_images(malformed_html)
-          expect(result).to be_a(Hash)
-          expect(result).to include(:markdown, :inline_images, :warnings)
         rescue RuntimeError => e
           expect(e.message).to match(/html-to-markdown panic during conversion/)
         end

@@ -13,21 +13,14 @@ The html-to-markdown library provides comprehensive, single-pass metadata extrac
 
 ### Single-Pass Collection
 
-Metadata extraction uses the same `MetadataCollector` pattern as inline image collection:
+Metadata is collected during the single `convert()` tree walk and returned as part of the `ConversionResult`:
 
 ```rust
-// From lib.rs line 445
-let metadata_collector = Rc::new(RefCell::new(metadata::MetadataCollector::new(metadata_cfg)));
+// v3 API: convert() returns ConversionResult with metadata included
+let result = convert(html, Some(options))?;
 
-// Passed to converter during tree walk
-let markdown = converter::convert_html_with_metadata(
-    normalized_html.as_ref(),
-    &options,
-    Rc::clone(&metadata_collector)
-)?;
-
-// After conversion, recover and return metadata
-let metadata = metadata_collector.finish();
+// Access metadata from the result
+let metadata = result.metadata;
 ```
 
 **Key Benefits:**
@@ -73,20 +66,16 @@ impl Default for MetadataConfig {
 
 ### Selective Extraction
 
-Only extract specific metadata types:
+Only extract specific metadata types by configuring `ConversionOptions`:
 
 ```rust
-let config = MetadataConfig {
-    extract_document: true,
-    extract_headers: true,
-    extract_links: false,      // Skip links
-    extract_images: false,     // Skip images
-    extract_structured_data: false,
-    max_structured_data_size: 0,
+let options = ConversionOptions {
+    extract_metadata: true,  // Enable metadata extraction (default)
+    ..Default::default()
 };
 
-let (markdown, metadata) = convert_with_metadata(html, None, config)?;
-// metadata.links will be empty (not extracted)
+let result = convert(html, Some(options))?;
+// result.metadata contains document, headers, links, images, structured_data
 ```
 
 ## Document Metadata Extraction
@@ -546,57 +535,30 @@ StructuredData {
 - **Feed generation**: Use article schema for RSS/JSON feeds
 - **Knowledge graphs**: Populate semantic web data
 
-## Complete Example: convert_with_metadata
+## Complete Example: convert() with Metadata
 
-From `/crates/html-to-markdown/src/lib.rs` (lines 428-462):
+The v3 API uses a single `convert()` function that returns a `ConversionResult` containing all extracted data:
 
 ```rust
-pub fn convert_with_metadata(
-    html: &str,
-    options: Option<ConversionOptions>,
-    metadata_cfg: MetadataConfig,
-) -> Result<(String, ExtendedMetadata)> {
-    // Validate input
-    validate_input(html)?;
-    let options = options.unwrap_or_default();
+use html_to_markdown_rs::{convert, ConversionOptions};
 
-    // Early return if no extraction requested
-    if !metadata_cfg.any_enabled() {
-        let markdown = convert(html, Some(options))?;
-        return Ok((markdown, ExtendedMetadata::default()));
-    }
+let html = "<html><head><title>My Page</title></head><body><h1>Hello</h1></body></html>";
+let result = convert(html, None)?;
 
-    // Normalize line endings
-    let normalized_html = normalize_line_endings(html);
+// Access the converted markdown
+println!("{}", result.content);
 
-    // Create collector for single-pass gathering
-    let metadata_collector = Rc::new(RefCell::new(
-        metadata::MetadataCollector::new(metadata_cfg)
-    ));
-
-    // Convert with metadata collection
-    let markdown = converter::convert_html_with_metadata(
-        normalized_html.as_ref(),
-        &options,
-        Rc::clone(&metadata_collector)
-    )?;
-
-    // Apply wrapping if configured
-    let markdown = if options.wrap {
-        wrapper::wrap_markdown(&markdown, &options)
-    } else {
-        markdown
-    };
-
-    // Recover metadata from collector
-    let metadata_collector = Rc::try_unwrap(metadata_collector)
-        .map_err(|_| ConversionError::Other("failed to recover metadata state".to_string()))?
-        .into_inner();
-    let metadata = metadata_collector.finish();
-
-    // Return both markdown and metadata
-    Ok((markdown, metadata))
+// Access metadata from the result
+if let Some(metadata) = &result.metadata {
+    println!("Title: {:?}", metadata.document.title);
+    println!("Headers: {:?}", metadata.headers);
+    println!("Links: {:?}", metadata.links);
+    println!("Images: {:?}", metadata.images);
 }
+
+// Tables and warnings are also available
+println!("Tables: {:?}", result.tables);
+println!("Warnings: {:?}", result.warnings);
 ```
 
 ## Performance Characteristics
@@ -618,7 +580,7 @@ pub fn convert_with_metadata(
 **Core Files:**
 
 - `/crates/html-to-markdown/src/metadata.rs` - All metadata types and collector
-- `/crates/html-to-markdown/src/lib.rs` - `convert_with_metadata()` public API (lines 310-462)
+- `/crates/html-to-markdown/src/lib.rs` - `convert()` public API returning `ConversionResult`
 - `/crates/html-to-markdown/src/converter.rs` - Integration with conversion pipeline
 
 **Testing:**
@@ -627,35 +589,23 @@ pub fn convert_with_metadata(
 
 ## API Pattern Consistency
 
-Metadata extraction follows the same pattern as inline images:
+The v3 API uses a single `convert()` function for all use cases:
 
 ```rust
-// Image extraction (inline-images feature)
-pub fn convert_with_inline_images(
-    html: &str,
-    options: Option<ConversionOptions>,
-    image_cfg: InlineImageConfig,
-) -> Result<HtmlExtraction> { ... }
+// Basic conversion -- returns ConversionResult with .content, .metadata, .tables, .images, .warnings
+let result = convert(html, None)?;
 
-// Metadata extraction (metadata feature)
-pub fn convert_with_metadata(
-    html: &str,
-    options: Option<ConversionOptions>,
-    metadata_cfg: MetadataConfig,
-) -> Result<(String, ExtendedMetadata)> { ... }
+// With options
+let result = convert(html, Some(options))?;
 
-// Visitor pattern (visitor feature)
-pub fn convert_with_visitor(
-    html: &str,
-    options: Option<ConversionOptions>,
-    visitor: Option<visitor::VisitorHandle>,
-) -> Result<String> { ... }
+// With visitor (for custom element handling)
+let result = convert(html, Some(options), Some(visitor))?;
 ```
 
 ## Quick Integration Guide
 
-1. Enable `metadata` feature in Cargo.toml
-2. Import: `use html_to_markdown_rs::{convert_with_metadata, MetadataConfig};`
-3. Call: `let (md, meta) = convert_with_metadata(html, None, MetadataConfig::default())?;`
-4. Access: `meta.document.title`, `meta.headers`, `meta.links`, `meta.images`
-5. Optional: Filter metadata types via `MetadataConfig` to reduce overhead
+1. Enable `metadata` feature in Cargo.toml (enabled by default)
+2. Import: `use html_to_markdown_rs::convert;`
+3. Call: `let result = convert(html, None)?;`
+4. Access: `result.metadata.document.title`, `result.metadata.headers`, `result.metadata.links`, `result.metadata.images`
+5. Optional: Configure `extract_metadata` in `ConversionOptions` to disable metadata extraction

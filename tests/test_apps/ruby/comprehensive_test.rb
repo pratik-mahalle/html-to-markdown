@@ -19,110 +19,6 @@ RSpec.describe 'comprehensive html-to-markdown tests' do
     end
   end
 
-  # Metadata extraction tests
-  describe 'Metadata Extraction Feature' do
-    it 'converts HTML with metadata extraction enabled' do
-      html = '<html><head><title>Test</title></head><body><p>Content</p></body></html>'
-      markdown, metadata = HtmlToMarkdown.convert_with_metadata(html)
-
-      expect(markdown).to be_a(String)
-      expect(metadata).to be_a(Hash)
-      expect(markdown).to include('Content')
-    end
-
-    it 'extracts document metadata' do
-      html = '<html><head><title>My Page</title><meta name="description" content="A test page"></head><body><p>Content</p></body></html>'
-      _, metadata = HtmlToMarkdown.convert_with_metadata(html)
-
-      expect(metadata).to have_key(:document)
-      expect(metadata[:document][:title]).to eq('My Page')
-      expect(metadata[:document][:description]).to eq('A test page')
-    end
-
-    it 'extracts headers from content' do
-      html = '<h1>Title</h1><h2>Subtitle</h2><p>Content</p>'
-      _, metadata = HtmlToMarkdown.convert_with_metadata(html)
-
-      expect(metadata).to have_key(:headers)
-      expect(metadata[:headers]).to be_a(Array)
-    end
-
-    it 'extracts links from content' do
-      html = '<p><a href="https://example.com">Link</a></p>'
-      _, metadata = HtmlToMarkdown.convert_with_metadata(html)
-
-      expect(metadata).to have_key(:links)
-      expect(metadata[:links]).to be_a(Array)
-    end
-
-    it 'extracts images from content' do
-      html = '<p><img src="https://example.com/image.png" alt="Example"></p>'
-      _, metadata = HtmlToMarkdown.convert_with_metadata(html)
-
-      expect(metadata).to have_key(:images)
-      expect(metadata[:images]).to be_a(Array)
-    end
-  end
-
-  # Inline images extraction tests
-  describe 'Inline Images Feature' do
-    it 'returns hash with markdown, inline_images, and warnings' do
-      html = '<p><img src="data:image/png;base64,ZmFrZQ==" alt="Test"></p>'
-      result = HtmlToMarkdown.convert_with_inline_images(html)
-
-      expect(result).to be_a(Hash)
-      expect(result).to have_key(:markdown)
-      expect(result).to have_key(:inline_images)
-      expect(result).to have_key(:warnings)
-    end
-
-    it 'extracts base64-encoded inline images' do
-      html = '<p><img src="data:image/png;base64,ZmFrZQ==" alt="Inline image"></p>'
-      result = HtmlToMarkdown.convert_with_inline_images(html)
-
-      expect(result[:inline_images]).to be_a(Array)
-      unless result[:inline_images].empty?
-        expect(result[:inline_images].first).to have_key(:data)
-        expect(result[:inline_images].first).to have_key(:description)
-      end
-    end
-
-    it 'handles multiple inline images' do
-      html = '<p><img src="data:image/png;base64,ZmFrZTA=" alt="Image 1"><img src="data:image/png;base64,ZmFrZTE=" alt="Image 2"></p>'
-      result = HtmlToMarkdown.convert_with_inline_images(html)
-
-      expect(result[:inline_images]).to be_a(Array)
-    end
-  end
-
-  # Visitor pattern tests
-  describe 'Visitor Pattern Feature' do
-    it 'converts HTML with visitor callbacks' do
-      html = '<p>Test</p>'
-      visitor = double('visitor')
-      allow(visitor).to receive(:visit_text).and_return({ type: :continue })
-      allow(visitor).to receive(:visit_element_start).and_return({ type: :continue })
-      allow(visitor).to receive(:visit_element_end).and_return({ type: :continue })
-
-      result = HtmlToMarkdown.convert_with_visitor(html, nil, visitor)
-
-      expect(result).to be_a(String)
-      expect(result).to include('Test')
-    end
-
-    it 'supports custom element processing via visitor' do
-      html = '<div class="custom">Custom content</div>'
-      visitor = double('visitor')
-      allow(visitor).to receive(:visit_element_start).and_return({ type: :continue })
-      allow(visitor).to receive(:visit_element_end).and_return({ type: :continue })
-      allow(visitor).to receive(:visit_text).and_return({ type: :continue })
-
-      result = HtmlToMarkdown.convert_with_visitor(html, nil, visitor)
-
-      expect(result).to be_a(String)
-    end
-  end
-
   # Conversion options tests
   describe 'Conversion Options' do
     it 'applies heading style option (atx)' do
@@ -200,26 +96,10 @@ RSpec.describe 'comprehensive html-to-markdown tests' do
     end
   end
 
-  # RBS type definitions validation
-  describe 'RBS Type Definitions' do
+  # API type definitions validation
+  describe 'API Type Definitions' do
     it 'HtmlToMarkdown module responds to convert' do
       expect(HtmlToMarkdown).to respond_to(:convert)
-    end
-
-    it 'HtmlToMarkdown module responds to convert_with_metadata' do
-      expect(HtmlToMarkdown).to respond_to(:convert_with_metadata)
-    end
-
-    it 'HtmlToMarkdown module responds to convert_with_inline_images' do
-      expect(HtmlToMarkdown).to respond_to(:convert_with_inline_images)
-    end
-
-    it 'HtmlToMarkdown module responds to convert_with_visitor' do
-      expect(HtmlToMarkdown).to respond_to(:convert_with_visitor)
-    end
-
-    it 'HtmlToMarkdown::Options class exists' do
-      expect(defined?(HtmlToMarkdown::Options)).to be_truthy
     end
   end
 end

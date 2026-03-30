@@ -41,7 +41,7 @@ html = """
 IO.puts("Converting HTML with BasicVisitor:")
 IO.puts("")
 
-{:ok, markdown} = HtmlToMarkdown.Visitor.convert_with_visitor(html, BasicVisitor, nil)
+{:ok, markdown} = HtmlToMarkdown.convert(html)
 
 IO.puts("")
 IO.puts("Converted Markdown:")

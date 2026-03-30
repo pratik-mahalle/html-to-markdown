@@ -20,10 +20,10 @@ function detectExtension(string $root): string
 
     $path = $targetDir . DIRECTORY_SEPARATOR . $filename;
 
-    // Always (re)build the extension with the metadata and visitor features enabled. Other tasks in this repo
+    // Always (re)build the extension. Other tasks in this repo
     // may have built the workspace with `--no-default-features`, leaving behind an extension
-    // binary that is missing `html_to_markdown_convert_with_metadata` or `html_to_markdown_convert_with_visitor`.
-    $command = ['cargo', 'build', '-p', 'html-to-markdown-php', '--release', '--features', 'metadata,visitor'];
+    // binary that is missing required symbols.
+    $command = ['cargo', 'build', '-p', 'html-to-markdown-php', '--release'];
     runProcess($command, $root);
 
     if (file_exists($path)) {

@@ -3,8 +3,6 @@
 declare(strict_types=1);
 
 use function HtmlToMarkdown\convert;
-use function HtmlToMarkdown\convert_with_metadata;
-use function HtmlToMarkdown\convert_with_inline_images;
 use PHPUnit\Framework\TestCase;
 
 final class SmokeTest extends TestCase

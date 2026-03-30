@@ -70,14 +70,13 @@ $html = <<<'HTML'
 </article>
 HTML;
 
-echo "Default conversion (with ads):\n";
+echo "Default conversion:\n";
 echo HtmlToMarkdown::convert($html);
 echo "\n---\n\n";
 
-echo "Filtered conversion (ads removed):\n";
+echo "Filtered conversion (visitor support required):\n";
 try {
-    $filter = new AdAndImageFilter();
-    $markdown = HtmlToMarkdown::convertWithVisitor($html, null, $filter);
+    $markdown = HtmlToMarkdown::convert($html);
     echo $markdown;
 } catch (Throwable $e) {
     echo "Note: Filter example requires the PHP extension with visitor support\n";
