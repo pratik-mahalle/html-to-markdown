@@ -9,8 +9,8 @@ import java.util.Map;
  * An inline image extracted from an HTML document (e.g. data URIs or SVG elements).
  *
  * <p>This is different from {@link dev.kreuzberg.htmltomarkdown.metadata.ImageMetadata}, which
- * captures metadata about images found in the HTML. {@code InlineImage} contains the actual
- * decoded image data bytes.
+ * captures metadata about images found in the HTML. {@code InlineImage} contains the actual decoded
+ * image data bytes.
  *
  * @param data raw image data bytes (encoded in its original format)
  * @param format image format (e.g. "png", "jpeg", "gif", "svg")

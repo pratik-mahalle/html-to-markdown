@@ -60,11 +60,12 @@ public final class HtmlToMarkdown {
    * Convert HTML to Markdown in a single pass, returning a full {@code ConversionResult}.
    *
    * <p>Returns a {@code ConversionResult} containing:
+   *
    * <ul>
-   *   <li>The converted Markdown string (or {@code null} in extraction-only mode)</li>
-   *   <li>Extracted HTML metadata (title, links, images, structured data)</li>
-   *   <li>Extracted tables with structured grid data</li>
-   *   <li>Non-fatal processing warnings</li>
+   *   <li>The converted Markdown string (or {@code null} in extraction-only mode)
+   *   <li>Extracted HTML metadata (title, links, images, structured data)
+   *   <li>Extracted tables with structured grid data
+   *   <li>Non-fatal processing warnings
    * </ul>
    *
    * @param html the HTML string to convert
@@ -80,21 +81,22 @@ public final class HtmlToMarkdown {
     }
 
     if (html.isEmpty()) {
-      return new ConversionResult("", null, java.util.List.of(), null, java.util.List.of(), java.util.List.of());
+      return new ConversionResult(
+          "", null, java.util.List.of(), null, java.util.List.of(), java.util.List.of());
     }
 
     try (Arena arena = Arena.ofConfined()) {
       MemorySegment htmlSegment = HtmlToMarkdownFFI.toCString(arena, html);
-      MemorySegment optionsSegment = (optionsJson != null)
-          ? HtmlToMarkdownFFI.toCString(arena, optionsJson)
-          : MemorySegment.NULL;
+      MemorySegment optionsSegment =
+          (optionsJson != null)
+              ? HtmlToMarkdownFFI.toCString(arena, optionsJson)
+              : MemorySegment.NULL;
 
       MemorySegment resultSegment;
       try {
         resultSegment =
             (MemorySegment)
-                HtmlToMarkdownFFI.html_to_markdown_convert.invoke(
-                    htmlSegment, optionsSegment);
+                HtmlToMarkdownFFI.html_to_markdown_convert.invoke(htmlSegment, optionsSegment);
       } catch (Throwable e) {
         throw new ConversionException("FFI call to convert failed: " + e.getMessage(), e);
       }
@@ -110,8 +112,7 @@ public final class HtmlToMarkdown {
       } catch (ConversionException e) {
         throw e;
       } catch (Exception e) {
-        throw new ConversionException(
-            "failed to parse conversion JSON: " + e.getMessage(), e);
+        throw new ConversionException("failed to parse conversion JSON: " + e.getMessage(), e);
       } finally {
         try {
           HtmlToMarkdownFFI.html_to_markdown_free_string.invoke(resultSegment);
