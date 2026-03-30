@@ -54,10 +54,10 @@ html-to-markdown-rs = "3"
 ### Go
 
 ```bash
-go get github.com/kreuzberg-dev/html-to-markdown/packages/go/v2
+go get github.com/kreuzberg-dev/html-to-markdown/packages/go/v3
 ```
 
-Import path: `github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown`
+Import path: `github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown`
 
 ### Ruby
 
@@ -264,7 +264,7 @@ const result = JSON.parse(convert(html, options));
 ### Go (JSON options)
 
 ```go
-import "github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown"
+import "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown"
 
 result, err := htmltomarkdown.Convert(html)
 // result.Content contains the markdown string
