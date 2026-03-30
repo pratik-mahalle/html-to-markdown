@@ -9,34 +9,6 @@ int main(void) {
     int passed = 0;
     int failed = 0;
 
-    printf("Running {}...\n", "test_structure_code_block");
-    test_structure_code_block();
-    passed++;
-
-    printf("Running {}...\n", "test_structure_deep_nesting_h1_h2_h3");
-    test_structure_deep_nesting_h1_h2_h3();
-    passed++;
-
-    printf("Running {}...\n", "test_structure_h1_h2_nested_group");
-    test_structure_h1_h2_nested_group();
-    passed++;
-
-    printf("Running {}...\n", "test_structure_heading_paragraph");
-    test_structure_heading_paragraph();
-    passed++;
-
-    printf("Running {}...\n", "test_structure_list");
-    test_structure_list();
-    passed++;
-
-    printf("Running {}...\n", "test_structure_multiple_headings");
-    test_structure_multiple_headings();
-    passed++;
-
-    printf("Running {}...\n", "test_structure_sibling_h1_groups");
-    test_structure_sibling_h1_groups();
-    passed++;
-
     printf("Running {}...\n", "test_blockquote_multiple_paragraphs");
     test_blockquote_multiple_paragraphs();
     passed++;
@@ -391,6 +363,34 @@ int main(void) {
 
     printf("Running {}...\n", "test_smoke_simple_paragraph");
     test_smoke_simple_paragraph();
+    passed++;
+
+    printf("Running {}...\n", "test_structure_code_block");
+    test_structure_code_block();
+    passed++;
+
+    printf("Running {}...\n", "test_structure_deep_nesting_h1_h2_h3");
+    test_structure_deep_nesting_h1_h2_h3();
+    passed++;
+
+    printf("Running {}...\n", "test_structure_h1_h2_nested_group");
+    test_structure_h1_h2_nested_group();
+    passed++;
+
+    printf("Running {}...\n", "test_structure_heading_paragraph");
+    test_structure_heading_paragraph();
+    passed++;
+
+    printf("Running {}...\n", "test_structure_list");
+    test_structure_list();
+    passed++;
+
+    printf("Running {}...\n", "test_structure_multiple_headings");
+    test_structure_multiple_headings();
+    passed++;
+
+    printf("Running {}...\n", "test_structure_sibling_h1_groups");
+    test_structure_sibling_h1_groups();
     passed++;
 
     printf("Running {}...\n", "test_metadata_author_meta");

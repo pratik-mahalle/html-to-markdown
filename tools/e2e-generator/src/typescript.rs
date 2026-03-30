@@ -87,7 +87,7 @@ fn render_test_file(category: &str, fixtures: &[&Fixture]) -> String {
 
 fn render_test_function(out: &mut String, fixture: &Fixture) {
     let fn_name = sanitize_test_name(&fixture.id);
-    let description = &fixture.description;
+    let description = fixture.description.replace('\'', "\\'");
 
     // HTML input.
     let html = match &fixture.html {
