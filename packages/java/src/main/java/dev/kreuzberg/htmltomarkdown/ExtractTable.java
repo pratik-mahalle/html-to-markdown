@@ -9,5 +9,4 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @param markdown the rendered Markdown representation of the table
  */
 public record ExtractTable(
-    @JsonProperty("grid") TableGrid grid,
-    @JsonProperty("markdown") String markdown) { }
+    @JsonProperty("grid") TableGrid grid, @JsonProperty("markdown") String markdown) { }

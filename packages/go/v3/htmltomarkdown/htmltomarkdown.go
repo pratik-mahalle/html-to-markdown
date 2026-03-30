@@ -166,7 +166,6 @@ func Version() string {
 	return C.GoString(cVersion)
 }
 
-
 // TextDirection represents the directionality of text content.
 //
 // This enum is used to indicate whether text flows left-to-right (as in English)

@@ -15,6 +15,10 @@ pub fn generate(fixtures: &[Fixture], output_dir: &Utf8Path) -> Result<usize> {
     let spec_dir = ruby_dir.join("spec");
     std::fs::create_dir_all(&spec_dir)?;
 
+    // Generate Gemfile.
+    let gemfile = render_gemfile();
+    std::fs::write(ruby_dir.join("Gemfile"), gemfile)?;
+
     // Group fixtures by category.
     let by_category: HashMap<&str, Vec<&Fixture>> = fixtures
         .iter()
@@ -32,6 +36,17 @@ pub fn generate(fixtures: &[Fixture], output_dir: &Utf8Path) -> Result<usize> {
     }
 
     Ok(total)
+}
+
+fn render_gemfile() -> String {
+    r#"# frozen_string_literal: true
+
+source 'https://rubygems.org'
+
+gem 'html-to-markdown', path: '../../packages/ruby'
+gem 'rspec'
+"#
+    .to_string()
 }
 
 fn render_test_file(category: &str, fixtures: &[&Fixture]) -> String {
