@@ -151,7 +151,7 @@ fn parse_heading_style(term: Term) -> NifResult<HeadingStyle> {
     let value = decode_atom_or_string(term)?;
     match value.as_str() {
         "atx" => Ok(HeadingStyle::Atx),
-        "atx_closed" | "atxclosed" => Ok(HeadingStyle::AtxClosed),
+        "atx_closed" | "atxclosed" | "atxClosed" => Ok(HeadingStyle::AtxClosed),
         "underlined" => Ok(HeadingStyle::Underlined),
         _ => Err(bad_option_msg("heading_style", format!("invalid value: {value}"))),
     }
@@ -169,7 +169,7 @@ fn parse_list_indent_type(term: Term) -> NifResult<ListIndentType> {
 fn parse_highlight_style(term: Term) -> NifResult<HighlightStyle> {
     let value = decode_atom_or_string(term)?.replace('-', "_");
     match value.as_str() {
-        "double_equal" | "doubleequal" => Ok(HighlightStyle::DoubleEqual),
+        "double_equal" | "doubleequal" | "doubleEqual" => Ok(HighlightStyle::DoubleEqual),
         "html" => Ok(HighlightStyle::Html),
         "bold" => Ok(HighlightStyle::Bold),
         "none" => Ok(HighlightStyle::None),
