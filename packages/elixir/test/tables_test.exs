@@ -10,7 +10,9 @@ defmodule HtmlToMarkdown.TablesTest do
       </table>
       """
 
-      {:ok, content} = HtmlToMarkdown.convert(html)
+      {:ok, result} = HtmlToMarkdown.convert(html)
+      assert is_map(result)
+      content = result.content
       assert is_binary(content)
       assert String.contains?(content, "Name")
       assert String.contains?(content, "Age")
@@ -20,8 +22,8 @@ defmodule HtmlToMarkdown.TablesTest do
 
     test "converts non-table HTML without error" do
       html = "<p>Hello world</p>"
-      {:ok, content} = HtmlToMarkdown.convert(html)
-      assert is_binary(content)
+      {:ok, result} = HtmlToMarkdown.convert(html)
+      assert is_binary(result.content)
     end
 
     test "converts multiple tables" do
@@ -31,29 +33,29 @@ defmodule HtmlToMarkdown.TablesTest do
       <table><tr><th>B</th></tr><tr><td>2</td></tr></table>
       """
 
-      {:ok, content} = HtmlToMarkdown.convert(html)
-      assert String.contains?(content, "A")
-      assert String.contains?(content, "B")
+      {:ok, result} = HtmlToMarkdown.convert(html)
+      assert String.contains?(result.content, "A")
+      assert String.contains?(result.content, "B")
     end
 
     test "content includes table markdown" do
       html = "<table><tr><th>X</th></tr><tr><td>Y</td></tr></table>"
-      {:ok, content} = HtmlToMarkdown.convert(html)
-      assert String.contains?(content, "X")
-      assert String.contains?(content, "Y")
+      {:ok, result} = HtmlToMarkdown.convert(html)
+      assert String.contains?(result.content, "X")
+      assert String.contains?(result.content, "Y")
     end
 
     test "handles special characters in cells" do
       html = "<table><tr><td>c &amp; d</td></tr></table>"
-      {:ok, content} = HtmlToMarkdown.convert(html)
-      assert is_binary(content)
+      {:ok, result} = HtmlToMarkdown.convert(html)
+      assert is_binary(result.content)
     end
 
     test "accepts options" do
       html = "<table><tr><th>H</th></tr><tr><td>V</td></tr></table>"
 
-      {:ok, content} = HtmlToMarkdown.convert(html, %{heading_style: "atx"})
-      assert is_binary(content)
+      {:ok, result} = HtmlToMarkdown.convert(html, %{heading_style: "atx"})
+      assert is_binary(result.content)
     end
   end
 end

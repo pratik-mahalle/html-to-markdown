@@ -88,6 +88,10 @@ jobs:
           cd packages/python && uv run maturin develop --release
         shell: bash
 
+      - name: Build CLI binary
+        run: cargo build --release -p html-to-markdown-cli
+        shell: bash
+
       - name: Run Python Tests
         run: task python:test:ci
         shell: bash
