@@ -168,4 +168,3 @@ func ExampleVersion() {
 	version := Version()
 	println("html-to-markdown version:", version)
 }
-
