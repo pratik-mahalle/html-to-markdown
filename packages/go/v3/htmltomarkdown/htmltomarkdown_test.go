@@ -1,7 +1,6 @@
 package htmltomarkdown
 
 import (
-	"encoding/json"
 	"strings"
 	"testing"
 )
@@ -70,8 +69,12 @@ func TestConvert(t *testing.T) {
 				t.Errorf("Convert() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !strings.Contains(got, tt.contains) {
-				t.Errorf("Convert() = %v, want to contain %v", got, tt.contains)
+			content := ""
+			if got != nil && got.Content != nil {
+				content = *got.Content
+			}
+			if !strings.Contains(content, tt.contains) {
+				t.Errorf("Convert() content = %v, want to contain %v", content, tt.contains)
 			}
 		})
 	}
@@ -81,15 +84,17 @@ func TestMustConvert(t *testing.T) {
 	t.Run("successful conversion", func(t *testing.T) {
 		html := "<h1>Test</h1>"
 		result := MustConvert(html)
-		if !strings.Contains(result, "Test") {
-			t.Errorf("MustConvert() = %v, want to contain 'Test'", result)
+		if result.Content == nil || !strings.Contains(*result.Content, "Test") {
+			t.Errorf("MustConvert().Content = %v, want to contain 'Test'", result.Content)
 		}
 	})
 
 	t.Run("empty string", func(t *testing.T) {
 		result := MustConvert("")
-		if result != "" {
-			t.Errorf("MustConvert(\"\") = %v, want empty string", result)
+		if result.Content == nil {
+			t.Errorf("MustConvert(\"\").Content = nil, want non-nil empty string")
+		} else if *result.Content != "" {
+			t.Errorf("MustConvert(\"\").Content = %v, want empty string", *result.Content)
 		}
 	})
 }
@@ -143,16 +148,20 @@ func BenchmarkConvertSimple(b *testing.B) {
 }
 
 func ExampleConvert() {
-	markdown, err := Convert("<h1>Hello World</h1>")
+	result, err := Convert("<h1>Hello World</h1>")
 	if err != nil {
 		panic(err)
 	}
-	println(markdown)
+	if result.Content != nil {
+		println(*result.Content)
+	}
 }
 
 func ExampleMustConvert() {
-	markdown := MustConvert("<p>This is a paragraph.</p>")
-	println(markdown)
+	result := MustConvert("<p>This is a paragraph.</p>")
+	if result.Content != nil {
+		println(*result.Content)
+	}
 }
 
 func ExampleVersion() {
