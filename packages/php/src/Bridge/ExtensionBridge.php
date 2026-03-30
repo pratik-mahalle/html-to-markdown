@@ -28,7 +28,7 @@ final class ExtensionBridge implements ExtensionBridgeContract
         }
 
         try {
-            return \html_to_markdown_convert($html, $options);
+            return html_to_markdown_convert($html, $options);
         } catch (\Throwable $exception) {
             throw ConversionFailed::withMessage($exception->getMessage());
         }

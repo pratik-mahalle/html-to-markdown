@@ -1,6 +1,6 @@
 //! Inline image configuration and conversion functions.
 
-use html_to_markdown_rs::{InlineImage, InlineImageWarning};
+use html_to_markdown_rs::InlineImage;
 use magnus::prelude::*;
 use magnus::{Error, Ruby, Value};
 
@@ -50,12 +50,5 @@ pub fn inline_image_to_value(ruby: &Ruby, image: InlineImage) -> Result<Value, E
     }
     hash.aset(ruby.intern("attributes"), attrs)?;
 
-    Ok(hash.as_value())
-}
-
-pub fn warning_to_value(ruby: &Ruby, warning: InlineImageWarning) -> Result<Value, Error> {
-    let hash = ruby.hash_new();
-    hash.aset(ruby.intern("index"), warning.index as i64)?;
-    hash.aset(ruby.intern("message"), warning.message)?;
     Ok(hash.as_value())
 }
