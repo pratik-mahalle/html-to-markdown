@@ -18,7 +18,7 @@ public class StructureTests
     public void TestStructureCodeBlock()
     {
         var html = "<p>Example code:</p><pre><code class=\"language-rust\">fn main() { println!(\"Hello\"); }</code></pre>";
-        var result = HtmlToMarkdownConverter.Convert(html, "{\"include_document_structure\":true}");
+        var result = HtmlToMarkdownConverter.Convert(html, "{\"includeDocumentStructure\":true}");
         var content = result.Content ?? "";
 
         Assert.False(string.IsNullOrWhiteSpace(content));
@@ -31,7 +31,7 @@ public class StructureTests
     public void TestStructureDeepNestingH1H2H3()
     {
         var html = "<h1>Top Level</h1><p>Top intro.</p><h2>Mid Level</h2><p>Mid content.</p><h3>Deep Level</h3><p>Deep content.</p>";
-        var result = HtmlToMarkdownConverter.Convert(html, "{\"include_document_structure\":true}");
+        var result = HtmlToMarkdownConverter.Convert(html, "{\"includeDocumentStructure\":true}");
         var content = result.Content ?? "";
 
         Assert.False(string.IsNullOrWhiteSpace(content));
@@ -44,7 +44,7 @@ public class StructureTests
     public void TestStructureH1H2NestedGroup()
     {
         var html = "<h1>Chapter One</h1><p>Chapter intro.</p><h2>Section One</h2><p>Section content.</p>";
-        var result = HtmlToMarkdownConverter.Convert(html, "{\"include_document_structure\":true}");
+        var result = HtmlToMarkdownConverter.Convert(html, "{\"includeDocumentStructure\":true}");
         var content = result.Content ?? "";
 
         Assert.False(string.IsNullOrWhiteSpace(content));
@@ -57,7 +57,7 @@ public class StructureTests
     public void TestStructureHeadingParagraph()
     {
         var html = "<h1>Title</h1><p>A paragraph of text.</p>";
-        var result = HtmlToMarkdownConverter.Convert(html, "{\"include_document_structure\":true}");
+        var result = HtmlToMarkdownConverter.Convert(html, "{\"includeDocumentStructure\":true}");
         var content = result.Content ?? "";
 
         Assert.False(string.IsNullOrWhiteSpace(content));
@@ -70,7 +70,7 @@ public class StructureTests
     public void TestStructureList()
     {
         var html = "<p>Items:</p><ul><li>Alpha</li><li>Beta</li><li>Gamma</li></ul>";
-        var result = HtmlToMarkdownConverter.Convert(html, "{\"include_document_structure\":true}");
+        var result = HtmlToMarkdownConverter.Convert(html, "{\"includeDocumentStructure\":true}");
         var content = result.Content ?? "";
 
         Assert.False(string.IsNullOrWhiteSpace(content));
@@ -83,7 +83,7 @@ public class StructureTests
     public void TestStructureMultipleHeadings()
     {
         var html = "<h1>Main Title</h1><h2>Section One</h2><p>Section one content.</p><h2>Section Two</h2><p>Section two content.</p>";
-        var result = HtmlToMarkdownConverter.Convert(html, "{\"include_document_structure\":true}");
+        var result = HtmlToMarkdownConverter.Convert(html, "{\"includeDocumentStructure\":true}");
         var content = result.Content ?? "";
 
         Assert.False(string.IsNullOrWhiteSpace(content));
@@ -96,7 +96,7 @@ public class StructureTests
     public void TestStructureSiblingH1Groups()
     {
         var html = "<h1>Chapter One</h1><h2>Section A</h2><p>Section A content.</p><h1>Chapter Two</h1><h2>Section B</h2><p>Section B content.</p>";
-        var result = HtmlToMarkdownConverter.Convert(html, "{\"include_document_structure\":true}");
+        var result = HtmlToMarkdownConverter.Convert(html, "{\"includeDocumentStructure\":true}");
         var content = result.Content ?? "";
 
         Assert.False(string.IsNullOrWhiteSpace(content));
