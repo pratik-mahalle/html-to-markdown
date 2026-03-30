@@ -132,6 +132,8 @@ tasks:
     desc: "Run Ruby E2E tests in e2e/ruby directory"
     silent: false
     cmds:
+      - cmd: cd e2e/ruby && bundle install --quiet
+        ignore_error: false
       - cmd: cd e2e/ruby && bundle exec rspec spec/
         ignore_error: false
 
