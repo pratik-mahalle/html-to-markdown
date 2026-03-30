@@ -7,27 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [3.0.0] - 2026-03-27
+## [3.0.0] - 2026-03-30
 
 ### Added
 
-- **`extract()` API**: New primary entry point returning `ConversionResult` with structured content, document tree, metadata, tables, images, and warnings. Available in all 12 language bindings.
-- **`ConversionResult` type**: Rich result struct with `content` (optional markdown/djot/plain), `document` (optional `DocumentStructure`), `metadata` (`HtmlMetadata`), `tables`, `images`, and `warnings`.
-- **`DocumentStructure`**: Structured document tree aligned with kreuzberg's model. Flat node array with index-based parent/child references, `NodeContent` enum (Heading, Paragraph, List, Table, Image, Code, Quote, etc.), and `TextAnnotation` for inline formatting with byte offsets.
-- **`ConversionOptionsBuilder`**: Fluent builder pattern for constructing options (`ConversionOptions::builder().wrap(true).build()`).
-- **New options**: `include_document_structure`, `extract_images`, `max_image_size`, `capture_svg`, `infer_dimensions`.
-- **`OutputFormat::None`**: Skip text rendering, extract structure/metadata only.
+- **Single `convert()` API**: One entry point across all 12 language bindings returning `ConversionResult` with content, document, metadata, tables, images, and warnings.
+- **`ConversionResult` type**: Structured result with `content` (markdown/djot/plain), `document` (optional `DocumentStructure`), `metadata` (`HtmlMetadata`), `tables` (grid-based), `images` (inline image data), and `warnings`.
+- **`DocumentStructure`**: Structured document tree with flat node array, index-based parent/child references, and `TextAnnotation` for inline formatting.
+- **Options support in all bindings**: Go, Java, C# now accept options. All generators wire fixture options into e2e tests.
+- **GFM defaults**: Code blocks default to backtick fences (was indented). ATX headings remain default.
+- **E2E contract validation**: Generators produce tests validating ConversionResult structure (metadata, tables, warnings) across all 12 languages.
+- **New options**: `includeDocumentStructure`, `extractImages`, `maxImageSize`, `captureSvg`, `inferDimensions`, `outputFormat` (markdown/djot/plain).
+- **`<q>` element**: Wraps content in quotation marks.
+- **`<figure>`/`<figcaption>` elements**: Routed to semantic handler with caption separation.
+- **`hidden` attribute**: Elements with `hidden` stripped before parsing.
 
 ### Changed
 
-- **`convert()` returns `ConversionResult`** instead of `String`. Use `convert_to_string()` for v2 backward compatibility.
-- **`ExtendedMetadata` renamed to `HtmlMetadata`** across all crates and bindings for kreuzberg alignment.
+- **`convert()` returns `ConversionResult`** instead of `String` in all bindings (Go, Java, C#, Node, Python, PHP, Ruby, Elixir, R, WASM, C FFI).
+- **`ExtendedMetadata` renamed to `HtmlMetadata`** across all crates and bindings.
+- **Go `Convert()`** returns `*ConversionResult` with `Content`, `Metadata`, `Tables`, `Images`, `Warnings` fields. Accepts optional JSON options via variadic parameter.
+- **Table data** uses grid-based schema (`TableGrid` with `GridCell`) instead of flat `cells [][]string`.
+- **`serde(deny_unknown_fields)`** on `MetadataConfig`, `MetadataConfigUpdate`, `InlineImageConfigUpdate`.
+- **Go 1.26**, golangci-lint@latest.
 
 ### Removed
 
-- **hOCR support**: Entire `hocr` module deleted (17 source files). The `hocr_spatial_tables` option removed from all bindings.
-- **Python v1 compatibility layer**: `convert_to_markdown()` and `markdownify()` functions removed.
-- **Standalone `convert_with_visitor()`**: Removed from Node.js, Python, Ruby. Use visitor parameter on `convert()` instead.
+- **All `convert_with_*` functions**: `convert_with_metadata`, `convert_with_inline_images`, `convert_with_visitor` (standalone), `convert_with_tables`, `convert_with_async_visitor` removed from public API. Single `convert()` replaces all.
+- **Async visitor**: Feature removed entirely (`async-visitor` Cargo feature, `AsyncHtmlVisitor` trait, async bridge/dispatch code).
+- **Profiling**: All profiling infrastructure removed (8 binding crates, CI workflow, C tests, `start_profiling`/`stop_profiling` APIs).
+- **Benchmarks**: All benchmark scripts and harness removed.
+- **hOCR support**: Entire `hocr` module deleted. The `hocr_spatial_tables` option removed.
+- **Python v1 compatibility**: `convert_to_markdown()` and `markdownify()` removed.
+- **Redundant binding tests**: Tests covered by e2e generators removed from Python, Ruby, Elixir, R.
 
 ## [2.30.0] - 2026-03-27
 
