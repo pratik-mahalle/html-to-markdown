@@ -60,7 +60,12 @@ fn render_test_file(category: &str, fixtures: &[&Fixture]) -> String {
     let _ = writeln!(out, "\"\"\"");
     let _ = writeln!(out, "# ruff: noqa: S101");
     let _ = writeln!(out, "import pytest");
-    let _ = writeln!(out, "from html_to_markdown import convert");
+    let has_options = fixtures.iter().any(|f| f.options.is_some());
+    if has_options {
+        let _ = writeln!(out, "from html_to_markdown import convert, ConversionOptions");
+    } else {
+        let _ = writeln!(out, "from html_to_markdown import convert");
+    }
     let _ = writeln!(out);
 
     for fixture in fixtures {
@@ -96,18 +101,18 @@ fn render_test_function(out: &mut String, fixture: &Fixture) {
     let escaped_html = escape_python_string(html);
     let _ = writeln!(out, "    html = \"{escaped_html}\"");
 
-    // Build options dict if specified.
+    // Build ConversionOptions if specified.
     if let Some(opts) = &fixture.options {
         let entries: Vec<String> = opts
             .iter()
             .map(|(k, v)| {
                 let snake_key = camel_to_snake(k);
                 let py_val = json_value_to_python(v);
-                format!("\"{snake_key}\": {py_val}")
+                format!("{snake_key}={py_val}")
             })
             .collect();
-        let dict_literal = entries.join(", ");
-        let _ = writeln!(out, "    opts = {{{dict_literal}}}");
+        let kwargs = entries.join(", ");
+        let _ = writeln!(out, "    opts = ConversionOptions({kwargs})");
     }
 
     let convert_call = if fixture.options.is_some() {
