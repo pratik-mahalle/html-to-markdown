@@ -34,6 +34,6 @@ return (new Config())
             'sort_algorithm' => 'alpha',
         ],
         'no_superfluous_phpdoc_tags' => true,
-        'native_function_invocation' => ['include' => ['@internal']],
+        'native_function_invocation' => ['include' => ['@internal'], 'exclude' => ['html_to_markdown_convert']],
     ])
     ->setFinder($finder);
