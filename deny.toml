@@ -24,10 +24,14 @@ allow = [
   "CDLA-Permissive-2.0",
   "Unicode-3.0",
   "bzip2-1.0.6",
-  "MPL-2.0",
 ]
 confidence-threshold = 0.8
-exceptions = []
+exceptions = [
+  # cbindgen is a build-only tool for generating C headers, not linked into output
+  { allow = [
+    "MPL-2.0",
+  ], crate = "cbindgen" },
+]
 
 [licenses.private]
 ignore = false
