@@ -95,6 +95,8 @@ tasks:
       - cmd: cd {{.GO_PKG}} && go test -v
         env:
           GOTOOLCHAIN: "{{.GO_TOOLCHAIN}}"
+          HTML_TO_MARKDOWN_FFI_PATH: '{{.TARGET_DIR}}/release/{{if eq .OS "darwin"}}libhtml_to_markdown_ffi.dylib{{else if eq .OS "windows"}}html_to_markdown_ffi.dll{{else}}libhtml_to_markdown_ffi.so{{end}}'
+          HTML_TO_MARKDOWN_FFI_DISABLE_DOWNLOAD: "1"
           LD_LIBRARY_PATH: '{{if ne .OS "windows"}}{{.TARGET_DIR}}/release{{if .LD_LIBRARY_PATH}}:{{.LD_LIBRARY_PATH}}{{end}}{{end}}'
           DYLD_LIBRARY_PATH: '{{if eq .OS "darwin"}}{{.TARGET_DIR}}/release{{if .DYLD_LIBRARY_PATH}}:{{.DYLD_LIBRARY_PATH}}{{end}}{{end}}'
           PATH: '{{if eq .OS "windows"}}{{.TARGET_DIR}}/release;{{end}}{{.PATH}}'
@@ -110,6 +112,8 @@ tasks:
       - cmd: cd {{.GO_PKG}} && go test -v -coverprofile=coverage.out -covermode=atomic
         env:
           GOTOOLCHAIN: "{{.GO_TOOLCHAIN}}"
+          HTML_TO_MARKDOWN_FFI_PATH: '{{.TARGET_DIR}}/release/{{if eq .OS "darwin"}}libhtml_to_markdown_ffi.dylib{{else if eq .OS "windows"}}html_to_markdown_ffi.dll{{else}}libhtml_to_markdown_ffi.so{{end}}'
+          HTML_TO_MARKDOWN_FFI_DISABLE_DOWNLOAD: "1"
           LD_LIBRARY_PATH: '{{if ne .OS "windows"}}{{.TARGET_DIR}}/release{{if .LD_LIBRARY_PATH}}:{{.LD_LIBRARY_PATH}}{{end}}{{end}}'
           DYLD_LIBRARY_PATH: '{{if eq .OS "darwin"}}{{.TARGET_DIR}}/release{{if .DYLD_LIBRARY_PATH}}:{{.DYLD_LIBRARY_PATH}}{{end}}{{end}}'
           PATH: '{{if eq .OS "windows"}}{{.TARGET_DIR}}/release;{{end}}{{.PATH}}'
@@ -181,6 +185,8 @@ tasks:
       - cmd: cd e2e/go && go test -v ./...
         env:
           GOTOOLCHAIN: "{{.GO_TOOLCHAIN}}"
+          HTML_TO_MARKDOWN_FFI_PATH: '{{.TARGET_DIR}}/release/{{if eq .OS "darwin"}}libhtml_to_markdown_ffi.dylib{{else if eq .OS "windows"}}html_to_markdown_ffi.dll{{else}}libhtml_to_markdown_ffi.so{{end}}'
+          HTML_TO_MARKDOWN_FFI_DISABLE_DOWNLOAD: "1"
           LD_LIBRARY_PATH: '{{if ne .OS "windows"}}{{.TARGET_DIR}}/release{{if .LD_LIBRARY_PATH}}:{{.LD_LIBRARY_PATH}}{{end}}{{end}}'
           DYLD_LIBRARY_PATH: '{{if eq .OS "darwin"}}{{.TARGET_DIR}}/release{{if .DYLD_LIBRARY_PATH}}:{{.DYLD_LIBRARY_PATH}}{{end}}{{end}}'
           PATH: '{{if eq .OS "windows"}}{{.TARGET_DIR}}/release;{{end}}{{.PATH}}'
