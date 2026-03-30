@@ -1,53 +1,8 @@
 //! Inline image configuration and conversion functions.
 
-use crate::types::{arg_error, symbol_to_string};
-use html_to_markdown_rs::{
-    DEFAULT_INLINE_IMAGE_LIMIT, HtmlExtraction, InlineImage, InlineImageConfig, InlineImageConfigUpdate,
-    InlineImageWarning,
-};
+use html_to_markdown_rs::{InlineImage, InlineImageWarning};
 use magnus::prelude::*;
-use magnus::r_hash::ForEach;
-use magnus::{Error, RHash, Ruby, TryConvert, Value};
-
-pub fn build_inline_image_config(_ruby: &Ruby, config: Option<Value>) -> Result<InlineImageConfig, Error> {
-    let mut update = InlineImageConfigUpdate::default();
-
-    let Some(config) = config else {
-        return Ok(InlineImageConfig::new(DEFAULT_INLINE_IMAGE_LIMIT));
-    };
-
-    if config.is_nil() {
-        return Ok(InlineImageConfig::new(DEFAULT_INLINE_IMAGE_LIMIT));
-    }
-
-    let hash = RHash::from_value(config).ok_or_else(|| arg_error("inline image config must be provided as a Hash"))?;
-
-    hash.foreach(|key: Value, val: Value| {
-        let key_name = symbol_to_string(key)?;
-        match key_name.as_str() {
-            "max_decoded_size_bytes" => {
-                update.max_decoded_size_bytes = Some(u64::try_convert(val)?);
-            }
-            "filename_prefix" => {
-                update.filename_prefix = if val.is_nil() {
-                    None
-                } else {
-                    Some(String::try_convert(val)?)
-                };
-            }
-            "capture_svg" => {
-                update.capture_svg = Some(bool::try_convert(val)?);
-            }
-            "infer_dimensions" => {
-                update.infer_dimensions = Some(bool::try_convert(val)?);
-            }
-            _ => {}
-        }
-        Ok(ForEach::Continue)
-    })?;
-
-    Ok(InlineImageConfig::from_update(update))
-}
+use magnus::{Error, Ruby, Value};
 
 pub fn inline_image_to_value(ruby: &Ruby, image: InlineImage) -> Result<Value, Error> {
     let InlineImage {
@@ -102,24 +57,5 @@ pub fn warning_to_value(ruby: &Ruby, warning: InlineImageWarning) -> Result<Valu
     let hash = ruby.hash_new();
     hash.aset(ruby.intern("index"), warning.index as i64)?;
     hash.aset(ruby.intern("message"), warning.message)?;
-    Ok(hash.as_value())
-}
-
-pub fn extraction_to_value(ruby: &Ruby, extraction: HtmlExtraction) -> Result<Value, Error> {
-    let hash = ruby.hash_new();
-    hash.aset(ruby.intern("markdown"), extraction.markdown)?;
-
-    let inline_images = ruby.ary_new();
-    for image in extraction.inline_images {
-        inline_images.push(inline_image_to_value(ruby, image)?)?;
-    }
-    hash.aset(ruby.intern("inline_images"), inline_images)?;
-
-    let warnings = ruby.ary_new();
-    for warning in extraction.warnings {
-        warnings.push(warning_to_value(ruby, warning)?)?;
-    }
-    hash.aset(ruby.intern("warnings"), warnings)?;
-
     Ok(hash.as_value())
 }

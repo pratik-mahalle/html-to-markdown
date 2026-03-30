@@ -1,7 +1,5 @@
 package dev.kreuzberg.htmltomarkdown;
 
-import dev.kreuzberg.htmltomarkdown.metadata.MetadataExtraction;
-import dev.kreuzberg.htmltomarkdown.visitor.Visitor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -78,39 +76,6 @@ class ComprehensiveTest {
 
         assertEquals(normalizedExpected, normalizedResult,
                 "Failed for test case: " + testCase.name());
-    }
-
-    @Test
-    @DisplayName("Convert document with metadata extraction")
-    void testMetadataExtraction() {
-        String html = "<html><head><title>Test Page</title></head><body>"
-                + "<h1>Heading</h1>"
-                + "<a href=\"https://example.com\">Link</a>"
-                + "<img src=\"image.png\" alt=\"An image\" />"
-                + "</body></html>";
-
-        MetadataExtraction result = HtmlToMarkdown.convertWithMetadata(html);
-
-        assertNotNull(result, "MetadataExtraction result should not be null");
-        assertNotNull(result.getMarkdown(), "Markdown should not be null");
-        assertNotNull(result.getMetadata(), "Metadata should not be null");
-
-        assertTrue(result.getMarkdown().contains("Heading"), "Heading should be in markdown");
-        assertTrue(result.getMarkdown().contains("Link"), "Link should be in markdown");
-    }
-
-    @Test
-    @DisplayName("Convert with custom visitor implementation")
-    void testCustomVisitorImplementation() {
-        String html = "<p>Text</p><a href=\"https://example.com\">Link</a>";
-
-        Visitor visitor = new Visitor() {
-            // Default implementation
-        };
-
-        String result = HtmlToMarkdown.convertWithVisitor(html, visitor);
-        assertNotNull(result, "Visitor result should not be null");
-        assertTrue(result.contains("Text"), "Text should be in result");
     }
 
     @Test

@@ -2,7 +2,7 @@
 
 Integration tests for the published `html-to-markdown` Java package from Maven Central.
 
-This test app validates that the package is correctly published and accessible via Maven Central, with comprehensive test coverage for all major features including JNI/FFI functionality, error handling, type safety, metadata extraction, and visitor patterns.
+This test app validates that the package is correctly published and accessible via Maven Central, with comprehensive test coverage for core conversion, error handling, and type safety. The v3 API uses a single `convert()` function.
 
 ## Prerequisites
 
@@ -65,15 +65,6 @@ mvn test -Dtest=ComprehensiveTest
 
 # Error handling tests - edge cases and error conditions
 mvn test -Dtest=ErrorHandlingTest
-
-# Type safety tests - Java type system validation
-mvn test -Dtest=TypeSafetyTest
-
-# Metadata extraction tests - document metadata features
-mvn test -Dtest=MetadataExtractionTest
-
-# Visitor functionality tests - custom visitor implementation
-mvn test -Dtest=VisitorFunctionalityTest
 ```
 
 ### Run Specific Test Methods

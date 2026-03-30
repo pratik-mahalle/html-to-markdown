@@ -27,18 +27,13 @@
  *
  * <pre>{@code
  * import dev.kreuzberg.htmltomarkdown.HtmlToMarkdown;
- * import dev.kreuzberg.htmltomarkdown.metadata.MetadataExtraction;
  *
  * String html = "<html><head><title>My Page</title></head><body>"
  *     + "<h1>Welcome</h1>"
  *     + "<a href=\"https://example.com\">Example</a>"
  *     + "</body></html>";
  *
- * MetadataExtraction result = HtmlToMarkdown.convertWithMetadata(html);
- *
- * String markdown = result.getMarkdown();
- * String title = result.getDocumentMetadata().title();
- * int linkCount = result.getLinkCount();
+ * String markdown = HtmlToMarkdown.convert(html);
  * }</pre>
  *
  * @since 2.13.0

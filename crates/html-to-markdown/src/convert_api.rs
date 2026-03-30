@@ -97,6 +97,8 @@ pub fn convert(html: &str, options: Option<ConversionOptions>) -> Result<Convers
         };
 
     // Run the conversion pipeline.
+    // Pass structure_collector by value — convert_html_impl will consume it via Rc::try_unwrap
+    // to return the finished DocumentStructure. We must not hold a second Rc reference.
     let (markdown, document) = {
         #[cfg(all(feature = "metadata", feature = "inline-images"))]
         {
@@ -106,7 +108,7 @@ pub fn convert(html: &str, options: Option<ConversionOptions>) -> Result<Convers
                 image_collector.as_ref().map(Rc::clone),
                 metadata_collector.as_ref().map(Rc::clone),
                 None,
-                structure_collector.as_ref().map(std::rc::Rc::clone),
+                structure_collector,
             )?
         }
         #[cfg(all(feature = "metadata", not(feature = "inline-images")))]
@@ -117,7 +119,7 @@ pub fn convert(html: &str, options: Option<ConversionOptions>) -> Result<Convers
                 None,
                 metadata_collector.as_ref().map(Rc::clone),
                 None,
-                structure_collector.as_ref().map(std::rc::Rc::clone),
+                structure_collector,
             )?
         }
         #[cfg(all(not(feature = "metadata"), feature = "inline-images"))]
@@ -128,7 +130,7 @@ pub fn convert(html: &str, options: Option<ConversionOptions>) -> Result<Convers
                 image_collector.as_ref().map(Rc::clone),
                 None,
                 None,
-                structure_collector.as_ref().map(std::rc::Rc::clone),
+                structure_collector,
             )?
         }
         #[cfg(all(not(feature = "metadata"), not(feature = "inline-images")))]
@@ -139,7 +141,7 @@ pub fn convert(html: &str, options: Option<ConversionOptions>) -> Result<Convers
                 None,
                 None,
                 None,
-                structure_collector.as_ref().map(std::rc::Rc::clone),
+                structure_collector,
             )?
         }
     };

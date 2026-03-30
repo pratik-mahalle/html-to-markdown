@@ -1,56 +1,12 @@
 //! Metadata configuration and conversion functions.
 
-use crate::types::{arg_error, symbol_to_string};
 use html_to_markdown_rs::metadata::{
     DocumentMetadata as RustDocumentMetadata, HeaderMetadata as RustHeaderMetadata,
     HtmlMetadata as RustHtmlMetadata, ImageMetadata as RustImageMetadata, LinkMetadata as RustLinkMetadata,
-    MetadataConfig as RustMetadataConfig, StructuredData as RustStructuredData, TextDirection as RustTextDirection,
+    StructuredData as RustStructuredData, TextDirection as RustTextDirection,
 };
 use magnus::prelude::*;
-use magnus::r_hash::ForEach;
-use magnus::{Error, RHash, Ruby, TryConvert, Value};
-
-pub fn build_metadata_config(_ruby: &Ruby, config: Option<Value>) -> Result<RustMetadataConfig, Error> {
-    let mut cfg = RustMetadataConfig::default();
-
-    let Some(config) = config else {
-        return Ok(cfg);
-    };
-
-    if config.is_nil() {
-        return Ok(cfg);
-    }
-
-    let hash = RHash::from_value(config).ok_or_else(|| arg_error("metadata_config must be provided as a Hash"))?;
-
-    hash.foreach(|key: Value, val: Value| {
-        let key_name = symbol_to_string(key)?;
-        match key_name.as_str() {
-            "extract_document" => {
-                cfg.extract_document = bool::try_convert(val)?;
-            }
-            "extract_headers" => {
-                cfg.extract_headers = bool::try_convert(val)?;
-            }
-            "extract_links" => {
-                cfg.extract_links = bool::try_convert(val)?;
-            }
-            "extract_images" => {
-                cfg.extract_images = bool::try_convert(val)?;
-            }
-            "extract_structured_data" => {
-                cfg.extract_structured_data = bool::try_convert(val)?;
-            }
-            "max_structured_data_size" => {
-                cfg.max_structured_data_size = usize::try_convert(val)?;
-            }
-            _ => {}
-        }
-        Ok(ForEach::Continue)
-    })?;
-
-    Ok(cfg)
-}
+use magnus::{Error, Ruby, Value};
 
 fn opt_string_to_ruby(ruby: &Ruby, opt: Option<String>) -> Result<Value, Error> {
     match opt {

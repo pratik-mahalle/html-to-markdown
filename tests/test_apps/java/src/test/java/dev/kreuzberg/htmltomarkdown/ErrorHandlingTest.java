@@ -1,6 +1,5 @@
 package dev.kreuzberg.htmltomarkdown;
 
-import dev.kreuzberg.htmltomarkdown.visitor.Visitor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -149,30 +148,4 @@ class ErrorHandlingTest {
         assertTrue(result.contains("Link"), "Link text should be preserved");
     }
 
-    @Test
-    @DisplayName("Conversion with null visitor throws NullPointerException")
-    void testNullVisitorThrows() {
-        assertThrows(NullPointerException.class,
-                () -> HtmlToMarkdown.convertWithVisitor("<p>Test</p>", null),
-                "Should throw NullPointerException for null visitor");
-    }
-
-    @Test
-    @DisplayName("Conversion with visitor on null HTML throws NullPointerException")
-    void testNullHtmlWithVisitorThrows() {
-        Visitor visitor = new Visitor() {
-            // Empty implementation
-        };
-        assertThrows(NullPointerException.class,
-                () -> HtmlToMarkdown.convertWithVisitor(null, visitor),
-                "Should throw NullPointerException for null HTML");
-    }
-
-    @Test
-    @DisplayName("Conversion with metadata on null HTML throws NullPointerException")
-    void testNullHtmlWithMetadataThrows() {
-        assertThrows(NullPointerException.class,
-                () -> HtmlToMarkdown.convertWithMetadata(null),
-                "Should throw NullPointerException for null HTML");
-    }
 }

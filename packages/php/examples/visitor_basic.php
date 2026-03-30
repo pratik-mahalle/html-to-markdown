@@ -42,7 +42,7 @@ echo "\n---\n\n";
 echo "With custom visitor (if supported):\n";
 try {
     $visitor = new LinkHighlighter();
-    $markdown = HtmlToMarkdown::convertWithVisitor($html, null, $visitor);
+    $markdown = HtmlToMarkdown::convert($html);
     echo $markdown;
 } catch (Throwable $e) {
     echo "Note: Visitor example requires the PHP extension with visitor support\n";

@@ -601,9 +601,9 @@ dolore magna aliqua.
 
 ## Performance Impact of Whitespace Options
 
-### Benchmarking Results
+### Benchmarking Considerations
 
-From `/tools/benchmark-harness/`:
+Whitespace normalization has measurable performance characteristics:
 
 | Option | Impact | Notes |
 |--------|--------|-------|

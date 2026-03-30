@@ -13,7 +13,7 @@ pnpm add html-to-markdown
 ## Basic Usage
 
 ```typescript
-import { convertWithMetadata } from 'html-to-markdown';
+import { convert } from '@kreuzberg/html-to-markdown';
 
 const html = `
   <html lang="en">
@@ -27,68 +27,66 @@ const html = `
   </html>
 `;
 
-const { markdown, metadata } = convertWithMetadata(html);
+const result = JSON.parse(convert(html, { extractMetadata: true }));
 
 // Access extracted metadata
-console.log(metadata.document.title);     // "Hello World"
-console.log(metadata.document.language);  // "en"
-console.log(metadata.headers[0].text);    // "Welcome"
-console.log(metadata.links[0].href);      // "https://example.com"
+console.log(result.metadata.document.title);     // "Hello World"
+console.log(result.metadata.document.language);  // "en"
+console.log(result.metadata.headers[0].text);    // "Welcome"
+console.log(result.metadata.links[0].href);      // "https://example.com"
 ```
 
 ## API Overview
 
 ### Functions
 
-#### `convertWithMetadata(html, options?, metadataConfig?)`
+#### `convert(html, options?)`
 
-Convert HTML string to Markdown with metadata extraction.
+Convert HTML string to Markdown with metadata extraction. Returns a JSON string -- always `JSON.parse()` the result.
 
 ```typescript
-const { markdown, metadata } = convertWithMetadata(html);
+const result = JSON.parse(convert(html, { extractMetadata: true }));
+const { content, metadata } = result;
 ```
 
-#### `convertWithMetadataBuffer(buffer, options?, metadataConfig?)`
+#### `convertBuffer(buffer, options?)`
 
-Convert from Buffer/Uint8Array (zero-copy).
+Convert from Buffer/Uint8Array (avoids intermediate JS string).
 
 ```typescript
 const buffer = Buffer.from(html);
-const { markdown, metadata } = convertWithMetadataBuffer(buffer);
+const result = JSON.parse(convertBuffer(buffer, { extractMetadata: true }));
 ```
 
-#### `convertFileWithMetadata(filePath, options?, metadataConfig?)`
+#### `convertFile(filePath, options?)`
 
 Convert HTML file asynchronously.
 
 ```typescript
-const { markdown, metadata } = await convertFileWithMetadata('page.html');
+const json = await convertFile('page.html', { extractMetadata: true });
+const result = JSON.parse(json);
 ```
 
-#### `convertStreamWithMetadata(stream, options?, metadataConfig?)`
+#### `convertStream(stream, options?)`
 
 Convert from Node.js stream.
 
 ```typescript
 import fs from 'node:fs';
 const stream = fs.createReadStream('page.html', 'utf8');
-const { markdown, metadata } = await convertStreamWithMetadata(stream);
+const json = await convertStream(stream, { extractMetadata: true });
+const result = JSON.parse(json);
 ```
 
 ## Configuration
 
+Metadata extraction is controlled via the `extractMetadata` field in `JsConversionOptions`:
+
 ```typescript
-import { convertWithMetadata, type JsMetadataConfig } from 'html-to-markdown';
+import { convert } from '@kreuzberg/html-to-markdown';
 
-const config: JsMetadataConfig = {
-  extractHeaders: true,              // H1-H6 elements
-  extractLinks: true,                // <a> elements
-  extractImages: true,               // <img> and <svg>
-  extractStructuredData: true,       // JSON-LD, Microdata, RDFa
-  maxStructuredDataSize: 1_000_000,  // 1MB limit
-};
-
-const result = convertWithMetadata(html, undefined, config);
+const result = JSON.parse(convert(html, { extractMetadata: true }));
+console.log(result.metadata);
 ```
 
 ## Metadata Structure
@@ -156,8 +154,8 @@ result.metadata.structuredData.forEach(data => {
 
 ```typescript
 function getSeoMetadata(html: string) {
-  const { metadata } = convertWithMetadata(html);
-  const doc = metadata.document;
+  const result = JSON.parse(convert(html, { extractMetadata: true }));
+  const doc = result.metadata.document;
 
   return {
     title: doc.title,
@@ -174,9 +172,9 @@ function getSeoMetadata(html: string) {
 
 ```typescript
 function buildTOC(html: string) {
-  const { metadata } = convertWithMetadata(html);
+  const result = JSON.parse(convert(html, { extractMetadata: true }));
 
-  return metadata.headers.map(h => ({
+  return result.metadata.headers.map(h => ({
     level: h.level,
     text: h.text,
     anchor: h.id || h.text.toLowerCase().replace(/\s+/g, '-'),
@@ -188,12 +186,12 @@ function buildTOC(html: string) {
 
 ```typescript
 function getLinks(html: string) {
-  const { metadata } = convertWithMetadata(html);
+  const result = JSON.parse(convert(html, { extractMetadata: true }));
 
   return {
-    internal: metadata.links.filter(l => l.linkType === 'internal'),
-    external: metadata.links.filter(l => l.linkType === 'external'),
-    emails: metadata.links.filter(l => l.linkType === 'email'),
+    internal: result.metadata.links.filter(l => l.linkType === 'internal'),
+    external: result.metadata.links.filter(l => l.linkType === 'external'),
+    emails: result.metadata.links.filter(l => l.linkType === 'email'),
   };
 }
 ```
@@ -202,9 +200,9 @@ function getLinks(html: string) {
 
 ```typescript
 function getImages(html: string) {
-  const { metadata } = convertWithMetadata(html);
+  const result = JSON.parse(convert(html, { extractMetadata: true }));
 
-  return metadata.images.map(img => ({
+  return result.metadata.images.map(img => ({
     url: img.src,
     alt: img.alt || 'No description',
     title: img.title,
@@ -216,13 +214,13 @@ function getImages(html: string) {
 
 ```typescript
 function checkA11y(html: string) {
-  const { metadata } = convertWithMetadata(html);
+  const result = JSON.parse(convert(html, { extractMetadata: true }));
 
   return {
-    imagesWithoutAlt: metadata.images
+    imagesWithoutAlt: result.metadata.images
       .filter(img => !img.alt)
       .map(img => img.src),
-    linksWithoutText: metadata.links
+    linksWithoutText: result.metadata.links
       .filter(link => !link.text.trim())
       .map(link => link.href),
   };
@@ -234,26 +232,23 @@ function checkA11y(html: string) {
 1. **Use Buffer variant for large files**:
 
    ```typescript
+   import { convertBuffer } from '@kreuzberg/html-to-markdown-node';
    const buffer = await fs.promises.readFile('large.html');
-   const result = convertWithMetadataBuffer(buffer);
+   const result = JSON.parse(convertBuffer(buffer, { extractMetadata: true }));
    ```
 
 2. **Use Stream for processing**:
 
    ```typescript
+   import { convertStream } from '@kreuzberg/html-to-markdown';
    const stream = fs.createReadStream('large.html', 'utf8');
-   const result = await convertStreamWithMetadata(stream);
+   const result = JSON.parse(await convertStream(stream, { extractMetadata: true }));
    ```
 
-3. **Disable unused metadata extraction**:
+3. **Disable metadata extraction if not needed**:
 
    ```typescript
-   const result = convertWithMetadata(html, undefined, {
-     extractHeaders: true,
-     extractLinks: false,    // Skip if not needed
-     extractImages: false,   // Skip if not needed
-     extractStructuredData: false,
-   });
+   const result = JSON.parse(convert(html, { extractMetadata: false }));
    ```
 
 ## Type Safety
@@ -261,29 +256,20 @@ function checkA11y(html: string) {
 All metadata types are fully typed for TypeScript:
 
 ```typescript
-import {
-  type JsMetadataExtraction,
-  type JsDocumentMetadata,
-  type JsHeaderMetadata,
-  type JsLinkMetadata,
-  type JsImageMetadata,
-  type JsStructuredData,
-  type JsHtmlMetadata,
-  type JsMetadataConfig,
-} from 'html-to-markdown';
+import { convert } from '@kreuzberg/html-to-markdown';
 
-// Full IDE autocomplete and type checking
-const result: JsMetadataExtraction = convertWithMetadata(html);
-const title: string | undefined = result.metadata.document.title;
-const headers: JsHeaderMetadata[] = result.metadata.headers;
+// JSON.parse() the result for full type safety
+const result = JSON.parse(convert(html, { extractMetadata: true }));
+const title: string | undefined = result.metadata?.document?.title;
+const headers = result.metadata?.headers ?? [];
 ```
 
 ## Error Handling
 
 ```typescript
 try {
-  const { markdown, metadata } = convertWithMetadata(html);
-  // Use result
+  const result = JSON.parse(convert(html, { extractMetadata: true }));
+  // Use result.content, result.metadata
 } catch (error) {
   console.error('Conversion failed:', error);
 }

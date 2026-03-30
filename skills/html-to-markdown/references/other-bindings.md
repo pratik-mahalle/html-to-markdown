@@ -94,7 +94,7 @@ result[:tables].each { |t| puts t[:markdown] }
 
 # Reusable options handle (performance)
 handle = HtmlToMarkdown.options({ heading_style: "atx" })
-markdown = HtmlToMarkdown.convert_with_options(html, handle)
+result = HtmlToMarkdown.convert(html, handle)
 ```
 
 ### Ruby convert() return Hash
@@ -297,7 +297,7 @@ images = result.images
 
 # Options handle (reuse for performance)
 {:ok, handle} = HtmlToMarkdown.create_options_handle(%{heading_style: "atx"})
-{:ok, result} = HtmlToMarkdown.convert_with_options(html, handle)
+{:ok, result} = HtmlToMarkdown.convert(html, handle)
 ```
 
 ---
@@ -339,7 +339,7 @@ images <- result$images
 
 # Options handle (performance)
 handle <- create_options_handle(list(heading_style = "atx"))
-result <- convert_with_options_handle("<h1>Hello</h1>", handle)
+result <- convert_handle("<h1>Hello</h1>", handle)
 ```
 
 ---

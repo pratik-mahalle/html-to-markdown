@@ -362,14 +362,14 @@ For other platforms, use Python, Ruby, or PHP bindings with visitor support:
 **Python:**
 
 ```python
-from html_to_markdown import convert_with_visitor
+from html_to_markdown import convert
 
 class MyVisitor:
     def visit_link(self, ctx, href, text, title):
         # Your visitor logic here
         return {"type": "continue"}
 
-markdown = convert_with_visitor(html, visitor=MyVisitor())
+result = convert(html, None, MyVisitor())
 ```
 
 **Ruby:**
@@ -383,7 +383,7 @@ class MyVisitor
   end
 end
 
-markdown = HtmlToMarkdown.convert_with_visitor(html, visitor: MyVisitor.new)
+result = HtmlToMarkdown.convert(html, nil, MyVisitor.new)
 ```
 
 **PHP:**
@@ -397,7 +397,7 @@ class MyVisitor {
     }
 }
 
-$markdown = Converter::convertWithVisitor($html, new MyVisitor());
+$result = Converter::convert($html, null, new MyVisitor());
 ```
 
 #### 3. Preprocess HTML Before Conversion

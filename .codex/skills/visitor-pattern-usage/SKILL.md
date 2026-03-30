@@ -25,9 +25,6 @@ The visitor pattern is conditionally compiled:
 ```rust
 #[cfg(feature = "visitor")]
 pub mod visitor;
-
-#[cfg(feature = "async-visitor")]
-pub use visitor_helpers::AsyncVisitorHandle;
 ```
 
 **In Cargo.toml:**
@@ -36,7 +33,6 @@ pub use visitor_helpers::AsyncVisitorHandle;
 [features]
 default = ["metadata"]
 visitor = []
-async-visitor = ["visitor", "dep:async-trait"]
 ```
 
 ## Core Traits and Types
@@ -273,7 +269,7 @@ impl HtmlVisitor for PlainTextLinkVisitor {
 // Usage
 let html = r#"<p>Visit <a href="https://example.com">our site</a></p>"#;
 let mut visitor = PlainTextLinkVisitor;
-let markdown = convert_with_visitor(html, None, Some(&mut visitor))?;
+let markdown = convert(html, None, Some(&mut visitor))?;
 // Output: Visit our site (https://example.com)
 ```
 
@@ -347,7 +343,7 @@ let html = r#"
 <pre><code class="language-rust">fn main() {}</code></pre>
 "#;
 let mut visitor = HighlightingVisitor;
-let markdown = convert_with_visitor(html, None, Some(&mut visitor))?;
+let markdown = convert(html, None, Some(&mut visitor))?;
 ```
 
 ## Filtering by Node Type
@@ -384,7 +380,7 @@ impl HtmlVisitor for ImageOnlyVisitor {
 
 // Usage
 let mut visitor = ImageOnlyVisitor { image_count: 0 };
-let markdown = convert_with_visitor(html, None, Some(&mut visitor))?;
+let markdown = convert(html, None, Some(&mut visitor))?;
 println!("Found {} images", visitor.image_count);
 ```
 
@@ -432,7 +428,7 @@ impl HtmlVisitor for DepthTrackingVisitor {
 
 // Usage
 let mut visitor = DepthTrackingVisitor { current_depth: 0 };
-let markdown = convert_with_visitor(html, None, Some(&mut visitor))?;
+let markdown = convert(html, None, Some(&mut visitor))?;
 ```
 
 ## Attribute-Based Routing
@@ -492,70 +488,7 @@ let html = r#"
 <p data-featured="true">Important paragraph</p>
 "#;
 let mut visitor = AttributeRoutingVisitor;
-let markdown = convert_with_visitor(html, None, Some(&mut visitor))?;
-```
-
-## Async Visitor Support
-
-For languages with native async/await (Python, TypeScript, Elixir):
-
-```rust
-#[cfg(feature = "async-visitor")]
-pub async fn convert_with_async_visitor(
-    html: &str,
-    options: Option<ConversionOptions>,
-    visitor: Option<AsyncVisitorHandle>,
-) -> Result<String> { ... }
-```
-
-### Python Async Example (PyO3)
-
-```python
-import asyncio
-import html_to_markdown
-
-class AsyncSyntaxHighlighter:
-    async def visit_code_block(self, ctx, code, language):
-        # Call async syntax highlighting service
-        highlighted = await highlight_service.highlight(code, language)
-        return f"```{language}\n{highlighted}\n```"
-
-    async def visit_link(self, ctx, href, text, title):
-        # Check external link status asynchronously
-        is_valid = await check_link_validity(href)
-        if is_valid:
-            return f"[{text}]({href})"
-        else:
-            return f"~~[{text}]({href})~~ (broken)"
-
-# Usage
-markdown = await html_to_markdown.convert_with_async_visitor(
-    html,
-    None,
-    AsyncSyntaxHighlighter()
-)
-```
-
-### TypeScript Async Example (NAPI-RS)
-
-```typescript
-import { convertWithAsyncVisitor } from 'html-to-markdown';
-
-class AsyncContentProcessor {
-    async visitLink(ctx, href, text, title) {
-        // Fetch metadata for link
-        const metadata = await fetch(href).then(r => r.json());
-        return `[${text}](${href} "${metadata.title}")`;
-    }
-
-    async visitImage(ctx, src, alt, title) {
-        // Optimize image
-        const optimized = await imageOptimizer.optimize(src);
-        return `![${alt}](${optimized})`;
-    }
-}
-
-const markdown = await convertWithAsyncVisitor(html, undefined, new AsyncContentProcessor());
+let markdown = convert(html, None, Some(&mut visitor))?;
 ```
 
 ## State Management in Visitors
@@ -600,7 +533,7 @@ let mut visitor = LinkCollectorVisitor {
     internal_links: HashSet::new(),
 };
 
-let markdown = convert_with_visitor(html, None, Some(&mut visitor))?;
+let markdown = convert(html, None, Some(&mut visitor))?;
 
 println!("External: {:?}", visitor.external_links);
 println!("Email: {:?}", visitor.email_links);
@@ -662,7 +595,7 @@ let options = ConversionOptions {
 
 // Visitor can override specific behaviors
 let mut visitor = CustomVisitor;
-let markdown = convert_with_visitor(html, Some(options), Some(&mut visitor))?;
+let markdown = convert(html, Some(options), Some(&mut visitor))?;
 ```
 
 **Priority:** Visitor always takes precedence. If visitor returns `Custom` or `Skip`, conversion options are bypassed for that element.
@@ -722,23 +655,12 @@ task ruby:test  # packages/ruby/spec/visitor_spec.rb
 ## API Pattern
 
 ```rust
-// Simple visitor (sync)
-pub fn convert_with_visitor(
+// Primary API -- visitor is an optional third argument
+pub fn convert(
     html: &str,
     options: Option<ConversionOptions>,
     visitor: Option<visitor::VisitorHandle>,
-) -> Result<String>
-
-// Async visitor (for languages with native async)
-#[cfg(feature = "async-visitor")]
-pub async fn convert_with_async_visitor(
-    html: &str,
-    options: Option<ConversionOptions>,
-    visitor: Option<AsyncVisitorHandle>,
-) -> Result<String>
-
-// Combined with metadata (future enhancement)
-// pub fn convert_with_metadata_and_visitor(...) -> Result<(String, ExtendedMetadata)>
+) -> Result<ConversionResult>
 ```
 
 ## Quick Reference: Common Visitor Patterns

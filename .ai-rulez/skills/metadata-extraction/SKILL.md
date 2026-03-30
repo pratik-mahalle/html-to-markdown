@@ -12,21 +12,14 @@ The html-to-markdown library provides comprehensive, single-pass metadata extrac
 
 ### Single-Pass Collection
 
-Metadata extraction uses the same `MetadataCollector` pattern as inline image collection:
+Metadata is collected during the single `convert()` tree walk and returned as part of the `ConversionResult`:
 
 ```rust
-// From lib.rs line 445
-let metadata_collector = Rc::new(RefCell::new(metadata::MetadataCollector::new(metadata_cfg)));
+// v3 API: convert() returns ConversionResult with metadata included
+let result = convert(html, Some(options))?;
 
-// Passed to converter during tree walk
-let markdown = converter::convert_html_with_metadata(
-    normalized_html.as_ref(),
-    &options,
-    Rc::clone(&metadata_collector)
-)?;
-
-// After conversion, recover and return metadata
-let metadata = metadata_collector.finish();
+// Access metadata from the result
+let metadata = result.metadata;
 ```
 
 **Key Benefits:**
@@ -72,27 +65,16 @@ impl Default for MetadataConfig {
 
 ### Selective Extraction
 
-Implement a custom visitor to extract only specific metadata types:
+Only extract specific metadata types by configuring `ConversionOptions`:
 
 ```rust
-// Create a visitor that collects only headers and links
-struct SelectiveMetadataVisitor {
-    headers: Vec<HeaderMetadata>,
-    links: Vec<LinkMetadata>,
-}
+let options = ConversionOptions {
+    extract_metadata: true,  // Enable metadata extraction (default)
+    ..Default::default()
+};
 
-impl HtmlVisitor for SelectiveMetadataVisitor {
-    fn visit_heading(&mut self, element: &Element, _ctx: &VisitorContext) -> VisitResult {
-        // Collect header metadata
-        // Skip link collection (visit_link not overridden)
-        VisitResult::Process
-    }
-}
-
-// Use the visitor during conversion
-let mut visitor = SelectiveMetadataVisitor::default();
-let markdown = convert(html, Some(options))?;
-// visitor now contains headers and links, but not images
+let result = convert(html, Some(options))?;
+// result.metadata contains document, headers, links, images, structured_data
 ```
 
 ## Document Metadata Extraction
@@ -552,22 +534,30 @@ StructuredData {
 - **Feed generation**: Use article schema for RSS/JSON feeds
 - **Knowledge graphs**: Populate semantic web data
 
-## Integration with Conversion API
+## Complete Example: convert() with Metadata
 
-Metadata extraction integrates with the standard conversion pipeline through the visitor pattern:
+The v3 API uses a single `convert()` function that returns a `ConversionResult` containing all extracted data:
 
 ```rust
-// Standard conversion with visitor that collects metadata
-pub fn convert(
-    html: &str,
-    options: Option<ConversionOptions>,
-) -> Result<String> {
-    // Conversion with optional visitor for metadata collection
-    // See visitor pattern documentation for integration details
+use html_to_markdown_rs::{convert, ConversionOptions};
+
+let html = "<html><head><title>My Page</title></head><body><h1>Hello</h1></body></html>";
+let result = convert(html, None)?;
+
+// Access the converted markdown
+println!("{}", result.content);
+
+// Access metadata from the result
+if let Some(metadata) = &result.metadata {
+    println!("Title: {:?}", metadata.document.title);
+    println!("Headers: {:?}", metadata.headers);
+    println!("Links: {:?}", metadata.links);
+    println!("Images: {:?}", metadata.images);
 }
 
-// Visitors can implement MetadataCollector functionality
-// for custom metadata extraction per application needs
+// Tables and warnings are also available
+println!("Tables: {:?}", result.tables);
+println!("Warnings: {:?}", result.warnings);
 ```
 
 ## Performance Characteristics
@@ -588,35 +578,33 @@ pub fn convert(
 
 **Core Files:**
 
-- `/crates/html-to-markdown/src/lib.rs` - Core conversion API
-- `/crates/html-to-markdown/src/converter.rs` - Conversion pipeline
-- `/crates/html-to-markdown/src/visitor.rs` - Visitor pattern implementation (for custom metadata extraction)
+- `/crates/html-to-markdown/src/metadata.rs` - All metadata types and collector
+- `/crates/html-to-markdown/src/lib.rs` - `convert()` public API returning `ConversionResult`
+- `/crates/html-to-markdown/src/converter.rs` - Integration with conversion pipeline
 
 **Testing:**
 
 - `/crates/html-to-markdown/src/lib.rs` - Tests starting at line 604
 
-## Implementation via Visitor Pattern
+## API Pattern Consistency
 
-Metadata extraction should be implemented using the visitor pattern:
+The v3 API uses a single `convert()` function for all use cases:
 
 ```rust
-// Visitor pattern provides extensible architecture
-pub fn convert(
-    html: &str,
-    options: Option<ConversionOptions>,
-) -> Result<String> { ... }
+// Basic conversion -- returns ConversionResult with .content, .metadata, .tables, .images, .warnings
+let result = convert(html, None)?;
 
-// Custom visitors can implement metadata collection
-// See visitor-pattern-usage documentation for details
+// With options
+let result = convert(html, Some(options))?;
+
+// With visitor (for custom element handling)
+let result = convert(html, Some(options), Some(visitor))?;
 ```
 
 ## Quick Integration Guide
 
-Use the visitor pattern to implement custom metadata extraction:
-
-1. Implement a custom visitor struct
-2. Override visitor methods for elements you want to extract metadata from
-3. Accumulate metadata in the visitor's internal state
-4. After conversion, extract the collected metadata from your visitor
-5. See visitor-pattern-usage documentation for detailed examples
+1. Enable `metadata` feature in Cargo.toml (enabled by default)
+2. Import: `use html_to_markdown_rs::convert;`
+3. Call: `let result = convert(html, None)?;`
+4. Access: `result.metadata.document.title`, `result.metadata.headers`, `result.metadata.links`, `result.metadata.images`
+5. Optional: Configure `extract_metadata` in `ConversionOptions` to disable metadata extraction

@@ -10,8 +10,6 @@ from html_to_markdown import (
     ConversionOptions,
     OutputFormat,
     convert,
-    convert_with_handle,
-    create_options_handle,
 )
 
 
@@ -136,27 +134,20 @@ class TestComplexStructures:
 class TestApiConsistency:
     """Test API consistency across different invocation methods."""
 
-    def test_convert_vs_handle_consistency(self) -> None:
-        """Test consistency between convert and convert_with_handle."""
+    def test_convert_with_default_options(self) -> None:
+        """Test convert with default options."""
         html = "<h1>Title</h1><p>Content</p>"
-        options = ConversionOptions(output_format=OutputFormat.MARKDOWN)
+        result = convert(html)
+        assert len(result) > 0  # noqa: S101
+        assert "Title" in result  # noqa: S101
 
-        result1 = convert(html, options)
-        handle = create_options_handle()
-        result2 = convert_with_handle(html, handle)
-
-        assert len(result1) > 0  # noqa: S101
-        assert len(result2) > 0  # noqa: S101
-
-    def test_multiple_conversions_with_same_handle(self) -> None:
-        """Test reusing a handle for multiple conversions."""
-        handle = create_options_handle()
-
+    def test_multiple_conversions(self) -> None:
+        """Test multiple conversions in sequence."""
         html1 = "<p>First</p>"
         html2 = "<p>Second</p>"
 
-        result1 = convert_with_handle(html1, handle)
-        result2 = convert_with_handle(html2, handle)
+        result1 = convert(html1)
+        result2 = convert(html2)
 
         assert "First" in result1  # noqa: S101
         assert "Second" in result2  # noqa: S101

@@ -40,11 +40,27 @@ type Warning struct {
 	Kind    string `json:"kind"`
 }
 
+// GridCell represents a single cell in a table grid.
+type GridCell struct {
+	Content  string `json:"content"`
+	Row      uint32 `json:"row"`
+	Col      uint32 `json:"col"`
+	RowSpan  uint32 `json:"row_span"`
+	ColSpan  uint32 `json:"col_span"`
+	IsHeader bool   `json:"is_header"`
+}
+
+// TableGrid represents a structured table grid with cell-level data including spans.
+type TableGrid struct {
+	Rows  uint32     `json:"rows"`
+	Cols  uint32     `json:"cols"`
+	Cells []GridCell `json:"cells"`
+}
+
 // TableData represents a table extracted during conversion.
 type TableData struct {
-	Cells      [][]string `json:"cells"`
-	Markdown   string     `json:"markdown"`
-	IsHeaderRow []bool    `json:"is_header_row"`
+	Grid     TableGrid `json:"grid"`
+	Markdown string    `json:"markdown"`
 }
 
 // ConversionResult holds the structured output from HTML to Markdown conversion.
@@ -57,7 +73,6 @@ type ConversionResult struct {
 	Warnings []Warning         `json:"warnings"`
 }
 
-// MetadataResult holds the markdown content and extended metadata from conversion.
 // Convert converts HTML to Markdown.
 //
 // It returns a ConversionResult containing the converted content, metadata,

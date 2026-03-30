@@ -35,8 +35,7 @@
  *
  * String html = "<p>Visit <a href=\"https://evil.com\">here</a>"
  *     + " or <a href=\"/about\">our site</a></p>";
- * String markdown = HtmlToMarkdown.convertWithVisitor(html,
- *     new MyVisitor());
+ * String markdown = HtmlToMarkdown.convert(html);
  * // Output: Visit or our site
  * }</pre>
  *

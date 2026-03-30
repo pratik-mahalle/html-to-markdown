@@ -20,46 +20,30 @@ test_that("convert multiple elements", {
 
 test_that("convert with options", {
   opts <- conversion_options(heading_style = "underlined")
-  result <- convert_with_options("<h1>Underlined</h1>", opts)
+  result <- convert("<h1>Underlined</h1>", opts)
   expect_match(result, "====")
 })
 
 test_that("convert with NULL options uses defaults", {
-  result <- convert_with_options("<h1>Default</h1>", NULL)
+  result <- convert("<h1>Default</h1>", NULL)
   expect_match(result, "# Default")
-})
-
-test_that("convert with options handle", {
-  opts <- conversion_options(heading_style = "atx_closed")
-  handle <- create_options_handle(opts)
-  result <- convert_with_options_handle("<h1>Closed</h1>", handle)
-  expect_match(result, "# Closed #")
-})
-
-test_that("options handle can be reused", {
-  opts <- conversion_options(heading_style = "underlined")
-  handle <- create_options_handle(opts)
-  r1 <- convert_with_options_handle("<h1>First</h1>", handle)
-  r2 <- convert_with_options_handle("<h1>Second</h1>", handle)
-  expect_match(r1, "====")
-  expect_match(r2, "====")
 })
 
 test_that("convert with code block style", {
   opts <- conversion_options(code_block_style = "tildes")
-  result <- convert_with_options("<pre><code>hello</code></pre>", opts)
+  result <- convert("<pre><code>hello</code></pre>", opts)
   expect_match(result, "~~~")
 })
 
 test_that("convert with strip_tags", {
   opts <- conversion_options(strip_tags = c("div"))
-  result <- convert_with_options("<div><p>Keep</p></div>", opts)
+  result <- convert("<div><p>Keep</p></div>", opts)
   expect_match(result, "Keep")
 })
 
 test_that("invalid option value raises error", {
   opts <- list(heading_style = "invalid_value")
-  expect_error(convert_with_options("<h1>Test</h1>", opts))
+  expect_error(convert("<h1>Test</h1>", opts))
 })
 
 test_that("convert empty string", {

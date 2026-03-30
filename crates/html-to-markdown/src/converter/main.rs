@@ -238,6 +238,10 @@ pub(crate) fn convert_html_impl(
         return Err(crate::error::ConversionError::Visitor(err.clone()));
     }
 
+    // Drop ctx before unwrapping the structure collector Rc — ctx holds a cloned Rc
+    // reference to the same collector, and Rc::try_unwrap requires exactly one reference.
+    drop(ctx);
+
     // If plain text was requested, discard the markdown output and return plain text.
     // The full pipeline was still run above so that metadata + visitor callbacks fire.
     if is_plain_text {

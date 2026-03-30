@@ -43,10 +43,10 @@ In TypeScript/Node.js, use `JsConversionOptions` interface (camelCase).
 | `skip_images` | `skip_images` | `skipImages` | bool | `false` | Omit all `<img>` elements from output entirely |
 | `output_format` | `output_format` | `outputFormat` | enum | `markdown` | Output format: `markdown` (CommonMark), `djot`, `plain` (text only) |
 | `include_document_structure` | `include_document_structure` | n/a (Node: not in `JsConversionOptions`) | bool | `false` | Include structured document tree in `ConversionResult.document`. Python/Rust only. |
-| `extract_images` | `extract_images` | n/a (Node: use `convertWithInlineImages()`) | bool | `false` | Extract inline data URI images and SVGs. Requires `inline-images` Rust feature. |
-| `max_image_size` | `max_image_size` | n/a (Node: `JsInlineImageConfig.maxDecodedSizeBytes`) | u64/int | `5242880` | Maximum decoded image size in bytes (default 5 MiB). Requires `inline-images`. |
-| `capture_svg` | `capture_svg` | n/a (Node: `JsInlineImageConfig.captureSvg`) | bool | `false` | Capture `<svg>` elements as images. Requires `inline-images`. |
-| `infer_dimensions` | `infer_dimensions` | n/a (Node: `JsInlineImageConfig.inferDimensions`) | bool | `true` | Infer image width/height from data URI. Requires `inline-images`. |
+| `extract_images` | `extract_images` | `extractImages` | bool | `false` | Extract inline data URI images and SVGs. Requires `inline-images` Rust feature. |
+| `max_image_size` | `max_image_size` | `maxImageSize` | u64/int | `5242880` | Maximum decoded image size in bytes (default 5 MiB). Requires `inline-images`. |
+| `capture_svg` | `capture_svg` | `captureSvg` | bool | `false` | Capture `<svg>` elements as images. Requires `inline-images`. |
+| `infer_dimensions` | `infer_dimensions` | `inferDimensions` | bool | `true` | Infer image width/height from data URI. Requires `inline-images`. |
 
 ## PreprocessingOptions Fields
 
@@ -138,4 +138,4 @@ Controls what metadata is extracted. Metadata is returned in `ConversionResult.m
 - In **Rust**, preprocessing is a field inside `ConversionOptions` struct (`options.preprocessing`).
 - The `metadata` feature is **enabled by default** in the Rust crate (`features = ["metadata"]`). In Python and Node.js bindings, metadata is always available.
 - TypeScript/Node.js enum values are **PascalCase strings** (e.g. `'Atx'` not `'atx'`). This is a NAPI-RS `const enum` requirement — lowercase values will be rejected at runtime.
-- Inline image extraction in Node.js uses `convertWithInlineImages()` with a separate `JsInlineImageConfig` parameter (not options fields). The `maxDecodedSizeBytes` in `JsInlineImageConfig` is `bigint`. Use `BigInt(5_242_880)` not the number `5_242_880`.
+- Inline image extraction in Node.js is configured via `extractImages`, `maxImageSize`, `captureSvg`, and `inferDimensions` options passed to `convert()`. Extracted images appear in the result's `images` array.

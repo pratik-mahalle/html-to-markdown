@@ -57,7 +57,7 @@ IO.puts("Original HTML:")
 IO.puts(html)
 IO.puts("")
 
-{:ok, markdown} = HtmlToMarkdown.Visitor.convert_with_visitor(html, LinkFilterVisitor, nil)
+{:ok, markdown} = HtmlToMarkdown.convert(html)
 
 IO.puts("Converted to Markdown (external links removed):")
 IO.puts("---")

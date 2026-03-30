@@ -21,7 +21,7 @@ defmodule HtmlToMarkdown.Visitor do
   Conversion with a visitor involves:
 
   1. Define a visitor module with callback implementations
-  2. Call `convert_with_visitor/3` with HTML, options, and visitor
+  2. Call `convert/2` with HTML, options, and visitor
   3. The converter dispatches callbacks as it traverses the DOM
   4. Each callback returns a `VisitResult` to control continuation
 
@@ -82,7 +82,7 @@ defmodule HtmlToMarkdown.Visitor do
   end
 
   html = "<p>Check <a href='https://example.com'>this</a> out!</p>"
-  {:ok, markdown} = HtmlToMarkdown.Visitor.convert_with_visitor(html, LinkFilter, nil)
+  {:ok, markdown} = HtmlToMarkdown.convert(html, LinkFilter, nil)
   # markdown == "Check this out!\\n"
   ```
 
@@ -121,7 +121,7 @@ defmodule HtmlToMarkdown.Visitor do
   end
 
   {:ok, pid} = ImageCollector.start_link(nil)
-  {:ok, _markdown} = HtmlToMarkdown.Visitor.convert_with_visitor(html, pid, nil)
+  {:ok, _markdown} = HtmlToMarkdown.convert(html, pid, nil)
   # Can query collected images via GenServer API
   ```
   """

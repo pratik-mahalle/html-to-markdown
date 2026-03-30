@@ -206,13 +206,13 @@ Input HTML string
 
 ## Performance Considerations
 
-### Benchmark Context
+### Parser Performance
 
-The `/tools/benchmark-harness/` suite includes parser benchmarks:
+Parser performance characteristics:
 
 - astral-tl performance: Sub-millisecond for typical documents
 - html5ever fallback: Used sparingly for worst-case handling
-- Memory profiling via `benchmark:harness:memory` task
+- Memory efficiency: Monitor with profiling tools like `cargo flamegraph`
 
 ### Optimization Strategies
 

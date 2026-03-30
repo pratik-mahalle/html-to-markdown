@@ -34,29 +34,12 @@ RSpec.describe 'html-to-markdown smoke tests' do
     expect(result).to eq('')
   end
 
-  it 'supports convert_with_metadata' do
-    html = '<html><head><title>Test</title></head><body><p>Content</p></body></html>'
-    markdown, metadata = HtmlToMarkdown.convert_with_metadata(html)
+  it 'converts complex HTML' do
+    html = '<h1>Title</h1><p>Paragraph with <strong>bold</strong></p>'
+    result = HtmlToMarkdown.convert(html)
 
-    expect(markdown).to be_a(String)
-    expect(metadata).to be_a(Hash)
-  end
-
-  it 'supports convert_with_inline_images' do
-    html = '<p><img src="data:image/png;base64,ZmFrZQ==" alt="Test"></p>'
-    result = HtmlToMarkdown.convert_with_inline_images(html)
-
-    expect(result).to be_a(Hash)
-    expect(result).to have_key(:markdown)
-    expect(result).to have_key(:inline_images)
-  end
-
-  it 'supports convert_with_visitor' do
-    html = '<p>Test</p>'
-    visitor = double('visitor')
-    allow(visitor).to receive(:visit_text).and_return({ type: :continue })
-
-    result = HtmlToMarkdown.convert_with_visitor(html, nil, visitor)
     expect(result).to be_a(String)
+    expect(result).to include('Title')
+    expect(result).to include('bold')
   end
 end

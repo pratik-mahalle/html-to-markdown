@@ -144,25 +144,16 @@ markdown = HtmlToMarkdown.convert(
 
 ### Inline Images
 
-Extract inline binary data (data URIs, SVG) together with the converted Markdown.
+Convert HTML with inline images (data URIs, SVG) to Markdown.
 
 ```ruby
 require 'html_to_markdown'
 
-result = HtmlToMarkdown.convert_with_inline_images(
-  '<img src="data:image/png;base64,iVBORw0..." alt="Pixel">',
-  image_config: {
-    max_decoded_size_bytes: 1 * 1024 * 1024,
-    infer_dimensions: true,
-    filename_prefix: 'img_',
-    capture_svg: true
-  }
+markdown = HtmlToMarkdown.convert(
+  '<img src="data:image/png;base64,iVBORw0..." alt="Pixel">'
 )
 
-puts result.markdown
-result.inline_images.each do |img|
-  puts "#{img.filename} -> #{img.format} (#{img.data.bytesize} bytes)"
-end
+puts markdown
 ```
 
 ## CLI
