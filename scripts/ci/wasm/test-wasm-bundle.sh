@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Skip if no test files exist (unit tests moved to e2e)
+if ! find . -name '*.spec.ts' -o -name '*.test.ts' | grep -q .; then
+  echo "No test files found, skipping vitest (tests are in e2e/)"
+  exit 0
+fi
+
 VITEST_TIMEOUT_MS="${VITEST_TIMEOUT_MS:-60000}"
 
 pnpm vitest run \
