@@ -18,4 +18,4 @@ public record GridCell(
     @JsonProperty("col") int col,
     @JsonProperty("row_span") int rowSpan,
     @JsonProperty("col_span") int colSpan,
-    @JsonProperty("is_header") boolean isHeader) { }
+    @JsonProperty("is_header") boolean isHeader) {}

@@ -13,4 +13,4 @@ import java.util.List;
 public record TableGrid(
     @JsonProperty("rows") int rows,
     @JsonProperty("cols") int cols,
-    @JsonProperty("cells") List<GridCell> cells) { }
+    @JsonProperty("cells") List<GridCell> cells) {}
