@@ -6,14 +6,14 @@ Brief reference for Go, Ruby, PHP, Java, C#, Elixir, R, WASM, and C FFI.
 
 ## Go
 
-**Module:** `github.com/kreuzberg-dev/html-to-markdown/packages/go/v2`
+**Module:** `github.com/kreuzberg-dev/html-to-markdown/packages/go/v3`
 **Package:** `htmltomarkdown`
-**Install:** `go get github.com/kreuzberg-dev/html-to-markdown/packages/go/v2`
+**Install:** `go get github.com/kreuzberg-dev/html-to-markdown/packages/go/v3`
 
 Uses cgo with the C FFI layer. Options are passed as JSON strings internally.
 
 ```go
-import "github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/htmltomarkdown"
+import "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown"
 
 // Primary function — returns ExtractionResult
 result, err := htmltomarkdown.Convert(html)

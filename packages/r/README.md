@@ -196,7 +196,8 @@ Set `output_format` to `"plain"` to strip all markup and return only visible tex
 ```r
 html <- "<h1>Title</h1><p>This is <strong>bold</strong> and <em>italic</em> text.</p>"
 
-plain <- html_to_markdown(html, output_format = "plain")
+result <- convert(html, options = list(output_format = "plain"))
+plain <- result$content
 # Result: "Title\n\nThis is bold and italic text."
 ```
 
