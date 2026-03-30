@@ -15,7 +15,7 @@ class StructureTest {
     void testStructureCodeBlock() {
         // Fenced code block produces Code node
         var html = "<p>Example code:</p><pre><code class=\"language-rust\">fn main() { println!(\"Hello\"); }</code></pre>";
-        var result = HtmlToMarkdown.convert(html, "{\"include_document_structure\":true}");
+        var result = HtmlToMarkdown.convert(html, "{\"includeDocumentStructure\":true}");
         var content = result.content() != null ? result.content() : "";
 
         assertNotEquals("", content.strip(), "expected non-empty content");
@@ -25,7 +25,7 @@ class StructureTest {
     void testStructureDeepNestingH1H2H3() {
         // H1 > H2 > H3 creates three levels of heading nesting
         var html = "<h1>Top Level</h1><p>Top intro.</p><h2>Mid Level</h2><p>Mid content.</p><h3>Deep Level</h3><p>Deep content.</p>";
-        var result = HtmlToMarkdown.convert(html, "{\"include_document_structure\":true}");
+        var result = HtmlToMarkdown.convert(html, "{\"includeDocumentStructure\":true}");
         var content = result.content() != null ? result.content() : "";
 
         assertNotEquals("", content.strip(), "expected non-empty content");
@@ -35,7 +35,7 @@ class StructureTest {
     void testStructureH1H2NestedGroup() {
         // H1 followed by H2 creates a nested group under the H1
         var html = "<h1>Chapter One</h1><p>Chapter intro.</p><h2>Section One</h2><p>Section content.</p>";
-        var result = HtmlToMarkdown.convert(html, "{\"include_document_structure\":true}");
+        var result = HtmlToMarkdown.convert(html, "{\"includeDocumentStructure\":true}");
         var content = result.content() != null ? result.content() : "";
 
         assertNotEquals("", content.strip(), "expected non-empty content");
@@ -45,7 +45,7 @@ class StructureTest {
     void testStructureHeadingParagraph() {
         // Simple heading followed by paragraph produces Heading and Paragraph nodes
         var html = "<h1>Title</h1><p>A paragraph of text.</p>";
-        var result = HtmlToMarkdown.convert(html, "{\"include_document_structure\":true}");
+        var result = HtmlToMarkdown.convert(html, "{\"includeDocumentStructure\":true}");
         var content = result.content() != null ? result.content() : "";
 
         assertNotEquals("", content.strip(), "expected non-empty content");
@@ -55,7 +55,7 @@ class StructureTest {
     void testStructureList() {
         // Unordered list produces List and ListItem nodes
         var html = "<p>Items:</p><ul><li>Alpha</li><li>Beta</li><li>Gamma</li></ul>";
-        var result = HtmlToMarkdown.convert(html, "{\"include_document_structure\":true}");
+        var result = HtmlToMarkdown.convert(html, "{\"includeDocumentStructure\":true}");
         var content = result.content() != null ? result.content() : "";
 
         assertNotEquals("", content.strip(), "expected non-empty content");
@@ -65,7 +65,7 @@ class StructureTest {
     void testStructureMultipleHeadings() {
         // Multiple headings create multiple Heading nodes with correct levels
         var html = "<h1>Main Title</h1><h2>Section One</h2><p>Section one content.</p><h2>Section Two</h2><p>Section two content.</p>";
-        var result = HtmlToMarkdown.convert(html, "{\"include_document_structure\":true}");
+        var result = HtmlToMarkdown.convert(html, "{\"includeDocumentStructure\":true}");
         var content = result.content() != null ? result.content() : "";
 
         assertNotEquals("", content.strip(), "expected non-empty content");
@@ -75,7 +75,7 @@ class StructureTest {
     void testStructureSiblingH1Groups() {
         // H1, H2, then another H1 creates two sibling top-level groups
         var html = "<h1>Chapter One</h1><h2>Section A</h2><p>Section A content.</p><h1>Chapter Two</h1><h2>Section B</h2><p>Section B content.</p>";
-        var result = HtmlToMarkdown.convert(html, "{\"include_document_structure\":true}");
+        var result = HtmlToMarkdown.convert(html, "{\"includeDocumentStructure\":true}");
         var content = result.content() != null ? result.content() : "";
 
         assertNotEquals("", content.strip(), "expected non-empty content");

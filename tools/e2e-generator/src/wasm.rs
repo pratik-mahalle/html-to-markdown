@@ -67,7 +67,7 @@ fn render_test_file(category: &str, fixtures: &[&Fixture]) -> String {
 fn render_test_function(out: &mut String, fixture: &Fixture, indent: usize) {
     let ind = " ".repeat(indent);
     let ind2 = " ".repeat(indent + 2);
-    let description = &fixture.description;
+    let description = fixture.description.replace('\'', "\\'");
 
     let _ = writeln!(out, "{}it('{}: {}', () => {{", ind, fixture.id, description);
 

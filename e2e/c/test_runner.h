@@ -1,13 +1,6 @@
 #ifndef TEST_RUNNER_H
 #define TEST_RUNNER_H
 
-void test_structure_code_block(void);
-void test_structure_deep_nesting_h1_h2_h3(void);
-void test_structure_h1_h2_nested_group(void);
-void test_structure_heading_paragraph(void);
-void test_structure_list(void);
-void test_structure_multiple_headings(void);
-void test_structure_sibling_h1_groups(void);
 void test_blockquote_multiple_paragraphs(void);
 void test_blockquote_nested(void);
 void test_blockquote_simple(void);
@@ -97,6 +90,13 @@ void test_options_wrap_enabled(void);
 void test_smoke_empty_string(void);
 void test_smoke_simple_heading(void);
 void test_smoke_simple_paragraph(void);
+void test_structure_code_block(void);
+void test_structure_deep_nesting_h1_h2_h3(void);
+void test_structure_h1_h2_nested_group(void);
+void test_structure_heading_paragraph(void);
+void test_structure_list(void);
+void test_structure_multiple_headings(void);
+void test_structure_sibling_h1_groups(void);
 void test_metadata_author_meta(void);
 void test_metadata_canonical_url(void);
 void test_metadata_description_meta(void);
