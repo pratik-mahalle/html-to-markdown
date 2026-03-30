@@ -1,8 +1,6 @@
 #![allow(clippy::all, clippy::pedantic, clippy::nursery, missing_docs)]
 
-use html_to_markdown_rs::{
-    ConversionOptions, convert as convert_rs, error::ConversionError, safety::guard_panic,
-};
+use html_to_markdown_rs::{error::ConversionError, safety::guard_panic};
 
 mod conversion;
 mod options;

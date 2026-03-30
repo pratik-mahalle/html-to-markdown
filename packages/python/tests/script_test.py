@@ -9,7 +9,9 @@ def test_script_with_angle_brackets_does_not_swallow_following_content() -> None
     </html>
     """
     result = convert(html)
-    assert "Content" in result
+    content = result["content"]
+    assert content is not None
+    assert "Content" in content
 
 
 def test_script_with_string_angles_is_ignored() -> None:
@@ -19,9 +21,11 @@ def test_script_with_string_angles_is_ignored() -> None:
     <p>after</p>
     """
     result = convert(html)
-    assert "before" in result
-    assert "after" in result
-    assert "<tag>" not in result
+    content = result["content"]
+    assert content is not None
+    assert "before" in content
+    assert "after" in content
+    assert "<tag>" not in content
 
 
 def test_bare_angle_brackets_in_html_body() -> None:
@@ -33,7 +37,9 @@ def test_bare_angle_brackets_in_html_body() -> None:
     </html>
     """
     result = convert(html)
-    assert "Content" in result, f"Expected 'Content' in result, got: {result}"
+    content = result["content"]
+    assert content is not None
+    assert "Content" in content
 
 
 def test_angle_brackets_in_div() -> None:
@@ -45,7 +51,9 @@ def test_angle_brackets_in_div() -> None:
     </html>
     """
     result = convert(html)
-    assert "Content" in result, f"Expected 'Content' in result, got: {result}"
+    content = result["content"]
+    assert content is not None
+    assert "Content" in content
 
 
 def test_multiple_angle_brackets() -> None:
@@ -57,7 +65,9 @@ def test_multiple_angle_brackets() -> None:
     </html>
     """
     result = convert(html)
-    assert "Content" in result, f"Expected 'Content' in result, got: {result}"
+    content = result["content"]
+    assert content is not None
+    assert "Content" in content
 
 
 def test_angle_brackets_with_script_tag() -> None:
@@ -73,11 +83,15 @@ def test_angle_brackets_with_script_tag() -> None:
     </html>
     """
     result = convert(html)
-    assert "Content" in result, f"Expected 'Content' in result, got: {result}"
+    content = result["content"]
+    assert content is not None
+    assert "Content" in content
 
 
 def test_angle_bracket_at_tag_boundary() -> None:
     """Test angle bracket immediately after tag."""
     html = "<p>test</p>1<2"
     result = convert(html)
-    assert "test" in result
+    content = result["content"]
+    assert content is not None
+    assert "test" in content
