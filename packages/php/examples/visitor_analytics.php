@@ -171,21 +171,15 @@ $html = <<<'HTML'
 </article>
 HTML;
 
-$analytics = new ContentAnalytics();
-
 try {
-    $markdown = HtmlToMarkdown::convertWithVisitor($html, null, $analytics);
+    $markdown = HtmlToMarkdown::convert($html);
 
     echo "Converted Markdown:\n";
     echo "==================\n";
     echo $markdown;
     echo "\n\n";
 
-    echo $analytics->getReport();
+    echo "Note: Full analytics integration requires visitor support in the PHP extension.\n";
 } catch (Throwable $e) {
-    echo "Note: Analytics example requires the PHP extension with visitor support\n";
     echo "Error: " . $e->getMessage() . "\n";
-
-    echo "\nExample statistics (if extension was available):\n";
-    HtmlToMarkdown::convert($html);
 }

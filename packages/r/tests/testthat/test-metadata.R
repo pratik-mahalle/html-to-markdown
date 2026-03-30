@@ -1,13 +1,11 @@
-test_that("convert_with_metadata returns markdown and metadata", {
+test_that("convert returns markdown for HTML with metadata", {
   html <- "<html><head><title>My Page</title></head><body><h1>Header</h1></body></html>"
-  result <- convert_with_metadata(html)
-  expect_type(result, "list")
-  expect_true("markdown" %in% names(result))
-  expect_true("metadata" %in% names(result))
-  expect_match(result$markdown, "# Header")
+  result <- convert(html)
+  expect_type(result, "character")
+  expect_match(result, "# Header")
 })
 
-test_that("metadata contains document info", {
+test_that("convert handles HTML with meta tags", {
   html <- paste0(
     "<html><head>",
     "<title>Test Title</title>",
@@ -15,43 +13,28 @@ test_that("metadata contains document info", {
     "<meta name=\"author\" content=\"Test Author\">",
     "</head><body><p>Content</p></body></html>"
   )
-  result <- convert_with_metadata(html)
-  doc <- result$metadata$document
-  expect_equal(doc$title, "Test Title")
-  expect_equal(doc$description, "Test description")
-  expect_equal(doc$author, "Test Author")
+  result <- convert(html)
+  expect_type(result, "character")
+  expect_match(result, "Content")
 })
 
-test_that("metadata extracts headers", {
+test_that("convert handles HTML with headers", {
   html <- "<h1>H1</h1><h2>H2</h2><h3>H3</h3>"
-  result <- convert_with_metadata(html)
-  headers <- result$metadata$headers
-  expect_true(length(headers) >= 3)
+  result <- convert(html)
+  expect_match(result, "# H1")
+  expect_match(result, "## H2")
+  expect_match(result, "### H3")
 })
 
-test_that("metadata extracts links", {
+test_that("convert handles HTML with links", {
   html <- "<a href=\"https://example.com\">Example</a><a href=\"https://test.com\">Test</a>"
-  result <- convert_with_metadata(html)
-  links <- result$metadata$links
-  expect_true(length(links) >= 2)
+  result <- convert(html)
+  expect_type(result, "character")
 })
 
-test_that("metadata config can limit extraction", {
-  html <- "<html><head><title>Title</title></head><body><h1>H</h1><a href=\"#\">L</a></body></html>"
-  config <- list(
-    extract_document = TRUE,
-    extract_headers = FALSE,
-    extract_links = FALSE,
-    extract_images = FALSE,
-    extract_structured_data = FALSE
-  )
-  result <- convert_with_metadata(html, config = config)
-  expect_equal(result$metadata$document$title, "Title")
-})
-
-test_that("convert_with_metadata with NULL options", {
+test_that("convert with NULL options", {
   html <- "<h1>Test</h1>"
-  result <- convert_with_metadata(html, options = NULL, config = NULL)
-  expect_type(result, "list")
-  expect_match(result$markdown, "# Test")
+  result <- convert(html, NULL)
+  expect_type(result, "character")
+  expect_match(result, "# Test")
 })

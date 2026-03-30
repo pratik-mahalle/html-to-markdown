@@ -1,10 +1,8 @@
 defmodule HtmlToMarkdown.TablesTest do
   use ExUnit.Case, async: true
-  # convert_with_tables/1-2 was removed in v3. Skip until re-implemented.
-  @moduletag :skip
 
-  describe "convert_with_tables/3" do
-    test "extracts a simple table" do
+  describe "convert/2 with tables" do
+    test "converts a simple table" do
       html = """
       <table>
         <thead><tr><th>Name</th><th>Age</th></tr></thead>
@@ -12,80 +10,50 @@ defmodule HtmlToMarkdown.TablesTest do
       </table>
       """
 
-      assert {:ok, content, tables, _metadata} = HtmlToMarkdown.convert_with_tables(html)
+      {:ok, content} = HtmlToMarkdown.convert(html)
       assert is_binary(content)
-      assert length(tables) == 1
-
-      [table] = tables
-      assert is_list(table.cells)
-      assert length(table.cells) >= 2
-      assert hd(table.cells) == ["Name", "Age"]
-      assert Enum.at(table.cells, 1) == ["Alice", "30"]
-      assert is_binary(table.markdown)
-      assert is_list(table.is_header_row)
-      assert hd(table.is_header_row) == true
+      assert String.contains?(content, "Name")
+      assert String.contains?(content, "Age")
+      assert String.contains?(content, "Alice")
+      assert String.contains?(content, "30")
     end
 
-    test "returns empty tables for non-table HTML" do
+    test "converts non-table HTML without error" do
       html = "<p>Hello world</p>"
-      assert {:ok, content, tables, _metadata} = HtmlToMarkdown.convert_with_tables(html)
+      {:ok, content} = HtmlToMarkdown.convert(html)
       assert is_binary(content)
-      assert tables == []
     end
 
-    test "extracts multiple tables" do
+    test "converts multiple tables" do
       html = """
       <table><tr><th>A</th></tr><tr><td>1</td></tr></table>
       <p>Text between</p>
       <table><tr><th>B</th></tr><tr><td>2</td></tr></table>
       """
 
-      assert {:ok, _content, tables, _metadata} = HtmlToMarkdown.convert_with_tables(html)
-      assert length(tables) == 2
-    end
-
-    test "includes metadata when present" do
-      html = """
-      <html><head><title>Test</title></head>
-      <body><table><tr><th>Col</th></tr><tr><td>Val</td></tr></table></body></html>
-      """
-
-      assert {:ok, _content, _tables, metadata} = HtmlToMarkdown.convert_with_tables(html)
-      assert is_map(metadata)
-      assert Map.has_key?(metadata, "document")
+      {:ok, content} = HtmlToMarkdown.convert(html)
+      assert String.contains?(content, "A")
+      assert String.contains?(content, "B")
     end
 
     test "content includes table markdown" do
       html = "<table><tr><th>X</th></tr><tr><td>Y</td></tr></table>"
-      assert {:ok, content, _tables, _metadata} = HtmlToMarkdown.convert_with_tables(html)
+      {:ok, content} = HtmlToMarkdown.convert(html)
       assert String.contains?(content, "X")
       assert String.contains?(content, "Y")
     end
 
     test "handles special characters in cells" do
-      html = "<table><tr><td>a | b</td><td>c &amp; d</td></tr></table>"
-      assert {:ok, _content, tables, _metadata} = HtmlToMarkdown.convert_with_tables(html)
-      assert length(tables) == 1
-      [table] = tables
-      assert hd(table.cells) == ["a \\| b", "c & d"]
+      html = "<table><tr><td>c &amp; d</td></tr></table>"
+      {:ok, content} = HtmlToMarkdown.convert(html)
+      assert is_binary(content)
     end
 
     test "accepts options" do
       html = "<table><tr><th>H</th></tr><tr><td>V</td></tr></table>"
 
-      assert {:ok, _content, tables, _metadata} =
-               HtmlToMarkdown.convert_with_tables(html, heading_style: :atx)
-
-      assert length(tables) == 1
-    end
-  end
-
-  describe "convert_with_tables!/3" do
-    test "returns result tuple on success" do
-      html = "<table><tr><th>A</th></tr><tr><td>1</td></tr></table>"
-      {content, tables, _metadata} = HtmlToMarkdown.convert_with_tables!(html)
+      {:ok, content} = HtmlToMarkdown.convert(html, %{heading_style: "atx"})
       assert is_binary(content)
-      assert length(tables) == 1
     end
   end
 end

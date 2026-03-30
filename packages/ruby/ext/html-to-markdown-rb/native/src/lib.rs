@@ -8,7 +8,6 @@ mod conversion;
 mod options;
 mod types;
 
-use conversion::extraction_to_value;
 use options::build_conversion_options;
 use types::{arg_error, runtime_error};
 

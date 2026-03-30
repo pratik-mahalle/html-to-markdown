@@ -2,8 +2,8 @@
  * html-to-markdown C FFI Test App
  *
  * Comprehensive test program for the html-to-markdown C FFI API.
- * Tests conversion, metadata extraction, error handling, visitor API,
- * version info, and profiling functions.
+ * Tests conversion, error handling, visitor API, version info,
+ * and profiling functions.
  *
  * Compile: see Makefile
  * Run:     ./htm_test
@@ -35,16 +35,6 @@ extern void html_to_markdown_free_string(char *s);
 extern const char *html_to_markdown_last_error(void);
 extern uint32_t html_to_markdown_last_error_code(void);
 extern const char *html_to_markdown_error_code_name(uint32_t code);
-
-/* Metadata conversion */
-extern char *html_to_markdown_convert_with_metadata(const char *html,
-                                                     char **metadata_json_out);
-extern char *html_to_markdown_convert_with_metadata_with_len(
-    const char *html, char **metadata_json_out, uintptr_t *markdown_len_out,
-    uintptr_t *metadata_len_out);
-extern char *html_to_markdown_convert_with_metadata_bytes_with_len(
-    const uint8_t *html, uintptr_t len, char **metadata_json_out,
-    uintptr_t *markdown_len_out, uintptr_t *metadata_len_out);
 
 /* Visit result type */
 typedef enum {
@@ -364,88 +354,7 @@ static void test_basic_conversion(void) {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Section 4: Metadata Conversion                                            */
-/* -------------------------------------------------------------------------- */
-
-static void test_metadata_conversion(void) {
-    /* convert_with_metadata basic */
-    {
-        const char *html = "<html><head><title>Test Page</title></head>"
-                           "<body><h1>Hello</h1></body></html>";
-        char *metadata_json = NULL;
-        char *markdown =
-            html_to_markdown_convert_with_metadata(html, &metadata_json);
-        if (markdown && strstr(markdown, "Hello")) {
-            pass("convert_with_metadata() returns markdown with content");
-        } else {
-            fail("convert_with_metadata() markdown", markdown ? markdown : "NULL");
-        }
-        if (metadata_json && strlen(metadata_json) > 0) {
-            pass("convert_with_metadata() returns non-empty metadata JSON");
-        } else {
-            fail("convert_with_metadata() metadata", "NULL or empty");
-        }
-        html_to_markdown_free_string(markdown);
-        html_to_markdown_free_string(metadata_json);
-    }
-
-    /* convert_with_metadata NULL input */
-    {
-        char *metadata_json = NULL;
-        const char *markdown =
-            html_to_markdown_convert_with_metadata(NULL, &metadata_json);
-        if (markdown == NULL) {
-            pass("convert_with_metadata(NULL) returns NULL");
-        } else {
-            fail("convert_with_metadata(NULL)", "expected NULL");
-        }
-    }
-
-    /* convert_with_metadata_with_len */
-    {
-        const char *html = "<html><head><title>Len</title></head>"
-                           "<body><p>Content</p></body></html>";
-        char *metadata_json = NULL;
-        uintptr_t md_len = 0, meta_len = 0;
-        char *markdown = html_to_markdown_convert_with_metadata_with_len(
-            html, &metadata_json, &md_len, &meta_len);
-        if (markdown && md_len > 0 && md_len == strlen(markdown)) {
-            pass("convert_with_metadata_with_len() markdown length correct");
-        } else {
-            fail("convert_with_metadata_with_len() markdown", "length mismatch");
-        }
-        if (metadata_json && meta_len > 0 && meta_len == strlen(metadata_json)) {
-            pass("convert_with_metadata_with_len() metadata length correct");
-        } else {
-            fail("convert_with_metadata_with_len() metadata", "length mismatch");
-        }
-        html_to_markdown_free_string(markdown);
-        html_to_markdown_free_string(metadata_json);
-    }
-
-    /* convert_with_metadata_bytes_with_len */
-    {
-        const char *html = "<html><body><p>Bytes test</p></body></html>";
-        uintptr_t html_len = strlen(html);
-        char *metadata_json = NULL;
-        uintptr_t md_len = 0, meta_len = 0;
-        char *markdown =
-            html_to_markdown_convert_with_metadata_bytes_with_len(
-                (const uint8_t *)html, html_len, &metadata_json, &md_len,
-                &meta_len);
-        if (markdown && md_len > 0 && strstr(markdown, "Bytes test")) {
-            pass("convert_with_metadata_bytes_with_len() works correctly");
-        } else {
-            fail("convert_with_metadata_bytes_with_len()",
-                 markdown ? markdown : "NULL");
-        }
-        html_to_markdown_free_string(markdown);
-        html_to_markdown_free_string(metadata_json);
-    }
-}
-
-/* -------------------------------------------------------------------------- */
-/* Section 5: Error Handling                                                  */
+/* Section 4: Error Handling                                                  */
 /* -------------------------------------------------------------------------- */
 
 static void test_error_handling(void) {
@@ -509,7 +418,7 @@ static void test_error_handling(void) {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Section 6: Visitor API                                                     */
+/* Section 5: Visitor API                                                     */
 /* -------------------------------------------------------------------------- */
 
 static void test_visitor_api(void) {
@@ -660,7 +569,7 @@ static void test_visitor_api(void) {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Section 7: Profiling API                                                   */
+/* Section 6: Profiling API                                                   */
 /* -------------------------------------------------------------------------- */
 
 static void test_profiling_api(void) {
@@ -707,7 +616,7 @@ static void test_profiling_api(void) {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Section 8: Memory Safety                                                   */
+/* Section 7: Memory Safety                                                   */
 /* -------------------------------------------------------------------------- */
 
 static void test_memory_safety(void) {
@@ -766,9 +675,6 @@ int main(void) {
 
     section("Basic Conversion");
     test_basic_conversion();
-
-    section("Metadata Conversion");
-    test_metadata_conversion();
 
     section("Error Handling");
     test_error_handling();

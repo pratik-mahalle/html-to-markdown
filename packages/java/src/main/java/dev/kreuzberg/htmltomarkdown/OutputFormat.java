@@ -12,8 +12,8 @@ package dev.kreuzberg.htmltomarkdown;
  * String markdown = HtmlToMarkdown.convert("<h1>Hello</h1>");
  *
  * // Note: Full options support coming in future versions
- * // String djot = HtmlToMarkdown.convertWithOptions("<h1>Hello</h1>",
- * //     new ConversionOptions().setOutputFormat(OutputFormat.DJOT));
+ * // ConversionOptions opts = new ConversionOptions().setOutputFormat(OutputFormat.DJOT);
+ * // String djot = HtmlToMarkdown.convert("<h1>Hello</h1>", opts);
  * }</pre>
  *
  * @since 2.20.0

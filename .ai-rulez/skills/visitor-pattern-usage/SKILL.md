@@ -24,9 +24,6 @@ The visitor pattern is conditionally compiled:
 ```rust
 #[cfg(feature = "visitor")]
 pub mod visitor;
-
-#[cfg(feature = "async-visitor")]
-pub use visitor_helpers::AsyncVisitorHandle;
 ```
 
 **In Cargo.toml:**
@@ -35,7 +32,6 @@ pub use visitor_helpers::AsyncVisitorHandle;
 [features]
 default = ["metadata"]
 visitor = []
-async-visitor = ["visitor", "dep:async-trait"]
 ```
 
 ## Core Traits and Types
@@ -494,71 +490,6 @@ let mut visitor = AttributeRoutingVisitor;
 let markdown = convert(html, None, Some(&mut visitor))?;
 ```
 
-## Async Visitor Support
-
-For languages with native async/await (Python, TypeScript, Elixir):
-
-The async visitor is passed as the third argument to `convert()` in async-enabled bindings:
-
-```rust
-#[cfg(feature = "async-visitor")]
-pub async fn convert(
-    html: &str,
-    options: Option<ConversionOptions>,
-    visitor: Option<AsyncVisitorHandle>,
-) -> Result<String> { ... }
-```
-
-### Python Async Example (PyO3)
-
-```python
-import asyncio
-import html_to_markdown
-
-class AsyncSyntaxHighlighter:
-    async def visit_code_block(self, ctx, code, language):
-        # Call async syntax highlighting service
-        highlighted = await highlight_service.highlight(code, language)
-        return f"```{language}\n{highlighted}\n```"
-
-    async def visit_link(self, ctx, href, text, title):
-        # Check external link status asynchronously
-        is_valid = await check_link_validity(href)
-        if is_valid:
-            return f"[{text}]({href})"
-        else:
-            return f"~~[{text}]({href})~~ (broken)"
-
-# Usage
-markdown = await html_to_markdown.convert(
-    html,
-    None,
-    AsyncSyntaxHighlighter()
-)
-```
-
-### TypeScript Async Example (NAPI-RS)
-
-```typescript
-import { convert } from 'html-to-markdown';
-
-class AsyncContentProcessor {
-    async visitLink(ctx, href, text, title) {
-        // Fetch metadata for link
-        const metadata = await fetch(href).then(r => r.json());
-        return `[${text}](${href} "${metadata.title}")`;
-    }
-
-    async visitImage(ctx, src, alt, title) {
-        // Optimize image
-        const optimized = await imageOptimizer.optimize(src);
-        return `![${alt}](${optimized})`;
-    }
-}
-
-const markdown = await convert(html, undefined, new AsyncContentProcessor());
-```
-
 ## State Management in Visitors
 
 Maintain state across multiple visits:
@@ -728,14 +659,6 @@ pub fn convert(
     html: &str,
     options: Option<ConversionOptions>,
     visitor: Option<visitor::VisitorHandle>,
-) -> Result<ConversionResult>
-
-// Async variant (for languages with native async)
-#[cfg(feature = "async-visitor")]
-pub async fn convert(
-    html: &str,
-    options: Option<ConversionOptions>,
-    visitor: Option<AsyncVisitorHandle>,
 ) -> Result<ConversionResult>
 ```
 

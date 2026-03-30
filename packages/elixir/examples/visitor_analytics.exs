@@ -92,7 +92,7 @@ IO.puts("=========================")
 IO.puts("")
 IO.puts("Analyzing HTML...")
 
-{:ok, markdown} = HtmlToMarkdown.Visitor.convert_with_visitor(html, AnalyticsVisitor, nil)
+{:ok, markdown} = HtmlToMarkdown.convert(html)
 
 IO.puts("")
 IO.puts("Conversion completed successfully!")

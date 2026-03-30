@@ -19,17 +19,15 @@ make test
 
 ## Test Coverage
 
-The test suite (`main.c`) validates 9 sections of the C FFI API:
+The test suite (`main.c`) validates 7 sections of the C FFI API:
 
 1. **Library Info** - Version string, error state after success
 2. **Error Code Functions** - All 6 error codes (ok, invalid_utf8, parse, visitor, memory, internal), unknown codes
 3. **Basic Conversion** - Headings, paragraphs, bold, italic, links, empty input, nested HTML, Unicode
-4. **Length-aware Conversion** - `convert_with_len`, `convert_bytes_with_len`, edge cases
-5. **Metadata Conversion** - `convert_with_metadata`, `_with_len`, `_bytes_with_len`, NULL handling
-6. **Error Handling** - NULL input, error state propagation, error state clearing, `free_string(NULL)`
-7. **Visitor API** - Result constructors, visitor create/free, convert with visitor, bytes variant
-8. **Profiling API** - Start/stop lifecycle, NULL path, platform availability
-9. **Memory Safety** - 100 repeated conversions, alternating success/failure cycles
+4. **Error Handling** - NULL input, error state propagation, error state clearing, `free_string(NULL)`
+5. **Visitor API** - Result constructors, visitor create/free, convert with visitor, bytes variant
+6. **Profiling API** - Start/stop lifecycle, NULL path, platform availability
+7. **Memory Safety** - 100 repeated conversions, alternating success/failure cycles
 
 ## File Structure
 

@@ -144,9 +144,9 @@ interface JsInlineImageConfig {
 }
 ```
 
-### JsInlineImage (in JsHtmlExtraction.inlineImages)
+### JsInlineImage (in result.images)
 
-Inline images are extracted via `convertWithInlineImages()`, not via `convert()`. The result is in `extraction.inlineImages`:
+Inline images are extracted when `extractImages` is enabled in options. The result is in `result.images`:
 
 ```typescript
 interface JsInlineImage {
@@ -185,28 +185,23 @@ interface ConversionResult {
 
 ## Visitor Pattern
 
-The visitor is passed as a separate parameter to `convertWithInlineImages()` or `convertWithMetadata()` — it is **not** a field on `JsConversionOptions`. The primary `convert()` function does not accept a visitor.
+The visitor is passed as a third argument to `convert()`:
 
 ```typescript
-import {
-    convertWithInlineImages,
-    convertWithMetadata,
-} from '@kreuzberg/html-to-markdown-node';
+import { convert } from '@kreuzberg/html-to-markdown';
 import { wrapVisitorCallbacks } from '@kreuzberg/html-to-markdown';
 
 const visitor = wrapVisitorCallbacks({
-    visitElementStart: async (ctx) => {
+    visitElementStart: (ctx) => {
         // ctx.tagName, ctx.attributes available
         return { type: 'continue' };
     },
-    visitText: async (ctx, text) => {
+    visitText: (ctx, text) => {
         return { type: 'continue' };
     },
 });
 
-// Visitor is the 4th parameter to convertWithInlineImages / convertWithMetadata
-const extraction = convertWithInlineImages(html, options, imageConfig, visitor);
-const metaExtraction = convertWithMetadata(html, options, metadataConfig, visitor);
+const result = convert(html, options, visitor);
 ```
 
 Visitor return types: `{ type: 'continue' }` | `{ type: 'skip' }` | `{ type: 'preserve_html' }` | `{ type: 'custom', output: string }` | `{ type: 'error', message: string }`.
@@ -230,10 +225,9 @@ for (const table of result3.tables) {
     console.log(table.markdown);
 }
 
-// Inline images — use convertWithInlineImages() (separate function, not via convert())
-import { convertWithInlineImages } from '@kreuzberg/html-to-markdown-node';
-const extraction = convertWithInlineImages(html, options, { captureSvg: true });
-for (const image of extraction.inlineImages) {
+// Inline images — enable extractImages in options
+const result4 = JSON.parse(convert(html, { extractImages: true, captureSvg: true }));
+for (const image of result4.images) {
     console.log(image.format, image.filename);
 }
 

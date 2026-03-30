@@ -1,5 +1,5 @@
 #!/usr/bin/env Rscript
-# E2E smoke test for the htmltomarkdown R package
+# E2E smoke test for the htmltomarkdown R package (v3 API)
 
 library(htmltomarkdown)
 
@@ -15,27 +15,32 @@ stopifnot(nchar(v) > 0)
 stopifnot(grepl("^\\d+\\.\\d+\\.\\d+$", v))
 cat("PASS: version =", v, "\n")
 
-# Options
-opts <- conversion_options(heading_style = "underlined")
-result <- convert_with_options("<h1>Test</h1>", opts)
-stopifnot(grepl("====", result))
-cat("PASS: conversion with options\n")
+# Empty input
+result <- convert("")
+stopifnot(result == "")
+cat("PASS: empty input\n")
 
-# Options handle
-handle <- create_options_handle(opts)
-result <- convert_with_options_handle("<h1>Handle</h1>", handle)
-stopifnot(grepl("====", result))
-cat("PASS: options handle\n")
+# Bold and italic
+result <- convert("<p><strong>bold</strong> and <em>italic</em></p>")
+stopifnot(grepl("bold", result))
+stopifnot(grepl("italic", result))
+cat("PASS: bold and italic conversion\n")
 
-# Metadata
-meta <- convert_with_metadata("<html><head><title>Page</title></head><body><h1>H</h1></body></html>")
-stopifnot(meta$metadata$document$title == "Page")
-cat("PASS: metadata extraction\n")
+# Links
+result <- convert('<a href="https://example.com">Link</a>')
+stopifnot(grepl("Link", result))
+stopifnot(grepl("https://example.com", result))
+cat("PASS: link conversion\n")
 
-# Inline images
-img_result <- convert_with_inline_images("<p>No images</p>")
-stopifnot(is.list(img_result))
-stopifnot("markdown" %in% names(img_result))
-cat("PASS: inline images\n")
+# Lists
+result <- convert("<ul><li>Item 1</li><li>Item 2</li></ul>")
+stopifnot(grepl("Item 1", result))
+stopifnot(grepl("Item 2", result))
+cat("PASS: list conversion\n")
+
+# Code block
+result <- convert("<pre><code>code here</code></pre>")
+stopifnot(grepl("code here", result))
+cat("PASS: code block conversion\n")
 
 cat("\nAll smoke tests passed!\n")

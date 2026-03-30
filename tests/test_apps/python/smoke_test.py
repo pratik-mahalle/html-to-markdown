@@ -3,11 +3,8 @@
 import html_to_markdown
 from html_to_markdown import (
     ConversionOptions,
-    ConversionOptionsHandle,
     OutputFormat,
     convert,
-    convert_with_handle,
-    create_options_handle,
 )
 
 
@@ -40,22 +37,6 @@ def test_conversion_with_djot_format() -> None:
     options = ConversionOptions(output_format=OutputFormat.DJOT)
     result = convert(html, options)
     assert "Title" in result  # noqa: S101
-
-
-def test_conversion_with_options_handle() -> None:
-    """Test conversion with ConversionOptionsHandle."""
-    html = "<h1>Title</h1><p>Content</p>"
-    handle = ConversionOptionsHandle()
-    result = convert_with_handle(html, handle)
-    assert "#" in result or "Title" in result  # noqa: S101
-
-
-def test_create_options_handle() -> None:
-    """Test creating options handle via factory function."""
-    html = "<h1>Test</h1>"
-    handle = create_options_handle()
-    result = convert_with_handle(html, handle)
-    assert "Test" in result  # noqa: S101
 
 
 def test_empty_string_handling() -> None:
