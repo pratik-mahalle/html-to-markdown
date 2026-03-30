@@ -54,7 +54,7 @@ defmodule HtmlToMarkdown.TablesTest do
     test "accepts options" do
       html = "<table><tr><th>H</th></tr><tr><td>V</td></tr></table>"
 
-      {:ok, result} = HtmlToMarkdown.convert(html, %{heading_style: "atx"})
+      {:ok, result} = HtmlToMarkdown.convert(html, %{"heading_style" => "atx"})
       assert is_binary(result.content)
     end
   end
