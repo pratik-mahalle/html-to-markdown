@@ -192,6 +192,13 @@ pub fn handle_img(
             }
         }
     }
+
+    #[cfg(feature = "document-structure")]
+    if let Some(ref sc) = ctx.structure_collector {
+        let src_opt = if src.is_empty() { None } else { Some(src.as_ref()) };
+        let alt_opt = if alt.is_empty() { None } else { Some(alt.as_ref()) };
+        sc.borrow_mut().push_image(src_opt, alt_opt);
+    }
 }
 
 /// Format an image as Markdown syntax.

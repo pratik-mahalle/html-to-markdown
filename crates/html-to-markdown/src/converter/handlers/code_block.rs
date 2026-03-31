@@ -301,6 +301,11 @@ pub fn handle_pre(
         {
             format_code_block(&processed_content, language.as_deref(), output, options, ctx);
         }
+
+        #[cfg(feature = "document-structure")]
+        if let Some(ref sc) = ctx.structure_collector {
+            sc.borrow_mut().push_code(&processed_content, language.as_deref());
+        }
     }
 }
 
