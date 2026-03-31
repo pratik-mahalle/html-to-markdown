@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.1] - 2026-03-31
+
+### Fixed
+
+- **WASM TypeScript types**: `convert()` now returns typed `WasmConversionResult` instead of `any`. All `WasmConversionTable`, `WasmGridCell`, `WasmTableGrid`, `WasmConversionWarning`, and `WasmInlineImage` interfaces are now emitted in generated `.d.ts` files. Added missing options fields (`skipImages`, `outputFormat`, `includeDocumentStructure`, `extractImages`, `maxImageSize`, `captureSvg`, `inferDimensions`). Fixes #265.
+- **Python type stubs**: Synced crate `.pyi` stub with package stub — added keyword-only (`*`) parameter markers and `visitor` parameter to `convert()`.
+- **PHP type stubs**: Expanded PHPStan stubs with full `ConversionResult`, `ConversionOptions`, and all nested type shapes. Wired stubs into `composer.json` PHPStan config.
+
 ## [3.0.0] - 2026-03-30
 
 ### Added
