@@ -107,7 +107,6 @@ pub(crate) fn handle_ol(
         }
     }
 
-    #[cfg(feature = "document-structure")]
     if let Some(ref sc) = ctx.structure_collector {
         sc.borrow_mut().push_list_start(true);
     }
@@ -126,7 +125,6 @@ pub(crate) fn handle_ol(
         dom_ctx,
     );
 
-    #[cfg(feature = "document-structure")]
     if let Some(ref sc) = ctx.structure_collector {
         sc.borrow_mut().push_list_end();
     }

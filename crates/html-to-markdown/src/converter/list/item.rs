@@ -204,7 +204,6 @@ pub(crate) fn handle_li(
             }
         }
 
-        #[cfg(feature = "document-structure")]
         let item_start_pos = output.len();
 
         let children = tag.children();
@@ -216,7 +215,6 @@ pub(crate) fn handle_li(
 
         trim_trailing_whitespace(output);
 
-        #[cfg(feature = "document-structure")]
         if let Some(ref sc) = ctx.structure_collector {
             let rendered = &output[item_start_pos..];
             // Strip the bullet/number prefix to get content text
