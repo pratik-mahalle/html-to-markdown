@@ -215,12 +215,14 @@ pub(crate) fn handle_li(
 
         trim_trailing_whitespace(output);
 
-        if let Some(ref sc) = ctx.structure_collector {
-            if item_start_pos <= output.len() && output.is_char_boundary(item_start_pos) {
-                let rendered = &output[item_start_pos..];
-                let content = rendered.trim();
-                if !content.is_empty() {
-                    sc.borrow_mut().push_list_item(content);
+        if !ctx.in_table_cell {
+            if let Some(ref sc) = ctx.structure_collector {
+                if item_start_pos <= output.len() && output.is_char_boundary(item_start_pos) {
+                    let rendered = &output[item_start_pos..];
+                    let content = rendered.trim();
+                    if !content.is_empty() {
+                        sc.borrow_mut().push_list_item(content);
+                    }
                 }
             }
         }
