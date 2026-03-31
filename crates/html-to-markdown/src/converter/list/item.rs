@@ -216,11 +216,12 @@ pub(crate) fn handle_li(
         trim_trailing_whitespace(output);
 
         if let Some(ref sc) = ctx.structure_collector {
-            let rendered = &output[item_start_pos..];
-            // Strip the bullet/number prefix to get content text
-            let content = rendered.trim();
-            if !content.is_empty() {
-                sc.borrow_mut().push_list_item(content);
+            if item_start_pos <= output.len() && output.is_char_boundary(item_start_pos) {
+                let rendered = &output[item_start_pos..];
+                let content = rendered.trim();
+                if !content.is_empty() {
+                    sc.borrow_mut().push_list_item(content);
+                }
             }
         }
 
