@@ -106,7 +106,7 @@ repos:
 
   # JavaScript/TypeScript/JSON: biome (formatting + linting)
   - repo: https://github.com/biomejs/pre-commit
-    rev: v2.4.9
+    rev: v2.4.10
     hooks:
       - id: biome-format
       - id: biome-lint
@@ -155,7 +155,7 @@ repos:
 
   # GitHub Actions: linting
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.11
+    rev: v1.7.12
     hooks:
       - id: actionlint
 
@@ -176,7 +176,7 @@ repos:
         exclude: ^\.mvn/wrapper/|^e2e/
 
   - repo: https://github.com/rvben/rumdl-pre-commit
-    rev: "v0.1.62"
+    rev: "v0.1.63"
     hooks:
       - id: rumdl-fmt
         exclude: 'test_documents/|\.ai-rulez/|\.remote-cache/|e2e/|fixtures/'
