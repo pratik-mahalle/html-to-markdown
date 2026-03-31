@@ -25,7 +25,7 @@ inline-images = ["html-to-markdown-rs/inline-images"]
 
 [dependencies]
 ext-php-rs = { workspace = true }
-html-to-markdown-bindings-common = { path = "../html-to-markdown-bindings-common", version = "3.0.0", features = [
+html-to-markdown-bindings-common = { path = "../html-to-markdown-bindings-common", version = "3.0.1", features = [
     "metadata",
     "inline-images",
 ] }

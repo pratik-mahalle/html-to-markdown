@@ -1,4 +1,4 @@
-version: "3.0.0"
+version: "3.0.1"
 license: MIT
 discord_url: https://discord.gg/pXxagNK2zN
 banner_url: https://github.com/user-attachments/assets/419fc06c-8313-4324-b159-4b4d3cfce5c0
@@ -217,7 +217,7 @@ languages:
       <dependency>
           <groupId>dev.kreuzberg</groupId>
           <artifactId>html-to-markdown</artifactId>
-          <version>3.0.0</version>
+          <version>3.0.1</version>
           <classifier>linux</classifier> <!-- or macos, windows -->
       </dependency>
     description: |

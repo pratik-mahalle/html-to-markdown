@@ -53,9 +53,12 @@
 	"extra": {
 		"html-to-markdown": {
 			"binary-base-url": "https://github.com/kreuzberg-dev/html-to-markdown/releases/download"
+		},
+		"phpstan": {
+			"includes": ["stubs/html_to_markdown_extension.php"]
 		}
 	},
 	"minimum-stability": "stable",
 	"prefer-stable": true,
-	"version": "3.0.0"
+	"version": "3.0.1"
 }

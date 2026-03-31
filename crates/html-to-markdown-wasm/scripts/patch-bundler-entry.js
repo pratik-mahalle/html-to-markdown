@@ -28,6 +28,7 @@ export type WasmNewlineStyle = "spaces" | "backslash";
 export type WasmCodeBlockStyle = "indented" | "backticks" | "tildes";
 export type WasmHighlightStyle = "doubleEqual" | "html" | "bold" | "none";
 export type WasmPreprocessingPreset = "minimal" | "standard" | "aggressive";
+export type WasmOutputFormat = "markdown" | "djot" | "plain";
 
 export interface WasmPreprocessingOptions {
   enabled?: boolean;
@@ -68,6 +69,80 @@ export interface WasmConversionOptions {
   debug?: boolean;
   stripTags?: string[];
   preserveTags?: string[];
+  skipImages?: boolean;
+  outputFormat?: WasmOutputFormat;
+  includeDocumentStructure?: boolean;
+  extractImages?: boolean;
+  maxImageSize?: number;
+  captureSvg?: boolean;
+  inferDimensions?: boolean;
+}
+
+/** A single cell in a structured table grid. */
+export interface WasmGridCell {
+  content: string;
+  row: number;
+  col: number;
+  rowSpan: number;
+  colSpan: number;
+  isHeader: boolean;
+}
+
+/** Structured table grid with cell-level data. */
+export interface WasmTableGrid {
+  rows: number;
+  cols: number;
+  cells: WasmGridCell[];
+}
+
+/** A table extracted during conversion. */
+export interface WasmConversionTable {
+  grid: WasmTableGrid;
+  markdown: string;
+}
+
+/** Non-fatal warning emitted during conversion. */
+export interface WasmConversionWarning {
+  /** Human-readable warning message. */
+  message: string;
+  /** Warning kind identifier. */
+  kind: string;
+}
+
+/** An extracted inline image from the HTML document. */
+export interface WasmInlineImage {
+  /** Raw image data as a Uint8Array. */
+  data: Uint8Array;
+  /** Image format (png, jpeg, gif, svg, etc.). */
+  format: string;
+  /** Generated or provided filename, or null. */
+  filename: string | null;
+  /** Alt text or description, or null. */
+  description: string | null;
+  /** Image width in pixels, or null if not available. */
+  width: number | null;
+  /** Image height in pixels, or null if not available. */
+  height: number | null;
+  /** Source type ("img_data_uri" or "svg_element"). */
+  source: string;
+  /** HTML attributes from the source element. */
+  attributes: Record<string, string>;
+}
+
+/** Result of the convert() API. */
+export interface WasmConversionResult {
+  /** Converted text output (markdown, djot, or plain text), or null. */
+  content: string | null;
+  /** Structured document tree serialized as a JSON value, or null. */
+  document: unknown | null;
+  /** Extracted HTML metadata serialized as a JSON value, or null. */
+  metadata: unknown | null;
+  /** All tables found in the HTML, in document order. */
+  tables: WasmConversionTable[];
+  /** Extracted inline images (data URIs and SVGs). */
+  images: WasmInlineImage[];
+  /** Non-fatal processing warnings. */
+  warnings: WasmConversionWarning[];
 }
 `;
 
@@ -96,7 +171,7 @@ function patchJsDoc(targetPath, typeSpecifier) {
   jsContent = jsContent.replace(optionsPattern, optionsReplacement);
 
   const returnsPattern = /@returns\s+\{any\}/g;
-  const returnsReplacement = '@returns {Record<string, string>}';
+  const returnsReplacement = '@returns {WasmConversionResult}';
   jsContent = jsContent.replace(returnsPattern, returnsReplacement);
 
   if (jsContent !== originalContent) {
@@ -248,6 +323,29 @@ if (content.includes('options: any')) {
 }
 
 content = content.replace('readonly attributes: any;', 'readonly attributes: Record<string, string>;');
+
+// Fix return types: wasm-bindgen generates `string` or `any` for Result<JsValue, JsValue>
+if (!content.includes('WasmConversionResult')) {
+  // convert() returns a structured result object, not a string
+  content = content.replace(
+    /export function convert\(html: string, options\?: WasmConversionOptions \| null\): string;/,
+    'export function convert(html: string, options?: WasmConversionOptions | null): WasmConversionResult;'
+  );
+  // Also handle the case where wasm-bindgen emits `any` as the return type
+  content = content.replace(
+    /export function convert\(html: string, options\?: WasmConversionOptions \| null\): any;/,
+    'export function convert(html: string, options?: WasmConversionOptions | null): WasmConversionResult;'
+  );
+  // convertWithMetadata and convertBytesWithMetadata return structured results
+  content = content.replace(
+    /export function convertWithMetadata\(([^)]*)\): any;/,
+    'export function convertWithMetadata($1): WasmConversionResult;'
+  );
+  content = content.replace(
+    /export function convertBytesWithMetadata\(([^)]*)\): any;/,
+    'export function convertBytesWithMetadata($1): WasmConversionResult;'
+  );
+}
 
 if (!content.includes('interface WasmConversionOptions')) {
   content += `\n${typeDefinitions}`;
