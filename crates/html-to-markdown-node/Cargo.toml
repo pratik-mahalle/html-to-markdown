@@ -25,7 +25,7 @@ full = ["metadata"]
 metadata = ["html-to-markdown-rs/metadata"]
 
 [dependencies]
-html-to-markdown-bindings-common = { path = "../html-to-markdown-bindings-common", version = "3.0.2", features = [
+html-to-markdown-bindings-common = { path = "../html-to-markdown-bindings-common", version = "3.1.0", features = [
     "metadata",
     "inline-images",
 ] }

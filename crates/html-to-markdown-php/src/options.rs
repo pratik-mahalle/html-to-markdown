@@ -110,6 +110,9 @@ pub fn parse_conversion_options(table: &ZendHashTable) -> PhpResult<ConversionOp
             "preserve_tags" | "preserveTags" => {
                 update.preserve_tags = Some(read_string_list(value, &key_str)?);
             }
+            "link_style" | "linkStyle" => {
+                update.link_style = Some(parse_link_style(value, &key_str)?);
+            }
             "output_format" | "outputFormat" => {
                 update.output_format = Some(parse_output_format(value, &key_str)?);
             }
