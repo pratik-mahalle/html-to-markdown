@@ -5,8 +5,8 @@ CC = gcc
 CFLAGS = -Wall -Wextra -std=c11
 LDFLAGS = -L. -lhtml_to_markdown
 
-SOURCES = main.c test_edge_cases.c test_options.c test_structure.c test_conversion.c test_real_world.c test_smoke.c test_metadata.c
-OBJECTS = main.o test_edge_cases.o test_options.o test_structure.o test_conversion.o test_real_world.o test_smoke.o test_metadata.o
+SOURCES = main.c test_options.c test_conversion.c test_real_world.c test_edge_cases.c test_smoke.c test_structure.c test_metadata.c
+OBJECTS = main.o test_options.o test_conversion.o test_real_world.o test_edge_cases.o test_smoke.o test_structure.o test_metadata.o
 TARGET = test_runner
 
 .PHONY: all clean test

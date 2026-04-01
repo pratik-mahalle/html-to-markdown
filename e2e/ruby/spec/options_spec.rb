@@ -74,7 +74,7 @@ RSpec.describe 'options' do
 
   it 'options_heading_style_atx_closed: ATX closed heading style adds closing hashes' do
     html = '<h1>Closed Heading</h1>'
-    opts = { 'heading_style' => 'atxclosed' }
+    opts = { 'heading_style' => 'atx_closed' }
     result = HtmlToMarkdown.convert(html, opts)
     content = result[:content] || ''
 
