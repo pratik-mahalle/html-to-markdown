@@ -48,6 +48,7 @@ mod wasm_tests {
             code_block_style: None,
             keep_inline_images_in: None,
             skip_images: None,
+            link_style: None,
             preprocessing: None,
             encoding: None,
             debug: None,
