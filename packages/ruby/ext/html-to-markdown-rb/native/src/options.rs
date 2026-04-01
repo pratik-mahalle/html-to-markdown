@@ -2,8 +2,8 @@
 
 use crate::types::{arg_error, symbol_to_string};
 use html_to_markdown_rs::{
-    CodeBlockStyle, ConversionOptions, ConversionOptionsUpdate, HeadingStyle, HighlightStyle, ListIndentType,
-    NewlineStyle, OutputFormat, PreprocessingOptionsUpdate, PreprocessingPreset, WhitespaceMode,
+    CodeBlockStyle, ConversionOptions, ConversionOptionsUpdate, HeadingStyle, HighlightStyle, LinkStyle,
+    ListIndentType, NewlineStyle, OutputFormat, PreprocessingOptionsUpdate, PreprocessingPreset, WhitespaceMode,
 };
 use magnus::prelude::*;
 use magnus::r_hash::ForEach;
@@ -67,6 +67,14 @@ pub fn parse_output_format(value: Value) -> Result<OutputFormat, Error> {
         "djot" => Ok(OutputFormat::Djot),
         "plain" => Ok(OutputFormat::Plain),
         other => Err(arg_error(format!("invalid output_format: {other}"))),
+    }
+}
+
+pub fn parse_link_style(value: Value) -> Result<LinkStyle, Error> {
+    match symbol_to_string(value)?.as_str() {
+        "inline" => Ok(LinkStyle::Inline),
+        "reference" => Ok(LinkStyle::Reference),
+        other => Err(arg_error(format!("invalid link_style: {other}"))),
     }
 }
 
@@ -225,6 +233,9 @@ pub fn build_conversion_options(ruby: &Ruby, options: Option<Value>) -> Result<C
             }
             "preserve_tags" => {
                 update.preserve_tags = Some(parse_vec_of_strings(val)?);
+            }
+            "link_style" => {
+                update.link_style = Some(parse_link_style(val)?);
             }
             "output_format" => {
                 update.output_format = Some(parse_output_format(val)?);

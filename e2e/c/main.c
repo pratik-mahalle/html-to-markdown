@@ -9,78 +9,6 @@ int main(void) {
     int passed = 0;
     int failed = 0;
 
-    printf("Running {}...\n", "test_empty_html");
-    test_empty_html();
-    passed++;
-
-    printf("Running {}...\n", "test_encoding_cjk_characters");
-    test_encoding_cjk_characters();
-    passed++;
-
-    printf("Running {}...\n", "test_encoding_html_entities");
-    test_encoding_html_entities();
-    passed++;
-
-    printf("Running {}...\n", "test_encoding_named_entities");
-    test_encoding_named_entities();
-    passed++;
-
-    printf("Running {}...\n", "test_encoding_numeric_entities");
-    test_encoding_numeric_entities();
-    passed++;
-
-    printf("Running {}...\n", "test_encoding_unicode_emoji");
-    test_encoding_unicode_emoji();
-    passed++;
-
-    printf("Running {}...\n", "test_html_comments_only");
-    test_html_comments_only();
-    passed++;
-
-    printf("Running {}...\n", "test_just_whitespace_input");
-    test_just_whitespace_input();
-    passed++;
-
-    printf("Running {}...\n", "test_malformed_deeply_nested_elements");
-    test_malformed_deeply_nested_elements();
-    passed++;
-
-    printf("Running {}...\n", "test_malformed_missing_block_closing_tags");
-    test_malformed_missing_block_closing_tags();
-    passed++;
-
-    printf("Running {}...\n", "test_malformed_overlapping_tags");
-    test_malformed_overlapping_tags();
-    passed++;
-
-    printf("Running {}...\n", "test_malformed_unclosed_paragraph");
-    test_malformed_unclosed_paragraph();
-    passed++;
-
-    printf("Running {}...\n", "test_script_tags_only");
-    test_script_tags_only();
-    passed++;
-
-    printf("Running {}...\n", "test_style_tags_only");
-    test_style_tags_only();
-    passed++;
-
-    printf("Running {}...\n", "test_whitespace_only");
-    test_whitespace_only();
-    passed++;
-
-    printf("Running {}...\n", "test_xss_onclick_handler_removed");
-    test_xss_onclick_handler_removed();
-    passed++;
-
-    printf("Running {}...\n", "test_xss_script_tag_stripped");
-    test_xss_script_tag_stripped();
-    passed++;
-
-    printf("Running {}...\n", "test_xss_svg_nested_script_stripped");
-    test_xss_svg_nested_script_stripped();
-    passed++;
-
     printf("Running {}...\n", "test_options_code_block_backticks");
     test_options_code_block_backticks();
     passed++;
@@ -147,34 +75,6 @@ int main(void) {
 
     printf("Running {}...\n", "test_options_wrap_enabled");
     test_options_wrap_enabled();
-    passed++;
-
-    printf("Running {}...\n", "test_structure_code_block");
-    test_structure_code_block();
-    passed++;
-
-    printf("Running {}...\n", "test_structure_deep_nesting_h1_h2_h3");
-    test_structure_deep_nesting_h1_h2_h3();
-    passed++;
-
-    printf("Running {}...\n", "test_structure_h1_h2_nested_group");
-    test_structure_h1_h2_nested_group();
-    passed++;
-
-    printf("Running {}...\n", "test_structure_heading_paragraph");
-    test_structure_heading_paragraph();
-    passed++;
-
-    printf("Running {}...\n", "test_structure_list");
-    test_structure_list();
-    passed++;
-
-    printf("Running {}...\n", "test_structure_multiple_headings");
-    test_structure_multiple_headings();
-    passed++;
-
-    printf("Running {}...\n", "test_structure_sibling_h1_groups");
-    test_structure_sibling_h1_groups();
     passed++;
 
     printf("Running {}...\n", "test_blockquote_multiple_paragraphs");
@@ -465,6 +365,78 @@ int main(void) {
     test_real_world_product_page();
     passed++;
 
+    printf("Running {}...\n", "test_empty_html");
+    test_empty_html();
+    passed++;
+
+    printf("Running {}...\n", "test_encoding_cjk_characters");
+    test_encoding_cjk_characters();
+    passed++;
+
+    printf("Running {}...\n", "test_encoding_html_entities");
+    test_encoding_html_entities();
+    passed++;
+
+    printf("Running {}...\n", "test_encoding_named_entities");
+    test_encoding_named_entities();
+    passed++;
+
+    printf("Running {}...\n", "test_encoding_numeric_entities");
+    test_encoding_numeric_entities();
+    passed++;
+
+    printf("Running {}...\n", "test_encoding_unicode_emoji");
+    test_encoding_unicode_emoji();
+    passed++;
+
+    printf("Running {}...\n", "test_html_comments_only");
+    test_html_comments_only();
+    passed++;
+
+    printf("Running {}...\n", "test_just_whitespace_input");
+    test_just_whitespace_input();
+    passed++;
+
+    printf("Running {}...\n", "test_malformed_deeply_nested_elements");
+    test_malformed_deeply_nested_elements();
+    passed++;
+
+    printf("Running {}...\n", "test_malformed_missing_block_closing_tags");
+    test_malformed_missing_block_closing_tags();
+    passed++;
+
+    printf("Running {}...\n", "test_malformed_overlapping_tags");
+    test_malformed_overlapping_tags();
+    passed++;
+
+    printf("Running {}...\n", "test_malformed_unclosed_paragraph");
+    test_malformed_unclosed_paragraph();
+    passed++;
+
+    printf("Running {}...\n", "test_script_tags_only");
+    test_script_tags_only();
+    passed++;
+
+    printf("Running {}...\n", "test_style_tags_only");
+    test_style_tags_only();
+    passed++;
+
+    printf("Running {}...\n", "test_whitespace_only");
+    test_whitespace_only();
+    passed++;
+
+    printf("Running {}...\n", "test_xss_onclick_handler_removed");
+    test_xss_onclick_handler_removed();
+    passed++;
+
+    printf("Running {}...\n", "test_xss_script_tag_stripped");
+    test_xss_script_tag_stripped();
+    passed++;
+
+    printf("Running {}...\n", "test_xss_svg_nested_script_stripped");
+    test_xss_svg_nested_script_stripped();
+    passed++;
+
     printf("Running {}...\n", "test_smoke_empty_string");
     test_smoke_empty_string();
     passed++;
@@ -475,6 +447,34 @@ int main(void) {
 
     printf("Running {}...\n", "test_smoke_simple_paragraph");
     test_smoke_simple_paragraph();
+    passed++;
+
+    printf("Running {}...\n", "test_structure_code_block");
+    test_structure_code_block();
+    passed++;
+
+    printf("Running {}...\n", "test_structure_deep_nesting_h1_h2_h3");
+    test_structure_deep_nesting_h1_h2_h3();
+    passed++;
+
+    printf("Running {}...\n", "test_structure_h1_h2_nested_group");
+    test_structure_h1_h2_nested_group();
+    passed++;
+
+    printf("Running {}...\n", "test_structure_heading_paragraph");
+    test_structure_heading_paragraph();
+    passed++;
+
+    printf("Running {}...\n", "test_structure_list");
+    test_structure_list();
+    passed++;
+
+    printf("Running {}...\n", "test_structure_multiple_headings");
+    test_structure_multiple_headings();
+    passed++;
+
+    printf("Running {}...\n", "test_structure_sibling_h1_groups");
+    test_structure_sibling_h1_groups();
     passed++;
 
     printf("Running {}...\n", "test_metadata_author_meta");
