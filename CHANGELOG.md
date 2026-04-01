@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.2] - 2026-04-01
+
+### Fixed
+
+- **Structure collector in tables**: Suppressed `StructureCollector` calls for headings and lists inside table cells, preventing spurious document-structure nodes from table content.
+- **Char boundary safety**: Fixed potential panics from slicing at non-UTF-8-char boundaries in `generate_id` hash truncation and list item text extraction.
+- **Dead feature gates removed**: Cleaned up unused `document-structure` feature gates that were no longer wired to any Cargo feature.
+- **Structure collector coverage**: Added missing `StructureCollector` calls for lists, images, and code blocks so document structure captures all block-level elements.
+
 ## [3.0.1] - 2026-03-31
 
 ### Fixed
