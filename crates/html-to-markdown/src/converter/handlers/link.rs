@@ -190,6 +190,13 @@ pub fn handle_link(
             label = href.clone();
         }
 
+        // Normalize Wikipedia-style back-reference links: <a href="#cite_ref-N">^</a>
+        // These produce `[^](#cite_ref-N)` which is confusing (looks like a footnote).
+        // Convert to `[↑](#cite_ref-N)` to avoid ambiguity with markdown footnote syntax.
+        if label == "^" && href.starts_with('#') {
+            label = "↑".to_string();
+        }
+
         let escaped_label = escape_link_label(&label);
 
         #[cfg(feature = "visitor")]
