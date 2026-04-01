@@ -1,5 +1,5 @@
 use html_to_markdown_rs::{
-    CodeBlockStyle, HeadingStyle, HighlightStyle, ListIndentType, NewlineStyle, OutputFormat, WhitespaceMode,
+    CodeBlockStyle, HeadingStyle, HighlightStyle, LinkStyle, ListIndentType, NewlineStyle, OutputFormat, WhitespaceMode,
 };
 use serde::{Deserialize, Serialize};
 
@@ -121,6 +121,25 @@ impl From<WasmHighlightStyle> for HighlightStyle {
             WasmHighlightStyle::Html => HighlightStyle::Html,
             WasmHighlightStyle::Bold => HighlightStyle::Bold,
             WasmHighlightStyle::None => HighlightStyle::None,
+        }
+    }
+}
+
+/// Link rendering style
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum WasmLinkStyle {
+    /// Inline links: [text](url)
+    Inline,
+    /// Reference-style links: [text][1] with definitions at end
+    Reference,
+}
+
+impl From<WasmLinkStyle> for LinkStyle {
+    fn from(val: WasmLinkStyle) -> Self {
+        match val {
+            WasmLinkStyle::Inline => LinkStyle::Inline,
+            WasmLinkStyle::Reference => LinkStyle::Reference,
         }
     }
 }
