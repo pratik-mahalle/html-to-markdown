@@ -232,8 +232,8 @@ fn camel_to_snake(s: &str) -> String {
 fn json_value_to_ruby(v: &serde_json::Value) -> String {
     match v {
         serde_json::Value::String(s) => {
-            let lower = s.to_lowercase();
-            format!("\"{}\"", escape_ruby_string(&lower))
+            let snake = camel_to_snake(s);
+            format!("\"{}\"", escape_ruby_string(&snake))
         }
         serde_json::Value::Bool(true) => "true".to_string(),
         serde_json::Value::Bool(false) => "false".to_string(),
