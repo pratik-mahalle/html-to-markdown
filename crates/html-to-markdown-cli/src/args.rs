@@ -1,8 +1,8 @@
 #![allow(clippy::all, clippy::pedantic, clippy::nursery, missing_docs)]
 
 use crate::validators::{
-    CliCodeBlockStyle, CliHeadingStyle, CliHighlightStyle, CliListIndentType, CliNewlineStyle, CliOutputFormat,
-    CliPreprocessingPreset, CliWhitespaceMode, validate_bullets, validate_strong_em_symbol,
+    CliCodeBlockStyle, CliHeadingStyle, CliHighlightStyle, CliLinkStyle, CliListIndentType, CliNewlineStyle,
+    CliOutputFormat, CliPreprocessingPreset, CliWhitespaceMode, validate_bullets, validate_strong_em_symbol,
 };
 use clap::{Parser, ValueEnum};
 use std::path::PathBuf;
@@ -184,6 +184,15 @@ pub struct Cli {
     #[arg(short = 'a', long)]
     #[arg(help_heading = "Links")]
     pub autolinks: bool,
+
+    /// Link rendering style
+    ///
+    /// Controls how links are formatted:
+    /// - 'inline': [text](url) (default)
+    /// - 'reference': [text][1] with definitions at end
+    #[arg(long, value_name = "STYLE")]
+    #[arg(help_heading = "Links")]
+    pub link_style: Option<CliLinkStyle>,
 
     /// Add default title to links
     ///

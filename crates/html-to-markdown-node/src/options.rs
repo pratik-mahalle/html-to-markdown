@@ -1,5 +1,5 @@
 use crate::enums::{
-    JsCodeBlockStyle, JsHeadingStyle, JsHighlightStyle, JsListIndentType, JsNewlineStyle, JsOutputFormat,
+    JsCodeBlockStyle, JsHeadingStyle, JsHighlightStyle, JsLinkStyle, JsListIndentType, JsNewlineStyle, JsOutputFormat,
     JsPreprocessingPreset, JsWhitespaceMode,
 };
 use html_to_markdown_rs::{
@@ -108,6 +108,8 @@ pub struct JsConversionOptions {
     pub preserve_tags: Option<Vec<String>>,
     /// Skip image conversion (keep as HTML)
     pub skip_images: Option<bool>,
+    /// Link rendering style
+    pub link_style: Option<JsLinkStyle>,
     /// Output format for conversion
     pub output_format: Option<JsOutputFormat>,
     /// Include structured document tree in result
@@ -156,6 +158,7 @@ impl From<JsConversionOptions> for ConversionOptionsUpdate {
             strip_tags: val.strip_tags,
             preserve_tags: val.preserve_tags,
             skip_images: val.skip_images,
+            link_style: val.link_style.map(Into::into),
             output_format: val.output_format.map(Into::into),
             include_document_structure: val.include_document_structure,
             extract_images: val.extract_images,

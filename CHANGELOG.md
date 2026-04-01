@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-04-01
+
+### Added
+
+- **Reference-style links**: New `link_style` option (`"inline"` default, `"reference"`) renders links as `[text][1]` with numbered `[1]: url "title"` definitions appended at the end of the output. Supports URL+title deduplication, images (`![alt][1]`), and media elements (audio, video, iframe). Available across all bindings (Python, Node.js, WASM, PHP, CLI `--link-style`, FFI via JSON).
+
 ## [3.0.2] - 2026-04-01
 
 ### Fixed

@@ -1,8 +1,8 @@
 use ext_php_rs::prelude::*;
 use ext_php_rs::types::Zval;
 use html_to_markdown_rs::{
-    CodeBlockStyle, HeadingStyle, HighlightStyle, ListIndentType, NewlineStyle, OutputFormat, PreprocessingPreset,
-    WhitespaceMode,
+    CodeBlockStyle, HeadingStyle, HighlightStyle, LinkStyle, ListIndentType, NewlineStyle, OutputFormat,
+    PreprocessingPreset, WhitespaceMode,
 };
 
 /// Parse a heading style string into HeadingStyle enum.
@@ -70,6 +70,15 @@ pub fn parse_preprocessing_preset(value: &Zval, key: &str) -> PhpResult<Preproce
         "standard" | "Standard" => Ok(PreprocessingPreset::Standard),
         "aggressive" | "Aggressive" => Ok(PreprocessingPreset::Aggressive),
         other => Err(PhpException::default(format!("Invalid preprocessing preset '{other}'"))),
+    }
+}
+
+/// Parse a link style string into LinkStyle enum.
+pub fn parse_link_style(value: &Zval, key: &str) -> PhpResult<LinkStyle> {
+    match read_string(value, key)?.as_str() {
+        "inline" | "Inline" => Ok(LinkStyle::Inline),
+        "reference" | "Reference" => Ok(LinkStyle::Reference),
+        other => Err(PhpException::default(format!("Invalid link_style '{other}'"))),
     }
 }
 

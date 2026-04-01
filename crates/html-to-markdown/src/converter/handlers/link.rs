@@ -115,6 +115,7 @@ pub fn handle_link(
                             title.as_deref(),
                             raw_text.as_str(),
                             options,
+                            ctx.reference_collector.as_ref(),
                         );
                         push_heading(output, ctx, options, heading_level, link_buffer.as_str());
                         return;
@@ -233,6 +234,7 @@ pub fn handle_link(
                         title.as_deref(),
                         label.as_str(),
                         options,
+                        ctx.reference_collector.as_ref(),
                     );
                     Some(buf)
                 }
@@ -255,6 +257,7 @@ pub fn handle_link(
                 title.as_deref(),
                 label.as_str(),
                 options,
+                ctx.reference_collector.as_ref(),
             );
             Some(buf)
         };
@@ -269,6 +272,7 @@ pub fn handle_link(
                 title.as_deref(),
                 label.as_str(),
                 options,
+                ctx.reference_collector.as_ref(),
             );
             Some(buf)
         };

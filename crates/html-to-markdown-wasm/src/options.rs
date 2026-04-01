@@ -1,6 +1,6 @@
 use crate::enums::{
-    WasmCodeBlockStyle, WasmHeadingStyle, WasmHighlightStyle, WasmListIndentType, WasmNewlineStyle, WasmOutputFormat,
-    WasmPreprocessingPreset, WasmWhitespaceMode,
+    WasmCodeBlockStyle, WasmHeadingStyle, WasmHighlightStyle, WasmLinkStyle, WasmListIndentType, WasmNewlineStyle,
+    WasmOutputFormat, WasmPreprocessingPreset, WasmWhitespaceMode,
 };
 use html_to_markdown_rs::{ConversionOptionsUpdate, PreprocessingOptionsUpdate};
 use serde::{Deserialize, Serialize};
@@ -104,6 +104,8 @@ pub struct WasmConversionOptions {
     pub strip_tags: Option<Vec<String>>,
     /// List of HTML tags to preserve as-is in the output
     pub preserve_tags: Option<Vec<String>>,
+    /// Link rendering style
+    pub link_style: Option<WasmLinkStyle>,
     /// Output format for conversion
     pub output_format: Option<WasmOutputFormat>,
     /// Include structured document tree in result
@@ -152,6 +154,7 @@ impl From<WasmConversionOptions> for ConversionOptionsUpdate {
             debug: val.debug,
             strip_tags: val.strip_tags,
             preserve_tags: val.preserve_tags,
+            link_style: val.link_style.map(Into::into),
             output_format: val.output_format.map(Into::into),
             include_document_structure: val.include_document_structure,
             extract_images: val.extract_images,

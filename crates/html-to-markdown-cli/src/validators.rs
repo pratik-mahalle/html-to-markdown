@@ -2,8 +2,8 @@
 
 use clap::ValueEnum;
 use html_to_markdown_rs::{
-    CodeBlockStyle, HeadingStyle, HighlightStyle, ListIndentType, NewlineStyle, OutputFormat, PreprocessingPreset,
-    WhitespaceMode,
+    CodeBlockStyle, HeadingStyle, HighlightStyle, LinkStyle, ListIndentType, NewlineStyle, OutputFormat,
+    PreprocessingPreset, WhitespaceMode,
 };
 
 #[derive(Copy, Clone, PartialEq, Eq, ValueEnum)]
@@ -156,6 +156,23 @@ impl From<CliOutputFormat> for OutputFormat {
             CliOutputFormat::Markdown => Self::Markdown,
             CliOutputFormat::Djot => Self::Djot,
             CliOutputFormat::Plain => Self::Plain,
+        }
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, ValueEnum)]
+pub enum CliLinkStyle {
+    /// Inline links: [text](url) (default)
+    Inline,
+    /// Reference-style links: [text][1] with definitions at end
+    Reference,
+}
+
+impl From<CliLinkStyle> for LinkStyle {
+    fn from(style: CliLinkStyle) -> Self {
+        match style {
+            CliLinkStyle::Inline => Self::Inline,
+            CliLinkStyle::Reference => Self::Reference,
         }
     }
 }

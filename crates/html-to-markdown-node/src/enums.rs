@@ -1,6 +1,6 @@
 use html_to_markdown_rs::{
-    CodeBlockStyle, HeadingStyle, HighlightStyle, ListIndentType, NewlineStyle, OutputFormat, PreprocessingPreset,
-    WhitespaceMode,
+    CodeBlockStyle, HeadingStyle, HighlightStyle, LinkStyle, ListIndentType, NewlineStyle, OutputFormat,
+    PreprocessingPreset, WhitespaceMode,
 };
 use napi_derive::napi;
 
@@ -116,6 +116,24 @@ impl From<JsHighlightStyle> for HighlightStyle {
             JsHighlightStyle::Html => Self::Html,
             JsHighlightStyle::Bold => Self::Bold,
             JsHighlightStyle::None => Self::None,
+        }
+    }
+}
+
+/// Link rendering style
+#[napi(string_enum)]
+pub enum JsLinkStyle {
+    /// Inline links: [text](url)
+    Inline,
+    /// Reference-style links: [text][1] with definitions at end
+    Reference,
+}
+
+impl From<JsLinkStyle> for LinkStyle {
+    fn from(val: JsLinkStyle) -> Self {
+        match val {
+            JsLinkStyle::Inline => Self::Inline,
+            JsLinkStyle::Reference => Self::Reference,
         }
     }
 }
