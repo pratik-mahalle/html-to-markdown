@@ -18,7 +18,7 @@
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown?label=Java&color=007ec6" alt="Java">
   </a>
   <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown">
-    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/html-to-markdown?label=Go&color=007ec6&filter=v3.0.1" alt="Go">
+    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/html-to-markdown?label=Go&color=007ec6&filter=v3.0.2" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/">
     <img src="https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown?label=C%23&color=007ec6" alt="C#">
@@ -67,7 +67,7 @@ Uses Foreign Function & Memory API for zero-dependency, thread-safe conversion w
 <dependency>
     <groupId>dev.kreuzberg</groupId>
     <artifactId>html-to-markdown</artifactId>
-    <version>3.0.1</version>
+    <version>3.0.2</version>
     <classifier>linux</classifier> <!-- or macos, windows -->
 </dependency>
 
@@ -83,14 +83,14 @@ Requires Java 25+ with Panama FFI support.
 <dependency>
     <groupId>dev.kreuzberg</groupId>
     <artifactId>html-to-markdown</artifactId>
-    <version>3.0.1</version>
+    <version>3.0.2</version>
 </dependency>
 ```
 
 **Gradle (Kotlin DSL):**
 
 ```kotlin
-implementation("dev.kreuzberg:html-to-markdown:3.0.1")
+implementation("dev.kreuzberg:html-to-markdown:3.0.2")
 ```
 
 

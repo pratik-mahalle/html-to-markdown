@@ -347,7 +347,7 @@ impl StructureCollector {
 
         let mut hasher = DefaultHasher::new();
         node_type.hash(&mut hasher);
-        let end = text.floor_char_boundary(text.len().min(64));
+        let end = crate::converter::utility::content::floor_char_boundary(text, text.len().min(64));
         text[..end].hash(&mut hasher);
         index.hash(&mut hasher);
         let digest = hasher.finish();

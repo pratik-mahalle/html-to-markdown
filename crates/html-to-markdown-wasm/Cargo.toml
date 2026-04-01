@@ -39,7 +39,7 @@ wasmtime-testing = []
 [dependencies]
 console_error_panic_hook = { version = "0.1", optional = true }
 getrandom = { version = "0.4", features = ["wasm_js"] }
-html-to-markdown-bindings-common = { path = "../html-to-markdown-bindings-common", version = "3.0.1", features = [
+html-to-markdown-bindings-common = { path = "../html-to-markdown-bindings-common", version = "3.0.2", features = [
     "metadata",
     "inline-images",
 ] }
