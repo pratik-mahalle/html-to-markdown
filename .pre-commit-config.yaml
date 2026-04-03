@@ -55,14 +55,14 @@ repos:
 
   # Python: ruff (linting + formatting) + mypy (type checking)
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.8
+    rev: v0.15.9
     hooks:
       - id: ruff
         args: ["--fix"]
       - id: ruff-format
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.19.1
+    rev: v1.20.0
     hooks:
       - id: mypy
         exclude: "e2e/|scripts/|crates/|tests/test_apps/"
@@ -176,7 +176,7 @@ repos:
         exclude: ^\.mvn/wrapper/|^e2e/
 
   - repo: https://github.com/rvben/rumdl-pre-commit
-    rev: "v0.1.64"
+    rev: "v0.1.66"
     hooks:
       - id: rumdl-fmt
         exclude: 'test_documents/|\.ai-rulez/|\.remote-cache/|e2e/|fixtures/'
