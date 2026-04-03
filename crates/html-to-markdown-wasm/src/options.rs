@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 /// HTML preprocessing options
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct WasmPreprocessingOptions {
     /// Enable preprocessing
     #[serde(default)]
@@ -40,7 +40,7 @@ impl From<WasmPreprocessingOptions> for PreprocessingOptionsUpdate {
 
 /// Main conversion options
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct WasmConversionOptions {
     /// Heading style
     pub heading_style: Option<WasmHeadingStyle>,
