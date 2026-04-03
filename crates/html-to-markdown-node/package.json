@@ -64,6 +64,6 @@
 		"vitest": "^4.1.2"
 	},
 	"dependencies": {
-		"@emnapi/runtime": "1.9.1"
+		"@emnapi/runtime": "1.9.2"
 	}
 }
