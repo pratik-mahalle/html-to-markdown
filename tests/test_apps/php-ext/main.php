@@ -132,6 +132,16 @@ function assert_string_contains(string $needle, string $haystack, string $messag
     }
 }
 
+function assert_string_not_contains(string $needle, string $haystack, string $message = ''): void
+{
+    if (str_contains($haystack, $needle)) {
+        $msg = $message !== '' ? "{$message}: " : '';
+        throw new \RuntimeException(
+            "Assertion failed: {$msg}string should not contain '{$needle}'"
+        );
+    }
+}
+
 function assert_array_key(string $key, array $array, string $message = ''): void
 {
     if (!array_key_exists($key, $array)) {
@@ -354,6 +364,8 @@ $runner->test('convert with skip_images option', function (): void {
     $result = html_to_markdown_convert($html, ['skip_images' => true]);
     assert_string_contains('Text', $result['content']);
     assert_string_contains('more text', $result['content']);
+    assert_string_not_contains('![pic]', $result['content'], 'Image markdown should be removed');
+    assert_string_not_contains('image.png', $result['content'], 'Image URL should be removed');
 });
 
 $runner->test('convert with strip_tags option', function (): void {
