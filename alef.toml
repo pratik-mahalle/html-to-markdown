@@ -560,6 +560,8 @@ table_extraction = "table-extraction/basic_extraction.md"
 extra_paths = [
   "packages/ruby/lib/html_to_markdown/version.rb",
   "packages/python/html_to_markdown/__init__.py",
+  "crates/html-to-markdown-node/package.json",
+  "crates/html-to-markdown-node/npm/*/package.json",
 ]
 
 [scaffold]

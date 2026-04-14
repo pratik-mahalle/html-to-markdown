@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`code_block_style`** default changed from `Indented` to `Backticks` — code blocks now use triple-backtick fences by default instead of 4-space indentation.
 - **`bullets`** default changed from `"-"` to `"-*+"` — nested unordered lists now cycle through `-`, `*`, `+` at successive nesting levels.
 - **`preprocessing.enabled`** default changed from `false` to `true` — HTML preprocessing (navigation removal, form stripping) is now on by default.
-- **Serde field names** changed from `camelCase` to `snake_case` — affects JSON serialization/deserialization of all option structs (`heading_style` instead of `headingStyle`).
+- **Rust serde field names** changed from `camelCase` to `snake_case` — affects JSON serialization/deserialization of the Rust core `ConversionOptions` struct (`heading_style` instead of `headingStyle`). Language bindings are not affected — each binding uses its language-native naming convention (camelCase for JS/TS/Java/C#, snake_case for Python/Ruby/Elixir/R).
 
 #### Package Renames
 
