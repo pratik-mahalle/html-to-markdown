@@ -13,4 +13,4 @@ if [[ "${use_cross}" == "true" ]]; then
   args+=(--use-cross)
 fi
 
-pnpm --filter html-to-markdown-node exec napi build "${args[@]}"
+pnpm --filter @kreuzberg/html-to-markdown-node exec napi build "${args[@]}"

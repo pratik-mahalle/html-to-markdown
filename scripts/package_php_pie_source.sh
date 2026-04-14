@@ -18,7 +18,7 @@ trap cleanup EXIT
 
 mkdir -p "$DEST_DIR"
 
-EXT_SRC_DIR="$ROOT/packages/php-ext"
+EXT_SRC_DIR="$ROOT/packages/php"
 
 rsync -a "$EXT_SRC_DIR"/ "$STAGING"/
 mkdir -p "$STAGING/packages/php-ext"

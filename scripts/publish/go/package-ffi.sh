@@ -56,7 +56,7 @@ mkdir -p "${stage_dir}"
 cp -f "${lib_path}" "${stage_dir}/${target_name}"
 
 # Copy header file
-header_path="crates/html-to-markdown-ffi/html_to_markdown.h"
+header_path="crates/html-to-markdown-ffi/include/html_to_markdown.h"
 if [[ -f "${header_path}" ]]; then
   cp -f "${header_path}" "${stage_dir}/html_to_markdown.h"
 else

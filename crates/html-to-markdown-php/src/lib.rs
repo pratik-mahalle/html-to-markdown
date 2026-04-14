@@ -1144,16 +1144,6 @@ impl HtmlToMarkdownRsApi {
             .map_err(|e| ext_php_rs::exception::PhpException::default(e.to_string()))?;
         Ok(result.into())
     }
-
-    pub fn create_engine_from_json(json: Option<String>) -> PhpResult<CrawlEngineHandle> {
-        let config: Option<html_to_markdown_rs::CrawlConfig> = json
-            .map(|s| serde_json::from_str(&s).map_err(|e| PhpException::default(e.to_string())))
-            .transpose()?;
-        let result = html_to_markdown_rs::create_engine(config).map_err(|e| PhpException::default(e.to_string()))?;
-        Ok(CrawlEngineHandle {
-            inner: Arc::new(result),
-        })
-    }
 }
 
 impl From<MetadataConfig> for html_to_markdown_rs::metadata::MetadataConfig {

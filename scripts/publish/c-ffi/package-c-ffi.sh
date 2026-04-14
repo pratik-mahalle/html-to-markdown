@@ -59,7 +59,7 @@ if [[ -z "${static_path}" || ! -f "${static_path}" ]]; then
 fi
 
 # Source paths
-header_path="crates/html-to-markdown-ffi/html_to_markdown.h"
+header_path="crates/html-to-markdown-ffi/include/html_to_markdown.h"
 cmake_config="crates/html-to-markdown-ffi/cmake/html-to-markdown-ffi-config.cmake"
 cmake_version_template="crates/html-to-markdown-ffi/cmake/html-to-markdown-ffi-config-version.cmake"
 pc_template="crates/html-to-markdown-ffi/html-to-markdown-ffi.pc.in"
