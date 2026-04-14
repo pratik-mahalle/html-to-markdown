@@ -150,9 +150,13 @@ tasks:
     env:
       MIX_ENV: "test"
     cmds:
-      - cmd: cd packages/elixir && mix local.hex --force && mix local.rebar --force && mix deps.get && mix compile
+      - cmd: cd packages/elixir && mix local.hex --force && mix local.rebar --force && mix deps.get && MIX_ENV=test mix compile
         ignore_error: false
-      - cmd: cd e2e/elixir && mix local.hex --force && mix deps.get && mix compile
+      - cmd: cd e2e/elixir && mix local.hex --force && mix local.rebar --force && mix deps.get
+        ignore_error: false
+      - cmd: cd e2e/elixir && mix deps.compile rustler --force
+        ignore_error: false
+      - cmd: cd e2e/elixir && mix compile
         ignore_error: false
       - cmd: cd e2e/elixir && mix test test/
         ignore_error: false

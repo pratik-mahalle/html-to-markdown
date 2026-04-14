@@ -23,7 +23,7 @@ namespace {
         {
             $result = HtmlToMarkdownRs::convert($html, null);
 
-            return $result->getContent() ?? '';
+            return $result->content ?? '';
         }
     }
 

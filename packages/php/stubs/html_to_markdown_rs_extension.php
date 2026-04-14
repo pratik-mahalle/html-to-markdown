@@ -391,6 +391,16 @@ class PreprocessingOptionsUpdate
  */
 class ConversionResult
 {
+    public ?string $content;
+    public ?DocumentStructure $document;
+    public HtmlMetadata $metadata;
+    /** @var array<TableData> */
+    public array $tables;
+    /** @var array<string> */
+    public array $images;
+    /** @var array<ProcessingWarning> */
+    public array $warnings;
+
     /**
      * @param array<TableData> $tables
      * @param array<string> $images

@@ -1208,11 +1208,11 @@ impl From<ConversionOptions> for html_to_markdown_rs::ConversionOptions {
 impl From<html_to_markdown_rs::ConversionOptions> for ConversionOptions {
     fn from(val: html_to_markdown_rs::ConversionOptions) -> Self {
         Self {
-            heading_style: serde_json::to_value(&val.heading_style)
+            heading_style: serde_json::to_value(val.heading_style)
                 .ok()
                 .and_then(|s| s.as_str().map(String::from))
                 .unwrap_or_default(),
-            list_indent_type: serde_json::to_value(&val.list_indent_type)
+            list_indent_type: serde_json::to_value(val.list_indent_type)
                 .ok()
                 .and_then(|s| s.as_str().map(String::from))
                 .unwrap_or_default(),
@@ -1227,12 +1227,12 @@ impl From<html_to_markdown_rs::ConversionOptions> for ConversionOptions {
             autolinks: val.autolinks,
             default_title: val.default_title,
             br_in_tables: val.br_in_tables,
-            highlight_style: serde_json::to_value(&val.highlight_style)
+            highlight_style: serde_json::to_value(val.highlight_style)
                 .ok()
                 .and_then(|s| s.as_str().map(String::from))
                 .unwrap_or_default(),
             extract_metadata: val.extract_metadata,
-            whitespace_mode: serde_json::to_value(&val.whitespace_mode)
+            whitespace_mode: serde_json::to_value(val.whitespace_mode)
                 .ok()
                 .and_then(|s| s.as_str().map(String::from))
                 .unwrap_or_default(),
@@ -1242,11 +1242,11 @@ impl From<html_to_markdown_rs::ConversionOptions> for ConversionOptions {
             convert_as_inline: val.convert_as_inline,
             sub_symbol: val.sub_symbol,
             sup_symbol: val.sup_symbol,
-            newline_style: serde_json::to_value(&val.newline_style)
+            newline_style: serde_json::to_value(val.newline_style)
                 .ok()
                 .and_then(|s| s.as_str().map(String::from))
                 .unwrap_or_default(),
-            code_block_style: serde_json::to_value(&val.code_block_style)
+            code_block_style: serde_json::to_value(val.code_block_style)
                 .ok()
                 .and_then(|s| s.as_str().map(String::from))
                 .unwrap_or_default(),
@@ -1257,11 +1257,11 @@ impl From<html_to_markdown_rs::ConversionOptions> for ConversionOptions {
             strip_tags: val.strip_tags,
             preserve_tags: val.preserve_tags,
             skip_images: val.skip_images,
-            link_style: serde_json::to_value(&val.link_style)
+            link_style: serde_json::to_value(val.link_style)
                 .ok()
                 .and_then(|s| s.as_str().map(String::from))
                 .unwrap_or_default(),
-            output_format: serde_json::to_value(&val.output_format)
+            output_format: serde_json::to_value(val.output_format)
                 .ok()
                 .and_then(|s| s.as_str().map(String::from))
                 .unwrap_or_default(),
@@ -1377,7 +1377,7 @@ impl From<html_to_markdown_rs::PreprocessingOptions> for PreprocessingOptions {
     fn from(val: html_to_markdown_rs::PreprocessingOptions) -> Self {
         Self {
             enabled: val.enabled,
-            preset: serde_json::to_value(&val.preset)
+            preset: serde_json::to_value(val.preset)
                 .ok()
                 .and_then(|s| s.as_str().map(String::from))
                 .unwrap_or_default(),
@@ -1457,7 +1457,7 @@ impl From<html_to_markdown_rs::DocumentNode> for DocumentNode {
     fn from(val: html_to_markdown_rs::DocumentNode) -> Self {
         Self {
             id: val.id,
-            content: serde_json::to_value(&val.content)
+            content: serde_json::to_value(val.content)
                 .ok()
                 .and_then(|s| s.as_str().map(String::from))
                 .unwrap_or_default(),
@@ -1481,7 +1481,7 @@ impl From<html_to_markdown_rs::TextAnnotation> for TextAnnotation {
         Self {
             start: val.start,
             end: val.end,
-            kind: serde_json::to_value(&val.kind)
+            kind: serde_json::to_value(val.kind)
                 .ok()
                 .and_then(|s| s.as_str().map(String::from))
                 .unwrap_or_default(),
@@ -1564,7 +1564,7 @@ impl From<html_to_markdown_rs::ProcessingWarning> for ProcessingWarning {
     fn from(val: html_to_markdown_rs::ProcessingWarning) -> Self {
         Self {
             message: val.message,
-            kind: serde_json::to_value(&val.kind)
+            kind: serde_json::to_value(val.kind)
                 .ok()
                 .and_then(|s| s.as_str().map(String::from))
                 .unwrap_or_default(),
@@ -1639,7 +1639,7 @@ impl From<html_to_markdown_rs::LinkMetadata> for LinkMetadata {
             href: val.href,
             text: val.text,
             title: val.title,
-            link_type: serde_json::to_value(&val.link_type)
+            link_type: serde_json::to_value(val.link_type)
                 .ok()
                 .and_then(|s| s.as_str().map(String::from))
                 .unwrap_or_default(),
@@ -1663,7 +1663,7 @@ impl From<html_to_markdown_rs::ImageMetadata> for ImageMetadata {
             alt: val.alt,
             title: val.title,
             dimensions: val.dimensions.as_ref().map(|v| format!("{:?}", v)),
-            image_type: serde_json::to_value(&val.image_type)
+            image_type: serde_json::to_value(val.image_type)
                 .ok()
                 .and_then(|s| s.as_str().map(String::from))
                 .unwrap_or_default(),
@@ -1682,7 +1682,7 @@ impl From<StructuredData> for html_to_markdown_rs::StructuredData {
 impl From<html_to_markdown_rs::StructuredData> for StructuredData {
     fn from(val: html_to_markdown_rs::StructuredData) -> Self {
         Self {
-            data_type: serde_json::to_value(&val.data_type)
+            data_type: serde_json::to_value(val.data_type)
                 .ok()
                 .and_then(|s| s.as_str().map(String::from))
                 .unwrap_or_default(),
