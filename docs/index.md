@@ -133,6 +133,6 @@ Convert HTML to Markdown, Djot, or plain text. One Rust core, 12 native language
 
 ### Part of Kreuzberg
 
-html-to-markdown powers the HTML conversion pipeline in [kreuzberg](https://docs.kreuzberg.dev), a document intelligence library for extracting text and structured data from PDFs, DOCX, images, and other document formats.
+html-to-markdown powers the HTML conversion pipeline in [Kreuzberg](https://docs.kreuzberg.dev), a document intelligence library for extracting text and structured data from PDFs, DOCX, images, and other document formats.
 
 </div>

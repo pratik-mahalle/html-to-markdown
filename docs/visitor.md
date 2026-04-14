@@ -207,6 +207,6 @@ Override `visit_text` and push each text fragment into an external buffer. The v
 
 `visit_text` fires on every text node. Keep the handler small. Match the few element kinds you care about in `visit_element_start` and return `Continue` for everything else. Allocations inside the handler multiply by the number of text nodes in the input.
 
-The visitor trait is synchronous. The core walker calls each method in place during the single-pass DOM traversal. There is no queuing or batching.
+The visitor trait is synchronous. The core walker calls each method in place during the single-pass DOM traversal.
 
 --8<-- "snippets/feedback.md"
