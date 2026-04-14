@@ -20,7 +20,12 @@
 	"scripts": {
 		"build": "napi build --release",
 		"build:debug": "napi build",
-		"test": "node -e \"console.log('Add test command')\""
+		"test": "node -e \"console.log('Add test command')\"",
+		"typecheck": "tsc --noEmit",
+		"lint": "biome check --no-errors-on-unmatched .",
+		"lint:fix": "biome check --write --no-errors-on-unmatched .",
+		"format": "biome format --write .",
+		"format:check": "biome format --no-errors-on-unmatched ."
 	},
 	"napi": {
 		"name": "html-to-markdown-rs",
