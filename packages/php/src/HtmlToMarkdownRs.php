@@ -34,7 +34,7 @@ final class HtmlToMarkdownRs
      */
     public static function convert(string $html, ?ConversionOptions $options = null): ConversionResult
     {
-        return convert($html, $options); // delegate to extension function
+        return \Html\To\Markdown\Rs\HtmlToMarkdownRsApi::convert($html, $options); // delegate to native extension class
     }
 
 }

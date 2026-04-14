@@ -955,15 +955,9 @@ enum StructuredDataType: string
     case RDFa = 'RDFa';
 }
 
-} // end namespace
-
-namespace {
-
-/**
- * @param string $html
- * @param ?\Html\To\Markdown\Rs\ConversionOptions $options
- * @return \Html\To\Markdown\Rs\ConversionResult
- */
-function convert(string $html, ?\Html\To\Markdown\Rs\ConversionOptions $options = null): \Html\To\Markdown\Rs\ConversionResult { }
-
+class HtmlToMarkdownRsApi
+{
+    public static function convert(string $html, ?\Html\To\Markdown\Rs\ConversionOptions $options = null): \Html\To\Markdown\Rs\ConversionResult { }
 }
+
+} // end namespace

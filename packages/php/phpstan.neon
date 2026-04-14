@@ -9,5 +9,5 @@ parameters:
         - src
         - tests
     tmpDir: var/cache/phpstan
-    stubFiles:
+    scanFiles:
         - stubs/html_to_markdown_rs_extension.php
