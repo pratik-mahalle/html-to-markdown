@@ -272,7 +272,7 @@ class DocumentNode:
     attributes: dict[str, str] | None
     def __init__(
         self,
-        id: str,
+        id: str,  # noqa: A002
         content: NodeContent | dict[str, Any],
         children: list[int],
         annotations: list[TextAnnotation],
@@ -358,7 +358,7 @@ class HeaderMetadata:
         text: str,
         depth: int,
         html_offset: int,
-        id: str | None = None,
+        id: str | None = None,  # noqa: A002
     ) -> None: ...
     def is_valid(self) -> bool: ...
 
