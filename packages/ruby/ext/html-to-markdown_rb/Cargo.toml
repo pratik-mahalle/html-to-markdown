@@ -4,6 +4,9 @@ version = "3.2.0"
 edition = "2024"
 license = "MIT"
 
+[package.metadata.cargo-machete]
+ignored = ["html-to-markdown-rs", "magnus", "serde", "serde_json", "serde_magnus", "tokio"]
+
 [lib]
 crate-type = ["cdylib"]
 
