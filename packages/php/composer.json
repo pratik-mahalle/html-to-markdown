@@ -13,7 +13,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Html\To\Markdown\Rs\\\\": "src/"
+      "Html\\To\\Markdown\\Rs\\\\": "src/"
     },
     "files": ["src/functions.php"]
   },
