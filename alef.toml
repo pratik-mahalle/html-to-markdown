@@ -564,6 +564,37 @@ extra_paths = [
   "crates/html-to-markdown-node/npm/*/package.json",
 ]
 
+# test_apps version sync — use text_replacements to avoid clobbering unrelated semver strings
+[[sync.text_replacements]]
+path = "test_apps/node/package.json"
+search = '"@kreuzberg/html-to-markdown-node": "[^"]*"'
+replace = '"@kreuzberg/html-to-markdown-node": "{version}"'
+
+[[sync.text_replacements]]
+path = "test_apps/bun/package.json"
+search = '"@kreuzberg/html-to-markdown": "[^"]*"'
+replace = '"@kreuzberg/html-to-markdown": "{version}"'
+
+[[sync.text_replacements]]
+path = "test_apps/wasm/package.json"
+search = '"@kreuzberg/html-to-markdown-wasm": "[^"]*"'
+replace = '"@kreuzberg/html-to-markdown-wasm": "{version}"'
+
+[[sync.text_replacements]]
+path = "test_apps/java/pom.xml"
+search = "<version>{version}</version>"
+replace = "<version>{version}</version>"
+
+[[sync.text_replacements]]
+path = "test_apps/csharp/TestApp.csproj"
+search = 'Include="KreuzbergDev.HtmlToMarkdown" Version="[^"]*"'
+replace = 'Include="KreuzbergDev.HtmlToMarkdown" Version="{version}"'
+
+[[sync.text_replacements]]
+path = "test_apps/php/composer.json"
+search = '"kreuzberg-dev/html-to-markdown": "[^"]*"'
+replace = '"kreuzberg-dev/html-to-markdown": ">={version}"'
+
 [scaffold]
 description = "High-performance HTML to Markdown converter"
 license = "MIT"

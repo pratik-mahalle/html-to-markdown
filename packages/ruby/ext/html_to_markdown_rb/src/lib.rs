@@ -5,8 +5,9 @@ use magnus::{Error, IntoValueFromNative, Ruby, function, method, prelude::*, try
 use std::collections::HashMap;
 use std::sync::Arc;
 
-#[derive(Clone)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::MetadataConfig")]
+#[serde(default)]
 pub struct MetadataConfig {
     pub extract_document: bool,
     pub extract_headers: bool,
@@ -95,8 +96,9 @@ impl MetadataConfig {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::MetadataConfigUpdate")]
+#[serde(default)]
 pub struct MetadataConfigUpdate {
     pub extract_document: Option<bool>,
     pub extract_headers: Option<bool>,
@@ -173,8 +175,9 @@ impl MetadataConfigUpdate {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::ConversionOptions")]
+#[serde(default)]
 pub struct ConversionOptions {
     pub heading_style: HeadingStyle,
     pub list_indent_type: ListIndentType,
@@ -629,8 +632,9 @@ impl ConversionOptionsBuilder {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::ConversionOptionsUpdate")]
+#[serde(default)]
 pub struct ConversionOptionsUpdate {
     pub heading_style: Option<HeadingStyle>,
     pub list_indent_type: Option<ListIndentType>,
@@ -1001,8 +1005,9 @@ impl ConversionOptionsUpdate {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::PreprocessingOptions")]
+#[serde(default)]
 pub struct PreprocessingOptions {
     pub enabled: bool,
     pub preset: PreprocessingPreset,
@@ -1063,8 +1068,9 @@ impl PreprocessingOptions {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::PreprocessingOptionsUpdate")]
+#[serde(default)]
 pub struct PreprocessingOptionsUpdate {
     pub enabled: Option<bool>,
     pub preset: Option<PreprocessingPreset>,
@@ -1125,8 +1131,9 @@ impl PreprocessingOptionsUpdate {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::ConversionResult")]
+#[serde(default)]
 pub struct ConversionResult {
     pub content: Option<String>,
     pub document: Option<DocumentStructure>,
@@ -1203,7 +1210,7 @@ impl ConversionResult {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::DocumentStructure")]
 pub struct DocumentStructure {
     pub nodes: Vec<DocumentNode>,
@@ -1234,7 +1241,7 @@ impl DocumentStructure {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::DocumentNode")]
 pub struct DocumentNode {
     pub id: String,
@@ -1299,7 +1306,7 @@ impl DocumentNode {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::TextAnnotation")]
 pub struct TextAnnotation {
     pub start: u32,
@@ -1335,8 +1342,9 @@ impl TextAnnotation {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::TableGrid")]
+#[serde(default)]
 pub struct TableGrid {
     pub rows: u32,
     pub cols: u32,
@@ -1385,7 +1393,7 @@ impl TableGrid {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::GridCell")]
 pub struct GridCell {
     pub content: String,
@@ -1443,7 +1451,7 @@ impl GridCell {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::TableData")]
 pub struct TableData {
     pub grid: TableGrid,
@@ -1474,7 +1482,7 @@ impl TableData {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::ProcessingWarning")]
 pub struct ProcessingWarning {
     pub message: String,
@@ -1505,8 +1513,9 @@ impl ProcessingWarning {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::DocumentMetadata")]
+#[serde(default)]
 pub struct DocumentMetadata {
     pub title: Option<String>,
     pub description: Option<String>,
@@ -1623,7 +1632,7 @@ impl DocumentMetadata {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::HeaderMetadata")]
 pub struct HeaderMetadata {
     pub level: u8,
@@ -1686,7 +1695,7 @@ impl HeaderMetadata {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::LinkMetadata")]
 pub struct LinkMetadata {
     pub href: String,
@@ -1751,7 +1760,7 @@ impl LinkMetadata {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::ImageMetadata")]
 pub struct ImageMetadata {
     pub src: String,
@@ -1816,7 +1825,7 @@ impl ImageMetadata {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::StructuredData")]
 pub struct StructuredData {
     pub data_type: StructuredDataType,
@@ -1856,8 +1865,9 @@ impl StructuredData {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::HtmlMetadata")]
+#[serde(default)]
 pub struct HtmlMetadata {
     pub document: DocumentMetadata,
     pub headers: Vec<HeaderMetadata>,
@@ -1926,7 +1936,7 @@ impl HtmlMetadata {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 pub enum PreprocessingPreset {
     Minimal,
     Standard,
@@ -1968,7 +1978,7 @@ impl magnus::TryConvert for PreprocessingPreset {
 unsafe impl IntoValueFromNative for PreprocessingPreset {}
 unsafe impl TryConvertOwned for PreprocessingPreset {}
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 pub enum HeadingStyle {
     Underlined,
     Atx,
@@ -2010,7 +2020,7 @@ impl magnus::TryConvert for HeadingStyle {
 unsafe impl IntoValueFromNative for HeadingStyle {}
 unsafe impl TryConvertOwned for HeadingStyle {}
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 pub enum ListIndentType {
     Spaces,
     Tabs,
@@ -2049,7 +2059,7 @@ impl magnus::TryConvert for ListIndentType {
 unsafe impl IntoValueFromNative for ListIndentType {}
 unsafe impl TryConvertOwned for ListIndentType {}
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 pub enum WhitespaceMode {
     Normalized,
     Strict,
@@ -2088,7 +2098,7 @@ impl magnus::TryConvert for WhitespaceMode {
 unsafe impl IntoValueFromNative for WhitespaceMode {}
 unsafe impl TryConvertOwned for WhitespaceMode {}
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 pub enum NewlineStyle {
     Spaces,
     Backslash,
@@ -2127,7 +2137,7 @@ impl magnus::TryConvert for NewlineStyle {
 unsafe impl IntoValueFromNative for NewlineStyle {}
 unsafe impl TryConvertOwned for NewlineStyle {}
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 pub enum CodeBlockStyle {
     Indented,
     Backticks,
@@ -2169,7 +2179,7 @@ impl magnus::TryConvert for CodeBlockStyle {
 unsafe impl IntoValueFromNative for CodeBlockStyle {}
 unsafe impl TryConvertOwned for CodeBlockStyle {}
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 pub enum HighlightStyle {
     DoubleEqual,
     Html,
@@ -2214,7 +2224,7 @@ impl magnus::TryConvert for HighlightStyle {
 unsafe impl IntoValueFromNative for HighlightStyle {}
 unsafe impl TryConvertOwned for HighlightStyle {}
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 pub enum LinkStyle {
     Inline,
     Reference,
@@ -2253,7 +2263,7 @@ impl magnus::TryConvert for LinkStyle {
 unsafe impl IntoValueFromNative for LinkStyle {}
 unsafe impl TryConvertOwned for LinkStyle {}
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 pub enum OutputFormat {
     Markdown,
     Djot,
@@ -2295,79 +2305,81 @@ impl magnus::TryConvert for OutputFormat {
 unsafe impl IntoValueFromNative for OutputFormat {}
 unsafe impl TryConvertOwned for OutputFormat {}
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[serde(tag = "node_type")]
 pub enum NodeContent {
-    Heading,
-    Paragraph,
-    List,
-    ListItem,
-    Table,
-    Image,
-    Code,
+    Heading {
+        level: u8,
+        text: String,
+    },
+    Paragraph {
+        text: String,
+    },
+    List {
+        ordered: bool,
+    },
+    ListItem {
+        text: String,
+    },
+    Table {
+        grid: TableGrid,
+    },
+    Image {
+        description: Option<String>,
+        src: Option<String>,
+        image_index: Option<u32>,
+    },
+    Code {
+        text: String,
+        language: Option<String>,
+    },
     Quote,
     DefinitionList,
-    DefinitionItem,
-    RawBlock,
-    MetadataBlock,
-    Group,
+    DefinitionItem {
+        term: String,
+        definition: String,
+    },
+    RawBlock {
+        format: String,
+        content: String,
+    },
+    MetadataBlock {
+        entries: String,
+    },
+    Group {
+        label: Option<String>,
+        heading_level: Option<u8>,
+        heading_text: Option<String>,
+    },
 }
 
 impl Default for NodeContent {
     fn default() -> Self {
-        Self::Heading
+        Self::Heading {
+            level: Default::default(),
+            text: Default::default(),
+        }
     }
 }
 
 impl magnus::IntoValue for NodeContent {
     fn into_value_with(self, handle: &Ruby) -> magnus::Value {
-        let sym = match self {
-            NodeContent::Heading => "heading",
-            NodeContent::Paragraph => "paragraph",
-            NodeContent::List => "list",
-            NodeContent::ListItem => "list_item",
-            NodeContent::Table => "table",
-            NodeContent::Image => "image",
-            NodeContent::Code => "code",
-            NodeContent::Quote => "quote",
-            NodeContent::DefinitionList => "definition_list",
-            NodeContent::DefinitionItem => "definition_item",
-            NodeContent::RawBlock => "raw_block",
-            NodeContent::MetadataBlock => "metadata_block",
-            NodeContent::Group => "group",
-        };
-        handle.to_symbol(sym).into_value_with(handle)
+        serde_magnus::serialize(handle, &self).unwrap_or_else(|_| handle.qnil().into_value_with(handle))
     }
 }
 
 impl magnus::TryConvert for NodeContent {
     fn try_convert(val: magnus::Value) -> Result<Self, magnus::Error> {
-        let s: String = magnus::TryConvert::try_convert(val)?;
-        match s.as_str() {
-            "heading" => Ok(NodeContent::Heading),
-            "paragraph" => Ok(NodeContent::Paragraph),
-            "list" => Ok(NodeContent::List),
-            "list_item" => Ok(NodeContent::ListItem),
-            "table" => Ok(NodeContent::Table),
-            "image" => Ok(NodeContent::Image),
-            "code" => Ok(NodeContent::Code),
-            "quote" => Ok(NodeContent::Quote),
-            "definition_list" => Ok(NodeContent::DefinitionList),
-            "definition_item" => Ok(NodeContent::DefinitionItem),
-            "raw_block" => Ok(NodeContent::RawBlock),
-            "metadata_block" => Ok(NodeContent::MetadataBlock),
-            "group" => Ok(NodeContent::Group),
-            other => Err(magnus::Error::new(
-                unsafe { Ruby::get_unchecked() }.exception_arg_error(),
-                format!("invalid NodeContent value: {other}"),
-            )),
-        }
+        serde_magnus::deserialize(&magnus::Ruby::get().unwrap(), val)
+            .map_err(|e| magnus::Error::new(magnus::exception::type_error(), e.to_string()))
     }
 }
 
 unsafe impl IntoValueFromNative for NodeContent {}
 unsafe impl TryConvertOwned for NodeContent {}
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[serde(tag = "annotation_type")]
 pub enum AnnotationKind {
     Bold,
     Italic,
@@ -2377,7 +2389,7 @@ pub enum AnnotationKind {
     Subscript,
     Superscript,
     Highlight,
-    Link,
+    Link { url: String, title: Option<String> },
 }
 
 impl Default for AnnotationKind {
@@ -2388,46 +2400,21 @@ impl Default for AnnotationKind {
 
 impl magnus::IntoValue for AnnotationKind {
     fn into_value_with(self, handle: &Ruby) -> magnus::Value {
-        let sym = match self {
-            AnnotationKind::Bold => "bold",
-            AnnotationKind::Italic => "italic",
-            AnnotationKind::Underline => "underline",
-            AnnotationKind::Strikethrough => "strikethrough",
-            AnnotationKind::Code => "code",
-            AnnotationKind::Subscript => "subscript",
-            AnnotationKind::Superscript => "superscript",
-            AnnotationKind::Highlight => "highlight",
-            AnnotationKind::Link => "link",
-        };
-        handle.to_symbol(sym).into_value_with(handle)
+        serde_magnus::serialize(handle, &self).unwrap_or_else(|_| handle.qnil().into_value_with(handle))
     }
 }
 
 impl magnus::TryConvert for AnnotationKind {
     fn try_convert(val: magnus::Value) -> Result<Self, magnus::Error> {
-        let s: String = magnus::TryConvert::try_convert(val)?;
-        match s.as_str() {
-            "bold" => Ok(AnnotationKind::Bold),
-            "italic" => Ok(AnnotationKind::Italic),
-            "underline" => Ok(AnnotationKind::Underline),
-            "strikethrough" => Ok(AnnotationKind::Strikethrough),
-            "code" => Ok(AnnotationKind::Code),
-            "subscript" => Ok(AnnotationKind::Subscript),
-            "superscript" => Ok(AnnotationKind::Superscript),
-            "highlight" => Ok(AnnotationKind::Highlight),
-            "link" => Ok(AnnotationKind::Link),
-            other => Err(magnus::Error::new(
-                unsafe { Ruby::get_unchecked() }.exception_arg_error(),
-                format!("invalid AnnotationKind value: {other}"),
-            )),
-        }
+        serde_magnus::deserialize(&magnus::Ruby::get().unwrap(), val)
+            .map_err(|e| magnus::Error::new(magnus::exception::type_error(), e.to_string()))
     }
 }
 
 unsafe impl IntoValueFromNative for AnnotationKind {}
 unsafe impl TryConvertOwned for AnnotationKind {}
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 pub enum WarningKind {
     ImageExtractionFailed,
     EncodingFallback,
@@ -2475,10 +2462,13 @@ impl magnus::TryConvert for WarningKind {
 unsafe impl IntoValueFromNative for WarningKind {}
 unsafe impl TryConvertOwned for WarningKind {}
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 pub enum TextDirection {
+    #[serde(rename = "ltr")]
     LeftToRight,
+    #[serde(rename = "rtl")]
     RightToLeft,
+    #[serde(rename = "auto")]
     Auto,
 }
 
@@ -2517,7 +2507,7 @@ impl magnus::TryConvert for TextDirection {
 unsafe impl IntoValueFromNative for TextDirection {}
 unsafe impl TryConvertOwned for TextDirection {}
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 pub enum LinkType {
     Anchor,
     Internal,
@@ -2568,7 +2558,7 @@ impl magnus::TryConvert for LinkType {
 unsafe impl IntoValueFromNative for LinkType {}
 unsafe impl TryConvertOwned for LinkType {}
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 pub enum ImageType {
     DataUri,
     InlineSvg,
@@ -2613,10 +2603,12 @@ impl magnus::TryConvert for ImageType {
 unsafe impl IntoValueFromNative for ImageType {}
 unsafe impl TryConvertOwned for ImageType {}
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 pub enum StructuredDataType {
+    #[serde(rename = "json_ld")]
     JsonLd,
     Microdata,
+    #[serde(rename = "rdfa")]
     RDFa,
 }
 
@@ -2655,10 +2647,18 @@ impl magnus::TryConvert for StructuredDataType {
 unsafe impl IntoValueFromNative for StructuredDataType {}
 unsafe impl TryConvertOwned for StructuredDataType {}
 
-fn convert(html: String, options: Option<ConversionOptions>) -> Result<ConversionResult, Error> {
-    let ruby = Ruby::get().expect("called from Ruby context");
+fn convert(html: String, options: Option<String>) -> Result<ConversionResult, Error> {
+    let options: Option<ConversionOptions> = options
+        .as_deref()
+        .filter(|s| *s != "nil")
+        .map(|s| {
+            let core: html_to_markdown_rs::ConversionOptions = serde_json::from_str(s)
+                .map_err(|e| magnus::Error::new(magnus::exception::type_error(), e.to_string()))?;
+            Ok::<_, magnus::Error>(core.into())
+        })
+        .transpose()?;
     let result = html_to_markdown_rs::convert(&html, options.map(Into::into))
-        .map_err(|e| magnus::Error::new(ruby.exception_runtime_error(), e.to_string()))?;
+        .map_err(|e| magnus::Error::new(magnus::exception::runtime_error(), e.to_string()))?;
     Ok(result.into())
 }
 
@@ -3445,48 +3445,34 @@ impl From<html_to_markdown_rs::OutputFormat> for OutputFormat {
 impl From<NodeContent> for html_to_markdown_rs::NodeContent {
     fn from(val: NodeContent) -> Self {
         match val {
-            NodeContent::Heading => Self::Heading {
-                level: Default::default(),
-                text: Default::default(),
+            NodeContent::Heading { level, text } => Self::Heading { level, text },
+            NodeContent::Paragraph { text } => Self::Paragraph { text },
+            NodeContent::List { ordered } => Self::List { ordered },
+            NodeContent::ListItem { text } => Self::ListItem { text },
+            NodeContent::Table { grid } => Self::Table { grid: grid.into() },
+            NodeContent::Image {
+                description,
+                src,
+                image_index,
+            } => Self::Image {
+                description,
+                src,
+                image_index,
             },
-            NodeContent::Paragraph => Self::Paragraph {
-                text: Default::default(),
-            },
-            NodeContent::List => Self::List {
-                ordered: Default::default(),
-            },
-            NodeContent::ListItem => Self::ListItem {
-                text: Default::default(),
-            },
-            NodeContent::Table => Self::Table {
-                grid: Default::default(),
-            },
-            NodeContent::Image => Self::Image {
-                description: Default::default(),
-                src: Default::default(),
-                image_index: Default::default(),
-            },
-            NodeContent::Code => Self::Code {
-                text: Default::default(),
-                language: Default::default(),
-            },
+            NodeContent::Code { text, language } => Self::Code { text, language },
             NodeContent::Quote => Self::Quote,
             NodeContent::DefinitionList => Self::DefinitionList,
-            NodeContent::DefinitionItem => Self::DefinitionItem {
-                term: Default::default(),
-                definition: Default::default(),
-            },
-            NodeContent::RawBlock => Self::RawBlock {
-                format: Default::default(),
-                content: Default::default(),
-            },
-            NodeContent::MetadataBlock => Self::MetadataBlock {
-                entries: Default::default(),
-            },
-            NodeContent::Group => Self::Group {
-                label: Default::default(),
-                heading_level: Default::default(),
-                heading_text: Default::default(),
+            NodeContent::DefinitionItem { term, definition } => Self::DefinitionItem { term, definition },
+            NodeContent::RawBlock { format, content } => Self::RawBlock { format, content },
+            NodeContent::MetadataBlock { entries } => Self::MetadataBlock { entries },
+            NodeContent::Group {
+                label,
+                heading_level,
+                heading_text,
+            } => Self::Group {
+                label,
+                heading_level,
+                heading_text,
             },
         }
     }
@@ -3495,19 +3481,37 @@ impl From<NodeContent> for html_to_markdown_rs::NodeContent {
 impl From<html_to_markdown_rs::NodeContent> for NodeContent {
     fn from(val: html_to_markdown_rs::NodeContent) -> Self {
         match val {
-            html_to_markdown_rs::NodeContent::Heading { .. } => Self::Heading,
-            html_to_markdown_rs::NodeContent::Paragraph { .. } => Self::Paragraph,
-            html_to_markdown_rs::NodeContent::List { .. } => Self::List,
-            html_to_markdown_rs::NodeContent::ListItem { .. } => Self::ListItem,
-            html_to_markdown_rs::NodeContent::Table { .. } => Self::Table,
-            html_to_markdown_rs::NodeContent::Image { .. } => Self::Image,
-            html_to_markdown_rs::NodeContent::Code { .. } => Self::Code,
+            html_to_markdown_rs::NodeContent::Heading { level, text } => Self::Heading { level, text },
+            html_to_markdown_rs::NodeContent::Paragraph { text } => Self::Paragraph { text },
+            html_to_markdown_rs::NodeContent::List { ordered } => Self::List { ordered },
+            html_to_markdown_rs::NodeContent::ListItem { text } => Self::ListItem { text },
+            html_to_markdown_rs::NodeContent::Table { grid } => Self::Table { grid: grid.into() },
+            html_to_markdown_rs::NodeContent::Image {
+                description,
+                src,
+                image_index,
+            } => Self::Image {
+                description,
+                src,
+                image_index,
+            },
+            html_to_markdown_rs::NodeContent::Code { text, language } => Self::Code { text, language },
             html_to_markdown_rs::NodeContent::Quote => Self::Quote,
             html_to_markdown_rs::NodeContent::DefinitionList => Self::DefinitionList,
-            html_to_markdown_rs::NodeContent::DefinitionItem { .. } => Self::DefinitionItem,
-            html_to_markdown_rs::NodeContent::RawBlock { .. } => Self::RawBlock,
-            html_to_markdown_rs::NodeContent::MetadataBlock { .. } => Self::MetadataBlock,
-            html_to_markdown_rs::NodeContent::Group { .. } => Self::Group,
+            html_to_markdown_rs::NodeContent::DefinitionItem { term, definition } => {
+                Self::DefinitionItem { term, definition }
+            }
+            html_to_markdown_rs::NodeContent::RawBlock { format, content } => Self::RawBlock { format, content },
+            html_to_markdown_rs::NodeContent::MetadataBlock { entries } => Self::MetadataBlock { entries },
+            html_to_markdown_rs::NodeContent::Group {
+                label,
+                heading_level,
+                heading_text,
+            } => Self::Group {
+                label,
+                heading_level,
+                heading_text,
+            },
         }
     }
 }
@@ -3523,10 +3527,7 @@ impl From<AnnotationKind> for html_to_markdown_rs::AnnotationKind {
             AnnotationKind::Subscript => Self::Subscript,
             AnnotationKind::Superscript => Self::Superscript,
             AnnotationKind::Highlight => Self::Highlight,
-            AnnotationKind::Link => Self::Link {
-                url: Default::default(),
-                title: Default::default(),
-            },
+            AnnotationKind::Link { url, title } => Self::Link { url, title },
         }
     }
 }
@@ -3542,7 +3543,7 @@ impl From<html_to_markdown_rs::AnnotationKind> for AnnotationKind {
             html_to_markdown_rs::AnnotationKind::Subscript => Self::Subscript,
             html_to_markdown_rs::AnnotationKind::Superscript => Self::Superscript,
             html_to_markdown_rs::AnnotationKind::Highlight => Self::Highlight,
-            html_to_markdown_rs::AnnotationKind::Link { .. } => Self::Link,
+            html_to_markdown_rs::AnnotationKind::Link { url, title } => Self::Link { url, title },
         }
     }
 }
@@ -3662,9 +3663,8 @@ impl From<html_to_markdown_rs::StructuredDataType> for StructuredDataType {
 /// Convert a `html_to_markdown_rs::error::ConversionError` error to a Magnus runtime error.
 #[allow(dead_code)]
 fn conversion_error_to_magnus_err(e: html_to_markdown_rs::error::ConversionError) -> magnus::Error {
-    let ruby = Ruby::get().expect("called from Ruby context");
     let msg = e.to_string();
-    magnus::Error::new(ruby.exception_runtime_error(), msg)
+    magnus::Error::new(magnus::exception::runtime_error(), msg)
 }
 
 #[magnus::init]

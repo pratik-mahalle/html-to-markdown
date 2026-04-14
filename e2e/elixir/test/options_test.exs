@@ -8,8 +8,8 @@ defmodule E2e.OptionsTest do
       options = HtmlToMarkdown.conversionoptions_default()
       options = %{options | code_block_style: :backticks}
       {:ok, result} = HtmlToMarkdown.convert("<pre><code class=\"language-js\">console.log('hi');</code></pre>", options)
-      assert String.contains?(result.content, "```")
-      assert String.contains?(result.content, "console.log('hi');")
+      assert String.contains?(to_string(result.content), "```")
+      assert String.contains?(to_string(result.content), "console.log('hi');")
     end
   end
 
@@ -18,8 +18,8 @@ defmodule E2e.OptionsTest do
       options = HtmlToMarkdown.conversionoptions_default()
       options = %{options | code_block_style: :tildes}
       {:ok, result} = HtmlToMarkdown.convert("<pre><code>some code</code></pre>", options)
-      assert String.contains?(result.content, "~~~")
-      assert String.contains?(result.content, "some code")
+      assert String.contains?(to_string(result.content), "~~~")
+      assert String.contains?(to_string(result.content), "some code")
     end
   end
 
@@ -29,9 +29,9 @@ defmodule E2e.OptionsTest do
       options = %{options | escape_asterisks: true}
       {:ok, result} = HtmlToMarkdown.convert("<p>Use 2*3 = 6 in math.</p>", options)
       assert result.content != ""
-      assert String.contains?(result.content, "2")
-      assert String.contains?(result.content, "3")
-      assert String.contains?(result.content, "6")
+      assert String.contains?(to_string(result.content), "2")
+      assert String.contains?(to_string(result.content), "3")
+      assert String.contains?(to_string(result.content), "6")
     end
   end
 
@@ -41,9 +41,9 @@ defmodule E2e.OptionsTest do
       options = %{options | escape_misc: true}
       {:ok, result} = HtmlToMarkdown.convert("<p>Use \# and | and ~ in text.</p>", options)
       assert result.content != ""
-      assert String.contains?(result.content, "Use")
-      assert String.contains?(result.content, "and")
-      assert String.contains?(result.content, "in text.")
+      assert String.contains?(to_string(result.content), "Use")
+      assert String.contains?(to_string(result.content), "and")
+      assert String.contains?(to_string(result.content), "in text.")
     end
   end
 
@@ -53,9 +53,9 @@ defmodule E2e.OptionsTest do
       options = %{options | escape_underscores: true}
       {:ok, result} = HtmlToMarkdown.convert("<p>The variable_name is defined.</p>", options)
       assert result.content != ""
-      assert String.contains?(result.content, "variable")
-      assert String.contains?(result.content, "name")
-      assert String.contains?(result.content, "defined.")
+      assert String.contains?(to_string(result.content), "variable")
+      assert String.contains?(to_string(result.content), "name")
+      assert String.contains?(to_string(result.content), "defined.")
     end
   end
 
@@ -64,8 +64,8 @@ defmodule E2e.OptionsTest do
       options = HtmlToMarkdown.conversionoptions_default()
       options = %{options | heading_style: :atx}
       {:ok, result} = HtmlToMarkdown.convert("<h1>Title</h1><h2>Subtitle</h2>", options)
-      assert String.contains?(result.content, "\# Title")
-      assert String.contains?(result.content, "\#\# Subtitle")
+      assert String.contains?(to_string(result.content), "\# Title")
+      assert String.contains?(to_string(result.content), "\#\# Subtitle")
     end
   end
 
@@ -74,7 +74,7 @@ defmodule E2e.OptionsTest do
       options = HtmlToMarkdown.conversionoptions_default()
       options = %{options | heading_style: :atx_closed}
       {:ok, result} = HtmlToMarkdown.convert("<h1>Closed Heading</h1>", options)
-      assert String.contains?(result.content, "\# Closed Heading \#")
+      assert String.contains?(to_string(result.content), "\# Closed Heading \#")
     end
   end
 
@@ -84,7 +84,7 @@ defmodule E2e.OptionsTest do
       options = %{options | heading_style: :underlined}
       {:ok, result} = HtmlToMarkdown.convert("<h1>Main Title</h1>", options)
       assert result.content != ""
-      assert String.contains?(result.content, "Main Title")
+      assert String.contains?(to_string(result.content), "Main Title")
     end
   end
 
@@ -93,8 +93,8 @@ defmodule E2e.OptionsTest do
       options = HtmlToMarkdown.conversionoptions_default()
       options = %{options | bullets: "*"}
       {:ok, result} = HtmlToMarkdown.convert("<ul><li>Item A</li><li>Item B</li></ul>", options)
-      assert String.contains?(result.content, "* Item A")
-      assert String.contains?(result.content, "* Item B")
+      assert String.contains?(to_string(result.content), "* Item A")
+      assert String.contains?(to_string(result.content), "* Item B")
     end
   end
 
@@ -104,8 +104,8 @@ defmodule E2e.OptionsTest do
       options = %{options | list_indent_type: :tabs}
       {:ok, result} = HtmlToMarkdown.convert("<ul><li>Parent<ul><li>Child</li></ul></li></ul>", options)
       assert result.content != ""
-      assert String.contains?(result.content, "Parent")
-      assert String.contains?(result.content, "Child")
+      assert String.contains?(to_string(result.content), "Parent")
+      assert String.contains?(to_string(result.content), "Child")
     end
   end
 
@@ -115,7 +115,7 @@ defmodule E2e.OptionsTest do
       options = %{options | output_format: :djot}
       {:ok, result} = HtmlToMarkdown.convert("<p>Simple paragraph.</p>", options)
       assert result.content != ""
-      assert String.contains?(result.content, "Simple paragraph.")
+      assert String.contains?(to_string(result.content), "Simple paragraph.")
     end
   end
 
@@ -125,8 +125,8 @@ defmodule E2e.OptionsTest do
       options = %{options | heading_style: :atx}
       options = %{options | output_format: :markdown}
       {:ok, result} = HtmlToMarkdown.convert("<h1>Title</h1><p>Some text.</p>", options)
-      assert String.contains?(result.content, "\# Title")
-      assert String.contains?(result.content, "Some text.")
+      assert String.contains?(to_string(result.content), "\# Title")
+      assert String.contains?(to_string(result.content), "Some text.")
     end
   end
 
@@ -135,9 +135,9 @@ defmodule E2e.OptionsTest do
       options = HtmlToMarkdown.conversionoptions_default()
       options = %{options | output_format: :plain}
       {:ok, result} = HtmlToMarkdown.convert("<h1>Title</h1><p>Some <strong>bold</strong> text.</p>", options)
-      assert String.contains?(result.content, "Title")
-      assert String.contains?(result.content, "bold")
-      assert String.contains?(result.content, "text.")
+      assert String.contains?(to_string(result.content), "Title")
+      assert String.contains?(to_string(result.content), "bold")
+      assert String.contains?(to_string(result.content), "text.")
     end
   end
 
@@ -147,10 +147,10 @@ defmodule E2e.OptionsTest do
       options = %{options | whitespace_mode: :normalized}
       {:ok, result} = HtmlToMarkdown.convert("<p>Text   with    extra   spaces.</p>", options)
       assert result.content != ""
-      assert String.contains?(result.content, "Text")
-      assert String.contains?(result.content, "with")
-      assert String.contains?(result.content, "extra")
-      assert String.contains?(result.content, "spaces.")
+      assert String.contains?(to_string(result.content), "Text")
+      assert String.contains?(to_string(result.content), "with")
+      assert String.contains?(to_string(result.content), "extra")
+      assert String.contains?(to_string(result.content), "spaces.")
     end
   end
 
@@ -160,8 +160,8 @@ defmodule E2e.OptionsTest do
       options = %{options | whitespace_mode: :strict}
       {:ok, result} = HtmlToMarkdown.convert("<p>Preserved   spacing.</p>", options)
       assert result.content != ""
-      assert String.contains?(result.content, "Preserved")
-      assert String.contains?(result.content, "spacing.")
+      assert String.contains?(to_string(result.content), "Preserved")
+      assert String.contains?(to_string(result.content), "spacing.")
     end
   end
 
@@ -170,7 +170,7 @@ defmodule E2e.OptionsTest do
       options = HtmlToMarkdown.conversionoptions_default()
       options = %{options | wrap: false}
       {:ok, result} = HtmlToMarkdown.convert("<p>This is a long paragraph that should not be wrapped at all because wrapping is disabled.</p>", options)
-      assert String.contains?(result.content, "This is a long paragraph that should not be wrapped at all because wrapping is disabled.")
+      assert String.contains?(to_string(result.content), "This is a long paragraph that should not be wrapped at all because wrapping is disabled.")
     end
   end
 
@@ -181,7 +181,7 @@ defmodule E2e.OptionsTest do
       options = %{options | wrap_width: 40}
       {:ok, result} = HtmlToMarkdown.convert("<p>This is a long paragraph that should be wrapped at the specified column width when the wrap option is enabled.</p>", options)
       assert result.content != ""
-      assert String.contains?(result.content, "This is a long paragraph")
+      assert String.contains?(to_string(result.content), "This is a long paragraph")
     end
   end
 end

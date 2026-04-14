@@ -14,9 +14,9 @@ defmodule E2e.EdgeCasesTest do
     test "CJK (Chinese, Japanese, Korean) characters are preserved" do
       {:ok, result} = HtmlToMarkdown.convert("<p>中文内容</p><p>日本語テキスト</p><p>한국어 텍스트</p>")
       assert result.content != ""
-      assert String.contains?(result.content, "中文内容")
-      assert String.contains?(result.content, "日本語テキスト")
-      assert String.contains?(result.content, "한국어 텍스트")
+      assert String.contains?(to_string(result.content), "中文内容")
+      assert String.contains?(to_string(result.content), "日本語テキスト")
+      assert String.contains?(to_string(result.content), "한국어 텍스트")
     end
   end
 
@@ -24,9 +24,9 @@ defmodule E2e.EdgeCasesTest do
     test "Common HTML entities are decoded in output" do
       {:ok, result} = HtmlToMarkdown.convert("<p>&amp; &lt; &gt; &nbsp; &quot; &apos;</p>")
       assert result.content != ""
-      assert String.contains?(result.content, "&")
-      assert String.contains?(result.content, "<")
-      assert String.contains?(result.content, ">")
+      assert String.contains?(to_string(result.content), "&")
+      assert String.contains?(to_string(result.content), "<")
+      assert String.contains?(to_string(result.content), ">")
     end
   end
 
@@ -34,8 +34,8 @@ defmodule E2e.EdgeCasesTest do
     test "Named HTML entities like &mdash; and &hellip; are decoded" do
       {:ok, result} = HtmlToMarkdown.convert("<p>Em dash&mdash;used for parenthetical remarks&mdash;is common. Ellipsis&hellip; indicates omission. Non-breaking&nbsp;space.</p>")
       assert result.content != ""
-      assert String.contains?(result.content, "—")
-      assert String.contains?(result.content, "…")
+      assert String.contains?(to_string(result.content), "—")
+      assert String.contains?(to_string(result.content), "…")
     end
   end
 
@@ -43,9 +43,9 @@ defmodule E2e.EdgeCasesTest do
     test "Numeric HTML entities (decimal and hex) are decoded" do
       {:ok, result} = HtmlToMarkdown.convert("<p>Copyright: &\#169; Trade: &\#174; Euro: &\#8364; Hex: &\#x00A9;</p>")
       assert result.content != ""
-      assert String.contains?(result.content, "©")
-      assert String.contains?(result.content, "®")
-      assert String.contains?(result.content, "€")
+      assert String.contains?(to_string(result.content), "©")
+      assert String.contains?(to_string(result.content), "®")
+      assert String.contains?(to_string(result.content), "€")
     end
   end
 
@@ -53,9 +53,9 @@ defmodule E2e.EdgeCasesTest do
     test "Emoji and Unicode characters are preserved" do
       {:ok, result} = HtmlToMarkdown.convert("<p>Hello 🌍 World 🚀</p><p>Stars: ⭐ ✨</p>")
       assert result.content != ""
-      assert String.contains?(result.content, "🌍")
-      assert String.contains?(result.content, "🚀")
-      assert String.contains?(result.content, "⭐")
+      assert String.contains?(to_string(result.content), "🌍")
+      assert String.contains?(to_string(result.content), "🚀")
+      assert String.contains?(to_string(result.content), "⭐")
     end
   end
 
@@ -77,7 +77,7 @@ defmodule E2e.EdgeCasesTest do
     test "Deeply nested elements (100 levels) are handled without stack overflow" do
       {:ok, result} = HtmlToMarkdown.convert("<div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><p>Deeply nested content</p></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div>")
       assert result.content != ""
-      assert String.contains?(result.content, "Deeply nested content")
+      assert String.contains?(to_string(result.content), "Deeply nested content")
     end
   end
 
@@ -85,9 +85,9 @@ defmodule E2e.EdgeCasesTest do
     test "Missing closing tags on block elements are auto-closed by parser" do
       {:ok, result} = HtmlToMarkdown.convert("<div><h1>Title<p>First paragraph<p>Second paragraph</div>")
       assert result.content != ""
-      assert String.contains?(result.content, "Title")
-      assert String.contains?(result.content, "First paragraph")
-      assert String.contains?(result.content, "Second paragraph")
+      assert String.contains?(to_string(result.content), "Title")
+      assert String.contains?(to_string(result.content), "First paragraph")
+      assert String.contains?(to_string(result.content), "Second paragraph")
     end
   end
 
@@ -95,7 +95,7 @@ defmodule E2e.EdgeCasesTest do
     test "Overlapping bold/italic tags are recovered by the HTML parser without panic" do
       {:ok, result} = HtmlToMarkdown.convert("<p><b><i>bold and italic</b></i></p>")
       assert result.content != ""
-      assert String.contains?(result.content, "bold and italic")
+      assert String.contains?(to_string(result.content), "bold and italic")
     end
   end
 
@@ -103,7 +103,7 @@ defmodule E2e.EdgeCasesTest do
     test "Unclosed <p> tag is recovered gracefully and content is preserved" do
       {:ok, result} = HtmlToMarkdown.convert("<p>This paragraph is never closed")
       assert result.content != ""
-      assert String.contains?(result.content, "This paragraph is never closed")
+      assert String.contains?(to_string(result.content), "This paragraph is never closed")
     end
   end
 
@@ -132,7 +132,7 @@ defmodule E2e.EdgeCasesTest do
     test "onclick and other on* event handlers are removed from elements" do
       {:ok, result} = HtmlToMarkdown.convert("<p><a href=\"https://example.com\" onclick=\"alert('xss')\">Click me</a></p><button onmouseover=\"steal_data()\">Hover me</button>")
       assert result.content != ""
-      assert String.contains?(result.content, "Click me")
+      assert String.contains?(to_string(result.content), "Click me")
     end
   end
 
@@ -140,8 +140,8 @@ defmodule E2e.EdgeCasesTest do
     test "Script tag content is stripped and does not appear in output" do
       {:ok, result} = HtmlToMarkdown.convert("<p>Safe content.</p><script>alert('xss')</script><p>More safe content.</p>")
       assert result.content != ""
-      assert String.contains?(result.content, "Safe content")
-      assert String.contains?(result.content, "More safe content")
+      assert String.contains?(to_string(result.content), "Safe content")
+      assert String.contains?(to_string(result.content), "More safe content")
     end
   end
 
@@ -149,8 +149,8 @@ defmodule E2e.EdgeCasesTest do
     test "Script tags nested inside SVG are stripped" do
       {:ok, result} = HtmlToMarkdown.convert("<p>Before SVG.</p><svg xmlns=\"http://www.w3.org/2000/svg\"><script>alert('svg-xss')</script><text>SVG text</text></svg><p>After SVG.</p>")
       assert result.content != ""
-      assert String.contains?(result.content, "Before SVG")
-      assert String.contains?(result.content, "After SVG")
+      assert String.contains?(to_string(result.content), "Before SVG")
+      assert String.contains?(to_string(result.content), "After SVG")
     end
   end
 end

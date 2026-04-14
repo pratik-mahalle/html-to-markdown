@@ -30,6 +30,7 @@ public sealed class StructuredData
     /// <summary>
     /// Type of structured data (JSON-LD, Microdata, RDFa)
     /// </summary>
+    [JsonConverter(typeof(StructuredDataTypeJsonConverter))]
     [JsonPropertyName("data_type")]
     public StructuredDataType DataType { get; set; } = default!;
 

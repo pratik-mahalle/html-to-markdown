@@ -1472,14 +1472,6 @@ char *htm_conversion_result_tables(const HTMConversionResult *ptr);
 char *htm_conversion_result_warnings(const HTMConversionResult *ptr);
 
 /**
- * Serialize a `ConversionResult` to a JSON string. Returns null on failure.
- * # Safety
- * `ptr` must be a valid, non-null pointer returned by a `htm` function.
- * The returned string must be freed with `htm_free_string`.
- */
-char *htm_conversion_result_to_json(const HTMConversionResult *ptr);
-
-/**
  * Create a `DocumentStructure` from a JSON string. Returns null on failure.
  * # Safety
  * JSON string must be valid UTF-8 and null-terminated.

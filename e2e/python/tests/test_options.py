@@ -10,8 +10,10 @@ def test_options_code_block_backticks() -> None:
     html = "<pre><code class=\"language-js\">console.log('hi');</code></pre>"
     options = ConversionOptions(code_block_style=CodeBlockStyle.BACKTICKS)
     result = convert(html=html, options=options)
-    assert result.content is not None and "```" in result.content
-    assert result.content is not None and "console.log('hi');" in result.content
+    assert result.content is not None
+    assert "```" in result.content
+    assert result.content is not None
+    assert "console.log('hi');" in result.content
 
 
 def test_options_code_block_tildes() -> None:
@@ -19,8 +21,10 @@ def test_options_code_block_tildes() -> None:
     html = "<pre><code>some code</code></pre>"
     options = ConversionOptions(code_block_style=CodeBlockStyle.TILDES)
     result = convert(html=html, options=options)
-    assert result.content is not None and "~~~" in result.content
-    assert result.content is not None and "some code" in result.content
+    assert result.content is not None
+    assert "~~~" in result.content
+    assert result.content is not None
+    assert "some code" in result.content
 
 
 def test_options_escape_asterisks() -> None:
@@ -29,9 +33,12 @@ def test_options_escape_asterisks() -> None:
     options = ConversionOptions(escape_asterisks=True)
     result = convert(html=html, options=options)
     assert result.content
-    assert result.content is not None and "2" in result.content
-    assert result.content is not None and "3" in result.content
-    assert result.content is not None and "6" in result.content
+    assert result.content is not None
+    assert "2" in result.content
+    assert result.content is not None
+    assert "3" in result.content
+    assert result.content is not None
+    assert "6" in result.content
 
 
 def test_options_escape_misc() -> None:
@@ -40,9 +47,12 @@ def test_options_escape_misc() -> None:
     options = ConversionOptions(escape_misc=True)
     result = convert(html=html, options=options)
     assert result.content
-    assert result.content is not None and "Use" in result.content
-    assert result.content is not None and "and" in result.content
-    assert result.content is not None and "in text." in result.content
+    assert result.content is not None
+    assert "Use" in result.content
+    assert result.content is not None
+    assert "and" in result.content
+    assert result.content is not None
+    assert "in text." in result.content
 
 
 def test_options_escape_underscores() -> None:
@@ -51,9 +61,12 @@ def test_options_escape_underscores() -> None:
     options = ConversionOptions(escape_underscores=True)
     result = convert(html=html, options=options)
     assert result.content
-    assert result.content is not None and "variable" in result.content
-    assert result.content is not None and "name" in result.content
-    assert result.content is not None and "defined." in result.content
+    assert result.content is not None
+    assert "variable" in result.content
+    assert result.content is not None
+    assert "name" in result.content
+    assert result.content is not None
+    assert "defined." in result.content
 
 
 def test_options_heading_style_atx() -> None:
@@ -61,8 +74,10 @@ def test_options_heading_style_atx() -> None:
     html = "<h1>Title</h1><h2>Subtitle</h2>"
     options = ConversionOptions(heading_style=HeadingStyle.ATX)
     result = convert(html=html, options=options)
-    assert result.content is not None and "# Title" in result.content
-    assert result.content is not None and "## Subtitle" in result.content
+    assert result.content is not None
+    assert "# Title" in result.content
+    assert result.content is not None
+    assert "## Subtitle" in result.content
 
 
 def test_options_heading_style_atx_closed() -> None:
@@ -70,7 +85,8 @@ def test_options_heading_style_atx_closed() -> None:
     html = "<h1>Closed Heading</h1>"
     options = ConversionOptions(heading_style=HeadingStyle.ATX_CLOSED)
     result = convert(html=html, options=options)
-    assert result.content is not None and "# Closed Heading #" in result.content
+    assert result.content is not None
+    assert "# Closed Heading #" in result.content
 
 
 def test_options_heading_style_underlined() -> None:
@@ -79,7 +95,8 @@ def test_options_heading_style_underlined() -> None:
     options = ConversionOptions(heading_style=HeadingStyle.UNDERLINED)
     result = convert(html=html, options=options)
     assert result.content
-    assert result.content is not None and "Main Title" in result.content
+    assert result.content is not None
+    assert "Main Title" in result.content
 
 
 def test_options_list_custom_bullets() -> None:
@@ -87,8 +104,10 @@ def test_options_list_custom_bullets() -> None:
     html = "<ul><li>Item A</li><li>Item B</li></ul>"
     options = ConversionOptions(bullets="*")
     result = convert(html=html, options=options)
-    assert result.content is not None and "* Item A" in result.content
-    assert result.content is not None and "* Item B" in result.content
+    assert result.content is not None
+    assert "* Item A" in result.content
+    assert result.content is not None
+    assert "* Item B" in result.content
 
 
 def test_options_list_indent_tabs() -> None:
@@ -97,8 +116,10 @@ def test_options_list_indent_tabs() -> None:
     options = ConversionOptions(list_indent_type=ListIndentType.TABS)
     result = convert(html=html, options=options)
     assert result.content
-    assert result.content is not None and "Parent" in result.content
-    assert result.content is not None and "Child" in result.content
+    assert result.content is not None
+    assert "Parent" in result.content
+    assert result.content is not None
+    assert "Child" in result.content
 
 
 def test_options_output_format_djot() -> None:
@@ -107,7 +128,8 @@ def test_options_output_format_djot() -> None:
     options = ConversionOptions(output_format=OutputFormat.DJOT)
     result = convert(html=html, options=options)
     assert result.content
-    assert result.content is not None and "Simple paragraph." in result.content
+    assert result.content is not None
+    assert "Simple paragraph." in result.content
 
 
 def test_options_output_format_markdown() -> None:
@@ -115,8 +137,10 @@ def test_options_output_format_markdown() -> None:
     html = "<h1>Title</h1><p>Some text.</p>"
     options = ConversionOptions(heading_style=HeadingStyle.ATX, output_format=OutputFormat.MARKDOWN)
     result = convert(html=html, options=options)
-    assert result.content is not None and "# Title" in result.content
-    assert result.content is not None and "Some text." in result.content
+    assert result.content is not None
+    assert "# Title" in result.content
+    assert result.content is not None
+    assert "Some text." in result.content
 
 
 def test_options_output_format_plain() -> None:
@@ -124,9 +148,12 @@ def test_options_output_format_plain() -> None:
     html = "<h1>Title</h1><p>Some <strong>bold</strong> text.</p>"
     options = ConversionOptions(output_format=OutputFormat.PLAIN)
     result = convert(html=html, options=options)
-    assert result.content is not None and "Title" in result.content
-    assert result.content is not None and "bold" in result.content
-    assert result.content is not None and "text." in result.content
+    assert result.content is not None
+    assert "Title" in result.content
+    assert result.content is not None
+    assert "bold" in result.content
+    assert result.content is not None
+    assert "text." in result.content
 
 
 def test_options_whitespace_normalized() -> None:
@@ -135,10 +162,14 @@ def test_options_whitespace_normalized() -> None:
     options = ConversionOptions(whitespace_mode=WhitespaceMode.NORMALIZED)
     result = convert(html=html, options=options)
     assert result.content
-    assert result.content is not None and "Text" in result.content
-    assert result.content is not None and "with" in result.content
-    assert result.content is not None and "extra" in result.content
-    assert result.content is not None and "spaces." in result.content
+    assert result.content is not None
+    assert "Text" in result.content
+    assert result.content is not None
+    assert "with" in result.content
+    assert result.content is not None
+    assert "extra" in result.content
+    assert result.content is not None
+    assert "spaces." in result.content
 
 
 def test_options_whitespace_strict() -> None:
@@ -147,8 +178,10 @@ def test_options_whitespace_strict() -> None:
     options = ConversionOptions(whitespace_mode=WhitespaceMode.STRICT)
     result = convert(html=html, options=options)
     assert result.content
-    assert result.content is not None and "Preserved" in result.content
-    assert result.content is not None and "spacing." in result.content
+    assert result.content is not None
+    assert "Preserved" in result.content
+    assert result.content is not None
+    assert "spacing." in result.content
 
 
 def test_options_wrap_disabled() -> None:
@@ -156,10 +189,8 @@ def test_options_wrap_disabled() -> None:
     html = "<p>This is a long paragraph that should not be wrapped at all because wrapping is disabled.</p>"
     options = ConversionOptions(wrap=False)
     result = convert(html=html, options=options)
-    assert (
-        result.content is not None
-        and "This is a long paragraph that should not be wrapped at all because wrapping is disabled." in result.content
-    )
+    assert result.content is not None
+    assert "This is a long paragraph that should not be wrapped at all because wrapping is disabled." in result.content
 
 
 def test_options_wrap_enabled() -> None:
@@ -168,4 +199,5 @@ def test_options_wrap_enabled() -> None:
     options = ConversionOptions(wrap=True, wrap_width=40)
     result = convert(html=html, options=options)
     assert result.content
-    assert result.content is not None and "This is a long paragraph" in result.content
+    assert result.content is not None
+    assert "This is a long paragraph" in result.content

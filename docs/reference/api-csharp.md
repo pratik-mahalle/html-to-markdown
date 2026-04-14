@@ -2,11 +2,11 @@
 title: "C# API Reference"
 ---
 
-## C# API Reference <span class="version-badge">v3.1.0</span>
+## C# API Reference <span class="version-badge">v3.2.0</span>
 
-### Functions
+## Functions
 
-#### Convert()
+### Convert()
 
 Convert HTML to Markdown, returning a `ConversionResult` with content, metadata, images,
 and warnings.
@@ -35,9 +35,9 @@ public static ConversionResult Convert(string html, ConversionOptions? options =
 
 ---
 
-### Types
+## Types
 
-#### ConversionOptions
+### ConversionOptions
 
 Main conversion options for HTML to Markdown conversion.
 
@@ -84,9 +84,9 @@ Use `ConversionOptions.builder()` to construct, or `the default constructor` for
 | `CaptureSvg` | `bool` | `false` | Capture SVG elements as images. |
 | `InferDimensions` | `bool` | `true` | Infer image dimensions from data. |
 
-##### Methods
+#### Methods
 
-###### CreateDefault()
+##### CreateDefault()
 
 **Signature:**
 
@@ -94,7 +94,7 @@ Use `ConversionOptions.builder()` to construct, or `the default constructor` for
 public ConversionOptions CreateDefault()
 ```
 
-###### Builder()
+##### Builder()
 
 Create a new builder with default values.
 
@@ -107,7 +107,7 @@ public ConversionOptionsBuilder Builder()
 
 ---
 
-#### ConversionResult
+### ConversionResult
 
 The primary result of HTML conversion and extraction.
 
@@ -126,15 +126,15 @@ metadata, extracted tables, images, and processing warnings.
 
 ---
 
-#### ConversionOptionsBuilder
+### ConversionOptionsBuilder
 
 Builder for `ConversionOptions`.
 
 All fields start with default values. Call `.build()` to produce the final options.
 
-##### Methods
+#### Methods
 
-###### StripTags()
+##### StripTags()
 
 Set the list of HTML tag names whose content is stripped from output.
 
@@ -144,7 +144,7 @@ Set the list of HTML tag names whose content is stripped from output.
 public ConversionOptionsBuilder StripTags(List<string> tags)
 ```
 
-###### PreserveTags()
+##### PreserveTags()
 
 Set the list of HTML tag names that are preserved verbatim in output.
 
@@ -154,7 +154,7 @@ Set the list of HTML tag names that are preserved verbatim in output.
 public ConversionOptionsBuilder PreserveTags(List<string> tags)
 ```
 
-###### KeepInlineImagesIn()
+##### KeepInlineImagesIn()
 
 Set the list of HTML tag names whose `<img>` children are kept inline.
 
@@ -164,7 +164,7 @@ Set the list of HTML tag names whose `<img>` children are kept inline.
 public ConversionOptionsBuilder KeepInlineImagesIn(List<string> tags)
 ```
 
-###### Preprocessing()
+##### Preprocessing()
 
 Set the pre-processing options applied to the HTML before conversion.
 
@@ -174,7 +174,7 @@ Set the pre-processing options applied to the HTML before conversion.
 public ConversionOptionsBuilder Preprocessing(PreprocessingOptions preprocessing)
 ```
 
-###### Build()
+##### Build()
 
 Build the final `ConversionOptions`.
 
@@ -187,7 +187,7 @@ public ConversionOptions Build()
 
 ---
 
-#### DocumentMetadata
+### DocumentMetadata
 
 Document-level metadata extracted from `<head>` and top-level elements.
 
@@ -211,7 +211,7 @@ and browsers for document indexing and presentation.
 
 ---
 
-#### DocumentNode
+### DocumentNode
 
 A single node in the document tree.
 
@@ -227,7 +227,7 @@ A single node in the document tree.
 
 ---
 
-#### DocumentStructure
+### DocumentStructure
 
 A structured document tree representing the semantic content of an HTML document.
 
@@ -241,7 +241,7 @@ Uses a flat node array with index-based parent/child references for efficient tr
 
 ---
 
-#### GridCell
+### GridCell
 
 A single cell in a table grid.
 
@@ -257,7 +257,7 @@ A single cell in a table grid.
 
 ---
 
-#### HeaderMetadata
+### HeaderMetadata
 
 Header element metadata with hierarchy tracking.
 
@@ -272,9 +272,9 @@ and position in the document structure.
 | `Depth` | `nuint` | — | Document tree depth at the header element |
 | `HtmlOffset` | `nuint` | — | Byte offset in original HTML document |
 
-##### Methods
+#### Methods
 
-###### IsValid()
+##### IsValid()
 
 Validate that the header level is within valid range (1-6).
 
@@ -291,7 +291,7 @@ public bool IsValid()
 
 ---
 
-#### HtmlMetadata
+### HtmlMetadata
 
 Comprehensive metadata extraction result from HTML document.
 
@@ -309,7 +309,7 @@ suitable for serialization and transmission across language boundaries.
 
 ---
 
-#### ImageMetadata
+### ImageMetadata
 
 Image metadata with source and dimensions.
 
@@ -328,7 +328,7 @@ for image analysis and optimization.
 
 ---
 
-#### LinkMetadata
+### LinkMetadata
 
 Hyperlink metadata with categorization and attributes.
 
@@ -343,9 +343,9 @@ Represents `<a>` elements with parsed href values, text content, and link type c
 | `Rel` | `List<string>` | — | Rel attribute values (e.g., "nofollow", "stylesheet", "canonical") |
 | `Attributes` | `Dictionary<string, string>` | — | Additional HTML attributes |
 
-##### Methods
+#### Methods
 
-###### ClassifyLink()
+##### ClassifyLink()
 
 Classify a link based on href value.
 
@@ -362,7 +362,7 @@ public LinkType ClassifyLink(string href)
 
 ---
 
-#### MetadataConfig
+### MetadataConfig
 
 Configuration for metadata extraction granularity.
 
@@ -380,9 +380,9 @@ the HTML-to-Markdown conversion process.
 | `ExtractStructuredData` | `bool` | `true` | Extract structured data (JSON-LD, Microdata, RDFa). When enabled, collects machine-readable structured data including: - JSON-LD script blocks with schema detection - Microdata attributes (itemscope, itemtype, itemprop) - RDFa markup - Extracted schema type if detectable |
 | `MaxStructuredDataSize` | `nuint` | `null` | Maximum total size of structured data to collect (bytes). Prevents memory exhaustion attacks on malformed or adversarial documents containing excessively large structured data blocks. When the accumulated size of structured data exceeds this limit, further collection stops. Default: `1_000_000` bytes (1 MB) |
 
-##### Methods
+#### Methods
 
-###### CreateDefault()
+##### CreateDefault()
 
 Create default metadata configuration.
 
@@ -394,7 +394,7 @@ Defaults to extracting all metadata types with 1MB limit on structured data.
 public MetadataConfig CreateDefault()
 ```
 
-###### AnyEnabled()
+##### AnyEnabled()
 
 Check if any metadata extraction is enabled.
 
@@ -414,7 +414,7 @@ public bool AnyEnabled()
 
 ---
 
-#### PreprocessingOptions
+### PreprocessingOptions
 
 HTML preprocessing options for document cleanup before conversion.
 
@@ -425,9 +425,9 @@ HTML preprocessing options for document cleanup before conversion.
 | `RemoveNavigation` | `bool` | `true` | Remove navigation elements (nav, breadcrumbs, menus, sidebars) |
 | `RemoveForms` | `bool` | `true` | Remove form elements (forms, inputs, buttons, etc.) |
 
-##### Methods
+#### Methods
 
-###### CreateDefault()
+##### CreateDefault()
 
 **Signature:**
 
@@ -438,7 +438,7 @@ public PreprocessingOptions CreateDefault()
 
 ---
 
-#### ProcessingWarning
+### ProcessingWarning
 
 A non-fatal warning generated during HTML processing.
 
@@ -450,7 +450,7 @@ A non-fatal warning generated during HTML processing.
 
 ---
 
-#### StructuredData
+### StructuredData
 
 Structured data block (JSON-LD, Microdata, or RDFa).
 
@@ -466,7 +466,7 @@ JSON-LD blocks are collected as raw JSON strings for flexibility.
 
 ---
 
-#### TableData
+### TableData
 
 A top-level extracted table with both structured data and markdown representation.
 
@@ -478,7 +478,7 @@ A top-level extracted table with both structured data and markdown representatio
 
 ---
 
-#### TableGrid
+### TableGrid
 
 A structured table grid with cell-level data including spans.
 
@@ -491,7 +491,7 @@ A structured table grid with cell-level data including spans.
 
 ---
 
-#### TextAnnotation
+### TextAnnotation
 
 An inline text annotation with byte-range offsets.
 
@@ -506,9 +506,9 @@ Annotations describe formatting (bold, italic, etc.) and links within a node's t
 
 ---
 
-### Enums
+## Enums
 
-#### PreprocessingPreset
+### PreprocessingPreset
 
 HTML preprocessing aggressiveness level.
 
@@ -523,7 +523,7 @@ Controls the extent of cleanup performed before conversion. Higher levels remove
 
 ---
 
-#### HeadingStyle
+### HeadingStyle
 
 Heading style options for Markdown output.
 
@@ -538,7 +538,7 @@ Controls how headings (h1-h6) are rendered in the output Markdown.
 
 ---
 
-#### ListIndentType
+### ListIndentType
 
 List indentation character type.
 
@@ -552,7 +552,7 @@ Controls whether list items are indented with spaces or tabs.
 
 ---
 
-#### WhitespaceMode
+### WhitespaceMode
 
 Whitespace handling strategy during conversion.
 
@@ -566,7 +566,7 @@ Determines how sequences of whitespace characters (spaces, tabs, newlines) are p
 
 ---
 
-#### NewlineStyle
+### NewlineStyle
 
 Line break syntax in Markdown output.
 
@@ -580,7 +580,7 @@ Controls how soft line breaks (from `<br>` or line breaks in source) are rendere
 
 ---
 
-#### CodeBlockStyle
+### CodeBlockStyle
 
 Code block fence style in Markdown output.
 
@@ -595,7 +595,7 @@ Determines how code blocks (`<pre><code>`) are rendered in Markdown.
 
 ---
 
-#### HighlightStyle
+### HighlightStyle
 
 Highlight rendering style for `<mark>` elements.
 
@@ -611,7 +611,7 @@ Controls how highlighted text is rendered in Markdown output.
 
 ---
 
-#### LinkStyle
+### LinkStyle
 
 Link rendering style in Markdown output.
 
@@ -626,7 +626,7 @@ reference-style `[text][1]` syntax with definitions collected at the end.
 
 ---
 
-#### OutputFormat
+### OutputFormat
 
 Output format for conversion.
 
@@ -641,7 +641,7 @@ Specifies the target markup language format for the conversion output.
 
 ---
 
-#### NodeContent
+### NodeContent
 
 The semantic content type of a document node.
 
@@ -666,7 +666,7 @@ Uses internally tagged representation (`"node_type": "heading"`) for JSON serial
 
 ---
 
-#### AnnotationKind
+### AnnotationKind
 
 The type of an inline text annotation.
 
@@ -687,7 +687,7 @@ Uses internally tagged representation (`"annotation_type": "bold"`) for JSON ser
 
 ---
 
-#### WarningKind
+### WarningKind
 
 Categories of processing warnings.
 
@@ -702,7 +702,7 @@ Categories of processing warnings.
 
 ---
 
-#### TextDirection
+### TextDirection
 
 Text directionality of document content.
 
@@ -717,7 +717,7 @@ Corresponds to the HTML `dir` attribute and `bdi` element directionality.
 
 ---
 
-#### LinkType
+### LinkType
 
 Link classification based on href value and document context.
 
@@ -735,7 +735,7 @@ Used to categorize links during extraction for filtering and analysis.
 
 ---
 
-#### ImageType
+### ImageType
 
 Image source classification for proper handling and processing.
 
@@ -751,7 +751,7 @@ Determines whether an image is embedded (data URI), inline SVG, external, or rel
 
 ---
 
-#### StructuredDataType
+### StructuredDataType
 
 Structured data format type.
 
@@ -766,9 +766,9 @@ Identifies the schema/format used for structured data markup.
 
 ---
 
-### Errors
+## Errors
 
-#### ConversionError
+### ConversionError
 
 Errors that can occur during HTML to Markdown conversion.
 

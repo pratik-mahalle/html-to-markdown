@@ -1,21 +1,19 @@
 [package]
 name = "html-to-markdown-wasm"
-version.workspace = true
+version = "3.2.0"
 edition = "2024"
-description = "High-performance HTML to Markdown converter"
 license = "MIT"
-readme.workspace = true
-keywords.workspace = true
-categories.workspace = true
+description = "High-performance HTML to Markdown converter"
 repository = "https://github.com/kreuzberg-dev/html-to-markdown"
 
-[package.metadata.wasm-pack.profile.release]
-wasm-opt = false
+[package.metadata.cargo-machete]
+ignored = ["wasm-bindgen-futures"]
 
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
-html-to-markdown-rs = { path = "../html-to-markdown", features = ["full"] }
+html-to-markdown-rs = { path = "../html-to-markdown", features = ["full", "metadata", "visitor", "serde", "inline-images"] }
 serde-wasm-bindgen = "0.6"
 wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"

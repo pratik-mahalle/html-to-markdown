@@ -7,26 +7,20 @@ internal static partial class NativeMethods
 {
     private const string LibName = "html_to_markdown_ffi";
 
-    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_preprocessing_options_from_json")]
-    internal static extern IntPtr PreprocessingOptionsFromJson([MarshalAs(UnmanagedType.LPStr)] string json);
-
-    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_preprocessing_options_free")]
-    internal static extern void PreprocessingOptionsFree(IntPtr ptr);
-
     [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_conversion_options_from_json")]
     internal static extern IntPtr ConversionOptionsFromJson([MarshalAs(UnmanagedType.LPStr)] string json);
 
     [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_conversion_options_free")]
     internal static extern void ConversionOptionsFree(IntPtr ptr);
 
-    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_preprocessing_options_to_json")]
-    internal static extern IntPtr PreprocessingOptionsToJson(IntPtr ptr);
+    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_preprocessing_options_from_json")]
+    internal static extern IntPtr PreprocessingOptionsFromJson([MarshalAs(UnmanagedType.LPStr)] string json);
 
-    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_conversion_options_builder_to_json")]
-    internal static extern IntPtr ConversionOptionsBuilderToJson(IntPtr ptr);
+    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_preprocessing_options_free")]
+    internal static extern void PreprocessingOptionsFree(IntPtr ptr);
 
-    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_conversion_options_builder_free")]
-    internal static extern void ConversionOptionsBuilderFree(IntPtr ptr);
+    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_conversion_options_to_json")]
+    internal static extern IntPtr ConversionOptionsToJson(IntPtr ptr);
 
     [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_metadata_config_to_json")]
     internal static extern IntPtr MetadataConfigToJson(IntPtr ptr);
@@ -34,14 +28,17 @@ internal static partial class NativeMethods
     [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_metadata_config_free")]
     internal static extern void MetadataConfigFree(IntPtr ptr);
 
-    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_conversion_options_to_json")]
-    internal static extern IntPtr ConversionOptionsToJson(IntPtr ptr);
-
     [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_conversion_result_to_json")]
     internal static extern IntPtr ConversionResultToJson(IntPtr ptr);
 
     [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_conversion_result_free")]
     internal static extern void ConversionResultFree(IntPtr ptr);
+
+    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_preprocessing_options_to_json")]
+    internal static extern IntPtr PreprocessingOptionsToJson(IntPtr ptr);
+
+    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_conversion_options_builder_free")]
+    internal static extern void ConversionOptionsBuilderFree(IntPtr ptr);
 
     [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_convert")]
     internal static extern IntPtr Convert(
@@ -49,43 +46,49 @@ internal static partial class NativeMethods
         IntPtr options
     );
 
-    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_default")]
-    internal static extern IntPtr Default();
+    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_metadata_config_default")]
+    internal static extern IntPtr MetadataConfigDefault();
 
-    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_any_enabled")]
-    internal static extern int AnyEnabled();
+    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_metadata_config_any_enabled")]
+    internal static extern int MetadataConfigAnyEnabled();
 
-    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_builder")]
-    internal static extern IntPtr Builder();
+    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_conversion_options_default")]
+    internal static extern IntPtr ConversionOptionsDefault();
 
-    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_strip_tags")]
-    internal static extern IntPtr StripTags(
+    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_conversion_options_builder")]
+    internal static extern IntPtr ConversionOptionsBuilder();
+
+    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_conversion_options_builder_strip_tags")]
+    internal static extern IntPtr ConversionOptionsBuilderStripTags(
         IntPtr tags
     );
 
-    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_preserve_tags")]
-    internal static extern IntPtr PreserveTags(
+    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_conversion_options_builder_preserve_tags")]
+    internal static extern IntPtr ConversionOptionsBuilderPreserveTags(
         IntPtr tags
     );
 
-    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_keep_inline_images_in")]
-    internal static extern IntPtr KeepInlineImagesIn(
+    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_conversion_options_builder_keep_inline_images_in")]
+    internal static extern IntPtr ConversionOptionsBuilderKeepInlineImagesIn(
         IntPtr tags
     );
 
-    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_preprocessing")]
-    internal static extern IntPtr Preprocessing(
+    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_conversion_options_builder_preprocessing")]
+    internal static extern IntPtr ConversionOptionsBuilderPreprocessing(
         IntPtr preprocessing
     );
 
-    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_build")]
-    internal static extern IntPtr Build();
+    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_conversion_options_builder_build")]
+    internal static extern IntPtr ConversionOptionsBuilderBuild();
 
-    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_is_valid")]
-    internal static extern int IsValid();
+    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_preprocessing_options_default")]
+    internal static extern IntPtr PreprocessingOptionsDefault();
 
-    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_classify_link")]
-    internal static extern IntPtr ClassifyLink(
+    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_header_metadata_is_valid")]
+    internal static extern int HeaderMetadataIsValid();
+
+    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_link_metadata_classify_link")]
+    internal static extern IntPtr LinkMetadataClassifyLink(
         [MarshalAs(UnmanagedType.LPStr)] string href
     );
 

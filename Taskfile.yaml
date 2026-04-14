@@ -237,63 +237,63 @@ tasks:
 
   e2e:smoke:python:
     desc: "Smoke test Python package from PyPI"
-    dir: tests/test_apps/python
+    dir: test_apps/python
     cmds:
       - uv sync
       - uv run pytest smoke_test.py -v
 
   e2e:smoke:node:
     desc: "Smoke test Node package from npm"
-    dir: tests/test_apps/node
+    dir: test_apps/node
     cmds:
       - pnpm install
       - pnpm test:smoke
 
   e2e:smoke:ruby:
     desc: "Smoke test Ruby gem from RubyGems"
-    dir: tests/test_apps/ruby
+    dir: test_apps/ruby
     cmds:
       - bundle install
       - bundle exec rspec smoke_test.rb
 
   e2e:smoke:php:
     desc: "Smoke test PHP package from Packagist"
-    dir: tests/test_apps/php
+    dir: test_apps/php
     cmds:
       - composer install
       - vendor/bin/phpunit smoke_test.php
 
   e2e:smoke:go:
     desc: "Smoke test Go package from pkg.go.dev"
-    dir: tests/test_apps/go
+    dir: test_apps/go
     cmds:
       - go mod download
       - go test -v -run Smoke
 
   e2e:smoke:java:
     desc: "Smoke test Java package from Maven Central"
-    dir: tests/test_apps/java
+    dir: test_apps/java
     cmds:
       - ./mvnw{{if eq .OS "windows"}}.cmd{{end}} clean install -DskipTests
       - ./mvnw{{if eq .OS "windows"}}.cmd{{end}} test -Dtest=SmokeTest
 
   e2e:smoke:csharp:
     desc: "Smoke test C# package from NuGet"
-    dir: tests/test_apps/csharp
+    dir: test_apps/csharp
     cmds:
       - dotnet restore
       - dotnet test --filter FullyQualifiedName~SmokeTest
 
   e2e:smoke:elixir:
     desc: "Smoke test Elixir package from Hex.pm"
-    dir: tests/test_apps/elixir
+    dir: test_apps/elixir
     cmds:
       - mix deps.get
       - mix test test/smoke_test.exs
 
   e2e:smoke:r:
     desc: "Smoke test R package"
-    dir: tests/test_apps/r
+    dir: test_apps/r
     cmds:
       - Rscript smoke_test.R
 
@@ -313,54 +313,54 @@ tasks:
 
   e2e:test:python:
     desc: "Comprehensive tests for Python package"
-    dir: tests/test_apps/python
+    dir: test_apps/python
     cmds:
       - uv sync
       - uv run pytest comprehensive_test.py -v
 
   e2e:test:node:
     desc: "Comprehensive tests for Node package"
-    dir: tests/test_apps/node
+    dir: test_apps/node
     cmds:
       - pnpm install
       - pnpm test:comprehensive
 
   e2e:test:ruby:
     desc: "Comprehensive tests for Ruby gem"
-    dir: tests/test_apps/ruby
+    dir: test_apps/ruby
     cmds:
       - bundle install
       - bundle exec rspec comprehensive_test.rb
 
   e2e:test:php:
     desc: "Comprehensive tests for PHP package"
-    dir: tests/test_apps/php
+    dir: test_apps/php
     cmds:
       - composer install
       - vendor/bin/phpunit comprehensive_test.php
 
   e2e:test:go:
     desc: "Comprehensive tests for Go package"
-    dir: tests/test_apps/go
+    dir: test_apps/go
     cmds:
       - go mod download
       - go test -v -run Comprehensive
 
   e2e:test:java:
     desc: "Comprehensive tests for Java package"
-    dir: tests/test_apps/java
+    dir: test_apps/java
     cmds:
       - ./mvnw{{if eq .OS "windows"}}.cmd{{end}} test -Dtest=ComprehensiveTest
 
   e2e:test:csharp:
     desc: "Comprehensive tests for C# package"
-    dir: tests/test_apps/csharp
+    dir: test_apps/csharp
     cmds:
       - dotnet test --filter FullyQualifiedName~ComprehensiveTest
 
   e2e:test:elixir:
     desc: "Comprehensive tests for Elixir package"
-    dir: tests/test_apps/elixir
+    dir: test_apps/elixir
     cmds:
       - mix test test/comprehensive_test.exs
 

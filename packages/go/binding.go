@@ -537,9 +537,9 @@ type MetadataConfigUpdate struct {
 // ```
 type ConversionOptions struct {
     // Heading style to use in Markdown output (ATX `#` or Setext underline).
-    HeadingStyle HeadingStyle `json:"heading_style"`
+    HeadingStyle HeadingStyle `json:"heading_style,omitempty"`
     // How to indent nested list items (spaces or tab).
-    ListIndentType ListIndentType `json:"list_indent_type"`
+    ListIndentType ListIndentType `json:"list_indent_type,omitempty"`
     // Number of spaces (or tabs) to use for each level of list indentation.
     ListIndentWidth *uint `json:"list_indent_width,omitempty"`
     // Bullet character(s) to use for unordered list items (e.g. `"-"`, `"*"`).
@@ -563,11 +563,11 @@ type ConversionOptions struct {
     // Render `<br>` elements inside table cells as literal line breaks.
     BrInTables bool `json:"br_in_tables"`
     // Style used for `<mark>` / highlighted text (e.g. `==text==`).
-    HighlightStyle HighlightStyle `json:"highlight_style"`
+    HighlightStyle HighlightStyle `json:"highlight_style,omitempty"`
     // Extract `<meta>` and `<head>` information into the result metadata.
     ExtractMetadata *bool `json:"extract_metadata,omitempty"`
     // Controls how whitespace is normalised during conversion.
-    WhitespaceMode WhitespaceMode `json:"whitespace_mode"`
+    WhitespaceMode WhitespaceMode `json:"whitespace_mode,omitempty"`
     // Strip all newlines from the output, producing a single-line result.
     StripNewlines bool `json:"strip_newlines"`
     // Wrap long lines at [`wrap_width`](Self::wrap_width) characters.
@@ -583,7 +583,7 @@ type ConversionOptions struct {
     // How to encode hard line breaks (`<br>`) in Markdown.
     NewlineStyle *NewlineStyle `json:"newline_style,omitempty"`
     // Style used for fenced code blocks (backticks or tilde).
-    CodeBlockStyle CodeBlockStyle `json:"code_block_style"`
+    CodeBlockStyle CodeBlockStyle `json:"code_block_style,omitempty"`
     // HTML tag names whose `<img>` children are kept inline instead of block.
     KeepInlineImagesIn []string `json:"keep_inline_images_in,omitempty"`
     // Pre-processing options applied to the HTML before conversion.
@@ -599,9 +599,9 @@ type ConversionOptions struct {
     // Skip conversion of `<img>` elements (omit images from output).
     SkipImages bool `json:"skip_images"`
     // Link rendering style (inline or reference).
-    LinkStyle LinkStyle `json:"link_style"`
+    LinkStyle LinkStyle `json:"link_style,omitempty"`
     // Target output format (Markdown, plain text, etc.).
-    OutputFormat OutputFormat `json:"output_format"`
+    OutputFormat OutputFormat `json:"output_format,omitempty"`
     // Include structured document tree in result.
     IncludeDocumentStructure bool `json:"include_document_structure"`
     // Extract inline images from data URIs and SVGs.
@@ -962,7 +962,7 @@ type PreprocessingOptions struct {
     // Enable HTML preprocessing globally
     Enabled *bool `json:"enabled,omitempty"`
     // Preprocessing preset level (Minimal, Standard, Aggressive)
-    Preset PreprocessingPreset `json:"preset"`
+    Preset PreprocessingPreset `json:"preset,omitempty"`
     // Remove navigation elements (nav, breadcrumbs, menus, sidebars)
     RemoveNavigation *bool `json:"remove_navigation,omitempty"`
     // Remove form elements (forms, inputs, buttons, etc.)

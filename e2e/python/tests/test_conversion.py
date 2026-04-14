@@ -8,8 +8,10 @@ def test_blockquote_multiple_paragraphs() -> None:
     """Blockquote with multiple paragraphs has each paragraph prefixed."""
     html = "<blockquote><p>First paragraph.</p><p>Second paragraph.</p></blockquote>"
     result = convert(html=html)
-    assert result.content is not None and "> First paragraph." in result.content
-    assert result.content is not None and "> Second paragraph." in result.content
+    assert result.content is not None
+    assert "> First paragraph." in result.content
+    assert result.content is not None
+    assert "> Second paragraph." in result.content
 
 
 def test_blockquote_nested() -> None:
@@ -17,15 +19,18 @@ def test_blockquote_nested() -> None:
     html = "<blockquote><p>Outer quote.</p><blockquote><p>Inner quote.</p></blockquote></blockquote>"
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "Outer quote." in result.content
-    assert result.content is not None and "Inner quote." in result.content
+    assert result.content is not None
+    assert "Outer quote." in result.content
+    assert result.content is not None
+    assert "Inner quote." in result.content
 
 
 def test_blockquote_simple() -> None:
     """Simple blockquote."""
     html = "<blockquote><p>Quote text</p></blockquote>"
     result = convert(html=html)
-    assert result.content is not None and "> Quote text" in result.content
+    assert result.content is not None
+    assert "> Quote text" in result.content
 
 
 def test_blockquote_with_list() -> None:
@@ -33,23 +38,28 @@ def test_blockquote_with_list() -> None:
     html = "<blockquote><p>Quote intro:</p><ul><li>Point one</li><li>Point two</li></ul></blockquote>"
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "Quote intro:" in result.content
-    assert result.content is not None and "Point one" in result.content
-    assert result.content is not None and "Point two" in result.content
+    assert result.content is not None
+    assert "Quote intro:" in result.content
+    assert result.content is not None
+    assert "Point one" in result.content
+    assert result.content is not None
+    assert "Point two" in result.content
 
 
 def test_bold_and_italic() -> None:
     """Nested bold and italic."""
     html = "<p><strong><em>both</em></strong></p>"
     result = convert(html=html)
-    assert result.content is not None and "***both***" in result.content
+    assert result.content is not None
+    assert "***both***" in result.content
 
 
 def test_bold_strong() -> None:
     """Strong tag converts to bold."""
     html = "<p><strong>bold</strong></p>"
     result = convert(html=html)
-    assert result.content is not None and "**bold**" in result.content
+    assert result.content is not None
+    assert "**bold**" in result.content
 
 
 def test_code_block() -> None:
@@ -57,7 +67,8 @@ def test_code_block() -> None:
     html = "<pre><code class=\"language-python\">print('hello')</code></pre>"
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "print('hello')" in result.content
+    assert result.content is not None
+    assert "print('hello')" in result.content
 
 
 def test_code_block_no_language() -> None:
@@ -65,14 +76,16 @@ def test_code_block_no_language() -> None:
     html = "<pre><code>plain code here</code></pre>"
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "plain code here" in result.content
+    assert result.content is not None
+    assert "plain code here" in result.content
 
 
 def test_code_inline_in_paragraph() -> None:
     """Inline code element nested inside a paragraph."""
     html = "<p>Call the <code>initialize()</code> method first.</p>"
     result = convert(html=html)
-    assert result.content is not None and "`initialize()`" in result.content
+    assert result.content is not None
+    assert "`initialize()`" in result.content
 
 
 def test_code_with_backticks_in_content() -> None:
@@ -80,7 +93,8 @@ def test_code_with_backticks_in_content() -> None:
     html = "<p>Use <code>`backtick` here</code> carefully.</p>"
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "backtick" in result.content
+    assert result.content is not None
+    assert "backtick" in result.content
 
 
 def test_emphasis_mark_highlight() -> None:
@@ -88,45 +102,54 @@ def test_emphasis_mark_highlight() -> None:
     html = "<p><mark>highlighted</mark></p>"
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "highlighted" in result.content
+    assert result.content is not None
+    assert "highlighted" in result.content
 
 
 def test_emphasis_strikethrough_del() -> None:
     """del tag converts to GFM strikethrough."""
     html = "<p><del>deleted text</del></p>"
     result = convert(html=html)
-    assert result.content is not None and "~~deleted text~~" in result.content
+    assert result.content is not None
+    assert "~~deleted text~~" in result.content
 
 
 def test_emphasis_strikethrough_s() -> None:
     """s tag converts to GFM strikethrough."""
     html = "<p><s>strikethrough</s></p>"
     result = convert(html=html)
-    assert result.content is not None and "~~strikethrough~~" in result.content
+    assert result.content is not None
+    assert "~~strikethrough~~" in result.content
 
 
 def test_emphasis_subscript() -> None:
     """sub tag content is preserved."""
     html = "<p>H<sub>2</sub>O</p>"
     result = convert(html=html)
-    assert result.content is not None and "H" in result.content
-    assert result.content is not None and "2" in result.content
-    assert result.content is not None and "O" in result.content
+    assert result.content is not None
+    assert "H" in result.content
+    assert result.content is not None
+    assert "2" in result.content
+    assert result.content is not None
+    assert "O" in result.content
 
 
 def test_emphasis_superscript() -> None:
     """sup tag content is preserved."""
     html = "<p>x<sup>2</sup></p>"
     result = convert(html=html)
-    assert result.content is not None and "x" in result.content
-    assert result.content is not None and "2" in result.content
+    assert result.content is not None
+    assert "x" in result.content
+    assert result.content is not None
+    assert "2" in result.content
 
 
 def test_emphasis_underline_u() -> None:
     """u tag content is preserved in output."""
     html = "<p><u>underlined</u></p>"
     result = convert(html=html)
-    assert result.content is not None and "underlined" in result.content
+    assert result.content is not None
+    assert "underlined" in result.content
 
 
 def test_form_input_elements() -> None:
@@ -134,7 +157,8 @@ def test_form_input_elements() -> None:
     html = '<form><label for="name">Name:</label><input type="text" id="name" placeholder="Enter name"></form>'
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "Name" in result.content
+    assert result.content is not None
+    assert "Name" in result.content
 
 
 def test_form_select_options() -> None:
@@ -142,7 +166,8 @@ def test_form_select_options() -> None:
     html = '<form><label>Color:</label><select><option value="red">Red</option><option value="blue" selected>Blue</option><option value="green">Green</option></select></form>'
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "Color" in result.content
+    assert result.content is not None
+    assert "Color" in result.content
 
 
 def test_form_textarea() -> None:
@@ -150,7 +175,8 @@ def test_form_textarea() -> None:
     html = "<form><label>Message:</label><textarea>Default text content</textarea></form>"
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "Message" in result.content
+    assert result.content is not None
+    assert "Message" in result.content
 
 
 def test_heading_h1() -> None:
@@ -201,16 +227,20 @@ def test_image_figure_figcaption() -> None:
         '<figure><img src="sunset.jpg" alt="A sunset"><figcaption>Beautiful sunset over the ocean</figcaption></figure>'
     )
     result = convert(html=html)
-    assert result.content is not None and "![A sunset](sunset.jpg)" in result.content
-    assert result.content is not None and "Beautiful sunset over the ocean" in result.content
+    assert result.content is not None
+    assert "![A sunset](sunset.jpg)" in result.content
+    assert result.content is not None
+    assert "Beautiful sunset over the ocean" in result.content
 
 
 def test_image_linked() -> None:
     """Image inside an anchor produces a linked image."""
     html = '<a href="https://example.com"><img src="icon.png" alt="Icon"></a>'
     result = convert(html=html)
-    assert result.content is not None and "![Icon](icon.png)" in result.content
-    assert result.content is not None and "https://example.com" in result.content
+    assert result.content is not None
+    assert "![Icon](icon.png)" in result.content
+    assert result.content is not None
+    assert "https://example.com" in result.content
 
 
 def test_image_no_alt() -> None:
@@ -218,44 +248,52 @@ def test_image_no_alt() -> None:
     html = '<img src="banner.jpg">'
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "banner.jpg" in result.content
+    assert result.content is not None
+    assert "banner.jpg" in result.content
 
 
 def test_image_simple() -> None:
     """Image with alt text."""
     html = '<img src="photo.jpg" alt="A photo">'
     result = convert(html=html)
-    assert result.content is not None and "![A photo](photo.jpg)" in result.content
+    assert result.content is not None
+    assert "![A photo](photo.jpg)" in result.content
 
 
 def test_image_with_title() -> None:
     """Image with title attribute includes title in output."""
     html = '<img src="chart.png" alt="Sales chart" title="Q3 Sales">'
     result = convert(html=html)
-    assert result.content is not None and "![Sales chart](chart.png" in result.content
-    assert result.content is not None and "Q3 Sales" in result.content
+    assert result.content is not None
+    assert "![Sales chart](chart.png" in result.content
+    assert result.content is not None
+    assert "Q3 Sales" in result.content
 
 
 def test_inline_code() -> None:
     """Inline code."""
     html = "<p>Use <code>console.log()</code> to debug</p>"
     result = convert(html=html)
-    assert result.content is not None and "`console.log()`" in result.content
+    assert result.content is not None
+    assert "`console.log()`" in result.content
 
 
 def test_italic_em() -> None:
     """Em tag converts to italic."""
     html = "<p><em>italic</em></p>"
     result = convert(html=html)
-    assert result.content is not None and "*italic*" in result.content
+    assert result.content is not None
+    assert "*italic*" in result.content
 
 
 def test_line_break_br_tag() -> None:
     """Single br tag produces a line break in output."""
     html = "<p>First line.<br>Second line.</p>"
     result = convert(html=html)
-    assert result.content is not None and "First line." in result.content
-    assert result.content is not None and "Second line." in result.content
+    assert result.content is not None
+    assert "First line." in result.content
+    assert result.content is not None
+    assert "Second line." in result.content
 
 
 def test_line_break_hr_tag() -> None:
@@ -263,117 +301,150 @@ def test_line_break_hr_tag() -> None:
     html = "<p>Before rule.</p><hr><p>After rule.</p>"
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "Before rule." in result.content
-    assert result.content is not None and "After rule." in result.content
+    assert result.content is not None
+    assert "Before rule." in result.content
+    assert result.content is not None
+    assert "After rule." in result.content
 
 
 def test_line_break_multiple_br() -> None:
     """Multiple consecutive br tags in sequence."""
     html = "<p>Start.<br><br>End.</p>"
     result = convert(html=html)
-    assert result.content is not None and "Start." in result.content
-    assert result.content is not None and "End." in result.content
+    assert result.content is not None
+    assert "Start." in result.content
+    assert result.content is not None
+    assert "End." in result.content
 
 
 def test_link_anchor_fragment() -> None:
     """Fragment-only anchor link is preserved."""
     html = '<a href="#section">Jump to section</a>'
     result = convert(html=html)
-    assert result.content is not None and "[Jump to section](#section)" in result.content
+    assert result.content is not None
+    assert "[Jump to section](#section)" in result.content
 
 
 def test_link_empty_href() -> None:
     """Link with empty href produces output with the link text."""
     html = '<a href="">No destination</a>'
     result = convert(html=html)
-    assert result.content is not None and "No destination" in result.content
+    assert result.content is not None
+    assert "No destination" in result.content
 
 
 def test_link_image_inside() -> None:
     """Image inside a link produces a linked image."""
     html = '<a href="https://example.com"><img src="logo.png" alt="Logo"></a>'
     result = convert(html=html)
-    assert result.content is not None and "![Logo](logo.png)" in result.content
-    assert result.content is not None and "https://example.com" in result.content
+    assert result.content is not None
+    assert "![Logo](logo.png)" in result.content
+    assert result.content is not None
+    assert "https://example.com" in result.content
 
 
 def test_link_mailto() -> None:
     """Mailto link is preserved with mailto: scheme."""
     html = '<a href="mailto:user@example.com">Email us</a>'
     result = convert(html=html)
-    assert result.content is not None and "mailto:user@example.com" in result.content
+    assert result.content is not None
+    assert "mailto:user@example.com" in result.content
 
 
 def test_link_simple() -> None:
     """Simple link."""
     html = '<a href="https://example.com">Example</a>'
     result = convert(html=html)
-    assert result.content is not None and "[Example](https://example.com)" in result.content
+    assert result.content is not None
+    assert "[Example](https://example.com)" in result.content
 
 
 def test_link_with_bold_text() -> None:
     """Link containing bold text preserves formatting."""
     html = '<a href="https://example.com"><strong>Bold link</strong></a>'
     result = convert(html=html)
-    assert result.content is not None and "**Bold link**" in result.content
-    assert result.content is not None and "https://example.com" in result.content
+    assert result.content is not None
+    assert "**Bold link**" in result.content
+    assert result.content is not None
+    assert "https://example.com" in result.content
 
 
 def test_link_with_title() -> None:
     """Link with title attribute."""
     html = '<a href="https://example.com" title="Example Site">Example</a>'
     result = convert(html=html)
-    assert result.content is not None and "[Example](https://example.com" in result.content
-    assert result.content is not None and "Example Site" in result.content
+    assert result.content is not None
+    assert "[Example](https://example.com" in result.content
+    assert result.content is not None
+    assert "Example Site" in result.content
 
 
 def test_list_definition_dl() -> None:
     """Definition list with dt and dd elements."""
     html = "<dl><dt>Term One</dt><dd>Definition of term one.</dd><dt>Term Two</dt><dd>Definition of term two.</dd></dl>"
     result = convert(html=html)
-    assert result.content is not None and "Term One" in result.content
-    assert result.content is not None and "Definition of term one." in result.content
-    assert result.content is not None and "Term Two" in result.content
-    assert result.content is not None and "Definition of term two." in result.content
+    assert result.content is not None
+    assert "Term One" in result.content
+    assert result.content is not None
+    assert "Definition of term one." in result.content
+    assert result.content is not None
+    assert "Term Two" in result.content
+    assert result.content is not None
+    assert "Definition of term two." in result.content
 
 
 def test_list_item_multiple_paragraphs() -> None:
     """List item containing multiple paragraphs."""
     html = "<ul><li><p>First paragraph in item.</p><p>Second paragraph in item.</p></li><li>Simple item</li></ul>"
     result = convert(html=html)
-    assert result.content is not None and "First paragraph in item." in result.content
-    assert result.content is not None and "Second paragraph in item." in result.content
-    assert result.content is not None and "Simple item" in result.content
+    assert result.content is not None
+    assert "First paragraph in item." in result.content
+    assert result.content is not None
+    assert "Second paragraph in item." in result.content
+    assert result.content is not None
+    assert "Simple item" in result.content
 
 
 def test_list_mixed_nested() -> None:
     """Mixed list: ordered list nested inside unordered list."""
     html = "<ul><li>Item A<ol><li>Sub 1</li><li>Sub 2</li></ol></li><li>Item B</li></ul>"
     result = convert(html=html)
-    assert result.content is not None and "Item A" in result.content
-    assert result.content is not None and "Sub 1" in result.content
-    assert result.content is not None and "Sub 2" in result.content
-    assert result.content is not None and "Item B" in result.content
+    assert result.content is not None
+    assert "Item A" in result.content
+    assert result.content is not None
+    assert "Sub 1" in result.content
+    assert result.content is not None
+    assert "Sub 2" in result.content
+    assert result.content is not None
+    assert "Item B" in result.content
 
 
 def test_list_nested_ordered() -> None:
     """Nested ordered list with two levels of depth."""
     html = "<ol><li>Step 1<ol><li>Step 1a</li><li>Step 1b</li></ol></li><li>Step 2</li></ol>"
     result = convert(html=html)
-    assert result.content is not None and "Step 1" in result.content
-    assert result.content is not None and "Step 1a" in result.content
-    assert result.content is not None and "Step 1b" in result.content
-    assert result.content is not None and "Step 2" in result.content
+    assert result.content is not None
+    assert "Step 1" in result.content
+    assert result.content is not None
+    assert "Step 1a" in result.content
+    assert result.content is not None
+    assert "Step 1b" in result.content
+    assert result.content is not None
+    assert "Step 2" in result.content
 
 
 def test_list_nested_unordered() -> None:
     """Nested unordered list with two levels of depth."""
     html = "<ul><li>Parent A<ul><li>Child A1</li><li>Child A2</li></ul></li><li>Parent B</li></ul>"
     result = convert(html=html)
-    assert result.content is not None and "Parent A" in result.content
-    assert result.content is not None and "Child A1" in result.content
-    assert result.content is not None and "Child A2" in result.content
-    assert result.content is not None and "Parent B" in result.content
+    assert result.content is not None
+    assert "Parent A" in result.content
+    assert result.content is not None
+    assert "Child A1" in result.content
+    assert result.content is not None
+    assert "Child A2" in result.content
+    assert result.content is not None
+    assert "Parent B" in result.content
 
 
 def test_list_task_checkboxes() -> None:
@@ -381,32 +452,40 @@ def test_list_task_checkboxes() -> None:
     html = '<ul><li><input type="checkbox" checked> Done task</li><li><input type="checkbox"> Pending task</li></ul>'
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "Done task" in result.content
-    assert result.content is not None and "Pending task" in result.content
+    assert result.content is not None
+    assert "Done task" in result.content
+    assert result.content is not None
+    assert "Pending task" in result.content
 
 
 def test_ordered_list() -> None:
     """Ordered list."""
     html = "<ol><li>First</li><li>Second</li><li>Third</li></ol>"
     result = convert(html=html)
-    assert result.content is not None and "1. First" in result.content
-    assert result.content is not None and "2. Second" in result.content
-    assert result.content is not None and "3. Third" in result.content
+    assert result.content is not None
+    assert "1. First" in result.content
+    assert result.content is not None
+    assert "2. Second" in result.content
+    assert result.content is not None
+    assert "3. Third" in result.content
 
 
 def test_paragraph_multiple() -> None:
     """Multiple paragraphs are separated by a blank line."""
     html = "<p>First paragraph.</p><p>Second paragraph.</p>"
     result = convert(html=html)
-    assert result.content is not None and "First paragraph." in result.content
-    assert result.content is not None and "Second paragraph." in result.content
+    assert result.content is not None
+    assert "First paragraph." in result.content
+    assert result.content is not None
+    assert "Second paragraph." in result.content
 
 
 def test_paragraph_nested_divs() -> None:
     """Text nested inside divs is extracted correctly."""
     html = "<div><div><p>Nested text</p></div></div>"
     result = convert(html=html)
-    assert result.content is not None and "Nested text" in result.content
+    assert result.content is not None
+    assert "Nested text" in result.content
 
 
 def test_paragraph_simple() -> None:
@@ -420,9 +499,12 @@ def test_paragraph_with_inline_formatting() -> None:
     """Paragraph with bold, italic, and a link."""
     html = '<p>This has <strong>bold</strong>, <em>italic</em>, and a <a href="https://example.com">link</a>.</p>'
     result = convert(html=html)
-    assert result.content is not None and "**bold**" in result.content
-    assert result.content is not None and "*italic*" in result.content
-    assert result.content is not None and "[link](https://example.com)" in result.content
+    assert result.content is not None
+    assert "**bold**" in result.content
+    assert result.content is not None
+    assert "*italic*" in result.content
+    assert result.content is not None
+    assert "[link](https://example.com)" in result.content
 
 
 def test_paragraph_with_line_breaks() -> None:
@@ -430,34 +512,44 @@ def test_paragraph_with_line_breaks() -> None:
     html = "<p>Line one.<br>Line two.<br>Line three.</p>"
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "Line one." in result.content
-    assert result.content is not None and "Line two." in result.content
-    assert result.content is not None and "Line three." in result.content
+    assert result.content is not None
+    assert "Line one." in result.content
+    assert result.content is not None
+    assert "Line two." in result.content
+    assert result.content is not None
+    assert "Line three." in result.content
 
 
 def test_semantic_abbr() -> None:
     """Abbreviation element text is preserved."""
     html = '<p>The <abbr title="World Wide Web">WWW</abbr> is global.</p>'
     result = convert(html=html)
-    assert result.content is not None and "WWW" in result.content
+    assert result.content is not None
+    assert "WWW" in result.content
 
 
 def test_semantic_article() -> None:
     """Article element wrapping content preserves inner content."""
     html = "<article><h2>Article Title</h2><p>Article body.</p></article>"
     result = convert(html=html)
-    assert result.content is not None and "Article Title" in result.content
-    assert result.content is not None and "Article body." in result.content
+    assert result.content is not None
+    assert "Article Title" in result.content
+    assert result.content is not None
+    assert "Article body." in result.content
 
 
 def test_semantic_definition_list() -> None:
     """Definition list with term and description."""
     html = "<dl><dt>HTML</dt><dd>HyperText Markup Language</dd><dt>CSS</dt><dd>Cascading Style Sheets</dd></dl>"
     result = convert(html=html)
-    assert result.content is not None and "HTML" in result.content
-    assert result.content is not None and "HyperText Markup Language" in result.content
-    assert result.content is not None and "CSS" in result.content
-    assert result.content is not None and "Cascading Style Sheets" in result.content
+    assert result.content is not None
+    assert "HTML" in result.content
+    assert result.content is not None
+    assert "HyperText Markup Language" in result.content
+    assert result.content is not None
+    assert "CSS" in result.content
+    assert result.content is not None
+    assert "Cascading Style Sheets" in result.content
 
 
 def test_semantic_details_summary() -> None:
@@ -465,7 +557,8 @@ def test_semantic_details_summary() -> None:
     html = "<details><summary>Click to expand</summary><p>Hidden content here.</p></details>"
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "Click to expand" in result.content
+    assert result.content is not None
+    assert "Click to expand" in result.content
 
 
 def test_semantic_hr() -> None:
@@ -473,8 +566,10 @@ def test_semantic_hr() -> None:
     html = "<p>Above</p><hr><p>Below</p>"
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "Above" in result.content
-    assert result.content is not None and "Below" in result.content
+    assert result.content is not None
+    assert "Above" in result.content
+    assert result.content is not None
+    assert "Below" in result.content
 
 
 def test_semantic_mark_highlight() -> None:
@@ -482,15 +577,18 @@ def test_semantic_mark_highlight() -> None:
     html = "<p>This is <mark>highlighted text</mark> in a sentence.</p>"
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "highlighted text" in result.content
+    assert result.content is not None
+    assert "highlighted text" in result.content
 
 
 def test_semantic_section_with_heading() -> None:
     """Section element with heading preserves structure."""
     html = "<section><h3>Section Heading</h3><p>Section content.</p></section>"
     result = convert(html=html)
-    assert result.content is not None and "Section Heading" in result.content
-    assert result.content is not None and "Section content." in result.content
+    assert result.content is not None
+    assert "Section Heading" in result.content
+    assert result.content is not None
+    assert "Section content." in result.content
 
 
 def test_semantic_sub_superscript() -> None:
@@ -498,22 +596,32 @@ def test_semantic_sub_superscript() -> None:
     html = "<p>H<sub>2</sub>O and E=mc<sup>2</sup></p>"
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "H" in result.content
-    assert result.content is not None and "2" in result.content
-    assert result.content is not None and "O" in result.content
-    assert result.content is not None and "E=mc" in result.content
+    assert result.content is not None
+    assert "H" in result.content
+    assert result.content is not None
+    assert "2" in result.content
+    assert result.content is not None
+    assert "O" in result.content
+    assert result.content is not None
+    assert "E=mc" in result.content
 
 
 def test_simple_table() -> None:
     """Simple table with header."""
     html = "<table><thead><tr><th>Name</th><th>Age</th></tr></thead><tbody><tr><td>Alice</td><td>30</td></tr></tbody></table>"
     result = convert(html=html)
-    assert result.content is not None and "Name" in result.content
-    assert result.content is not None and "Age" in result.content
-    assert result.content is not None and "Alice" in result.content
-    assert result.content is not None and "30" in result.content
-    assert result.content is not None and "|" in result.content
-    assert result.content is not None and "---" in result.content
+    assert result.content is not None
+    assert "Name" in result.content
+    assert result.content is not None
+    assert "Age" in result.content
+    assert result.content is not None
+    assert "Alice" in result.content
+    assert result.content is not None
+    assert "30" in result.content
+    assert result.content is not None
+    assert "|" in result.content
+    assert result.content is not None
+    assert "---" in result.content
 
 
 def test_table_empty() -> None:
@@ -528,11 +636,16 @@ def test_table_no_thead() -> None:
     html = "<table><tr><td>Product</td><td>Price</td></tr><tr><td>Apple</td><td>1.00</td></tr></table>"
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "Product" in result.content
-    assert result.content is not None and "Price" in result.content
-    assert result.content is not None and "Apple" in result.content
-    assert result.content is not None and "1.00" in result.content
-    assert result.content is not None and "|" in result.content
+    assert result.content is not None
+    assert "Product" in result.content
+    assert result.content is not None
+    assert "Price" in result.content
+    assert result.content is not None
+    assert "Apple" in result.content
+    assert result.content is not None
+    assert "1.00" in result.content
+    assert result.content is not None
+    assert "|" in result.content
 
 
 def test_table_pipe_chars_in_content() -> None:
@@ -540,9 +653,12 @@ def test_table_pipe_chars_in_content() -> None:
     html = "<table><thead><tr><th>Expression</th><th>Result</th></tr></thead><tbody><tr><td>a | b</td><td>true</td></tr></tbody></table>"
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "Expression" in result.content
-    assert result.content is not None and "Result" in result.content
-    assert result.content is not None and "true" in result.content
+    assert result.content is not None
+    assert "Expression" in result.content
+    assert result.content is not None
+    assert "Result" in result.content
+    assert result.content is not None
+    assert "true" in result.content
 
 
 def test_table_with_alignment() -> None:
@@ -550,13 +666,20 @@ def test_table_with_alignment() -> None:
     html = '<table><thead><tr><th align="left">Left</th><th align="center">Center</th><th align="right">Right</th></tr></thead><tbody><tr><td>L</td><td>C</td><td>R</td></tr></tbody></table>'
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "Left" in result.content
-    assert result.content is not None and "Center" in result.content
-    assert result.content is not None and "Right" in result.content
-    assert result.content is not None and "L" in result.content
-    assert result.content is not None and "C" in result.content
-    assert result.content is not None and "R" in result.content
-    assert result.content is not None and "|" in result.content
+    assert result.content is not None
+    assert "Left" in result.content
+    assert result.content is not None
+    assert "Center" in result.content
+    assert result.content is not None
+    assert "Right" in result.content
+    assert result.content is not None
+    assert "L" in result.content
+    assert result.content is not None
+    assert "C" in result.content
+    assert result.content is not None
+    assert "R" in result.content
+    assert result.content is not None
+    assert "|" in result.content
 
 
 def test_table_with_colspan() -> None:
@@ -564,15 +687,21 @@ def test_table_with_colspan() -> None:
     html = '<table><thead><tr><th colspan="2">Full Name</th></tr></thead><tbody><tr><td>John</td><td>Doe</td></tr></tbody></table>'
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "Full Name" in result.content
-    assert result.content is not None and "John" in result.content
-    assert result.content is not None and "Doe" in result.content
+    assert result.content is not None
+    assert "Full Name" in result.content
+    assert result.content is not None
+    assert "John" in result.content
+    assert result.content is not None
+    assert "Doe" in result.content
 
 
 def test_unordered_list() -> None:
     """Unordered list."""
     html = "<ul><li>Item 1</li><li>Item 2</li><li>Item 3</li></ul>"
     result = convert(html=html)
-    assert result.content is not None and "- Item 1" in result.content
-    assert result.content is not None and "- Item 2" in result.content
-    assert result.content is not None and "- Item 3" in result.content
+    assert result.content is not None
+    assert "- Item 1" in result.content
+    assert result.content is not None
+    assert "- Item 2" in result.content
+    assert result.content is not None
+    assert "- Item 3" in result.content

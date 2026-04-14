@@ -1893,7 +1893,9 @@ fn conversion_error_to_rustler_err(e: html_to_markdown_rs::error::ConversionErro
     e.to_string()
 }
 
-fn on_load(_env: rustler::Env, _info: rustler::Term) -> bool {
+fn on_load(env: rustler::Env, _info: rustler::Term) -> bool {
+    env.register::<ConversionOptionsBuilder>()
+        .expect("Failed to register resource type ConversionOptionsBuilder");
     true
 }
 

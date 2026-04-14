@@ -94,7 +94,8 @@ def test_structured_data_json_ld() -> None:
     html = '<html><head><title>Article</title><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"My Article","author":{"@type":"Person","name":"Jane Doe"},"datePublished":"2024-01-15"}</script></head><body><h1>My Article</h1><p>Article body text.</p></body></html>'
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "My Article" in result.content
+    assert result.content is not None
+    assert "My Article" in result.content
 
 
 def test_structured_data_multiple_json_ld() -> None:
@@ -102,7 +103,8 @@ def test_structured_data_multiple_json_ld() -> None:
     html = '<html><head><title>Shop Page</title><script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"Widget","price":"9.99"}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home"}]}</script></head><body><h1>Widget</h1><p>A great widget for all purposes.</p></body></html>'
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "Widget" in result.content
+    assert result.content is not None
+    assert "Widget" in result.content
 
 
 def test_twitter_card_tags() -> None:

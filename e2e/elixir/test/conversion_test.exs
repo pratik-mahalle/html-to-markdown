@@ -6,8 +6,8 @@ defmodule E2e.ConversionTest do
   describe "blockquote_multiple_paragraphs" do
     test "Blockquote with multiple paragraphs has each paragraph prefixed" do
       {:ok, result} = HtmlToMarkdown.convert("<blockquote><p>First paragraph.</p><p>Second paragraph.</p></blockquote>")
-      assert String.contains?(result.content, "> First paragraph.")
-      assert String.contains?(result.content, "> Second paragraph.")
+      assert String.contains?(to_string(result.content), "> First paragraph.")
+      assert String.contains?(to_string(result.content), "> Second paragraph.")
     end
   end
 
@@ -15,15 +15,15 @@ defmodule E2e.ConversionTest do
     test "Nested blockquote produces double-prefixed lines" do
       {:ok, result} = HtmlToMarkdown.convert("<blockquote><p>Outer quote.</p><blockquote><p>Inner quote.</p></blockquote></blockquote>")
       assert result.content != ""
-      assert String.contains?(result.content, "Outer quote.")
-      assert String.contains?(result.content, "Inner quote.")
+      assert String.contains?(to_string(result.content), "Outer quote.")
+      assert String.contains?(to_string(result.content), "Inner quote.")
     end
   end
 
   describe "blockquote_simple" do
     test "Simple blockquote" do
       {:ok, result} = HtmlToMarkdown.convert("<blockquote><p>Quote text</p></blockquote>")
-      assert String.contains?(result.content, "> Quote text")
+      assert String.contains?(to_string(result.content), "> Quote text")
     end
   end
 
@@ -31,23 +31,23 @@ defmodule E2e.ConversionTest do
     test "Blockquote containing a list preserves list items inside quote" do
       {:ok, result} = HtmlToMarkdown.convert("<blockquote><p>Quote intro:</p><ul><li>Point one</li><li>Point two</li></ul></blockquote>")
       assert result.content != ""
-      assert String.contains?(result.content, "Quote intro:")
-      assert String.contains?(result.content, "Point one")
-      assert String.contains?(result.content, "Point two")
+      assert String.contains?(to_string(result.content), "Quote intro:")
+      assert String.contains?(to_string(result.content), "Point one")
+      assert String.contains?(to_string(result.content), "Point two")
     end
   end
 
   describe "bold_and_italic" do
     test "Nested bold and italic" do
       {:ok, result} = HtmlToMarkdown.convert("<p><strong><em>both</em></strong></p>")
-      assert String.contains?(result.content, "***both***")
+      assert String.contains?(to_string(result.content), "***both***")
     end
   end
 
   describe "bold_strong" do
     test "Strong tag converts to bold" do
       {:ok, result} = HtmlToMarkdown.convert("<p><strong>bold</strong></p>")
-      assert String.contains?(result.content, "**bold**")
+      assert String.contains?(to_string(result.content), "**bold**")
     end
   end
 
@@ -55,7 +55,7 @@ defmodule E2e.ConversionTest do
     test "Code block with language preserves content" do
       {:ok, result} = HtmlToMarkdown.convert("<pre><code class=\"language-python\">print('hello')</code></pre>")
       assert result.content != ""
-      assert String.contains?(result.content, "print('hello')")
+      assert String.contains?(to_string(result.content), "print('hello')")
     end
   end
 
@@ -63,14 +63,14 @@ defmodule E2e.ConversionTest do
     test "Code block without a language class preserves content" do
       {:ok, result} = HtmlToMarkdown.convert("<pre><code>plain code here</code></pre>")
       assert result.content != ""
-      assert String.contains?(result.content, "plain code here")
+      assert String.contains?(to_string(result.content), "plain code here")
     end
   end
 
   describe "code_inline_in_paragraph" do
     test "Inline code element nested inside a paragraph" do
       {:ok, result} = HtmlToMarkdown.convert("<p>Call the <code>initialize()</code> method first.</p>")
-      assert String.contains?(result.content, "`initialize()`")
+      assert String.contains?(to_string(result.content), "`initialize()`")
     end
   end
 
@@ -78,7 +78,7 @@ defmodule E2e.ConversionTest do
     test "Inline code containing backtick characters is properly escaped" do
       {:ok, result} = HtmlToMarkdown.convert("<p>Use <code>`backtick` here</code> carefully.</p>")
       assert result.content != ""
-      assert String.contains?(result.content, "backtick")
+      assert String.contains?(to_string(result.content), "backtick")
     end
   end
 
@@ -86,45 +86,45 @@ defmodule E2e.ConversionTest do
     test "mark tag produces highlighted output" do
       {:ok, result} = HtmlToMarkdown.convert("<p><mark>highlighted</mark></p>")
       assert result.content != ""
-      assert String.contains?(result.content, "highlighted")
+      assert String.contains?(to_string(result.content), "highlighted")
     end
   end
 
   describe "emphasis_strikethrough_del" do
     test "del tag converts to GFM strikethrough" do
       {:ok, result} = HtmlToMarkdown.convert("<p><del>deleted text</del></p>")
-      assert String.contains?(result.content, "~~deleted text~~")
+      assert String.contains?(to_string(result.content), "~~deleted text~~")
     end
   end
 
   describe "emphasis_strikethrough_s" do
     test "s tag converts to GFM strikethrough" do
       {:ok, result} = HtmlToMarkdown.convert("<p><s>strikethrough</s></p>")
-      assert String.contains?(result.content, "~~strikethrough~~")
+      assert String.contains?(to_string(result.content), "~~strikethrough~~")
     end
   end
 
   describe "emphasis_subscript" do
     test "sub tag content is preserved" do
       {:ok, result} = HtmlToMarkdown.convert("<p>H<sub>2</sub>O</p>")
-      assert String.contains?(result.content, "H")
-      assert String.contains?(result.content, "2")
-      assert String.contains?(result.content, "O")
+      assert String.contains?(to_string(result.content), "H")
+      assert String.contains?(to_string(result.content), "2")
+      assert String.contains?(to_string(result.content), "O")
     end
   end
 
   describe "emphasis_superscript" do
     test "sup tag content is preserved" do
       {:ok, result} = HtmlToMarkdown.convert("<p>x<sup>2</sup></p>")
-      assert String.contains?(result.content, "x")
-      assert String.contains?(result.content, "2")
+      assert String.contains?(to_string(result.content), "x")
+      assert String.contains?(to_string(result.content), "2")
     end
   end
 
   describe "emphasis_underline_u" do
     test "u tag content is preserved in output" do
       {:ok, result} = HtmlToMarkdown.convert("<p><u>underlined</u></p>")
-      assert String.contains?(result.content, "underlined")
+      assert String.contains?(to_string(result.content), "underlined")
     end
   end
 
@@ -132,7 +132,7 @@ defmodule E2e.ConversionTest do
     test "Form input elements produce readable output without form mechanics" do
       {:ok, result} = HtmlToMarkdown.convert("<form><label for=\"name\">Name:</label><input type=\"text\" id=\"name\" placeholder=\"Enter name\"></form>")
       assert result.content != ""
-      assert String.contains?(result.content, "Name")
+      assert String.contains?(to_string(result.content), "Name")
     end
   end
 
@@ -140,7 +140,7 @@ defmodule E2e.ConversionTest do
     test "Select element with options produces readable output" do
       {:ok, result} = HtmlToMarkdown.convert("<form><label>Color:</label><select><option value=\"red\">Red</option><option value=\"blue\" selected>Blue</option><option value=\"green\">Green</option></select></form>")
       assert result.content != ""
-      assert String.contains?(result.content, "Color")
+      assert String.contains?(to_string(result.content), "Color")
     end
   end
 
@@ -148,7 +148,7 @@ defmodule E2e.ConversionTest do
     test "Textarea element produces readable output" do
       {:ok, result} = HtmlToMarkdown.convert("<form><label>Message:</label><textarea>Default text content</textarea></form>")
       assert result.content != ""
-      assert String.contains?(result.content, "Message")
+      assert String.contains?(to_string(result.content), "Message")
     end
   end
 
@@ -197,16 +197,16 @@ defmodule E2e.ConversionTest do
   describe "image_figure_figcaption" do
     test "Figure with figcaption preserves both image and caption" do
       {:ok, result} = HtmlToMarkdown.convert("<figure><img src=\"sunset.jpg\" alt=\"A sunset\"><figcaption>Beautiful sunset over the ocean</figcaption></figure>")
-      assert String.contains?(result.content, "![A sunset](sunset.jpg)")
-      assert String.contains?(result.content, "Beautiful sunset over the ocean")
+      assert String.contains?(to_string(result.content), "![A sunset](sunset.jpg)")
+      assert String.contains?(to_string(result.content), "Beautiful sunset over the ocean")
     end
   end
 
   describe "image_linked" do
     test "Image inside an anchor produces a linked image" do
       {:ok, result} = HtmlToMarkdown.convert("<a href=\"https://example.com\"><img src=\"icon.png\" alt=\"Icon\"></a>")
-      assert String.contains?(result.content, "![Icon](icon.png)")
-      assert String.contains?(result.content, "https://example.com")
+      assert String.contains?(to_string(result.content), "![Icon](icon.png)")
+      assert String.contains?(to_string(result.content), "https://example.com")
     end
   end
 
@@ -214,44 +214,44 @@ defmodule E2e.ConversionTest do
     test "Image without alt text produces image markdown" do
       {:ok, result} = HtmlToMarkdown.convert("<img src=\"banner.jpg\">")
       assert result.content != ""
-      assert String.contains?(result.content, "banner.jpg")
+      assert String.contains?(to_string(result.content), "banner.jpg")
     end
   end
 
   describe "image_simple" do
     test "Image with alt text" do
       {:ok, result} = HtmlToMarkdown.convert("<img src=\"photo.jpg\" alt=\"A photo\">")
-      assert String.contains?(result.content, "![A photo](photo.jpg)")
+      assert String.contains?(to_string(result.content), "![A photo](photo.jpg)")
     end
   end
 
   describe "image_with_title" do
     test "Image with title attribute includes title in output" do
       {:ok, result} = HtmlToMarkdown.convert("<img src=\"chart.png\" alt=\"Sales chart\" title=\"Q3 Sales\">")
-      assert String.contains?(result.content, "![Sales chart](chart.png")
-      assert String.contains?(result.content, "Q3 Sales")
+      assert String.contains?(to_string(result.content), "![Sales chart](chart.png")
+      assert String.contains?(to_string(result.content), "Q3 Sales")
     end
   end
 
   describe "inline_code" do
     test "Inline code" do
       {:ok, result} = HtmlToMarkdown.convert("<p>Use <code>console.log()</code> to debug</p>")
-      assert String.contains?(result.content, "`console.log()`")
+      assert String.contains?(to_string(result.content), "`console.log()`")
     end
   end
 
   describe "italic_em" do
     test "Em tag converts to italic" do
       {:ok, result} = HtmlToMarkdown.convert("<p><em>italic</em></p>")
-      assert String.contains?(result.content, "*italic*")
+      assert String.contains?(to_string(result.content), "*italic*")
     end
   end
 
   describe "line_break_br_tag" do
     test "Single br tag produces a line break in output" do
       {:ok, result} = HtmlToMarkdown.convert("<p>First line.<br>Second line.</p>")
-      assert String.contains?(result.content, "First line.")
-      assert String.contains?(result.content, "Second line.")
+      assert String.contains?(to_string(result.content), "First line.")
+      assert String.contains?(to_string(result.content), "Second line.")
     end
   end
 
@@ -259,117 +259,117 @@ defmodule E2e.ConversionTest do
     test "hr tag produces a horizontal separator between content" do
       {:ok, result} = HtmlToMarkdown.convert("<p>Before rule.</p><hr><p>After rule.</p>")
       assert result.content != ""
-      assert String.contains?(result.content, "Before rule.")
-      assert String.contains?(result.content, "After rule.")
+      assert String.contains?(to_string(result.content), "Before rule.")
+      assert String.contains?(to_string(result.content), "After rule.")
     end
   end
 
   describe "line_break_multiple_br" do
     test "Multiple consecutive br tags in sequence" do
       {:ok, result} = HtmlToMarkdown.convert("<p>Start.<br><br>End.</p>")
-      assert String.contains?(result.content, "Start.")
-      assert String.contains?(result.content, "End.")
+      assert String.contains?(to_string(result.content), "Start.")
+      assert String.contains?(to_string(result.content), "End.")
     end
   end
 
   describe "link_anchor_fragment" do
     test "Fragment-only anchor link is preserved" do
       {:ok, result} = HtmlToMarkdown.convert("<a href=\"\#section\">Jump to section</a>")
-      assert String.contains?(result.content, "[Jump to section](\#section)")
+      assert String.contains?(to_string(result.content), "[Jump to section](\#section)")
     end
   end
 
   describe "link_empty_href" do
     test "Link with empty href produces output with the link text" do
       {:ok, result} = HtmlToMarkdown.convert("<a href=\"\">No destination</a>")
-      assert String.contains?(result.content, "No destination")
+      assert String.contains?(to_string(result.content), "No destination")
     end
   end
 
   describe "link_image_inside" do
     test "Image inside a link produces a linked image" do
       {:ok, result} = HtmlToMarkdown.convert("<a href=\"https://example.com\"><img src=\"logo.png\" alt=\"Logo\"></a>")
-      assert String.contains?(result.content, "![Logo](logo.png)")
-      assert String.contains?(result.content, "https://example.com")
+      assert String.contains?(to_string(result.content), "![Logo](logo.png)")
+      assert String.contains?(to_string(result.content), "https://example.com")
     end
   end
 
   describe "link_mailto" do
     test "Mailto link is preserved with mailto: scheme" do
       {:ok, result} = HtmlToMarkdown.convert("<a href=\"mailto:user@example.com\">Email us</a>")
-      assert String.contains?(result.content, "mailto:user@example.com")
+      assert String.contains?(to_string(result.content), "mailto:user@example.com")
     end
   end
 
   describe "link_simple" do
     test "Simple link" do
       {:ok, result} = HtmlToMarkdown.convert("<a href=\"https://example.com\">Example</a>")
-      assert String.contains?(result.content, "[Example](https://example.com)")
+      assert String.contains?(to_string(result.content), "[Example](https://example.com)")
     end
   end
 
   describe "link_with_bold_text" do
     test "Link containing bold text preserves formatting" do
       {:ok, result} = HtmlToMarkdown.convert("<a href=\"https://example.com\"><strong>Bold link</strong></a>")
-      assert String.contains?(result.content, "**Bold link**")
-      assert String.contains?(result.content, "https://example.com")
+      assert String.contains?(to_string(result.content), "**Bold link**")
+      assert String.contains?(to_string(result.content), "https://example.com")
     end
   end
 
   describe "link_with_title" do
     test "Link with title attribute" do
       {:ok, result} = HtmlToMarkdown.convert("<a href=\"https://example.com\" title=\"Example Site\">Example</a>")
-      assert String.contains?(result.content, "[Example](https://example.com")
-      assert String.contains?(result.content, "Example Site")
+      assert String.contains?(to_string(result.content), "[Example](https://example.com")
+      assert String.contains?(to_string(result.content), "Example Site")
     end
   end
 
   describe "list_definition_dl" do
     test "Definition list with dt and dd elements" do
       {:ok, result} = HtmlToMarkdown.convert("<dl><dt>Term One</dt><dd>Definition of term one.</dd><dt>Term Two</dt><dd>Definition of term two.</dd></dl>")
-      assert String.contains?(result.content, "Term One")
-      assert String.contains?(result.content, "Definition of term one.")
-      assert String.contains?(result.content, "Term Two")
-      assert String.contains?(result.content, "Definition of term two.")
+      assert String.contains?(to_string(result.content), "Term One")
+      assert String.contains?(to_string(result.content), "Definition of term one.")
+      assert String.contains?(to_string(result.content), "Term Two")
+      assert String.contains?(to_string(result.content), "Definition of term two.")
     end
   end
 
   describe "list_item_multiple_paragraphs" do
     test "List item containing multiple paragraphs" do
       {:ok, result} = HtmlToMarkdown.convert("<ul><li><p>First paragraph in item.</p><p>Second paragraph in item.</p></li><li>Simple item</li></ul>")
-      assert String.contains?(result.content, "First paragraph in item.")
-      assert String.contains?(result.content, "Second paragraph in item.")
-      assert String.contains?(result.content, "Simple item")
+      assert String.contains?(to_string(result.content), "First paragraph in item.")
+      assert String.contains?(to_string(result.content), "Second paragraph in item.")
+      assert String.contains?(to_string(result.content), "Simple item")
     end
   end
 
   describe "list_mixed_nested" do
     test "Mixed list: ordered list nested inside unordered list" do
       {:ok, result} = HtmlToMarkdown.convert("<ul><li>Item A<ol><li>Sub 1</li><li>Sub 2</li></ol></li><li>Item B</li></ul>")
-      assert String.contains?(result.content, "Item A")
-      assert String.contains?(result.content, "Sub 1")
-      assert String.contains?(result.content, "Sub 2")
-      assert String.contains?(result.content, "Item B")
+      assert String.contains?(to_string(result.content), "Item A")
+      assert String.contains?(to_string(result.content), "Sub 1")
+      assert String.contains?(to_string(result.content), "Sub 2")
+      assert String.contains?(to_string(result.content), "Item B")
     end
   end
 
   describe "list_nested_ordered" do
     test "Nested ordered list with two levels of depth" do
       {:ok, result} = HtmlToMarkdown.convert("<ol><li>Step 1<ol><li>Step 1a</li><li>Step 1b</li></ol></li><li>Step 2</li></ol>")
-      assert String.contains?(result.content, "Step 1")
-      assert String.contains?(result.content, "Step 1a")
-      assert String.contains?(result.content, "Step 1b")
-      assert String.contains?(result.content, "Step 2")
+      assert String.contains?(to_string(result.content), "Step 1")
+      assert String.contains?(to_string(result.content), "Step 1a")
+      assert String.contains?(to_string(result.content), "Step 1b")
+      assert String.contains?(to_string(result.content), "Step 2")
     end
   end
 
   describe "list_nested_unordered" do
     test "Nested unordered list with two levels of depth" do
       {:ok, result} = HtmlToMarkdown.convert("<ul><li>Parent A<ul><li>Child A1</li><li>Child A2</li></ul></li><li>Parent B</li></ul>")
-      assert String.contains?(result.content, "Parent A")
-      assert String.contains?(result.content, "Child A1")
-      assert String.contains?(result.content, "Child A2")
-      assert String.contains?(result.content, "Parent B")
+      assert String.contains?(to_string(result.content), "Parent A")
+      assert String.contains?(to_string(result.content), "Child A1")
+      assert String.contains?(to_string(result.content), "Child A2")
+      assert String.contains?(to_string(result.content), "Parent B")
     end
   end
 
@@ -377,32 +377,32 @@ defmodule E2e.ConversionTest do
     test "Task list with checked and unchecked checkboxes" do
       {:ok, result} = HtmlToMarkdown.convert("<ul><li><input type=\"checkbox\" checked> Done task</li><li><input type=\"checkbox\"> Pending task</li></ul>")
       assert result.content != ""
-      assert String.contains?(result.content, "Done task")
-      assert String.contains?(result.content, "Pending task")
+      assert String.contains?(to_string(result.content), "Done task")
+      assert String.contains?(to_string(result.content), "Pending task")
     end
   end
 
   describe "ordered_list" do
     test "Ordered list" do
       {:ok, result} = HtmlToMarkdown.convert("<ol><li>First</li><li>Second</li><li>Third</li></ol>")
-      assert String.contains?(result.content, "1. First")
-      assert String.contains?(result.content, "2. Second")
-      assert String.contains?(result.content, "3. Third")
+      assert String.contains?(to_string(result.content), "1. First")
+      assert String.contains?(to_string(result.content), "2. Second")
+      assert String.contains?(to_string(result.content), "3. Third")
     end
   end
 
   describe "paragraph_multiple" do
     test "Multiple paragraphs are separated by a blank line" do
       {:ok, result} = HtmlToMarkdown.convert("<p>First paragraph.</p><p>Second paragraph.</p>")
-      assert String.contains?(result.content, "First paragraph.")
-      assert String.contains?(result.content, "Second paragraph.")
+      assert String.contains?(to_string(result.content), "First paragraph.")
+      assert String.contains?(to_string(result.content), "Second paragraph.")
     end
   end
 
   describe "paragraph_nested_divs" do
     test "Text nested inside divs is extracted correctly" do
       {:ok, result} = HtmlToMarkdown.convert("<div><div><p>Nested text</p></div></div>")
-      assert String.contains?(result.content, "Nested text")
+      assert String.contains?(to_string(result.content), "Nested text")
     end
   end
 
@@ -416,9 +416,9 @@ defmodule E2e.ConversionTest do
   describe "paragraph_with_inline_formatting" do
     test "Paragraph with bold, italic, and a link" do
       {:ok, result} = HtmlToMarkdown.convert("<p>This has <strong>bold</strong>, <em>italic</em>, and a <a href=\"https://example.com\">link</a>.</p>")
-      assert String.contains?(result.content, "**bold**")
-      assert String.contains?(result.content, "*italic*")
-      assert String.contains?(result.content, "[link](https://example.com)")
+      assert String.contains?(to_string(result.content), "**bold**")
+      assert String.contains?(to_string(result.content), "*italic*")
+      assert String.contains?(to_string(result.content), "[link](https://example.com)")
     end
   end
 
@@ -426,34 +426,34 @@ defmodule E2e.ConversionTest do
     test "Paragraph with br tags produces line breaks in output" do
       {:ok, result} = HtmlToMarkdown.convert("<p>Line one.<br>Line two.<br>Line three.</p>")
       assert result.content != ""
-      assert String.contains?(result.content, "Line one.")
-      assert String.contains?(result.content, "Line two.")
-      assert String.contains?(result.content, "Line three.")
+      assert String.contains?(to_string(result.content), "Line one.")
+      assert String.contains?(to_string(result.content), "Line two.")
+      assert String.contains?(to_string(result.content), "Line three.")
     end
   end
 
   describe "semantic_abbr" do
     test "Abbreviation element text is preserved" do
       {:ok, result} = HtmlToMarkdown.convert("<p>The <abbr title=\"World Wide Web\">WWW</abbr> is global.</p>")
-      assert String.contains?(result.content, "WWW")
+      assert String.contains?(to_string(result.content), "WWW")
     end
   end
 
   describe "semantic_article" do
     test "Article element wrapping content preserves inner content" do
       {:ok, result} = HtmlToMarkdown.convert("<article><h2>Article Title</h2><p>Article body.</p></article>")
-      assert String.contains?(result.content, "Article Title")
-      assert String.contains?(result.content, "Article body.")
+      assert String.contains?(to_string(result.content), "Article Title")
+      assert String.contains?(to_string(result.content), "Article body.")
     end
   end
 
   describe "semantic_definition_list" do
     test "Definition list with term and description" do
       {:ok, result} = HtmlToMarkdown.convert("<dl><dt>HTML</dt><dd>HyperText Markup Language</dd><dt>CSS</dt><dd>Cascading Style Sheets</dd></dl>")
-      assert String.contains?(result.content, "HTML")
-      assert String.contains?(result.content, "HyperText Markup Language")
-      assert String.contains?(result.content, "CSS")
-      assert String.contains?(result.content, "Cascading Style Sheets")
+      assert String.contains?(to_string(result.content), "HTML")
+      assert String.contains?(to_string(result.content), "HyperText Markup Language")
+      assert String.contains?(to_string(result.content), "CSS")
+      assert String.contains?(to_string(result.content), "Cascading Style Sheets")
     end
   end
 
@@ -461,7 +461,7 @@ defmodule E2e.ConversionTest do
     test "Details and summary elements produce readable output" do
       {:ok, result} = HtmlToMarkdown.convert("<details><summary>Click to expand</summary><p>Hidden content here.</p></details>")
       assert result.content != ""
-      assert String.contains?(result.content, "Click to expand")
+      assert String.contains?(to_string(result.content), "Click to expand")
     end
   end
 
@@ -469,8 +469,8 @@ defmodule E2e.ConversionTest do
     test "Horizontal rule produces a separator in output" do
       {:ok, result} = HtmlToMarkdown.convert("<p>Above</p><hr><p>Below</p>")
       assert result.content != ""
-      assert String.contains?(result.content, "Above")
-      assert String.contains?(result.content, "Below")
+      assert String.contains?(to_string(result.content), "Above")
+      assert String.contains?(to_string(result.content), "Below")
     end
   end
 
@@ -478,15 +478,15 @@ defmodule E2e.ConversionTest do
     test "Mark tag produces highlighted output" do
       {:ok, result} = HtmlToMarkdown.convert("<p>This is <mark>highlighted text</mark> in a sentence.</p>")
       assert result.content != ""
-      assert String.contains?(result.content, "highlighted text")
+      assert String.contains?(to_string(result.content), "highlighted text")
     end
   end
 
   describe "semantic_section_with_heading" do
     test "Section element with heading preserves structure" do
       {:ok, result} = HtmlToMarkdown.convert("<section><h3>Section Heading</h3><p>Section content.</p></section>")
-      assert String.contains?(result.content, "Section Heading")
-      assert String.contains?(result.content, "Section content.")
+      assert String.contains?(to_string(result.content), "Section Heading")
+      assert String.contains?(to_string(result.content), "Section content.")
     end
   end
 
@@ -494,22 +494,22 @@ defmodule E2e.ConversionTest do
     test "Subscript and superscript elements are preserved in output" do
       {:ok, result} = HtmlToMarkdown.convert("<p>H<sub>2</sub>O and E=mc<sup>2</sup></p>")
       assert result.content != ""
-      assert String.contains?(result.content, "H")
-      assert String.contains?(result.content, "2")
-      assert String.contains?(result.content, "O")
-      assert String.contains?(result.content, "E=mc")
+      assert String.contains?(to_string(result.content), "H")
+      assert String.contains?(to_string(result.content), "2")
+      assert String.contains?(to_string(result.content), "O")
+      assert String.contains?(to_string(result.content), "E=mc")
     end
   end
 
   describe "simple_table" do
     test "Simple table with header" do
       {:ok, result} = HtmlToMarkdown.convert("<table><thead><tr><th>Name</th><th>Age</th></tr></thead><tbody><tr><td>Alice</td><td>30</td></tr></tbody></table>")
-      assert String.contains?(result.content, "Name")
-      assert String.contains?(result.content, "Age")
-      assert String.contains?(result.content, "Alice")
-      assert String.contains?(result.content, "30")
-      assert String.contains?(result.content, "|")
-      assert String.contains?(result.content, "---")
+      assert String.contains?(to_string(result.content), "Name")
+      assert String.contains?(to_string(result.content), "Age")
+      assert String.contains?(to_string(result.content), "Alice")
+      assert String.contains?(to_string(result.content), "30")
+      assert String.contains?(to_string(result.content), "|")
+      assert String.contains?(to_string(result.content), "---")
     end
   end
 
@@ -524,11 +524,11 @@ defmodule E2e.ConversionTest do
     test "Table without thead uses first row as implied header" do
       {:ok, result} = HtmlToMarkdown.convert("<table><tr><td>Product</td><td>Price</td></tr><tr><td>Apple</td><td>1.00</td></tr></table>")
       assert result.content != ""
-      assert String.contains?(result.content, "Product")
-      assert String.contains?(result.content, "Price")
-      assert String.contains?(result.content, "Apple")
-      assert String.contains?(result.content, "1.00")
-      assert String.contains?(result.content, "|")
+      assert String.contains?(to_string(result.content), "Product")
+      assert String.contains?(to_string(result.content), "Price")
+      assert String.contains?(to_string(result.content), "Apple")
+      assert String.contains?(to_string(result.content), "1.00")
+      assert String.contains?(to_string(result.content), "|")
     end
   end
 
@@ -536,9 +536,9 @@ defmodule E2e.ConversionTest do
     test "Table cells containing pipe characters are escaped in output" do
       {:ok, result} = HtmlToMarkdown.convert("<table><thead><tr><th>Expression</th><th>Result</th></tr></thead><tbody><tr><td>a | b</td><td>true</td></tr></tbody></table>")
       assert result.content != ""
-      assert String.contains?(result.content, "Expression")
-      assert String.contains?(result.content, "Result")
-      assert String.contains?(result.content, "true")
+      assert String.contains?(to_string(result.content), "Expression")
+      assert String.contains?(to_string(result.content), "Result")
+      assert String.contains?(to_string(result.content), "true")
     end
   end
 
@@ -546,13 +546,13 @@ defmodule E2e.ConversionTest do
     test "Table with column alignment attributes" do
       {:ok, result} = HtmlToMarkdown.convert("<table><thead><tr><th align=\"left\">Left</th><th align=\"center\">Center</th><th align=\"right\">Right</th></tr></thead><tbody><tr><td>L</td><td>C</td><td>R</td></tr></tbody></table>")
       assert result.content != ""
-      assert String.contains?(result.content, "Left")
-      assert String.contains?(result.content, "Center")
-      assert String.contains?(result.content, "Right")
-      assert String.contains?(result.content, "L")
-      assert String.contains?(result.content, "C")
-      assert String.contains?(result.content, "R")
-      assert String.contains?(result.content, "|")
+      assert String.contains?(to_string(result.content), "Left")
+      assert String.contains?(to_string(result.content), "Center")
+      assert String.contains?(to_string(result.content), "Right")
+      assert String.contains?(to_string(result.content), "L")
+      assert String.contains?(to_string(result.content), "C")
+      assert String.contains?(to_string(result.content), "R")
+      assert String.contains?(to_string(result.content), "|")
     end
   end
 
@@ -560,18 +560,18 @@ defmodule E2e.ConversionTest do
     test "Table with colspan attribute in a header cell" do
       {:ok, result} = HtmlToMarkdown.convert("<table><thead><tr><th colspan=\"2\">Full Name</th></tr></thead><tbody><tr><td>John</td><td>Doe</td></tr></tbody></table>")
       assert result.content != ""
-      assert String.contains?(result.content, "Full Name")
-      assert String.contains?(result.content, "John")
-      assert String.contains?(result.content, "Doe")
+      assert String.contains?(to_string(result.content), "Full Name")
+      assert String.contains?(to_string(result.content), "John")
+      assert String.contains?(to_string(result.content), "Doe")
     end
   end
 
   describe "unordered_list" do
     test "Unordered list" do
       {:ok, result} = HtmlToMarkdown.convert("<ul><li>Item 1</li><li>Item 2</li><li>Item 3</li></ul>")
-      assert String.contains?(result.content, "- Item 1")
-      assert String.contains?(result.content, "- Item 2")
-      assert String.contains?(result.content, "- Item 3")
+      assert String.contains?(to_string(result.content), "- Item 1")
+      assert String.contains?(to_string(result.content), "- Item 2")
+      assert String.contains?(to_string(result.content), "- Item 3")
     end
   end
 end

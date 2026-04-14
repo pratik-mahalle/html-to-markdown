@@ -73,6 +73,7 @@ public sealed class DocumentMetadata
     /// <summary>
     /// Document text direction from `dir` attribute
     /// </summary>
+    [JsonConverter(typeof(TextDirectionJsonConverter))]
     [JsonPropertyName("text_direction")]
     public TextDirection? TextDirection { get; set; } = null;
 

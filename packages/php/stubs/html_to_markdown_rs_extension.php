@@ -57,6 +57,13 @@ class ConversionOptionsBuilder
  */
 class MetadataConfig
 {
+    public bool $extract_document;
+    public bool $extract_headers;
+    public bool $extract_links;
+    public bool $extract_images;
+    public bool $extract_structured_data;
+    public int $max_structured_data_size;
+
     public function __construct(
         bool $extract_document,
         bool $extract_headers,
@@ -111,6 +118,13 @@ class MetadataConfig
  */
 class MetadataConfigUpdate
 {
+    public ?bool $extract_document;
+    public ?bool $extract_headers;
+    public ?bool $extract_links;
+    public ?bool $extract_images;
+    public ?bool $extract_structured_data;
+    public ?int $max_structured_data_size;
+
     public function __construct(
         ?bool $extract_document = null,
         ?bool $extract_headers = null,
@@ -147,6 +161,48 @@ class MetadataConfigUpdate
  */
 class ConversionOptions
 {
+    public HeadingStyle $heading_style;
+    public ListIndentType $list_indent_type;
+    public int $list_indent_width;
+    public string $bullets;
+    public string $strong_em_symbol;
+    public bool $escape_asterisks;
+    public bool $escape_underscores;
+    public bool $escape_misc;
+    public bool $escape_ascii;
+    public string $code_language;
+    public bool $autolinks;
+    public bool $default_title;
+    public bool $br_in_tables;
+    public HighlightStyle $highlight_style;
+    public bool $extract_metadata;
+    public WhitespaceMode $whitespace_mode;
+    public bool $strip_newlines;
+    public bool $wrap;
+    public int $wrap_width;
+    public bool $convert_as_inline;
+    public string $sub_symbol;
+    public string $sup_symbol;
+    public NewlineStyle $newline_style;
+    public CodeBlockStyle $code_block_style;
+    /** @var array<string> */
+    public array $keep_inline_images_in;
+    public PreprocessingOptions $preprocessing;
+    public string $encoding;
+    public bool $debug;
+    /** @var array<string> */
+    public array $strip_tags;
+    /** @var array<string> */
+    public array $preserve_tags;
+    public bool $skip_images;
+    public LinkStyle $link_style;
+    public OutputFormat $output_format;
+    public bool $include_document_structure;
+    public bool $extract_images;
+    public int $max_image_size;
+    public bool $capture_svg;
+    public bool $infer_dimensions;
+
     /**
      * @param array<string> $keep_inline_images_in
      * @param array<string> $strip_tags
@@ -244,6 +300,48 @@ class ConversionOptions
  */
 class ConversionOptionsUpdate
 {
+    public ?HeadingStyle $heading_style;
+    public ?ListIndentType $list_indent_type;
+    public ?int $list_indent_width;
+    public ?string $bullets;
+    public ?string $strong_em_symbol;
+    public ?bool $escape_asterisks;
+    public ?bool $escape_underscores;
+    public ?bool $escape_misc;
+    public ?bool $escape_ascii;
+    public ?string $code_language;
+    public ?bool $autolinks;
+    public ?bool $default_title;
+    public ?bool $br_in_tables;
+    public ?HighlightStyle $highlight_style;
+    public ?bool $extract_metadata;
+    public ?WhitespaceMode $whitespace_mode;
+    public ?bool $strip_newlines;
+    public ?bool $wrap;
+    public ?int $wrap_width;
+    public ?bool $convert_as_inline;
+    public ?string $sub_symbol;
+    public ?string $sup_symbol;
+    public ?NewlineStyle $newline_style;
+    public ?CodeBlockStyle $code_block_style;
+    /** @var ?array<string> */
+    public ?array $keep_inline_images_in;
+    public ?PreprocessingOptionsUpdate $preprocessing;
+    public ?string $encoding;
+    public ?bool $debug;
+    /** @var ?array<string> */
+    public ?array $strip_tags;
+    /** @var ?array<string> */
+    public ?array $preserve_tags;
+    public ?bool $skip_images;
+    public ?LinkStyle $link_style;
+    public ?OutputFormat $output_format;
+    public ?bool $include_document_structure;
+    public ?bool $extract_images;
+    public ?int $max_image_size;
+    public ?bool $capture_svg;
+    public ?bool $infer_dimensions;
+
     /**
      * @param ?array<string> $keep_inline_images_in
      * @param ?array<string> $strip_tags
@@ -338,6 +436,11 @@ class ConversionOptionsUpdate
  */
 class PreprocessingOptions
 {
+    public bool $enabled;
+    public PreprocessingPreset $preset;
+    public bool $remove_navigation;
+    public bool $remove_forms;
+
     public function __construct(
         bool $enabled,
         PreprocessingPreset $preset,
@@ -360,6 +463,11 @@ class PreprocessingOptions
  */
 class PreprocessingOptionsUpdate
 {
+    public ?bool $enabled;
+    public ?PreprocessingPreset $preset;
+    public ?bool $remove_navigation;
+    public ?bool $remove_forms;
+
     public function __construct(
         ?bool $enabled = null,
         ?PreprocessingPreset $preset = null,
@@ -433,6 +541,10 @@ class ConversionResult
  */
 class DocumentStructure
 {
+    /** @var array<DocumentNode> */
+    public array $nodes;
+    public ?string $source_format;
+
     /**
      * @param array<DocumentNode> $nodes
      */
@@ -451,6 +563,16 @@ class DocumentStructure
  */
 class DocumentNode
 {
+    public string $id;
+    public NodeContent $content;
+    public ?int $parent;
+    /** @var array<int> */
+    public array $children;
+    /** @var array<TextAnnotation> */
+    public array $annotations;
+    /** @var ?array<string, string> */
+    public ?array $attributes;
+
     /**
      * @param array<int> $children
      * @param array<TextAnnotation> $annotations
@@ -483,6 +605,10 @@ class DocumentNode
  */
 class TextAnnotation
 {
+    public int $start;
+    public int $end;
+    public AnnotationKind $kind;
+
     public function __construct(
         int $start,
         int $end,
@@ -499,6 +625,11 @@ class TextAnnotation
  */
 class TableGrid
 {
+    public int $rows;
+    public int $cols;
+    /** @var array<GridCell> */
+    public array $cells;
+
     /**
      * @param array<GridCell> $cells
      */
@@ -519,6 +650,13 @@ class TableGrid
  */
 class GridCell
 {
+    public string $content;
+    public int $row;
+    public int $col;
+    public int $row_span;
+    public int $col_span;
+    public bool $is_header;
+
     public function __construct(
         string $content,
         int $row,
@@ -541,6 +679,9 @@ class GridCell
  */
 class TableData
 {
+    public TableGrid $grid;
+    public string $markdown;
+
     public function __construct(
         TableGrid $grid,
         string $markdown
@@ -555,6 +696,9 @@ class TableData
  */
 class ProcessingWarning
 {
+    public string $message;
+    public WarningKind $kind;
+
     public function __construct(
         string $message,
         WarningKind $kind
@@ -586,6 +730,22 @@ class ProcessingWarning
  */
 class DocumentMetadata
 {
+    public ?string $title;
+    public ?string $description;
+    /** @var array<string> */
+    public array $keywords;
+    public ?string $author;
+    public ?string $canonical_url;
+    public ?string $base_href;
+    public ?string $language;
+    public ?TextDirection $text_direction;
+    /** @var array<string, string> */
+    public array $open_graph;
+    /** @var array<string, string> */
+    public array $twitter_card;
+    /** @var array<string, string> */
+    public array $meta_tags;
+
     /**
      * @param array<string> $keywords
      * @param array<string, string> $open_graph
@@ -647,6 +807,12 @@ class DocumentMetadata
  */
 class HeaderMetadata
 {
+    public int $level;
+    public string $text;
+    public ?string $id;
+    public int $depth;
+    public int $html_offset;
+
     public function __construct(
         int $level,
         string $text,
@@ -686,6 +852,15 @@ class HeaderMetadata
  */
 class LinkMetadata
 {
+    public string $href;
+    public string $text;
+    public ?string $title;
+    public LinkType $link_type;
+    /** @var array<string> */
+    public array $rel;
+    /** @var array<string, string> */
+    public array $attributes;
+
     /**
      * @param array<string> $rel
      * @param array<string, string> $attributes
@@ -733,6 +908,14 @@ class LinkMetadata
  */
 class ImageMetadata
 {
+    public string $src;
+    public ?string $alt;
+    public ?string $title;
+    public ?string $dimensions;
+    public ImageType $image_type;
+    /** @var array<string, string> */
+    public array $attributes;
+
     /**
      * @param array<string, string> $attributes
      */
@@ -775,6 +958,10 @@ class ImageMetadata
  */
 class StructuredData
 {
+    public StructuredDataType $data_type;
+    public string $raw_json;
+    public ?string $schema_type;
+
     public function __construct(
         StructuredDataType $data_type,
         string $raw_json,
@@ -809,6 +996,16 @@ class StructuredData
  */
 class HtmlMetadata
 {
+    public DocumentMetadata $document;
+    /** @var array<HeaderMetadata> */
+    public array $headers;
+    /** @var array<LinkMetadata> */
+    public array $links;
+    /** @var array<ImageMetadata> */
+    public array $images;
+    /** @var array<StructuredData> */
+    public array $structured_data;
+
     /**
      * @param array<HeaderMetadata> $headers
      * @param array<LinkMetadata> $links

@@ -18,14 +18,9 @@
 		"**/*.node"
 	],
 	"scripts": {
-		"build": "napi build --manifest-path ../../crates/html-to-markdown-node/Cargo.toml --release",
-		"build:debug": "napi build --manifest-path ../../crates/html-to-markdown-node/Cargo.toml",
-		"test": "node -e \"console.log('Add test command')\"",
-		"typecheck": "tsc --noEmit",
-		"lint": "biome check --no-errors-on-unmatched .",
-		"lint:fix": "biome check --write --no-errors-on-unmatched .",
-		"format": "biome format --write .",
-		"format:check": "biome format --no-errors-on-unmatched ."
+		"build": "napi build --release",
+		"build:debug": "napi build",
+		"test": "node -e \"console.log('Add test command')\""
 	},
 	"napi": {
 		"name": "html-to-markdown-rs",
@@ -37,6 +32,6 @@
 		]
 	},
 	"devDependencies": {
-		"@napi-rs/cli": "^3.6.1"
+		"@napi-rs/cli": "^3.0.0"
 	}
 }

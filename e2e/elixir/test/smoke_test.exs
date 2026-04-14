@@ -13,7 +13,7 @@ defmodule E2e.SmokeTest do
   describe "smoke_simple_heading" do
     test "H1 heading converts to ATX markdown" do
       {:ok, result} = HtmlToMarkdown.convert("<h1>Title</h1>")
-      assert String.contains?(result.content, "\# Title")
+      assert String.contains?(to_string(result.content), "\# Title")
     end
   end
 

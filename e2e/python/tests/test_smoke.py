@@ -15,7 +15,8 @@ def test_smoke_simple_heading() -> None:
     """H1 heading converts to ATX markdown."""
     html = "<h1>Title</h1>"
     result = convert(html=html)
-    assert result.content is not None and "# Title" in result.content
+    assert result.content is not None
+    assert "# Title" in result.content
 
 
 def test_smoke_simple_paragraph() -> None:

@@ -23,11 +23,13 @@ public final class HtmlToMarkdownRs {
         NativeLib.HTM_CONVERSION_OPTIONS_FREE.invoke(coptions);
       }
       if (resultPtr.equals(MemorySegment.NULL)) {
+        checkLastError();
         return null;
       }
       var jsonPtr = (MemorySegment) NativeLib.HTM_CONVERSION_RESULT_TO_JSON.invoke(resultPtr);
       NativeLib.HTM_CONVERSION_RESULT_FREE.invoke(resultPtr);
       if (jsonPtr.equals(MemorySegment.NULL)) {
+        checkLastError();
         return null;
       }
       String json = jsonPtr.reinterpret(Long.MAX_VALUE).getString(0);
@@ -40,11 +42,20 @@ public final class HtmlToMarkdownRs {
 
   // Helper methods for FFI marshalling
 
+  private static void checkLastError() throws Throwable {
+    int errCode = (int) NativeLib.HTM_LAST_ERROR_CODE.invoke();
+    if (errCode != 0) {
+      var ctxPtr = (MemorySegment) NativeLib.HTM_LAST_ERROR_CONTEXT.invoke();
+      String msg = ctxPtr.reinterpret(Long.MAX_VALUE).getString(0);
+      throw new HtmlToMarkdownRsException(errCode, msg);
+    }
+  }
+
   private static com.fasterxml.jackson.databind.ObjectMapper createObjectMapper() {
     return new com.fasterxml.jackson.databind.ObjectMapper()
+        .registerModule(new com.fasterxml.jackson.datatype.jdk8.Jdk8Module())
         .findAndRegisterModules()
         .setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
-        .setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_DEFAULT)
         .configure(
             com.fasterxml.jackson.databind.MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true);
   }

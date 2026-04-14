@@ -6,7 +6,7 @@ title: "Configuration Reference"
 
 This page documents all configuration types and their defaults across all languages.
 
-### ConversionOptions
+## ConversionOptions
 
 Main conversion options for HTML to Markdown conversion.
 
@@ -55,7 +55,7 @@ Use `ConversionOptions.builder()` to construct, or `the default constructor` for
 
 ---
 
-### PreprocessingOptions
+## PreprocessingOptions
 
 HTML preprocessing options for document cleanup before conversion.
 

@@ -16,9 +16,12 @@ def test_encoding_cjk_characters() -> None:
     html = "<p>中文内容</p><p>日本語テキスト</p><p>한국어 텍스트</p>"
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "中文内容" in result.content
-    assert result.content is not None and "日本語テキスト" in result.content
-    assert result.content is not None and "한국어 텍스트" in result.content
+    assert result.content is not None
+    assert "中文内容" in result.content
+    assert result.content is not None
+    assert "日本語テキスト" in result.content
+    assert result.content is not None
+    assert "한국어 텍스트" in result.content
 
 
 def test_encoding_html_entities() -> None:
@@ -26,9 +29,12 @@ def test_encoding_html_entities() -> None:
     html = "<p>&amp; &lt; &gt; &nbsp; &quot; &apos;</p>"
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "&" in result.content
-    assert result.content is not None and "<" in result.content
-    assert result.content is not None and ">" in result.content
+    assert result.content is not None
+    assert "&" in result.content
+    assert result.content is not None
+    assert "<" in result.content
+    assert result.content is not None
+    assert ">" in result.content
 
 
 def test_encoding_named_entities() -> None:
@@ -36,8 +42,10 @@ def test_encoding_named_entities() -> None:
     html = "<p>Em dash&mdash;used for parenthetical remarks&mdash;is common. Ellipsis&hellip; indicates omission. Non-breaking&nbsp;space.</p>"
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "—" in result.content
-    assert result.content is not None and "…" in result.content
+    assert result.content is not None
+    assert "—" in result.content
+    assert result.content is not None
+    assert "…" in result.content
 
 
 def test_encoding_numeric_entities() -> None:
@@ -45,9 +53,12 @@ def test_encoding_numeric_entities() -> None:
     html = "<p>Copyright: &#169; Trade: &#174; Euro: &#8364; Hex: &#x00A9;</p>"
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "©" in result.content
-    assert result.content is not None and "®" in result.content
-    assert result.content is not None and "€" in result.content
+    assert result.content is not None
+    assert "©" in result.content
+    assert result.content is not None
+    assert "®" in result.content
+    assert result.content is not None
+    assert "€" in result.content
 
 
 def test_encoding_unicode_emoji() -> None:
@@ -55,9 +66,12 @@ def test_encoding_unicode_emoji() -> None:
     html = "<p>Hello 🌍 World 🚀</p><p>Stars: ⭐ ✨</p>"
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "🌍" in result.content
-    assert result.content is not None and "🚀" in result.content
-    assert result.content is not None and "⭐" in result.content
+    assert result.content is not None
+    assert "🌍" in result.content
+    assert result.content is not None
+    assert "🚀" in result.content
+    assert result.content is not None
+    assert "⭐" in result.content
 
 
 def test_html_comments_only() -> None:
@@ -79,7 +93,8 @@ def test_malformed_deeply_nested_elements() -> None:
     html = "<div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><p>Deeply nested content</p></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div>"
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "Deeply nested content" in result.content
+    assert result.content is not None
+    assert "Deeply nested content" in result.content
 
 
 def test_malformed_missing_block_closing_tags() -> None:
@@ -87,9 +102,12 @@ def test_malformed_missing_block_closing_tags() -> None:
     html = "<div><h1>Title<p>First paragraph<p>Second paragraph</div>"
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "Title" in result.content
-    assert result.content is not None and "First paragraph" in result.content
-    assert result.content is not None and "Second paragraph" in result.content
+    assert result.content is not None
+    assert "Title" in result.content
+    assert result.content is not None
+    assert "First paragraph" in result.content
+    assert result.content is not None
+    assert "Second paragraph" in result.content
 
 
 def test_malformed_overlapping_tags() -> None:
@@ -97,7 +115,8 @@ def test_malformed_overlapping_tags() -> None:
     html = "<p><b><i>bold and italic</b></i></p>"
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "bold and italic" in result.content
+    assert result.content is not None
+    assert "bold and italic" in result.content
 
 
 def test_malformed_unclosed_paragraph() -> None:
@@ -105,7 +124,8 @@ def test_malformed_unclosed_paragraph() -> None:
     html = "<p>This paragraph is never closed"
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "This paragraph is never closed" in result.content
+    assert result.content is not None
+    assert "This paragraph is never closed" in result.content
 
 
 def test_script_tags_only() -> None:
@@ -138,7 +158,8 @@ def test_xss_onclick_handler_removed() -> None:
     html = '<p><a href="https://example.com" onclick="alert(\'xss\')">Click me</a></p><button onmouseover="steal_data()">Hover me</button>'
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "Click me" in result.content
+    assert result.content is not None
+    assert "Click me" in result.content
 
 
 def test_xss_script_tag_stripped() -> None:
@@ -146,8 +167,10 @@ def test_xss_script_tag_stripped() -> None:
     html = "<p>Safe content.</p><script>alert('xss')</script><p>More safe content.</p>"
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "Safe content" in result.content
-    assert result.content is not None and "More safe content" in result.content
+    assert result.content is not None
+    assert "Safe content" in result.content
+    assert result.content is not None
+    assert "More safe content" in result.content
 
 
 def test_xss_svg_nested_script_stripped() -> None:
@@ -155,5 +178,7 @@ def test_xss_svg_nested_script_stripped() -> None:
     html = "<p>Before SVG.</p><svg xmlns=\"http://www.w3.org/2000/svg\"><script>alert('svg-xss')</script><text>SVG text</text></svg><p>After SVG.</p>"
     result = convert(html=html)
     assert result.content
-    assert result.content is not None and "Before SVG" in result.content
-    assert result.content is not None and "After SVG" in result.content
+    assert result.content is not None
+    assert "Before SVG" in result.content
+    assert result.content is not None
+    assert "After SVG" in result.content

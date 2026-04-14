@@ -273,6 +273,7 @@ pub unsafe extern "C" fn htm_metadata_config_any_enabled(this: *const html_to_ma
         set_last_error(1, "Null pointer passed for self");
         return 0;
     }
+    // SAFETY: null check above guarantees this is a valid pointer.
     let obj = unsafe { &*this };
     let result = obj.any_enabled();
     if result {
@@ -1106,6 +1107,7 @@ pub unsafe extern "C" fn htm_conversion_options_builder_strip_tags(
         set_last_error(1, "Null pointer passed for self");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees this is a valid pointer originally from Box::into_raw.
     let obj = unsafe { *Box::from_raw(this) };
     if tags.is_null() {
         set_last_error(1, "Null pointer passed for parameter 'tags'");
@@ -1143,6 +1145,7 @@ pub unsafe extern "C" fn htm_conversion_options_builder_preserve_tags(
         set_last_error(1, "Null pointer passed for self");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees this is a valid pointer originally from Box::into_raw.
     let obj = unsafe { *Box::from_raw(this) };
     if tags.is_null() {
         set_last_error(1, "Null pointer passed for parameter 'tags'");
@@ -1180,6 +1183,7 @@ pub unsafe extern "C" fn htm_conversion_options_builder_keep_inline_images_in(
         set_last_error(1, "Null pointer passed for self");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees this is a valid pointer originally from Box::into_raw.
     let obj = unsafe { *Box::from_raw(this) };
     if tags.is_null() {
         set_last_error(1, "Null pointer passed for parameter 'tags'");
@@ -1217,6 +1221,7 @@ pub unsafe extern "C" fn htm_conversion_options_builder_preprocessing(
         set_last_error(1, "Null pointer passed for self");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees this is a valid pointer originally from Box::into_raw.
     let obj = unsafe { *Box::from_raw(this) };
     if preprocessing.is_null() {
         set_last_error(1, "Null pointer passed for parameter 'preprocessing'");
@@ -1240,6 +1245,7 @@ pub unsafe extern "C" fn htm_conversion_options_builder_build(
         set_last_error(1, "Null pointer passed for self");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees this is a valid pointer originally from Box::into_raw.
     let obj = unsafe { *Box::from_raw(this) };
     let result = obj.build();
     Box::into_raw(Box::new(result))
@@ -2315,35 +2321,6 @@ pub unsafe extern "C" fn htm_conversion_result_warnings(
             Err(_) => std::ptr::null_mut(),
         },
         Err(_) => std::ptr::null_mut(),
-    }
-}
-
-/// Serialize a `ConversionResult` to a JSON string. Returns null on failure.
-/// # Safety
-/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
-/// The returned string must be freed with `htm_free_string`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_result_to_json(
-    ptr: *const html_to_markdown_rs::ConversionResult,
-) -> *mut c_char {
-    clear_last_error();
-    if ptr.is_null() {
-        set_last_error(1, "Null pointer passed to to_json");
-        return std::ptr::null_mut();
-    }
-    let val = unsafe { &*ptr };
-    match serde_json::to_string(val) {
-        Ok(s) => match CString::new(s) {
-            Ok(cs) => cs.into_raw(),
-            Err(e) => {
-                set_last_error(2, &e.to_string());
-                std::ptr::null_mut()
-            }
-        },
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
     }
 }
 
@@ -3649,6 +3626,7 @@ pub unsafe extern "C" fn htm_header_metadata_is_valid(this: *const html_to_markd
         set_last_error(1, "Null pointer passed for self");
         return 0;
     }
+    // SAFETY: null check above guarantees this is a valid pointer.
     let obj = unsafe { &*this };
     let result = obj.is_valid();
     if result {
@@ -5040,7 +5018,7 @@ pub unsafe extern "C" fn htm_convert(
     let options_rs = if options.is_null() {
         None
     } else {
-        Some(unsafe { &*options }.clone())
+        Some(unsafe { &*(options as *const html_to_markdown_rs::ConversionOptions) }.clone())
     };
     let result = html_to_markdown_rs::convert(&html_rs, options_rs);
     match result {
@@ -6657,7 +6635,7 @@ pub unsafe extern "C" fn htm_convert_with_visitor(
     let options_rs: Option<html_to_markdown_rs::ConversionOptions> = if options.is_null() {
         None
     } else {
-        Some(unsafe { &*options }.clone())
+        Some(unsafe { &*(options as *const html_to_markdown_rs::ConversionOptions) }.clone())
     };
 
     // Build the visitor handle if provided.

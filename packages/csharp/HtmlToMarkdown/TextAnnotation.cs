@@ -28,6 +28,7 @@ public sealed class TextAnnotation
     /// <summary>
     /// The type of annotation.
     /// </summary>
+    [JsonConverter(typeof(AnnotationKindJsonConverter))]
     [JsonPropertyName("kind")]
     public AnnotationKind Kind { get; set; } = default!;
 

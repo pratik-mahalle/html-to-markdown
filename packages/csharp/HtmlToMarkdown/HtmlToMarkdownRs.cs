@@ -13,7 +13,7 @@ public static class HtmlToMarkdownRs
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower) },
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
     };
 
     /// <summary>
@@ -50,6 +50,14 @@ public static class HtmlToMarkdownRs
             html,
             optionsHandle
         );
+        if (result == IntPtr.Zero)
+        {
+            var err = GetLastError();
+            if (err.Code != 0)
+            {
+                throw err;
+            }
+        }
         var jsonPtr = NativeMethods.ConversionResultToJson(result);
         var json = Marshal.PtrToStringUTF8(jsonPtr);
         NativeMethods.FreeString(jsonPtr);
@@ -66,7 +74,7 @@ public static class HtmlToMarkdownRs
     /// </summary>
     public static MetadataConfig MetadataConfigDefault()
     {
-        var result = NativeMethods.Default();
+        var result = NativeMethods.MetadataConfigDefault();
         var jsonPtr = NativeMethods.MetadataConfigToJson(result);
         var json = Marshal.PtrToStringUTF8(jsonPtr);
         NativeMethods.FreeString(jsonPtr);
@@ -118,14 +126,14 @@ public static class HtmlToMarkdownRs
     /// </summary>
     public static bool MetadataConfigAnyEnabled()
     {
-        var result = NativeMethods.AnyEnabled();
+        var result = NativeMethods.MetadataConfigAnyEnabled();
         var returnValue = result != 0;
         return returnValue;
     }
 
     public static ConversionOptions ConversionOptionsDefault()
     {
-        var result = NativeMethods.Default();
+        var result = NativeMethods.ConversionOptionsDefault();
         var jsonPtr = NativeMethods.ConversionOptionsToJson(result);
         var json = Marshal.PtrToStringUTF8(jsonPtr);
         NativeMethods.FreeString(jsonPtr);
@@ -134,9 +142,19 @@ public static class HtmlToMarkdownRs
         return returnValue;
     }
 
+    /// <summary>
+    /// Create a new builder with default values.
+    /// </summary>
+    public static ConversionOptionsBuilder ConversionOptionsBuilder()
+    {
+        var result = NativeMethods.ConversionOptionsBuilder();
+        var returnValue = new ConversionOptionsBuilder(result);
+        return returnValue;
+    }
+
     public static PreprocessingOptions PreprocessingOptionsDefault()
     {
-        var result = NativeMethods.Default();
+        var result = NativeMethods.PreprocessingOptionsDefault();
         var jsonPtr = NativeMethods.PreprocessingOptionsToJson(result);
         var json = Marshal.PtrToStringUTF8(jsonPtr);
         NativeMethods.FreeString(jsonPtr);
@@ -177,7 +195,7 @@ public static class HtmlToMarkdownRs
     /// </summary>
     public static bool HeaderMetadataIsValid()
     {
-        var result = NativeMethods.IsValid();
+        var result = NativeMethods.HeaderMetadataIsValid();
         var returnValue = result != 0;
         return returnValue;
     }
@@ -207,7 +225,7 @@ public static class HtmlToMarkdownRs
     public static LinkType LinkMetadataClassifyLink(string href)
     {
         ArgumentNullException.ThrowIfNull(href);
-        var result = NativeMethods.ClassifyLink(
+        var result = NativeMethods.LinkMetadataClassifyLink(
             href
         );
         var json = Marshal.PtrToStringUTF8(result);

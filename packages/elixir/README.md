@@ -18,7 +18,7 @@
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown?label=Java&color=007ec6" alt="Java">
   </a>
   <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown">
-    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/html-to-markdown?label=Go&color=007ec6&filter=v3.1.0" alt="Go">
+    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/html-to-markdown?label=Go&color=007ec6&filter=v3.2.0" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/">
     <img src="https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown?label=C%23&color=007ec6" alt="C#">
@@ -73,7 +73,7 @@ Requires Elixir 1.19+ and OTP 28. Add to your `mix.exs`:
 ```elixir
 def deps do
   [
-    {:html_to_markdown, "~> 3.1.0"}
+    {:html_to_markdown, "~> 3.2.0"}
   ]
 end
 ```
@@ -86,6 +86,15 @@ end
 
 ## Performance Snapshot
 
+**Apple M4** · `convert()` · Real Wikipedia documents
+
+| Document | Size | Latency | Throughput |
+|----------|------|---------|------------|
+| Lists (Timeline) | 129KB |  | 321.7 MB/s |
+| Tables (Countries) | 360KB |  | 293.8 MB/s |
+| Medium (Python) | 656KB |  | 281.5 MB/s |
+| Large (Rust) | 567KB |  | 268.7 MB/s |
+| Small (Intro) | 463KB |  | 262.9 MB/s |
 
 
 

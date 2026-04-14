@@ -92,7 +92,7 @@ defmodule E2e.MetadataTest do
     test "JSON-LD script tag is stripped from output (security) but metadata may be extracted" do
       {:ok, result} = HtmlToMarkdown.convert("<html><head><title>Article</title><script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"My Article\",\"author\":{\"@type\":\"Person\",\"name\":\"Jane Doe\"},\"datePublished\":\"2024-01-15\"}</script></head><body><h1>My Article</h1><p>Article body text.</p></body></html>")
       assert result.content != ""
-      assert String.contains?(result.content, "My Article")
+      assert String.contains?(to_string(result.content), "My Article")
     end
   end
 
@@ -100,7 +100,7 @@ defmodule E2e.MetadataTest do
     test "Multiple JSON-LD blocks are all stripped from output" do
       {:ok, result} = HtmlToMarkdown.convert("<html><head><title>Shop Page</title><script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"Product\",\"name\":\"Widget\",\"price\":\"9.99\"}</script><script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"BreadcrumbList\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\"}]}</script></head><body><h1>Widget</h1><p>A great widget for all purposes.</p></body></html>")
       assert result.content != ""
-      assert String.contains?(result.content, "Widget")
+      assert String.contains?(to_string(result.content), "Widget")
     end
   end
 

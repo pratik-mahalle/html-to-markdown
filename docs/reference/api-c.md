@@ -2,11 +2,11 @@
 title: "C API Reference"
 ---
 
-## C API Reference <span class="version-badge">v3.1.0</span>
+## C API Reference <span class="version-badge">v3.2.0</span>
 
-### Functions
+## Functions
 
-#### htm_convert()
+### htm_convert()
 
 Convert HTML to Markdown, returning a `ConversionResult` with content, metadata, images,
 and warnings.
@@ -35,9 +35,9 @@ HTMConversionResult* htm_convert(const char* html, HTMConversionOptions options)
 
 ---
 
-### Types
+## Types
 
-#### HTMConversionOptions
+### HTMConversionOptions
 
 Main conversion options for HTML to Markdown conversion.
 
@@ -84,9 +84,9 @@ Use `ConversionOptions.builder()` to construct, or `the default constructor` for
 | `capture_svg` | `bool` | `false` | Capture SVG elements as images. |
 | `infer_dimensions` | `bool` | `true` | Infer image dimensions from data. |
 
-##### Methods
+#### Methods
 
-###### htm_default()
+##### htm_default()
 
 **Signature:**
 
@@ -94,7 +94,7 @@ Use `ConversionOptions.builder()` to construct, or `the default constructor` for
 HTMConversionOptions htm_default();
 ```
 
-###### htm_builder()
+##### htm_builder()
 
 Create a new builder with default values.
 
@@ -107,7 +107,7 @@ HTMConversionOptionsBuilder htm_builder();
 
 ---
 
-#### HTMConversionResult
+### HTMConversionResult
 
 The primary result of HTML conversion and extraction.
 
@@ -126,15 +126,15 @@ metadata, extracted tables, images, and processing warnings.
 
 ---
 
-#### HTMConversionOptionsBuilder
+### HTMConversionOptionsBuilder
 
 Builder for `ConversionOptions`.
 
 All fields start with default values. Call `.build()` to produce the final options.
 
-##### Methods
+#### Methods
 
-###### htm_strip_tags()
+##### htm_strip_tags()
 
 Set the list of HTML tag names whose content is stripped from output.
 
@@ -144,7 +144,7 @@ Set the list of HTML tag names whose content is stripped from output.
 HTMConversionOptionsBuilder htm_strip_tags(const char** tags);
 ```
 
-###### htm_preserve_tags()
+##### htm_preserve_tags()
 
 Set the list of HTML tag names that are preserved verbatim in output.
 
@@ -154,7 +154,7 @@ Set the list of HTML tag names that are preserved verbatim in output.
 HTMConversionOptionsBuilder htm_preserve_tags(const char** tags);
 ```
 
-###### htm_keep_inline_images_in()
+##### htm_keep_inline_images_in()
 
 Set the list of HTML tag names whose `<img>` children are kept inline.
 
@@ -164,7 +164,7 @@ Set the list of HTML tag names whose `<img>` children are kept inline.
 HTMConversionOptionsBuilder htm_keep_inline_images_in(const char** tags);
 ```
 
-###### htm_preprocessing()
+##### htm_preprocessing()
 
 Set the pre-processing options applied to the HTML before conversion.
 
@@ -174,7 +174,7 @@ Set the pre-processing options applied to the HTML before conversion.
 HTMConversionOptionsBuilder htm_preprocessing(HTMPreprocessingOptions preprocessing);
 ```
 
-###### htm_build()
+##### htm_build()
 
 Build the final `ConversionOptions`.
 
@@ -187,7 +187,7 @@ HTMConversionOptions htm_build();
 
 ---
 
-#### HTMDocumentMetadata
+### HTMDocumentMetadata
 
 Document-level metadata extracted from `<head>` and top-level elements.
 
@@ -211,7 +211,7 @@ and browsers for document indexing and presentation.
 
 ---
 
-#### HTMDocumentNode
+### HTMDocumentNode
 
 A single node in the document tree.
 
@@ -227,7 +227,7 @@ A single node in the document tree.
 
 ---
 
-#### HTMDocumentStructure
+### HTMDocumentStructure
 
 A structured document tree representing the semantic content of an HTML document.
 
@@ -241,7 +241,7 @@ Uses a flat node array with index-based parent/child references for efficient tr
 
 ---
 
-#### HTMGridCell
+### HTMGridCell
 
 A single cell in a table grid.
 
@@ -257,7 +257,7 @@ A single cell in a table grid.
 
 ---
 
-#### HTMHeaderMetadata
+### HTMHeaderMetadata
 
 Header element metadata with hierarchy tracking.
 
@@ -272,9 +272,9 @@ and position in the document structure.
 | `depth` | `uintptr_t` | — | Document tree depth at the header element |
 | `html_offset` | `uintptr_t` | — | Byte offset in original HTML document |
 
-##### Methods
+#### Methods
 
-###### htm_is_valid()
+##### htm_is_valid()
 
 Validate that the header level is within valid range (1-6).
 
@@ -291,7 +291,7 @@ bool htm_is_valid();
 
 ---
 
-#### HTMHtmlMetadata
+### HTMHtmlMetadata
 
 Comprehensive metadata extraction result from HTML document.
 
@@ -309,7 +309,7 @@ suitable for serialization and transmission across language boundaries.
 
 ---
 
-#### HTMImageMetadata
+### HTMImageMetadata
 
 Image metadata with source and dimensions.
 
@@ -328,7 +328,7 @@ for image analysis and optimization.
 
 ---
 
-#### HTMLinkMetadata
+### HTMLinkMetadata
 
 Hyperlink metadata with categorization and attributes.
 
@@ -343,9 +343,9 @@ Represents `<a>` elements with parsed href values, text content, and link type c
 | `rel` | `const char**` | — | Rel attribute values (e.g., "nofollow", "stylesheet", "canonical") |
 | `attributes` | `void*` | — | Additional HTML attributes |
 
-##### Methods
+#### Methods
 
-###### htm_classify_link()
+##### htm_classify_link()
 
 Classify a link based on href value.
 
@@ -362,7 +362,7 @@ HTMLinkType htm_classify_link(const char* href);
 
 ---
 
-#### HTMMetadataConfig
+### HTMMetadataConfig
 
 Configuration for metadata extraction granularity.
 
@@ -380,9 +380,9 @@ the HTML-to-Markdown conversion process.
 | `extract_structured_data` | `bool` | `true` | Extract structured data (JSON-LD, Microdata, RDFa). When enabled, collects machine-readable structured data including: - JSON-LD script blocks with schema detection - Microdata attributes (itemscope, itemtype, itemprop) - RDFa markup - Extracted schema type if detectable |
 | `max_structured_data_size` | `uintptr_t` | `NULL` | Maximum total size of structured data to collect (bytes). Prevents memory exhaustion attacks on malformed or adversarial documents containing excessively large structured data blocks. When the accumulated size of structured data exceeds this limit, further collection stops. Default: `1_000_000` bytes (1 MB) |
 
-##### Methods
+#### Methods
 
-###### htm_default()
+##### htm_default()
 
 Create default metadata configuration.
 
@@ -394,7 +394,7 @@ Defaults to extracting all metadata types with 1MB limit on structured data.
 HTMMetadataConfig htm_default();
 ```
 
-###### htm_any_enabled()
+##### htm_any_enabled()
 
 Check if any metadata extraction is enabled.
 
@@ -414,7 +414,7 @@ bool htm_any_enabled();
 
 ---
 
-#### HTMPreprocessingOptions
+### HTMPreprocessingOptions
 
 HTML preprocessing options for document cleanup before conversion.
 
@@ -425,9 +425,9 @@ HTML preprocessing options for document cleanup before conversion.
 | `remove_navigation` | `bool` | `true` | Remove navigation elements (nav, breadcrumbs, menus, sidebars) |
 | `remove_forms` | `bool` | `true` | Remove form elements (forms, inputs, buttons, etc.) |
 
-##### Methods
+#### Methods
 
-###### htm_default()
+##### htm_default()
 
 **Signature:**
 
@@ -438,7 +438,7 @@ HTMPreprocessingOptions htm_default();
 
 ---
 
-#### HTMProcessingWarning
+### HTMProcessingWarning
 
 A non-fatal warning generated during HTML processing.
 
@@ -450,7 +450,7 @@ A non-fatal warning generated during HTML processing.
 
 ---
 
-#### HTMStructuredData
+### HTMStructuredData
 
 Structured data block (JSON-LD, Microdata, or RDFa).
 
@@ -466,7 +466,7 @@ JSON-LD blocks are collected as raw JSON strings for flexibility.
 
 ---
 
-#### HTMTableData
+### HTMTableData
 
 A top-level extracted table with both structured data and markdown representation.
 
@@ -478,7 +478,7 @@ A top-level extracted table with both structured data and markdown representatio
 
 ---
 
-#### HTMTableGrid
+### HTMTableGrid
 
 A structured table grid with cell-level data including spans.
 
@@ -491,7 +491,7 @@ A structured table grid with cell-level data including spans.
 
 ---
 
-#### HTMTextAnnotation
+### HTMTextAnnotation
 
 An inline text annotation with byte-range offsets.
 
@@ -506,9 +506,9 @@ Annotations describe formatting (bold, italic, etc.) and links within a node's t
 
 ---
 
-### Enums
+## Enums
 
-#### HTMPreprocessingPreset
+### HTMPreprocessingPreset
 
 HTML preprocessing aggressiveness level.
 
@@ -523,7 +523,7 @@ Controls the extent of cleanup performed before conversion. Higher levels remove
 
 ---
 
-#### HTMHeadingStyle
+### HTMHeadingStyle
 
 Heading style options for Markdown output.
 
@@ -538,7 +538,7 @@ Controls how headings (h1-h6) are rendered in the output Markdown.
 
 ---
 
-#### HTMListIndentType
+### HTMListIndentType
 
 List indentation character type.
 
@@ -552,7 +552,7 @@ Controls whether list items are indented with spaces or tabs.
 
 ---
 
-#### HTMWhitespaceMode
+### HTMWhitespaceMode
 
 Whitespace handling strategy during conversion.
 
@@ -566,7 +566,7 @@ Determines how sequences of whitespace characters (spaces, tabs, newlines) are p
 
 ---
 
-#### HTMNewlineStyle
+### HTMNewlineStyle
 
 Line break syntax in Markdown output.
 
@@ -580,7 +580,7 @@ Controls how soft line breaks (from `<br>` or line breaks in source) are rendere
 
 ---
 
-#### HTMCodeBlockStyle
+### HTMCodeBlockStyle
 
 Code block fence style in Markdown output.
 
@@ -595,7 +595,7 @@ Determines how code blocks (`<pre><code>`) are rendered in Markdown.
 
 ---
 
-#### HTMHighlightStyle
+### HTMHighlightStyle
 
 Highlight rendering style for `<mark>` elements.
 
@@ -611,7 +611,7 @@ Controls how highlighted text is rendered in Markdown output.
 
 ---
 
-#### HTMLinkStyle
+### HTMLinkStyle
 
 Link rendering style in Markdown output.
 
@@ -626,7 +626,7 @@ reference-style `[text][1]` syntax with definitions collected at the end.
 
 ---
 
-#### HTMOutputFormat
+### HTMOutputFormat
 
 Output format for conversion.
 
@@ -641,7 +641,7 @@ Specifies the target markup language format for the conversion output.
 
 ---
 
-#### HTMNodeContent
+### HTMNodeContent
 
 The semantic content type of a document node.
 
@@ -666,7 +666,7 @@ Uses internally tagged representation (`"node_type": "heading"`) for JSON serial
 
 ---
 
-#### HTMAnnotationKind
+### HTMAnnotationKind
 
 The type of an inline text annotation.
 
@@ -687,7 +687,7 @@ Uses internally tagged representation (`"annotation_type": "bold"`) for JSON ser
 
 ---
 
-#### HTMWarningKind
+### HTMWarningKind
 
 Categories of processing warnings.
 
@@ -702,7 +702,7 @@ Categories of processing warnings.
 
 ---
 
-#### HTMTextDirection
+### HTMTextDirection
 
 Text directionality of document content.
 
@@ -717,7 +717,7 @@ Corresponds to the HTML `dir` attribute and `bdi` element directionality.
 
 ---
 
-#### HTMLinkType
+### HTMLinkType
 
 Link classification based on href value and document context.
 
@@ -735,7 +735,7 @@ Used to categorize links during extraction for filtering and analysis.
 
 ---
 
-#### HTMImageType
+### HTMImageType
 
 Image source classification for proper handling and processing.
 
@@ -751,7 +751,7 @@ Determines whether an image is embedded (data URI), inline SVG, external, or rel
 
 ---
 
-#### HTMStructuredDataType
+### HTMStructuredDataType
 
 Structured data format type.
 
@@ -766,9 +766,9 @@ Identifies the schema/format used for structured data markup.
 
 ---
 
-### Errors
+## Errors
 
-#### HTMConversionError
+### HTMConversionError
 
 Errors that can occur during HTML to Markdown conversion.
 

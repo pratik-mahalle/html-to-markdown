@@ -20,6 +20,7 @@ public sealed class DocumentNode
     /// <summary>
     /// The semantic content of this node.
     /// </summary>
+    [JsonConverter(typeof(NodeContentJsonConverter))]
     [JsonPropertyName("content")]
     public NodeContent Content { get; set; } = default!;
 

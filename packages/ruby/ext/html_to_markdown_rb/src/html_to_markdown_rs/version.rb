@@ -2,5 +2,5 @@
 # frozen_string_literal: true
 
 module Html_to_markdown_rs
-  VERSION = "3.1.0"
+  VERSION = "3.2.0"
 end

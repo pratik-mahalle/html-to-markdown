@@ -1521,13 +1521,13 @@ impl From<JsNodeContent> for html_to_markdown_rs::NodeContent {
                 grid: val.grid.unwrap_or_default().into(),
             },
             "image" => Self::Image {
-                description: Some(val.description.unwrap_or_default()),
-                src: Some(val.src.unwrap_or_default()),
-                image_index: Some(val.image_index.unwrap_or_default()),
+                description: val.description,
+                src: val.src,
+                image_index: val.image_index,
             },
             "code" => Self::Code {
                 text: val.text.unwrap_or_default(),
-                language: Some(val.language.unwrap_or_default()),
+                language: val.language,
             },
             "quote" => Self::Quote,
             "definitionlist" => Self::DefinitionList,
@@ -1540,22 +1540,12 @@ impl From<JsNodeContent> for html_to_markdown_rs::NodeContent {
                 content: val.content.unwrap_or_default(),
             },
             "metadatablock" => Self::MetadataBlock {
-                entries: val
-                    .entries
-                    .unwrap_or_default()
-                    .into_iter()
-                    .map(|s| {
-                        let mut parts = s.splitn(2, '\t');
-                        let key = parts.next().unwrap_or("").to_string();
-                        let value = parts.next().unwrap_or("").to_string();
-                        (key, value)
-                    })
-                    .collect(),
+                entries: Default::default(),
             },
             "group" => Self::Group {
-                label: Some(val.label.unwrap_or_default()),
-                heading_level: Some(val.heading_level.unwrap_or_default()),
-                heading_text: Some(val.heading_text.unwrap_or_default()),
+                label: val.label,
+                heading_level: val.heading_level,
+                heading_text: val.heading_text,
             },
             _ => Self::Heading {
                 level: Default::default(),
@@ -1786,7 +1776,7 @@ impl From<html_to_markdown_rs::NodeContent> for JsNodeContent {
                 content: None,
                 definition: None,
                 description: None,
-                entries: Some(entries.into_iter().map(|(k, v)| format!("{k}\t{v}")).collect()),
+                entries: None,
                 format: None,
                 grid: None,
                 heading_level: None,
@@ -1840,7 +1830,7 @@ impl From<JsAnnotationKind> for html_to_markdown_rs::AnnotationKind {
             "highlight" => Self::Highlight,
             "link" => Self::Link {
                 url: val.url.unwrap_or_default(),
-                title: Some(val.title.unwrap_or_default()),
+                title: val.title,
             },
             _ => Self::Bold,
         }
