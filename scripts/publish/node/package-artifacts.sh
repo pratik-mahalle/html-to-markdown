@@ -3,7 +3,7 @@ set -euo pipefail
 
 target="${TARGET:?TARGET is required}"
 
-pnpm --filter @kreuzberg/html-to-markdown-node exec napi artifacts --output-dir ./artifacts
+pnpm --filter ./crates/html-to-markdown-node exec napi artifacts --output-dir ./artifacts
 test -d crates/html-to-markdown-node/npm || {
   echo "npm artifact directory missing"
   exit 1
