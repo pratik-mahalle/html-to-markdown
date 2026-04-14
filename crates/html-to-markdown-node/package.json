@@ -1,6 +1,6 @@
 {
 	"name": "@kreuzberg/html-to-markdown-node",
-	"version": "3.2.0",
+	"version": "3.1.0",
 	"description": "High-performance HTML to Markdown converter - Node.js native bindings",
 	"main": "index.js",
 	"types": "index.d.ts",
@@ -43,17 +43,6 @@
 		"registry": "https://registry.npmjs.org/",
 		"access": "public"
 	},
-	"optionalDependencies": {
-		"@kreuzberg/html-to-markdown-node-darwin-arm64": "3.2.0",
-		"@kreuzberg/html-to-markdown-node-darwin-x64": "3.2.0",
-		"@kreuzberg/html-to-markdown-node-win32-x64-msvc": "3.2.0",
-		"@kreuzberg/html-to-markdown-node-win32-arm64-msvc": "3.2.0",
-		"@kreuzberg/html-to-markdown-node-linux-x64-gnu": "3.2.0",
-		"@kreuzberg/html-to-markdown-node-linux-x64-musl": "3.2.0",
-		"@kreuzberg/html-to-markdown-node-linux-arm64-gnu": "3.2.0",
-		"@kreuzberg/html-to-markdown-node-linux-arm64-musl": "3.2.0",
-		"@kreuzberg/html-to-markdown-node-linux-arm-gnueabihf": "3.2.0"
-	},
 	"scripts": {
 		"artifacts": "napi artifacts",
 		"build": "napi build --platform --release",
@@ -64,6 +53,6 @@
 		"clean": "rm -rf *.node"
 	},
 	"devDependencies": {
-		"@napi-rs/cli": "^3.6.1"
+		"@napi-rs/cli": "^3.1.0"
 	}
 }
