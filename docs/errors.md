@@ -69,8 +69,7 @@ Warnings are the right place to surface "this was weird but the conversion worke
     result, err := htmltomarkdown.Convert(html)
     if err != nil {
         log.Fatalf("conversion failed: %v", err)
-    }
-    ```
+    }```
 
 === "Ruby"
     ```ruby
@@ -78,8 +77,7 @@ Warnings are the right place to surface "this was weird but the conversion worke
       result = HtmlToMarkdown.convert(html)
     rescue HtmlToMarkdown::ConversionError => e
       warn "conversion failed: #{e.message}"
-    end
-    ```
+    end```
 
 === "PHP"
     ```php
@@ -87,8 +85,7 @@ Warnings are the right place to surface "this was weird but the conversion worke
         $result = $converter->convert($html);
     } catch (ConversionException $e) {
         error_log("conversion failed: " . $e->getMessage());
-    }
-    ```
+    }```
 
 === "Java"
     ```java
@@ -96,8 +93,7 @@ Warnings are the right place to surface "this was weird but the conversion worke
         ConversionResult result = HtmlToMarkdown.convert(html);
     } catch (ConversionException e) {
         System.err.println("conversion failed: " + e.getMessage());
-    }
-    ```
+    }```
 
 === "C#"
     ```csharp
@@ -108,16 +104,14 @@ Warnings are the right place to surface "this was weird but the conversion worke
     catch (ConversionException e)
     {
         Console.Error.WriteLine($"conversion failed: {e.Message}");
-    }
-    ```
+    }```
 
 === "Elixir"
     ```elixir
     case HtmlToMarkdown.convert(html) do
       {:ok, result} -> IO.puts(result.content)
       {:error, reason} -> IO.warn("conversion failed: #{reason}")
-    end
-    ```
+    end```
 
 === "R"
     ```r
@@ -127,8 +121,7 @@ Warnings are the right place to surface "this was weird but the conversion worke
         message("conversion failed: ", conditionMessage(e))
         NULL
       }
-    )
-    ```
+    )```
 
 ## CLI Warnings
 

@@ -1,4 +1,5 @@
 # Installation
+
 Install **html-to-markdown** for your language using the commands below. Each binding wraps the same Rust core, so behavior matches across runtimes. Pick a tab under **Language bindings** for copy-paste snippets, feature flags, and a quick verification step where applicable.
 
 ## Requirements

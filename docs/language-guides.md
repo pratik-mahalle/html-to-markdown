@@ -16,7 +16,7 @@ See [Installation: Feature Flags](installation.md#feature-flags) for the six Car
 
 ## Python
 
-**Package:** `html-to-markdown` on PyPI  
+**Package:** `html-to-markdown` on PyPI
 **Requires:** Python ≥ 3.10
 
 ```bash
@@ -34,7 +34,7 @@ Option keys match the Rust field names (`snake_case`). `ConversionOptions` accep
 
 ## TypeScript
 
-**Package:** `@kreuzberg/html-to-markdown` on npm  
+**Package:** `@kreuzberg/html-to-markdown` on npm
 **Requires:** Node.js ≥ 18
 
 ```bash
@@ -52,7 +52,7 @@ Option keys are `camelCase` (`headingStyle`, `linkStyle`, `outputFormat`). The p
 
 ## Go
 
-**Module:** `github.com/kreuzberg-dev/html-to-markdown/packages/go/v3`  
+**Module:** `github.com/kreuzberg-dev/html-to-markdown/packages/go/v3`
 **Requires:** Go ≥ 1.26
 
 ```bash
@@ -73,7 +73,7 @@ Options use Go struct field names (`PascalCase`). `Convert` returns `(*Conversio
 
 ## Ruby
 
-**Gem:** `html-to-markdown` on RubyGems  
+**Gem:** `html-to-markdown` on RubyGems
 **Requires:** Ruby ≥ 3.2
 
 ```bash
@@ -130,7 +130,7 @@ System.out.println(result.getContent());
 
 Uses a builder for options. Errors throw `dev.kreuzberg.ConversionException` (checked). The library ships with native binaries for Linux x86_64, macOS arm64/x86_64, and Windows x86_64.
 
-## C#
+## C
 
 **NuGet:** `KreuzbergDev.HtmlToMarkdown`
 
@@ -150,7 +150,7 @@ Option properties are `PascalCase`. Errors throw `ConversionException`. The pack
 
 ## Elixir
 
-**Hex:** `html_to_markdown`  
+**Hex:** `html_to_markdown`
 **Requires:** Elixir ~> 1.19
 
 ```elixir
@@ -185,7 +185,7 @@ Options are named function arguments. The returned list matches the `ConversionR
 
 ## C
 
-**Link against:** `libhtml_to_markdown`  
+**Link against:** `libhtml_to_markdown`
 **Header:** `html_to_markdown.h`
 
 Download a pre-built release archive for your platform from the [GitHub releases page](https://github.com/kreuzberg-dev/html-to-markdown/releases), or build from source with `cargo build --release -p html-to-markdown-ffi`.

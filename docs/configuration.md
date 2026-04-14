@@ -153,6 +153,7 @@ Given this HTML:
 
 === "markdown"
     ```markdown
+
     # Report
 
     See [**example**](https://example.com).
@@ -160,6 +161,7 @@ Given this HTML:
 
 === "djot"
     ```djot
+
     # Report
 
     See [*example*](https://example.com).

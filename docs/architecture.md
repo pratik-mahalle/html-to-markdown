@@ -14,7 +14,7 @@ Under **`crates/`** there are **eight packages** (each is its own crate with its
 
 The workspace also includes **`tools/`** crates (for example snippet generation and checks); they are not part of the public layout below but are built with the same workspace commands.
 
-```
+```text
 crates/
 ├── html-to-markdown/          # Core library (html-to-markdown-rs on crates.io)
 ├── html-to-markdown-cli/      # CLI binary

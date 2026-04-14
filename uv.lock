@@ -277,7 +277,6 @@ dev = [
     { name = "pyyaml" },
     { name = "ruff" },
     { name = "uv-bump" },
-    { name = "zensical" },
 ]
 doc = [
     { name = "mkdocstrings", extra = ["python"] },
@@ -300,7 +299,6 @@ dev = [
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "ruff", specifier = ">=0.14.10" },
     { name = "uv-bump", git = "https://github.com/Goldziher/uv-bump" },
-    { name = "zensical", specifier = ">=0.0.31" },
 ]
 doc = [
     { name = "mkdocstrings", extras = ["python"] },
