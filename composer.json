@@ -70,7 +70,7 @@
     "extension-name": "html_to_markdown",
     "support-zts": true,
     "support-nts": true,
-    "build-path": "packages/php-ext",
+    "build-path": "crates/html-to-markdown-php",
     "configure-options": [
       {
         "name": "with-cargo-bin",

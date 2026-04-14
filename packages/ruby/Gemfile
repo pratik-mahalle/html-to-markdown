@@ -12,6 +12,7 @@ group :development, :test do
   gem 'rb_sys' # provides build tooling when developing locally
   gem 'rspec'
   gem 'rubocop', require: false
+  gem 'rubocop-performance', require: false
   gem 'rubocop-rspec', require: false
   gem 'steep', require: false
 end
