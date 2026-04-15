@@ -1528,7 +1528,7 @@ jobs:
   publish-packagist:
     name: Publish to Packagist
     runs-on: ubuntu-latest
-    needs: [prepare, php-pie, check-packagist]
+    needs: [prepare, check-packagist]
     if: |
       needs.prepare.result == 'success' &&
       needs.prepare.outputs.is_tag == 'true' &&
