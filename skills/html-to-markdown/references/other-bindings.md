@@ -6,16 +6,16 @@ Brief reference for Go, Ruby, PHP, Java, C#, Elixir, R, WASM, and C FFI.
 
 ## Go
 
-**Module:** `github.com/kreuzberg-dev/html-to-markdown/packages/go/v3`
+**Module:** `github.com/kreuzberg-dev/html-to-markdown-go`
 **Package:** `htmltomarkdown`
-**Install:** `go get github.com/kreuzberg-dev/html-to-markdown/packages/go/v3`
+**Install:** `go get github.com/kreuzberg-dev/html-to-markdown-go`
 
 Uses cgo with the C FFI layer. Options are passed as JSON strings internally.
 
 ```go
-import "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown"
+import "github.com/kreuzberg-dev/html-to-markdown-go/htmltomarkdown"
 
-// Primary function — returns ExtractionResult
+// Primary function — returns *ConversionResult
 result, err := htmltomarkdown.Convert(html)
 if err != nil {
     log.Fatal(err)
@@ -24,8 +24,10 @@ fmt.Println(result.Content)        // markdown string
 fmt.Println(len(result.Tables))    // extracted tables
 fmt.Println(len(result.Warnings))  // processing warnings
 
-// Must-or-panic variant
-result = htmltomarkdown.MustConvert(html)
+// With options (variadic)
+result, err = htmltomarkdown.Convert(html, &htmltomarkdown.ConversionOptions{
+    HeadingStyle: "atx",
+})
 
 // Metadata is in result.Metadata when metadata extraction is enabled
 fmt.Println(result.Metadata)
@@ -34,25 +36,11 @@ fmt.Println(result.Metadata)
 for _, table := range result.Tables {
     fmt.Println(table.Markdown)
 }
-
-// Version
-version := htmltomarkdown.Version()
-```
-
-### Go ExtractionResult
-
-```go
-type ExtractionResult struct {
-    Content  string
-    Tables   []TableData
-    Warnings []ProcessingWarning
-    Metadata interface{} // metadata map when metadata extraction is enabled
-}
 ```
 
 ### Go ConversionOptions
 
-Options are passed via JSON. See the Rust options for field names (use camelCase in JSON).
+Options are passed as a pointer to `ConversionOptions`. Fields use Go naming conventions (PascalCase). Pass `nil` or omit the argument for defaults.
 
 ---
 
@@ -118,60 +106,64 @@ result = HtmlToMarkdown.convert(html, handle)
 **Install:** `composer require kreuzberg-dev/html-to-markdown`
 **PHP requirement:** 8.4+
 
-Uses ext-php-rs (native PHP extension).
+Uses ext-php-rs (native PHP extension). The facade class is `HtmlToMarkdownRs` under the `Html\To\Markdown\Rs` namespace.
 
 ```php
 <?php
 declare(strict_types=1);
 
-use HtmlToMarkdown\Converter;
+use Html\To\Markdown\Rs\HtmlToMarkdownRs;
 
-// Primary function — returns array with content, metadata, tables, images, warnings
-$result = Converter::convert('<h1>Hello</h1>');
-$markdown = $result['content'];
+// Primary function — returns ConversionResult with content, metadata, tables, images, warnings
+$result = HtmlToMarkdownRs::convert('<h1>Hello</h1>');
+$markdown = $result->content;
 
-// With options (associative array)
-$result = Converter::convert('<h1>Hello</h1>', [
-    'heading_style' => 'atx',
-    'code_block_style' => 'backticks',
-    'autolinks' => true,
-]);
+// With options (ConversionOptions object)
+use Html\To\Markdown\Rs\ConversionOptions;
 
-// Metadata — in $result['metadata']
-$metadata = $result['metadata'];
-echo $metadata['document']['title'];
+$options = new ConversionOptions();
+$options->headingStyle = 'atx';
+$options->codeBlockStyle = 'backticks';
+$options->autolinks = true;
 
-// Tables — always in $result['tables']
-foreach ($result['tables'] as $table) {
-    echo $table['markdown'];
+$result = HtmlToMarkdownRs::convert('<h1>Hello</h1>', $options);
+
+// Metadata — in $result->metadata
+$metadata = $result->metadata;
+echo $metadata->document->title;
+
+// Tables — always in $result->tables
+foreach ($result->tables as $table) {
+    echo $table->markdown;
 }
 
-// Inline images — set extract_images: true
-$result = Converter::convert('<img src="data:..." />', ['extract_images' => true]);
-$images = $result['images'];
+// Inline images — set extractImages: true in options
+$options->extractImages = true;
+$result = HtmlToMarkdownRs::convert('<img src="data:..." />', $options);
+$images = $result->images;
 ```
 
 ---
 
 ## Java
 
-**Maven:** `dev.kreuzberg:html-to-markdown`
-**GroupId:** `dev.kreuzberg`
-**ArtifactId:** `html-to-markdown`
+**Maven:** `dev.kreuzberg.htmltomarkdown:html-to-markdown-rs`
+**GroupId:** `dev.kreuzberg.htmltomarkdown`
+**ArtifactId:** `html-to-markdown-rs`
 **Java requirement:** 21+ (uses Panama FFM API)
 
 ```xml
 <dependency>
-  <groupId>dev.kreuzberg</groupId>
-  <artifactId>html-to-markdown</artifactId>
-  <version>3.0.0</version>
+  <groupId>dev.kreuzberg.htmltomarkdown</groupId>
+  <artifactId>html-to-markdown-rs</artifactId>
+  <version>3.2.0</version>
 </dependency>
 ```
 
 ```java
 import dev.kreuzberg.htmltomarkdown.HtmlToMarkdown;
-import dev.kreuzberg.htmltomarkdown.HtmlToMarkdown.ConversionResult;
-import dev.kreuzberg.htmltomarkdown.HtmlToMarkdown.ConversionException;
+import dev.kreuzberg.htmltomarkdown.ConversionResult;
+import dev.kreuzberg.htmltomarkdown.HtmlToMarkdownRsException;
 
 // Primary function — returns ConversionResult
 try {
@@ -180,33 +172,21 @@ try {
     System.out.println(result.tables());     // List<TableData>
     System.out.println(result.warnings());   // List<ProcessingWarning>
     System.out.println(result.metadata());   // metadata map (when enabled)
-} catch (ConversionException e) {
+} catch (HtmlToMarkdownRsException e) {
     System.err.println("Conversion failed: " + e.getMessage());
 }
+
+// With options
+import dev.kreuzberg.htmltomarkdown.ConversionOptions;
+
+ConversionOptions options = new ConversionOptions();
+options.setHeadingStyle("atx");
+ConversionResult result = HtmlToMarkdown.convert("<h1>Hello</h1>", options);
 
 // Tables — always in result.tables()
 for (var table : result.tables()) {
     System.out.println(table.markdown());
 }
-
-// Metadata — in result.metadata() when metadata extraction is enabled
-var meta = result.metadata();
-
-// Version
-String version = HtmlToMarkdown.getVersion();
-```
-
-### ConversionOptions (Java)
-
-```java
-import dev.kreuzberg.htmltomarkdown.ConversionOptions;
-
-ConversionOptions options = new ConversionOptions();
-options.setHeadingStyle("atx");
-options.setCodeBlockStyle("backticks");
-options.setAutolinks(true);
-
-// Pass as JSON string to FFI — options are serialized internally
 ```
 
 ---
@@ -217,39 +197,37 @@ options.setAutolinks(true);
 **Install:** `dotnet add package KreuzbergDev.HtmlToMarkdown`
 **.NET requirement:** 6+
 
+The static entry point class is `HtmlToMarkdownRs`. The exception type is `HtmlToMarkdownRsException`.
+
 ```csharp
 using HtmlToMarkdown;
 
 // Primary function
-var result = HtmlToMarkdownConverter.Convert("<h1>Hello</h1>");
+var result = HtmlToMarkdownRs.Convert("<h1>Hello</h1>", null);
 Console.WriteLine(result.Content);         // markdown string
 Console.WriteLine(result.Tables.Count);    // table count
 Console.WriteLine(result.Warnings.Count);  // warning count
 Console.WriteLine(result.Metadata?.Document?.Title);  // metadata (when enabled)
 
-// ReadOnlySpan<byte> overload (avoids string allocation)
-var bytes = System.Text.Encoding.UTF8.GetBytes(html);
-var result2 = HtmlToMarkdownConverter.Convert(bytes.AsSpan());
+// With options
+var options = new ConversionOptions { ExtractImages = true };
+var result2 = HtmlToMarkdownRs.Convert(html, options);
+foreach (var image in result2.Images) {
+    Console.WriteLine(image.Format);
+}
 
 // Tables — always in result.Tables
 foreach (var table in result.Tables) {
     Console.WriteLine(table.Markdown);
 }
-
-// Inline images — set ExtractImages = true in options
-var options = new ConversionOptions { ExtractImages = true };
-var result3 = HtmlToMarkdownConverter.Convert(html, options);
-foreach (var image in result3.Images) {
-    Console.WriteLine(image.Format);
-}
 ```
 
-### HtmlToMarkdownException
+### HtmlToMarkdownRsException
 
 ```csharp
 try {
-    var result = HtmlToMarkdownConverter.Convert(html);
-} catch (HtmlToMarkdownException e) {
+    var result = HtmlToMarkdownRs.Convert(html, null);
+} catch (HtmlToMarkdownRsException e) {
     Console.Error.WriteLine($"Conversion failed: {e.Message}");
 }
 ```
@@ -380,26 +358,65 @@ const json = convertWithOptionsHandle('<h1>Hello</h1>', handle);
 
 ---
 
+## Node.js / npm
+
+**Package:** `@kreuzberg/html-to-markdown-node`
+**Install:** `npm install @kreuzberg/html-to-markdown-node`
+
+Uses NAPI-RS. Platform-specific native binaries are delivered as optional dependencies.
+
+```json
+{
+  "optionalDependencies": {
+    "@kreuzberg/html-to-markdown-node-darwin-arm64": "3.2.0",
+    "@kreuzberg/html-to-markdown-node-darwin-x64": "3.2.0",
+    "@kreuzberg/html-to-markdown-node-linux-arm64-gnu": "3.2.0",
+    "@kreuzberg/html-to-markdown-node-linux-arm64-musl": "3.2.0",
+    "@kreuzberg/html-to-markdown-node-linux-x64-gnu": "3.2.0",
+    "@kreuzberg/html-to-markdown-node-linux-x64-musl": "3.2.0",
+    "@kreuzberg/html-to-markdown-node-linux-arm-gnueabihf": "3.2.0",
+    "@kreuzberg/html-to-markdown-node-win32-x64-msvc": "3.2.0",
+    "@kreuzberg/html-to-markdown-node-win32-arm64-msvc": "3.2.0"
+  }
+}
+```
+
+---
+
 ## C FFI
 
 **Crate:** `html-to-markdown-ffi`
-**Header:** `html_to_markdown_ffi.h` (generated by cbindgen)
+**Header:** `html_to_markdown.h` (generated by cbindgen)
 
-Used internally by Go, Java, and C# bindings. Direct C usage:
+Used internally by Go, Java, and C# bindings. All exported symbols use the `htm_` prefix. Direct C usage:
 
 ```c
-#include "html_to_markdown_ffi.h"
+#include "html_to_markdown.h"
 
-// convert() — returns malloc'd JSON string containing the full ConversionResult
-// JSON has keys: content, tables, metadata, images, warnings
-char* result_json = html_to_markdown_convert(html_cstr, options_json_cstr);
-if (result_json) {
-    // parse JSON result — content, tables, metadata, images, warnings are all here
-    html_to_markdown_free_string(result_json);
+// htm_convert() — returns an opaque HTMConversionResult handle
+HTMConversionOptions *opts = htm_conversion_options_from_json("{\"headingStyle\":\"atx\"}");
+HTMConversionResult *result = htm_convert(html_cstr, opts);
+htm_conversion_options_free(opts);
+
+if (result) {
+    // Extract fields as malloc'd strings
+    char *content = htm_conversion_result_content(result);
+    // use content ...
+    htm_free_string(content);
+
+    htm_conversion_result_free(result);
 }
 
-// Always free returned strings with html_to_markdown_free_string()
-// Never free with stdlib free() — use the library's free function
+// Error handling
+int32_t code = htm_last_error_code();
+const char *msg = htm_last_error_context(); // borrowed — do NOT free
+
+// Version
+const char *ver = htm_version(); // static — do NOT free
 ```
 
-**Key FFI contract:** Every string returned by the library must be freed with `html_to_markdown_free_string()`. Never use the system `free()`.
+**Key FFI contracts:**
+- All exported functions use the `htm_` prefix.
+- Strings returned by `htm_conversion_result_content()` and similar field accessors must be freed with `htm_free_string()`. Never use the system `free()`.
+- `htm_last_error_context()` and `htm_version()` return borrowed/static pointers — do NOT free them.
+- Every `_free()` function has a matching allocator (`htm_convert` → `htm_conversion_result_free`, `htm_conversion_options_from_json` → `htm_conversion_options_free`).
