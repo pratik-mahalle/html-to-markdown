@@ -1771,7 +1771,7 @@ impl From<html_to_markdown_rs::NodeContent> for JsNodeContent {
                 term: None,
                 text: None,
             },
-            html_to_markdown_rs::NodeContent::MetadataBlock { entries } => Self {
+            html_to_markdown_rs::NodeContent::MetadataBlock { entries: _entries } => Self {
                 node_type_tag: "metadatablock".to_string(),
                 content: None,
                 definition: None,
