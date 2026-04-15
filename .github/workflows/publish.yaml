@@ -386,10 +386,24 @@ jobs:
           path: packages/python/dist/*.tar.gz
           retention-days: 14
 
-  php-pie:
-    name: Build PHP PIE source bundle
-    needs: prepare
-    runs-on: ubuntu-latest
+  php-package:
+    name: Build PHP PIE package (${{ matrix.settings.label }})
+    needs: [prepare, check-packagist]
+    if: ${{ needs.prepare.outputs.is_tag == 'true' && needs.check-packagist.outputs.exists != 'true' }}
+    runs-on: ${{ matrix.settings.os }}
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        settings:
+          - os: ubuntu-latest
+            label: linux-x86_64
+            platform: linux-x86_64
+          - os: macos-latest
+            label: macos-arm64
+            platform: macos-arm64
     steps:
       - name: Checkout
         uses: actions/checkout@v6 # v6
@@ -407,40 +421,24 @@ jobs:
       - name: Setup Rust
         uses: kreuzberg-dev/actions/setup-rust@v1 # v1
         with:
+          cache-key-prefix: publish-php-${{ matrix.settings.label }}
           toolchain: stable
 
-      - name: Set up PHP
-        uses: shivammathur/setup-php@2.37.0 # 2
-        with:
-          php-version: "8.4"
-          tools: composer:2.9.1
-          coverage: none
-
-      - name: Ensure packaging script is executable
-        run: scripts/publish/php/ensure-package-script-executable.sh
+      - name: Build PHP extension
         shell: bash
+        run: cargo build --release -p html-to-markdown-php
 
-      - name: Assemble PIE source archive
+      - name: Build PIE package
+        shell: bash
         env:
           VERSION: ${{ needs.prepare.outputs.version }}
-        run: scripts/publish/php/assemble-pie-archive.sh
-        shell: bash
+        run: scripts/publish/php/build-pie-package.sh "${{ matrix.settings.platform }}" "dist/php"
 
-      - name: Download PIE CLI
-        run: scripts/publish/php/download-pie-cli.sh
-        shell: bash
-
-      - name: Verify PIE build from archive
-        env:
-          VERSION: ${{ needs.prepare.outputs.version }}
-        run: scripts/publish/php/verify-pie-archive.sh
-        shell: bash
-
-      - name: Upload PIE source archive
+      - name: Upload PHP PIE package artifact
         uses: actions/upload-artifact@v7 # v7
         with:
-          name: php-pie-src
-          path: "build/artifacts/php_html_to_markdown-${{ needs.prepare.outputs.version }}-src.tgz"
+          name: php-package-${{ matrix.settings.label }}
+          path: dist/php/html-to-markdown-*.tar.gz*
           retention-days: 14
 
   node-typescript-defs:
@@ -1177,7 +1175,7 @@ jobs:
         prepare,
         python-wheels,
         python-sdist,
-        php-pie,
+        php-package,
         node-typescript-defs,
         node-bindings,
         wasm-bindings,
@@ -1198,11 +1196,12 @@ jobs:
           ref: ${{ needs.prepare.outputs.tag }}
           fetch-depth: 0
 
-      - name: Download PHP PIE artifact
+      - name: Download PHP package artifacts
         uses: actions/download-artifact@v8 # v8
         with:
-          name: php-pie-src
-          path: dist/php-pie
+          pattern: php-package-*
+          path: dist/php-package
+          merge-multiple: true
 
       - name: Download CLI artifacts
         uses: actions/download-artifact@v8 # v8
@@ -1225,11 +1224,10 @@ jobs:
           path: dist/c-ffi
           merge-multiple: false
 
-      - name: Upload PHP PIE source bundle
+      - name: Upload PHP PIE packages
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ needs.prepare.outputs.tag }}
-          VERSION: ${{ needs.prepare.outputs.version }}
         run: scripts/publish/upload-php-pie.sh
         shell: bash
 
