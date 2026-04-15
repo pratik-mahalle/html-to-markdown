@@ -792,6 +792,58 @@ header = "html_to_markdown.h"
 function = "htm_convert"
 prefix = "htm"
 
+[e2e.registry]
+output = "test_apps"
+categories = ["smoke", "conversion"]
+
+[e2e.registry.packages.python]
+name = "html-to-markdown"
+version = ">=3.2.0"
+
+[e2e.registry.packages.node]
+name = "@kreuzberg/html-to-markdown-node"
+version = "^3.2.0"
+
+[e2e.registry.packages.rust]
+name = "html-to-markdown-rs"
+version = "3.2.0"
+
+[e2e.registry.packages.go]
+module = "github.com/kreuzberg-dev/html-to-markdown-go"
+version = "v3.2.0"
+
+[e2e.registry.packages.java]
+name = "dev.kreuzberg:html-to-markdown"
+version = "3.2.0"
+
+[e2e.registry.packages.csharp]
+name = "KreuzbergDev.HtmlToMarkdown"
+version = "3.2.0"
+
+[e2e.registry.packages.php]
+name = "kreuzberg-dev/html-to-markdown-rs"
+version = ">=3.2.0"
+
+[e2e.registry.packages.ruby]
+name = "html-to-markdown"
+version = "~> 3.2"
+
+[e2e.registry.packages.elixir]
+name = "html_to_markdown"
+version = "~> 3.2"
+
+[e2e.registry.packages.wasm]
+name = "@kreuzberg/html-to-markdown-wasm"
+version = "^3.2.0"
+
+[e2e.registry.packages.r]
+name = "htmltomarkdown"
+version = "3.2.0"
+
+[e2e.registry.packages.c]
+name = "html-to-markdown-ffi"
+version = "3.2.0"
+
 [e2e.packages.rust]
 path = "../../crates/html-to-markdown"
 
