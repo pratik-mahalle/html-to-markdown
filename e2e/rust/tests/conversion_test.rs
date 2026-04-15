@@ -781,3 +781,4 @@ fn test_unordered_list() {
     assert!(format!("{:?}", content).contains(r#"- Item 2"#), "expected to contain: {}", r#"- Item 2"#);
     assert!(format!("{:?}", content).contains(r#"- Item 3"#), "expected to contain: {}", r#"- Item 3"#);
 }
+

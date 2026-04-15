@@ -3,11 +3,11 @@ package dev.kreuzberg.htmltomarkdown;
 
 /** Generic conversion error */
 public class OtherException extends ConversionErrorException {
-  public OtherException(String message) {
-    super(message);
-  }
+    public OtherException(String message) {
+        super(message);
+    }
 
-  public OtherException(String message, Throwable cause) {
-    super(message, cause);
-  }
+    public OtherException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

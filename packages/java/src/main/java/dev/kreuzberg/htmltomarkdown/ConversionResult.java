@@ -10,8 +10,9 @@ public record ConversionResult(
     HtmlMetadata metadata,
     List<TableData> tables,
     List<String> images,
-    List<ProcessingWarning> warnings) {
-  public static ConversionResultBuilder builder() {
-    return new ConversionResultBuilder();
-  }
+    List<ProcessingWarning> warnings
+) {
+    public static ConversionResultBuilder builder() {
+        return new ConversionResultBuilder();
+    }
 }

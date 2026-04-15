@@ -5,30 +5,30 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum WarningKind {
-  ImageExtractionFailed("image_extraction_failed"),
-  EncodingFallback("encoding_fallback"),
-  TruncatedInput("truncated_input"),
-  MalformedHtml("malformed_html"),
-  SanitizationApplied("sanitization_applied");
+    ImageExtractionFailed("image_extraction_failed"),
+    EncodingFallback("encoding_fallback"),
+    TruncatedInput("truncated_input"),
+    MalformedHtml("malformed_html"),
+    SanitizationApplied("sanitization_applied");
 
-  private final String value;
+    private final String value;
 
-  WarningKind(String value) {
-    this.value = value;
-  }
-
-  @JsonValue
-  public String getValue() {
-    return value;
-  }
-
-  @JsonCreator
-  public static WarningKind fromValue(String value) {
-    for (WarningKind e : values()) {
-      if (e.value.equalsIgnoreCase(value)) {
-        return e;
-      }
+    WarningKind(String value) {
+        this.value = value;
     }
-    throw new IllegalArgumentException("Unknown value: " + value);
-  }
+
+    @JsonValue
+    public String getValue() {
+        return value;
+    }
+
+    @JsonCreator
+    public static WarningKind fromValue(String value) {
+        for (WarningKind e : values()) {
+            if (e.value.equalsIgnoreCase(value)) {
+                return e;
+            }
+        }
+        throw new IllegalArgumentException("Unknown value: " + value);
+    }
 }

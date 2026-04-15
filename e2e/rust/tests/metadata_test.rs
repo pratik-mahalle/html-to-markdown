@@ -73,7 +73,7 @@ fn test_metadata_keywords_meta() {
     let options = None;
     let result = convert(&html, options).expect("should succeed");
     assert!(result.content.is_some(), "expected content to be present");
-    assert!(result.metadata.document.keywords.len() >= 1, "expected at least 1 elements, got {}", result.metadata.document.keywords.len());
+    assert!(!result.metadata.document.keywords.is_empty(), "expected >= 1");
 }
 
 #[test]
@@ -155,3 +155,4 @@ fn test_twitter_card_tags() {
     assert_eq!(metadata_document_twitter_card_title.trim(), r#"Twitter Card Title"#, "equals assertion failed");
     assert_eq!(metadata_document_twitter_card_description.trim(), r#"Twitter card description."#, "equals assertion failed");
 }
+

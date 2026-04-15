@@ -9,6 +9,8 @@ defmodule HtmlToMarkdown.Native do
   def convert(_html, _options), do: :erlang.nif_error(:nif_not_loaded)
   def metadataconfig_default, do: :erlang.nif_error(:nif_not_loaded)
   def metadataconfig_any_enabled(_obj), do: :erlang.nif_error(:nif_not_loaded)
+  def headermetadata_is_valid(_obj), do: :erlang.nif_error(:nif_not_loaded)
+  def linkmetadata_classify_link(_href), do: :erlang.nif_error(:nif_not_loaded)
   def conversionoptions_default, do: :erlang.nif_error(:nif_not_loaded)
   def conversionoptions_builder, do: :erlang.nif_error(:nif_not_loaded)
   def conversionoptionsbuilder_strip_tags(_obj, _tags), do: :erlang.nif_error(:nif_not_loaded)
@@ -22,6 +24,4 @@ defmodule HtmlToMarkdown.Native do
 
   def conversionoptionsbuilder_build(_obj), do: :erlang.nif_error(:nif_not_loaded)
   def preprocessingoptions_default, do: :erlang.nif_error(:nif_not_loaded)
-  def headermetadata_is_valid(_obj), do: :erlang.nif_error(:nif_not_loaded)
-  def linkmetadata_classify_link(_href), do: :erlang.nif_error(:nif_not_loaded)
 end

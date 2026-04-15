@@ -7,8 +7,9 @@ public record PreprocessingOptions(
     boolean enabled,
     PreprocessingPreset preset,
     @JsonProperty("remove_navigation") boolean removeNavigation,
-    @JsonProperty("remove_forms") boolean removeForms) {
-  public static PreprocessingOptionsBuilder builder() {
-    return new PreprocessingOptionsBuilder();
-  }
+    @JsonProperty("remove_forms") boolean removeForms
+) {
+    public static PreprocessingOptionsBuilder builder() {
+        return new PreprocessingOptionsBuilder();
+    }
 }

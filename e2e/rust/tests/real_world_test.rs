@@ -68,3 +68,4 @@ fn test_real_world_product_page() {
     assert!(format!("{:?}", content).contains(r#"---"#), "expected to contain: {}", r#"---"#);
     assert!(content.len() >= 300, "expected length >= 300, got {}", content.len());
 }
+

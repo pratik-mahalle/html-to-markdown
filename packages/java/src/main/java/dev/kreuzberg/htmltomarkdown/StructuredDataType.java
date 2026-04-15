@@ -5,28 +5,28 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum StructuredDataType {
-  JsonLd("json_ld"),
-  Microdata("microdata"),
-  RDFa("rdfa");
+    JsonLd("json_ld"),
+    Microdata("microdata"),
+    RDFa("rdfa");
 
-  private final String value;
+    private final String value;
 
-  StructuredDataType(String value) {
-    this.value = value;
-  }
-
-  @JsonValue
-  public String getValue() {
-    return value;
-  }
-
-  @JsonCreator
-  public static StructuredDataType fromValue(String value) {
-    for (StructuredDataType e : values()) {
-      if (e.value.equalsIgnoreCase(value)) {
-        return e;
-      }
+    StructuredDataType(String value) {
+        this.value = value;
     }
-    throw new IllegalArgumentException("Unknown value: " + value);
-  }
+
+    @JsonValue
+    public String getValue() {
+        return value;
+    }
+
+    @JsonCreator
+    public static StructuredDataType fromValue(String value) {
+        for (StructuredDataType e : values()) {
+            if (e.value.equalsIgnoreCase(value)) {
+                return e;
+            }
+        }
+        throw new IllegalArgumentException("Unknown value: " + value);
+    }
 }

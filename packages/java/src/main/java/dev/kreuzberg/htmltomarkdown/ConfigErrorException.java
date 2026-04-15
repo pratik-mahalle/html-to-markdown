@@ -3,11 +3,11 @@ package dev.kreuzberg.htmltomarkdown;
 
 /** Invalid configuration */
 public class ConfigErrorException extends ConversionErrorException {
-  public ConfigErrorException(String message) {
-    super(message);
-  }
+    public ConfigErrorException(String message) {
+        super(message);
+    }
 
-  public ConfigErrorException(String message, Throwable cause) {
-    super(message, cause);
-  }
+    public ConfigErrorException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

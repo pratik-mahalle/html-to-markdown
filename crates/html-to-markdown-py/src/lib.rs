@@ -189,6 +189,300 @@ impl MetadataConfigUpdate {
 
 #[derive(Clone, Default, serde::Serialize)]
 #[pyclass(frozen, from_py_object)]
+pub struct DocumentMetadata {
+    /// Document title from `<title>` tag
+    #[pyo3(get)]
+    pub title: Option<String>,
+    /// Document description from `<meta name="description">` tag
+    #[pyo3(get)]
+    pub description: Option<String>,
+    /// Document keywords from `<meta name="keywords">` tag, split on commas
+    #[pyo3(get)]
+    pub keywords: Vec<String>,
+    /// Document author from `<meta name="author">` tag
+    #[pyo3(get)]
+    pub author: Option<String>,
+    /// Canonical URL from `<link rel="canonical">` tag
+    #[pyo3(get)]
+    pub canonical_url: Option<String>,
+    /// Base URL from `<base href="">` tag for resolving relative URLs
+    #[pyo3(get)]
+    pub base_href: Option<String>,
+    /// Document language from `lang` attribute
+    #[pyo3(get)]
+    pub language: Option<String>,
+    /// Document text direction from `dir` attribute
+    #[pyo3(get)]
+    pub text_direction: Option<TextDirection>,
+    /// Open Graph metadata (og:* properties) for social media
+    /// Keys like "title", "description", "image", "url", etc.
+    #[pyo3(get)]
+    pub open_graph: HashMap<String, String>,
+    /// Twitter Card metadata (twitter:* properties)
+    /// Keys like "card", "site", "creator", "title", "description", "image", etc.
+    #[pyo3(get)]
+    pub twitter_card: HashMap<String, String>,
+    /// Additional meta tags not covered by specific fields
+    /// Keys are meta name/property attributes, values are content
+    #[pyo3(get)]
+    pub meta_tags: HashMap<String, String>,
+}
+
+#[pymethods]
+impl DocumentMetadata {
+    #[allow(clippy::too_many_arguments)]
+    #[must_use]
+    #[pyo3(signature = (keywords=None, open_graph=None, twitter_card=None, meta_tags=None, title=None, description=None, author=None, canonical_url=None, base_href=None, language=None, text_direction=None))]
+    #[new]
+    pub fn new(
+        keywords: Option<Vec<String>>,
+        open_graph: Option<HashMap<String, String>>,
+        twitter_card: Option<HashMap<String, String>>,
+        meta_tags: Option<HashMap<String, String>>,
+        title: Option<String>,
+        description: Option<String>,
+        author: Option<String>,
+        canonical_url: Option<String>,
+        base_href: Option<String>,
+        language: Option<String>,
+        text_direction: Option<TextDirection>,
+    ) -> Self {
+        Self {
+            title,
+            description,
+            keywords: keywords.unwrap_or_default(),
+            author,
+            canonical_url,
+            base_href,
+            language,
+            text_direction,
+            open_graph: open_graph.unwrap_or_default(),
+            twitter_card: twitter_card.unwrap_or_default(),
+            meta_tags: meta_tags.unwrap_or_default(),
+        }
+    }
+}
+
+#[derive(Clone, serde::Serialize)]
+#[pyclass(frozen, from_py_object)]
+pub struct HeaderMetadata {
+    /// Header level: 1 (h1) through 6 (h6)
+    #[pyo3(get)]
+    pub level: u8,
+    /// Normalized text content of the header
+    #[pyo3(get)]
+    pub text: String,
+    /// HTML id attribute if present
+    #[pyo3(get)]
+    pub id: Option<String>,
+    /// Document tree depth at the header element
+    #[pyo3(get)]
+    pub depth: usize,
+    /// Byte offset in original HTML document
+    #[pyo3(get)]
+    pub html_offset: usize,
+}
+
+#[pymethods]
+impl HeaderMetadata {
+    #[must_use]
+    #[pyo3(signature = (level, text, depth, html_offset, id=None))]
+    #[new]
+    pub fn new(level: u8, text: String, depth: usize, html_offset: usize, id: Option<String>) -> Self {
+        Self {
+            level,
+            text,
+            id,
+            depth,
+            html_offset,
+        }
+    }
+
+    #[pyo3(signature = ())]
+    pub fn is_valid(&self) -> bool {
+        let core_self = html_to_markdown_rs::metadata::HeaderMetadata {
+            level: self.level,
+            text: self.text.clone(),
+            id: self.id.clone(),
+            depth: self.depth,
+            html_offset: self.html_offset,
+        };
+        core_self.is_valid()
+    }
+}
+
+#[derive(Clone, serde::Serialize)]
+#[pyclass(frozen, from_py_object)]
+pub struct LinkMetadata {
+    /// The href URL value
+    #[pyo3(get)]
+    pub href: String,
+    /// Link text content (normalized, concatenated if mixed with elements)
+    #[pyo3(get)]
+    pub text: String,
+    /// Optional title attribute (often shown as tooltip)
+    #[pyo3(get)]
+    pub title: Option<String>,
+    /// Link type classification
+    #[pyo3(get)]
+    pub link_type: LinkType,
+    /// Rel attribute values (e.g., "nofollow", "stylesheet", "canonical")
+    #[pyo3(get)]
+    pub rel: Vec<String>,
+    /// Additional HTML attributes
+    #[pyo3(get)]
+    pub attributes: HashMap<String, String>,
+}
+
+#[pymethods]
+impl LinkMetadata {
+    #[must_use]
+    #[pyo3(signature = (href, text, link_type, rel, attributes, title=None))]
+    #[new]
+    pub fn new(
+        href: String,
+        text: String,
+        link_type: LinkType,
+        rel: Vec<String>,
+        attributes: HashMap<String, String>,
+        title: Option<String>,
+    ) -> Self {
+        Self {
+            href,
+            text,
+            title,
+            link_type,
+            rel,
+            attributes,
+        }
+    }
+
+    #[staticmethod]
+    #[pyo3(signature = (href))]
+    pub fn classify_link(href: String) -> LinkType {
+        html_to_markdown_rs::metadata::LinkMetadata::classify_link(&href).into()
+    }
+}
+
+#[derive(Clone, serde::Serialize)]
+#[pyclass(frozen, from_py_object)]
+pub struct ImageMetadata {
+    /// Image source (URL, data URI, or SVG content identifier)
+    #[pyo3(get)]
+    pub src: String,
+    /// Alternative text from alt attribute (for accessibility)
+    #[pyo3(get)]
+    pub alt: Option<String>,
+    /// Title attribute (often shown as tooltip)
+    #[pyo3(get)]
+    pub title: Option<String>,
+    /// Image dimensions as (width, height) if available
+    #[pyo3(get)]
+    pub dimensions: Option<String>,
+    /// Image type classification
+    #[pyo3(get)]
+    pub image_type: ImageType,
+    /// Additional HTML attributes
+    #[pyo3(get)]
+    pub attributes: HashMap<String, String>,
+}
+
+#[pymethods]
+impl ImageMetadata {
+    #[must_use]
+    #[pyo3(signature = (src, image_type, attributes, alt=None, title=None, dimensions=None))]
+    #[new]
+    pub fn new(
+        src: String,
+        image_type: ImageType,
+        attributes: HashMap<String, String>,
+        alt: Option<String>,
+        title: Option<String>,
+        dimensions: Option<String>,
+    ) -> Self {
+        Self {
+            src,
+            alt,
+            title,
+            dimensions,
+            image_type,
+            attributes,
+        }
+    }
+}
+
+#[derive(Clone, serde::Serialize)]
+#[pyclass(frozen, from_py_object)]
+pub struct StructuredData {
+    /// Type of structured data (JSON-LD, Microdata, RDFa)
+    #[pyo3(get)]
+    pub data_type: StructuredDataType,
+    /// Raw JSON string (for JSON-LD) or serialized representation
+    #[pyo3(get)]
+    pub raw_json: String,
+    /// Schema type if detectable (e.g., "Article", "Event", "Product")
+    #[pyo3(get)]
+    pub schema_type: Option<String>,
+}
+
+#[pymethods]
+impl StructuredData {
+    #[must_use]
+    #[pyo3(signature = (data_type, raw_json, schema_type=None))]
+    #[new]
+    pub fn new(data_type: StructuredDataType, raw_json: String, schema_type: Option<String>) -> Self {
+        Self {
+            data_type,
+            raw_json,
+            schema_type,
+        }
+    }
+}
+
+#[derive(Clone, Default, serde::Serialize)]
+#[pyclass(frozen, from_py_object)]
+pub struct HtmlMetadata {
+    /// Document-level metadata (title, description, canonical, etc.)
+    #[pyo3(get)]
+    pub document: DocumentMetadata,
+    /// Extracted header elements with hierarchy
+    #[pyo3(get)]
+    pub headers: Vec<HeaderMetadata>,
+    /// Extracted hyperlinks with type classification
+    #[pyo3(get)]
+    pub links: Vec<LinkMetadata>,
+    /// Extracted images with source and dimensions
+    #[pyo3(get)]
+    pub images: Vec<ImageMetadata>,
+    /// Extracted structured data blocks
+    #[pyo3(get)]
+    pub structured_data: Vec<StructuredData>,
+}
+
+#[pymethods]
+impl HtmlMetadata {
+    #[must_use]
+    #[pyo3(signature = (document=None, headers=None, links=None, images=None, structured_data=None))]
+    #[new]
+    pub fn new(
+        document: Option<DocumentMetadata>,
+        headers: Option<Vec<HeaderMetadata>>,
+        links: Option<Vec<LinkMetadata>>,
+        images: Option<Vec<ImageMetadata>>,
+        structured_data: Option<Vec<StructuredData>>,
+    ) -> Self {
+        Self {
+            document: document.unwrap_or_default(),
+            headers: headers.unwrap_or_default(),
+            links: links.unwrap_or_default(),
+            images: images.unwrap_or_default(),
+            structured_data: structured_data.unwrap_or_default(),
+        }
+    }
+}
+
+#[derive(Clone, Default, serde::Serialize)]
+#[pyclass(frozen, from_py_object)]
 #[allow(clippy::similar_names)]
 pub struct ConversionOptions {
     /// Heading style to use in Markdown output (ATX `#` or Setext underline).
@@ -399,14 +693,14 @@ impl ConversionOptions {
     #[staticmethod]
     #[pyo3(signature = ())]
     pub fn default() -> ConversionOptions {
-        html_to_markdown_rs::ConversionOptions::default().into()
+        html_to_markdown_rs::options::ConversionOptions::default().into()
     }
 
     #[staticmethod]
     #[pyo3(signature = ())]
     pub fn builder() -> ConversionOptionsBuilder {
         ConversionOptionsBuilder {
-            inner: Arc::new(html_to_markdown_rs::ConversionOptions::builder()),
+            inner: Arc::new(html_to_markdown_rs::options::ConversionOptions::builder()),
         }
     }
 }
@@ -414,7 +708,7 @@ impl ConversionOptions {
 #[derive(Clone)]
 #[pyclass(frozen, from_py_object)]
 pub struct ConversionOptionsBuilder {
-    inner: Arc<html_to_markdown_rs::ConversionOptionsBuilder>,
+    inner: Arc<html_to_markdown_rs::options::ConversionOptionsBuilder>,
 }
 
 #[pymethods]
@@ -702,7 +996,7 @@ impl PreprocessingOptions {
     #[staticmethod]
     #[pyo3(signature = ())]
     pub fn default() -> PreprocessingOptions {
-        html_to_markdown_rs::PreprocessingOptions::default().into()
+        html_to_markdown_rs::options::PreprocessingOptions::default().into()
     }
 }
 
@@ -1001,297 +1295,67 @@ impl ProcessingWarning {
     }
 }
 
-#[derive(Clone, Default, serde::Serialize)]
-#[pyclass(frozen, from_py_object)]
-pub struct DocumentMetadata {
-    /// Document title from `<title>` tag
-    #[pyo3(get)]
-    pub title: Option<String>,
-    /// Document description from `<meta name="description">` tag
-    #[pyo3(get)]
-    pub description: Option<String>,
-    /// Document keywords from `<meta name="keywords">` tag, split on commas
-    #[pyo3(get)]
-    pub keywords: Vec<String>,
-    /// Document author from `<meta name="author">` tag
-    #[pyo3(get)]
-    pub author: Option<String>,
-    /// Canonical URL from `<link rel="canonical">` tag
-    #[pyo3(get)]
-    pub canonical_url: Option<String>,
-    /// Base URL from `<base href="">` tag for resolving relative URLs
-    #[pyo3(get)]
-    pub base_href: Option<String>,
-    /// Document language from `lang` attribute
-    #[pyo3(get)]
-    pub language: Option<String>,
-    /// Document text direction from `dir` attribute
-    #[pyo3(get)]
-    pub text_direction: Option<TextDirection>,
-    /// Open Graph metadata (og:* properties) for social media
-    /// Keys like "title", "description", "image", "url", etc.
-    #[pyo3(get)]
-    pub open_graph: HashMap<String, String>,
-    /// Twitter Card metadata (twitter:* properties)
-    /// Keys like "card", "site", "creator", "title", "description", "image", etc.
-    #[pyo3(get)]
-    pub twitter_card: HashMap<String, String>,
-    /// Additional meta tags not covered by specific fields
-    /// Keys are meta name/property attributes, values are content
-    #[pyo3(get)]
-    pub meta_tags: HashMap<String, String>,
+#[derive(Clone, PartialEq, serde::Serialize)]
+#[pyclass(eq, eq_int, from_py_object)]
+pub enum TextDirection {
+    LeftToRight = 0,
+    RightToLeft = 1,
+    Auto = 2,
 }
 
-#[pymethods]
-impl DocumentMetadata {
-    #[allow(clippy::too_many_arguments)]
-    #[must_use]
-    #[pyo3(signature = (keywords=None, open_graph=None, twitter_card=None, meta_tags=None, title=None, description=None, author=None, canonical_url=None, base_href=None, language=None, text_direction=None))]
-    #[new]
-    pub fn new(
-        keywords: Option<Vec<String>>,
-        open_graph: Option<HashMap<String, String>>,
-        twitter_card: Option<HashMap<String, String>>,
-        meta_tags: Option<HashMap<String, String>>,
-        title: Option<String>,
-        description: Option<String>,
-        author: Option<String>,
-        canonical_url: Option<String>,
-        base_href: Option<String>,
-        language: Option<String>,
-        text_direction: Option<TextDirection>,
-    ) -> Self {
-        Self {
-            title,
-            description,
-            keywords: keywords.unwrap_or_default(),
-            author,
-            canonical_url,
-            base_href,
-            language,
-            text_direction,
-            open_graph: open_graph.unwrap_or_default(),
-            twitter_card: twitter_card.unwrap_or_default(),
-            meta_tags: meta_tags.unwrap_or_default(),
-        }
+#[allow(clippy::derivable_impls)]
+impl Default for TextDirection {
+    fn default() -> Self {
+        Self::LeftToRight
     }
 }
 
-#[derive(Clone, serde::Serialize)]
-#[pyclass(frozen, from_py_object)]
-pub struct HeaderMetadata {
-    /// Header level: 1 (h1) through 6 (h6)
-    #[pyo3(get)]
-    pub level: u8,
-    /// Normalized text content of the header
-    #[pyo3(get)]
-    pub text: String,
-    /// HTML id attribute if present
-    #[pyo3(get)]
-    pub id: Option<String>,
-    /// Document tree depth at the header element
-    #[pyo3(get)]
-    pub depth: usize,
-    /// Byte offset in original HTML document
-    #[pyo3(get)]
-    pub html_offset: usize,
+#[derive(Clone, PartialEq, serde::Serialize)]
+#[pyclass(eq, eq_int, from_py_object)]
+pub enum LinkType {
+    Anchor = 0,
+    Internal = 1,
+    External = 2,
+    Email = 3,
+    Phone = 4,
+    Other = 5,
 }
 
-#[pymethods]
-impl HeaderMetadata {
-    #[must_use]
-    #[pyo3(signature = (level, text, depth, html_offset, id=None))]
-    #[new]
-    pub fn new(level: u8, text: String, depth: usize, html_offset: usize, id: Option<String>) -> Self {
-        Self {
-            level,
-            text,
-            id,
-            depth,
-            html_offset,
-        }
-    }
-
-    #[pyo3(signature = ())]
-    pub fn is_valid(&self) -> bool {
-        let core_self = html_to_markdown_rs::HeaderMetadata {
-            level: self.level,
-            text: self.text.clone(),
-            id: self.id.clone(),
-            depth: self.depth,
-            html_offset: self.html_offset,
-        };
-        core_self.is_valid()
+#[allow(clippy::derivable_impls)]
+impl Default for LinkType {
+    fn default() -> Self {
+        Self::Anchor
     }
 }
 
-#[derive(Clone, serde::Serialize)]
-#[pyclass(frozen, from_py_object)]
-pub struct LinkMetadata {
-    /// The href URL value
-    #[pyo3(get)]
-    pub href: String,
-    /// Link text content (normalized, concatenated if mixed with elements)
-    #[pyo3(get)]
-    pub text: String,
-    /// Optional title attribute (often shown as tooltip)
-    #[pyo3(get)]
-    pub title: Option<String>,
-    /// Link type classification
-    #[pyo3(get)]
-    pub link_type: LinkType,
-    /// Rel attribute values (e.g., "nofollow", "stylesheet", "canonical")
-    #[pyo3(get)]
-    pub rel: Vec<String>,
-    /// Additional HTML attributes
-    #[pyo3(get)]
-    pub attributes: HashMap<String, String>,
+#[derive(Clone, PartialEq, serde::Serialize)]
+#[pyclass(eq, eq_int, from_py_object)]
+pub enum ImageType {
+    DataUri = 0,
+    InlineSvg = 1,
+    External = 2,
+    Relative = 3,
 }
 
-#[pymethods]
-impl LinkMetadata {
-    #[must_use]
-    #[pyo3(signature = (href, text, link_type, rel, attributes, title=None))]
-    #[new]
-    pub fn new(
-        href: String,
-        text: String,
-        link_type: LinkType,
-        rel: Vec<String>,
-        attributes: HashMap<String, String>,
-        title: Option<String>,
-    ) -> Self {
-        Self {
-            href,
-            text,
-            title,
-            link_type,
-            rel,
-            attributes,
-        }
-    }
-
-    #[staticmethod]
-    #[pyo3(signature = (href))]
-    pub fn classify_link(href: String) -> LinkType {
-        html_to_markdown_rs::LinkMetadata::classify_link(&href).into()
+#[allow(clippy::derivable_impls)]
+impl Default for ImageType {
+    fn default() -> Self {
+        Self::DataUri
     }
 }
 
-#[derive(Clone, serde::Serialize)]
-#[pyclass(frozen, from_py_object)]
-pub struct ImageMetadata {
-    /// Image source (URL, data URI, or SVG content identifier)
-    #[pyo3(get)]
-    pub src: String,
-    /// Alternative text from alt attribute (for accessibility)
-    #[pyo3(get)]
-    pub alt: Option<String>,
-    /// Title attribute (often shown as tooltip)
-    #[pyo3(get)]
-    pub title: Option<String>,
-    /// Image dimensions as (width, height) if available
-    #[pyo3(get)]
-    pub dimensions: Option<String>,
-    /// Image type classification
-    #[pyo3(get)]
-    pub image_type: ImageType,
-    /// Additional HTML attributes
-    #[pyo3(get)]
-    pub attributes: HashMap<String, String>,
+#[derive(Clone, PartialEq, serde::Serialize)]
+#[pyclass(eq, eq_int, from_py_object)]
+pub enum StructuredDataType {
+    JsonLd = 0,
+    Microdata = 1,
+    RDFa = 2,
 }
 
-#[pymethods]
-impl ImageMetadata {
-    #[must_use]
-    #[pyo3(signature = (src, image_type, attributes, alt=None, title=None, dimensions=None))]
-    #[new]
-    pub fn new(
-        src: String,
-        image_type: ImageType,
-        attributes: HashMap<String, String>,
-        alt: Option<String>,
-        title: Option<String>,
-        dimensions: Option<String>,
-    ) -> Self {
-        Self {
-            src,
-            alt,
-            title,
-            dimensions,
-            image_type,
-            attributes,
-        }
-    }
-}
-
-#[derive(Clone, serde::Serialize)]
-#[pyclass(frozen, from_py_object)]
-pub struct StructuredData {
-    /// Type of structured data (JSON-LD, Microdata, RDFa)
-    #[pyo3(get)]
-    pub data_type: StructuredDataType,
-    /// Raw JSON string (for JSON-LD) or serialized representation
-    #[pyo3(get)]
-    pub raw_json: String,
-    /// Schema type if detectable (e.g., "Article", "Event", "Product")
-    #[pyo3(get)]
-    pub schema_type: Option<String>,
-}
-
-#[pymethods]
-impl StructuredData {
-    #[must_use]
-    #[pyo3(signature = (data_type, raw_json, schema_type=None))]
-    #[new]
-    pub fn new(data_type: StructuredDataType, raw_json: String, schema_type: Option<String>) -> Self {
-        Self {
-            data_type,
-            raw_json,
-            schema_type,
-        }
-    }
-}
-
-#[derive(Clone, Default, serde::Serialize)]
-#[pyclass(frozen, from_py_object)]
-pub struct HtmlMetadata {
-    /// Document-level metadata (title, description, canonical, etc.)
-    #[pyo3(get)]
-    pub document: DocumentMetadata,
-    /// Extracted header elements with hierarchy
-    #[pyo3(get)]
-    pub headers: Vec<HeaderMetadata>,
-    /// Extracted hyperlinks with type classification
-    #[pyo3(get)]
-    pub links: Vec<LinkMetadata>,
-    /// Extracted images with source and dimensions
-    #[pyo3(get)]
-    pub images: Vec<ImageMetadata>,
-    /// Extracted structured data blocks
-    #[pyo3(get)]
-    pub structured_data: Vec<StructuredData>,
-}
-
-#[pymethods]
-impl HtmlMetadata {
-    #[must_use]
-    #[pyo3(signature = (document=None, headers=None, links=None, images=None, structured_data=None))]
-    #[new]
-    pub fn new(
-        document: Option<DocumentMetadata>,
-        headers: Option<Vec<HeaderMetadata>>,
-        links: Option<Vec<LinkMetadata>>,
-        images: Option<Vec<ImageMetadata>>,
-        structured_data: Option<Vec<StructuredData>>,
-    ) -> Self {
-        Self {
-            document: document.unwrap_or_default(),
-            headers: headers.unwrap_or_default(),
-            links: links.unwrap_or_default(),
-            images: images.unwrap_or_default(),
-            structured_data: structured_data.unwrap_or_default(),
-        }
+#[allow(clippy::derivable_impls)]
+impl Default for StructuredDataType {
+    fn default() -> Self {
+        Self::JsonLd
     }
 }
 
@@ -1431,7 +1495,7 @@ impl Default for OutputFormat {
 #[derive(Clone)]
 #[pyclass(frozen)]
 pub struct NodeContent {
-    pub(crate) inner: html_to_markdown_rs::NodeContent,
+    pub(crate) inner: html_to_markdown_rs::types::NodeContent,
 }
 
 #[pymethods]
@@ -1440,20 +1504,20 @@ impl NodeContent {
     fn new(py: Python<'_>, value: &Bound<'_, pyo3::types::PyDict>) -> PyResult<Self> {
         let json_mod = py.import("json")?;
         let json_str: String = json_mod.call_method1("dumps", (value,))?.extract()?;
-        let inner: html_to_markdown_rs::NodeContent = serde_json::from_str(&json_str)
+        let inner: html_to_markdown_rs::types::NodeContent = serde_json::from_str(&json_str)
             .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Invalid NodeContent: {e}")))?;
         Ok(Self { inner })
     }
 }
 
-impl From<NodeContent> for html_to_markdown_rs::NodeContent {
+impl From<NodeContent> for html_to_markdown_rs::types::NodeContent {
     fn from(val: NodeContent) -> Self {
         val.inner
     }
 }
 
-impl From<html_to_markdown_rs::NodeContent> for NodeContent {
-    fn from(val: html_to_markdown_rs::NodeContent) -> Self {
+impl From<html_to_markdown_rs::types::NodeContent> for NodeContent {
+    fn from(val: html_to_markdown_rs::types::NodeContent) -> Self {
         Self { inner: val }
     }
 }
@@ -1475,7 +1539,7 @@ impl Default for NodeContent {
 #[derive(Clone)]
 #[pyclass(frozen)]
 pub struct AnnotationKind {
-    pub(crate) inner: html_to_markdown_rs::AnnotationKind,
+    pub(crate) inner: html_to_markdown_rs::types::AnnotationKind,
 }
 
 #[pymethods]
@@ -1484,20 +1548,20 @@ impl AnnotationKind {
     fn new(py: Python<'_>, value: &Bound<'_, pyo3::types::PyDict>) -> PyResult<Self> {
         let json_mod = py.import("json")?;
         let json_str: String = json_mod.call_method1("dumps", (value,))?.extract()?;
-        let inner: html_to_markdown_rs::AnnotationKind = serde_json::from_str(&json_str)
+        let inner: html_to_markdown_rs::types::AnnotationKind = serde_json::from_str(&json_str)
             .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Invalid AnnotationKind: {e}")))?;
         Ok(Self { inner })
     }
 }
 
-impl From<AnnotationKind> for html_to_markdown_rs::AnnotationKind {
+impl From<AnnotationKind> for html_to_markdown_rs::types::AnnotationKind {
     fn from(val: AnnotationKind) -> Self {
         val.inner
     }
 }
 
-impl From<html_to_markdown_rs::AnnotationKind> for AnnotationKind {
-    fn from(val: html_to_markdown_rs::AnnotationKind) -> Self {
+impl From<html_to_markdown_rs::types::AnnotationKind> for AnnotationKind {
+    fn from(val: html_to_markdown_rs::types::AnnotationKind) -> Self {
         Self { inner: val }
     }
 }
@@ -1533,76 +1597,12 @@ impl Default for WarningKind {
     }
 }
 
-#[derive(Clone, PartialEq, serde::Serialize)]
-#[pyclass(eq, eq_int, from_py_object)]
-pub enum TextDirection {
-    LeftToRight = 0,
-    RightToLeft = 1,
-    Auto = 2,
-}
-
-#[allow(clippy::derivable_impls)]
-impl Default for TextDirection {
-    fn default() -> Self {
-        Self::LeftToRight
-    }
-}
-
-#[derive(Clone, PartialEq, serde::Serialize)]
-#[pyclass(eq, eq_int, from_py_object)]
-pub enum LinkType {
-    Anchor = 0,
-    Internal = 1,
-    External = 2,
-    Email = 3,
-    Phone = 4,
-    Other = 5,
-}
-
-#[allow(clippy::derivable_impls)]
-impl Default for LinkType {
-    fn default() -> Self {
-        Self::Anchor
-    }
-}
-
-#[derive(Clone, PartialEq, serde::Serialize)]
-#[pyclass(eq, eq_int, from_py_object)]
-pub enum ImageType {
-    DataUri = 0,
-    InlineSvg = 1,
-    External = 2,
-    Relative = 3,
-}
-
-#[allow(clippy::derivable_impls)]
-impl Default for ImageType {
-    fn default() -> Self {
-        Self::DataUri
-    }
-}
-
-#[derive(Clone, PartialEq, serde::Serialize)]
-#[pyclass(eq, eq_int, from_py_object)]
-pub enum StructuredDataType {
-    JsonLd = 0,
-    Microdata = 1,
-    RDFa = 2,
-}
-
-#[allow(clippy::derivable_impls)]
-impl Default for StructuredDataType {
-    fn default() -> Self {
-        Self::JsonLd
-    }
-}
-
 #[allow(clippy::missing_errors_doc)]
 #[pyfunction]
 #[pyo3(signature = (html, options=None))]
 pub fn convert(html: String, options: Option<ConversionOptions>) -> PyResult<ConversionResult> {
     let options_core = options.map(Into::into);
-    html_to_markdown_rs::convert(&html, options_core)
+    html_to_markdown_rs::convert_api::convert(&html, options_core)
         .map(|val| val.into())
         .map_err(|e| pyo3::exceptions::PyRuntimeError::new_err(e.to_string()))
 }
@@ -1633,34 +1633,8 @@ fn conversion_error_to_py_err(e: html_to_markdown_rs::error::ConversionError) ->
     }
 }
 
-impl From<MetadataConfig> for html_to_markdown_rs::metadata::MetadataConfig {
-    fn from(val: MetadataConfig) -> Self {
-        Self {
-            extract_document: val.extract_document,
-            extract_headers: val.extract_headers,
-            extract_links: val.extract_links,
-            extract_images: val.extract_images,
-            extract_structured_data: val.extract_structured_data,
-            max_structured_data_size: val.max_structured_data_size,
-        }
-    }
-}
-
 impl From<html_to_markdown_rs::metadata::MetadataConfig> for MetadataConfig {
     fn from(val: html_to_markdown_rs::metadata::MetadataConfig) -> Self {
-        Self {
-            extract_document: val.extract_document,
-            extract_headers: val.extract_headers,
-            extract_links: val.extract_links,
-            extract_images: val.extract_images,
-            extract_structured_data: val.extract_structured_data,
-            max_structured_data_size: val.max_structured_data_size,
-        }
-    }
-}
-
-impl From<MetadataConfigUpdate> for html_to_markdown_rs::metadata::MetadataConfigUpdate {
-    fn from(val: MetadataConfigUpdate) -> Self {
         Self {
             extract_document: val.extract_document,
             extract_headers: val.extract_headers,
@@ -1685,7 +1659,85 @@ impl From<html_to_markdown_rs::metadata::MetadataConfigUpdate> for MetadataConfi
     }
 }
 
-impl From<ConversionOptions> for html_to_markdown_rs::ConversionOptions {
+impl From<html_to_markdown_rs::metadata::DocumentMetadata> for DocumentMetadata {
+    fn from(val: html_to_markdown_rs::metadata::DocumentMetadata) -> Self {
+        Self {
+            title: val.title,
+            description: val.description,
+            keywords: val.keywords,
+            author: val.author,
+            canonical_url: val.canonical_url,
+            base_href: val.base_href,
+            language: val.language,
+            text_direction: val.text_direction.map(Into::into),
+            open_graph: val.open_graph.into_iter().collect(),
+            twitter_card: val.twitter_card.into_iter().collect(),
+            meta_tags: val.meta_tags.into_iter().collect(),
+        }
+    }
+}
+
+impl From<html_to_markdown_rs::metadata::HeaderMetadata> for HeaderMetadata {
+    fn from(val: html_to_markdown_rs::metadata::HeaderMetadata) -> Self {
+        Self {
+            level: val.level,
+            text: val.text,
+            id: val.id,
+            depth: val.depth,
+            html_offset: val.html_offset,
+        }
+    }
+}
+
+impl From<html_to_markdown_rs::metadata::LinkMetadata> for LinkMetadata {
+    fn from(val: html_to_markdown_rs::metadata::LinkMetadata) -> Self {
+        Self {
+            href: val.href,
+            text: val.text,
+            title: val.title,
+            link_type: val.link_type.into(),
+            rel: val.rel,
+            attributes: val.attributes.into_iter().collect(),
+        }
+    }
+}
+
+impl From<html_to_markdown_rs::metadata::ImageMetadata> for ImageMetadata {
+    fn from(val: html_to_markdown_rs::metadata::ImageMetadata) -> Self {
+        Self {
+            src: val.src,
+            alt: val.alt,
+            title: val.title,
+            dimensions: val.dimensions.as_ref().map(|v| format!("{:?}", v)),
+            image_type: val.image_type.into(),
+            attributes: val.attributes.into_iter().collect(),
+        }
+    }
+}
+
+impl From<html_to_markdown_rs::metadata::StructuredData> for StructuredData {
+    fn from(val: html_to_markdown_rs::metadata::StructuredData) -> Self {
+        Self {
+            data_type: val.data_type.into(),
+            raw_json: val.raw_json,
+            schema_type: val.schema_type,
+        }
+    }
+}
+
+impl From<html_to_markdown_rs::metadata::HtmlMetadata> for HtmlMetadata {
+    fn from(val: html_to_markdown_rs::metadata::HtmlMetadata) -> Self {
+        Self {
+            document: val.document.into(),
+            headers: val.headers.into_iter().map(Into::into).collect(),
+            links: val.links.into_iter().map(Into::into).collect(),
+            images: val.images.into_iter().map(Into::into).collect(),
+            structured_data: val.structured_data.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+impl From<ConversionOptions> for html_to_markdown_rs::options::ConversionOptions {
     fn from(val: ConversionOptions) -> Self {
         Self {
             heading_style: val.heading_style.into(),
@@ -1730,8 +1782,8 @@ impl From<ConversionOptions> for html_to_markdown_rs::ConversionOptions {
     }
 }
 
-impl From<html_to_markdown_rs::ConversionOptions> for ConversionOptions {
-    fn from(val: html_to_markdown_rs::ConversionOptions) -> Self {
+impl From<html_to_markdown_rs::options::ConversionOptions> for ConversionOptions {
+    fn from(val: html_to_markdown_rs::options::ConversionOptions) -> Self {
         Self {
             heading_style: val.heading_style.into(),
             list_indent_type: val.list_indent_type.into(),
@@ -1775,53 +1827,8 @@ impl From<html_to_markdown_rs::ConversionOptions> for ConversionOptions {
     }
 }
 
-impl From<ConversionOptionsUpdate> for html_to_markdown_rs::ConversionOptionsUpdate {
-    fn from(val: ConversionOptionsUpdate) -> Self {
-        Self {
-            heading_style: val.heading_style.map(Into::into),
-            list_indent_type: val.list_indent_type.map(Into::into),
-            list_indent_width: val.list_indent_width,
-            bullets: val.bullets,
-            strong_em_symbol: val.strong_em_symbol.and_then(|s| s.chars().next()),
-            escape_asterisks: val.escape_asterisks,
-            escape_underscores: val.escape_underscores,
-            escape_misc: val.escape_misc,
-            escape_ascii: val.escape_ascii,
-            code_language: val.code_language,
-            autolinks: val.autolinks,
-            default_title: val.default_title,
-            br_in_tables: val.br_in_tables,
-            highlight_style: val.highlight_style.map(Into::into),
-            extract_metadata: val.extract_metadata,
-            whitespace_mode: val.whitespace_mode.map(Into::into),
-            strip_newlines: val.strip_newlines,
-            wrap: val.wrap,
-            wrap_width: val.wrap_width,
-            convert_as_inline: val.convert_as_inline,
-            sub_symbol: val.sub_symbol,
-            sup_symbol: val.sup_symbol,
-            newline_style: val.newline_style.map(Into::into),
-            code_block_style: val.code_block_style.map(Into::into),
-            keep_inline_images_in: val.keep_inline_images_in,
-            preprocessing: val.preprocessing.map(Into::into),
-            encoding: val.encoding,
-            debug: val.debug,
-            strip_tags: val.strip_tags,
-            preserve_tags: val.preserve_tags,
-            skip_images: val.skip_images,
-            link_style: val.link_style.map(Into::into),
-            output_format: val.output_format.map(Into::into),
-            include_document_structure: val.include_document_structure,
-            extract_images: val.extract_images,
-            max_image_size: val.max_image_size,
-            capture_svg: val.capture_svg,
-            infer_dimensions: val.infer_dimensions,
-        }
-    }
-}
-
-impl From<html_to_markdown_rs::ConversionOptionsUpdate> for ConversionOptionsUpdate {
-    fn from(val: html_to_markdown_rs::ConversionOptionsUpdate) -> Self {
+impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for ConversionOptionsUpdate {
+    fn from(val: html_to_markdown_rs::options::ConversionOptionsUpdate) -> Self {
         Self {
             heading_style: val.heading_style.map(Into::into),
             list_indent_type: val.list_indent_type.map(Into::into),
@@ -1865,7 +1872,7 @@ impl From<html_to_markdown_rs::ConversionOptionsUpdate> for ConversionOptionsUpd
     }
 }
 
-impl From<PreprocessingOptions> for html_to_markdown_rs::PreprocessingOptions {
+impl From<PreprocessingOptions> for html_to_markdown_rs::options::PreprocessingOptions {
     fn from(val: PreprocessingOptions) -> Self {
         Self {
             enabled: val.enabled,
@@ -1876,8 +1883,8 @@ impl From<PreprocessingOptions> for html_to_markdown_rs::PreprocessingOptions {
     }
 }
 
-impl From<html_to_markdown_rs::PreprocessingOptions> for PreprocessingOptions {
-    fn from(val: html_to_markdown_rs::PreprocessingOptions) -> Self {
+impl From<html_to_markdown_rs::options::PreprocessingOptions> for PreprocessingOptions {
+    fn from(val: html_to_markdown_rs::options::PreprocessingOptions) -> Self {
         Self {
             enabled: val.enabled,
             preset: val.preset.into(),
@@ -1887,8 +1894,8 @@ impl From<html_to_markdown_rs::PreprocessingOptions> for PreprocessingOptions {
     }
 }
 
-impl From<PreprocessingOptionsUpdate> for html_to_markdown_rs::PreprocessingOptionsUpdate {
-    fn from(val: PreprocessingOptionsUpdate) -> Self {
+impl From<html_to_markdown_rs::options::PreprocessingOptionsUpdate> for PreprocessingOptionsUpdate {
+    fn from(val: html_to_markdown_rs::options::PreprocessingOptionsUpdate) -> Self {
         Self {
             enabled: val.enabled,
             preset: val.preset.map(Into::into),
@@ -1898,47 +1905,8 @@ impl From<PreprocessingOptionsUpdate> for html_to_markdown_rs::PreprocessingOpti
     }
 }
 
-impl From<html_to_markdown_rs::PreprocessingOptionsUpdate> for PreprocessingOptionsUpdate {
-    fn from(val: html_to_markdown_rs::PreprocessingOptionsUpdate) -> Self {
-        Self {
-            enabled: val.enabled,
-            preset: val.preset.map(Into::into),
-            remove_navigation: val.remove_navigation,
-            remove_forms: val.remove_forms,
-        }
-    }
-}
-
-#[allow(clippy::needless_update)]
-impl From<ConversionResult> for html_to_markdown_rs::ConversionResult {
-    fn from(val: ConversionResult) -> Self {
-        Self {
-            content: val.content,
-            document: val.document.map(Into::into),
-            metadata: val.metadata.into(),
-            tables: val.tables.into_iter().map(Into::into).collect(),
-            images: Default::default(),
-            warnings: val.warnings.into_iter().map(Into::into).collect(),
-            ..Default::default()
-        }
-    }
-}
-
-impl From<html_to_markdown_rs::ConversionResult> for ConversionResult {
-    fn from(val: html_to_markdown_rs::ConversionResult) -> Self {
-        Self {
-            content: val.content,
-            document: val.document.map(Into::into),
-            metadata: val.metadata.into(),
-            tables: val.tables.into_iter().map(Into::into).collect(),
-            images: val.images.iter().map(|i| format!("{:?}", i)).collect(),
-            warnings: val.warnings.into_iter().map(Into::into).collect(),
-        }
-    }
-}
-
-impl From<DocumentStructure> for html_to_markdown_rs::DocumentStructure {
-    fn from(val: DocumentStructure) -> Self {
+impl From<html_to_markdown_rs::types::DocumentStructure> for DocumentStructure {
+    fn from(val: html_to_markdown_rs::types::DocumentStructure) -> Self {
         Self {
             nodes: val.nodes.into_iter().map(Into::into).collect(),
             source_format: val.source_format,
@@ -1946,17 +1914,8 @@ impl From<DocumentStructure> for html_to_markdown_rs::DocumentStructure {
     }
 }
 
-impl From<html_to_markdown_rs::DocumentStructure> for DocumentStructure {
-    fn from(val: html_to_markdown_rs::DocumentStructure) -> Self {
-        Self {
-            nodes: val.nodes.into_iter().map(Into::into).collect(),
-            source_format: val.source_format,
-        }
-    }
-}
-
-impl From<DocumentNode> for html_to_markdown_rs::DocumentNode {
-    fn from(val: DocumentNode) -> Self {
+impl From<html_to_markdown_rs::types::DocumentNode> for DocumentNode {
+    fn from(val: html_to_markdown_rs::types::DocumentNode) -> Self {
         Self {
             id: val.id,
             content: val.content.into(),
@@ -1968,21 +1927,8 @@ impl From<DocumentNode> for html_to_markdown_rs::DocumentNode {
     }
 }
 
-impl From<html_to_markdown_rs::DocumentNode> for DocumentNode {
-    fn from(val: html_to_markdown_rs::DocumentNode) -> Self {
-        Self {
-            id: val.id,
-            content: val.content.into(),
-            parent: val.parent,
-            children: val.children,
-            annotations: val.annotations.into_iter().map(Into::into).collect(),
-            attributes: val.attributes.map(|m| m.into_iter().collect()),
-        }
-    }
-}
-
-impl From<TextAnnotation> for html_to_markdown_rs::TextAnnotation {
-    fn from(val: TextAnnotation) -> Self {
+impl From<html_to_markdown_rs::types::TextAnnotation> for TextAnnotation {
+    fn from(val: html_to_markdown_rs::types::TextAnnotation) -> Self {
         Self {
             start: val.start,
             end: val.end,
@@ -1991,18 +1937,8 @@ impl From<TextAnnotation> for html_to_markdown_rs::TextAnnotation {
     }
 }
 
-impl From<html_to_markdown_rs::TextAnnotation> for TextAnnotation {
-    fn from(val: html_to_markdown_rs::TextAnnotation) -> Self {
-        Self {
-            start: val.start,
-            end: val.end,
-            kind: val.kind.into(),
-        }
-    }
-}
-
-impl From<TableGrid> for html_to_markdown_rs::TableGrid {
-    fn from(val: TableGrid) -> Self {
+impl From<html_to_markdown_rs::types::TableGrid> for TableGrid {
+    fn from(val: html_to_markdown_rs::types::TableGrid) -> Self {
         Self {
             rows: val.rows,
             cols: val.cols,
@@ -2011,18 +1947,8 @@ impl From<TableGrid> for html_to_markdown_rs::TableGrid {
     }
 }
 
-impl From<html_to_markdown_rs::TableGrid> for TableGrid {
-    fn from(val: html_to_markdown_rs::TableGrid) -> Self {
-        Self {
-            rows: val.rows,
-            cols: val.cols,
-            cells: val.cells.into_iter().map(Into::into).collect(),
-        }
-    }
-}
-
-impl From<GridCell> for html_to_markdown_rs::GridCell {
-    fn from(val: GridCell) -> Self {
+impl From<html_to_markdown_rs::types::GridCell> for GridCell {
+    fn from(val: html_to_markdown_rs::types::GridCell) -> Self {
         Self {
             content: val.content,
             row: val.row,
@@ -2034,21 +1960,8 @@ impl From<GridCell> for html_to_markdown_rs::GridCell {
     }
 }
 
-impl From<html_to_markdown_rs::GridCell> for GridCell {
-    fn from(val: html_to_markdown_rs::GridCell) -> Self {
-        Self {
-            content: val.content,
-            row: val.row,
-            col: val.col,
-            row_span: val.row_span,
-            col_span: val.col_span,
-            is_header: val.is_header,
-        }
-    }
-}
-
-impl From<TableData> for html_to_markdown_rs::TableData {
-    fn from(val: TableData) -> Self {
+impl From<html_to_markdown_rs::types::TableData> for TableData {
+    fn from(val: html_to_markdown_rs::types::TableData) -> Self {
         Self {
             grid: val.grid.into(),
             markdown: val.markdown,
@@ -2056,17 +1969,8 @@ impl From<TableData> for html_to_markdown_rs::TableData {
     }
 }
 
-impl From<html_to_markdown_rs::TableData> for TableData {
-    fn from(val: html_to_markdown_rs::TableData) -> Self {
-        Self {
-            grid: val.grid.into(),
-            markdown: val.markdown,
-        }
-    }
-}
-
-impl From<ProcessingWarning> for html_to_markdown_rs::ProcessingWarning {
-    fn from(val: ProcessingWarning) -> Self {
+impl From<html_to_markdown_rs::types::ProcessingWarning> for ProcessingWarning {
+    fn from(val: html_to_markdown_rs::types::ProcessingWarning) -> Self {
         Self {
             message: val.message,
             kind: val.kind.into(),
@@ -2074,172 +1978,51 @@ impl From<ProcessingWarning> for html_to_markdown_rs::ProcessingWarning {
     }
 }
 
-impl From<html_to_markdown_rs::ProcessingWarning> for ProcessingWarning {
-    fn from(val: html_to_markdown_rs::ProcessingWarning) -> Self {
-        Self {
-            message: val.message,
-            kind: val.kind.into(),
+impl From<html_to_markdown_rs::metadata::TextDirection> for TextDirection {
+    fn from(val: html_to_markdown_rs::metadata::TextDirection) -> Self {
+        match val {
+            html_to_markdown_rs::metadata::TextDirection::LeftToRight => Self::LeftToRight,
+            html_to_markdown_rs::metadata::TextDirection::RightToLeft => Self::RightToLeft,
+            html_to_markdown_rs::metadata::TextDirection::Auto => Self::Auto,
         }
     }
 }
 
-impl From<DocumentMetadata> for html_to_markdown_rs::DocumentMetadata {
-    fn from(val: DocumentMetadata) -> Self {
-        Self {
-            title: val.title,
-            description: val.description,
-            keywords: val.keywords,
-            author: val.author,
-            canonical_url: val.canonical_url,
-            base_href: val.base_href,
-            language: val.language,
-            text_direction: val.text_direction.map(Into::into),
-            open_graph: val.open_graph.into_iter().collect(),
-            twitter_card: val.twitter_card.into_iter().collect(),
-            meta_tags: val.meta_tags.into_iter().collect(),
+impl From<html_to_markdown_rs::metadata::LinkType> for LinkType {
+    fn from(val: html_to_markdown_rs::metadata::LinkType) -> Self {
+        match val {
+            html_to_markdown_rs::metadata::LinkType::Anchor => Self::Anchor,
+            html_to_markdown_rs::metadata::LinkType::Internal => Self::Internal,
+            html_to_markdown_rs::metadata::LinkType::External => Self::External,
+            html_to_markdown_rs::metadata::LinkType::Email => Self::Email,
+            html_to_markdown_rs::metadata::LinkType::Phone => Self::Phone,
+            html_to_markdown_rs::metadata::LinkType::Other => Self::Other,
         }
     }
 }
 
-impl From<html_to_markdown_rs::DocumentMetadata> for DocumentMetadata {
-    fn from(val: html_to_markdown_rs::DocumentMetadata) -> Self {
-        Self {
-            title: val.title,
-            description: val.description,
-            keywords: val.keywords,
-            author: val.author,
-            canonical_url: val.canonical_url,
-            base_href: val.base_href,
-            language: val.language,
-            text_direction: val.text_direction.map(Into::into),
-            open_graph: val.open_graph.into_iter().collect(),
-            twitter_card: val.twitter_card.into_iter().collect(),
-            meta_tags: val.meta_tags.into_iter().collect(),
+impl From<html_to_markdown_rs::metadata::ImageType> for ImageType {
+    fn from(val: html_to_markdown_rs::metadata::ImageType) -> Self {
+        match val {
+            html_to_markdown_rs::metadata::ImageType::DataUri => Self::DataUri,
+            html_to_markdown_rs::metadata::ImageType::InlineSvg => Self::InlineSvg,
+            html_to_markdown_rs::metadata::ImageType::External => Self::External,
+            html_to_markdown_rs::metadata::ImageType::Relative => Self::Relative,
         }
     }
 }
 
-impl From<HeaderMetadata> for html_to_markdown_rs::HeaderMetadata {
-    fn from(val: HeaderMetadata) -> Self {
-        Self {
-            level: val.level,
-            text: val.text,
-            id: val.id,
-            depth: val.depth,
-            html_offset: val.html_offset,
+impl From<html_to_markdown_rs::metadata::StructuredDataType> for StructuredDataType {
+    fn from(val: html_to_markdown_rs::metadata::StructuredDataType) -> Self {
+        match val {
+            html_to_markdown_rs::metadata::StructuredDataType::JsonLd => Self::JsonLd,
+            html_to_markdown_rs::metadata::StructuredDataType::Microdata => Self::Microdata,
+            html_to_markdown_rs::metadata::StructuredDataType::RDFa => Self::RDFa,
         }
     }
 }
 
-impl From<html_to_markdown_rs::HeaderMetadata> for HeaderMetadata {
-    fn from(val: html_to_markdown_rs::HeaderMetadata) -> Self {
-        Self {
-            level: val.level,
-            text: val.text,
-            id: val.id,
-            depth: val.depth,
-            html_offset: val.html_offset,
-        }
-    }
-}
-
-impl From<LinkMetadata> for html_to_markdown_rs::LinkMetadata {
-    fn from(val: LinkMetadata) -> Self {
-        Self {
-            href: val.href,
-            text: val.text,
-            title: val.title,
-            link_type: val.link_type.into(),
-            rel: val.rel,
-            attributes: val.attributes.into_iter().collect(),
-        }
-    }
-}
-
-impl From<html_to_markdown_rs::LinkMetadata> for LinkMetadata {
-    fn from(val: html_to_markdown_rs::LinkMetadata) -> Self {
-        Self {
-            href: val.href,
-            text: val.text,
-            title: val.title,
-            link_type: val.link_type.into(),
-            rel: val.rel,
-            attributes: val.attributes.into_iter().collect(),
-        }
-    }
-}
-
-impl From<ImageMetadata> for html_to_markdown_rs::ImageMetadata {
-    fn from(val: ImageMetadata) -> Self {
-        Self {
-            src: val.src,
-            alt: val.alt,
-            title: val.title,
-            dimensions: Default::default(),
-            image_type: val.image_type.into(),
-            attributes: val.attributes.into_iter().collect(),
-        }
-    }
-}
-
-impl From<html_to_markdown_rs::ImageMetadata> for ImageMetadata {
-    fn from(val: html_to_markdown_rs::ImageMetadata) -> Self {
-        Self {
-            src: val.src,
-            alt: val.alt,
-            title: val.title,
-            dimensions: val.dimensions.as_ref().map(|v| format!("{:?}", v)),
-            image_type: val.image_type.into(),
-            attributes: val.attributes.into_iter().collect(),
-        }
-    }
-}
-
-impl From<StructuredData> for html_to_markdown_rs::StructuredData {
-    fn from(val: StructuredData) -> Self {
-        Self {
-            data_type: val.data_type.into(),
-            raw_json: val.raw_json,
-            schema_type: val.schema_type,
-        }
-    }
-}
-
-impl From<html_to_markdown_rs::StructuredData> for StructuredData {
-    fn from(val: html_to_markdown_rs::StructuredData) -> Self {
-        Self {
-            data_type: val.data_type.into(),
-            raw_json: val.raw_json,
-            schema_type: val.schema_type,
-        }
-    }
-}
-
-impl From<HtmlMetadata> for html_to_markdown_rs::HtmlMetadata {
-    fn from(val: HtmlMetadata) -> Self {
-        Self {
-            document: val.document.into(),
-            headers: val.headers.into_iter().map(Into::into).collect(),
-            links: val.links.into_iter().map(Into::into).collect(),
-            images: val.images.into_iter().map(Into::into).collect(),
-            structured_data: val.structured_data.into_iter().map(Into::into).collect(),
-        }
-    }
-}
-
-impl From<html_to_markdown_rs::HtmlMetadata> for HtmlMetadata {
-    fn from(val: html_to_markdown_rs::HtmlMetadata) -> Self {
-        Self {
-            document: val.document.into(),
-            headers: val.headers.into_iter().map(Into::into).collect(),
-            links: val.links.into_iter().map(Into::into).collect(),
-            images: val.images.into_iter().map(Into::into).collect(),
-            structured_data: val.structured_data.into_iter().map(Into::into).collect(),
-        }
-    }
-}
-
-impl From<PreprocessingPreset> for html_to_markdown_rs::PreprocessingPreset {
+impl From<PreprocessingPreset> for html_to_markdown_rs::options::PreprocessingPreset {
     fn from(val: PreprocessingPreset) -> Self {
         match val {
             PreprocessingPreset::Minimal => Self::Minimal,
@@ -2249,17 +2032,17 @@ impl From<PreprocessingPreset> for html_to_markdown_rs::PreprocessingPreset {
     }
 }
 
-impl From<html_to_markdown_rs::PreprocessingPreset> for PreprocessingPreset {
-    fn from(val: html_to_markdown_rs::PreprocessingPreset) -> Self {
+impl From<html_to_markdown_rs::options::PreprocessingPreset> for PreprocessingPreset {
+    fn from(val: html_to_markdown_rs::options::PreprocessingPreset) -> Self {
         match val {
-            html_to_markdown_rs::PreprocessingPreset::Minimal => Self::Minimal,
-            html_to_markdown_rs::PreprocessingPreset::Standard => Self::Standard,
-            html_to_markdown_rs::PreprocessingPreset::Aggressive => Self::Aggressive,
+            html_to_markdown_rs::options::PreprocessingPreset::Minimal => Self::Minimal,
+            html_to_markdown_rs::options::PreprocessingPreset::Standard => Self::Standard,
+            html_to_markdown_rs::options::PreprocessingPreset::Aggressive => Self::Aggressive,
         }
     }
 }
 
-impl From<HeadingStyle> for html_to_markdown_rs::HeadingStyle {
+impl From<HeadingStyle> for html_to_markdown_rs::options::HeadingStyle {
     fn from(val: HeadingStyle) -> Self {
         match val {
             HeadingStyle::Underlined => Self::Underlined,
@@ -2269,17 +2052,17 @@ impl From<HeadingStyle> for html_to_markdown_rs::HeadingStyle {
     }
 }
 
-impl From<html_to_markdown_rs::HeadingStyle> for HeadingStyle {
-    fn from(val: html_to_markdown_rs::HeadingStyle) -> Self {
+impl From<html_to_markdown_rs::options::HeadingStyle> for HeadingStyle {
+    fn from(val: html_to_markdown_rs::options::HeadingStyle) -> Self {
         match val {
-            html_to_markdown_rs::HeadingStyle::Underlined => Self::Underlined,
-            html_to_markdown_rs::HeadingStyle::Atx => Self::Atx,
-            html_to_markdown_rs::HeadingStyle::AtxClosed => Self::AtxClosed,
+            html_to_markdown_rs::options::HeadingStyle::Underlined => Self::Underlined,
+            html_to_markdown_rs::options::HeadingStyle::Atx => Self::Atx,
+            html_to_markdown_rs::options::HeadingStyle::AtxClosed => Self::AtxClosed,
         }
     }
 }
 
-impl From<ListIndentType> for html_to_markdown_rs::ListIndentType {
+impl From<ListIndentType> for html_to_markdown_rs::options::ListIndentType {
     fn from(val: ListIndentType) -> Self {
         match val {
             ListIndentType::Spaces => Self::Spaces,
@@ -2288,16 +2071,16 @@ impl From<ListIndentType> for html_to_markdown_rs::ListIndentType {
     }
 }
 
-impl From<html_to_markdown_rs::ListIndentType> for ListIndentType {
-    fn from(val: html_to_markdown_rs::ListIndentType) -> Self {
+impl From<html_to_markdown_rs::options::ListIndentType> for ListIndentType {
+    fn from(val: html_to_markdown_rs::options::ListIndentType) -> Self {
         match val {
-            html_to_markdown_rs::ListIndentType::Spaces => Self::Spaces,
-            html_to_markdown_rs::ListIndentType::Tabs => Self::Tabs,
+            html_to_markdown_rs::options::ListIndentType::Spaces => Self::Spaces,
+            html_to_markdown_rs::options::ListIndentType::Tabs => Self::Tabs,
         }
     }
 }
 
-impl From<WhitespaceMode> for html_to_markdown_rs::WhitespaceMode {
+impl From<WhitespaceMode> for html_to_markdown_rs::options::WhitespaceMode {
     fn from(val: WhitespaceMode) -> Self {
         match val {
             WhitespaceMode::Normalized => Self::Normalized,
@@ -2306,16 +2089,16 @@ impl From<WhitespaceMode> for html_to_markdown_rs::WhitespaceMode {
     }
 }
 
-impl From<html_to_markdown_rs::WhitespaceMode> for WhitespaceMode {
-    fn from(val: html_to_markdown_rs::WhitespaceMode) -> Self {
+impl From<html_to_markdown_rs::options::WhitespaceMode> for WhitespaceMode {
+    fn from(val: html_to_markdown_rs::options::WhitespaceMode) -> Self {
         match val {
-            html_to_markdown_rs::WhitespaceMode::Normalized => Self::Normalized,
-            html_to_markdown_rs::WhitespaceMode::Strict => Self::Strict,
+            html_to_markdown_rs::options::WhitespaceMode::Normalized => Self::Normalized,
+            html_to_markdown_rs::options::WhitespaceMode::Strict => Self::Strict,
         }
     }
 }
 
-impl From<NewlineStyle> for html_to_markdown_rs::NewlineStyle {
+impl From<NewlineStyle> for html_to_markdown_rs::options::NewlineStyle {
     fn from(val: NewlineStyle) -> Self {
         match val {
             NewlineStyle::Spaces => Self::Spaces,
@@ -2324,16 +2107,16 @@ impl From<NewlineStyle> for html_to_markdown_rs::NewlineStyle {
     }
 }
 
-impl From<html_to_markdown_rs::NewlineStyle> for NewlineStyle {
-    fn from(val: html_to_markdown_rs::NewlineStyle) -> Self {
+impl From<html_to_markdown_rs::options::NewlineStyle> for NewlineStyle {
+    fn from(val: html_to_markdown_rs::options::NewlineStyle) -> Self {
         match val {
-            html_to_markdown_rs::NewlineStyle::Spaces => Self::Spaces,
-            html_to_markdown_rs::NewlineStyle::Backslash => Self::Backslash,
+            html_to_markdown_rs::options::NewlineStyle::Spaces => Self::Spaces,
+            html_to_markdown_rs::options::NewlineStyle::Backslash => Self::Backslash,
         }
     }
 }
 
-impl From<CodeBlockStyle> for html_to_markdown_rs::CodeBlockStyle {
+impl From<CodeBlockStyle> for html_to_markdown_rs::options::CodeBlockStyle {
     fn from(val: CodeBlockStyle) -> Self {
         match val {
             CodeBlockStyle::Indented => Self::Indented,
@@ -2343,17 +2126,17 @@ impl From<CodeBlockStyle> for html_to_markdown_rs::CodeBlockStyle {
     }
 }
 
-impl From<html_to_markdown_rs::CodeBlockStyle> for CodeBlockStyle {
-    fn from(val: html_to_markdown_rs::CodeBlockStyle) -> Self {
+impl From<html_to_markdown_rs::options::CodeBlockStyle> for CodeBlockStyle {
+    fn from(val: html_to_markdown_rs::options::CodeBlockStyle) -> Self {
         match val {
-            html_to_markdown_rs::CodeBlockStyle::Indented => Self::Indented,
-            html_to_markdown_rs::CodeBlockStyle::Backticks => Self::Backticks,
-            html_to_markdown_rs::CodeBlockStyle::Tildes => Self::Tildes,
+            html_to_markdown_rs::options::CodeBlockStyle::Indented => Self::Indented,
+            html_to_markdown_rs::options::CodeBlockStyle::Backticks => Self::Backticks,
+            html_to_markdown_rs::options::CodeBlockStyle::Tildes => Self::Tildes,
         }
     }
 }
 
-impl From<HighlightStyle> for html_to_markdown_rs::HighlightStyle {
+impl From<HighlightStyle> for html_to_markdown_rs::options::HighlightStyle {
     fn from(val: HighlightStyle) -> Self {
         match val {
             HighlightStyle::DoubleEqual => Self::DoubleEqual,
@@ -2364,18 +2147,18 @@ impl From<HighlightStyle> for html_to_markdown_rs::HighlightStyle {
     }
 }
 
-impl From<html_to_markdown_rs::HighlightStyle> for HighlightStyle {
-    fn from(val: html_to_markdown_rs::HighlightStyle) -> Self {
+impl From<html_to_markdown_rs::options::HighlightStyle> for HighlightStyle {
+    fn from(val: html_to_markdown_rs::options::HighlightStyle) -> Self {
         match val {
-            html_to_markdown_rs::HighlightStyle::DoubleEqual => Self::DoubleEqual,
-            html_to_markdown_rs::HighlightStyle::Html => Self::Html,
-            html_to_markdown_rs::HighlightStyle::Bold => Self::Bold,
-            html_to_markdown_rs::HighlightStyle::None => Self::None,
+            html_to_markdown_rs::options::HighlightStyle::DoubleEqual => Self::DoubleEqual,
+            html_to_markdown_rs::options::HighlightStyle::Html => Self::Html,
+            html_to_markdown_rs::options::HighlightStyle::Bold => Self::Bold,
+            html_to_markdown_rs::options::HighlightStyle::None => Self::None,
         }
     }
 }
 
-impl From<LinkStyle> for html_to_markdown_rs::LinkStyle {
+impl From<LinkStyle> for html_to_markdown_rs::options::LinkStyle {
     fn from(val: LinkStyle) -> Self {
         match val {
             LinkStyle::Inline => Self::Inline,
@@ -2384,16 +2167,16 @@ impl From<LinkStyle> for html_to_markdown_rs::LinkStyle {
     }
 }
 
-impl From<html_to_markdown_rs::LinkStyle> for LinkStyle {
-    fn from(val: html_to_markdown_rs::LinkStyle) -> Self {
+impl From<html_to_markdown_rs::options::LinkStyle> for LinkStyle {
+    fn from(val: html_to_markdown_rs::options::LinkStyle) -> Self {
         match val {
-            html_to_markdown_rs::LinkStyle::Inline => Self::Inline,
-            html_to_markdown_rs::LinkStyle::Reference => Self::Reference,
+            html_to_markdown_rs::options::LinkStyle::Inline => Self::Inline,
+            html_to_markdown_rs::options::LinkStyle::Reference => Self::Reference,
         }
     }
 }
 
-impl From<OutputFormat> for html_to_markdown_rs::OutputFormat {
+impl From<OutputFormat> for html_to_markdown_rs::options::OutputFormat {
     fn from(val: OutputFormat) -> Self {
         match val {
             OutputFormat::Markdown => Self::Markdown,
@@ -2403,124 +2186,24 @@ impl From<OutputFormat> for html_to_markdown_rs::OutputFormat {
     }
 }
 
-impl From<html_to_markdown_rs::OutputFormat> for OutputFormat {
-    fn from(val: html_to_markdown_rs::OutputFormat) -> Self {
+impl From<html_to_markdown_rs::options::OutputFormat> for OutputFormat {
+    fn from(val: html_to_markdown_rs::options::OutputFormat) -> Self {
         match val {
-            html_to_markdown_rs::OutputFormat::Markdown => Self::Markdown,
-            html_to_markdown_rs::OutputFormat::Djot => Self::Djot,
-            html_to_markdown_rs::OutputFormat::Plain => Self::Plain,
+            html_to_markdown_rs::options::OutputFormat::Markdown => Self::Markdown,
+            html_to_markdown_rs::options::OutputFormat::Djot => Self::Djot,
+            html_to_markdown_rs::options::OutputFormat::Plain => Self::Plain,
         }
     }
 }
 
-impl From<WarningKind> for html_to_markdown_rs::WarningKind {
-    fn from(val: WarningKind) -> Self {
+impl From<html_to_markdown_rs::types::WarningKind> for WarningKind {
+    fn from(val: html_to_markdown_rs::types::WarningKind) -> Self {
         match val {
-            WarningKind::ImageExtractionFailed => Self::ImageExtractionFailed,
-            WarningKind::EncodingFallback => Self::EncodingFallback,
-            WarningKind::TruncatedInput => Self::TruncatedInput,
-            WarningKind::MalformedHtml => Self::MalformedHtml,
-            WarningKind::SanitizationApplied => Self::SanitizationApplied,
-        }
-    }
-}
-
-impl From<html_to_markdown_rs::WarningKind> for WarningKind {
-    fn from(val: html_to_markdown_rs::WarningKind) -> Self {
-        match val {
-            html_to_markdown_rs::WarningKind::ImageExtractionFailed => Self::ImageExtractionFailed,
-            html_to_markdown_rs::WarningKind::EncodingFallback => Self::EncodingFallback,
-            html_to_markdown_rs::WarningKind::TruncatedInput => Self::TruncatedInput,
-            html_to_markdown_rs::WarningKind::MalformedHtml => Self::MalformedHtml,
-            html_to_markdown_rs::WarningKind::SanitizationApplied => Self::SanitizationApplied,
-        }
-    }
-}
-
-impl From<TextDirection> for html_to_markdown_rs::TextDirection {
-    fn from(val: TextDirection) -> Self {
-        match val {
-            TextDirection::LeftToRight => Self::LeftToRight,
-            TextDirection::RightToLeft => Self::RightToLeft,
-            TextDirection::Auto => Self::Auto,
-        }
-    }
-}
-
-impl From<html_to_markdown_rs::TextDirection> for TextDirection {
-    fn from(val: html_to_markdown_rs::TextDirection) -> Self {
-        match val {
-            html_to_markdown_rs::TextDirection::LeftToRight => Self::LeftToRight,
-            html_to_markdown_rs::TextDirection::RightToLeft => Self::RightToLeft,
-            html_to_markdown_rs::TextDirection::Auto => Self::Auto,
-        }
-    }
-}
-
-impl From<LinkType> for html_to_markdown_rs::LinkType {
-    fn from(val: LinkType) -> Self {
-        match val {
-            LinkType::Anchor => Self::Anchor,
-            LinkType::Internal => Self::Internal,
-            LinkType::External => Self::External,
-            LinkType::Email => Self::Email,
-            LinkType::Phone => Self::Phone,
-            LinkType::Other => Self::Other,
-        }
-    }
-}
-
-impl From<html_to_markdown_rs::LinkType> for LinkType {
-    fn from(val: html_to_markdown_rs::LinkType) -> Self {
-        match val {
-            html_to_markdown_rs::LinkType::Anchor => Self::Anchor,
-            html_to_markdown_rs::LinkType::Internal => Self::Internal,
-            html_to_markdown_rs::LinkType::External => Self::External,
-            html_to_markdown_rs::LinkType::Email => Self::Email,
-            html_to_markdown_rs::LinkType::Phone => Self::Phone,
-            html_to_markdown_rs::LinkType::Other => Self::Other,
-        }
-    }
-}
-
-impl From<ImageType> for html_to_markdown_rs::ImageType {
-    fn from(val: ImageType) -> Self {
-        match val {
-            ImageType::DataUri => Self::DataUri,
-            ImageType::InlineSvg => Self::InlineSvg,
-            ImageType::External => Self::External,
-            ImageType::Relative => Self::Relative,
-        }
-    }
-}
-
-impl From<html_to_markdown_rs::ImageType> for ImageType {
-    fn from(val: html_to_markdown_rs::ImageType) -> Self {
-        match val {
-            html_to_markdown_rs::ImageType::DataUri => Self::DataUri,
-            html_to_markdown_rs::ImageType::InlineSvg => Self::InlineSvg,
-            html_to_markdown_rs::ImageType::External => Self::External,
-            html_to_markdown_rs::ImageType::Relative => Self::Relative,
-        }
-    }
-}
-
-impl From<StructuredDataType> for html_to_markdown_rs::StructuredDataType {
-    fn from(val: StructuredDataType) -> Self {
-        match val {
-            StructuredDataType::JsonLd => Self::JsonLd,
-            StructuredDataType::Microdata => Self::Microdata,
-            StructuredDataType::RDFa => Self::RDFa,
-        }
-    }
-}
-
-impl From<html_to_markdown_rs::StructuredDataType> for StructuredDataType {
-    fn from(val: html_to_markdown_rs::StructuredDataType) -> Self {
-        match val {
-            html_to_markdown_rs::StructuredDataType::JsonLd => Self::JsonLd,
-            html_to_markdown_rs::StructuredDataType::Microdata => Self::Microdata,
-            html_to_markdown_rs::StructuredDataType::RDFa => Self::RDFa,
+            html_to_markdown_rs::types::WarningKind::ImageExtractionFailed => Self::ImageExtractionFailed,
+            html_to_markdown_rs::types::WarningKind::EncodingFallback => Self::EncodingFallback,
+            html_to_markdown_rs::types::WarningKind::TruncatedInput => Self::TruncatedInput,
+            html_to_markdown_rs::types::WarningKind::MalformedHtml => Self::MalformedHtml,
+            html_to_markdown_rs::types::WarningKind::SanitizationApplied => Self::SanitizationApplied,
         }
     }
 }
@@ -2529,6 +2212,12 @@ impl From<html_to_markdown_rs::StructuredDataType> for StructuredDataType {
 pub fn _html_to_markdown(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<MetadataConfig>()?;
     m.add_class::<MetadataConfigUpdate>()?;
+    m.add_class::<DocumentMetadata>()?;
+    m.add_class::<HeaderMetadata>()?;
+    m.add_class::<LinkMetadata>()?;
+    m.add_class::<ImageMetadata>()?;
+    m.add_class::<StructuredData>()?;
+    m.add_class::<HtmlMetadata>()?;
     m.add_class::<ConversionOptions>()?;
     m.add_class::<ConversionOptionsBuilder>()?;
     m.add_class::<ConversionOptionsUpdate>()?;
@@ -2542,12 +2231,10 @@ pub fn _html_to_markdown(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<GridCell>()?;
     m.add_class::<TableData>()?;
     m.add_class::<ProcessingWarning>()?;
-    m.add_class::<DocumentMetadata>()?;
-    m.add_class::<HeaderMetadata>()?;
-    m.add_class::<LinkMetadata>()?;
-    m.add_class::<ImageMetadata>()?;
-    m.add_class::<StructuredData>()?;
-    m.add_class::<HtmlMetadata>()?;
+    m.add_class::<TextDirection>()?;
+    m.add_class::<LinkType>()?;
+    m.add_class::<ImageType>()?;
+    m.add_class::<StructuredDataType>()?;
     m.add_class::<PreprocessingPreset>()?;
     m.add_class::<HeadingStyle>()?;
     m.add_class::<ListIndentType>()?;
@@ -2560,10 +2247,6 @@ pub fn _html_to_markdown(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<NodeContent>()?;
     m.add_class::<AnnotationKind>()?;
     m.add_class::<WarningKind>()?;
-    m.add_class::<TextDirection>()?;
-    m.add_class::<LinkType>()?;
-    m.add_class::<ImageType>()?;
-    m.add_class::<StructuredDataType>()?;
     m.add_function(wrap_pyfunction!(convert, m)?)?;
     m.add("ParseError", m.py().get_type::<ParseError>())?;
     m.add("SanitizationError", m.py().get_type::<SanitizationError>())?;

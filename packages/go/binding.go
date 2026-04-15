@@ -45,6 +45,74 @@ type ConversionError struct {
 
 func (e *ConversionError) Error() string { return e.Message }
 
+// Text directionality of document content.
+//
+// Corresponds to the HTML `dir` attribute and `bdi` element directionality.
+type TextDirection string
+
+const (
+    // Left-to-right text flow (default for Latin scripts)
+    TextDirectionLeftToRight TextDirection = "left_to_right"
+    // Right-to-left text flow (Hebrew, Arabic, Urdu, etc.)
+    TextDirectionRightToLeft TextDirection = "right_to_left"
+    // Automatic directionality detection
+    TextDirectionAuto TextDirection = "auto"
+)
+
+
+// Link classification based on href value and document context.
+//
+// Used to categorize links during extraction for filtering and analysis.
+type LinkType string
+
+const (
+    // Anchor link within same document (href starts with #)
+    LinkTypeAnchor LinkType = "anchor"
+    // Internal link within same domain
+    LinkTypeInternal LinkType = "internal"
+    // External link to different domain
+    LinkTypeExternal LinkType = "external"
+    // Email link (mailto:)
+    LinkTypeEmail LinkType = "email"
+    // Phone link (tel:)
+    LinkTypePhone LinkType = "phone"
+    // Other protocol or unclassifiable
+    LinkTypeOther LinkType = "other"
+)
+
+
+// Image source classification for proper handling and processing.
+//
+// Determines whether an image is embedded (data URI), inline SVG, external, or relative.
+type ImageType string
+
+const (
+    // Data URI embedded image (base64 or other encoding)
+    ImageTypeDataUri ImageType = "data_uri"
+    // Inline SVG element
+    ImageTypeInlineSvg ImageType = "inline_svg"
+    // External image URL (http/https)
+    ImageTypeExternal ImageType = "external"
+    // Relative image path
+    ImageTypeRelative ImageType = "relative"
+)
+
+
+// Structured data format type.
+//
+// Identifies the schema/format used for structured data markup.
+type StructuredDataType string
+
+const (
+    // JSON-LD (JSON for Linking Data) script blocks
+    StructuredDataTypeJsonLd StructuredDataType = "json_ld"
+    // HTML5 Microdata attributes (itemscope, itemtype, itemprop)
+    StructuredDataTypeMicrodata StructuredDataType = "microdata"
+    // RDF in Attributes (RDFa) markup
+    StructuredDataTypeRdFa StructuredDataType = "rd_fa"
+)
+
+
 // HTML preprocessing aggressiveness level.
 //
 // Controls the extent of cleanup performed before conversion. Higher levels remove more elements.
@@ -243,74 +311,6 @@ const (
     WarningKindMalformedHtml WarningKind = "malformed_html"
     // Sanitization was applied to remove potentially unsafe content.
     WarningKindSanitizationApplied WarningKind = "sanitization_applied"
-)
-
-
-// Text directionality of document content.
-//
-// Corresponds to the HTML `dir` attribute and `bdi` element directionality.
-type TextDirection string
-
-const (
-    // Left-to-right text flow (default for Latin scripts)
-    TextDirectionLeftToRight TextDirection = "left_to_right"
-    // Right-to-left text flow (Hebrew, Arabic, Urdu, etc.)
-    TextDirectionRightToLeft TextDirection = "right_to_left"
-    // Automatic directionality detection
-    TextDirectionAuto TextDirection = "auto"
-)
-
-
-// Link classification based on href value and document context.
-//
-// Used to categorize links during extraction for filtering and analysis.
-type LinkType string
-
-const (
-    // Anchor link within same document (href starts with #)
-    LinkTypeAnchor LinkType = "anchor"
-    // Internal link within same domain
-    LinkTypeInternal LinkType = "internal"
-    // External link to different domain
-    LinkTypeExternal LinkType = "external"
-    // Email link (mailto:)
-    LinkTypeEmail LinkType = "email"
-    // Phone link (tel:)
-    LinkTypePhone LinkType = "phone"
-    // Other protocol or unclassifiable
-    LinkTypeOther LinkType = "other"
-)
-
-
-// Image source classification for proper handling and processing.
-//
-// Determines whether an image is embedded (data URI), inline SVG, external, or relative.
-type ImageType string
-
-const (
-    // Data URI embedded image (base64 or other encoding)
-    ImageTypeDataUri ImageType = "data_uri"
-    // Inline SVG element
-    ImageTypeInlineSvg ImageType = "inline_svg"
-    // External image URL (http/https)
-    ImageTypeExternal ImageType = "external"
-    // Relative image path
-    ImageTypeRelative ImageType = "relative"
-)
-
-
-// Structured data format type.
-//
-// Identifies the schema/format used for structured data markup.
-type StructuredDataType string
-
-const (
-    // JSON-LD (JSON for Linking Data) script blocks
-    StructuredDataTypeJsonLd StructuredDataType = "json_ld"
-    // HTML5 Microdata attributes (itemscope, itemtype, itemprop)
-    StructuredDataTypeMicrodata StructuredDataType = "microdata"
-    // RDF in Attributes (RDFa) markup
-    StructuredDataTypeRdFa StructuredDataType = "rd_fa"
 )
 
 
@@ -517,6 +517,343 @@ type MetadataConfigUpdate struct {
     // When Some(size), sets the new size limit. None leaves the current limit unchanged.
     // Use this to adjust safety thresholds for different documents.
     MaxStructuredDataSize *uint `json:"max_structured_data_size,omitempty"`
+}
+
+
+// Document-level metadata extracted from `<head>` and top-level elements.
+//
+// Contains all metadata typically used by search engines, social media platforms,
+// and browsers for document indexing and presentation.
+//
+// # Examples
+//
+// ```
+// # use html_to_markdown_rs::metadata::DocumentMetadata;
+// let doc = DocumentMetadata {
+// title: Some("My Article".to_string()),
+// description: Some("A great article about Rust".to_string()),
+// keywords: vec!["rust".to_string(), "programming".to_string()],
+// ..Default::default()
+// };
+//
+// assert_eq!(doc.title, Some("My Article".to_string()));
+// ```
+type DocumentMetadata struct {
+    // Document title from `<title>` tag
+    Title *string `json:"title,omitempty"`
+    // Document description from `<meta name="description">` tag
+    Description *string `json:"description,omitempty"`
+    // Document keywords from `<meta name="keywords">` tag, split on commas
+    Keywords []string `json:"keywords,omitempty"`
+    // Document author from `<meta name="author">` tag
+    Author *string `json:"author,omitempty"`
+    // Canonical URL from `<link rel="canonical">` tag
+    CanonicalUrl *string `json:"canonical_url,omitempty"`
+    // Base URL from `<base href="">` tag for resolving relative URLs
+    BaseHref *string `json:"base_href,omitempty"`
+    // Document language from `lang` attribute
+    Language *string `json:"language,omitempty"`
+    // Document text direction from `dir` attribute
+    TextDirection *TextDirection `json:"text_direction,omitempty"`
+    // Open Graph metadata (og:* properties) for social media
+    // Keys like "title", "description", "image", "url", etc.
+    OpenGraph map[string]string `json:"open_graph,omitempty"`
+    // Twitter Card metadata (twitter:* properties)
+    // Keys like "card", "site", "creator", "title", "description", "image", etc.
+    TwitterCard map[string]string `json:"twitter_card,omitempty"`
+    // Additional meta tags not covered by specific fields
+    // Keys are meta name/property attributes, values are content
+    MetaTags map[string]string `json:"meta_tags,omitempty"`
+}
+
+
+// DocumentMetadata option function
+type DocumentMetadataOption func(*DocumentMetadata)
+
+// WithDocumentMetadataTitle sets the title field.
+func WithDocumentMetadataTitle(v string) DocumentMetadataOption {
+    return func(c *DocumentMetadata) { c.Title = &v }
+}
+
+// WithDocumentMetadataDescription sets the description field.
+func WithDocumentMetadataDescription(v string) DocumentMetadataOption {
+    return func(c *DocumentMetadata) { c.Description = &v }
+}
+
+// WithDocumentMetadataKeywords sets the keywords field.
+func WithDocumentMetadataKeywords(v []string) DocumentMetadataOption {
+    return func(c *DocumentMetadata) { c.Keywords = v }
+}
+
+// WithDocumentMetadataAuthor sets the author field.
+func WithDocumentMetadataAuthor(v string) DocumentMetadataOption {
+    return func(c *DocumentMetadata) { c.Author = &v }
+}
+
+// WithDocumentMetadataCanonicalUrl sets the canonical_url field.
+func WithDocumentMetadataCanonicalUrl(v string) DocumentMetadataOption {
+    return func(c *DocumentMetadata) { c.CanonicalUrl = &v }
+}
+
+// WithDocumentMetadataBaseHref sets the base_href field.
+func WithDocumentMetadataBaseHref(v string) DocumentMetadataOption {
+    return func(c *DocumentMetadata) { c.BaseHref = &v }
+}
+
+// WithDocumentMetadataLanguage sets the language field.
+func WithDocumentMetadataLanguage(v string) DocumentMetadataOption {
+    return func(c *DocumentMetadata) { c.Language = &v }
+}
+
+// WithDocumentMetadataTextDirection sets the text_direction field.
+func WithDocumentMetadataTextDirection(v TextDirection) DocumentMetadataOption {
+    return func(c *DocumentMetadata) { c.TextDirection = &v }
+}
+
+// WithDocumentMetadataOpenGraph sets the open_graph field.
+func WithDocumentMetadataOpenGraph(v map[string]string) DocumentMetadataOption {
+    return func(c *DocumentMetadata) { c.OpenGraph = v }
+}
+
+// WithDocumentMetadataTwitterCard sets the twitter_card field.
+func WithDocumentMetadataTwitterCard(v map[string]string) DocumentMetadataOption {
+    return func(c *DocumentMetadata) { c.TwitterCard = v }
+}
+
+// WithDocumentMetadataMetaTags sets the meta_tags field.
+func WithDocumentMetadataMetaTags(v map[string]string) DocumentMetadataOption {
+    return func(c *DocumentMetadata) { c.MetaTags = v }
+}
+
+// NewDocumentMetadata creates a DocumentMetadata with optional parameters.
+func NewDocumentMetadata(opts ...DocumentMetadataOption) *DocumentMetadata {
+    c := &DocumentMetadata {
+        Title: nil,
+        Description: nil,
+        Keywords: nil,
+        Author: nil,
+        CanonicalUrl: nil,
+        BaseHref: nil,
+        Language: nil,
+        TextDirection: nil,
+        OpenGraph: nil,
+        TwitterCard: nil,
+        MetaTags: nil,
+    }
+    for _, opt := range opts {
+        opt(c)
+    }
+    return c
+}
+
+
+// Header element metadata with hierarchy tracking.
+//
+// Captures heading elements (h1-h6) with their text content, identifiers,
+// and position in the document structure.
+//
+// # Examples
+//
+// ```
+// # use html_to_markdown_rs::metadata::HeaderMetadata;
+// let header = HeaderMetadata {
+// level: 1,
+// text: "Main Title".to_string(),
+// id: Some("main-title".to_string()),
+// depth: 0,
+// html_offset: 145,
+// };
+//
+// assert_eq!(header.level, 1);
+// assert!(header.is_valid());
+// ```
+type HeaderMetadata struct {
+    // Header level: 1 (h1) through 6 (h6)
+    Level uint8 `json:"level"`
+    // Normalized text content of the header
+    Text string `json:"text"`
+    // HTML id attribute if present
+    Id *string `json:"id,omitempty"`
+    // Document tree depth at the header element
+    Depth uint `json:"depth"`
+    // Byte offset in original HTML document
+    HtmlOffset uint `json:"html_offset"`
+}
+
+
+// Hyperlink metadata with categorization and attributes.
+//
+// Represents `<a>` elements with parsed href values, text content, and link type classification.
+//
+// # Examples
+//
+// ```
+// # use html_to_markdown_rs::metadata::{LinkMetadata, LinkType};
+// let link = LinkMetadata {
+// href: "https://example.com".to_string(),
+// text: "Example".to_string(),
+// title: Some("Visit Example".to_string()),
+// link_type: LinkType::External,
+// rel: vec!["nofollow".to_string()],
+// attributes: Default::default(),
+// };
+//
+// assert_eq!(link.link_type, LinkType::External);
+// assert_eq!(link.text, "Example");
+// ```
+type LinkMetadata struct {
+    // The href URL value
+    Href string `json:"href"`
+    // Link text content (normalized, concatenated if mixed with elements)
+    Text string `json:"text"`
+    // Optional title attribute (often shown as tooltip)
+    Title *string `json:"title,omitempty"`
+    // Link type classification
+    LinkType LinkType `json:"link_type"`
+    // Rel attribute values (e.g., "nofollow", "stylesheet", "canonical")
+    Rel []string `json:"rel,omitempty"`
+    // Additional HTML attributes
+    Attributes map[string]string `json:"attributes,omitempty"`
+}
+
+
+// Image metadata with source and dimensions.
+//
+// Captures `<img>` elements and inline `<svg>` elements with metadata
+// for image analysis and optimization.
+//
+// # Examples
+//
+// ```
+// # use html_to_markdown_rs::metadata::{ImageMetadata, ImageType};
+// let img = ImageMetadata {
+// src: "https://example.com/image.jpg".to_string(),
+// alt: Some("An example image".to_string()),
+// title: Some("Example".to_string()),
+// dimensions: Some((800, 600)),
+// image_type: ImageType::External,
+// attributes: Default::default(),
+// };
+//
+// assert_eq!(img.image_type, ImageType::External);
+// ```
+type ImageMetadata struct {
+    // Image source (URL, data URI, or SVG content identifier)
+    Src string `json:"src"`
+    // Alternative text from alt attribute (for accessibility)
+    Alt *string `json:"alt,omitempty"`
+    // Title attribute (often shown as tooltip)
+    Title *string `json:"title,omitempty"`
+    // Image dimensions as (width, height) if available
+    Dimensions *string `json:"dimensions,omitempty"`
+    // Image type classification
+    ImageType ImageType `json:"image_type"`
+    // Additional HTML attributes
+    Attributes map[string]string `json:"attributes,omitempty"`
+}
+
+
+// Structured data block (JSON-LD, Microdata, or RDFa).
+//
+// Represents machine-readable structured data found in the document.
+// JSON-LD blocks are collected as raw JSON strings for flexibility.
+//
+// # Examples
+//
+// ```
+// # use html_to_markdown_rs::metadata::{StructuredData, StructuredDataType};
+// let schema = StructuredData {
+// data_type: StructuredDataType::JsonLd,
+// raw_json: r#"{"@context":"https://schema.org","@type":"Article"}"#.to_string(),
+// schema_type: Some("Article".to_string()),
+// };
+//
+// assert_eq!(schema.data_type, StructuredDataType::JsonLd);
+// ```
+type StructuredData struct {
+    // Type of structured data (JSON-LD, Microdata, RDFa)
+    DataType StructuredDataType `json:"data_type"`
+    // Raw JSON string (for JSON-LD) or serialized representation
+    RawJson string `json:"raw_json"`
+    // Schema type if detectable (e.g., "Article", "Event", "Product")
+    SchemaType *string `json:"schema_type,omitempty"`
+}
+
+
+// Comprehensive metadata extraction result from HTML document.
+//
+// Contains all extracted metadata types in a single structure,
+// suitable for serialization and transmission across language boundaries.
+//
+// # Examples
+//
+// ```
+// # use html_to_markdown_rs::metadata::HtmlMetadata;
+// let metadata = HtmlMetadata {
+// document: Default::default(),
+// headers: Vec::new(),
+// links: Vec::new(),
+// images: Vec::new(),
+// structured_data: Vec::new(),
+// };
+//
+// assert!(metadata.headers.is_empty());
+// ```
+type HtmlMetadata struct {
+    // Document-level metadata (title, description, canonical, etc.)
+    Document DocumentMetadata `json:"document"`
+    // Extracted header elements with hierarchy
+    Headers []HeaderMetadata `json:"headers,omitempty"`
+    // Extracted hyperlinks with type classification
+    Links []LinkMetadata `json:"links,omitempty"`
+    // Extracted images with source and dimensions
+    Images []ImageMetadata `json:"images,omitempty"`
+    // Extracted structured data blocks
+    StructuredData []StructuredData `json:"structured_data,omitempty"`
+}
+
+
+// HtmlMetadata option function
+type HtmlMetadataOption func(*HtmlMetadata)
+
+// WithHtmlMetadataDocument sets the document field.
+func WithHtmlMetadataDocument(v DocumentMetadata) HtmlMetadataOption {
+    return func(c *HtmlMetadata) { c.Document = v }
+}
+
+// WithHtmlMetadataHeaders sets the headers field.
+func WithHtmlMetadataHeaders(v []HeaderMetadata) HtmlMetadataOption {
+    return func(c *HtmlMetadata) { c.Headers = v }
+}
+
+// WithHtmlMetadataLinks sets the links field.
+func WithHtmlMetadataLinks(v []LinkMetadata) HtmlMetadataOption {
+    return func(c *HtmlMetadata) { c.Links = v }
+}
+
+// WithHtmlMetadataImages sets the images field.
+func WithHtmlMetadataImages(v []ImageMetadata) HtmlMetadataOption {
+    return func(c *HtmlMetadata) { c.Images = v }
+}
+
+// WithHtmlMetadataStructuredData sets the structured_data field.
+func WithHtmlMetadataStructuredData(v []StructuredData) HtmlMetadataOption {
+    return func(c *HtmlMetadata) { c.StructuredData = v }
+}
+
+// NewHtmlMetadata creates a HtmlMetadata with optional parameters.
+func NewHtmlMetadata(opts ...HtmlMetadataOption) *HtmlMetadata {
+    c := &HtmlMetadata {
+        Document: DocumentMetadata{},
+        Headers: nil,
+        Links: nil,
+        Images: nil,
+        StructuredData: nil,
+    }
+    for _, opt := range opts {
+        opt(c)
+    }
+    return c
 }
 
 
@@ -1231,343 +1568,6 @@ type ProcessingWarning struct {
 }
 
 
-// Document-level metadata extracted from `<head>` and top-level elements.
-//
-// Contains all metadata typically used by search engines, social media platforms,
-// and browsers for document indexing and presentation.
-//
-// # Examples
-//
-// ```
-// # use html_to_markdown_rs::metadata::DocumentMetadata;
-// let doc = DocumentMetadata {
-// title: Some("My Article".to_string()),
-// description: Some("A great article about Rust".to_string()),
-// keywords: vec!["rust".to_string(), "programming".to_string()],
-// ..Default::default()
-// };
-//
-// assert_eq!(doc.title, Some("My Article".to_string()));
-// ```
-type DocumentMetadata struct {
-    // Document title from `<title>` tag
-    Title *string `json:"title,omitempty"`
-    // Document description from `<meta name="description">` tag
-    Description *string `json:"description,omitempty"`
-    // Document keywords from `<meta name="keywords">` tag, split on commas
-    Keywords []string `json:"keywords,omitempty"`
-    // Document author from `<meta name="author">` tag
-    Author *string `json:"author,omitempty"`
-    // Canonical URL from `<link rel="canonical">` tag
-    CanonicalUrl *string `json:"canonical_url,omitempty"`
-    // Base URL from `<base href="">` tag for resolving relative URLs
-    BaseHref *string `json:"base_href,omitempty"`
-    // Document language from `lang` attribute
-    Language *string `json:"language,omitempty"`
-    // Document text direction from `dir` attribute
-    TextDirection *TextDirection `json:"text_direction,omitempty"`
-    // Open Graph metadata (og:* properties) for social media
-    // Keys like "title", "description", "image", "url", etc.
-    OpenGraph map[string]string `json:"open_graph,omitempty"`
-    // Twitter Card metadata (twitter:* properties)
-    // Keys like "card", "site", "creator", "title", "description", "image", etc.
-    TwitterCard map[string]string `json:"twitter_card,omitempty"`
-    // Additional meta tags not covered by specific fields
-    // Keys are meta name/property attributes, values are content
-    MetaTags map[string]string `json:"meta_tags,omitempty"`
-}
-
-
-// DocumentMetadata option function
-type DocumentMetadataOption func(*DocumentMetadata)
-
-// WithDocumentMetadataTitle sets the title field.
-func WithDocumentMetadataTitle(v string) DocumentMetadataOption {
-    return func(c *DocumentMetadata) { c.Title = &v }
-}
-
-// WithDocumentMetadataDescription sets the description field.
-func WithDocumentMetadataDescription(v string) DocumentMetadataOption {
-    return func(c *DocumentMetadata) { c.Description = &v }
-}
-
-// WithDocumentMetadataKeywords sets the keywords field.
-func WithDocumentMetadataKeywords(v []string) DocumentMetadataOption {
-    return func(c *DocumentMetadata) { c.Keywords = v }
-}
-
-// WithDocumentMetadataAuthor sets the author field.
-func WithDocumentMetadataAuthor(v string) DocumentMetadataOption {
-    return func(c *DocumentMetadata) { c.Author = &v }
-}
-
-// WithDocumentMetadataCanonicalUrl sets the canonical_url field.
-func WithDocumentMetadataCanonicalUrl(v string) DocumentMetadataOption {
-    return func(c *DocumentMetadata) { c.CanonicalUrl = &v }
-}
-
-// WithDocumentMetadataBaseHref sets the base_href field.
-func WithDocumentMetadataBaseHref(v string) DocumentMetadataOption {
-    return func(c *DocumentMetadata) { c.BaseHref = &v }
-}
-
-// WithDocumentMetadataLanguage sets the language field.
-func WithDocumentMetadataLanguage(v string) DocumentMetadataOption {
-    return func(c *DocumentMetadata) { c.Language = &v }
-}
-
-// WithDocumentMetadataTextDirection sets the text_direction field.
-func WithDocumentMetadataTextDirection(v TextDirection) DocumentMetadataOption {
-    return func(c *DocumentMetadata) { c.TextDirection = &v }
-}
-
-// WithDocumentMetadataOpenGraph sets the open_graph field.
-func WithDocumentMetadataOpenGraph(v map[string]string) DocumentMetadataOption {
-    return func(c *DocumentMetadata) { c.OpenGraph = v }
-}
-
-// WithDocumentMetadataTwitterCard sets the twitter_card field.
-func WithDocumentMetadataTwitterCard(v map[string]string) DocumentMetadataOption {
-    return func(c *DocumentMetadata) { c.TwitterCard = v }
-}
-
-// WithDocumentMetadataMetaTags sets the meta_tags field.
-func WithDocumentMetadataMetaTags(v map[string]string) DocumentMetadataOption {
-    return func(c *DocumentMetadata) { c.MetaTags = v }
-}
-
-// NewDocumentMetadata creates a DocumentMetadata with optional parameters.
-func NewDocumentMetadata(opts ...DocumentMetadataOption) *DocumentMetadata {
-    c := &DocumentMetadata {
-        Title: nil,
-        Description: nil,
-        Keywords: nil,
-        Author: nil,
-        CanonicalUrl: nil,
-        BaseHref: nil,
-        Language: nil,
-        TextDirection: nil,
-        OpenGraph: nil,
-        TwitterCard: nil,
-        MetaTags: nil,
-    }
-    for _, opt := range opts {
-        opt(c)
-    }
-    return c
-}
-
-
-// Header element metadata with hierarchy tracking.
-//
-// Captures heading elements (h1-h6) with their text content, identifiers,
-// and position in the document structure.
-//
-// # Examples
-//
-// ```
-// # use html_to_markdown_rs::metadata::HeaderMetadata;
-// let header = HeaderMetadata {
-// level: 1,
-// text: "Main Title".to_string(),
-// id: Some("main-title".to_string()),
-// depth: 0,
-// html_offset: 145,
-// };
-//
-// assert_eq!(header.level, 1);
-// assert!(header.is_valid());
-// ```
-type HeaderMetadata struct {
-    // Header level: 1 (h1) through 6 (h6)
-    Level uint8 `json:"level"`
-    // Normalized text content of the header
-    Text string `json:"text"`
-    // HTML id attribute if present
-    Id *string `json:"id,omitempty"`
-    // Document tree depth at the header element
-    Depth uint `json:"depth"`
-    // Byte offset in original HTML document
-    HtmlOffset uint `json:"html_offset"`
-}
-
-
-// Hyperlink metadata with categorization and attributes.
-//
-// Represents `<a>` elements with parsed href values, text content, and link type classification.
-//
-// # Examples
-//
-// ```
-// # use html_to_markdown_rs::metadata::{LinkMetadata, LinkType};
-// let link = LinkMetadata {
-// href: "https://example.com".to_string(),
-// text: "Example".to_string(),
-// title: Some("Visit Example".to_string()),
-// link_type: LinkType::External,
-// rel: vec!["nofollow".to_string()],
-// attributes: Default::default(),
-// };
-//
-// assert_eq!(link.link_type, LinkType::External);
-// assert_eq!(link.text, "Example");
-// ```
-type LinkMetadata struct {
-    // The href URL value
-    Href string `json:"href"`
-    // Link text content (normalized, concatenated if mixed with elements)
-    Text string `json:"text"`
-    // Optional title attribute (often shown as tooltip)
-    Title *string `json:"title,omitempty"`
-    // Link type classification
-    LinkType LinkType `json:"link_type"`
-    // Rel attribute values (e.g., "nofollow", "stylesheet", "canonical")
-    Rel []string `json:"rel,omitempty"`
-    // Additional HTML attributes
-    Attributes map[string]string `json:"attributes,omitempty"`
-}
-
-
-// Image metadata with source and dimensions.
-//
-// Captures `<img>` elements and inline `<svg>` elements with metadata
-// for image analysis and optimization.
-//
-// # Examples
-//
-// ```
-// # use html_to_markdown_rs::metadata::{ImageMetadata, ImageType};
-// let img = ImageMetadata {
-// src: "https://example.com/image.jpg".to_string(),
-// alt: Some("An example image".to_string()),
-// title: Some("Example".to_string()),
-// dimensions: Some((800, 600)),
-// image_type: ImageType::External,
-// attributes: Default::default(),
-// };
-//
-// assert_eq!(img.image_type, ImageType::External);
-// ```
-type ImageMetadata struct {
-    // Image source (URL, data URI, or SVG content identifier)
-    Src string `json:"src"`
-    // Alternative text from alt attribute (for accessibility)
-    Alt *string `json:"alt,omitempty"`
-    // Title attribute (often shown as tooltip)
-    Title *string `json:"title,omitempty"`
-    // Image dimensions as (width, height) if available
-    Dimensions *string `json:"dimensions,omitempty"`
-    // Image type classification
-    ImageType ImageType `json:"image_type"`
-    // Additional HTML attributes
-    Attributes map[string]string `json:"attributes,omitempty"`
-}
-
-
-// Structured data block (JSON-LD, Microdata, or RDFa).
-//
-// Represents machine-readable structured data found in the document.
-// JSON-LD blocks are collected as raw JSON strings for flexibility.
-//
-// # Examples
-//
-// ```
-// # use html_to_markdown_rs::metadata::{StructuredData, StructuredDataType};
-// let schema = StructuredData {
-// data_type: StructuredDataType::JsonLd,
-// raw_json: r#"{"@context":"https://schema.org","@type":"Article"}"#.to_string(),
-// schema_type: Some("Article".to_string()),
-// };
-//
-// assert_eq!(schema.data_type, StructuredDataType::JsonLd);
-// ```
-type StructuredData struct {
-    // Type of structured data (JSON-LD, Microdata, RDFa)
-    DataType StructuredDataType `json:"data_type"`
-    // Raw JSON string (for JSON-LD) or serialized representation
-    RawJson string `json:"raw_json"`
-    // Schema type if detectable (e.g., "Article", "Event", "Product")
-    SchemaType *string `json:"schema_type,omitempty"`
-}
-
-
-// Comprehensive metadata extraction result from HTML document.
-//
-// Contains all extracted metadata types in a single structure,
-// suitable for serialization and transmission across language boundaries.
-//
-// # Examples
-//
-// ```
-// # use html_to_markdown_rs::metadata::HtmlMetadata;
-// let metadata = HtmlMetadata {
-// document: Default::default(),
-// headers: Vec::new(),
-// links: Vec::new(),
-// images: Vec::new(),
-// structured_data: Vec::new(),
-// };
-//
-// assert!(metadata.headers.is_empty());
-// ```
-type HtmlMetadata struct {
-    // Document-level metadata (title, description, canonical, etc.)
-    Document DocumentMetadata `json:"document"`
-    // Extracted header elements with hierarchy
-    Headers []HeaderMetadata `json:"headers,omitempty"`
-    // Extracted hyperlinks with type classification
-    Links []LinkMetadata `json:"links,omitempty"`
-    // Extracted images with source and dimensions
-    Images []ImageMetadata `json:"images,omitempty"`
-    // Extracted structured data blocks
-    StructuredData []StructuredData `json:"structured_data,omitempty"`
-}
-
-
-// HtmlMetadata option function
-type HtmlMetadataOption func(*HtmlMetadata)
-
-// WithHtmlMetadataDocument sets the document field.
-func WithHtmlMetadataDocument(v DocumentMetadata) HtmlMetadataOption {
-    return func(c *HtmlMetadata) { c.Document = v }
-}
-
-// WithHtmlMetadataHeaders sets the headers field.
-func WithHtmlMetadataHeaders(v []HeaderMetadata) HtmlMetadataOption {
-    return func(c *HtmlMetadata) { c.Headers = v }
-}
-
-// WithHtmlMetadataLinks sets the links field.
-func WithHtmlMetadataLinks(v []LinkMetadata) HtmlMetadataOption {
-    return func(c *HtmlMetadata) { c.Links = v }
-}
-
-// WithHtmlMetadataImages sets the images field.
-func WithHtmlMetadataImages(v []ImageMetadata) HtmlMetadataOption {
-    return func(c *HtmlMetadata) { c.Images = v }
-}
-
-// WithHtmlMetadataStructuredData sets the structured_data field.
-func WithHtmlMetadataStructuredData(v []StructuredData) HtmlMetadataOption {
-    return func(c *HtmlMetadata) { c.StructuredData = v }
-}
-
-// NewHtmlMetadata creates a HtmlMetadata with optional parameters.
-func NewHtmlMetadata(opts ...HtmlMetadataOption) *HtmlMetadata {
-    c := &HtmlMetadata {
-        Document: DocumentMetadata{},
-        Headers: nil,
-        Links: nil,
-        Images: nil,
-        StructuredData: nil,
-    }
-    for _, opt := range opts {
-        opt(c)
-    }
-    return c
-}
-
-
 // Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images,
 // and warnings.
 //
@@ -1670,6 +1670,40 @@ func (r *MetadataConfig) AnyEnabled() *bool {
 }
 
 
+// Validate that the header level is within valid range (1-6).
+//
+// # Returns
+//
+// `true` if level is 1-6, `false` otherwise.
+//
+// # Examples
+//
+// ```
+// # use html_to_markdown_rs::metadata::HeaderMetadata;
+// let valid = HeaderMetadata {
+// level: 3,
+// text: "Title".to_string(),
+// id: None,
+// depth: 2,
+// html_offset: 100,
+// };
+// assert!(valid.is_valid());
+//
+// let invalid = HeaderMetadata {
+// level: 7,  // Invalid
+// text: "Title".to_string(),
+// id: None,
+// depth: 2,
+// html_offset: 100,
+// };
+// assert!(!invalid.is_valid());
+// ```
+func (r *HeaderMetadata) IsValid() *bool {
+    ptr := C.htm_header_metadata_is_valid ((*C.HTMHeaderMetadata)(unsafe.Pointer(r)))
+    return func() *bool { v := ptr != 0; return &v }()
+}
+
+
 // Set the list of HTML tag names whose content is stripped from output.
 func (r *ConversionOptionsBuilder) StripTags(tags []string) *ConversionOptionsBuilder {
     jsonBytescTags, err := json.Marshal(tags)
@@ -1734,36 +1768,3 @@ func (r *ConversionOptionsBuilder) Build() *ConversionOptions {
     return (*ConversionOptions)(unsafe.Pointer(ptr))
 }
 
-
-// Validate that the header level is within valid range (1-6).
-//
-// # Returns
-//
-// `true` if level is 1-6, `false` otherwise.
-//
-// # Examples
-//
-// ```
-// # use html_to_markdown_rs::metadata::HeaderMetadata;
-// let valid = HeaderMetadata {
-// level: 3,
-// text: "Title".to_string(),
-// id: None,
-// depth: 2,
-// html_offset: 100,
-// };
-// assert!(valid.is_valid());
-//
-// let invalid = HeaderMetadata {
-// level: 7,  // Invalid
-// text: "Title".to_string(),
-// id: None,
-// depth: 2,
-// html_offset: 100,
-// };
-// assert!(!invalid.is_valid());
-// ```
-func (r *HeaderMetadata) IsValid() *bool {
-    ptr := C.htm_header_metadata_is_valid ((*C.HTMHeaderMetadata)(unsafe.Pointer(r)))
-    return func() *bool { v := ptr != 0; return &v }()
-}

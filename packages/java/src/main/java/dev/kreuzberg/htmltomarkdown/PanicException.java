@@ -3,11 +3,11 @@ package dev.kreuzberg.htmltomarkdown;
 
 /** Panic caught during conversion to prevent unwinding across FFI boundaries */
 public class PanicException extends ConversionErrorException {
-  public PanicException(String message) {
-    super(message);
-  }
+    public PanicException(String message) {
+        super(message);
+    }
 
-  public PanicException(String message, Throwable cause) {
-    super(message, cause);
-  }
+    public PanicException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

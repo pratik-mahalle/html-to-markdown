@@ -11,4 +11,6 @@ public record DocumentNode(
     Optional<Integer> parent,
     List<Integer> children,
     List<TextAnnotation> annotations,
-    Optional<Map<String, String>> attributes) {}
+    Optional<Map<String, String>> attributes
+) {
+}

@@ -1,5 +1,5 @@
 [package]
-name = "html_to_markdown_nif"
+name = "html-to-markdown-rb"
 version = "3.2.0"
 edition = "2024"
 license = "MIT"
@@ -9,6 +9,6 @@ crate-type = ["cdylib"]
 
 [dependencies]
 html-to-markdown-rs = { path = "../../../../crates/html-to-markdown", features = ["full", "metadata", "visitor", "serde", "inline-images"] }
-rustler = "0.37"
+magnus = "0.8"
+serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-tokio = { version = "1", features = ["full"] }

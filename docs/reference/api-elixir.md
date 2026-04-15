@@ -2,9 +2,2310 @@
 title: "Elixir API Reference"
 ---
 
-## Elixir API Reference <span class="version-badge">v3.2.0</span>
+# Elixir API Reference <span class="version-badge">v3.2.0</span>
 
 ## Functions
+
+### table_total_columns()
+
+Calculate total columns in a table.
+
+Scans all rows and cells to determine the maximum column count,
+accounting for colspan values.
+
+**Returns:**
+Maximum column count (minimum 1, maximum MAX_TABLE_COLS)
+
+**Signature:**
+
+```elixir
+@spec table_total_columns(node_handle, parser, dom_ctx) :: {:ok, term()} | {:error, term()}
+def table_total_columns(node_handle, parser, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `node_handle` | `NodeHandle` | Yes | Handle to the table element |
+| `parser` | `Parser` | Yes | HTML parser instance |
+| `dom_ctx` | `DomContext` | Yes | DOM context for tag name resolution |
+
+**Returns:** `integer()`
+
+
+---
+
+### handle_table()
+
+Convert an entire table element to Markdown.
+
+Main entry point for table conversion. Analyzes table structure to determine
+if it should be rendered as a Markdown table or converted to list format.
+Handles layout tables, blank tables, and tables with semantic meaning.
+Integrates with visitor pattern for custom table handling.
+
+**Signature:**
+
+```elixir
+@spec handle_table(node_handle, parser, output, options, ctx, dom_ctx, depth) :: {:ok, term()} | {:error, term()}
+def handle_table(node_handle, parser, output, options, ctx, dom_ctx, depth)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `node_handle` | `NodeHandle` | Yes | Handle to the table element |
+| `parser` | `Parser` | Yes | HTML parser instance |
+| `output` | `String.t()` | Yes | Mutable string to append table content |
+| `options` | `ConversionOptions` | Yes | Conversion options |
+| `ctx` | `Context` | Yes | Conversion context (visitor, etc) |
+| `dom_ctx` | `DomContext` | Yes | DOM context |
+| `depth` | `integer()` | Yes | Nesting depth |
+
+**Returns:** `:ok`
+
+
+---
+
+### handle_caption()
+
+Handles caption elements within tables.
+
+Extracts text content from the caption and formats it as italicized text
+with escaped hyphens to prevent Markdown table separator interpretation.
+
+**Signature:**
+
+```elixir
+@spec handle_caption(node_handle, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def handle_caption(node_handle, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `node_handle` | `NodeHandle` | Yes | Handle to the caption element |
+| `parser` | `Parser` | Yes | HTML parser instance |
+| `output` | `String.t()` | Yes | Output string to append caption text to |
+| `options` | `ConversionOptions` | Yes | Conversion options |
+| `ctx` | `Context` | Yes | Conversion context |
+| `depth` | `integer()` | Yes | Current recursion depth |
+| `dom_ctx` | `DomContext` | Yes | DOM context for tag name resolution |
+
+**Returns:** `:ok`
+
+
+---
+
+### get_colspan()
+
+Get colspan attribute value from an element.
+
+Reads the colspan attribute from a table cell, with bounds checking
+to prevent memory exhaustion attacks.
+
+**Returns:**
+The colspan value (minimum 1, maximum MAX_TABLE_COLS)
+
+**Signature:**
+
+```elixir
+@spec get_colspan(node_handle, parser) :: {:ok, term()} | {:error, term()}
+def get_colspan(node_handle, parser)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `node_handle` | `NodeHandle` | Yes | Handle to the cell element |
+| `parser` | `Parser` | Yes | HTML parser instance |
+
+**Returns:** `integer()`
+
+
+---
+
+### get_colspan_rowspan()
+
+Get both colspan and rowspan in a single lookup.
+
+More efficient than calling get_colspan and a separate rowspan lookup.
+
+**Returns:**
+A tuple of (colspan, rowspan), both minimum 1 and maximum MAX_TABLE_COLS
+
+**Signature:**
+
+```elixir
+@spec get_colspan_rowspan(node_handle, parser) :: {:ok, term()} | {:error, term()}
+def get_colspan_rowspan(node_handle, parser)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `node_handle` | `NodeHandle` | Yes | Handle to the cell element |
+| `parser` | `Parser` | Yes | HTML parser instance |
+
+**Returns:** `UsizeUsize`
+
+
+---
+
+### collect_table_cells()
+
+Collect table cells (td/th) from a row element.
+
+Extracts only the direct cell children of a row, filtering by tag name.
+
+**Signature:**
+
+```elixir
+@spec collect_table_cells(node_handle, parser, dom_ctx, cells) :: {:ok, term()} | {:error, term()}
+def collect_table_cells(node_handle, parser, dom_ctx, cells)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `node_handle` | `NodeHandle` | Yes | Handle to the row element |
+| `parser` | `Parser` | Yes | HTML parser instance |
+| `dom_ctx` | `DomContext` | Yes | DOM context for tag name resolution |
+| `cells` | `list(NodeHandle)` | Yes | Mutable vector to populate with cell handles |
+
+**Returns:** `:ok`
+
+
+---
+
+### convert_table_cell()
+
+Convert a table cell (td or th) to Markdown format.
+
+Processes cell content and renders it with pipe delimiters for Markdown tables.
+Handles colspan by adding extra pipes, and escapes pipes in cell content.
+
+**Signature:**
+
+```elixir
+@spec convert_table_cell(node_handle, parser, output, options, ctx, tag_name, dom_ctx) :: {:ok, term()} | {:error, term()}
+def convert_table_cell(node_handle, parser, output, options, ctx, tag_name, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `node_handle` | `NodeHandle` | Yes | Handle to the cell element |
+| `parser` | `Parser` | Yes | HTML parser instance |
+| `output` | `String.t()` | Yes | Mutable string to append cell content |
+| `options` | `ConversionOptions` | Yes | Conversion options (escape settings, br_in_tables) |
+| `ctx` | `Context` | Yes | Conversion context (visitor, etc) |
+| `tag_name` | `String.t()` | Yes | Tag name (for consistency, not used) |
+| `dom_ctx` | `DomContext` | Yes | DOM context for content extraction |
+
+**Returns:** `:ok`
+
+
+---
+
+### append_layout_row()
+
+Append a layout table row as a list item.
+
+For tables used for visual layout, converts rows to list items
+instead of table format for better readability.
+
+**Signature:**
+
+```elixir
+@spec append_layout_row(row_handle, parser, output, options, ctx, dom_ctx) :: {:ok, term()} | {:error, term()}
+def append_layout_row(row_handle, parser, output, options, ctx, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `row_handle` | `NodeHandle` | Yes | Handle to the row element |
+| `parser` | `Parser` | Yes | HTML parser instance |
+| `output` | `String.t()` | Yes | Mutable string to append content |
+| `options` | `ConversionOptions` | Yes | Conversion options |
+| `ctx` | `Context` | Yes | Conversion context |
+| `dom_ctx` | `DomContext` | Yes | DOM context |
+
+**Returns:** `:ok`
+
+
+---
+
+### convert_table_row()
+
+Convert a table row (tr) to Markdown format.
+
+Processes all cells in a row, handling colspan and rowspan for proper
+column alignment. Renders header separator row after the first row.
+Integrates with visitor pattern for custom row handling.
+
+**Signature:**
+
+```elixir
+@spec convert_table_row(node_handle, parser, output, options, ctx, row_index, has_span, rowspan_tracker, total_cols, header_cols, dom_ctx, depth, is_header) :: {:ok, term()} | {:error, term()}
+def convert_table_row(node_handle, parser, output, options, ctx, row_index, has_span, rowspan_tracker, total_cols, header_cols, dom_ctx, depth, is_header)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `node_handle` | `NodeHandle` | Yes | Handle to the row element |
+| `parser` | `Parser` | Yes | HTML parser instance |
+| `output` | `String.t()` | Yes | Mutable string to append row content |
+| `options` | `ConversionOptions` | Yes | Conversion options |
+| `ctx` | `Context` | Yes | Conversion context (visitor, etc) |
+| `row_index` | `integer()` | Yes | Index of this row in the table |
+| `has_span` | `boolean()` | Yes | Whether table has colspan/rowspan |
+| `rowspan_tracker` | `list(integer() | nil)` | Yes | Mutable array tracking rowspan remainder for each column |
+| `total_cols` | `integer()` | Yes | Total columns in the table |
+| `header_cols` | `integer()` | Yes | Columns to render in separator row |
+| `dom_ctx` | `DomContext` | Yes | DOM context |
+| `depth` | `integer()` | Yes | Nesting depth |
+| `is_header` | `boolean()` | Yes | Whether this is a header row |
+
+**Returns:** `:ok`
+
+
+---
+
+### scan_table()
+
+Scan a table element for structural metadata.
+
+Analyzes the table to determine characteristics that influence rendering:
+- Whether to render as a Markdown table or layout table
+- If spanning cells are present
+- If the table has semantic meaning (headers, captions)
+
+**Signature:**
+
+```elixir
+@spec scan_table(node_handle, parser, dom_ctx) :: {:ok, term()} | {:error, term()}
+def scan_table(node_handle, parser, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `node_handle` | `NodeHandle` | Yes | Handle to the table element |
+| `parser` | `Parser` | Yes | HTML parser instance |
+| `dom_ctx` | `DomContext` | Yes | DOM context for tag name resolution |
+
+**Returns:** `TableScan`
+
+
+---
+
+### dispatch_table_handler()
+
+Dispatches table element handling to the main convert_table function.
+
+# Usage in converter.rs
+```text
+if "table" == tag_name {
+    crate::converter::block::table::handle_table(
+        node_handle,
+        parser,
+        output,
+        options,
+        ctx,
+        dom_ctx,
+        depth,
+    );
+    return;
+}
+```
+
+**Signature:**
+
+```elixir
+@spec dispatch_table_handler(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def dispatch_table_handler(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `tag_name` | `String.t()` | Yes | The tag name |
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `boolean()`
+
+
+---
+
+### dispatch_block_handler()
+
+Dispatches block element handling to the appropriate handler.
+
+This function is designed to be called from the main walk_node function
+in converter.rs once the module is refactored. It returns `true` if the
+element was handled, `false` otherwise.
+
+# Usage in converter.rs
+```text
+if crate::converter::block::dispatch_block_handler(
+    &tag_name,
+    node_handle,
+    parser,
+    output,
+    options,
+    ctx,
+    depth,
+    dom_ctx,
+) {
+    return; // Element was handled
+}
+```
+
+**Signature:**
+
+```elixir
+@spec dispatch_block_handler(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def dispatch_block_handler(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `tag_name` | `String.t()` | Yes | The tag name |
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `boolean()`
+
+
+---
+
+### handle()
+
+Dispatcher for form elements.
+
+Routes all form-related elements to their respective handlers.
+
+**Signature:**
+
+```elixir
+@spec handle(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def handle(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `tag_name` | `String.t()` | Yes | The tag name |
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `:ok`
+
+
+---
+
+### dispatch_form_handler()
+
+Dispatches form element handling to the appropriate handler.
+
+This function routes form-related HTML elements to their specialized handlers
+based on tag name. It is designed to be called from the main `walk_node`
+function in `converter.rs`.
+
+# Routing Table
+
+The following tag routes are supported:
+- **Containers**: form, fieldset, legend, label
+- **Inputs**: input, textarea, select, option, optgroup, button
+- **Measurements**: progress, meter, output, datalist
+
+**Returns:**
+
+Returns `true` if the tag was successfully handled by a form handler,
+`false` if the tag is not a form element and requires other handling.
+
+**Signature:**
+
+```elixir
+@spec dispatch_form_handler(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def dispatch_form_handler(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `tag_name` | `String.t()` | Yes | The tag name |
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `boolean()`
+
+
+---
+
+### handle_blockquote()
+
+Handle a `<blockquote>` element and convert to Markdown.
+
+This handler processes blockquote elements including:
+- Converting inline blockquotes by processing children as inline
+- Handling nested blockquotes via blockquote_depth tracking
+- Processing citation URLs from cite attribute
+- Invoking visitor callbacks when the visitor feature is enabled
+- Adding proper spacing and blockquote prefix formatting
+
+**Signature:**
+
+```elixir
+@spec handle_blockquote(node_handle, tag, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def handle_blockquote(node_handle, tag, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `tag` | `HtmlTag` | Yes | The h t m l tag |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `:ok`
+
+
+---
+
+### handle_code()
+
+Handle an inline `<code>` element and convert to Markdown.
+
+This handler processes inline code elements including:
+- Extracting code content and applying backtick delimiters
+- Handling backticks in content by using multiple delimiters
+- Invoking visitor callbacks when the visitor feature is enabled
+- Generating appropriate markdown output with proper escaping
+
+**Signature:**
+
+```elixir
+@spec handle_code(node_handle, tag, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def handle_code(node_handle, tag, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `tag` | `HtmlTag` | Yes | The h t m l tag |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `:ok`
+
+
+---
+
+### handle_pre()
+
+Handle a `<pre>` element and convert to Markdown.
+
+This handler processes code block elements including:
+- Extracting language information from class attributes
+- Processing whitespace and dedenting code content
+- Supporting multiple code block styles (indented, backticks, tildes)
+- Invoking visitor callbacks when the visitor feature is enabled
+- Generating appropriate markdown output
+
+**Signature:**
+
+```elixir
+@spec handle_pre(node_handle, tag, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def handle_pre(node_handle, tag, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `tag` | `HtmlTag` | Yes | The h t m l tag |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `:ok`
+
+
+---
+
+### handle_graphic()
+
+Handle a `<graphic>` element and convert to Markdown.
+
+This handler processes graphic elements including:
+- Extracting source from url, href, xlink:href, or src attributes
+- Using alt attribute, with fallback to filename
+- Collecting metadata when the metadata feature is enabled
+- Invoking visitor callbacks when the visitor feature is enabled
+- Generating appropriate markdown output
+
+**Signature:**
+
+```elixir
+@spec handle_graphic(node_handle, tag, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def handle_graphic(node_handle, tag, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `tag` | `HtmlTag` | Yes | The h t m l tag |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `:ok`
+
+
+---
+
+### handle_img()
+
+Handle an `<img>` element and convert to Markdown.
+
+This handler processes image elements including:
+- Extracting src, alt, and title attributes
+- Collecting metadata when the metadata feature is enabled
+- Handling inline data URIs when the inline-images feature is enabled
+- Invoking visitor callbacks when the visitor feature is enabled
+- Generating appropriate markdown output
+
+**Signature:**
+
+```elixir
+@spec handle_img(node_handle, tag, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def handle_img(node_handle, tag, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `tag` | `HtmlTag` | Yes | The h t m l tag |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `:ok`
+
+
+---
+
+### handle_link()
+
+Handle an `<a>` (link) element and convert to Markdown.
+
+This handler processes link elements including:
+- Extracting href and title attributes
+- Detecting autolinks (where text equals href)
+- Handling links that contain heading elements
+- Processing complex link content (mixed block/inline)
+- Invoking visitor callbacks when the visitor feature is enabled
+- Collecting link metadata when the metadata feature is enabled
+- Generating appropriate markdown link output
+
+**Signature:**
+
+```elixir
+@spec handle_link(node_handle, tag, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def handle_link(node_handle, tag, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `tag` | `HtmlTag` | Yes | The h t m l tag |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `:ok`
+
+
+---
+
+### dispatch_inline_handler()
+
+Dispatches inline element handling to the appropriate handler.
+
+This function routes inline HTML elements to their specialized handlers
+based on tag name. It is designed to be called from the main `walk_node`
+function in `converter.rs`.
+
+# Routing Table
+
+The following tag routes are supported:
+
+| Tag(s) | Handler | Description |
+|--------|---------|-------------|
+| `strong`, `b` | emphasis | Bold/strong text formatting |
+| `em`, `i` | emphasis | Italic/emphasis text formatting |
+| `a` | link | Hyperlinks and anchors |
+| `code`, `kbd`, `samp` | code | Inline code and keyboard input |
+| `mark`, `del`, `s`, `ins`, `u`, `small`, `sub`, `sup`, `var`, `dfn`, `abbr`, `span` | semantic | Semantic formatting |
+| `ruby`, `rb`, `rt`, `rp`, `rtc` | ruby | Ruby annotations (East Asian typography) |
+
+# Return Value
+
+Returns `true` if the tag was recognized and handled, `false` otherwise.
+This allows the caller to distinguish between:
+- Handled inline elements (return `true`)
+- Unhandled elements (return `false`) that should be processed as text or passed through
+
+# Usage in converter.rs
+
+```text
+if crate::converter::inline::dispatch_inline_handler(
+    &tag_name,
+    &node_handle,
+    parser,
+    output,
+    options,
+    ctx,
+    depth,
+    dom_ctx,
+) {
+    return; // Element was handled, move to next sibling
+}
+// Element was not handled, process as default inline element
+```
+
+# Parameters
+
+* `tag_name` - The normalized HTML tag name (lowercase)
+* `node_handle` - The DOM node handle from the parser
+* `parser` - Reference to the tl HTML parser
+* `output` - Output buffer to write converted content to
+* `options` - Conversion configuration options
+* `ctx` - Processing context with state tracking
+* `depth` - Current DOM tree depth for recursion tracking
+* `dom_ctx` - DOM context for accessing tree structure
+
+For `<strong>Bold text</strong>`, the dispatcher:
+1. Recognizes "strong" tag
+2. Routes to emphasis handler
+3. Returns `true`
+4. Emphasis handler outputs `**Bold text**` to output buffer
+
+For `<span>Normal text</span>`, the dispatcher:
+1. Fails to recognize "span" tag
+2. Returns `false`
+3. Caller processes as default inline content
+
+**Signature:**
+
+```elixir
+@spec dispatch_inline_handler(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def dispatch_inline_handler(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `tag_name` | `String.t()` | Yes | The normalized HTML tag name (lowercase) |
+| `node_handle` | `NodeHandle` | Yes | The DOM node handle from the parser |
+| `parser` | `Parser` | Yes | Reference to the tl HTML parser |
+| `output` | `String.t()` | Yes | Output buffer to write converted content to |
+| `options` | `ConversionOptions` | Yes | Conversion configuration options |
+| `ctx` | `Context` | Yes | Processing context with state tracking |
+| `depth` | `integer()` | Yes | Current DOM tree depth for recursion tracking |
+| `dom_ctx` | `DomContext` | Yes | DOM context for accessing tree structure |
+
+**Returns:** `boolean()`
+
+
+---
+
+### calculate_list_continuation_indent()
+
+Calculate indentation level for list item continuations.
+
+Returns the number of 4-space indent groups needed for list continuations.
+
+List continuations (block elements inside list items) need special indentation:
+- Base indentation: (depth - 1) groups (for the nesting level)
+- Content indentation: depth groups (for the list item content)
+- Combined formula: (2 * depth - 1) groups of 4 spaces each
+
+**Signature:**
+
+```elixir
+@spec calculate_list_continuation_indent(depth) :: {:ok, term()} | {:error, term()}
+def calculate_list_continuation_indent(depth)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `depth` | `integer()` | Yes | The depth |
+
+**Returns:** `integer()`
+
+
+---
+
+### is_loose_list()
+
+Check if a list (ul or ol) is "loose".
+
+A loose list is one where any list item contains block-level elements
+like paragraphs (<p>). In loose lists, all items should have blank line
+separation (ending with \n\n) regardless of their own content.
+
+**Signature:**
+
+```elixir
+@spec is_loose_list(node_handle, parser, dom_ctx) :: {:ok, term()} | {:error, term()}
+def is_loose_list(node_handle, parser, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `parser` | `Parser` | Yes | The parser |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `boolean()`
+
+
+---
+
+### add_list_continuation_indent()
+
+Add list continuation indentation to output.
+
+Used when block elements (like <p> or <div>) appear inside list items.
+Adds appropriate line separation and indentation to continue the list item.
+
+**Signature:**
+
+```elixir
+@spec add_list_continuation_indent(output, list_depth, blank_line, options) :: {:ok, term()} | {:error, term()}
+def add_list_continuation_indent(output, list_depth, blank_line, options)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `output` | `String.t()` | Yes | The output string to append to |
+| `list_depth` | `integer()` | Yes | Current list nesting depth |
+| `blank_line` | `boolean()` | Yes | If true, adds blank line separation (\n\n); if false, single newline (\n) |
+| `options` | `ConversionOptions` | Yes | The options to use |
+
+**Returns:** `:ok`
+
+
+---
+
+### continuation_indent_string()
+
+Calculate the indentation string for list continuations based on depth and options.
+
+**Signature:**
+
+```elixir
+@spec continuation_indent_string(list_depth, options) :: {:ok, term()} | {:error, term()}
+def continuation_indent_string(list_depth, options)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `list_depth` | `integer()` | Yes | The list depth |
+| `options` | `ConversionOptions` | Yes | The options to use |
+
+**Returns:** `String.t() | nil`
+
+
+---
+
+### add_list_leading_separator()
+
+Add appropriate leading separator before a list.
+
+Lists need different separators depending on context:
+- In table cells: <br> tag if there's already content
+- Outside lists: blank line (\n\n) if needed
+- Inside list items: blank line before nested list
+
+**Signature:**
+
+```elixir
+@spec add_list_leading_separator(output, ctx) :: {:ok, term()} | {:error, term()}
+def add_list_leading_separator(output, ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `output` | `String.t()` | Yes | The output destination |
+| `ctx` | `Context` | Yes | The context |
+
+**Returns:** `:ok`
+
+
+---
+
+### add_nested_list_trailing_separator()
+
+Add appropriate trailing separator after a nested list.
+
+Nested lists inside list items need trailing newlines to separate
+from following content. In loose lists, use blank line (\n\n). In tight lists, single newline (\n).
+
+**Signature:**
+
+```elixir
+@spec add_nested_list_trailing_separator(output, ctx) :: {:ok, term()} | {:error, term()}
+def add_nested_list_trailing_separator(output, ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `output` | `String.t()` | Yes | The output destination |
+| `ctx` | `Context` | Yes | The context |
+
+**Returns:** `:ok`
+
+
+---
+
+### calculate_list_nesting_depth()
+
+Calculate the nesting depth for a list.
+
+If we're in a list but NOT in a list item, this is incorrectly nested HTML
+and we need to increment the depth. If in a list item, the depth was already
+incremented by the <li> element.
+
+**Signature:**
+
+```elixir
+@spec calculate_list_nesting_depth(ctx) :: {:ok, term()} | {:error, term()}
+def calculate_list_nesting_depth(ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `ctx` | `Context` | Yes | The context |
+
+**Returns:** `integer()`
+
+
+---
+
+### is_list_item()
+
+Check if a node is a list item element.
+
+**Signature:**
+
+```elixir
+@spec is_list_item(node_handle, parser, dom_ctx) :: {:ok, term()} | {:error, term()}
+def is_list_item(node_handle, parser, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `parser` | `Parser` | Yes | The parser |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `boolean()`
+
+
+---
+
+### process_list_children()
+
+Process a list's children, tracking which items had block elements.
+
+This is used to determine proper spacing between list items.
+Returns true if the last processed item had block children.
+
+**Signature:**
+
+```elixir
+@spec process_list_children(node_handle, parser, output, options, ctx, depth, is_ordered, is_loose, nested_depth, start_counter, dom_ctx) :: {:ok, term()} | {:error, term()}
+def process_list_children(node_handle, parser, output, options, ctx, depth, is_ordered, is_loose, nested_depth, start_counter, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `is_ordered` | `boolean()` | Yes | The is ordered |
+| `is_loose` | `boolean()` | Yes | The is loose |
+| `nested_depth` | `integer()` | Yes | The nested depth |
+| `start_counter` | `integer()` | Yes | The start counter |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `:ok`
+
+
+---
+
+### dispatch_list_handler()
+
+Dispatches list element handling to the appropriate handler.
+
+Returns `true` if the element was handled, `false` otherwise.
+
+# Supported Elements
+
+- `ol`: Ordered list - routed to `ordered.handle`
+- `ul`: Unordered list - routed to `unordered.handle`
+- `li`: List item - routed to `item.handle_li`
+- `dl`: Definition list - routed to `definition.handle_dl`
+- `dt`: Definition term - routed to `definition.handle_dt`
+- `dd`: Definition description - routed to `definition.handle_dd`
+
+**Signature:**
+
+```elixir
+@spec dispatch_list_handler(tag_name, node_handle, tag, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def dispatch_list_handler(tag_name, node_handle, tag, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `tag_name` | `String.t()` | Yes | The tag name |
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `tag` | `HtmlTag` | Yes | The h t m l tag |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `boolean()`
+
+
+---
+
+### convert_html()
+
+Converts HTML to Markdown using the provided conversion options.
+
+This is the main entry point for HTML to Markdown conversion.
+
+**Signature:**
+
+```elixir
+@spec convert_html(html, options) :: {:ok, term()} | {:error, term()}
+def convert_html(html, options)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `html` | `String.t()` | Yes | The html |
+| `options` | `ConversionOptions` | Yes | The options to use |
+
+**Returns:** `String.t()`
+
+**Errors:** Returns `{:error, reason}`
+
+
+---
+
+### convert_html_with_visitor()
+
+Converts HTML to Markdown with a custom visitor for callbacks during traversal.
+
+This variant allows passing a visitor that will receive callbacks for each node
+during the tree walk, enabling custom processing or analysis.
+
+**Signature:**
+
+```elixir
+@spec convert_html_with_visitor(html, options, visitor) :: {:ok, term()} | {:error, term()}
+def convert_html_with_visitor(html, options, visitor)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `html` | `String.t()` | Yes | The html |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `visitor` | `VisitorHandle | nil` | No | The visitor handle |
+
+**Returns:** `String.t()`
+
+**Errors:** Returns `{:error, reason}`
+
+
+---
+
+### dispatch_media_handler()
+
+Dispatches media element handling to the appropriate handler.
+
+This function routes media-related HTML elements to their specialized handlers
+based on tag name. It is designed to be called from the main `walk_node`
+function in `converter.rs`.
+
+# Routing Table
+
+The following tag routes are supported:
+
+| Tag(s) | Handler | Description |
+|--------|---------|-------------|
+| `iframe` | embedded | Embedded content frames |
+| `video` | embedded | Video elements |
+| `audio` | embedded | Audio elements |
+| `picture` | embedded | Responsive image containers |
+| `svg` | svg | SVG image elements |
+| `math` | svg | MathML elements |
+
+# Return Value
+
+Returns `true` if the tag was recognized and handled, `false` otherwise.
+
+**Signature:**
+
+```elixir
+@spec dispatch_media_handler(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def dispatch_media_handler(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `tag_name` | `String.t()` | Yes | The tag name |
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `boolean()`
+
+
+---
+
+### extract_plain_text()
+
+Extract plain text from a parsed DOM tree.
+
+Walks the tree collecting visible text with structural whitespace:
+- Block elements get blank-line separation
+- `<br>` becomes a newline, `<hr>` a blank line
+- `<pre>` preserves internal whitespace
+- `<img>` outputs alt text (unless `skip_images` is set)
+- `<script>`, `<style>`, `<head>`, `<template>`, `<noscript>` are skipped
+- Tables: cells separated by tab, rows by newline
+- Inline elements are recursed without markers
+
+**Signature:**
+
+```elixir
+@spec extract_plain_text(dom, parser, options) :: {:ok, term()} | {:error, term()}
+def extract_plain_text(dom, parser, options)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `dom` | `VDom` | Yes | The v dom |
+| `parser` | `Parser` | Yes | The parser |
+| `options` | `ConversionOptions` | Yes | The options to use |
+
+**Returns:** `String.t()`
+
+
+---
+
+### handle_dfn()
+
+Handles the `<dfn>` element.
+
+A dfn element marks a term that is being defined. The content represents
+the term, and its definition would typically appear in surrounding context.
+It is rendered as emphasized (italic) text.
+
+# Behavior
+
+- Content is collected from children
+- Non-empty content is wrapped with the configured emphasis symbol (default: `*`)
+- Inline suffix handling is applied (e.g., footnote references)
+
+**Signature:**
+
+```elixir
+@spec handle_dfn(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def handle_dfn(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `tag_name` | `String.t()` | Yes | The  tag name |
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `:ok`
+
+
+---
+
+### handle_abbr()
+
+Handles the `<abbr>` element.
+
+An abbr element marks an abbreviation or acronym. The `title` attribute
+provides the expansion of the abbreviation, which is appended in parentheses
+if present.
+
+# Behavior
+
+- Content is collected from children
+- Non-empty content is output as-is
+- If `title` attribute exists, it is appended in parentheses: `abbr (title)`
+
+Produces: `HTML (HyperText Markup Language)`
+
+**Signature:**
+
+```elixir
+@spec handle_abbr(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def handle_abbr(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `tag_name` | `String.t()` | Yes | The  tag name |
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `:ok`
+
+
+---
+
+### handle_time_data()
+
+Handles the `<time>` and `<data>` elements.
+
+Time and data elements contain machine-readable content in their attributes
+and human-readable content in their text. For Markdown purposes, we output
+only the human-readable text content, as Markdown doesn't have a way to
+preserve machine-readable metadata.
+
+# Behavior
+
+- Content is extracted from children and output as-is
+- Attributes (datetime, value) are not rendered in Markdown output
+
+**Signature:**
+
+```elixir
+@spec handle_time_data(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def handle_time_data(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `tag_name` | `String.t()` | Yes | The  tag name |
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `:ok`
+
+
+---
+
+### handle_cite()
+
+Handles the `<cite>` element.
+
+A cite element marks the title of a cited work (book, article, website, etc.).
+It is rendered as emphasized (italic) text in block mode, or as plain text in inline mode.
+
+# Behavior
+
+- **Block mode**: Content is wrapped with emphasis markers (default: `*`)
+- **Inline mode**: Content is output as-is without formatting
+
+**Signature:**
+
+```elixir
+@spec handle_cite(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def handle_cite(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `tag_name` | `String.t()` | Yes | The  tag name |
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `:ok`
+
+
+---
+
+### handle_q()
+
+Handles the `<q>` element.
+
+A q element marks an inline quotation. In Markdown, it is rendered as
+quoted text enclosed in double quotes. Backslashes and quotes within
+the content are escaped.
+
+# Behavior
+
+- **Block mode**: Content is wrapped in escaped double quotes: `"content"`
+- **Inline mode**: Content is output as-is without quotes
+
+# Escaping
+
+Internal backslashes and double quotes are escaped:
+- `\` → `\\`
+- `"` → `\"`
+
+**Signature:**
+
+```elixir
+@spec handle_q(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def handle_q(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `tag_name` | `String.t()` | Yes | The  tag name |
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `:ok`
+
+
+---
+
+### handle_hgroup()
+
+Handles the `<hgroup>` element.
+
+An hgroup element groups related headings together (e.g., a title and subtitle).
+In Markdown, we simply process all children sequentially, allowing nested
+headings to maintain their individual formatting.
+
+# Behavior
+
+- Children are processed sequentially in the current context
+- No special formatting is applied at the hgroup level
+
+**Signature:**
+
+```elixir
+@spec handle_hgroup(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def handle_hgroup(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `tag_name` | `String.t()` | Yes | The  tag name |
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `:ok`
+
+
+---
+
+### handle_dl()
+
+Handles the `<dl>` element.
+
+A definition list contains terms and their definitions. Terms and definitions
+are output as plain blocks without Pandoc-style colon syntax, since standard
+Markdown and GFM do not support definition lists.
+
+# Behavior
+
+- **Inline mode**: Children are processed inline without block spacing
+- **Block mode**: Content is collected and wrapped with proper spacing
+
+**Signature:**
+
+```elixir
+@spec handle_dl(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def handle_dl(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `tag_name` | `String.t()` | Yes | The  tag name |
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `:ok`
+
+
+---
+
+### handle_dt()
+
+Handles the `<dt>` element.
+
+A dt element contains a term being defined. Terms are output on their own line,
+with definitions following on subsequent lines.
+
+# Behavior
+
+- **Inline mode**: Content is output as-is
+- **Block mode**: Content is followed by a newline
+
+**Signature:**
+
+```elixir
+@spec handle_dt(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def handle_dt(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `tag_name` | `String.t()` | Yes | The  tag name |
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `:ok`
+
+
+---
+
+### handle_dd()
+
+Handles the `<dd>` element.
+
+A dd element contains the definition for a term. It is output as a plain
+block since standard Markdown and GFM do not support definition list syntax.
+
+# Behavior
+
+- **Inline mode**: Content is output as-is
+- **Block mode**: Content is output as a block
+
+**Signature:**
+
+```elixir
+@spec handle_dd(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def handle_dd(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `tag_name` | `String.t()` | Yes | The  tag name |
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `:ok`
+
+
+---
+
+### handle_menu()
+
+Handles the `<menu>` element.
+
+A menu element is a semantic list, typically used for command menus or
+navigation. It is rendered as an unordered list with dashes.
+
+# Behavior
+
+- **Inline mode**: Children are processed inline without list formatting
+- **Block mode**: Content is rendered as an unordered list
+- Uses `-` as the list bullet (overrides configured bullets)
+- Proper blank-line spacing is maintained
+
+**Signature:**
+
+```elixir
+@spec handle_menu(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def handle_menu(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `tag_name` | `String.t()` | Yes | The  tag name |
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `:ok`
+
+
+---
+
+### handle_figure()
+
+Handles the `<figure>` element.
+
+A figure element contains content (typically images) and optionally a figcaption.
+The handler collects all content and cleans up extra line breaks.
+
+# Behavior
+
+- **Inline mode**: Children are processed inline without block spacing
+- **Block mode**: Content is collected, line breaks normalized, and wrapped with blank lines
+- **Image normalization**: Removes extra spaces before `![` to improve Markdown formatting
+
+# Implementation Details
+
+The handler performs the following on the collected content:
+1. Normalizes newline + image sequences: `\n![` → `![`
+2. Normalizes space + image sequences: ` ![` → `![`
+3. Trims the final content and wraps it with blank lines
+
+**Signature:**
+
+```elixir
+@spec handle_figure(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def handle_figure(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `tag_name` | `String.t()` | Yes | The  tag name |
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `:ok`
+
+
+---
+
+### handle_figcaption()
+
+Handles the `<figcaption>` element.
+
+A figcaption element contains text that describes or supplements the figure.
+It is rendered as emphasized (italic) text to distinguish it from regular content.
+
+# Behavior
+
+- Content is collected and trimmed
+- Non-empty content is wrapped in `*text*` (emphasis) markers
+- Proper spacing is maintained around the caption
+
+# Implementation Details
+
+The handler:
+1. Collects and processes all children
+2. Checks for existing output and adds spacing as needed
+3. Wraps content in emphasis markers: `*caption*`
+4. Ensures proper blank-line spacing after the caption
+
+**Signature:**
+
+```elixir
+@spec handle_figcaption(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def handle_figcaption(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `tag_name` | `String.t()` | Yes | The  tag name |
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `:ok`
+
+
+---
+
+### handle_details()
+
+Handles the `<details>` element.
+
+A details element represents a disclosure widget that can be toggled
+to show/hide additional content. In Markdown, it's rendered as a block
+with all content visible.
+
+# Behavior
+
+- **Inline mode**: Children are processed inline without block spacing
+- **Block mode**: Content is collected and wrapped with proper blank-line spacing
+- **Empty content**: Skipped entirely
+
+**Signature:**
+
+```elixir
+@spec handle_details(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def handle_details(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `tag_name` | `String.t()` | Yes | The  tag name |
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `:ok`
+
+
+---
+
+### handle_summary()
+
+Handles the `<summary>` element.
+
+A summary element contains a caption for a details element.
+It is rendered as strong (bold) text to distinguish it from regular content.
+
+# Behavior
+
+- **Inline mode**: Content is rendered inline without emphasis
+- **Block mode**: Content is wrapped in strong markers (e.g., `**text**`)
+- Uses the configured strong/emphasis symbol from ConversionOptions
+
+# Implementation Details
+
+The handler:
+1. Creates a context with `in_strong: true` for nested formatting
+2. Collects content from all children
+3. Wraps non-empty content in strong markers (repeated twice per Markdown spec)
+
+**Signature:**
+
+```elixir
+@spec handle_summary(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def handle_summary(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `tag_name` | `String.t()` | Yes | The  tag name |
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `:ok`
+
+
+---
+
+### handle_dialog()
+
+Handles the `<dialog>` element.
+
+A dialog element represents a modal dialog box. In Markdown, it's rendered
+as a block container with content visible.
+
+# Behavior
+
+- **Inline mode**: Children are processed inline without block spacing
+- **Block mode**: Content is processed and wrapped with proper blank lines
+- Trailing whitespace is removed from collected content
+
+# Implementation Details
+
+The handler:
+1. Marks the position in output before processing children
+2. Processes all children in the normal context
+3. Removes trailing spaces and tabs from the output
+4. Ensures proper blank-line spacing after the dialog
+
+**Signature:**
+
+```elixir
+@spec handle_dialog(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def handle_dialog(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `tag_name` | `String.t()` | Yes | The  tag name |
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `:ok`
+
+
+---
+
+### dispatch_semantic_handler()
+
+Dispatches semantic element handling to the appropriate handler.
+
+This function routes semantic HTML5 elements to their specialized handlers
+based on tag name. It is designed to be called from the main `walk_node`
+function in `converter.rs`.
+
+# Routing Table
+
+The following tag routes are supported:
+- **Sectioning**: article, section, nav, aside, header, footer, main
+- **Figure**: figure, figcaption
+- **Summary**: details, summary, dialog
+- **Definition List**: hgroup, dl, dt, dd, menu
+- **Attributes**: cite, q, abbr, dfn, time, data
+
+**Returns:**
+
+Returns `true` if the tag was successfully handled by a semantic handler,
+`false` if the tag is not a semantic element and requires other handling.
+
+**Signature:**
+
+```elixir
+@spec dispatch_semantic_handler(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def dispatch_semantic_handler(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `tag_name` | `String.t()` | Yes | The tag name |
+| `node_handle` | `NodeHandle` | Yes | The node handle |
+| `parser` | `Parser` | Yes | The parser |
+| `output` | `String.t()` | Yes | The output destination |
+| `options` | `ConversionOptions` | Yes | The options to use |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | The depth |
+| `dom_ctx` | `DomContext` | Yes | The dom context |
+
+**Returns:** `boolean()`
+
+
+---
+
+### floor_char_boundary()
+
+Returns the largest valid char boundary index at or before `index`.
+
+If `index` is already a char boundary it is returned unchanged.
+Otherwise it walks backwards to find one.  Returns 0 if no boundary
+is found before `index`.
+
+**Signature:**
+
+```elixir
+@spec floor_char_boundary(s, index) :: {:ok, term()} | {:error, term()}
+def floor_char_boundary(s, index)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `s` | `String.t()` | Yes | The s |
+| `index` | `integer()` | Yes | The index |
+
+**Returns:** `integer()`
+
+
+---
+
+### handle_visitor_element_start()
+
+Handles visitor callback for element start (before processing).
+
+This function is called when entering an element during tree traversal,
+before the element's content is processed. The visitor can:
+- Continue with normal processing (Continue)
+- Skip the element entirely (Skip)
+- Provide custom output to replace the element (Custom)
+- Signal an error (Error)
+
+**Returns:**
+
+`VisitAction` enum indicating what should happen next:
+- `VisitAction.Continue` - Process element normally
+- `VisitAction.Skip` - Skip element, don't process or call visit_element_end
+- `VisitAction.Custom(output)` - Use custom output, skip normal processing
+- `VisitAction.Error` - Stop processing with error
+
+**Signature:**
+
+```elixir
+@spec handle_visitor_element_start(visitor_handle, tag_name, node_handle, tag, parser, output, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def handle_visitor_element_start(visitor_handle, tag_name, node_handle, tag, parser, output, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `visitor_handle` | `VisitorHandle` | Yes | Reference to the visitor for callbacks |
+| `tag_name` | `String.t()` | Yes | The normalized tag name being processed |
+| `node_handle` | `NodeHandle` | Yes | Handle to the DOM node |
+| `tag` | `HtmlTag` | Yes | Reference to the tag object |
+| `parser` | `Parser` | Yes | Reference to the tl parser |
+| `output` | `String.t()` | Yes | Mutable reference to output string |
+| `ctx` | `Context` | Yes | The context |
+| `depth` | `integer()` | Yes | Current tree depth |
+| `dom_ctx` | `DomContext` | Yes | Reference to DOM context for tree navigation |
+
+**Returns:** `VisitAction`
+
+
+---
+
+### handle_visitor_element_end()
+
+Handles visitor callback for element end (after processing).
+
+This function is called when exiting an element after its content has been processed.
+The visitor can:
+- Accept the output normally (Continue)
+- Replace the output with custom content (Custom)
+- Remove the output entirely (Skip)
+- Signal an error (Error)
+
+**Signature:**
+
+```elixir
+@spec handle_visitor_element_end(visitor_handle, tag_name, node_handle, tag, parser, output, element_output_start, ctx, depth, dom_ctx) :: {:ok, term()} | {:error, term()}
+def handle_visitor_element_end(visitor_handle, tag_name, node_handle, tag, parser, output, element_output_start, ctx, depth, dom_ctx)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `visitor_handle` | `VisitorHandle` | Yes | Reference to the visitor for callbacks |
+| `tag_name` | `String.t()` | Yes | The normalized tag name that was processed |
+| `node_handle` | `NodeHandle` | Yes | Handle to the DOM node |
+| `tag` | `HtmlTag` | Yes | Reference to the tag object |
+| `parser` | `Parser` | Yes | Reference to the tl parser |
+| `output` | `String.t()` | Yes | Mutable reference to output string |
+| `element_output_start` | `integer()` | Yes | Byte position where this element's output started |
+| `ctx` | `Context` | Yes | Reference to the conversion context |
+| `depth` | `integer()` | Yes | Current tree depth |
+| `dom_ctx` | `DomContext` | Yes | Reference to DOM context for tree navigation |
+
+**Returns:** `:ok`
+
+
+---
+
+### escape()
+
+Escape Markdown special characters in text.
+
+**Returns:**
+
+Escaped text
+
+**Signature:**
+
+```elixir
+@spec escape(text, escape_misc, escape_asterisks, escape_underscores, escape_ascii) :: {:ok, term()} | {:error, term()}
+def escape(text, escape_misc, escape_asterisks, escape_underscores, escape_ascii)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `text` | `String.t()` | Yes | Text to escape |
+| `escape_misc` | `boolean()` | Yes | Escape miscellaneous characters (`\` `&` `<` `` ` `` `[` `>` `~` `#` `=` `+` `\|` `-`) |
+| `escape_asterisks` | `boolean()` | Yes | Escape asterisks (`*`) |
+| `escape_underscores` | `boolean()` | Yes | Escape underscores (`_`) |
+| `escape_ascii` | `boolean()` | Yes | Escape all ASCII punctuation (for `CommonMark` spec compliance) |
+
+**Returns:** `Str`
+
+
+---
+
+### chomp()
+
+Extract boundary whitespace from text (chomp).
+
+Returns (prefix, suffix, `trimmed_text`) tuple.
+Prefix/suffix are " " if original text had leading/trailing whitespace.
+However, suffix is "" if the trailing whitespace is only newlines (not spaces/tabs).
+This prevents trailing newlines from becoming trailing spaces in the output.
+The trimmed text has all leading/trailing whitespace removed.
+
+**Signature:**
+
+```elixir
+@spec chomp(text) :: {:ok, term()} | {:error, term()}
+def chomp(text)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `text` | `String.t()` | Yes | The text |
+
+**Returns:** `StrStrStr`
+
+
+---
+
+### normalize_whitespace()
+
+Normalize whitespace by collapsing consecutive spaces and tabs.
+
+Multiple spaces and tabs are replaced with a single space.
+Newlines are preserved.
+Unicode spaces are normalized to ASCII spaces.
+
+**Returns:**
+
+Normalized text with collapsed spaces/tabs but preserved newlines
+
+**Signature:**
+
+```elixir
+@spec normalize_whitespace(text) :: {:ok, term()} | {:error, term()}
+def normalize_whitespace(text)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `text` | `String.t()` | Yes | The text to normalize |
+
+**Returns:** `String.t()`
+
+
+---
+
+### normalize_whitespace_cow()
+
+Normalize whitespace in text, returning borrowed or owned result as needed.
+
+This function optimizes memory by returning a borrowed reference when no normalization
+is needed, and only allocating a new string when whitespace changes are necessary.
+
+Multiple consecutive spaces, tabs, and Unicode space characters are replaced with
+a single ASCII space. Newlines are preserved as-is.
+
+**Returns:**
+
+`Cow.Borrowed` if text is already normalized, or `Cow.Owned` with normalized text
+
+**Signature:**
+
+```elixir
+@spec normalize_whitespace_cow(text) :: {:ok, term()} | {:error, term()}
+def normalize_whitespace_cow(text)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `text` | `String.t()` | Yes | The text to normalize |
+
+**Returns:** `Str`
+
+
+---
+
+### decode_html_entities()
+
+Decode common HTML entities.
+
+Decodes the most common HTML entities to their character equivalents:
+- `&quot;` → `"`
+- `&apos;` → `'`
+- `&lt;` → `<`
+- `&gt;` → `>`
+- `&amp;` → `&` (must be last to avoid double-decoding)
+
+**Returns:**
+
+Text with entities decoded
+
+**Signature:**
+
+```elixir
+@spec decode_html_entities(text) :: {:ok, term()} | {:error, term()}
+def decode_html_entities(text)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `text` | `String.t()` | Yes | Text containing HTML entities |
+
+**Returns:** `String.t()`
+
+
+---
+
+### decode_html_entities_cow()
+
+Decode HTML entities in text, returning borrowed or owned result as needed.
+
+This function optimizes memory by returning a borrowed reference when no HTML
+entities are present, and only allocating a new string when entity decoding
+is necessary.
+
+Decodes common HTML entities like:
+- `&quot;` → `"`
+- `&apos;` → `'`
+- `&lt;` → `<`
+- `&gt;` → `>`
+- `&amp;` → `&` (decoded last to avoid double-decoding)
+
+**Returns:**
+
+`Cow.Borrowed` if no entities found, or `Cow.Owned` with entities decoded
+
+**Signature:**
+
+```elixir
+@spec decode_html_entities_cow(text) :: {:ok, term()} | {:error, term()}
+def decode_html_entities_cow(text)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `text` | `String.t()` | Yes | Text potentially containing HTML entities |
+
+**Returns:** `Str`
+
+
+---
+
+### underline()
+
+Underline text with a character.
+
+**Signature:**
+
+```elixir
+@spec underline(text, pad_char) :: {:ok, term()} | {:error, term()}
+def underline(text, pad_char)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `text` | `String.t()` | Yes | The text |
+| `pad_char` | `String.t()` | Yes | The pad char |
+
+**Returns:** `String.t()`
+
+
+---
+
+### indent()
+
+Indent text with a string prefix.
+
+**Signature:**
+
+```elixir
+@spec indent(text, level, indent_str) :: {:ok, term()} | {:error, term()}
+def indent(text, level, indent_str)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `text` | `String.t()` | Yes | The text |
+| `level` | `integer()` | Yes | The level |
+| `indent_str` | `String.t()` | Yes | The indent str |
+
+**Returns:** `String.t()`
+
+
+---
+
+### build_document_structure()
+
+Build a `DocumentStructure` from an already-parsed `tl.VDom`.
+
+Walks the DOM once, mapping HTML elements to semantic `NodeContent` variants,
+tracking parent/child relationships, extracting inline `TextAnnotation`s, and
+constructing heading-based `Group` nodes.
+
+**Signature:**
+
+```elixir
+@spec build_document_structure(dom) :: {:ok, term()} | {:error, term()}
+def build_document_structure(dom)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `dom` | `VDom` | Yes | The v dom |
+
+**Returns:** `DocumentStructure`
+
+
+---
+
+### build_node_context()
+
+Build a `NodeContext` from current parsing state.
+
+Creates a complete `NodeContext` suitable for passing to visitor callbacks.
+This function collects metadata about the current node from various sources:
+- Tag name and attributes from the HTML element
+- Depth and parent information from the DOM tree
+- Index among siblings for positional awareness
+- Inline/block classification
+
+# Parameters
+
+- `node_type`: Coarse-grained classification (Link, Image, Heading, etc.)
+- `tag_name`: Raw HTML tag name (e.g., "div", "h1", "custom-element")
+- `attributes`: All HTML attributes as key-value pairs
+- `depth`: Nesting depth in the DOM tree (0 = root)
+- `index_in_parent`: Zero-based index among siblings
+- `parent_tag`: Parent element's tag name (None if root)
+- `is_inline`: Whether this element is treated as inline vs block
+
+**Returns:**
+
+A fully populated `NodeContext` ready for visitor dispatch.
+
+# Performance
+
+This function performs minimal allocations:
+- Clones `tag_name` (typically 2-10 bytes)
+- Clones `parent_tag` if present (typically 2-10 bytes)
+- Clones the attributes `BTreeMap` (heap allocation if non-empty)
+
+For text nodes and simple elements without attributes, allocations are minimal.
+
+**Signature:**
+
+```elixir
+@spec build_node_context(node_type, tag_name, attributes, depth, index_in_parent, parent_tag, is_inline) :: {:ok, term()} | {:error, term()}
+def build_node_context(node_type, tag_name, attributes, depth, index_in_parent, parent_tag, is_inline)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `node_type` | `NodeType` | Yes | Coarse-grained classification (Link, Image, Heading, etc.) |
+| `tag_name` | `String.t()` | Yes | Raw HTML tag name (e.g., "div", "h1", "custom-element") |
+| `attributes` | `map()` | Yes | All HTML attributes as key-value pairs |
+| `depth` | `integer()` | Yes | Nesting depth in the DOM tree (0 = root) |
+| `index_in_parent` | `integer()` | Yes | Zero-based index among siblings |
+| `parent_tag` | `String.t() | nil` | No | Parent element's tag name (None if root) |
+| `is_inline` | `boolean()` | Yes | Whether this element is treated as inline vs block |
+
+**Returns:** `NodeContext`
+
+
+---
 
 ### convert()
 
@@ -30,6 +2331,173 @@ def convert(html, options)
 | `options` | `ConversionOptions | nil` | No | Optional conversion options (defaults to `default options`) |
 
 **Returns:** `ConversionResult`
+
+**Errors:** Returns `{:error, reason}`
+
+
+---
+
+### convert_with_visitor()
+
+Internal: convert with visitor support. Used by FFI crate.
+Will be removed when convert() accepts visitor parameter directly.
+
+**Signature:**
+
+```elixir
+@spec convert_with_visitor(html, options, visitor) :: {:ok, term()} | {:error, term()}
+def convert_with_visitor(html, options, visitor)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `html` | `String.t()` | Yes | The html |
+| `options` | `ConversionOptions | nil` | No | The options to use |
+| `visitor` | `VisitorHandle | nil` | No | The visitor handle |
+
+**Returns:** `String.t()`
+
+**Errors:** Returns `{:error, reason}`
+
+
+---
+
+### conversion_options_from_json()
+
+Parse JSON string into `ConversionOptions`.
+
+Deserializes a JSON string into a full set of conversion options.
+The JSON can be either a complete or partial options object.
+
+**Returns:**
+
+Fully populated `ConversionOptions` with defaults applied to any unspecified values
+
+**Errors:**
+
+Returns `ConversionError.ConfigError` if JSON parsing fails or contains invalid option values
+
+**Signature:**
+
+```elixir
+@spec conversion_options_from_json(json) :: {:ok, term()} | {:error, term()}
+def conversion_options_from_json(json)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `json` | `String.t()` | Yes | JSON string representing conversion options |
+
+**Returns:** `ConversionOptions`
+
+**Errors:** Returns `{:error, reason}`
+
+
+---
+
+### conversion_options_update_from_json()
+
+Parse JSON string into partial `ConversionOptions` update.
+
+Deserializes a JSON string into a partial set of conversion options.
+Only specified options are included; unspecified options are None.
+
+**Returns:**
+
+`ConversionOptionsUpdate` with only specified fields populated
+
+**Errors:**
+
+Returns `ConversionError.ConfigError` if JSON parsing fails or contains invalid option values
+
+**Signature:**
+
+```elixir
+@spec conversion_options_update_from_json(json) :: {:ok, term()} | {:error, term()}
+def conversion_options_update_from_json(json)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `json` | `String.t()` | Yes | JSON string representing partial conversion options |
+
+**Returns:** `ConversionOptionsUpdate`
+
+**Errors:** Returns `{:error, reason}`
+
+
+---
+
+### inline_image_config_from_json()
+
+Parse JSON string into `InlineImageConfig` (requires `inline-images` feature).
+
+Deserializes a JSON string into inline image extraction configuration.
+The JSON can be either a complete or partial configuration object.
+
+**Returns:**
+
+Fully populated `InlineImageConfig` with defaults applied to any unspecified values
+
+**Errors:**
+
+Returns `ConversionError.ConfigError` if JSON parsing fails or contains invalid configuration values
+
+**Signature:**
+
+```elixir
+@spec inline_image_config_from_json(json) :: {:ok, term()} | {:error, term()}
+def inline_image_config_from_json(json)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `json` | `String.t()` | Yes | JSON string representing inline image configuration |
+
+**Returns:** `InlineImageConfig`
+
+**Errors:** Returns `{:error, reason}`
+
+
+---
+
+### metadata_config_from_json()
+
+Parse JSON string into `MetadataConfig` (requires `metadata` feature).
+
+Deserializes a JSON string into metadata extraction configuration.
+The JSON can be either a complete or partial configuration object.
+
+**Returns:**
+
+Fully populated `MetadataConfig` with defaults applied to any unspecified values
+
+**Errors:**
+
+Returns `ConversionError.ConfigError` if JSON parsing fails or contains invalid configuration values
+
+**Signature:**
+
+```elixir
+@spec metadata_config_from_json(json) :: {:ok, term()} | {:error, term()}
+def metadata_config_from_json(json)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `json` | `String.t()` | Yes | JSON string representing metadata extraction configuration |
+
+**Returns:** `MetadataConfig`
 
 **Errors:** Returns `{:error, reason}`
 
@@ -71,7 +2539,7 @@ Use `ConversionOptions.builder()` to construct, or `the default constructor` for
 | `newline_style` | `NewlineStyle` | `:spaces` | How to encode hard line breaks (`<br>`) in Markdown. |
 | `code_block_style` | `CodeBlockStyle` | `:backticks` | Style used for fenced code blocks (backticks or tilde). |
 | `keep_inline_images_in` | `list(String.t())` | `[]` | HTML tag names whose `<img>` children are kept inline instead of block. |
-| `preprocessing` | `PreprocessingOptions` | `nil` | Pre-processing options applied to the HTML before conversion. |
+| `preprocessing` | `PreprocessingOptions` | — | Pre-processing options applied to the HTML before conversion. |
 | `encoding` | `String.t()` | `"utf-8"` | Expected character encoding of the input HTML (default `"utf-8"`). |
 | `debug` | `boolean()` | `false` | Emit debug information during conversion. |
 | `strip_tags` | `list(String.t())` | `[]` | HTML tag names whose content is stripped from the output entirely. |
@@ -105,6 +2573,34 @@ Create a new builder with default values.
 def builder()
 ```
 
+##### apply_update()
+
+Apply a partial update to these conversion options.
+
+**Signature:**
+
+```elixir
+def apply_update(update)
+```
+
+##### from_update()
+
+Create from a partial update, applying to defaults.
+
+**Signature:**
+
+```elixir
+def from_update(update)
+```
+
+##### from()
+
+**Signature:**
+
+```elixir
+def from(update)
+```
+
 
 ---
 
@@ -119,10 +2615,20 @@ metadata, extracted tables, images, and processing warnings.
 |-------|------|---------|-------------|
 | `content` | `String.t() | nil` | `nil` | Converted text output (markdown, djot, or plain text). `None` when `output_format` is set to `OutputFormat.None`, indicating extraction-only mode. |
 | `document` | `DocumentStructure | nil` | `nil` | Structured document tree with semantic elements. Populated when `include_document_structure` is `True` in options. |
-| `metadata` | `HtmlMetadata` | `nil` | Extracted HTML metadata (title, OG, links, images, structured data). |
+| `metadata` | `HtmlMetadata` | — | Extracted HTML metadata (title, OG, links, images, structured data). |
 | `tables` | `list(TableData)` | `[]` | Extracted tables with structured cell data and markdown representation. |
-| `images` | `list(String.t())` | `[]` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `True` in options. |
+| `images` | `list(InlineImage)` | `[]` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `True` in options. |
 | `warnings` | `list(ProcessingWarning)` | `[]` | Non-fatal processing warnings. |
+
+
+---
+
+### Context
+
+Conversion context that tracks state during HTML to Markdown conversion.
+
+This context is passed through the recursive tree walker and maintains information
+about the current position in the document tree, nesting levels, and enabled features.
 
 
 ---
@@ -204,7 +2710,7 @@ and browsers for document indexing and presentation.
 | `canonical_url` | `String.t() | nil` | `nil` | Canonical URL from `<link rel="canonical">` tag |
 | `base_href` | `String.t() | nil` | `nil` | Base URL from `<base href="">` tag for resolving relative URLs |
 | `language` | `String.t() | nil` | `nil` | Document language from `lang` attribute |
-| `text_direction` | `TextDirection | nil` | `:left_to_right` | Document text direction from `dir` attribute |
+| `text_direction` | `TextDirection | nil` | `nil` | Document text direction from `dir` attribute |
 | `open_graph` | `map()` | `%{}` | Open Graph metadata (og:* properties) for social media Keys like "title", "description", "image", "url", etc. |
 | `twitter_card` | `map()` | `%{}` | Twitter Card metadata (twitter:* properties) Keys like "card", "site", "creator", "title", "description", "image", etc. |
 | `meta_tags` | `map()` | `%{}` | Additional meta tags not covered by specific fields Keys are meta name/property attributes, values are content |
@@ -238,6 +2744,128 @@ Uses a flat node array with index-based parent/child references for efficient tr
 |-------|------|---------|-------------|
 | `nodes` | `list(DocumentNode)` | — | All nodes in document reading order. |
 | `source_format` | `String.t() | nil` | `nil` | The source format (always "html" for this library). |
+
+
+---
+
+### DomContext
+
+DOM context that provides efficient access to parent/child relationships and text content.
+
+This context is built once during conversion and provides O(1) access to node relationships
+via precomputed maps. It also includes an LRU cache for text content extraction.
+
+
+---
+
+### FormatRenderer
+
+Trait for format-specific rendering of inline elements.
+
+Implementations provide the syntax for emphasis, strong, strikethrough, etc.
+in their respective output formats.
+
+#### Functions
+
+##### emphasis()
+
+Render emphasis (em, i elements)
+
+**Signature:**
+
+```elixir
+def emphasis(content)
+```
+
+##### strong()
+
+Render strong emphasis (strong, b elements)
+
+**Signature:**
+
+```elixir
+def strong(content, symbol)
+```
+
+##### strikethrough()
+
+Render strikethrough (del, s elements)
+
+**Signature:**
+
+```elixir
+def strikethrough(content)
+```
+
+##### highlight()
+
+Render highlight (mark element)
+
+**Signature:**
+
+```elixir
+def highlight(content)
+```
+
+##### inserted()
+
+Render inserted text (ins element)
+
+**Signature:**
+
+```elixir
+def inserted(content)
+```
+
+##### subscript()
+
+Render subscript (sub element)
+
+**Signature:**
+
+```elixir
+def subscript(content, custom_symbol)
+```
+
+##### superscript()
+
+Render superscript (sup element)
+
+**Signature:**
+
+```elixir
+def superscript(content, custom_symbol)
+```
+
+##### span_with_attributes()
+
+Render span with attributes (for Djot: [text]{.class})
+
+**Signature:**
+
+```elixir
+def span_with_attributes(content, classes, id)
+```
+
+##### div_with_attributes()
+
+Render div with attributes (for Djot: .: class)
+
+**Signature:**
+
+```elixir
+def div_with_attributes(content, classes)
+```
+
+##### is_djot()
+
+Check if this is Djot format
+
+**Signature:**
+
+```elixir
+def is_djot()
+```
 
 
 ---
@@ -301,7 +2929,7 @@ suitable for serialization and transmission across language boundaries.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `document` | `DocumentMetadata` | `nil` | Document-level metadata (title, description, canonical, etc.) |
+| `document` | `DocumentMetadata` | — | Document-level metadata (title, description, canonical, etc.) |
 | `headers` | `list(HeaderMetadata)` | `[]` | Extracted header elements with hierarchy |
 | `links` | `list(LinkMetadata)` | `[]` | Extracted hyperlinks with type classification |
 | `images` | `list(ImageMetadata)` | `[]` | Extracted images with source and dimensions |
@@ -322,9 +2950,81 @@ for image analysis and optimization.
 | `src` | `String.t()` | — | Image source (URL, data URI, or SVG content identifier) |
 | `alt` | `String.t() | nil` | `nil` | Alternative text from alt attribute (for accessibility) |
 | `title` | `String.t() | nil` | `nil` | Title attribute (often shown as tooltip) |
-| `dimensions` | `String.t() | nil` | `nil` | Image dimensions as (width, height) if available |
+| `dimensions` | `U32U32 | nil` | `nil` | Image dimensions as (width, height) if available |
 | `image_type` | `ImageType` | — | Image type classification |
 | `attributes` | `map()` | — | Additional HTML attributes |
+
+
+---
+
+### ImageMetadataPayload
+
+Payload type for image metadata extraction.
+
+
+---
+
+### InlineCollectorHandle
+
+Handle type for inline image collector when feature is enabled.
+
+
+---
+
+### InlineImageConfig
+
+Inline image configuration that specifies contexts where images remain as markdown links.
+
+This is a wrapper type that provides semantic clarity for the vector of element
+names where inline images should be preserved.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `keep_inline_images_in` | `list(String.t())` | `[]` | HTML elements where images should remain as markdown links (not converted to alt text) |
+
+#### Functions
+
+##### from_elements()
+
+Create a new inline image configuration from a list of element names.
+
+**Signature:**
+
+```elixir
+def from_elements(elements)
+```
+
+##### add_element()
+
+Add an element name to the list of elements where images are kept inline.
+
+**Signature:**
+
+```elixir
+def add_element(element)
+```
+
+##### should_keep_images()
+
+Check if a given element should keep images inline.
+
+**Returns:**
+
+`true` if the element is in the configured list, `false` otherwise
+
+**Signature:**
+
+```elixir
+def should_keep_images(element)
+```
+
+##### default()
+
+**Signature:**
+
+```elixir
+def default()
+```
 
 
 ---
@@ -363,6 +3063,29 @@ def classify_link(href)
 
 ---
 
+### MetadataCollector
+
+Internal metadata collector for single-pass extraction.
+
+Follows a pattern for efficient metadata extraction during tree traversal.
+Maintains state for:
+- Document metadata from head elements
+- Header hierarchy tracking
+- Link accumulation
+- Structured data collection
+- Language and directionality attributes
+
+# Architecture
+
+The collector is designed to be:
+- **Performant**: Pre-allocated collections, minimal cloning
+- **Single-pass**: Collects during main tree walk without separate passes
+- **Optional**: Zero overhead when disabled via feature flags
+- **Type-safe**: Strict separation of collection and result types
+
+
+---
+
 ### MetadataConfig
 
 Configuration for metadata extraction granularity.
@@ -379,7 +3102,7 @@ the HTML-to-Markdown conversion process.
 | `extract_links` | `boolean()` | `true` | Extract anchor (a) elements as links with type classification. When enabled, collects all hyperlinks with: - href attribute value - Link text content - Title attribute (tooltip text) - Automatic link type classification (anchor, internal, external, email, phone, other) - Rel attribute values - Additional custom attributes |
 | `extract_images` | `boolean()` | `true` | Extract image elements and data URIs. When enabled, collects all image elements with: - Source URL or data URI - Alt text for accessibility - Title attribute - Dimensions (width, height) if available - Automatic image type classification (data URI, external, relative, inline SVG) - Additional custom attributes |
 | `extract_structured_data` | `boolean()` | `true` | Extract structured data (JSON-LD, Microdata, RDFa). When enabled, collects machine-readable structured data including: - JSON-LD script blocks with schema detection - Microdata attributes (itemscope, itemtype, itemprop) - RDFa markup - Extracted schema type if detectable |
-| `max_structured_data_size` | `integer()` | `nil` | Maximum total size of structured data to collect (bytes). Prevents memory exhaustion attacks on malformed or adversarial documents containing excessively large structured data blocks. When the accumulated size of structured data exceeds this limit, further collection stops. Default: `1_000_000` bytes (1 MB) |
+| `max_structured_data_size` | `integer()` | — | Maximum total size of structured data to collect (bytes). Prevents memory exhaustion attacks on malformed or adversarial documents containing excessively large structured data blocks. When the accumulated size of structured data exceeds this limit, further collection stops. Default: `1_000_000` bytes (1 MB) |
 
 #### Functions
 
@@ -412,6 +3135,47 @@ This is useful for early exit optimization when the application doesn't need met
 def any_enabled()
 ```
 
+##### apply_update()
+
+Apply a partial update to this metadata configuration.
+
+Any specified fields in the update (Some values) will override the current values.
+Unspecified fields (None) are left unchanged. This allows selective modification
+of configuration without affecting unrelated settings.
+
+**Signature:**
+
+```elixir
+def apply_update(update)
+```
+
+##### from_update()
+
+Create new metadata configuration from a partial update.
+
+Creates a new `MetadataConfig` struct with defaults, then applies the update.
+Fields not specified in the update (None) keep their default values.
+This is a convenience method for constructing a configuration from a partial specification
+without needing to explicitly call `.default()` first.
+
+**Returns:**
+
+New `MetadataConfig` with specified updates applied to defaults
+
+**Signature:**
+
+```elixir
+def from_update(update)
+```
+
+##### from()
+
+**Signature:**
+
+```elixir
+def from(update)
+```
+
 
 ---
 
@@ -436,6 +3200,44 @@ HTML preprocessing options for document cleanup before conversion.
 def default()
 ```
 
+##### apply_update()
+
+Apply a partial update to these preprocessing options.
+
+Any specified fields in the update will override the current values.
+Unspecified fields (None) are left unchanged.
+
+**Signature:**
+
+```elixir
+def apply_update(update)
+```
+
+##### from_update()
+
+Create new preprocessing options from a partial update.
+
+Creates a new `PreprocessingOptions` struct with defaults, then applies the update.
+Fields not specified in the update keep their default values.
+
+**Returns:**
+
+New `PreprocessingOptions` with specified updates applied to defaults
+
+**Signature:**
+
+```elixir
+def from_update(update)
+```
+
+##### from()
+
+**Signature:**
+
+```elixir
+def from(update)
+```
+
 
 ---
 
@@ -447,6 +3249,213 @@ A non-fatal warning generated during HTML processing.
 |-------|------|---------|-------------|
 | `message` | `String.t()` | — | Human-readable warning message. |
 | `kind` | `WarningKind` | — | The category of warning. |
+
+
+---
+
+### ReferenceCollector
+
+Collects link/image references during conversion and produces a reference
+definitions section at the end of the document.
+
+#### Functions
+
+##### get_or_insert()
+
+Register a URL (and optional title) and return its 1-based reference number.
+
+If the same URL+title pair was already registered, the existing number is returned.
+
+**Signature:**
+
+```elixir
+def get_or_insert(url, title)
+```
+
+##### finish()
+
+Produce the reference definitions section.
+
+Returns an empty string when no references were collected.
+
+**Signature:**
+
+```elixir
+def finish()
+```
+
+
+---
+
+### ReferenceCollectorHandle
+
+Shared handle for passing the collector through the conversion context.
+
+
+---
+
+### StructureCollector
+
+Incremental builder for `DocumentStructure` during a single DOM walk.
+
+#### Functions
+
+##### push_heading()
+
+Record a heading element.
+
+Creates a `NodeContent.Group` (which owns all subsequent sibling content until a
+heading of equal or higher rank closes it) followed by a `NodeContent.Heading` child.
+
+Returns the index of the **heading** node (the group node is one before it).
+
+**Signature:**
+
+```elixir
+def push_heading(level, text, id)
+```
+
+##### push_paragraph()
+
+Record a paragraph element.
+
+Returns the node index.
+
+**Signature:**
+
+```elixir
+def push_paragraph(text)
+```
+
+##### push_list_start()
+
+Open a list container.
+
+Returns the node index; call `push_list_end` to close it.
+
+**Signature:**
+
+```elixir
+def push_list_start(ordered)
+```
+
+##### push_list_end()
+
+Close the innermost open list container.
+
+**Signature:**
+
+```elixir
+def push_list_end()
+```
+
+##### push_list_item()
+
+Record a list item under the current open list.
+
+If there is no open list, the item is parented under the current section/container.
+Returns the node index.
+
+**Signature:**
+
+```elixir
+def push_list_item(text)
+```
+
+##### push_table()
+
+Record a table.
+
+Returns the node index.
+
+**Signature:**
+
+```elixir
+def push_table(grid)
+```
+
+##### push_image()
+
+Record an image element.
+
+Returns the node index.
+
+**Signature:**
+
+```elixir
+def push_image(src, alt)
+```
+
+##### push_code()
+
+Record a code block.
+
+Returns the node index.
+
+**Signature:**
+
+```elixir
+def push_code(text, language)
+```
+
+##### push_quote_start()
+
+Open a blockquote container.
+
+Returns the node index; call `push_quote_end` to close it.
+
+**Signature:**
+
+```elixir
+def push_quote_start()
+```
+
+##### push_quote_end()
+
+Close the innermost open blockquote container.
+
+**Signature:**
+
+```elixir
+def push_quote_end()
+```
+
+##### push_raw_block()
+
+Record a raw block (e.g. preserved `<script>` or `<style>` content).
+
+Returns the node index.
+
+**Signature:**
+
+```elixir
+def push_raw_block(format, content)
+```
+
+##### finish()
+
+Consume the collector and return the completed `DocumentStructure`.
+
+**Signature:**
+
+```elixir
+def finish()
+```
+
+##### default()
+
+**Signature:**
+
+```elixir
+def default()
+```
+
+
+---
+
+### StructureCollectorHandle
+
+Shared mutable handle used in `crate.converter.Context`.
 
 
 ---
@@ -485,9 +3494,32 @@ A structured table grid with cell-level data including spans.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `rows` | `integer()` | `nil` | Number of rows. |
-| `cols` | `integer()` | `nil` | Number of columns. |
+| `rows` | `integer()` | — | Number of rows. |
+| `cols` | `integer()` | — | Number of columns. |
 | `cells` | `list(GridCell)` | `[]` | All cells in the table (may be fewer than rows*cols due to spans). |
+
+
+---
+
+### TableScan
+
+Scan results for a table element.
+
+Contains metadata about table structure to determine optimal rendering:
+- Row counts for consistency checking
+- Presence of headers, captions, and nested tables
+- Presence of colspan/rowspan (spanning cells)
+- Link and text content counts
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `row_counts` | `list(integer())` | `[]` | Number of cells in each row |
+| `has_span` | `boolean()` | — | Whether any cells have colspan or rowspan attributes |
+| `has_header` | `boolean()` | — | Whether the table has header cells (th elements or role="head") |
+| `has_caption` | `boolean()` | — | Whether the table has a caption element |
+| `nested_table_count` | `integer()` | — | Number of nested tables found inside this table |
+| `link_count` | `integer()` | — | Count of anchor elements in the table |
+| `has_text` | `boolean()` | — | Whether the table contains text content (not empty) |
 
 
 ---
@@ -508,6 +3540,84 @@ Annotations describe formatting (bold, italic, etc.) and links within a node's t
 ---
 
 ## Enums
+
+### VisitAction
+
+Result of visitor element start callback indicating what should happen next.
+
+| Value | Description |
+|-------|-------------|
+| `continue` | Continue with normal element processing |
+| `skip` | Skip the element entirely (don't process children or call visit_element_end) |
+| `custom` | Custom output was provided, skip normal processing |
+| `error` | Error occurred during visitor callback |
+
+
+---
+
+### TextDirection
+
+Text directionality of document content.
+
+Corresponds to the HTML `dir` attribute and `bdi` element directionality.
+
+| Value | Description |
+|-------|-------------|
+| `left_to_right` | Left-to-right text flow (default for Latin scripts) |
+| `right_to_left` | Right-to-left text flow (Hebrew, Arabic, Urdu, etc.) |
+| `auto` | Automatic directionality detection |
+
+
+---
+
+### LinkType
+
+Link classification based on href value and document context.
+
+Used to categorize links during extraction for filtering and analysis.
+
+| Value | Description |
+|-------|-------------|
+| `anchor` | Anchor link within same document (href starts with #) |
+| `internal` | Internal link within same domain |
+| `external` | External link to different domain |
+| `email` | Email link (mailto:) |
+| `phone` | Phone link (tel:) |
+| `other` | Other protocol or unclassifiable |
+
+
+---
+
+### ImageType
+
+Image source classification for proper handling and processing.
+
+Determines whether an image is embedded (data URI), inline SVG, external, or relative.
+
+| Value | Description |
+|-------|-------------|
+| `data_uri` | Data URI embedded image (base64 or other encoding) |
+| `inline_svg` | Inline SVG element |
+| `external` | External image URL (http/https) |
+| `relative` | Relative image path |
+
+
+---
+
+### StructuredDataType
+
+Structured data format type.
+
+Identifies the schema/format used for structured data markup.
+
+| Value | Description |
+|-------|-------------|
+| `json_ld` | JSON-LD (JSON for Linking Data) script blocks |
+| `microdata` | HTML5 Microdata attributes (itemscope, itemtype, itemprop) |
+| `rdfa` | RDF in Attributes (RDFa) markup |
+
+
+---
 
 ### PreprocessingPreset
 
@@ -642,6 +3752,24 @@ Specifies the target markup language format for the conversion output.
 
 ---
 
+### VisitorDispatch
+
+Result of dispatching a visitor callback.
+
+This enum represents the outcome of a visitor callback dispatch,
+providing a more ergonomic interface for control flow than the
+raw `VisitResult` type.
+
+| Value | Description |
+|-------|-------------|
+| `continue` | Continue with default conversion behavior |
+| `custom` | Replace default output with custom markdown — Fields: `0`: `String.t()` |
+| `skip` | Skip this element entirely (don't output anything) |
+| `preserve_html` | Preserve original HTML (don't convert to markdown) |
+
+
+---
+
 ### NodeContent
 
 The semantic content type of a document node.
@@ -650,19 +3778,19 @@ Uses internally tagged representation (`"node_type": "heading"`) for JSON serial
 
 | Value | Description |
 |-------|-------------|
-| `heading` | A heading element (h1-h6). |
-| `paragraph` | A paragraph of text. |
-| `list` | A list container (ordered or unordered). Children are `ListItem` nodes. |
-| `list_item` | A single list item. |
-| `table` | A table with structured cell data. |
-| `image` | An image element. |
-| `code` | A code block or inline code. |
+| `heading` | A heading element (h1-h6). — Fields: `level`: `integer()`, `text`: `String.t()` |
+| `paragraph` | A paragraph of text. — Fields: `text`: `String.t()` |
+| `list` | A list container (ordered or unordered). Children are `ListItem` nodes. — Fields: `ordered`: `boolean()` |
+| `list_item` | A single list item. — Fields: `text`: `String.t()` |
+| `table` | A table with structured cell data. — Fields: `grid`: `TableGrid` |
+| `image` | An image element. — Fields: `description`: `String.t()`, `src`: `String.t()`, `image_index`: `integer()` |
+| `code` | A code block or inline code. — Fields: `text`: `String.t()`, `language`: `String.t()` |
 | `quote` | A block quote container. |
 | `definition_list` | A definition list container. |
-| `definition_item` | A definition list entry with term and description. |
-| `raw_block` | A raw block preserved as-is (e.g. `<script>`, `<style>` content). |
-| `metadata_block` | A block of key-value metadata pairs (from `<head>` meta tags). |
-| `group` | A section grouping container (auto-generated from heading hierarchy). |
+| `definition_item` | A definition list entry with term and description. — Fields: `term`: `String.t()`, `definition`: `String.t()` |
+| `raw_block` | A raw block preserved as-is (e.g. `<script>`, `<style>` content). — Fields: `format`: `String.t()`, `content`: `String.t()` |
+| `metadata_block` | A block of key-value metadata pairs (from `<head>` meta tags). — Fields: `entries`: `list(StringString)` |
+| `group` | A section grouping container (auto-generated from heading hierarchy). — Fields: `label`: `String.t()`, `heading_level`: `integer()`, `heading_text`: `String.t()` |
 
 
 ---
@@ -683,7 +3811,7 @@ Uses internally tagged representation (`"annotation_type": "bold"`) for JSON ser
 | `subscript` | Subscript text. |
 | `superscript` | Superscript text. |
 | `highlight` | Highlighted / marked text. |
-| `link` | A hyperlink. |
+| `link` | A hyperlink. — Fields: `url`: `String.t()`, `title`: `String.t()` |
 
 
 ---
@@ -699,70 +3827,6 @@ Categories of processing warnings.
 | `truncated_input` | The input was truncated due to size limits. |
 | `malformed_html` | The HTML was malformed but processing continued with best effort. |
 | `sanitization_applied` | Sanitization was applied to remove potentially unsafe content. |
-
-
----
-
-### TextDirection
-
-Text directionality of document content.
-
-Corresponds to the HTML `dir` attribute and `bdi` element directionality.
-
-| Value | Description |
-|-------|-------------|
-| `left_to_right` | Left-to-right text flow (default for Latin scripts) |
-| `right_to_left` | Right-to-left text flow (Hebrew, Arabic, Urdu, etc.) |
-| `auto` | Automatic directionality detection |
-
-
----
-
-### LinkType
-
-Link classification based on href value and document context.
-
-Used to categorize links during extraction for filtering and analysis.
-
-| Value | Description |
-|-------|-------------|
-| `anchor` | Anchor link within same document (href starts with #) |
-| `internal` | Internal link within same domain |
-| `external` | External link to different domain |
-| `email` | Email link (mailto:) |
-| `phone` | Phone link (tel:) |
-| `other` | Other protocol or unclassifiable |
-
-
----
-
-### ImageType
-
-Image source classification for proper handling and processing.
-
-Determines whether an image is embedded (data URI), inline SVG, external, or relative.
-
-| Value | Description |
-|-------|-------------|
-| `data_uri` | Data URI embedded image (base64 or other encoding) |
-| `inline_svg` | Inline SVG element |
-| `external` | External image URL (http/https) |
-| `relative` | Relative image path |
-
-
----
-
-### StructuredDataType
-
-Structured data format type.
-
-Identifies the schema/format used for structured data markup.
-
-| Value | Description |
-|-------|-------------|
-| `json_ld` | JSON-LD (JSON for Linking Data) script blocks |
-| `microdata` | HTML5 Microdata attributes (itemscope, itemtype, itemprop) |
-| `rd_fa` | RDF in Attributes (RDFa) markup |
 
 
 ---
@@ -785,3 +3849,4 @@ Errors that can occur during HTML to Markdown conversion.
 
 
 ---
+

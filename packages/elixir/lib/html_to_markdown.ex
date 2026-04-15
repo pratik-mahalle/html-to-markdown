@@ -9,8 +9,7 @@ defmodule HtmlToMarkdown do
   end
 
   @doc "Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images,"
-  @spec convert(String.t(), String.t() | nil | nil) ::
-          {:ok, String.t() | nil} | {:error, String.t()}
+  @spec convert(String.t(), String.t() | nil | nil) :: {:ok, String.t() | nil} | {:error, String.t()}
   def convert(html, options) do
     HtmlToMarkdown.Native.convert(html, options)
   end
@@ -25,6 +24,18 @@ defmodule HtmlToMarkdown do
   @spec metadataconfig_any_enabled(map()) :: boolean()
   def metadataconfig_any_enabled(obj) do
     HtmlToMarkdown.Native.metadataconfig_any_enabled(obj)
+  end
+
+  @doc "Validate that the header level is within valid range (1-6)."
+  @spec headermetadata_is_valid(map()) :: boolean()
+  def headermetadata_is_valid(obj) do
+    HtmlToMarkdown.Native.headermetadata_is_valid(obj)
+  end
+
+  @doc "Classify a link based on href value."
+  @spec linkmetadata_classify_link(String.t()) :: map()
+  def linkmetadata_classify_link(href) do
+    HtmlToMarkdown.Native.linkmetadata_classify_link(href)
   end
 
   @doc "Method"
@@ -73,17 +84,5 @@ defmodule HtmlToMarkdown do
   @spec preprocessingoptions_default() :: String.t() | nil
   def preprocessingoptions_default do
     HtmlToMarkdown.Native.preprocessingoptions_default()
-  end
-
-  @doc "Validate that the header level is within valid range (1-6)."
-  @spec headermetadata_is_valid(map()) :: boolean()
-  def headermetadata_is_valid(obj) do
-    HtmlToMarkdown.Native.headermetadata_is_valid(obj)
-  end
-
-  @doc "Classify a link based on href value."
-  @spec linkmetadata_classify_link(String.t()) :: map()
-  def linkmetadata_classify_link(href) do
-    HtmlToMarkdown.Native.linkmetadata_classify_link(href)
   end
 end

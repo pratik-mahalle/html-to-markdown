@@ -216,3 +216,4 @@ fn test_options_wrap_enabled() {
     assert!(!content.is_empty(), "expected non-empty value");
     assert!(format!("{:?}", content).contains(r#"This is a long paragraph"#), "expected to contain: {}", r#"This is a long paragraph"#);
 }
+

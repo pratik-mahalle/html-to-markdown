@@ -515,22 +515,6 @@ void htm_free_string(char *ptr);
 const char *htm_version(void);
 
 /**
- * Create a `MetadataConfig` from a JSON string. Returns null on failure.
- * # Safety
- * JSON string must be valid UTF-8 and null-terminated.
- * Returned handle must be freed with `htm_metadata_config_free`.
- */
-HTMMetadataConfig *htm_metadata_config_from_json(const char *json);
-
-/**
- * Serialize a `MetadataConfig` to a JSON string. Returns null on failure.
- * # Safety
- * `ptr` must be a valid, non-null pointer returned by a `htm` function.
- * The returned string must be freed with `htm_free_string`.
- */
-char *htm_metadata_config_to_json(const HTMMetadataConfig *ptr);
-
-/**
  * Free a `MetadataConfig` handle.
  * # Safety
  * Pointer must have been returned by this library, or be null.
@@ -636,14 +620,6 @@ HTMMetadataConfig *htm_metadata_config_default(void);
 int32_t htm_metadata_config_any_enabled(const HTMMetadataConfig *this_);
 
 /**
- * Create a `MetadataConfigUpdate` from a JSON string. Returns null on failure.
- * # Safety
- * JSON string must be valid UTF-8 and null-terminated.
- * Returned handle must be freed with `htm_metadata_config_update_free`.
- */
-HTMMetadataConfigUpdate *htm_metadata_config_update_from_json(const char *json);
-
-/**
  * Free a `MetadataConfigUpdate` handle.
  * # Safety
  * Pointer must have been returned by this library, or be null.
@@ -693,20 +669,352 @@ int32_t htm_metadata_config_update_extract_structured_data(const HTMMetadataConf
 uintptr_t htm_metadata_config_update_max_structured_data_size(const HTMMetadataConfigUpdate *ptr);
 
 /**
- * Create a `ConversionOptions` from a JSON string. Returns null on failure.
+ * Free a `DocumentMetadata` handle.
  * # Safety
- * JSON string must be valid UTF-8 and null-terminated.
- * Returned handle must be freed with `htm_conversion_options_free`.
+ * Pointer must have been returned by this library, or be null.
  */
-HTMConversionOptions *htm_conversion_options_from_json(const char *json);
+void htm_document_metadata_free(HTMDocumentMetadata *ptr);
 
 /**
- * Serialize a `ConversionOptions` to a JSON string. Returns null on failure.
+ * Get the `title` field from a `DocumentMetadata`.
  * # Safety
- * `ptr` must be a valid, non-null pointer returned by a `htm` function.
- * The returned string must be freed with `htm_free_string`.
+ * Pointer must be a valid handle returned by this library.
  */
-char *htm_conversion_options_to_json(const HTMConversionOptions *ptr);
+char *htm_document_metadata_title(const HTMDocumentMetadata *ptr);
+
+/**
+ * Get the `description` field from a `DocumentMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_document_metadata_description(const HTMDocumentMetadata *ptr);
+
+/**
+ * Get the `keywords` field from a `DocumentMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_document_metadata_keywords(const HTMDocumentMetadata *ptr);
+
+/**
+ * Get the `author` field from a `DocumentMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_document_metadata_author(const HTMDocumentMetadata *ptr);
+
+/**
+ * Get the `canonical_url` field from a `DocumentMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_document_metadata_canonical_url(const HTMDocumentMetadata *ptr);
+
+/**
+ * Get the `base_href` field from a `DocumentMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_document_metadata_base_href(const HTMDocumentMetadata *ptr);
+
+/**
+ * Get the `language` field from a `DocumentMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_document_metadata_language(const HTMDocumentMetadata *ptr);
+
+/**
+ * Get the `text_direction` field from a `DocumentMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+HTMTextDirection *htm_document_metadata_text_direction(const HTMDocumentMetadata *ptr);
+
+/**
+ * Get the `open_graph` field from a `DocumentMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_document_metadata_open_graph(const HTMDocumentMetadata *ptr);
+
+/**
+ * Get the `twitter_card` field from a `DocumentMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_document_metadata_twitter_card(const HTMDocumentMetadata *ptr);
+
+/**
+ * Get the `meta_tags` field from a `DocumentMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_document_metadata_meta_tags(const HTMDocumentMetadata *ptr);
+
+/**
+ * Free a `HeaderMetadata` handle.
+ * # Safety
+ * Pointer must have been returned by this library, or be null.
+ */
+void htm_header_metadata_free(HTMHeaderMetadata *ptr);
+
+/**
+ * Get the `level` field from a `HeaderMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+uint8_t htm_header_metadata_level(const HTMHeaderMetadata *ptr);
+
+/**
+ * Get the `text` field from a `HeaderMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_header_metadata_text(const HTMHeaderMetadata *ptr);
+
+/**
+ * Get the `id` field from a `HeaderMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_header_metadata_id(const HTMHeaderMetadata *ptr);
+
+/**
+ * Get the `depth` field from a `HeaderMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+uintptr_t htm_header_metadata_depth(const HTMHeaderMetadata *ptr);
+
+/**
+ * Get the `html_offset` field from a `HeaderMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+uintptr_t htm_header_metadata_html_offset(const HTMHeaderMetadata *ptr);
+
+/**
+ * Validate that the header level is within valid range (1-6).
+ *
+ * # Returns
+ *
+ * `true` if level is 1-6, `false` otherwise.
+ *
+ * # Examples
+ *
+ * ```
+ * # use html_to_markdown_rs::metadata::HeaderMetadata;
+ * let valid = HeaderMetadata {
+ *     level: 3,
+ *     text: "Title".to_string(),
+ *     id: None,
+ *     depth: 2,
+ *     html_offset: 100,
+ * };
+ * assert!(valid.is_valid());
+ *
+ * let invalid = HeaderMetadata {
+ *     level: 7,  // Invalid
+ *     text: "Title".to_string(),
+ *     id: None,
+ *     depth: 2,
+ *     html_offset: 100,
+ * };
+ * assert!(!invalid.is_valid());
+ * ```
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+int32_t htm_header_metadata_is_valid(const HTMHeaderMetadata *this_);
+
+/**
+ * Free a `LinkMetadata` handle.
+ * # Safety
+ * Pointer must have been returned by this library, or be null.
+ */
+void htm_link_metadata_free(HTMLinkMetadata *ptr);
+
+/**
+ * Get the `href` field from a `LinkMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_link_metadata_href(const HTMLinkMetadata *ptr);
+
+/**
+ * Get the `text` field from a `LinkMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_link_metadata_text(const HTMLinkMetadata *ptr);
+
+/**
+ * Get the `title` field from a `LinkMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_link_metadata_title(const HTMLinkMetadata *ptr);
+
+/**
+ * Get the `link_type` field from a `LinkMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+HTMLinkType *htm_link_metadata_link_type(const HTMLinkMetadata *ptr);
+
+/**
+ * Get the `rel` field from a `LinkMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_link_metadata_rel(const HTMLinkMetadata *ptr);
+
+/**
+ * Get the `attributes` field from a `LinkMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_link_metadata_attributes(const HTMLinkMetadata *ptr);
+
+/**
+ * Classify a link based on href value.
+ *
+ * # Arguments
+ *
+ * * `href` - The href attribute value
+ *
+ * # Returns
+ *
+ * Appropriate [`LinkType`] based on protocol and content.
+ *
+ * # Examples
+ *
+ * ```
+ * # use html_to_markdown_rs::metadata::{LinkMetadata, LinkType};
+ * assert_eq!(LinkMetadata::classify_link("#section"), LinkType::Anchor);
+ * assert_eq!(LinkMetadata::classify_link("mailto:test@example.com"), LinkType::Email);
+ * assert_eq!(LinkMetadata::classify_link("tel:+1234567890"), LinkType::Phone);
+ * assert_eq!(LinkMetadata::classify_link("https://example.com"), LinkType::External);
+ * ```
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+HTMLinkType *htm_link_metadata_classify_link(const char *href);
+
+/**
+ * Free a `ImageMetadata` handle.
+ * # Safety
+ * Pointer must have been returned by this library, or be null.
+ */
+void htm_image_metadata_free(HTMImageMetadata *ptr);
+
+/**
+ * Get the `src` field from a `ImageMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_image_metadata_src(const HTMImageMetadata *ptr);
+
+/**
+ * Get the `alt` field from a `ImageMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_image_metadata_alt(const HTMImageMetadata *ptr);
+
+/**
+ * Get the `title` field from a `ImageMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_image_metadata_title(const HTMImageMetadata *ptr);
+
+/**
+ * Get the `image_type` field from a `ImageMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+HTMImageType *htm_image_metadata_image_type(const HTMImageMetadata *ptr);
+
+/**
+ * Get the `attributes` field from a `ImageMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_image_metadata_attributes(const HTMImageMetadata *ptr);
+
+/**
+ * Free a `StructuredData` handle.
+ * # Safety
+ * Pointer must have been returned by this library, or be null.
+ */
+void htm_structured_data_free(HTMStructuredData *ptr);
+
+/**
+ * Get the `data_type` field from a `StructuredData`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+HTMStructuredDataType *htm_structured_data_data_type(const HTMStructuredData *ptr);
+
+/**
+ * Get the `raw_json` field from a `StructuredData`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_structured_data_raw_json(const HTMStructuredData *ptr);
+
+/**
+ * Get the `schema_type` field from a `StructuredData`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_structured_data_schema_type(const HTMStructuredData *ptr);
+
+/**
+ * Free a `HtmlMetadata` handle.
+ * # Safety
+ * Pointer must have been returned by this library, or be null.
+ */
+void htm_html_metadata_free(HTMHtmlMetadata *ptr);
+
+/**
+ * Get the `document` field from a `HtmlMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+HTMDocumentMetadata *htm_html_metadata_document(const HTMHtmlMetadata *ptr);
+
+/**
+ * Get the `headers` field from a `HtmlMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_html_metadata_headers(const HTMHtmlMetadata *ptr);
+
+/**
+ * Get the `links` field from a `HtmlMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_html_metadata_links(const HTMHtmlMetadata *ptr);
+
+/**
+ * Get the `images` field from a `HtmlMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_html_metadata_images(const HTMHtmlMetadata *ptr);
+
+/**
+ * Get the `structured_data` field from a `HtmlMetadata`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_html_metadata_structured_data(const HTMHtmlMetadata *ptr);
 
 /**
  * Free a `ConversionOptions` handle.
@@ -1048,14 +1356,6 @@ HTMConversionOptionsBuilder *htm_conversion_options_builder_preprocessing(HTMCon
 HTMConversionOptions *htm_conversion_options_builder_build(HTMConversionOptionsBuilder *this_);
 
 /**
- * Create a `ConversionOptionsUpdate` from a JSON string. Returns null on failure.
- * # Safety
- * JSON string must be valid UTF-8 and null-terminated.
- * Returned handle must be freed with `htm_conversion_options_update_free`.
- */
-HTMConversionOptionsUpdate *htm_conversion_options_update_from_json(const char *json);
-
-/**
  * Free a `ConversionOptionsUpdate` handle.
  * # Safety
  * Pointer must have been returned by this library, or be null.
@@ -1329,22 +1629,6 @@ int32_t htm_conversion_options_update_capture_svg(const HTMConversionOptionsUpda
 int32_t htm_conversion_options_update_infer_dimensions(const HTMConversionOptionsUpdate *ptr);
 
 /**
- * Create a `PreprocessingOptions` from a JSON string. Returns null on failure.
- * # Safety
- * JSON string must be valid UTF-8 and null-terminated.
- * Returned handle must be freed with `htm_preprocessing_options_free`.
- */
-HTMPreprocessingOptions *htm_preprocessing_options_from_json(const char *json);
-
-/**
- * Serialize a `PreprocessingOptions` to a JSON string. Returns null on failure.
- * # Safety
- * `ptr` must be a valid, non-null pointer returned by a `htm` function.
- * The returned string must be freed with `htm_free_string`.
- */
-char *htm_preprocessing_options_to_json(const HTMPreprocessingOptions *ptr);
-
-/**
  * Free a `PreprocessingOptions` handle.
  * # Safety
  * Pointer must have been returned by this library, or be null.
@@ -1385,14 +1669,6 @@ int32_t htm_preprocessing_options_remove_forms(const HTMPreprocessingOptions *pt
  * Returned pointers must be freed with the appropriate free function.
  */
 HTMPreprocessingOptions *htm_preprocessing_options_default(void);
-
-/**
- * Create a `PreprocessingOptionsUpdate` from a JSON string. Returns null on failure.
- * # Safety
- * JSON string must be valid UTF-8 and null-terminated.
- * Returned handle must be freed with `htm_preprocessing_options_update_free`.
- */
-HTMPreprocessingOptionsUpdate *htm_preprocessing_options_update_from_json(const char *json);
 
 /**
  * Free a `PreprocessingOptionsUpdate` handle.
@@ -1801,432 +2077,64 @@ char *htm_processing_warning_message(const HTMProcessingWarning *ptr);
 HTMWarningKind *htm_processing_warning_kind(const HTMProcessingWarning *ptr);
 
 /**
- * Create a `DocumentMetadata` from a JSON string. Returns null on failure.
- * # Safety
- * JSON string must be valid UTF-8 and null-terminated.
- * Returned handle must be freed with `htm_document_metadata_free`.
- */
-HTMDocumentMetadata *htm_document_metadata_from_json(const char *json);
-
-/**
- * Serialize a `DocumentMetadata` to a JSON string. Returns null on failure.
- * # Safety
- * `ptr` must be a valid, non-null pointer returned by a `htm` function.
- * The returned string must be freed with `htm_free_string`.
- */
-char *htm_document_metadata_to_json(const HTMDocumentMetadata *ptr);
-
-/**
- * Free a `DocumentMetadata` handle.
- * # Safety
- * Pointer must have been returned by this library, or be null.
- */
-void htm_document_metadata_free(HTMDocumentMetadata *ptr);
-
-/**
- * Get the `title` field from a `DocumentMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-char *htm_document_metadata_title(const HTMDocumentMetadata *ptr);
-
-/**
- * Get the `description` field from a `DocumentMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-char *htm_document_metadata_description(const HTMDocumentMetadata *ptr);
-
-/**
- * Get the `keywords` field from a `DocumentMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-char *htm_document_metadata_keywords(const HTMDocumentMetadata *ptr);
-
-/**
- * Get the `author` field from a `DocumentMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-char *htm_document_metadata_author(const HTMDocumentMetadata *ptr);
-
-/**
- * Get the `canonical_url` field from a `DocumentMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-char *htm_document_metadata_canonical_url(const HTMDocumentMetadata *ptr);
-
-/**
- * Get the `base_href` field from a `DocumentMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-char *htm_document_metadata_base_href(const HTMDocumentMetadata *ptr);
-
-/**
- * Get the `language` field from a `DocumentMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-char *htm_document_metadata_language(const HTMDocumentMetadata *ptr);
-
-/**
- * Get the `text_direction` field from a `DocumentMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-HTMTextDirection *htm_document_metadata_text_direction(const HTMDocumentMetadata *ptr);
-
-/**
- * Get the `open_graph` field from a `DocumentMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-char *htm_document_metadata_open_graph(const HTMDocumentMetadata *ptr);
-
-/**
- * Get the `twitter_card` field from a `DocumentMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-char *htm_document_metadata_twitter_card(const HTMDocumentMetadata *ptr);
-
-/**
- * Get the `meta_tags` field from a `DocumentMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-char *htm_document_metadata_meta_tags(const HTMDocumentMetadata *ptr);
-
-/**
- * Create a `HeaderMetadata` from a JSON string. Returns null on failure.
- * # Safety
- * JSON string must be valid UTF-8 and null-terminated.
- * Returned handle must be freed with `htm_header_metadata_free`.
- */
-HTMHeaderMetadata *htm_header_metadata_from_json(const char *json);
-
-/**
- * Serialize a `HeaderMetadata` to a JSON string. Returns null on failure.
- * # Safety
- * `ptr` must be a valid, non-null pointer returned by a `htm` function.
- * The returned string must be freed with `htm_free_string`.
- */
-char *htm_header_metadata_to_json(const HTMHeaderMetadata *ptr);
-
-/**
- * Free a `HeaderMetadata` handle.
- * # Safety
- * Pointer must have been returned by this library, or be null.
- */
-void htm_header_metadata_free(HTMHeaderMetadata *ptr);
-
-/**
- * Get the `level` field from a `HeaderMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-uint8_t htm_header_metadata_level(const HTMHeaderMetadata *ptr);
-
-/**
- * Get the `text` field from a `HeaderMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-char *htm_header_metadata_text(const HTMHeaderMetadata *ptr);
-
-/**
- * Get the `id` field from a `HeaderMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-char *htm_header_metadata_id(const HTMHeaderMetadata *ptr);
-
-/**
- * Get the `depth` field from a `HeaderMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-uintptr_t htm_header_metadata_depth(const HTMHeaderMetadata *ptr);
-
-/**
- * Get the `html_offset` field from a `HeaderMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-uintptr_t htm_header_metadata_html_offset(const HTMHeaderMetadata *ptr);
-
-/**
- * Validate that the header level is within valid range (1-6).
- *
- * # Returns
- *
- * `true` if level is 1-6, `false` otherwise.
- *
- * # Examples
- *
- * ```
- * # use html_to_markdown_rs::metadata::HeaderMetadata;
- * let valid = HeaderMetadata {
- *     level: 3,
- *     text: "Title".to_string(),
- *     id: None,
- *     depth: 2,
- *     html_offset: 100,
- * };
- * assert!(valid.is_valid());
- *
- * let invalid = HeaderMetadata {
- *     level: 7,  // Invalid
- *     text: "Title".to_string(),
- *     id: None,
- *     depth: 2,
- *     html_offset: 100,
- * };
- * assert!(!invalid.is_valid());
- * ```
+ * Convert an integer to a `TextDirection` variant. Returns -1 on invalid input.
  * # Safety
  * Caller must ensure all pointer arguments are valid or null.
  * Returned pointers must be freed with the appropriate free function.
  */
-int32_t htm_header_metadata_is_valid(const HTMHeaderMetadata *this_);
+int32_t htm_text_direction_from_i32(int32_t value);
 
 /**
- * Create a `LinkMetadata` from a JSON string. Returns null on failure.
+ * Convert a `TextDirection` variant name (C string) to its integer value. Returns -1 on invalid input.
  * # Safety
- * JSON string must be valid UTF-8 and null-terminated.
- * Returned handle must be freed with `htm_link_metadata_free`.
+ * Caller must ensure `ptr` is a valid pointer to a `c_char` or null.
  */
-HTMLinkMetadata *htm_link_metadata_from_json(const char *json);
+int32_t htm_text_direction_from_str(const char *name);
 
 /**
- * Serialize a `LinkMetadata` to a JSON string. Returns null on failure.
- * # Safety
- * `ptr` must be a valid, non-null pointer returned by a `htm` function.
- * The returned string must be freed with `htm_free_string`.
- */
-char *htm_link_metadata_to_json(const HTMLinkMetadata *ptr);
-
-/**
- * Free a `LinkMetadata` handle.
- * # Safety
- * Pointer must have been returned by this library, or be null.
- */
-void htm_link_metadata_free(HTMLinkMetadata *ptr);
-
-/**
- * Get the `href` field from a `LinkMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-char *htm_link_metadata_href(const HTMLinkMetadata *ptr);
-
-/**
- * Get the `text` field from a `LinkMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-char *htm_link_metadata_text(const HTMLinkMetadata *ptr);
-
-/**
- * Get the `title` field from a `LinkMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-char *htm_link_metadata_title(const HTMLinkMetadata *ptr);
-
-/**
- * Get the `link_type` field from a `LinkMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-HTMLinkType *htm_link_metadata_link_type(const HTMLinkMetadata *ptr);
-
-/**
- * Get the `rel` field from a `LinkMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-char *htm_link_metadata_rel(const HTMLinkMetadata *ptr);
-
-/**
- * Get the `attributes` field from a `LinkMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-char *htm_link_metadata_attributes(const HTMLinkMetadata *ptr);
-
-/**
- * Classify a link based on href value.
- *
- * # Arguments
- *
- * * `href` - The href attribute value
- *
- * # Returns
- *
- * Appropriate [`LinkType`] based on protocol and content.
- *
- * # Examples
- *
- * ```
- * # use html_to_markdown_rs::metadata::{LinkMetadata, LinkType};
- * assert_eq!(LinkMetadata::classify_link("#section"), LinkType::Anchor);
- * assert_eq!(LinkMetadata::classify_link("mailto:test@example.com"), LinkType::Email);
- * assert_eq!(LinkMetadata::classify_link("tel:+1234567890"), LinkType::Phone);
- * assert_eq!(LinkMetadata::classify_link("https://example.com"), LinkType::External);
- * ```
+ * Convert an integer to a `LinkType` variant. Returns -1 on invalid input.
  * # Safety
  * Caller must ensure all pointer arguments are valid or null.
  * Returned pointers must be freed with the appropriate free function.
  */
-HTMLinkType *htm_link_metadata_classify_link(const char *href);
+int32_t htm_link_type_from_i32(int32_t value);
 
 /**
- * Free a `ImageMetadata` handle.
+ * Convert a `LinkType` variant name (C string) to its integer value. Returns -1 on invalid input.
  * # Safety
- * Pointer must have been returned by this library, or be null.
+ * Caller must ensure `ptr` is a valid pointer to a `c_char` or null.
  */
-void htm_image_metadata_free(HTMImageMetadata *ptr);
+int32_t htm_link_type_from_str(const char *name);
 
 /**
- * Get the `src` field from a `ImageMetadata`.
+ * Convert an integer to a `ImageType` variant. Returns -1 on invalid input.
  * # Safety
- * Pointer must be a valid handle returned by this library.
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
  */
-char *htm_image_metadata_src(const HTMImageMetadata *ptr);
+int32_t htm_image_type_from_i32(int32_t value);
 
 /**
- * Get the `alt` field from a `ImageMetadata`.
+ * Convert a `ImageType` variant name (C string) to its integer value. Returns -1 on invalid input.
  * # Safety
- * Pointer must be a valid handle returned by this library.
+ * Caller must ensure `ptr` is a valid pointer to a `c_char` or null.
  */
-char *htm_image_metadata_alt(const HTMImageMetadata *ptr);
+int32_t htm_image_type_from_str(const char *name);
 
 /**
- * Get the `title` field from a `ImageMetadata`.
+ * Convert an integer to a `StructuredDataType` variant. Returns -1 on invalid input.
  * # Safety
- * Pointer must be a valid handle returned by this library.
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
  */
-char *htm_image_metadata_title(const HTMImageMetadata *ptr);
+int32_t htm_structured_data_type_from_i32(int32_t value);
 
 /**
- * Get the `image_type` field from a `ImageMetadata`.
+ * Convert a `StructuredDataType` variant name (C string) to its integer value. Returns -1 on invalid input.
  * # Safety
- * Pointer must be a valid handle returned by this library.
+ * Caller must ensure `ptr` is a valid pointer to a `c_char` or null.
  */
-HTMImageType *htm_image_metadata_image_type(const HTMImageMetadata *ptr);
-
-/**
- * Get the `attributes` field from a `ImageMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-char *htm_image_metadata_attributes(const HTMImageMetadata *ptr);
-
-/**
- * Create a `StructuredData` from a JSON string. Returns null on failure.
- * # Safety
- * JSON string must be valid UTF-8 and null-terminated.
- * Returned handle must be freed with `htm_structured_data_free`.
- */
-HTMStructuredData *htm_structured_data_from_json(const char *json);
-
-/**
- * Serialize a `StructuredData` to a JSON string. Returns null on failure.
- * # Safety
- * `ptr` must be a valid, non-null pointer returned by a `htm` function.
- * The returned string must be freed with `htm_free_string`.
- */
-char *htm_structured_data_to_json(const HTMStructuredData *ptr);
-
-/**
- * Free a `StructuredData` handle.
- * # Safety
- * Pointer must have been returned by this library, or be null.
- */
-void htm_structured_data_free(HTMStructuredData *ptr);
-
-/**
- * Get the `data_type` field from a `StructuredData`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-HTMStructuredDataType *htm_structured_data_data_type(const HTMStructuredData *ptr);
-
-/**
- * Get the `raw_json` field from a `StructuredData`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-char *htm_structured_data_raw_json(const HTMStructuredData *ptr);
-
-/**
- * Get the `schema_type` field from a `StructuredData`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-char *htm_structured_data_schema_type(const HTMStructuredData *ptr);
-
-/**
- * Create a `HtmlMetadata` from a JSON string. Returns null on failure.
- * # Safety
- * JSON string must be valid UTF-8 and null-terminated.
- * Returned handle must be freed with `htm_html_metadata_free`.
- */
-HTMHtmlMetadata *htm_html_metadata_from_json(const char *json);
-
-/**
- * Serialize a `HtmlMetadata` to a JSON string. Returns null on failure.
- * # Safety
- * `ptr` must be a valid, non-null pointer returned by a `htm` function.
- * The returned string must be freed with `htm_free_string`.
- */
-char *htm_html_metadata_to_json(const HTMHtmlMetadata *ptr);
-
-/**
- * Free a `HtmlMetadata` handle.
- * # Safety
- * Pointer must have been returned by this library, or be null.
- */
-void htm_html_metadata_free(HTMHtmlMetadata *ptr);
-
-/**
- * Get the `document` field from a `HtmlMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-HTMDocumentMetadata *htm_html_metadata_document(const HTMHtmlMetadata *ptr);
-
-/**
- * Get the `headers` field from a `HtmlMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-char *htm_html_metadata_headers(const HTMHtmlMetadata *ptr);
-
-/**
- * Get the `links` field from a `HtmlMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-char *htm_html_metadata_links(const HTMHtmlMetadata *ptr);
-
-/**
- * Get the `images` field from a `HtmlMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-char *htm_html_metadata_images(const HTMHtmlMetadata *ptr);
-
-/**
- * Get the `structured_data` field from a `HtmlMetadata`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-char *htm_html_metadata_structured_data(const HTMHtmlMetadata *ptr);
+int32_t htm_structured_data_type_from_str(const char *name);
 
 /**
  * Convert an integer to a `PreprocessingPreset` variant. Returns -1 on invalid input.
@@ -2407,66 +2315,6 @@ int32_t htm_warning_kind_from_i32(int32_t value);
  * Caller must ensure `ptr` is a valid pointer to a `c_char` or null.
  */
 int32_t htm_warning_kind_from_str(const char *name);
-
-/**
- * Convert an integer to a `TextDirection` variant. Returns -1 on invalid input.
- * # Safety
- * Caller must ensure all pointer arguments are valid or null.
- * Returned pointers must be freed with the appropriate free function.
- */
-int32_t htm_text_direction_from_i32(int32_t value);
-
-/**
- * Convert a `TextDirection` variant name (C string) to its integer value. Returns -1 on invalid input.
- * # Safety
- * Caller must ensure `ptr` is a valid pointer to a `c_char` or null.
- */
-int32_t htm_text_direction_from_str(const char *name);
-
-/**
- * Convert an integer to a `LinkType` variant. Returns -1 on invalid input.
- * # Safety
- * Caller must ensure all pointer arguments are valid or null.
- * Returned pointers must be freed with the appropriate free function.
- */
-int32_t htm_link_type_from_i32(int32_t value);
-
-/**
- * Convert a `LinkType` variant name (C string) to its integer value. Returns -1 on invalid input.
- * # Safety
- * Caller must ensure `ptr` is a valid pointer to a `c_char` or null.
- */
-int32_t htm_link_type_from_str(const char *name);
-
-/**
- * Convert an integer to a `ImageType` variant. Returns -1 on invalid input.
- * # Safety
- * Caller must ensure all pointer arguments are valid or null.
- * Returned pointers must be freed with the appropriate free function.
- */
-int32_t htm_image_type_from_i32(int32_t value);
-
-/**
- * Convert a `ImageType` variant name (C string) to its integer value. Returns -1 on invalid input.
- * # Safety
- * Caller must ensure `ptr` is a valid pointer to a `c_char` or null.
- */
-int32_t htm_image_type_from_str(const char *name);
-
-/**
- * Convert an integer to a `StructuredDataType` variant. Returns -1 on invalid input.
- * # Safety
- * Caller must ensure all pointer arguments are valid or null.
- * Returned pointers must be freed with the appropriate free function.
- */
-int32_t htm_structured_data_type_from_i32(int32_t value);
-
-/**
- * Convert a `StructuredDataType` variant name (C string) to its integer value. Returns -1 on invalid input.
- * # Safety
- * Caller must ensure `ptr` is a valid pointer to a `c_char` or null.
- */
-int32_t htm_structured_data_type_from_str(const char *name);
 
 /**
  * Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images,

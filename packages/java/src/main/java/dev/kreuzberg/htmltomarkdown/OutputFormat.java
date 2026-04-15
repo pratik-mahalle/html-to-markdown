@@ -5,28 +5,28 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum OutputFormat {
-  Markdown("markdown"),
-  Djot("djot"),
-  Plain("plain");
+    Markdown("markdown"),
+    Djot("djot"),
+    Plain("plain");
 
-  private final String value;
+    private final String value;
 
-  OutputFormat(String value) {
-    this.value = value;
-  }
-
-  @JsonValue
-  public String getValue() {
-    return value;
-  }
-
-  @JsonCreator
-  public static OutputFormat fromValue(String value) {
-    for (OutputFormat e : values()) {
-      if (e.value.equalsIgnoreCase(value)) {
-        return e;
-      }
+    OutputFormat(String value) {
+        this.value = value;
     }
-    throw new IllegalArgumentException("Unknown value: " + value);
-  }
+
+    @JsonValue
+    public String getValue() {
+        return value;
+    }
+
+    @JsonCreator
+    public static OutputFormat fromValue(String value) {
+        for (OutputFormat e : values()) {
+            if (e.value.equalsIgnoreCase(value)) {
+                return e;
+            }
+        }
+        throw new IllegalArgumentException("Unknown value: " + value);
+    }
 }

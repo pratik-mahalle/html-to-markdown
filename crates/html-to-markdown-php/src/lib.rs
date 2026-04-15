@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use ext_php_rs::prelude::*;
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -171,6 +173,259 @@ impl MetadataConfigUpdate {
 
 #[derive(Clone, serde::Serialize, serde::Deserialize, Default)]
 #[php_class]
+#[php(name = "Html\\To\\Markdown\\Rs\\DocumentMetadata")]
+pub struct DocumentMetadata {
+    /// Document title from `<title>` tag
+    #[php(prop, name = "title")]
+    pub title: Option<String>,
+    /// Document description from `<meta name="description">` tag
+    #[php(prop, name = "description")]
+    pub description: Option<String>,
+    /// Document keywords from `<meta name="keywords">` tag, split on commas
+    #[php(prop, name = "keywords")]
+    pub keywords: Vec<String>,
+    /// Document author from `<meta name="author">` tag
+    #[php(prop, name = "author")]
+    pub author: Option<String>,
+    /// Canonical URL from `<link rel="canonical">` tag
+    #[php(prop, name = "canonical_url")]
+    pub canonical_url: Option<String>,
+    /// Base URL from `<base href="">` tag for resolving relative URLs
+    #[php(prop, name = "base_href")]
+    pub base_href: Option<String>,
+    /// Document language from `lang` attribute
+    #[php(prop, name = "language")]
+    pub language: Option<String>,
+    /// Document text direction from `dir` attribute
+    #[php(prop, name = "text_direction")]
+    pub text_direction: Option<String>,
+    /// Open Graph metadata (og:* properties) for social media
+    /// Keys like "title", "description", "image", "url", etc.
+    pub open_graph: HashMap<String, String>,
+    /// Twitter Card metadata (twitter:* properties)
+    /// Keys like "card", "site", "creator", "title", "description", "image", etc.
+    pub twitter_card: HashMap<String, String>,
+    /// Additional meta tags not covered by specific fields
+    /// Keys are meta name/property attributes, values are content
+    pub meta_tags: HashMap<String, String>,
+}
+
+#[php_impl]
+impl DocumentMetadata {
+    pub fn from_json(json: String) -> PhpResult<Self> {
+        serde_json::from_str(&json).map_err(|e| PhpException::default(e.to_string()))
+    }
+
+    #[php(getter)]
+    pub fn get_open_graph(&self) -> HashMap<String, String> {
+        self.open_graph.clone()
+    }
+
+    #[php(getter)]
+    pub fn get_twitter_card(&self) -> HashMap<String, String> {
+        self.twitter_card.clone()
+    }
+
+    #[php(getter)]
+    pub fn get_meta_tags(&self) -> HashMap<String, String> {
+        self.meta_tags.clone()
+    }
+}
+
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[php_class]
+#[php(name = "Html\\To\\Markdown\\Rs\\HeaderMetadata")]
+pub struct HeaderMetadata {
+    /// Header level: 1 (h1) through 6 (h6)
+    #[php(prop, name = "level")]
+    pub level: u8,
+    /// Normalized text content of the header
+    #[php(prop, name = "text")]
+    pub text: String,
+    /// HTML id attribute if present
+    #[php(prop, name = "id")]
+    pub id: Option<String>,
+    /// Document tree depth at the header element
+    #[php(prop, name = "depth")]
+    pub depth: i64,
+    /// Byte offset in original HTML document
+    #[php(prop, name = "html_offset")]
+    pub html_offset: i64,
+}
+
+#[php_impl]
+impl HeaderMetadata {
+    pub fn __construct(level: u8, text: String, depth: i64, html_offset: i64, id: Option<String>) -> Self {
+        Self {
+            level,
+            text,
+            id,
+            depth,
+            html_offset,
+        }
+    }
+
+    pub fn is_valid(&self) -> bool {
+        let core_self = html_to_markdown_rs::metadata::HeaderMetadata {
+            level: self.level,
+            text: self.text.clone(),
+            id: self.id.clone(),
+            depth: self.depth as usize,
+            html_offset: self.html_offset as usize,
+        };
+        core_self.is_valid()
+    }
+}
+
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[php_class]
+#[php(name = "Html\\To\\Markdown\\Rs\\LinkMetadata")]
+pub struct LinkMetadata {
+    /// The href URL value
+    #[php(prop, name = "href")]
+    pub href: String,
+    /// Link text content (normalized, concatenated if mixed with elements)
+    #[php(prop, name = "text")]
+    pub text: String,
+    /// Optional title attribute (often shown as tooltip)
+    #[php(prop, name = "title")]
+    pub title: Option<String>,
+    /// Link type classification
+    #[php(prop, name = "link_type")]
+    pub link_type: String,
+    /// Rel attribute values (e.g., "nofollow", "stylesheet", "canonical")
+    #[php(prop, name = "rel")]
+    pub rel: Vec<String>,
+    /// Additional HTML attributes
+    pub attributes: HashMap<String, String>,
+}
+
+#[php_impl]
+impl LinkMetadata {
+    pub fn from_json(json: String) -> PhpResult<Self> {
+        serde_json::from_str(&json).map_err(|e| PhpException::default(e.to_string()))
+    }
+
+    #[php(getter)]
+    pub fn get_attributes(&self) -> HashMap<String, String> {
+        self.attributes.clone()
+    }
+
+    pub fn classify_link(href: String) -> String {
+        format!(
+            "{:?}",
+            html_to_markdown_rs::metadata::LinkMetadata::classify_link(&href)
+        )
+    }
+}
+
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[php_class]
+#[php(name = "Html\\To\\Markdown\\Rs\\ImageMetadata")]
+pub struct ImageMetadata {
+    /// Image source (URL, data URI, or SVG content identifier)
+    #[php(prop, name = "src")]
+    pub src: String,
+    /// Alternative text from alt attribute (for accessibility)
+    #[php(prop, name = "alt")]
+    pub alt: Option<String>,
+    /// Title attribute (often shown as tooltip)
+    #[php(prop, name = "title")]
+    pub title: Option<String>,
+    /// Image dimensions as (width, height) if available
+    #[php(prop, name = "dimensions")]
+    pub dimensions: Option<String>,
+    /// Image type classification
+    #[php(prop, name = "image_type")]
+    pub image_type: String,
+    /// Additional HTML attributes
+    pub attributes: HashMap<String, String>,
+}
+
+#[php_impl]
+impl ImageMetadata {
+    pub fn from_json(json: String) -> PhpResult<Self> {
+        serde_json::from_str(&json).map_err(|e| PhpException::default(e.to_string()))
+    }
+
+    #[php(getter)]
+    pub fn get_attributes(&self) -> HashMap<String, String> {
+        self.attributes.clone()
+    }
+}
+
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[php_class]
+#[php(name = "Html\\To\\Markdown\\Rs\\StructuredData")]
+pub struct StructuredData {
+    /// Type of structured data (JSON-LD, Microdata, RDFa)
+    #[php(prop, name = "data_type")]
+    pub data_type: String,
+    /// Raw JSON string (for JSON-LD) or serialized representation
+    #[php(prop, name = "raw_json")]
+    pub raw_json: String,
+    /// Schema type if detectable (e.g., "Article", "Event", "Product")
+    #[php(prop, name = "schema_type")]
+    pub schema_type: Option<String>,
+}
+
+#[php_impl]
+impl StructuredData {
+    pub fn from_json(json: String) -> PhpResult<Self> {
+        serde_json::from_str(&json).map_err(|e| PhpException::default(e.to_string()))
+    }
+}
+
+#[derive(Clone, serde::Serialize, serde::Deserialize, Default)]
+#[php_class]
+#[php(name = "Html\\To\\Markdown\\Rs\\HtmlMetadata")]
+pub struct HtmlMetadata {
+    /// Document-level metadata (title, description, canonical, etc.)
+    pub document: DocumentMetadata,
+    /// Extracted header elements with hierarchy
+    pub headers: Vec<HeaderMetadata>,
+    /// Extracted hyperlinks with type classification
+    pub links: Vec<LinkMetadata>,
+    /// Extracted images with source and dimensions
+    pub images: Vec<ImageMetadata>,
+    /// Extracted structured data blocks
+    pub structured_data: Vec<StructuredData>,
+}
+
+#[php_impl]
+impl HtmlMetadata {
+    pub fn from_json(json: String) -> PhpResult<Self> {
+        serde_json::from_str(&json).map_err(|e| PhpException::default(e.to_string()))
+    }
+
+    #[php(getter)]
+    pub fn get_document(&self) -> DocumentMetadata {
+        self.document.clone()
+    }
+
+    #[php(getter)]
+    pub fn get_headers(&self) -> Vec<HeaderMetadata> {
+        self.headers.clone()
+    }
+
+    #[php(getter)]
+    pub fn get_links(&self) -> Vec<LinkMetadata> {
+        self.links.clone()
+    }
+
+    #[php(getter)]
+    pub fn get_images(&self) -> Vec<ImageMetadata> {
+        self.images.clone()
+    }
+
+    #[php(getter)]
+    pub fn get_structured_data(&self) -> Vec<StructuredData> {
+        self.structured_data.clone()
+    }
+}
+
+#[derive(Clone, serde::Serialize, serde::Deserialize, Default)]
+#[php_class]
 #[php(name = "Html\\To\\Markdown\\Rs\\ConversionOptions")]
 #[allow(clippy::similar_names)]
 pub struct ConversionOptions {
@@ -302,12 +557,12 @@ impl ConversionOptions {
 
     #[allow(clippy::should_implement_trait)]
     pub fn default() -> ConversionOptions {
-        html_to_markdown_rs::ConversionOptions::default().into()
+        html_to_markdown_rs::options::ConversionOptions::default().into()
     }
 
     pub fn builder() -> ConversionOptionsBuilder {
         ConversionOptionsBuilder {
-            inner: Arc::new(html_to_markdown_rs::ConversionOptions::builder()),
+            inner: Arc::new(html_to_markdown_rs::options::ConversionOptions::builder()),
         }
     }
 }
@@ -316,7 +571,7 @@ impl ConversionOptions {
 #[php_class]
 #[php(name = "Html\\To\\Markdown\\Rs\\ConversionOptionsBuilder")]
 pub struct ConversionOptionsBuilder {
-    inner: Arc<html_to_markdown_rs::ConversionOptionsBuilder>,
+    inner: Arc<html_to_markdown_rs::options::ConversionOptionsBuilder>,
 }
 
 #[php_impl]
@@ -508,7 +763,7 @@ impl PreprocessingOptions {
 
     #[allow(clippy::should_implement_trait)]
     pub fn default() -> PreprocessingOptions {
-        html_to_markdown_rs::PreprocessingOptions::default().into()
+        html_to_markdown_rs::options::PreprocessingOptions::default().into()
     }
 }
 
@@ -783,255 +1038,29 @@ impl ProcessingWarning {
     }
 }
 
-#[derive(Clone, serde::Serialize, serde::Deserialize, Default)]
-#[php_class]
-#[php(name = "Html\\To\\Markdown\\Rs\\DocumentMetadata")]
-pub struct DocumentMetadata {
-    /// Document title from `<title>` tag
-    #[php(prop, name = "title")]
-    pub title: Option<String>,
-    /// Document description from `<meta name="description">` tag
-    #[php(prop, name = "description")]
-    pub description: Option<String>,
-    /// Document keywords from `<meta name="keywords">` tag, split on commas
-    #[php(prop, name = "keywords")]
-    pub keywords: Vec<String>,
-    /// Document author from `<meta name="author">` tag
-    #[php(prop, name = "author")]
-    pub author: Option<String>,
-    /// Canonical URL from `<link rel="canonical">` tag
-    #[php(prop, name = "canonical_url")]
-    pub canonical_url: Option<String>,
-    /// Base URL from `<base href="">` tag for resolving relative URLs
-    #[php(prop, name = "base_href")]
-    pub base_href: Option<String>,
-    /// Document language from `lang` attribute
-    #[php(prop, name = "language")]
-    pub language: Option<String>,
-    /// Document text direction from `dir` attribute
-    #[php(prop, name = "text_direction")]
-    pub text_direction: Option<String>,
-    /// Open Graph metadata (og:* properties) for social media
-    /// Keys like "title", "description", "image", "url", etc.
-    pub open_graph: HashMap<String, String>,
-    /// Twitter Card metadata (twitter:* properties)
-    /// Keys like "card", "site", "creator", "title", "description", "image", etc.
-    pub twitter_card: HashMap<String, String>,
-    /// Additional meta tags not covered by specific fields
-    /// Keys are meta name/property attributes, values are content
-    pub meta_tags: HashMap<String, String>,
-}
+// TextDirection enum values
+pub const TEXTDIRECTION_LEFTTORIGHT: &str = "LeftToRight";
+pub const TEXTDIRECTION_RIGHTTOLEFT: &str = "RightToLeft";
+pub const TEXTDIRECTION_AUTO: &str = "Auto";
 
-#[php_impl]
-impl DocumentMetadata {
-    pub fn from_json(json: String) -> PhpResult<Self> {
-        serde_json::from_str(&json).map_err(|e| PhpException::default(e.to_string()))
-    }
+// LinkType enum values
+pub const LINKTYPE_ANCHOR: &str = "Anchor";
+pub const LINKTYPE_INTERNAL: &str = "Internal";
+pub const LINKTYPE_EXTERNAL: &str = "External";
+pub const LINKTYPE_EMAIL: &str = "Email";
+pub const LINKTYPE_PHONE: &str = "Phone";
+pub const LINKTYPE_OTHER: &str = "Other";
 
-    #[php(getter)]
-    pub fn get_open_graph(&self) -> HashMap<String, String> {
-        self.open_graph.clone()
-    }
+// ImageType enum values
+pub const IMAGETYPE_DATAURI: &str = "DataUri";
+pub const IMAGETYPE_INLINESVG: &str = "InlineSvg";
+pub const IMAGETYPE_EXTERNAL: &str = "External";
+pub const IMAGETYPE_RELATIVE: &str = "Relative";
 
-    #[php(getter)]
-    pub fn get_twitter_card(&self) -> HashMap<String, String> {
-        self.twitter_card.clone()
-    }
-
-    #[php(getter)]
-    pub fn get_meta_tags(&self) -> HashMap<String, String> {
-        self.meta_tags.clone()
-    }
-}
-
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
-#[php_class]
-#[php(name = "Html\\To\\Markdown\\Rs\\HeaderMetadata")]
-pub struct HeaderMetadata {
-    /// Header level: 1 (h1) through 6 (h6)
-    #[php(prop, name = "level")]
-    pub level: u8,
-    /// Normalized text content of the header
-    #[php(prop, name = "text")]
-    pub text: String,
-    /// HTML id attribute if present
-    #[php(prop, name = "id")]
-    pub id: Option<String>,
-    /// Document tree depth at the header element
-    #[php(prop, name = "depth")]
-    pub depth: i64,
-    /// Byte offset in original HTML document
-    #[php(prop, name = "html_offset")]
-    pub html_offset: i64,
-}
-
-#[php_impl]
-impl HeaderMetadata {
-    pub fn __construct(level: u8, text: String, depth: i64, html_offset: i64, id: Option<String>) -> Self {
-        Self {
-            level,
-            text,
-            id,
-            depth,
-            html_offset,
-        }
-    }
-
-    pub fn is_valid(&self) -> bool {
-        let core_self = html_to_markdown_rs::HeaderMetadata {
-            level: self.level,
-            text: self.text.clone(),
-            id: self.id.clone(),
-            depth: self.depth as usize,
-            html_offset: self.html_offset as usize,
-        };
-        core_self.is_valid()
-    }
-}
-
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
-#[php_class]
-#[php(name = "Html\\To\\Markdown\\Rs\\LinkMetadata")]
-pub struct LinkMetadata {
-    /// The href URL value
-    #[php(prop, name = "href")]
-    pub href: String,
-    /// Link text content (normalized, concatenated if mixed with elements)
-    #[php(prop, name = "text")]
-    pub text: String,
-    /// Optional title attribute (often shown as tooltip)
-    #[php(prop, name = "title")]
-    pub title: Option<String>,
-    /// Link type classification
-    #[php(prop, name = "link_type")]
-    pub link_type: String,
-    /// Rel attribute values (e.g., "nofollow", "stylesheet", "canonical")
-    #[php(prop, name = "rel")]
-    pub rel: Vec<String>,
-    /// Additional HTML attributes
-    pub attributes: HashMap<String, String>,
-}
-
-#[php_impl]
-impl LinkMetadata {
-    pub fn from_json(json: String) -> PhpResult<Self> {
-        serde_json::from_str(&json).map_err(|e| PhpException::default(e.to_string()))
-    }
-
-    #[php(getter)]
-    pub fn get_attributes(&self) -> HashMap<String, String> {
-        self.attributes.clone()
-    }
-
-    pub fn classify_link(href: String) -> String {
-        format!("{:?}", html_to_markdown_rs::LinkMetadata::classify_link(&href))
-    }
-}
-
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
-#[php_class]
-#[php(name = "Html\\To\\Markdown\\Rs\\ImageMetadata")]
-pub struct ImageMetadata {
-    /// Image source (URL, data URI, or SVG content identifier)
-    #[php(prop, name = "src")]
-    pub src: String,
-    /// Alternative text from alt attribute (for accessibility)
-    #[php(prop, name = "alt")]
-    pub alt: Option<String>,
-    /// Title attribute (often shown as tooltip)
-    #[php(prop, name = "title")]
-    pub title: Option<String>,
-    /// Image dimensions as (width, height) if available
-    #[php(prop, name = "dimensions")]
-    pub dimensions: Option<String>,
-    /// Image type classification
-    #[php(prop, name = "image_type")]
-    pub image_type: String,
-    /// Additional HTML attributes
-    pub attributes: HashMap<String, String>,
-}
-
-#[php_impl]
-impl ImageMetadata {
-    pub fn from_json(json: String) -> PhpResult<Self> {
-        serde_json::from_str(&json).map_err(|e| PhpException::default(e.to_string()))
-    }
-
-    #[php(getter)]
-    pub fn get_attributes(&self) -> HashMap<String, String> {
-        self.attributes.clone()
-    }
-}
-
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
-#[php_class]
-#[php(name = "Html\\To\\Markdown\\Rs\\StructuredData")]
-pub struct StructuredData {
-    /// Type of structured data (JSON-LD, Microdata, RDFa)
-    #[php(prop, name = "data_type")]
-    pub data_type: String,
-    /// Raw JSON string (for JSON-LD) or serialized representation
-    #[php(prop, name = "raw_json")]
-    pub raw_json: String,
-    /// Schema type if detectable (e.g., "Article", "Event", "Product")
-    #[php(prop, name = "schema_type")]
-    pub schema_type: Option<String>,
-}
-
-#[php_impl]
-impl StructuredData {
-    pub fn from_json(json: String) -> PhpResult<Self> {
-        serde_json::from_str(&json).map_err(|e| PhpException::default(e.to_string()))
-    }
-}
-
-#[derive(Clone, serde::Serialize, serde::Deserialize, Default)]
-#[php_class]
-#[php(name = "Html\\To\\Markdown\\Rs\\HtmlMetadata")]
-pub struct HtmlMetadata {
-    /// Document-level metadata (title, description, canonical, etc.)
-    pub document: DocumentMetadata,
-    /// Extracted header elements with hierarchy
-    pub headers: Vec<HeaderMetadata>,
-    /// Extracted hyperlinks with type classification
-    pub links: Vec<LinkMetadata>,
-    /// Extracted images with source and dimensions
-    pub images: Vec<ImageMetadata>,
-    /// Extracted structured data blocks
-    pub structured_data: Vec<StructuredData>,
-}
-
-#[php_impl]
-impl HtmlMetadata {
-    pub fn from_json(json: String) -> PhpResult<Self> {
-        serde_json::from_str(&json).map_err(|e| PhpException::default(e.to_string()))
-    }
-
-    #[php(getter)]
-    pub fn get_document(&self) -> DocumentMetadata {
-        self.document.clone()
-    }
-
-    #[php(getter)]
-    pub fn get_headers(&self) -> Vec<HeaderMetadata> {
-        self.headers.clone()
-    }
-
-    #[php(getter)]
-    pub fn get_links(&self) -> Vec<LinkMetadata> {
-        self.links.clone()
-    }
-
-    #[php(getter)]
-    pub fn get_images(&self) -> Vec<ImageMetadata> {
-        self.images.clone()
-    }
-
-    #[php(getter)]
-    pub fn get_structured_data(&self) -> Vec<StructuredData> {
-        self.structured_data.clone()
-    }
-}
+// StructuredDataType enum values
+pub const STRUCTUREDDATATYPE_JSONLD: &str = "JsonLd";
+pub const STRUCTUREDDATATYPE_MICRODATA: &str = "Microdata";
+pub const STRUCTUREDDATATYPE_RDFA: &str = "RDFa";
 
 // PreprocessingPreset enum values
 pub const PREPROCESSINGPRESET_MINIMAL: &str = "Minimal";
@@ -1108,30 +1137,6 @@ pub const WARNINGKIND_TRUNCATEDINPUT: &str = "TruncatedInput";
 pub const WARNINGKIND_MALFORMEDHTML: &str = "MalformedHtml";
 pub const WARNINGKIND_SANITIZATIONAPPLIED: &str = "SanitizationApplied";
 
-// TextDirection enum values
-pub const TEXTDIRECTION_LEFTTORIGHT: &str = "LeftToRight";
-pub const TEXTDIRECTION_RIGHTTOLEFT: &str = "RightToLeft";
-pub const TEXTDIRECTION_AUTO: &str = "Auto";
-
-// LinkType enum values
-pub const LINKTYPE_ANCHOR: &str = "Anchor";
-pub const LINKTYPE_INTERNAL: &str = "Internal";
-pub const LINKTYPE_EXTERNAL: &str = "External";
-pub const LINKTYPE_EMAIL: &str = "Email";
-pub const LINKTYPE_PHONE: &str = "Phone";
-pub const LINKTYPE_OTHER: &str = "Other";
-
-// ImageType enum values
-pub const IMAGETYPE_DATAURI: &str = "DataUri";
-pub const IMAGETYPE_INLINESVG: &str = "InlineSvg";
-pub const IMAGETYPE_EXTERNAL: &str = "External";
-pub const IMAGETYPE_RELATIVE: &str = "Relative";
-
-// StructuredDataType enum values
-pub const STRUCTUREDDATATYPE_JSONLD: &str = "JsonLd";
-pub const STRUCTUREDDATATYPE_MICRODATA: &str = "Microdata";
-pub const STRUCTUREDDATATYPE_RDFA: &str = "RDFa";
-
 #[php_class]
 #[php(name = "Html\\To\\Markdown\\Rs\\HtmlToMarkdownRsApi")]
 pub struct HtmlToMarkdownRsApi;
@@ -1140,22 +1145,9 @@ pub struct HtmlToMarkdownRsApi;
 impl HtmlToMarkdownRsApi {
     pub fn convert(html: String, options: Option<&ConversionOptions>) -> PhpResult<ConversionResult> {
         let options_core: Option<html_to_markdown_rs::ConversionOptions> = options.map(|v| v.clone().into());
-        let result = html_to_markdown_rs::convert(&html, options_core)
+        let result = html_to_markdown_rs::convert_api::convert(&html, options_core)
             .map_err(|e| ext_php_rs::exception::PhpException::default(e.to_string()))?;
         Ok(result.into())
-    }
-}
-
-impl From<MetadataConfig> for html_to_markdown_rs::metadata::MetadataConfig {
-    fn from(val: MetadataConfig) -> Self {
-        Self {
-            extract_document: val.extract_document,
-            extract_headers: val.extract_headers,
-            extract_links: val.extract_links,
-            extract_images: val.extract_images,
-            extract_structured_data: val.extract_structured_data,
-            max_structured_data_size: val.max_structured_data_size as usize,
-        }
     }
 }
 
@@ -1168,19 +1160,6 @@ impl From<html_to_markdown_rs::metadata::MetadataConfig> for MetadataConfig {
             extract_images: val.extract_images,
             extract_structured_data: val.extract_structured_data,
             max_structured_data_size: val.max_structured_data_size as i64,
-        }
-    }
-}
-
-impl From<MetadataConfigUpdate> for html_to_markdown_rs::metadata::MetadataConfigUpdate {
-    fn from(val: MetadataConfigUpdate) -> Self {
-        Self {
-            extract_document: val.extract_document,
-            extract_headers: val.extract_headers,
-            extract_links: val.extract_links,
-            extract_images: val.extract_images,
-            extract_structured_data: val.extract_structured_data,
-            max_structured_data_size: val.max_structured_data_size.map(|v| v as usize),
         }
     }
 }
@@ -1198,15 +1177,107 @@ impl From<html_to_markdown_rs::metadata::MetadataConfigUpdate> for MetadataConfi
     }
 }
 
-impl From<ConversionOptions> for html_to_markdown_rs::ConversionOptions {
+impl From<html_to_markdown_rs::metadata::DocumentMetadata> for DocumentMetadata {
+    fn from(val: html_to_markdown_rs::metadata::DocumentMetadata) -> Self {
+        Self {
+            title: val.title,
+            description: val.description,
+            keywords: val.keywords,
+            author: val.author,
+            canonical_url: val.canonical_url,
+            base_href: val.base_href,
+            language: val.language,
+            text_direction: val.text_direction.as_ref().map(|v| {
+                serde_json::to_value(v)
+                    .ok()
+                    .and_then(|s| s.as_str().map(String::from))
+                    .unwrap_or_default()
+            }),
+            open_graph: val.open_graph.into_iter().collect(),
+            twitter_card: val.twitter_card.into_iter().collect(),
+            meta_tags: val.meta_tags.into_iter().collect(),
+        }
+    }
+}
+
+impl From<html_to_markdown_rs::metadata::HeaderMetadata> for HeaderMetadata {
+    fn from(val: html_to_markdown_rs::metadata::HeaderMetadata) -> Self {
+        Self {
+            level: val.level,
+            text: val.text,
+            id: val.id,
+            depth: val.depth as i64,
+            html_offset: val.html_offset as i64,
+        }
+    }
+}
+
+impl From<html_to_markdown_rs::metadata::LinkMetadata> for LinkMetadata {
+    fn from(val: html_to_markdown_rs::metadata::LinkMetadata) -> Self {
+        Self {
+            href: val.href,
+            text: val.text,
+            title: val.title,
+            link_type: serde_json::to_value(val.link_type)
+                .ok()
+                .and_then(|s| s.as_str().map(String::from))
+                .unwrap_or_default(),
+            rel: val.rel,
+            attributes: val.attributes.into_iter().collect(),
+        }
+    }
+}
+
+impl From<html_to_markdown_rs::metadata::ImageMetadata> for ImageMetadata {
+    fn from(val: html_to_markdown_rs::metadata::ImageMetadata) -> Self {
+        Self {
+            src: val.src,
+            alt: val.alt,
+            title: val.title,
+            dimensions: val.dimensions.as_ref().map(|v| format!("{:?}", v)),
+            image_type: serde_json::to_value(val.image_type)
+                .ok()
+                .and_then(|s| s.as_str().map(String::from))
+                .unwrap_or_default(),
+            attributes: val.attributes.into_iter().collect(),
+        }
+    }
+}
+
+impl From<html_to_markdown_rs::metadata::StructuredData> for StructuredData {
+    fn from(val: html_to_markdown_rs::metadata::StructuredData) -> Self {
+        Self {
+            data_type: serde_json::to_value(val.data_type)
+                .ok()
+                .and_then(|s| s.as_str().map(String::from))
+                .unwrap_or_default(),
+            raw_json: val.raw_json,
+            schema_type: val.schema_type,
+        }
+    }
+}
+
+impl From<html_to_markdown_rs::metadata::HtmlMetadata> for HtmlMetadata {
+    fn from(val: html_to_markdown_rs::metadata::HtmlMetadata) -> Self {
+        Self {
+            document: val.document.into(),
+            headers: val.headers.into_iter().map(Into::into).collect(),
+            links: val.links.into_iter().map(Into::into).collect(),
+            images: val.images.into_iter().map(Into::into).collect(),
+            structured_data: val.structured_data.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+impl From<ConversionOptions> for html_to_markdown_rs::options::ConversionOptions {
     fn from(val: ConversionOptions) -> Self {
         let json = serde_json::to_string(&val).expect("alef: serialize binding type");
         serde_json::from_str(&json).expect("alef: deserialize to core type")
     }
 }
 
-impl From<html_to_markdown_rs::ConversionOptions> for ConversionOptions {
-    fn from(val: html_to_markdown_rs::ConversionOptions) -> Self {
+impl From<html_to_markdown_rs::options::ConversionOptions> for ConversionOptions {
+    fn from(val: html_to_markdown_rs::options::ConversionOptions) -> Self {
         Self {
             heading_style: serde_json::to_value(val.heading_style)
                 .ok()
@@ -1274,15 +1345,8 @@ impl From<html_to_markdown_rs::ConversionOptions> for ConversionOptions {
     }
 }
 
-impl From<ConversionOptionsUpdate> for html_to_markdown_rs::ConversionOptionsUpdate {
-    fn from(val: ConversionOptionsUpdate) -> Self {
-        let json = serde_json::to_string(&val).expect("alef: serialize binding type");
-        serde_json::from_str(&json).expect("alef: deserialize to core type")
-    }
-}
-
-impl From<html_to_markdown_rs::ConversionOptionsUpdate> for ConversionOptionsUpdate {
-    fn from(val: html_to_markdown_rs::ConversionOptionsUpdate) -> Self {
+impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for ConversionOptionsUpdate {
+    fn from(val: html_to_markdown_rs::options::ConversionOptionsUpdate) -> Self {
         Self {
             heading_style: val.heading_style.as_ref().map(|v| {
                 serde_json::to_value(v)
@@ -1366,15 +1430,15 @@ impl From<html_to_markdown_rs::ConversionOptionsUpdate> for ConversionOptionsUpd
     }
 }
 
-impl From<PreprocessingOptions> for html_to_markdown_rs::PreprocessingOptions {
+impl From<PreprocessingOptions> for html_to_markdown_rs::options::PreprocessingOptions {
     fn from(val: PreprocessingOptions) -> Self {
         let json = serde_json::to_string(&val).expect("alef: serialize binding type");
         serde_json::from_str(&json).expect("alef: deserialize to core type")
     }
 }
 
-impl From<html_to_markdown_rs::PreprocessingOptions> for PreprocessingOptions {
-    fn from(val: html_to_markdown_rs::PreprocessingOptions) -> Self {
+impl From<html_to_markdown_rs::options::PreprocessingOptions> for PreprocessingOptions {
+    fn from(val: html_to_markdown_rs::options::PreprocessingOptions) -> Self {
         Self {
             enabled: val.enabled,
             preset: serde_json::to_value(val.preset)
@@ -1387,15 +1451,8 @@ impl From<html_to_markdown_rs::PreprocessingOptions> for PreprocessingOptions {
     }
 }
 
-impl From<PreprocessingOptionsUpdate> for html_to_markdown_rs::PreprocessingOptionsUpdate {
-    fn from(val: PreprocessingOptionsUpdate) -> Self {
-        let json = serde_json::to_string(&val).expect("alef: serialize binding type");
-        serde_json::from_str(&json).expect("alef: deserialize to core type")
-    }
-}
-
-impl From<html_to_markdown_rs::PreprocessingOptionsUpdate> for PreprocessingOptionsUpdate {
-    fn from(val: html_to_markdown_rs::PreprocessingOptionsUpdate) -> Self {
+impl From<html_to_markdown_rs::options::PreprocessingOptionsUpdate> for PreprocessingOptionsUpdate {
+    fn from(val: html_to_markdown_rs::options::PreprocessingOptionsUpdate) -> Self {
         Self {
             enabled: val.enabled,
             preset: val.preset.as_ref().map(|v| {
@@ -1410,35 +1467,8 @@ impl From<html_to_markdown_rs::PreprocessingOptionsUpdate> for PreprocessingOpti
     }
 }
 
-impl From<ConversionResult> for html_to_markdown_rs::ConversionResult {
-    fn from(val: ConversionResult) -> Self {
-        let json = serde_json::to_string(&val).expect("alef: serialize binding type");
-        serde_json::from_str(&json).expect("alef: deserialize to core type")
-    }
-}
-
-impl From<html_to_markdown_rs::ConversionResult> for ConversionResult {
-    fn from(val: html_to_markdown_rs::ConversionResult) -> Self {
-        Self {
-            content: val.content,
-            document: val.document.map(Into::into),
-            metadata: val.metadata.into(),
-            tables: val.tables.into_iter().map(Into::into).collect(),
-            images: val.images.iter().map(|i| format!("{:?}", i)).collect(),
-            warnings: val.warnings.into_iter().map(Into::into).collect(),
-        }
-    }
-}
-
-impl From<DocumentStructure> for html_to_markdown_rs::DocumentStructure {
-    fn from(val: DocumentStructure) -> Self {
-        let json = serde_json::to_string(&val).expect("alef: serialize binding type");
-        serde_json::from_str(&json).expect("alef: deserialize to core type")
-    }
-}
-
-impl From<html_to_markdown_rs::DocumentStructure> for DocumentStructure {
-    fn from(val: html_to_markdown_rs::DocumentStructure) -> Self {
+impl From<html_to_markdown_rs::types::DocumentStructure> for DocumentStructure {
+    fn from(val: html_to_markdown_rs::types::DocumentStructure) -> Self {
         Self {
             nodes: val.nodes.into_iter().map(Into::into).collect(),
             source_format: val.source_format,
@@ -1446,15 +1476,8 @@ impl From<html_to_markdown_rs::DocumentStructure> for DocumentStructure {
     }
 }
 
-impl From<DocumentNode> for html_to_markdown_rs::DocumentNode {
-    fn from(val: DocumentNode) -> Self {
-        let json = serde_json::to_string(&val).expect("alef: serialize binding type");
-        serde_json::from_str(&json).expect("alef: deserialize to core type")
-    }
-}
-
-impl From<html_to_markdown_rs::DocumentNode> for DocumentNode {
-    fn from(val: html_to_markdown_rs::DocumentNode) -> Self {
+impl From<html_to_markdown_rs::types::DocumentNode> for DocumentNode {
+    fn from(val: html_to_markdown_rs::types::DocumentNode) -> Self {
         Self {
             id: val.id,
             content: serde_json::to_value(val.content)
@@ -1469,15 +1492,8 @@ impl From<html_to_markdown_rs::DocumentNode> for DocumentNode {
     }
 }
 
-impl From<TextAnnotation> for html_to_markdown_rs::TextAnnotation {
-    fn from(val: TextAnnotation) -> Self {
-        let json = serde_json::to_string(&val).expect("alef: serialize binding type");
-        serde_json::from_str(&json).expect("alef: deserialize to core type")
-    }
-}
-
-impl From<html_to_markdown_rs::TextAnnotation> for TextAnnotation {
-    fn from(val: html_to_markdown_rs::TextAnnotation) -> Self {
+impl From<html_to_markdown_rs::types::TextAnnotation> for TextAnnotation {
+    fn from(val: html_to_markdown_rs::types::TextAnnotation) -> Self {
         Self {
             start: val.start,
             end: val.end,
@@ -1489,8 +1505,8 @@ impl From<html_to_markdown_rs::TextAnnotation> for TextAnnotation {
     }
 }
 
-impl From<TableGrid> for html_to_markdown_rs::TableGrid {
-    fn from(val: TableGrid) -> Self {
+impl From<html_to_markdown_rs::types::TableGrid> for TableGrid {
+    fn from(val: html_to_markdown_rs::types::TableGrid) -> Self {
         Self {
             rows: val.rows,
             cols: val.cols,
@@ -1499,18 +1515,8 @@ impl From<TableGrid> for html_to_markdown_rs::TableGrid {
     }
 }
 
-impl From<html_to_markdown_rs::TableGrid> for TableGrid {
-    fn from(val: html_to_markdown_rs::TableGrid) -> Self {
-        Self {
-            rows: val.rows,
-            cols: val.cols,
-            cells: val.cells.into_iter().map(Into::into).collect(),
-        }
-    }
-}
-
-impl From<GridCell> for html_to_markdown_rs::GridCell {
-    fn from(val: GridCell) -> Self {
+impl From<html_to_markdown_rs::types::GridCell> for GridCell {
+    fn from(val: html_to_markdown_rs::types::GridCell) -> Self {
         Self {
             content: val.content,
             row: val.row,
@@ -1522,21 +1528,8 @@ impl From<GridCell> for html_to_markdown_rs::GridCell {
     }
 }
 
-impl From<html_to_markdown_rs::GridCell> for GridCell {
-    fn from(val: html_to_markdown_rs::GridCell) -> Self {
-        Self {
-            content: val.content,
-            row: val.row,
-            col: val.col,
-            row_span: val.row_span,
-            col_span: val.col_span,
-            is_header: val.is_header,
-        }
-    }
-}
-
-impl From<TableData> for html_to_markdown_rs::TableData {
-    fn from(val: TableData) -> Self {
+impl From<html_to_markdown_rs::types::TableData> for TableData {
+    fn from(val: html_to_markdown_rs::types::TableData) -> Self {
         Self {
             grid: val.grid.into(),
             markdown: val.markdown,
@@ -1544,169 +1537,14 @@ impl From<TableData> for html_to_markdown_rs::TableData {
     }
 }
 
-impl From<html_to_markdown_rs::TableData> for TableData {
-    fn from(val: html_to_markdown_rs::TableData) -> Self {
-        Self {
-            grid: val.grid.into(),
-            markdown: val.markdown,
-        }
-    }
-}
-
-impl From<ProcessingWarning> for html_to_markdown_rs::ProcessingWarning {
-    fn from(val: ProcessingWarning) -> Self {
-        let json = serde_json::to_string(&val).expect("alef: serialize binding type");
-        serde_json::from_str(&json).expect("alef: deserialize to core type")
-    }
-}
-
-impl From<html_to_markdown_rs::ProcessingWarning> for ProcessingWarning {
-    fn from(val: html_to_markdown_rs::ProcessingWarning) -> Self {
+impl From<html_to_markdown_rs::types::ProcessingWarning> for ProcessingWarning {
+    fn from(val: html_to_markdown_rs::types::ProcessingWarning) -> Self {
         Self {
             message: val.message,
             kind: serde_json::to_value(val.kind)
                 .ok()
                 .and_then(|s| s.as_str().map(String::from))
                 .unwrap_or_default(),
-        }
-    }
-}
-
-impl From<DocumentMetadata> for html_to_markdown_rs::DocumentMetadata {
-    fn from(val: DocumentMetadata) -> Self {
-        let json = serde_json::to_string(&val).expect("alef: serialize binding type");
-        serde_json::from_str(&json).expect("alef: deserialize to core type")
-    }
-}
-
-impl From<html_to_markdown_rs::DocumentMetadata> for DocumentMetadata {
-    fn from(val: html_to_markdown_rs::DocumentMetadata) -> Self {
-        Self {
-            title: val.title,
-            description: val.description,
-            keywords: val.keywords,
-            author: val.author,
-            canonical_url: val.canonical_url,
-            base_href: val.base_href,
-            language: val.language,
-            text_direction: val.text_direction.as_ref().map(|v| {
-                serde_json::to_value(v)
-                    .ok()
-                    .and_then(|s| s.as_str().map(String::from))
-                    .unwrap_or_default()
-            }),
-            open_graph: val.open_graph.into_iter().collect(),
-            twitter_card: val.twitter_card.into_iter().collect(),
-            meta_tags: val.meta_tags.into_iter().collect(),
-        }
-    }
-}
-
-impl From<HeaderMetadata> for html_to_markdown_rs::HeaderMetadata {
-    fn from(val: HeaderMetadata) -> Self {
-        Self {
-            level: val.level,
-            text: val.text,
-            id: val.id,
-            depth: val.depth as usize,
-            html_offset: val.html_offset as usize,
-        }
-    }
-}
-
-impl From<html_to_markdown_rs::HeaderMetadata> for HeaderMetadata {
-    fn from(val: html_to_markdown_rs::HeaderMetadata) -> Self {
-        Self {
-            level: val.level,
-            text: val.text,
-            id: val.id,
-            depth: val.depth as i64,
-            html_offset: val.html_offset as i64,
-        }
-    }
-}
-
-impl From<LinkMetadata> for html_to_markdown_rs::LinkMetadata {
-    fn from(val: LinkMetadata) -> Self {
-        let json = serde_json::to_string(&val).expect("alef: serialize binding type");
-        serde_json::from_str(&json).expect("alef: deserialize to core type")
-    }
-}
-
-impl From<html_to_markdown_rs::LinkMetadata> for LinkMetadata {
-    fn from(val: html_to_markdown_rs::LinkMetadata) -> Self {
-        Self {
-            href: val.href,
-            text: val.text,
-            title: val.title,
-            link_type: serde_json::to_value(val.link_type)
-                .ok()
-                .and_then(|s| s.as_str().map(String::from))
-                .unwrap_or_default(),
-            rel: val.rel,
-            attributes: val.attributes.into_iter().collect(),
-        }
-    }
-}
-
-impl From<ImageMetadata> for html_to_markdown_rs::ImageMetadata {
-    fn from(val: ImageMetadata) -> Self {
-        let json = serde_json::to_string(&val).expect("alef: serialize binding type");
-        serde_json::from_str(&json).expect("alef: deserialize to core type")
-    }
-}
-
-impl From<html_to_markdown_rs::ImageMetadata> for ImageMetadata {
-    fn from(val: html_to_markdown_rs::ImageMetadata) -> Self {
-        Self {
-            src: val.src,
-            alt: val.alt,
-            title: val.title,
-            dimensions: val.dimensions.as_ref().map(|v| format!("{:?}", v)),
-            image_type: serde_json::to_value(val.image_type)
-                .ok()
-                .and_then(|s| s.as_str().map(String::from))
-                .unwrap_or_default(),
-            attributes: val.attributes.into_iter().collect(),
-        }
-    }
-}
-
-impl From<StructuredData> for html_to_markdown_rs::StructuredData {
-    fn from(val: StructuredData) -> Self {
-        let json = serde_json::to_string(&val).expect("alef: serialize binding type");
-        serde_json::from_str(&json).expect("alef: deserialize to core type")
-    }
-}
-
-impl From<html_to_markdown_rs::StructuredData> for StructuredData {
-    fn from(val: html_to_markdown_rs::StructuredData) -> Self {
-        Self {
-            data_type: serde_json::to_value(val.data_type)
-                .ok()
-                .and_then(|s| s.as_str().map(String::from))
-                .unwrap_or_default(),
-            raw_json: val.raw_json,
-            schema_type: val.schema_type,
-        }
-    }
-}
-
-impl From<HtmlMetadata> for html_to_markdown_rs::HtmlMetadata {
-    fn from(val: HtmlMetadata) -> Self {
-        let json = serde_json::to_string(&val).expect("alef: serialize binding type");
-        serde_json::from_str(&json).expect("alef: deserialize to core type")
-    }
-}
-
-impl From<html_to_markdown_rs::HtmlMetadata> for HtmlMetadata {
-    fn from(val: html_to_markdown_rs::HtmlMetadata) -> Self {
-        Self {
-            document: val.document.into(),
-            headers: val.headers.into_iter().map(Into::into).collect(),
-            links: val.links.into_iter().map(Into::into).collect(),
-            images: val.images.into_iter().map(Into::into).collect(),
-            structured_data: val.structured_data.into_iter().map(Into::into).collect(),
         }
     }
 }
@@ -1747,6 +1585,12 @@ pub fn get_module(module: ModuleBuilder) -> ModuleBuilder {
     module
         .class::<MetadataConfig>()
         .class::<MetadataConfigUpdate>()
+        .class::<DocumentMetadata>()
+        .class::<HeaderMetadata>()
+        .class::<LinkMetadata>()
+        .class::<ImageMetadata>()
+        .class::<StructuredData>()
+        .class::<HtmlMetadata>()
         .class::<ConversionOptions>()
         .class::<ConversionOptionsBuilder>()
         .class::<ConversionOptionsUpdate>()
@@ -1760,11 +1604,5 @@ pub fn get_module(module: ModuleBuilder) -> ModuleBuilder {
         .class::<GridCell>()
         .class::<TableData>()
         .class::<ProcessingWarning>()
-        .class::<DocumentMetadata>()
-        .class::<HeaderMetadata>()
-        .class::<LinkMetadata>()
-        .class::<ImageMetadata>()
-        .class::<StructuredData>()
-        .class::<HtmlMetadata>()
         .class::<HtmlToMarkdownRsApi>()
 }

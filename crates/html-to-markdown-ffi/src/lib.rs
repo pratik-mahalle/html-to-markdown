@@ -2,7 +2,7 @@
 // Re-generate with: alef generate
 
 use std::cell::RefCell;
-use std::ffi::{c_char, CStr, CString};
+use std::ffi::{CStr, CString, c_char};
 
 thread_local! {
     static LAST_ERROR_CODE: RefCell<i32> = const { RefCell::new(0) };
@@ -59,67 +59,11 @@ pub unsafe extern "C" fn htm_version() -> *const c_char {
     VERSION.as_ptr() as *const c_char
 }
 
-/// Create a `MetadataConfig` from a JSON string. Returns null on failure.
-/// # Safety
-/// JSON string must be valid UTF-8 and null-terminated.
-/// Returned handle must be freed with `htm_metadata_config_free`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_metadata_config_from_json(
-    json: *const c_char,
-) -> *mut html_to_markdown_rs::MetadataConfig {
-    clear_last_error();
-    if json.is_null() {
-        set_last_error(1, "Null pointer passed for JSON string");
-        return std::ptr::null_mut();
-    }
-    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
-        Ok(s) => s,
-        Err(_) => {
-            set_last_error(1, "Invalid UTF-8 in JSON string");
-            return std::ptr::null_mut();
-        }
-    };
-    match serde_json::from_str::<html_to_markdown_rs::MetadataConfig>(c_str) {
-        Ok(val) => Box::into_raw(Box::new(val)),
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
-/// Serialize a `MetadataConfig` to a JSON string. Returns null on failure.
-/// # Safety
-/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
-/// The returned string must be freed with `htm_free_string`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_metadata_config_to_json(ptr: *const html_to_markdown_rs::MetadataConfig) -> *mut c_char {
-    clear_last_error();
-    if ptr.is_null() {
-        set_last_error(1, "Null pointer passed to to_json");
-        return std::ptr::null_mut();
-    }
-    let val = unsafe { &*ptr };
-    match serde_json::to_string(val) {
-        Ok(s) => match CString::new(s) {
-            Ok(cs) => cs.into_raw(),
-            Err(e) => {
-                set_last_error(2, &e.to_string());
-                std::ptr::null_mut()
-            }
-        },
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
 /// Free a `MetadataConfig` handle.
 /// # Safety
 /// Pointer must have been returned by this library, or be null.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_metadata_config_free(ptr: *mut html_to_markdown_rs::MetadataConfig) {
+pub unsafe extern "C" fn htm_metadata_config_free(ptr: *mut html_to_markdown_rs::metadata::MetadataConfig) {
     if !ptr.is_null() {
         unsafe {
             drop(Box::from_raw(ptr));
@@ -132,7 +76,7 @@ pub unsafe extern "C" fn htm_metadata_config_free(ptr: *mut html_to_markdown_rs:
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub const unsafe extern "C" fn htm_metadata_config_extract_document(
-    ptr: *const html_to_markdown_rs::MetadataConfig,
+    ptr: *const html_to_markdown_rs::metadata::MetadataConfig,
 ) -> i32 {
     if ptr.is_null() {
         return 0;
@@ -146,7 +90,7 @@ pub const unsafe extern "C" fn htm_metadata_config_extract_document(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub const unsafe extern "C" fn htm_metadata_config_extract_headers(
-    ptr: *const html_to_markdown_rs::MetadataConfig,
+    ptr: *const html_to_markdown_rs::metadata::MetadataConfig,
 ) -> i32 {
     if ptr.is_null() {
         return 0;
@@ -160,7 +104,7 @@ pub const unsafe extern "C" fn htm_metadata_config_extract_headers(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub const unsafe extern "C" fn htm_metadata_config_extract_links(
-    ptr: *const html_to_markdown_rs::MetadataConfig,
+    ptr: *const html_to_markdown_rs::metadata::MetadataConfig,
 ) -> i32 {
     if ptr.is_null() {
         return 0;
@@ -174,7 +118,7 @@ pub const unsafe extern "C" fn htm_metadata_config_extract_links(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub const unsafe extern "C" fn htm_metadata_config_extract_images(
-    ptr: *const html_to_markdown_rs::MetadataConfig,
+    ptr: *const html_to_markdown_rs::metadata::MetadataConfig,
 ) -> i32 {
     if ptr.is_null() {
         return 0;
@@ -188,7 +132,7 @@ pub const unsafe extern "C" fn htm_metadata_config_extract_images(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub const unsafe extern "C" fn htm_metadata_config_extract_structured_data(
-    ptr: *const html_to_markdown_rs::MetadataConfig,
+    ptr: *const html_to_markdown_rs::metadata::MetadataConfig,
 ) -> i32 {
     if ptr.is_null() {
         return 0;
@@ -202,7 +146,7 @@ pub const unsafe extern "C" fn htm_metadata_config_extract_structured_data(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub const unsafe extern "C" fn htm_metadata_config_max_structured_data_size(
-    ptr: *const html_to_markdown_rs::MetadataConfig,
+    ptr: *const html_to_markdown_rs::metadata::MetadataConfig,
 ) -> usize {
     if ptr.is_null() {
         return 0;
@@ -267,7 +211,9 @@ pub unsafe extern "C" fn htm_metadata_config_default() -> *mut html_to_markdown_
 /// Caller must ensure all pointer arguments are valid or null.
 /// Returned pointers must be freed with the appropriate free function.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_metadata_config_any_enabled(this: *const html_to_markdown_rs::MetadataConfig) -> i32 {
+pub unsafe extern "C" fn htm_metadata_config_any_enabled(
+    this: *const html_to_markdown_rs::metadata::MetadataConfig,
+) -> i32 {
     clear_last_error();
     if this.is_null() {
         set_last_error(1, "Null pointer passed for self");
@@ -276,47 +222,16 @@ pub unsafe extern "C" fn htm_metadata_config_any_enabled(this: *const html_to_ma
     // SAFETY: null check above guarantees this is a valid pointer.
     let obj = unsafe { &*this };
     let result = obj.any_enabled();
-    if result {
-        1
-    } else {
-        0
-    }
-}
-
-/// Create a `MetadataConfigUpdate` from a JSON string. Returns null on failure.
-/// # Safety
-/// JSON string must be valid UTF-8 and null-terminated.
-/// Returned handle must be freed with `htm_metadata_config_update_free`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_metadata_config_update_from_json(
-    json: *const c_char,
-) -> *mut html_to_markdown_rs::MetadataConfigUpdate {
-    clear_last_error();
-    if json.is_null() {
-        set_last_error(1, "Null pointer passed for JSON string");
-        return std::ptr::null_mut();
-    }
-    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
-        Ok(s) => s,
-        Err(_) => {
-            set_last_error(1, "Invalid UTF-8 in JSON string");
-            return std::ptr::null_mut();
-        }
-    };
-    match serde_json::from_str::<html_to_markdown_rs::MetadataConfigUpdate>(c_str) {
-        Ok(val) => Box::into_raw(Box::new(val)),
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
+    if result { 1 } else { 0 }
 }
 
 /// Free a `MetadataConfigUpdate` handle.
 /// # Safety
 /// Pointer must have been returned by this library, or be null.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_metadata_config_update_free(ptr: *mut html_to_markdown_rs::MetadataConfigUpdate) {
+pub unsafe extern "C" fn htm_metadata_config_update_free(
+    ptr: *mut html_to_markdown_rs::metadata::MetadataConfigUpdate,
+) {
     if !ptr.is_null() {
         unsafe {
             drop(Box::from_raw(ptr));
@@ -329,7 +244,7 @@ pub unsafe extern "C" fn htm_metadata_config_update_free(ptr: *mut html_to_markd
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_metadata_config_update_extract_document(
-    ptr: *const html_to_markdown_rs::MetadataConfigUpdate,
+    ptr: *const html_to_markdown_rs::metadata::MetadataConfigUpdate,
 ) -> i32 {
     if ptr.is_null() {
         return 0;
@@ -346,7 +261,7 @@ pub unsafe extern "C" fn htm_metadata_config_update_extract_document(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_metadata_config_update_extract_headers(
-    ptr: *const html_to_markdown_rs::MetadataConfigUpdate,
+    ptr: *const html_to_markdown_rs::metadata::MetadataConfigUpdate,
 ) -> i32 {
     if ptr.is_null() {
         return 0;
@@ -363,7 +278,7 @@ pub unsafe extern "C" fn htm_metadata_config_update_extract_headers(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_metadata_config_update_extract_links(
-    ptr: *const html_to_markdown_rs::MetadataConfigUpdate,
+    ptr: *const html_to_markdown_rs::metadata::MetadataConfigUpdate,
 ) -> i32 {
     if ptr.is_null() {
         return 0;
@@ -380,7 +295,7 @@ pub unsafe extern "C" fn htm_metadata_config_update_extract_links(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_metadata_config_update_extract_images(
-    ptr: *const html_to_markdown_rs::MetadataConfigUpdate,
+    ptr: *const html_to_markdown_rs::metadata::MetadataConfigUpdate,
 ) -> i32 {
     if ptr.is_null() {
         return 0;
@@ -397,7 +312,7 @@ pub unsafe extern "C" fn htm_metadata_config_update_extract_images(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_metadata_config_update_extract_structured_data(
-    ptr: *const html_to_markdown_rs::MetadataConfigUpdate,
+    ptr: *const html_to_markdown_rs::metadata::MetadataConfigUpdate,
 ) -> i32 {
     if ptr.is_null() {
         return 0;
@@ -414,7 +329,7 @@ pub unsafe extern "C" fn htm_metadata_config_update_extract_structured_data(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_metadata_config_update_max_structured_data_size(
-    ptr: *const html_to_markdown_rs::MetadataConfigUpdate,
+    ptr: *const html_to_markdown_rs::metadata::MetadataConfigUpdate,
 ) -> usize {
     if ptr.is_null() {
         return 0;
@@ -426,2801 +341,11 @@ pub unsafe extern "C" fn htm_metadata_config_update_max_structured_data_size(
     }
 }
 
-/// Create a `ConversionOptions` from a JSON string. Returns null on failure.
-/// # Safety
-/// JSON string must be valid UTF-8 and null-terminated.
-/// Returned handle must be freed with `htm_conversion_options_free`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_from_json(
-    json: *const c_char,
-) -> *mut html_to_markdown_rs::ConversionOptions {
-    clear_last_error();
-    if json.is_null() {
-        set_last_error(1, "Null pointer passed for JSON string");
-        return std::ptr::null_mut();
-    }
-    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
-        Ok(s) => s,
-        Err(_) => {
-            set_last_error(1, "Invalid UTF-8 in JSON string");
-            return std::ptr::null_mut();
-        }
-    };
-    match serde_json::from_str::<html_to_markdown_rs::ConversionOptions>(c_str) {
-        Ok(val) => Box::into_raw(Box::new(val)),
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
-/// Serialize a `ConversionOptions` to a JSON string. Returns null on failure.
-/// # Safety
-/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
-/// The returned string must be freed with `htm_free_string`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_to_json(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> *mut c_char {
-    clear_last_error();
-    if ptr.is_null() {
-        set_last_error(1, "Null pointer passed to to_json");
-        return std::ptr::null_mut();
-    }
-    let val = unsafe { &*ptr };
-    match serde_json::to_string(val) {
-        Ok(s) => match CString::new(s) {
-            Ok(cs) => cs.into_raw(),
-            Err(e) => {
-                set_last_error(2, &e.to_string());
-                std::ptr::null_mut()
-            }
-        },
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
-/// Free a `ConversionOptions` handle.
-/// # Safety
-/// Pointer must have been returned by this library, or be null.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_free(ptr: *mut html_to_markdown_rs::ConversionOptions) {
-    if !ptr.is_null() {
-        unsafe {
-            drop(Box::from_raw(ptr));
-        }
-    }
-}
-
-/// Get the `heading_style` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_heading_style(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> *mut html_to_markdown_rs::HeadingStyle {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.heading_style))
-}
-
-/// Get the `list_indent_type` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_list_indent_type(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> *mut html_to_markdown_rs::ListIndentType {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.list_indent_type))
-}
-
-/// Get the `list_indent_width` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_conversion_options_list_indent_width(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> usize {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.list_indent_width
-}
-
-/// Get the `bullets` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_bullets(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match CString::new(obj.bullets.to_string()) {
-        Ok(cs) => cs.into_raw(),
-        Err(_) => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `strong_em_symbol` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_strong_em_symbol(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match CString::new(obj.strong_em_symbol.to_string()) {
-        Ok(cs) => cs.into_raw(),
-        Err(_) => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `escape_asterisks` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_conversion_options_escape_asterisks(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.escape_asterisks as i32
-}
-
-/// Get the `escape_underscores` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_conversion_options_escape_underscores(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.escape_underscores as i32
-}
-
-/// Get the `escape_misc` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_conversion_options_escape_misc(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.escape_misc as i32
-}
-
-/// Get the `escape_ascii` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_conversion_options_escape_ascii(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.escape_ascii as i32
-}
-
-/// Get the `code_language` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_code_language(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match CString::new(obj.code_language.to_string()) {
-        Ok(cs) => cs.into_raw(),
-        Err(_) => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `autolinks` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_conversion_options_autolinks(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.autolinks as i32
-}
-
-/// Get the `default_title` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_conversion_options_default_title(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.default_title as i32
-}
-
-/// Get the `br_in_tables` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_conversion_options_br_in_tables(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.br_in_tables as i32
-}
-
-/// Get the `highlight_style` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_highlight_style(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> *mut html_to_markdown_rs::HighlightStyle {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.highlight_style))
-}
-
-/// Get the `extract_metadata` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_conversion_options_extract_metadata(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.extract_metadata as i32
-}
-
-/// Get the `whitespace_mode` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_whitespace_mode(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> *mut html_to_markdown_rs::WhitespaceMode {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.whitespace_mode))
-}
-
-/// Get the `strip_newlines` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_conversion_options_strip_newlines(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.strip_newlines as i32
-}
-
-/// Get the `wrap` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_conversion_options_wrap(ptr: *const html_to_markdown_rs::ConversionOptions) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.wrap as i32
-}
-
-/// Get the `wrap_width` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_conversion_options_wrap_width(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> usize {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.wrap_width
-}
-
-/// Get the `convert_as_inline` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_conversion_options_convert_as_inline(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.convert_as_inline as i32
-}
-
-/// Get the `sub_symbol` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_sub_symbol(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match CString::new(obj.sub_symbol.to_string()) {
-        Ok(cs) => cs.into_raw(),
-        Err(_) => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `sup_symbol` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_sup_symbol(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match CString::new(obj.sup_symbol.to_string()) {
-        Ok(cs) => cs.into_raw(),
-        Err(_) => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `newline_style` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_newline_style(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> *mut html_to_markdown_rs::NewlineStyle {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.newline_style))
-}
-
-/// Get the `code_block_style` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_code_block_style(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> *mut html_to_markdown_rs::CodeBlockStyle {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.code_block_style))
-}
-
-/// Get the `keep_inline_images_in` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_keep_inline_images_in(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match serde_json::to_string(&obj.keep_inline_images_in) {
-        Ok(s) => match CString::new(s) {
-            Ok(cs) => cs.into_raw(),
-            Err(_) => std::ptr::null_mut(),
-        },
-        Err(_) => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `preprocessing` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_preprocessing(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> *mut html_to_markdown_rs::PreprocessingOptions {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.preprocessing.clone()))
-}
-
-/// Get the `encoding` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_encoding(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match CString::new(obj.encoding.to_string()) {
-        Ok(cs) => cs.into_raw(),
-        Err(_) => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `debug` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_conversion_options_debug(ptr: *const html_to_markdown_rs::ConversionOptions) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.debug as i32
-}
-
-/// Get the `strip_tags` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_strip_tags(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match serde_json::to_string(&obj.strip_tags) {
-        Ok(s) => match CString::new(s) {
-            Ok(cs) => cs.into_raw(),
-            Err(_) => std::ptr::null_mut(),
-        },
-        Err(_) => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `preserve_tags` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_preserve_tags(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match serde_json::to_string(&obj.preserve_tags) {
-        Ok(s) => match CString::new(s) {
-            Ok(cs) => cs.into_raw(),
-            Err(_) => std::ptr::null_mut(),
-        },
-        Err(_) => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `skip_images` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_conversion_options_skip_images(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.skip_images as i32
-}
-
-/// Get the `link_style` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_link_style(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> *mut html_to_markdown_rs::LinkStyle {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.link_style))
-}
-
-/// Get the `output_format` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_output_format(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> *mut html_to_markdown_rs::OutputFormat {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.output_format))
-}
-
-/// Get the `include_document_structure` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_conversion_options_include_document_structure(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.include_document_structure as i32
-}
-
-/// Get the `extract_images` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_conversion_options_extract_images(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.extract_images as i32
-}
-
-/// Get the `max_image_size` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_conversion_options_max_image_size(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> u64 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.max_image_size
-}
-
-/// Get the `capture_svg` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_conversion_options_capture_svg(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.capture_svg as i32
-}
-
-/// Get the `infer_dimensions` field from a `ConversionOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_conversion_options_infer_dimensions(
-    ptr: *const html_to_markdown_rs::ConversionOptions,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.infer_dimensions as i32
-}
-
-/// # Safety
-/// Caller must ensure all pointer arguments are valid or null.
-/// Returned pointers must be freed with the appropriate free function.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_default() -> *mut html_to_markdown_rs::ConversionOptions {
-    clear_last_error();
-    let result = html_to_markdown_rs::ConversionOptions::default();
-    Box::into_raw(Box::new(result))
-}
-
-/// Create a new builder with default values.
-/// # Safety
-/// Caller must ensure all pointer arguments are valid or null.
-/// Returned pointers must be freed with the appropriate free function.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_builder() -> *mut html_to_markdown_rs::ConversionOptionsBuilder {
-    clear_last_error();
-    let result = html_to_markdown_rs::ConversionOptions::builder();
-    Box::into_raw(Box::new(result))
-}
-
-/// Free a `ConversionOptionsBuilder` handle.
-/// # Safety
-/// Pointer must have been returned by this library, or be null.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_builder_free(ptr: *mut html_to_markdown_rs::ConversionOptionsBuilder) {
-    if !ptr.is_null() {
-        unsafe {
-            drop(Box::from_raw(ptr));
-        }
-    }
-}
-
-/// Set the list of HTML tag names whose content is stripped from output.
-/// # Safety
-/// Caller must ensure all pointer arguments are valid or null.
-/// Returned pointers must be freed with the appropriate free function.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_builder_strip_tags(
-    this: *mut html_to_markdown_rs::ConversionOptionsBuilder,
-    tags: *const std::ffi::c_char,
-) -> *mut html_to_markdown_rs::ConversionOptionsBuilder {
-    clear_last_error();
-    if this.is_null() {
-        set_last_error(1, "Null pointer passed for self");
-        return std::ptr::null_mut();
-    }
-    // SAFETY: null check above guarantees this is a valid pointer originally from Box::into_raw.
-    let obj = unsafe { *Box::from_raw(this) };
-    if tags.is_null() {
-        set_last_error(1, "Null pointer passed for parameter 'tags'");
-        return std::ptr::null_mut();
-    }
-    let tags_rs_str = match unsafe { CStr::from_ptr(tags) }.to_str() {
-        Ok(s) => s,
-        Err(_) => {
-            set_last_error(1, "Invalid UTF-8 in parameter 'tags'");
-            return std::ptr::null_mut();
-        }
-    };
-    let tags_rs = match serde_json::from_str(tags_rs_str) {
-        Ok(v) => v,
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            return std::ptr::null_mut();
-        }
-    };
-    let result = obj.strip_tags(tags_rs);
-    Box::into_raw(Box::new(result))
-}
-
-/// Set the list of HTML tag names that are preserved verbatim in output.
-/// # Safety
-/// Caller must ensure all pointer arguments are valid or null.
-/// Returned pointers must be freed with the appropriate free function.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_builder_preserve_tags(
-    this: *mut html_to_markdown_rs::ConversionOptionsBuilder,
-    tags: *const std::ffi::c_char,
-) -> *mut html_to_markdown_rs::ConversionOptionsBuilder {
-    clear_last_error();
-    if this.is_null() {
-        set_last_error(1, "Null pointer passed for self");
-        return std::ptr::null_mut();
-    }
-    // SAFETY: null check above guarantees this is a valid pointer originally from Box::into_raw.
-    let obj = unsafe { *Box::from_raw(this) };
-    if tags.is_null() {
-        set_last_error(1, "Null pointer passed for parameter 'tags'");
-        return std::ptr::null_mut();
-    }
-    let tags_rs_str = match unsafe { CStr::from_ptr(tags) }.to_str() {
-        Ok(s) => s,
-        Err(_) => {
-            set_last_error(1, "Invalid UTF-8 in parameter 'tags'");
-            return std::ptr::null_mut();
-        }
-    };
-    let tags_rs = match serde_json::from_str(tags_rs_str) {
-        Ok(v) => v,
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            return std::ptr::null_mut();
-        }
-    };
-    let result = obj.preserve_tags(tags_rs);
-    Box::into_raw(Box::new(result))
-}
-
-/// Set the list of HTML tag names whose `<img>` children are kept inline.
-/// # Safety
-/// Caller must ensure all pointer arguments are valid or null.
-/// Returned pointers must be freed with the appropriate free function.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_builder_keep_inline_images_in(
-    this: *mut html_to_markdown_rs::ConversionOptionsBuilder,
-    tags: *const std::ffi::c_char,
-) -> *mut html_to_markdown_rs::ConversionOptionsBuilder {
-    clear_last_error();
-    if this.is_null() {
-        set_last_error(1, "Null pointer passed for self");
-        return std::ptr::null_mut();
-    }
-    // SAFETY: null check above guarantees this is a valid pointer originally from Box::into_raw.
-    let obj = unsafe { *Box::from_raw(this) };
-    if tags.is_null() {
-        set_last_error(1, "Null pointer passed for parameter 'tags'");
-        return std::ptr::null_mut();
-    }
-    let tags_rs_str = match unsafe { CStr::from_ptr(tags) }.to_str() {
-        Ok(s) => s,
-        Err(_) => {
-            set_last_error(1, "Invalid UTF-8 in parameter 'tags'");
-            return std::ptr::null_mut();
-        }
-    };
-    let tags_rs = match serde_json::from_str(tags_rs_str) {
-        Ok(v) => v,
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            return std::ptr::null_mut();
-        }
-    };
-    let result = obj.keep_inline_images_in(tags_rs);
-    Box::into_raw(Box::new(result))
-}
-
-/// Set the pre-processing options applied to the HTML before conversion.
-/// # Safety
-/// Caller must ensure all pointer arguments are valid or null.
-/// Returned pointers must be freed with the appropriate free function.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_builder_preprocessing(
-    this: *mut html_to_markdown_rs::ConversionOptionsBuilder,
-    preprocessing: *const html_to_markdown_rs::PreprocessingOptions,
-) -> *mut html_to_markdown_rs::ConversionOptionsBuilder {
-    clear_last_error();
-    if this.is_null() {
-        set_last_error(1, "Null pointer passed for self");
-        return std::ptr::null_mut();
-    }
-    // SAFETY: null check above guarantees this is a valid pointer originally from Box::into_raw.
-    let obj = unsafe { *Box::from_raw(this) };
-    if preprocessing.is_null() {
-        set_last_error(1, "Null pointer passed for parameter 'preprocessing'");
-        return std::ptr::null_mut();
-    }
-    let preprocessing_rs = unsafe { &*preprocessing }.clone();
-    let result = obj.preprocessing(preprocessing_rs);
-    Box::into_raw(Box::new(result))
-}
-
-/// Build the final [`ConversionOptions`].
-/// # Safety
-/// Caller must ensure all pointer arguments are valid or null.
-/// Returned pointers must be freed with the appropriate free function.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_builder_build(
-    this: *mut html_to_markdown_rs::ConversionOptionsBuilder,
-) -> *mut html_to_markdown_rs::ConversionOptions {
-    clear_last_error();
-    if this.is_null() {
-        set_last_error(1, "Null pointer passed for self");
-        return std::ptr::null_mut();
-    }
-    // SAFETY: null check above guarantees this is a valid pointer originally from Box::into_raw.
-    let obj = unsafe { *Box::from_raw(this) };
-    let result = obj.build();
-    Box::into_raw(Box::new(result))
-}
-
-/// Create a `ConversionOptionsUpdate` from a JSON string. Returns null on failure.
-/// # Safety
-/// JSON string must be valid UTF-8 and null-terminated.
-/// Returned handle must be freed with `htm_conversion_options_update_free`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_from_json(
-    json: *const c_char,
-) -> *mut html_to_markdown_rs::ConversionOptionsUpdate {
-    clear_last_error();
-    if json.is_null() {
-        set_last_error(1, "Null pointer passed for JSON string");
-        return std::ptr::null_mut();
-    }
-    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
-        Ok(s) => s,
-        Err(_) => {
-            set_last_error(1, "Invalid UTF-8 in JSON string");
-            return std::ptr::null_mut();
-        }
-    };
-    match serde_json::from_str::<html_to_markdown_rs::ConversionOptionsUpdate>(c_str) {
-        Ok(val) => Box::into_raw(Box::new(val)),
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
-/// Free a `ConversionOptionsUpdate` handle.
-/// # Safety
-/// Pointer must have been returned by this library, or be null.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_free(ptr: *mut html_to_markdown_rs::ConversionOptionsUpdate) {
-    if !ptr.is_null() {
-        unsafe {
-            drop(Box::from_raw(ptr));
-        }
-    }
-}
-
-/// Get the `heading_style` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_heading_style(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> *mut html_to_markdown_rs::HeadingStyle {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.heading_style {
-        Some(val) => Box::into_raw(Box::new(*val)),
-        None => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `list_indent_type` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_list_indent_type(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> *mut html_to_markdown_rs::ListIndentType {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.list_indent_type {
-        Some(val) => Box::into_raw(Box::new(*val)),
-        None => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `list_indent_width` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_list_indent_width(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> usize {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.list_indent_width {
-        Some(val) => *val,
-        None => 0,
-    }
-}
-
-/// Get the `bullets` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_bullets(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.bullets {
-        Some(val) => match CString::new(val.to_string()) {
-            Ok(cs) => cs.into_raw(),
-            Err(_) => std::ptr::null_mut(),
-        },
-        None => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `strong_em_symbol` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_strong_em_symbol(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.strong_em_symbol {
-        Some(val) => match CString::new(val.to_string()) {
-            Ok(cs) => cs.into_raw(),
-            Err(_) => std::ptr::null_mut(),
-        },
-        None => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `escape_asterisks` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_escape_asterisks(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.escape_asterisks {
-        Some(val) => *val as i32,
-        None => 0,
-    }
-}
-
-/// Get the `escape_underscores` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_escape_underscores(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.escape_underscores {
-        Some(val) => *val as i32,
-        None => 0,
-    }
-}
-
-/// Get the `escape_misc` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_escape_misc(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.escape_misc {
-        Some(val) => *val as i32,
-        None => 0,
-    }
-}
-
-/// Get the `escape_ascii` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_escape_ascii(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.escape_ascii {
-        Some(val) => *val as i32,
-        None => 0,
-    }
-}
-
-/// Get the `code_language` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_code_language(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.code_language {
-        Some(val) => match CString::new(val.to_string()) {
-            Ok(cs) => cs.into_raw(),
-            Err(_) => std::ptr::null_mut(),
-        },
-        None => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `autolinks` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_autolinks(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.autolinks {
-        Some(val) => *val as i32,
-        None => 0,
-    }
-}
-
-/// Get the `default_title` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_default_title(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.default_title {
-        Some(val) => *val as i32,
-        None => 0,
-    }
-}
-
-/// Get the `br_in_tables` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_br_in_tables(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.br_in_tables {
-        Some(val) => *val as i32,
-        None => 0,
-    }
-}
-
-/// Get the `highlight_style` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_highlight_style(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> *mut html_to_markdown_rs::HighlightStyle {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.highlight_style {
-        Some(val) => Box::into_raw(Box::new(*val)),
-        None => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `extract_metadata` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_extract_metadata(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.extract_metadata {
-        Some(val) => *val as i32,
-        None => 0,
-    }
-}
-
-/// Get the `whitespace_mode` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_whitespace_mode(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> *mut html_to_markdown_rs::WhitespaceMode {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.whitespace_mode {
-        Some(val) => Box::into_raw(Box::new(*val)),
-        None => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `strip_newlines` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_strip_newlines(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.strip_newlines {
-        Some(val) => *val as i32,
-        None => 0,
-    }
-}
-
-/// Get the `wrap` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_wrap(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.wrap {
-        Some(val) => *val as i32,
-        None => 0,
-    }
-}
-
-/// Get the `wrap_width` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_wrap_width(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> usize {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.wrap_width {
-        Some(val) => *val,
-        None => 0,
-    }
-}
-
-/// Get the `convert_as_inline` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_convert_as_inline(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.convert_as_inline {
-        Some(val) => *val as i32,
-        None => 0,
-    }
-}
-
-/// Get the `sub_symbol` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_sub_symbol(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.sub_symbol {
-        Some(val) => match CString::new(val.to_string()) {
-            Ok(cs) => cs.into_raw(),
-            Err(_) => std::ptr::null_mut(),
-        },
-        None => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `sup_symbol` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_sup_symbol(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.sup_symbol {
-        Some(val) => match CString::new(val.to_string()) {
-            Ok(cs) => cs.into_raw(),
-            Err(_) => std::ptr::null_mut(),
-        },
-        None => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `newline_style` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_newline_style(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> *mut html_to_markdown_rs::NewlineStyle {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.newline_style {
-        Some(val) => Box::into_raw(Box::new(*val)),
-        None => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `code_block_style` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_code_block_style(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> *mut html_to_markdown_rs::CodeBlockStyle {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.code_block_style {
-        Some(val) => Box::into_raw(Box::new(*val)),
-        None => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `keep_inline_images_in` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_keep_inline_images_in(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.keep_inline_images_in {
-        Some(val) => match serde_json::to_string(&val) {
-            Ok(s) => match CString::new(s) {
-                Ok(cs) => cs.into_raw(),
-                Err(_) => std::ptr::null_mut(),
-            },
-            Err(_) => std::ptr::null_mut(),
-        },
-        None => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `preprocessing` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_preprocessing(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> *mut html_to_markdown_rs::PreprocessingOptionsUpdate {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.preprocessing {
-        Some(val) => Box::into_raw(Box::new(val.clone())),
-        None => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `encoding` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_encoding(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.encoding {
-        Some(val) => match CString::new(val.to_string()) {
-            Ok(cs) => cs.into_raw(),
-            Err(_) => std::ptr::null_mut(),
-        },
-        None => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `debug` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_debug(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.debug {
-        Some(val) => *val as i32,
-        None => 0,
-    }
-}
-
-/// Get the `strip_tags` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_strip_tags(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.strip_tags {
-        Some(val) => match serde_json::to_string(&val) {
-            Ok(s) => match CString::new(s) {
-                Ok(cs) => cs.into_raw(),
-                Err(_) => std::ptr::null_mut(),
-            },
-            Err(_) => std::ptr::null_mut(),
-        },
-        None => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `preserve_tags` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_preserve_tags(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.preserve_tags {
-        Some(val) => match serde_json::to_string(&val) {
-            Ok(s) => match CString::new(s) {
-                Ok(cs) => cs.into_raw(),
-                Err(_) => std::ptr::null_mut(),
-            },
-            Err(_) => std::ptr::null_mut(),
-        },
-        None => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `skip_images` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_skip_images(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.skip_images {
-        Some(val) => *val as i32,
-        None => 0,
-    }
-}
-
-/// Get the `link_style` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_link_style(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> *mut html_to_markdown_rs::LinkStyle {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.link_style {
-        Some(val) => Box::into_raw(Box::new(*val)),
-        None => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `output_format` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_output_format(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> *mut html_to_markdown_rs::OutputFormat {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.output_format {
-        Some(val) => Box::into_raw(Box::new(*val)),
-        None => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `include_document_structure` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_include_document_structure(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.include_document_structure {
-        Some(val) => *val as i32,
-        None => 0,
-    }
-}
-
-/// Get the `extract_images` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_extract_images(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.extract_images {
-        Some(val) => *val as i32,
-        None => 0,
-    }
-}
-
-/// Get the `max_image_size` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_max_image_size(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> u64 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.max_image_size {
-        Some(val) => *val,
-        None => 0,
-    }
-}
-
-/// Get the `capture_svg` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_capture_svg(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.capture_svg {
-        Some(val) => *val as i32,
-        None => 0,
-    }
-}
-
-/// Get the `infer_dimensions` field from a `ConversionOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_options_update_infer_dimensions(
-    ptr: *const html_to_markdown_rs::ConversionOptionsUpdate,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.infer_dimensions {
-        Some(val) => *val as i32,
-        None => 0,
-    }
-}
-
-/// Create a `PreprocessingOptions` from a JSON string. Returns null on failure.
-/// # Safety
-/// JSON string must be valid UTF-8 and null-terminated.
-/// Returned handle must be freed with `htm_preprocessing_options_free`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_preprocessing_options_from_json(
-    json: *const c_char,
-) -> *mut html_to_markdown_rs::PreprocessingOptions {
-    clear_last_error();
-    if json.is_null() {
-        set_last_error(1, "Null pointer passed for JSON string");
-        return std::ptr::null_mut();
-    }
-    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
-        Ok(s) => s,
-        Err(_) => {
-            set_last_error(1, "Invalid UTF-8 in JSON string");
-            return std::ptr::null_mut();
-        }
-    };
-    match serde_json::from_str::<html_to_markdown_rs::PreprocessingOptions>(c_str) {
-        Ok(val) => Box::into_raw(Box::new(val)),
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
-/// Serialize a `PreprocessingOptions` to a JSON string. Returns null on failure.
-/// # Safety
-/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
-/// The returned string must be freed with `htm_free_string`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_preprocessing_options_to_json(
-    ptr: *const html_to_markdown_rs::PreprocessingOptions,
-) -> *mut c_char {
-    clear_last_error();
-    if ptr.is_null() {
-        set_last_error(1, "Null pointer passed to to_json");
-        return std::ptr::null_mut();
-    }
-    let val = unsafe { &*ptr };
-    match serde_json::to_string(val) {
-        Ok(s) => match CString::new(s) {
-            Ok(cs) => cs.into_raw(),
-            Err(e) => {
-                set_last_error(2, &e.to_string());
-                std::ptr::null_mut()
-            }
-        },
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
-/// Free a `PreprocessingOptions` handle.
-/// # Safety
-/// Pointer must have been returned by this library, or be null.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_preprocessing_options_free(ptr: *mut html_to_markdown_rs::PreprocessingOptions) {
-    if !ptr.is_null() {
-        unsafe {
-            drop(Box::from_raw(ptr));
-        }
-    }
-}
-
-/// Get the `enabled` field from a `PreprocessingOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_preprocessing_options_enabled(
-    ptr: *const html_to_markdown_rs::PreprocessingOptions,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.enabled as i32
-}
-
-/// Get the `preset` field from a `PreprocessingOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_preprocessing_options_preset(
-    ptr: *const html_to_markdown_rs::PreprocessingOptions,
-) -> *mut html_to_markdown_rs::PreprocessingPreset {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.preset))
-}
-
-/// Get the `remove_navigation` field from a `PreprocessingOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_preprocessing_options_remove_navigation(
-    ptr: *const html_to_markdown_rs::PreprocessingOptions,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.remove_navigation as i32
-}
-
-/// Get the `remove_forms` field from a `PreprocessingOptions`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_preprocessing_options_remove_forms(
-    ptr: *const html_to_markdown_rs::PreprocessingOptions,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.remove_forms as i32
-}
-
-/// # Safety
-/// Caller must ensure all pointer arguments are valid or null.
-/// Returned pointers must be freed with the appropriate free function.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_preprocessing_options_default() -> *mut html_to_markdown_rs::PreprocessingOptions {
-    clear_last_error();
-    let result = html_to_markdown_rs::PreprocessingOptions::default();
-    Box::into_raw(Box::new(result))
-}
-
-/// Create a `PreprocessingOptionsUpdate` from a JSON string. Returns null on failure.
-/// # Safety
-/// JSON string must be valid UTF-8 and null-terminated.
-/// Returned handle must be freed with `htm_preprocessing_options_update_free`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_preprocessing_options_update_from_json(
-    json: *const c_char,
-) -> *mut html_to_markdown_rs::PreprocessingOptionsUpdate {
-    clear_last_error();
-    if json.is_null() {
-        set_last_error(1, "Null pointer passed for JSON string");
-        return std::ptr::null_mut();
-    }
-    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
-        Ok(s) => s,
-        Err(_) => {
-            set_last_error(1, "Invalid UTF-8 in JSON string");
-            return std::ptr::null_mut();
-        }
-    };
-    match serde_json::from_str::<html_to_markdown_rs::PreprocessingOptionsUpdate>(c_str) {
-        Ok(val) => Box::into_raw(Box::new(val)),
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
-/// Free a `PreprocessingOptionsUpdate` handle.
-/// # Safety
-/// Pointer must have been returned by this library, or be null.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_preprocessing_options_update_free(
-    ptr: *mut html_to_markdown_rs::PreprocessingOptionsUpdate,
-) {
-    if !ptr.is_null() {
-        unsafe {
-            drop(Box::from_raw(ptr));
-        }
-    }
-}
-
-/// Get the `enabled` field from a `PreprocessingOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_preprocessing_options_update_enabled(
-    ptr: *const html_to_markdown_rs::PreprocessingOptionsUpdate,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.enabled {
-        Some(val) => *val as i32,
-        None => 0,
-    }
-}
-
-/// Get the `preset` field from a `PreprocessingOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_preprocessing_options_update_preset(
-    ptr: *const html_to_markdown_rs::PreprocessingOptionsUpdate,
-) -> *mut html_to_markdown_rs::PreprocessingPreset {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.preset {
-        Some(val) => Box::into_raw(Box::new(*val)),
-        None => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `remove_navigation` field from a `PreprocessingOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_preprocessing_options_update_remove_navigation(
-    ptr: *const html_to_markdown_rs::PreprocessingOptionsUpdate,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.remove_navigation {
-        Some(val) => *val as i32,
-        None => 0,
-    }
-}
-
-/// Get the `remove_forms` field from a `PreprocessingOptionsUpdate`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_preprocessing_options_update_remove_forms(
-    ptr: *const html_to_markdown_rs::PreprocessingOptionsUpdate,
-) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.remove_forms {
-        Some(val) => *val as i32,
-        None => 0,
-    }
-}
-
-/// Free a `ConversionResult` handle.
-/// # Safety
-/// Pointer must have been returned by this library, or be null.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_result_free(ptr: *mut html_to_markdown_rs::ConversionResult) {
-    if !ptr.is_null() {
-        unsafe {
-            drop(Box::from_raw(ptr));
-        }
-    }
-}
-
-/// Get the `content` field from a `ConversionResult`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_result_content(
-    ptr: *const html_to_markdown_rs::ConversionResult,
-) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.content {
-        Some(val) => match CString::new(val.to_string()) {
-            Ok(cs) => cs.into_raw(),
-            Err(_) => std::ptr::null_mut(),
-        },
-        None => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `document` field from a `ConversionResult`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_result_document(
-    ptr: *const html_to_markdown_rs::ConversionResult,
-) -> *mut html_to_markdown_rs::DocumentStructure {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.document {
-        Some(val) => Box::into_raw(Box::new(val.clone())),
-        None => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `metadata` field from a `ConversionResult`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_result_metadata(
-    ptr: *const html_to_markdown_rs::ConversionResult,
-) -> *mut html_to_markdown_rs::metadata::HtmlMetadata {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.metadata.clone()))
-}
-
-/// Get the `tables` field from a `ConversionResult`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_result_tables(
-    ptr: *const html_to_markdown_rs::ConversionResult,
-) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match serde_json::to_string(&obj.tables) {
-        Ok(s) => match CString::new(s) {
-            Ok(cs) => cs.into_raw(),
-            Err(_) => std::ptr::null_mut(),
-        },
-        Err(_) => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `warnings` field from a `ConversionResult`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_conversion_result_warnings(
-    ptr: *const html_to_markdown_rs::ConversionResult,
-) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match serde_json::to_string(&obj.warnings) {
-        Ok(s) => match CString::new(s) {
-            Ok(cs) => cs.into_raw(),
-            Err(_) => std::ptr::null_mut(),
-        },
-        Err(_) => std::ptr::null_mut(),
-    }
-}
-
-/// Create a `DocumentStructure` from a JSON string. Returns null on failure.
-/// # Safety
-/// JSON string must be valid UTF-8 and null-terminated.
-/// Returned handle must be freed with `htm_document_structure_free`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_document_structure_from_json(
-    json: *const c_char,
-) -> *mut html_to_markdown_rs::DocumentStructure {
-    clear_last_error();
-    if json.is_null() {
-        set_last_error(1, "Null pointer passed for JSON string");
-        return std::ptr::null_mut();
-    }
-    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
-        Ok(s) => s,
-        Err(_) => {
-            set_last_error(1, "Invalid UTF-8 in JSON string");
-            return std::ptr::null_mut();
-        }
-    };
-    match serde_json::from_str::<html_to_markdown_rs::DocumentStructure>(c_str) {
-        Ok(val) => Box::into_raw(Box::new(val)),
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
-/// Serialize a `DocumentStructure` to a JSON string. Returns null on failure.
-/// # Safety
-/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
-/// The returned string must be freed with `htm_free_string`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_document_structure_to_json(
-    ptr: *const html_to_markdown_rs::DocumentStructure,
-) -> *mut c_char {
-    clear_last_error();
-    if ptr.is_null() {
-        set_last_error(1, "Null pointer passed to to_json");
-        return std::ptr::null_mut();
-    }
-    let val = unsafe { &*ptr };
-    match serde_json::to_string(val) {
-        Ok(s) => match CString::new(s) {
-            Ok(cs) => cs.into_raw(),
-            Err(e) => {
-                set_last_error(2, &e.to_string());
-                std::ptr::null_mut()
-            }
-        },
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
-/// Free a `DocumentStructure` handle.
-/// # Safety
-/// Pointer must have been returned by this library, or be null.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_document_structure_free(ptr: *mut html_to_markdown_rs::DocumentStructure) {
-    if !ptr.is_null() {
-        unsafe {
-            drop(Box::from_raw(ptr));
-        }
-    }
-}
-
-/// Get the `nodes` field from a `DocumentStructure`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_document_structure_nodes(
-    ptr: *const html_to_markdown_rs::DocumentStructure,
-) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match serde_json::to_string(&obj.nodes) {
-        Ok(s) => match CString::new(s) {
-            Ok(cs) => cs.into_raw(),
-            Err(_) => std::ptr::null_mut(),
-        },
-        Err(_) => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `source_format` field from a `DocumentStructure`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_document_structure_source_format(
-    ptr: *const html_to_markdown_rs::DocumentStructure,
-) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.source_format {
-        Some(val) => match CString::new(val.to_string()) {
-            Ok(cs) => cs.into_raw(),
-            Err(_) => std::ptr::null_mut(),
-        },
-        None => std::ptr::null_mut(),
-    }
-}
-
-/// Create a `DocumentNode` from a JSON string. Returns null on failure.
-/// # Safety
-/// JSON string must be valid UTF-8 and null-terminated.
-/// Returned handle must be freed with `htm_document_node_free`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_document_node_from_json(json: *const c_char) -> *mut html_to_markdown_rs::DocumentNode {
-    clear_last_error();
-    if json.is_null() {
-        set_last_error(1, "Null pointer passed for JSON string");
-        return std::ptr::null_mut();
-    }
-    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
-        Ok(s) => s,
-        Err(_) => {
-            set_last_error(1, "Invalid UTF-8 in JSON string");
-            return std::ptr::null_mut();
-        }
-    };
-    match serde_json::from_str::<html_to_markdown_rs::DocumentNode>(c_str) {
-        Ok(val) => Box::into_raw(Box::new(val)),
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
-/// Serialize a `DocumentNode` to a JSON string. Returns null on failure.
-/// # Safety
-/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
-/// The returned string must be freed with `htm_free_string`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_document_node_to_json(ptr: *const html_to_markdown_rs::DocumentNode) -> *mut c_char {
-    clear_last_error();
-    if ptr.is_null() {
-        set_last_error(1, "Null pointer passed to to_json");
-        return std::ptr::null_mut();
-    }
-    let val = unsafe { &*ptr };
-    match serde_json::to_string(val) {
-        Ok(s) => match CString::new(s) {
-            Ok(cs) => cs.into_raw(),
-            Err(e) => {
-                set_last_error(2, &e.to_string());
-                std::ptr::null_mut()
-            }
-        },
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
-/// Free a `DocumentNode` handle.
-/// # Safety
-/// Pointer must have been returned by this library, or be null.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_document_node_free(ptr: *mut html_to_markdown_rs::DocumentNode) {
-    if !ptr.is_null() {
-        unsafe {
-            drop(Box::from_raw(ptr));
-        }
-    }
-}
-
-/// Get the `id` field from a `DocumentNode`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_document_node_id(ptr: *const html_to_markdown_rs::DocumentNode) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match CString::new(obj.id.to_string()) {
-        Ok(cs) => cs.into_raw(),
-        Err(_) => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `content` field from a `DocumentNode`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_document_node_content(
-    ptr: *const html_to_markdown_rs::DocumentNode,
-) -> *mut html_to_markdown_rs::NodeContent {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.content.clone()))
-}
-
-/// Get the `parent` field from a `DocumentNode`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_document_node_parent(ptr: *const html_to_markdown_rs::DocumentNode) -> u32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.parent {
-        Some(val) => *val,
-        None => 0,
-    }
-}
-
-/// Get the `children` field from a `DocumentNode`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_document_node_children(
-    ptr: *const html_to_markdown_rs::DocumentNode,
-) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match serde_json::to_string(&obj.children) {
-        Ok(s) => match CString::new(s) {
-            Ok(cs) => cs.into_raw(),
-            Err(_) => std::ptr::null_mut(),
-        },
-        Err(_) => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `annotations` field from a `DocumentNode`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_document_node_annotations(
-    ptr: *const html_to_markdown_rs::DocumentNode,
-) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match serde_json::to_string(&obj.annotations) {
-        Ok(s) => match CString::new(s) {
-            Ok(cs) => cs.into_raw(),
-            Err(_) => std::ptr::null_mut(),
-        },
-        Err(_) => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `attributes` field from a `DocumentNode`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_document_node_attributes(
-    ptr: *const html_to_markdown_rs::DocumentNode,
-) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match &obj.attributes {
-        Some(val) => match serde_json::to_string(&val) {
-            Ok(s) => match CString::new(s) {
-                Ok(cs) => cs.into_raw(),
-                Err(_) => std::ptr::null_mut(),
-            },
-            Err(_) => std::ptr::null_mut(),
-        },
-        None => std::ptr::null_mut(),
-    }
-}
-
-/// Create a `TextAnnotation` from a JSON string. Returns null on failure.
-/// # Safety
-/// JSON string must be valid UTF-8 and null-terminated.
-/// Returned handle must be freed with `htm_text_annotation_free`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_text_annotation_from_json(
-    json: *const c_char,
-) -> *mut html_to_markdown_rs::TextAnnotation {
-    clear_last_error();
-    if json.is_null() {
-        set_last_error(1, "Null pointer passed for JSON string");
-        return std::ptr::null_mut();
-    }
-    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
-        Ok(s) => s,
-        Err(_) => {
-            set_last_error(1, "Invalid UTF-8 in JSON string");
-            return std::ptr::null_mut();
-        }
-    };
-    match serde_json::from_str::<html_to_markdown_rs::TextAnnotation>(c_str) {
-        Ok(val) => Box::into_raw(Box::new(val)),
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
-/// Serialize a `TextAnnotation` to a JSON string. Returns null on failure.
-/// # Safety
-/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
-/// The returned string must be freed with `htm_free_string`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_text_annotation_to_json(ptr: *const html_to_markdown_rs::TextAnnotation) -> *mut c_char {
-    clear_last_error();
-    if ptr.is_null() {
-        set_last_error(1, "Null pointer passed to to_json");
-        return std::ptr::null_mut();
-    }
-    let val = unsafe { &*ptr };
-    match serde_json::to_string(val) {
-        Ok(s) => match CString::new(s) {
-            Ok(cs) => cs.into_raw(),
-            Err(e) => {
-                set_last_error(2, &e.to_string());
-                std::ptr::null_mut()
-            }
-        },
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
-/// Free a `TextAnnotation` handle.
-/// # Safety
-/// Pointer must have been returned by this library, or be null.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_text_annotation_free(ptr: *mut html_to_markdown_rs::TextAnnotation) {
-    if !ptr.is_null() {
-        unsafe {
-            drop(Box::from_raw(ptr));
-        }
-    }
-}
-
-/// Get the `start` field from a `TextAnnotation`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_text_annotation_start(ptr: *const html_to_markdown_rs::TextAnnotation) -> u32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.start
-}
-
-/// Get the `end` field from a `TextAnnotation`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_text_annotation_end(ptr: *const html_to_markdown_rs::TextAnnotation) -> u32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.end
-}
-
-/// Get the `kind` field from a `TextAnnotation`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_text_annotation_kind(
-    ptr: *const html_to_markdown_rs::TextAnnotation,
-) -> *mut html_to_markdown_rs::AnnotationKind {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.kind.clone()))
-}
-
-/// Create a `TableGrid` from a JSON string. Returns null on failure.
-/// # Safety
-/// JSON string must be valid UTF-8 and null-terminated.
-/// Returned handle must be freed with `htm_table_grid_free`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_table_grid_from_json(json: *const c_char) -> *mut html_to_markdown_rs::TableGrid {
-    clear_last_error();
-    if json.is_null() {
-        set_last_error(1, "Null pointer passed for JSON string");
-        return std::ptr::null_mut();
-    }
-    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
-        Ok(s) => s,
-        Err(_) => {
-            set_last_error(1, "Invalid UTF-8 in JSON string");
-            return std::ptr::null_mut();
-        }
-    };
-    match serde_json::from_str::<html_to_markdown_rs::TableGrid>(c_str) {
-        Ok(val) => Box::into_raw(Box::new(val)),
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
-/// Serialize a `TableGrid` to a JSON string. Returns null on failure.
-/// # Safety
-/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
-/// The returned string must be freed with `htm_free_string`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_table_grid_to_json(ptr: *const html_to_markdown_rs::TableGrid) -> *mut c_char {
-    clear_last_error();
-    if ptr.is_null() {
-        set_last_error(1, "Null pointer passed to to_json");
-        return std::ptr::null_mut();
-    }
-    let val = unsafe { &*ptr };
-    match serde_json::to_string(val) {
-        Ok(s) => match CString::new(s) {
-            Ok(cs) => cs.into_raw(),
-            Err(e) => {
-                set_last_error(2, &e.to_string());
-                std::ptr::null_mut()
-            }
-        },
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
-/// Free a `TableGrid` handle.
-/// # Safety
-/// Pointer must have been returned by this library, or be null.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_table_grid_free(ptr: *mut html_to_markdown_rs::TableGrid) {
-    if !ptr.is_null() {
-        unsafe {
-            drop(Box::from_raw(ptr));
-        }
-    }
-}
-
-/// Get the `rows` field from a `TableGrid`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_table_grid_rows(ptr: *const html_to_markdown_rs::TableGrid) -> u32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.rows
-}
-
-/// Get the `cols` field from a `TableGrid`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_table_grid_cols(ptr: *const html_to_markdown_rs::TableGrid) -> u32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.cols
-}
-
-/// Get the `cells` field from a `TableGrid`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_table_grid_cells(ptr: *const html_to_markdown_rs::TableGrid) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match serde_json::to_string(&obj.cells) {
-        Ok(s) => match CString::new(s) {
-            Ok(cs) => cs.into_raw(),
-            Err(_) => std::ptr::null_mut(),
-        },
-        Err(_) => std::ptr::null_mut(),
-    }
-}
-
-/// Create a `GridCell` from a JSON string. Returns null on failure.
-/// # Safety
-/// JSON string must be valid UTF-8 and null-terminated.
-/// Returned handle must be freed with `htm_grid_cell_free`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_grid_cell_from_json(json: *const c_char) -> *mut html_to_markdown_rs::GridCell {
-    clear_last_error();
-    if json.is_null() {
-        set_last_error(1, "Null pointer passed for JSON string");
-        return std::ptr::null_mut();
-    }
-    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
-        Ok(s) => s,
-        Err(_) => {
-            set_last_error(1, "Invalid UTF-8 in JSON string");
-            return std::ptr::null_mut();
-        }
-    };
-    match serde_json::from_str::<html_to_markdown_rs::GridCell>(c_str) {
-        Ok(val) => Box::into_raw(Box::new(val)),
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
-/// Serialize a `GridCell` to a JSON string. Returns null on failure.
-/// # Safety
-/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
-/// The returned string must be freed with `htm_free_string`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_grid_cell_to_json(ptr: *const html_to_markdown_rs::GridCell) -> *mut c_char {
-    clear_last_error();
-    if ptr.is_null() {
-        set_last_error(1, "Null pointer passed to to_json");
-        return std::ptr::null_mut();
-    }
-    let val = unsafe { &*ptr };
-    match serde_json::to_string(val) {
-        Ok(s) => match CString::new(s) {
-            Ok(cs) => cs.into_raw(),
-            Err(e) => {
-                set_last_error(2, &e.to_string());
-                std::ptr::null_mut()
-            }
-        },
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
-/// Free a `GridCell` handle.
-/// # Safety
-/// Pointer must have been returned by this library, or be null.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_grid_cell_free(ptr: *mut html_to_markdown_rs::GridCell) {
-    if !ptr.is_null() {
-        unsafe {
-            drop(Box::from_raw(ptr));
-        }
-    }
-}
-
-/// Get the `content` field from a `GridCell`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_grid_cell_content(ptr: *const html_to_markdown_rs::GridCell) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match CString::new(obj.content.to_string()) {
-        Ok(cs) => cs.into_raw(),
-        Err(_) => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `row` field from a `GridCell`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_grid_cell_row(ptr: *const html_to_markdown_rs::GridCell) -> u32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.row
-}
-
-/// Get the `col` field from a `GridCell`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_grid_cell_col(ptr: *const html_to_markdown_rs::GridCell) -> u32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.col
-}
-
-/// Get the `row_span` field from a `GridCell`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_grid_cell_row_span(ptr: *const html_to_markdown_rs::GridCell) -> u32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.row_span
-}
-
-/// Get the `col_span` field from a `GridCell`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_grid_cell_col_span(ptr: *const html_to_markdown_rs::GridCell) -> u32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.col_span
-}
-
-/// Get the `is_header` field from a `GridCell`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_grid_cell_is_header(ptr: *const html_to_markdown_rs::GridCell) -> i32 {
-    if ptr.is_null() {
-        return 0;
-    }
-    let obj = unsafe { &*ptr };
-    obj.is_header as i32
-}
-
-/// Create a `TableData` from a JSON string. Returns null on failure.
-/// # Safety
-/// JSON string must be valid UTF-8 and null-terminated.
-/// Returned handle must be freed with `htm_table_data_free`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_table_data_from_json(json: *const c_char) -> *mut html_to_markdown_rs::TableData {
-    clear_last_error();
-    if json.is_null() {
-        set_last_error(1, "Null pointer passed for JSON string");
-        return std::ptr::null_mut();
-    }
-    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
-        Ok(s) => s,
-        Err(_) => {
-            set_last_error(1, "Invalid UTF-8 in JSON string");
-            return std::ptr::null_mut();
-        }
-    };
-    match serde_json::from_str::<html_to_markdown_rs::TableData>(c_str) {
-        Ok(val) => Box::into_raw(Box::new(val)),
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
-/// Serialize a `TableData` to a JSON string. Returns null on failure.
-/// # Safety
-/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
-/// The returned string must be freed with `htm_free_string`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_table_data_to_json(ptr: *const html_to_markdown_rs::TableData) -> *mut c_char {
-    clear_last_error();
-    if ptr.is_null() {
-        set_last_error(1, "Null pointer passed to to_json");
-        return std::ptr::null_mut();
-    }
-    let val = unsafe { &*ptr };
-    match serde_json::to_string(val) {
-        Ok(s) => match CString::new(s) {
-            Ok(cs) => cs.into_raw(),
-            Err(e) => {
-                set_last_error(2, &e.to_string());
-                std::ptr::null_mut()
-            }
-        },
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
-/// Free a `TableData` handle.
-/// # Safety
-/// Pointer must have been returned by this library, or be null.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_table_data_free(ptr: *mut html_to_markdown_rs::TableData) {
-    if !ptr.is_null() {
-        unsafe {
-            drop(Box::from_raw(ptr));
-        }
-    }
-}
-
-/// Get the `grid` field from a `TableData`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_table_data_grid(
-    ptr: *const html_to_markdown_rs::TableData,
-) -> *mut html_to_markdown_rs::TableGrid {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.grid.clone()))
-}
-
-/// Get the `markdown` field from a `TableData`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_table_data_markdown(ptr: *const html_to_markdown_rs::TableData) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match CString::new(obj.markdown.to_string()) {
-        Ok(cs) => cs.into_raw(),
-        Err(_) => std::ptr::null_mut(),
-    }
-}
-
-/// Create a `ProcessingWarning` from a JSON string. Returns null on failure.
-/// # Safety
-/// JSON string must be valid UTF-8 and null-terminated.
-/// Returned handle must be freed with `htm_processing_warning_free`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_processing_warning_from_json(
-    json: *const c_char,
-) -> *mut html_to_markdown_rs::ProcessingWarning {
-    clear_last_error();
-    if json.is_null() {
-        set_last_error(1, "Null pointer passed for JSON string");
-        return std::ptr::null_mut();
-    }
-    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
-        Ok(s) => s,
-        Err(_) => {
-            set_last_error(1, "Invalid UTF-8 in JSON string");
-            return std::ptr::null_mut();
-        }
-    };
-    match serde_json::from_str::<html_to_markdown_rs::ProcessingWarning>(c_str) {
-        Ok(val) => Box::into_raw(Box::new(val)),
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
-/// Serialize a `ProcessingWarning` to a JSON string. Returns null on failure.
-/// # Safety
-/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
-/// The returned string must be freed with `htm_free_string`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_processing_warning_to_json(
-    ptr: *const html_to_markdown_rs::ProcessingWarning,
-) -> *mut c_char {
-    clear_last_error();
-    if ptr.is_null() {
-        set_last_error(1, "Null pointer passed to to_json");
-        return std::ptr::null_mut();
-    }
-    let val = unsafe { &*ptr };
-    match serde_json::to_string(val) {
-        Ok(s) => match CString::new(s) {
-            Ok(cs) => cs.into_raw(),
-            Err(e) => {
-                set_last_error(2, &e.to_string());
-                std::ptr::null_mut()
-            }
-        },
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
-/// Free a `ProcessingWarning` handle.
-/// # Safety
-/// Pointer must have been returned by this library, or be null.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_processing_warning_free(ptr: *mut html_to_markdown_rs::ProcessingWarning) {
-    if !ptr.is_null() {
-        unsafe {
-            drop(Box::from_raw(ptr));
-        }
-    }
-}
-
-/// Get the `message` field from a `ProcessingWarning`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_processing_warning_message(
-    ptr: *const html_to_markdown_rs::ProcessingWarning,
-) -> *mut std::ffi::c_char {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    match CString::new(obj.message.to_string()) {
-        Ok(cs) => cs.into_raw(),
-        Err(_) => std::ptr::null_mut(),
-    }
-}
-
-/// Get the `kind` field from a `ProcessingWarning`.
-/// # Safety
-/// Pointer must be a valid handle returned by this library.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_processing_warning_kind(
-    ptr: *const html_to_markdown_rs::ProcessingWarning,
-) -> *mut html_to_markdown_rs::WarningKind {
-    if ptr.is_null() {
-        return std::ptr::null_mut();
-    }
-    let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.kind))
-}
-
-/// Create a `DocumentMetadata` from a JSON string. Returns null on failure.
-/// # Safety
-/// JSON string must be valid UTF-8 and null-terminated.
-/// Returned handle must be freed with `htm_document_metadata_free`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_document_metadata_from_json(
-    json: *const c_char,
-) -> *mut html_to_markdown_rs::DocumentMetadata {
-    clear_last_error();
-    if json.is_null() {
-        set_last_error(1, "Null pointer passed for JSON string");
-        return std::ptr::null_mut();
-    }
-    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
-        Ok(s) => s,
-        Err(_) => {
-            set_last_error(1, "Invalid UTF-8 in JSON string");
-            return std::ptr::null_mut();
-        }
-    };
-    match serde_json::from_str::<html_to_markdown_rs::DocumentMetadata>(c_str) {
-        Ok(val) => Box::into_raw(Box::new(val)),
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
-/// Serialize a `DocumentMetadata` to a JSON string. Returns null on failure.
-/// # Safety
-/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
-/// The returned string must be freed with `htm_free_string`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_document_metadata_to_json(
-    ptr: *const html_to_markdown_rs::DocumentMetadata,
-) -> *mut c_char {
-    clear_last_error();
-    if ptr.is_null() {
-        set_last_error(1, "Null pointer passed to to_json");
-        return std::ptr::null_mut();
-    }
-    let val = unsafe { &*ptr };
-    match serde_json::to_string(val) {
-        Ok(s) => match CString::new(s) {
-            Ok(cs) => cs.into_raw(),
-            Err(e) => {
-                set_last_error(2, &e.to_string());
-                std::ptr::null_mut()
-            }
-        },
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
 /// Free a `DocumentMetadata` handle.
 /// # Safety
 /// Pointer must have been returned by this library, or be null.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_document_metadata_free(ptr: *mut html_to_markdown_rs::DocumentMetadata) {
+pub unsafe extern "C" fn htm_document_metadata_free(ptr: *mut html_to_markdown_rs::metadata::DocumentMetadata) {
     if !ptr.is_null() {
         unsafe {
             drop(Box::from_raw(ptr));
@@ -3233,7 +358,7 @@ pub unsafe extern "C" fn htm_document_metadata_free(ptr: *mut html_to_markdown_r
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_document_metadata_title(
-    ptr: *const html_to_markdown_rs::DocumentMetadata,
+    ptr: *const html_to_markdown_rs::metadata::DocumentMetadata,
 ) -> *mut std::ffi::c_char {
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -3253,7 +378,7 @@ pub unsafe extern "C" fn htm_document_metadata_title(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_document_metadata_description(
-    ptr: *const html_to_markdown_rs::DocumentMetadata,
+    ptr: *const html_to_markdown_rs::metadata::DocumentMetadata,
 ) -> *mut std::ffi::c_char {
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -3273,7 +398,7 @@ pub unsafe extern "C" fn htm_document_metadata_description(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_document_metadata_keywords(
-    ptr: *const html_to_markdown_rs::DocumentMetadata,
+    ptr: *const html_to_markdown_rs::metadata::DocumentMetadata,
 ) -> *mut std::ffi::c_char {
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -3293,7 +418,7 @@ pub unsafe extern "C" fn htm_document_metadata_keywords(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_document_metadata_author(
-    ptr: *const html_to_markdown_rs::DocumentMetadata,
+    ptr: *const html_to_markdown_rs::metadata::DocumentMetadata,
 ) -> *mut std::ffi::c_char {
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -3313,7 +438,7 @@ pub unsafe extern "C" fn htm_document_metadata_author(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_document_metadata_canonical_url(
-    ptr: *const html_to_markdown_rs::DocumentMetadata,
+    ptr: *const html_to_markdown_rs::metadata::DocumentMetadata,
 ) -> *mut std::ffi::c_char {
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -3333,7 +458,7 @@ pub unsafe extern "C" fn htm_document_metadata_canonical_url(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_document_metadata_base_href(
-    ptr: *const html_to_markdown_rs::DocumentMetadata,
+    ptr: *const html_to_markdown_rs::metadata::DocumentMetadata,
 ) -> *mut std::ffi::c_char {
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -3353,7 +478,7 @@ pub unsafe extern "C" fn htm_document_metadata_base_href(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_document_metadata_language(
-    ptr: *const html_to_markdown_rs::DocumentMetadata,
+    ptr: *const html_to_markdown_rs::metadata::DocumentMetadata,
 ) -> *mut std::ffi::c_char {
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -3373,14 +498,14 @@ pub unsafe extern "C" fn htm_document_metadata_language(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_document_metadata_text_direction(
-    ptr: *const html_to_markdown_rs::DocumentMetadata,
+    ptr: *const html_to_markdown_rs::metadata::DocumentMetadata,
 ) -> *mut html_to_markdown_rs::TextDirection {
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
     match &obj.text_direction {
-        Some(val) => Box::into_raw(Box::new(*val)),
+        Some(val) => Box::into_raw(Box::new(val.clone())),
         None => std::ptr::null_mut(),
     }
 }
@@ -3390,7 +515,7 @@ pub unsafe extern "C" fn htm_document_metadata_text_direction(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_document_metadata_open_graph(
-    ptr: *const html_to_markdown_rs::DocumentMetadata,
+    ptr: *const html_to_markdown_rs::metadata::DocumentMetadata,
 ) -> *mut std::ffi::c_char {
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -3410,7 +535,7 @@ pub unsafe extern "C" fn htm_document_metadata_open_graph(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_document_metadata_twitter_card(
-    ptr: *const html_to_markdown_rs::DocumentMetadata,
+    ptr: *const html_to_markdown_rs::metadata::DocumentMetadata,
 ) -> *mut std::ffi::c_char {
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -3430,7 +555,7 @@ pub unsafe extern "C" fn htm_document_metadata_twitter_card(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_document_metadata_meta_tags(
-    ptr: *const html_to_markdown_rs::DocumentMetadata,
+    ptr: *const html_to_markdown_rs::metadata::DocumentMetadata,
 ) -> *mut std::ffi::c_char {
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -3445,67 +570,11 @@ pub unsafe extern "C" fn htm_document_metadata_meta_tags(
     }
 }
 
-/// Create a `HeaderMetadata` from a JSON string. Returns null on failure.
-/// # Safety
-/// JSON string must be valid UTF-8 and null-terminated.
-/// Returned handle must be freed with `htm_header_metadata_free`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_header_metadata_from_json(
-    json: *const c_char,
-) -> *mut html_to_markdown_rs::HeaderMetadata {
-    clear_last_error();
-    if json.is_null() {
-        set_last_error(1, "Null pointer passed for JSON string");
-        return std::ptr::null_mut();
-    }
-    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
-        Ok(s) => s,
-        Err(_) => {
-            set_last_error(1, "Invalid UTF-8 in JSON string");
-            return std::ptr::null_mut();
-        }
-    };
-    match serde_json::from_str::<html_to_markdown_rs::HeaderMetadata>(c_str) {
-        Ok(val) => Box::into_raw(Box::new(val)),
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
-/// Serialize a `HeaderMetadata` to a JSON string. Returns null on failure.
-/// # Safety
-/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
-/// The returned string must be freed with `htm_free_string`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_header_metadata_to_json(ptr: *const html_to_markdown_rs::HeaderMetadata) -> *mut c_char {
-    clear_last_error();
-    if ptr.is_null() {
-        set_last_error(1, "Null pointer passed to to_json");
-        return std::ptr::null_mut();
-    }
-    let val = unsafe { &*ptr };
-    match serde_json::to_string(val) {
-        Ok(s) => match CString::new(s) {
-            Ok(cs) => cs.into_raw(),
-            Err(e) => {
-                set_last_error(2, &e.to_string());
-                std::ptr::null_mut()
-            }
-        },
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
 /// Free a `HeaderMetadata` handle.
 /// # Safety
 /// Pointer must have been returned by this library, or be null.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_header_metadata_free(ptr: *mut html_to_markdown_rs::HeaderMetadata) {
+pub unsafe extern "C" fn htm_header_metadata_free(ptr: *mut html_to_markdown_rs::metadata::HeaderMetadata) {
     if !ptr.is_null() {
         unsafe {
             drop(Box::from_raw(ptr));
@@ -3517,7 +586,9 @@ pub unsafe extern "C" fn htm_header_metadata_free(ptr: *mut html_to_markdown_rs:
 /// # Safety
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_header_metadata_level(ptr: *const html_to_markdown_rs::HeaderMetadata) -> u8 {
+pub const unsafe extern "C" fn htm_header_metadata_level(
+    ptr: *const html_to_markdown_rs::metadata::HeaderMetadata,
+) -> u8 {
     if ptr.is_null() {
         return 0;
     }
@@ -3530,7 +601,7 @@ pub const unsafe extern "C" fn htm_header_metadata_level(ptr: *const html_to_mar
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_header_metadata_text(
-    ptr: *const html_to_markdown_rs::HeaderMetadata,
+    ptr: *const html_to_markdown_rs::metadata::HeaderMetadata,
 ) -> *mut std::ffi::c_char {
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -3547,7 +618,7 @@ pub unsafe extern "C" fn htm_header_metadata_text(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_header_metadata_id(
-    ptr: *const html_to_markdown_rs::HeaderMetadata,
+    ptr: *const html_to_markdown_rs::metadata::HeaderMetadata,
 ) -> *mut std::ffi::c_char {
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -3566,7 +637,9 @@ pub unsafe extern "C" fn htm_header_metadata_id(
 /// # Safety
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
-pub const unsafe extern "C" fn htm_header_metadata_depth(ptr: *const html_to_markdown_rs::HeaderMetadata) -> usize {
+pub const unsafe extern "C" fn htm_header_metadata_depth(
+    ptr: *const html_to_markdown_rs::metadata::HeaderMetadata,
+) -> usize {
     if ptr.is_null() {
         return 0;
     }
@@ -3579,7 +652,7 @@ pub const unsafe extern "C" fn htm_header_metadata_depth(ptr: *const html_to_mar
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub const unsafe extern "C" fn htm_header_metadata_html_offset(
-    ptr: *const html_to_markdown_rs::HeaderMetadata,
+    ptr: *const html_to_markdown_rs::metadata::HeaderMetadata,
 ) -> usize {
     if ptr.is_null() {
         return 0;
@@ -3620,7 +693,9 @@ pub const unsafe extern "C" fn htm_header_metadata_html_offset(
 /// Caller must ensure all pointer arguments are valid or null.
 /// Returned pointers must be freed with the appropriate free function.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_header_metadata_is_valid(this: *const html_to_markdown_rs::HeaderMetadata) -> i32 {
+pub unsafe extern "C" fn htm_header_metadata_is_valid(
+    this: *const html_to_markdown_rs::metadata::HeaderMetadata,
+) -> i32 {
     clear_last_error();
     if this.is_null() {
         set_last_error(1, "Null pointer passed for self");
@@ -3629,72 +704,14 @@ pub unsafe extern "C" fn htm_header_metadata_is_valid(this: *const html_to_markd
     // SAFETY: null check above guarantees this is a valid pointer.
     let obj = unsafe { &*this };
     let result = obj.is_valid();
-    if result {
-        1
-    } else {
-        0
-    }
-}
-
-/// Create a `LinkMetadata` from a JSON string. Returns null on failure.
-/// # Safety
-/// JSON string must be valid UTF-8 and null-terminated.
-/// Returned handle must be freed with `htm_link_metadata_free`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_link_metadata_from_json(json: *const c_char) -> *mut html_to_markdown_rs::LinkMetadata {
-    clear_last_error();
-    if json.is_null() {
-        set_last_error(1, "Null pointer passed for JSON string");
-        return std::ptr::null_mut();
-    }
-    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
-        Ok(s) => s,
-        Err(_) => {
-            set_last_error(1, "Invalid UTF-8 in JSON string");
-            return std::ptr::null_mut();
-        }
-    };
-    match serde_json::from_str::<html_to_markdown_rs::LinkMetadata>(c_str) {
-        Ok(val) => Box::into_raw(Box::new(val)),
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
-/// Serialize a `LinkMetadata` to a JSON string. Returns null on failure.
-/// # Safety
-/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
-/// The returned string must be freed with `htm_free_string`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_link_metadata_to_json(ptr: *const html_to_markdown_rs::LinkMetadata) -> *mut c_char {
-    clear_last_error();
-    if ptr.is_null() {
-        set_last_error(1, "Null pointer passed to to_json");
-        return std::ptr::null_mut();
-    }
-    let val = unsafe { &*ptr };
-    match serde_json::to_string(val) {
-        Ok(s) => match CString::new(s) {
-            Ok(cs) => cs.into_raw(),
-            Err(e) => {
-                set_last_error(2, &e.to_string());
-                std::ptr::null_mut()
-            }
-        },
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
+    if result { 1 } else { 0 }
 }
 
 /// Free a `LinkMetadata` handle.
 /// # Safety
 /// Pointer must have been returned by this library, or be null.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_link_metadata_free(ptr: *mut html_to_markdown_rs::LinkMetadata) {
+pub unsafe extern "C" fn htm_link_metadata_free(ptr: *mut html_to_markdown_rs::metadata::LinkMetadata) {
     if !ptr.is_null() {
         unsafe {
             drop(Box::from_raw(ptr));
@@ -3707,7 +724,7 @@ pub unsafe extern "C" fn htm_link_metadata_free(ptr: *mut html_to_markdown_rs::L
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_link_metadata_href(
-    ptr: *const html_to_markdown_rs::LinkMetadata,
+    ptr: *const html_to_markdown_rs::metadata::LinkMetadata,
 ) -> *mut std::ffi::c_char {
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -3724,7 +741,7 @@ pub unsafe extern "C" fn htm_link_metadata_href(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_link_metadata_text(
-    ptr: *const html_to_markdown_rs::LinkMetadata,
+    ptr: *const html_to_markdown_rs::metadata::LinkMetadata,
 ) -> *mut std::ffi::c_char {
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -3741,7 +758,7 @@ pub unsafe extern "C" fn htm_link_metadata_text(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_link_metadata_title(
-    ptr: *const html_to_markdown_rs::LinkMetadata,
+    ptr: *const html_to_markdown_rs::metadata::LinkMetadata,
 ) -> *mut std::ffi::c_char {
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -3761,20 +778,22 @@ pub unsafe extern "C" fn htm_link_metadata_title(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_link_metadata_link_type(
-    ptr: *const html_to_markdown_rs::LinkMetadata,
+    ptr: *const html_to_markdown_rs::metadata::LinkMetadata,
 ) -> *mut html_to_markdown_rs::LinkType {
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.link_type))
+    Box::into_raw(Box::new(obj.link_type.clone()))
 }
 
 /// Get the `rel` field from a `LinkMetadata`.
 /// # Safety
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_link_metadata_rel(ptr: *const html_to_markdown_rs::LinkMetadata) -> *mut std::ffi::c_char {
+pub unsafe extern "C" fn htm_link_metadata_rel(
+    ptr: *const html_to_markdown_rs::metadata::LinkMetadata,
+) -> *mut std::ffi::c_char {
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
@@ -3793,7 +812,7 @@ pub unsafe extern "C" fn htm_link_metadata_rel(ptr: *const html_to_markdown_rs::
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_link_metadata_attributes(
-    ptr: *const html_to_markdown_rs::LinkMetadata,
+    ptr: *const html_to_markdown_rs::metadata::LinkMetadata,
 ) -> *mut std::ffi::c_char {
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -3854,7 +873,7 @@ pub unsafe extern "C" fn htm_link_metadata_classify_link(
 /// # Safety
 /// Pointer must have been returned by this library, or be null.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_image_metadata_free(ptr: *mut html_to_markdown_rs::ImageMetadata) {
+pub unsafe extern "C" fn htm_image_metadata_free(ptr: *mut html_to_markdown_rs::metadata::ImageMetadata) {
     if !ptr.is_null() {
         unsafe {
             drop(Box::from_raw(ptr));
@@ -3867,7 +886,7 @@ pub unsafe extern "C" fn htm_image_metadata_free(ptr: *mut html_to_markdown_rs::
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_image_metadata_src(
-    ptr: *const html_to_markdown_rs::ImageMetadata,
+    ptr: *const html_to_markdown_rs::metadata::ImageMetadata,
 ) -> *mut std::ffi::c_char {
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -3884,7 +903,7 @@ pub unsafe extern "C" fn htm_image_metadata_src(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_image_metadata_alt(
-    ptr: *const html_to_markdown_rs::ImageMetadata,
+    ptr: *const html_to_markdown_rs::metadata::ImageMetadata,
 ) -> *mut std::ffi::c_char {
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -3904,7 +923,7 @@ pub unsafe extern "C" fn htm_image_metadata_alt(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_image_metadata_title(
-    ptr: *const html_to_markdown_rs::ImageMetadata,
+    ptr: *const html_to_markdown_rs::metadata::ImageMetadata,
 ) -> *mut std::ffi::c_char {
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -3924,13 +943,13 @@ pub unsafe extern "C" fn htm_image_metadata_title(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_image_metadata_image_type(
-    ptr: *const html_to_markdown_rs::ImageMetadata,
+    ptr: *const html_to_markdown_rs::metadata::ImageMetadata,
 ) -> *mut html_to_markdown_rs::ImageType {
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.image_type))
+    Box::into_raw(Box::new(obj.image_type.clone()))
 }
 
 /// Get the `attributes` field from a `ImageMetadata`.
@@ -3938,7 +957,7 @@ pub unsafe extern "C" fn htm_image_metadata_image_type(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_image_metadata_attributes(
-    ptr: *const html_to_markdown_rs::ImageMetadata,
+    ptr: *const html_to_markdown_rs::metadata::ImageMetadata,
 ) -> *mut std::ffi::c_char {
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -3953,67 +972,11 @@ pub unsafe extern "C" fn htm_image_metadata_attributes(
     }
 }
 
-/// Create a `StructuredData` from a JSON string. Returns null on failure.
-/// # Safety
-/// JSON string must be valid UTF-8 and null-terminated.
-/// Returned handle must be freed with `htm_structured_data_free`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_structured_data_from_json(
-    json: *const c_char,
-) -> *mut html_to_markdown_rs::StructuredData {
-    clear_last_error();
-    if json.is_null() {
-        set_last_error(1, "Null pointer passed for JSON string");
-        return std::ptr::null_mut();
-    }
-    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
-        Ok(s) => s,
-        Err(_) => {
-            set_last_error(1, "Invalid UTF-8 in JSON string");
-            return std::ptr::null_mut();
-        }
-    };
-    match serde_json::from_str::<html_to_markdown_rs::StructuredData>(c_str) {
-        Ok(val) => Box::into_raw(Box::new(val)),
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
-/// Serialize a `StructuredData` to a JSON string. Returns null on failure.
-/// # Safety
-/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
-/// The returned string must be freed with `htm_free_string`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_structured_data_to_json(ptr: *const html_to_markdown_rs::StructuredData) -> *mut c_char {
-    clear_last_error();
-    if ptr.is_null() {
-        set_last_error(1, "Null pointer passed to to_json");
-        return std::ptr::null_mut();
-    }
-    let val = unsafe { &*ptr };
-    match serde_json::to_string(val) {
-        Ok(s) => match CString::new(s) {
-            Ok(cs) => cs.into_raw(),
-            Err(e) => {
-                set_last_error(2, &e.to_string());
-                std::ptr::null_mut()
-            }
-        },
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
 /// Free a `StructuredData` handle.
 /// # Safety
 /// Pointer must have been returned by this library, or be null.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_structured_data_free(ptr: *mut html_to_markdown_rs::StructuredData) {
+pub unsafe extern "C" fn htm_structured_data_free(ptr: *mut html_to_markdown_rs::metadata::StructuredData) {
     if !ptr.is_null() {
         unsafe {
             drop(Box::from_raw(ptr));
@@ -4026,13 +989,13 @@ pub unsafe extern "C" fn htm_structured_data_free(ptr: *mut html_to_markdown_rs:
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_structured_data_data_type(
-    ptr: *const html_to_markdown_rs::StructuredData,
+    ptr: *const html_to_markdown_rs::metadata::StructuredData,
 ) -> *mut html_to_markdown_rs::StructuredDataType {
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.data_type))
+    Box::into_raw(Box::new(obj.data_type.clone()))
 }
 
 /// Get the `raw_json` field from a `StructuredData`.
@@ -4040,7 +1003,7 @@ pub unsafe extern "C" fn htm_structured_data_data_type(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_structured_data_raw_json(
-    ptr: *const html_to_markdown_rs::StructuredData,
+    ptr: *const html_to_markdown_rs::metadata::StructuredData,
 ) -> *mut std::ffi::c_char {
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -4057,7 +1020,7 @@ pub unsafe extern "C" fn htm_structured_data_raw_json(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_structured_data_schema_type(
-    ptr: *const html_to_markdown_rs::StructuredData,
+    ptr: *const html_to_markdown_rs::metadata::StructuredData,
 ) -> *mut std::ffi::c_char {
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -4072,65 +1035,11 @@ pub unsafe extern "C" fn htm_structured_data_schema_type(
     }
 }
 
-/// Create a `HtmlMetadata` from a JSON string. Returns null on failure.
-/// # Safety
-/// JSON string must be valid UTF-8 and null-terminated.
-/// Returned handle must be freed with `htm_html_metadata_free`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_html_metadata_from_json(json: *const c_char) -> *mut html_to_markdown_rs::HtmlMetadata {
-    clear_last_error();
-    if json.is_null() {
-        set_last_error(1, "Null pointer passed for JSON string");
-        return std::ptr::null_mut();
-    }
-    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
-        Ok(s) => s,
-        Err(_) => {
-            set_last_error(1, "Invalid UTF-8 in JSON string");
-            return std::ptr::null_mut();
-        }
-    };
-    match serde_json::from_str::<html_to_markdown_rs::HtmlMetadata>(c_str) {
-        Ok(val) => Box::into_raw(Box::new(val)),
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
-/// Serialize a `HtmlMetadata` to a JSON string. Returns null on failure.
-/// # Safety
-/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
-/// The returned string must be freed with `htm_free_string`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_html_metadata_to_json(ptr: *const html_to_markdown_rs::HtmlMetadata) -> *mut c_char {
-    clear_last_error();
-    if ptr.is_null() {
-        set_last_error(1, "Null pointer passed to to_json");
-        return std::ptr::null_mut();
-    }
-    let val = unsafe { &*ptr };
-    match serde_json::to_string(val) {
-        Ok(s) => match CString::new(s) {
-            Ok(cs) => cs.into_raw(),
-            Err(e) => {
-                set_last_error(2, &e.to_string());
-                std::ptr::null_mut()
-            }
-        },
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
-}
-
 /// Free a `HtmlMetadata` handle.
 /// # Safety
 /// Pointer must have been returned by this library, or be null.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_html_metadata_free(ptr: *mut html_to_markdown_rs::HtmlMetadata) {
+pub unsafe extern "C" fn htm_html_metadata_free(ptr: *mut html_to_markdown_rs::metadata::HtmlMetadata) {
     if !ptr.is_null() {
         unsafe {
             drop(Box::from_raw(ptr));
@@ -4143,7 +1052,7 @@ pub unsafe extern "C" fn htm_html_metadata_free(ptr: *mut html_to_markdown_rs::H
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_html_metadata_document(
-    ptr: *const html_to_markdown_rs::HtmlMetadata,
+    ptr: *const html_to_markdown_rs::metadata::HtmlMetadata,
 ) -> *mut html_to_markdown_rs::DocumentMetadata {
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -4157,7 +1066,7 @@ pub unsafe extern "C" fn htm_html_metadata_document(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_html_metadata_headers(
-    ptr: *const html_to_markdown_rs::HtmlMetadata,
+    ptr: *const html_to_markdown_rs::metadata::HtmlMetadata,
 ) -> *mut std::ffi::c_char {
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -4177,7 +1086,7 @@ pub unsafe extern "C" fn htm_html_metadata_headers(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_html_metadata_links(
-    ptr: *const html_to_markdown_rs::HtmlMetadata,
+    ptr: *const html_to_markdown_rs::metadata::HtmlMetadata,
 ) -> *mut std::ffi::c_char {
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -4197,7 +1106,7 @@ pub unsafe extern "C" fn htm_html_metadata_links(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_html_metadata_images(
-    ptr: *const html_to_markdown_rs::HtmlMetadata,
+    ptr: *const html_to_markdown_rs::metadata::HtmlMetadata,
 ) -> *mut std::ffi::c_char {
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -4217,7 +1126,7 @@ pub unsafe extern "C" fn htm_html_metadata_images(
 /// Pointer must be a valid handle returned by this library.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_html_metadata_structured_data(
-    ptr: *const html_to_markdown_rs::HtmlMetadata,
+    ptr: *const html_to_markdown_rs::metadata::HtmlMetadata,
 ) -> *mut std::ffi::c_char {
     if ptr.is_null() {
         return std::ptr::null_mut();
@@ -4229,6 +1138,2772 @@ pub unsafe extern "C" fn htm_html_metadata_structured_data(
             Err(_) => std::ptr::null_mut(),
         },
         Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Free a `ConversionOptions` handle.
+/// # Safety
+/// Pointer must have been returned by this library, or be null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_free(ptr: *mut html_to_markdown_rs::options::ConversionOptions) {
+    if !ptr.is_null() {
+        unsafe {
+            drop(Box::from_raw(ptr));
+        }
+    }
+}
+
+/// Get the `heading_style` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_heading_style(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> *mut html_to_markdown_rs::HeadingStyle {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    Box::into_raw(Box::new(obj.heading_style.clone()))
+}
+
+/// Get the `list_indent_type` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_list_indent_type(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> *mut html_to_markdown_rs::ListIndentType {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    Box::into_raw(Box::new(obj.list_indent_type.clone()))
+}
+
+/// Get the `list_indent_width` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_conversion_options_list_indent_width(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> usize {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.list_indent_width
+}
+
+/// Get the `bullets` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_bullets(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match CString::new(obj.bullets.to_string()) {
+        Ok(cs) => cs.into_raw(),
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `strong_em_symbol` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_strong_em_symbol(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match CString::new(obj.strong_em_symbol.to_string()) {
+        Ok(cs) => cs.into_raw(),
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `escape_asterisks` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_conversion_options_escape_asterisks(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.escape_asterisks as i32
+}
+
+/// Get the `escape_underscores` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_conversion_options_escape_underscores(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.escape_underscores as i32
+}
+
+/// Get the `escape_misc` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_conversion_options_escape_misc(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.escape_misc as i32
+}
+
+/// Get the `escape_ascii` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_conversion_options_escape_ascii(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.escape_ascii as i32
+}
+
+/// Get the `code_language` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_code_language(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match CString::new(obj.code_language.to_string()) {
+        Ok(cs) => cs.into_raw(),
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `autolinks` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_conversion_options_autolinks(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.autolinks as i32
+}
+
+/// Get the `default_title` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_conversion_options_default_title(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.default_title as i32
+}
+
+/// Get the `br_in_tables` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_conversion_options_br_in_tables(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.br_in_tables as i32
+}
+
+/// Get the `highlight_style` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_highlight_style(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> *mut html_to_markdown_rs::HighlightStyle {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    Box::into_raw(Box::new(obj.highlight_style.clone()))
+}
+
+/// Get the `extract_metadata` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_conversion_options_extract_metadata(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.extract_metadata as i32
+}
+
+/// Get the `whitespace_mode` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_whitespace_mode(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> *mut html_to_markdown_rs::WhitespaceMode {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    Box::into_raw(Box::new(obj.whitespace_mode.clone()))
+}
+
+/// Get the `strip_newlines` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_conversion_options_strip_newlines(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.strip_newlines as i32
+}
+
+/// Get the `wrap` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_conversion_options_wrap(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.wrap as i32
+}
+
+/// Get the `wrap_width` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_conversion_options_wrap_width(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> usize {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.wrap_width
+}
+
+/// Get the `convert_as_inline` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_conversion_options_convert_as_inline(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.convert_as_inline as i32
+}
+
+/// Get the `sub_symbol` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_sub_symbol(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match CString::new(obj.sub_symbol.to_string()) {
+        Ok(cs) => cs.into_raw(),
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `sup_symbol` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_sup_symbol(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match CString::new(obj.sup_symbol.to_string()) {
+        Ok(cs) => cs.into_raw(),
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `newline_style` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_newline_style(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> *mut html_to_markdown_rs::NewlineStyle {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    Box::into_raw(Box::new(obj.newline_style.clone()))
+}
+
+/// Get the `code_block_style` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_code_block_style(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> *mut html_to_markdown_rs::CodeBlockStyle {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    Box::into_raw(Box::new(obj.code_block_style.clone()))
+}
+
+/// Get the `keep_inline_images_in` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_keep_inline_images_in(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match serde_json::to_string(&obj.keep_inline_images_in) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(_) => std::ptr::null_mut(),
+        },
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `preprocessing` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_preprocessing(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> *mut html_to_markdown_rs::PreprocessingOptions {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    Box::into_raw(Box::new(obj.preprocessing.clone()))
+}
+
+/// Get the `encoding` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_encoding(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match CString::new(obj.encoding.to_string()) {
+        Ok(cs) => cs.into_raw(),
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `debug` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_conversion_options_debug(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.debug as i32
+}
+
+/// Get the `strip_tags` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_strip_tags(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match serde_json::to_string(&obj.strip_tags) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(_) => std::ptr::null_mut(),
+        },
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `preserve_tags` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_preserve_tags(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match serde_json::to_string(&obj.preserve_tags) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(_) => std::ptr::null_mut(),
+        },
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `skip_images` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_conversion_options_skip_images(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.skip_images as i32
+}
+
+/// Get the `link_style` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_link_style(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> *mut html_to_markdown_rs::LinkStyle {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    Box::into_raw(Box::new(obj.link_style.clone()))
+}
+
+/// Get the `output_format` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_output_format(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> *mut html_to_markdown_rs::OutputFormat {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    Box::into_raw(Box::new(obj.output_format.clone()))
+}
+
+/// Get the `include_document_structure` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_conversion_options_include_document_structure(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.include_document_structure as i32
+}
+
+/// Get the `extract_images` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_conversion_options_extract_images(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.extract_images as i32
+}
+
+/// Get the `max_image_size` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_conversion_options_max_image_size(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> u64 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.max_image_size
+}
+
+/// Get the `capture_svg` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_conversion_options_capture_svg(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.capture_svg as i32
+}
+
+/// Get the `infer_dimensions` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_conversion_options_infer_dimensions(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.infer_dimensions as i32
+}
+
+/// # Safety
+/// Caller must ensure all pointer arguments are valid or null.
+/// Returned pointers must be freed with the appropriate free function.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_default() -> *mut html_to_markdown_rs::ConversionOptions {
+    clear_last_error();
+    let result = html_to_markdown_rs::ConversionOptions::default();
+    Box::into_raw(Box::new(result))
+}
+
+/// Create a new builder with default values.
+/// # Safety
+/// Caller must ensure all pointer arguments are valid or null.
+/// Returned pointers must be freed with the appropriate free function.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_builder() -> *mut html_to_markdown_rs::ConversionOptionsBuilder {
+    clear_last_error();
+    let result = html_to_markdown_rs::ConversionOptions::builder();
+    Box::into_raw(Box::new(result))
+}
+
+/// Free a `ConversionOptionsBuilder` handle.
+/// # Safety
+/// Pointer must have been returned by this library, or be null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_builder_free(
+    ptr: *mut html_to_markdown_rs::options::ConversionOptionsBuilder,
+) {
+    if !ptr.is_null() {
+        unsafe {
+            drop(Box::from_raw(ptr));
+        }
+    }
+}
+
+/// Set the list of HTML tag names whose content is stripped from output.
+/// # Safety
+/// Caller must ensure all pointer arguments are valid or null.
+/// Returned pointers must be freed with the appropriate free function.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_builder_strip_tags(
+    this: *mut html_to_markdown_rs::options::ConversionOptionsBuilder,
+    tags: *const std::ffi::c_char,
+) -> *mut html_to_markdown_rs::ConversionOptionsBuilder {
+    clear_last_error();
+    if this.is_null() {
+        set_last_error(1, "Null pointer passed for self");
+        return std::ptr::null_mut();
+    }
+    // SAFETY: null check above guarantees this is a valid pointer originally from Box::into_raw.
+    let obj = unsafe { *Box::from_raw(this) };
+    if tags.is_null() {
+        set_last_error(1, "Null pointer passed for parameter 'tags'");
+        return std::ptr::null_mut();
+    }
+    let tags_rs_str = match unsafe { CStr::from_ptr(tags) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in parameter 'tags'");
+            return std::ptr::null_mut();
+        }
+    };
+    let tags_rs = match serde_json::from_str(tags_rs_str) {
+        Ok(v) => v,
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            return std::ptr::null_mut();
+        }
+    };
+    let result = obj.strip_tags(tags_rs);
+    Box::into_raw(Box::new(result))
+}
+
+/// Set the list of HTML tag names that are preserved verbatim in output.
+/// # Safety
+/// Caller must ensure all pointer arguments are valid or null.
+/// Returned pointers must be freed with the appropriate free function.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_builder_preserve_tags(
+    this: *mut html_to_markdown_rs::options::ConversionOptionsBuilder,
+    tags: *const std::ffi::c_char,
+) -> *mut html_to_markdown_rs::ConversionOptionsBuilder {
+    clear_last_error();
+    if this.is_null() {
+        set_last_error(1, "Null pointer passed for self");
+        return std::ptr::null_mut();
+    }
+    // SAFETY: null check above guarantees this is a valid pointer originally from Box::into_raw.
+    let obj = unsafe { *Box::from_raw(this) };
+    if tags.is_null() {
+        set_last_error(1, "Null pointer passed for parameter 'tags'");
+        return std::ptr::null_mut();
+    }
+    let tags_rs_str = match unsafe { CStr::from_ptr(tags) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in parameter 'tags'");
+            return std::ptr::null_mut();
+        }
+    };
+    let tags_rs = match serde_json::from_str(tags_rs_str) {
+        Ok(v) => v,
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            return std::ptr::null_mut();
+        }
+    };
+    let result = obj.preserve_tags(tags_rs);
+    Box::into_raw(Box::new(result))
+}
+
+/// Set the list of HTML tag names whose `<img>` children are kept inline.
+/// # Safety
+/// Caller must ensure all pointer arguments are valid or null.
+/// Returned pointers must be freed with the appropriate free function.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_builder_keep_inline_images_in(
+    this: *mut html_to_markdown_rs::options::ConversionOptionsBuilder,
+    tags: *const std::ffi::c_char,
+) -> *mut html_to_markdown_rs::ConversionOptionsBuilder {
+    clear_last_error();
+    if this.is_null() {
+        set_last_error(1, "Null pointer passed for self");
+        return std::ptr::null_mut();
+    }
+    // SAFETY: null check above guarantees this is a valid pointer originally from Box::into_raw.
+    let obj = unsafe { *Box::from_raw(this) };
+    if tags.is_null() {
+        set_last_error(1, "Null pointer passed for parameter 'tags'");
+        return std::ptr::null_mut();
+    }
+    let tags_rs_str = match unsafe { CStr::from_ptr(tags) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in parameter 'tags'");
+            return std::ptr::null_mut();
+        }
+    };
+    let tags_rs = match serde_json::from_str(tags_rs_str) {
+        Ok(v) => v,
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            return std::ptr::null_mut();
+        }
+    };
+    let result = obj.keep_inline_images_in(tags_rs);
+    Box::into_raw(Box::new(result))
+}
+
+/// Set the pre-processing options applied to the HTML before conversion.
+/// # Safety
+/// Caller must ensure all pointer arguments are valid or null.
+/// Returned pointers must be freed with the appropriate free function.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_builder_preprocessing(
+    this: *mut html_to_markdown_rs::options::ConversionOptionsBuilder,
+    preprocessing: *const html_to_markdown_rs::PreprocessingOptions,
+) -> *mut html_to_markdown_rs::ConversionOptionsBuilder {
+    clear_last_error();
+    if this.is_null() {
+        set_last_error(1, "Null pointer passed for self");
+        return std::ptr::null_mut();
+    }
+    // SAFETY: null check above guarantees this is a valid pointer originally from Box::into_raw.
+    let obj = unsafe { *Box::from_raw(this) };
+    if preprocessing.is_null() {
+        set_last_error(1, "Null pointer passed for parameter 'preprocessing'");
+        return std::ptr::null_mut();
+    }
+    let preprocessing_rs = unsafe { &*preprocessing }.clone();
+    let result = obj.preprocessing(preprocessing_rs);
+    Box::into_raw(Box::new(result))
+}
+
+/// Build the final [`ConversionOptions`].
+/// # Safety
+/// Caller must ensure all pointer arguments are valid or null.
+/// Returned pointers must be freed with the appropriate free function.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_builder_build(
+    this: *mut html_to_markdown_rs::options::ConversionOptionsBuilder,
+) -> *mut html_to_markdown_rs::ConversionOptions {
+    clear_last_error();
+    if this.is_null() {
+        set_last_error(1, "Null pointer passed for self");
+        return std::ptr::null_mut();
+    }
+    // SAFETY: null check above guarantees this is a valid pointer originally from Box::into_raw.
+    let obj = unsafe { *Box::from_raw(this) };
+    let result = obj.build();
+    Box::into_raw(Box::new(result))
+}
+
+/// Free a `ConversionOptionsUpdate` handle.
+/// # Safety
+/// Pointer must have been returned by this library, or be null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_free(
+    ptr: *mut html_to_markdown_rs::options::ConversionOptionsUpdate,
+) {
+    if !ptr.is_null() {
+        unsafe {
+            drop(Box::from_raw(ptr));
+        }
+    }
+}
+
+/// Get the `heading_style` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_heading_style(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> *mut html_to_markdown_rs::HeadingStyle {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.heading_style {
+        Some(val) => Box::into_raw(Box::new(val.clone())),
+        None => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `list_indent_type` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_list_indent_type(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> *mut html_to_markdown_rs::ListIndentType {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.list_indent_type {
+        Some(val) => Box::into_raw(Box::new(val.clone())),
+        None => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `list_indent_width` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_list_indent_width(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> usize {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.list_indent_width {
+        Some(val) => *val,
+        None => 0,
+    }
+}
+
+/// Get the `bullets` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_bullets(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.bullets {
+        Some(val) => match CString::new(val.to_string()) {
+            Ok(cs) => cs.into_raw(),
+            Err(_) => std::ptr::null_mut(),
+        },
+        None => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `strong_em_symbol` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_strong_em_symbol(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.strong_em_symbol {
+        Some(val) => match CString::new(val.to_string()) {
+            Ok(cs) => cs.into_raw(),
+            Err(_) => std::ptr::null_mut(),
+        },
+        None => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `escape_asterisks` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_escape_asterisks(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.escape_asterisks {
+        Some(val) => *val as i32,
+        None => 0,
+    }
+}
+
+/// Get the `escape_underscores` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_escape_underscores(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.escape_underscores {
+        Some(val) => *val as i32,
+        None => 0,
+    }
+}
+
+/// Get the `escape_misc` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_escape_misc(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.escape_misc {
+        Some(val) => *val as i32,
+        None => 0,
+    }
+}
+
+/// Get the `escape_ascii` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_escape_ascii(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.escape_ascii {
+        Some(val) => *val as i32,
+        None => 0,
+    }
+}
+
+/// Get the `code_language` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_code_language(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.code_language {
+        Some(val) => match CString::new(val.to_string()) {
+            Ok(cs) => cs.into_raw(),
+            Err(_) => std::ptr::null_mut(),
+        },
+        None => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `autolinks` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_autolinks(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.autolinks {
+        Some(val) => *val as i32,
+        None => 0,
+    }
+}
+
+/// Get the `default_title` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_default_title(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.default_title {
+        Some(val) => *val as i32,
+        None => 0,
+    }
+}
+
+/// Get the `br_in_tables` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_br_in_tables(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.br_in_tables {
+        Some(val) => *val as i32,
+        None => 0,
+    }
+}
+
+/// Get the `highlight_style` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_highlight_style(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> *mut html_to_markdown_rs::HighlightStyle {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.highlight_style {
+        Some(val) => Box::into_raw(Box::new(val.clone())),
+        None => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `extract_metadata` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_extract_metadata(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.extract_metadata {
+        Some(val) => *val as i32,
+        None => 0,
+    }
+}
+
+/// Get the `whitespace_mode` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_whitespace_mode(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> *mut html_to_markdown_rs::WhitespaceMode {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.whitespace_mode {
+        Some(val) => Box::into_raw(Box::new(val.clone())),
+        None => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `strip_newlines` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_strip_newlines(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.strip_newlines {
+        Some(val) => *val as i32,
+        None => 0,
+    }
+}
+
+/// Get the `wrap` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_wrap(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.wrap {
+        Some(val) => *val as i32,
+        None => 0,
+    }
+}
+
+/// Get the `wrap_width` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_wrap_width(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> usize {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.wrap_width {
+        Some(val) => *val,
+        None => 0,
+    }
+}
+
+/// Get the `convert_as_inline` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_convert_as_inline(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.convert_as_inline {
+        Some(val) => *val as i32,
+        None => 0,
+    }
+}
+
+/// Get the `sub_symbol` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_sub_symbol(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.sub_symbol {
+        Some(val) => match CString::new(val.to_string()) {
+            Ok(cs) => cs.into_raw(),
+            Err(_) => std::ptr::null_mut(),
+        },
+        None => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `sup_symbol` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_sup_symbol(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.sup_symbol {
+        Some(val) => match CString::new(val.to_string()) {
+            Ok(cs) => cs.into_raw(),
+            Err(_) => std::ptr::null_mut(),
+        },
+        None => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `newline_style` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_newline_style(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> *mut html_to_markdown_rs::NewlineStyle {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.newline_style {
+        Some(val) => Box::into_raw(Box::new(val.clone())),
+        None => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `code_block_style` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_code_block_style(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> *mut html_to_markdown_rs::CodeBlockStyle {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.code_block_style {
+        Some(val) => Box::into_raw(Box::new(val.clone())),
+        None => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `keep_inline_images_in` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_keep_inline_images_in(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.keep_inline_images_in {
+        Some(val) => match serde_json::to_string(&val) {
+            Ok(s) => match CString::new(s) {
+                Ok(cs) => cs.into_raw(),
+                Err(_) => std::ptr::null_mut(),
+            },
+            Err(_) => std::ptr::null_mut(),
+        },
+        None => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `preprocessing` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_preprocessing(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> *mut html_to_markdown_rs::PreprocessingOptionsUpdate {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.preprocessing {
+        Some(val) => Box::into_raw(Box::new(val.clone())),
+        None => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `encoding` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_encoding(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.encoding {
+        Some(val) => match CString::new(val.to_string()) {
+            Ok(cs) => cs.into_raw(),
+            Err(_) => std::ptr::null_mut(),
+        },
+        None => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `debug` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_debug(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.debug {
+        Some(val) => *val as i32,
+        None => 0,
+    }
+}
+
+/// Get the `strip_tags` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_strip_tags(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.strip_tags {
+        Some(val) => match serde_json::to_string(&val) {
+            Ok(s) => match CString::new(s) {
+                Ok(cs) => cs.into_raw(),
+                Err(_) => std::ptr::null_mut(),
+            },
+            Err(_) => std::ptr::null_mut(),
+        },
+        None => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `preserve_tags` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_preserve_tags(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.preserve_tags {
+        Some(val) => match serde_json::to_string(&val) {
+            Ok(s) => match CString::new(s) {
+                Ok(cs) => cs.into_raw(),
+                Err(_) => std::ptr::null_mut(),
+            },
+            Err(_) => std::ptr::null_mut(),
+        },
+        None => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `skip_images` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_skip_images(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.skip_images {
+        Some(val) => *val as i32,
+        None => 0,
+    }
+}
+
+/// Get the `link_style` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_link_style(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> *mut html_to_markdown_rs::LinkStyle {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.link_style {
+        Some(val) => Box::into_raw(Box::new(val.clone())),
+        None => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `output_format` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_output_format(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> *mut html_to_markdown_rs::OutputFormat {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.output_format {
+        Some(val) => Box::into_raw(Box::new(val.clone())),
+        None => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `include_document_structure` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_include_document_structure(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.include_document_structure {
+        Some(val) => *val as i32,
+        None => 0,
+    }
+}
+
+/// Get the `extract_images` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_extract_images(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.extract_images {
+        Some(val) => *val as i32,
+        None => 0,
+    }
+}
+
+/// Get the `max_image_size` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_max_image_size(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> u64 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.max_image_size {
+        Some(val) => *val,
+        None => 0,
+    }
+}
+
+/// Get the `capture_svg` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_capture_svg(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.capture_svg {
+        Some(val) => *val as i32,
+        None => 0,
+    }
+}
+
+/// Get the `infer_dimensions` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_infer_dimensions(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.infer_dimensions {
+        Some(val) => *val as i32,
+        None => 0,
+    }
+}
+
+/// Free a `PreprocessingOptions` handle.
+/// # Safety
+/// Pointer must have been returned by this library, or be null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_preprocessing_options_free(ptr: *mut html_to_markdown_rs::options::PreprocessingOptions) {
+    if !ptr.is_null() {
+        unsafe {
+            drop(Box::from_raw(ptr));
+        }
+    }
+}
+
+/// Get the `enabled` field from a `PreprocessingOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_preprocessing_options_enabled(
+    ptr: *const html_to_markdown_rs::options::PreprocessingOptions,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.enabled as i32
+}
+
+/// Get the `preset` field from a `PreprocessingOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_preprocessing_options_preset(
+    ptr: *const html_to_markdown_rs::options::PreprocessingOptions,
+) -> *mut html_to_markdown_rs::PreprocessingPreset {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    Box::into_raw(Box::new(obj.preset.clone()))
+}
+
+/// Get the `remove_navigation` field from a `PreprocessingOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_preprocessing_options_remove_navigation(
+    ptr: *const html_to_markdown_rs::options::PreprocessingOptions,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.remove_navigation as i32
+}
+
+/// Get the `remove_forms` field from a `PreprocessingOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_preprocessing_options_remove_forms(
+    ptr: *const html_to_markdown_rs::options::PreprocessingOptions,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.remove_forms as i32
+}
+
+/// # Safety
+/// Caller must ensure all pointer arguments are valid or null.
+/// Returned pointers must be freed with the appropriate free function.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_preprocessing_options_default() -> *mut html_to_markdown_rs::PreprocessingOptions {
+    clear_last_error();
+    let result = html_to_markdown_rs::PreprocessingOptions::default();
+    Box::into_raw(Box::new(result))
+}
+
+/// Free a `PreprocessingOptionsUpdate` handle.
+/// # Safety
+/// Pointer must have been returned by this library, or be null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_preprocessing_options_update_free(
+    ptr: *mut html_to_markdown_rs::options::PreprocessingOptionsUpdate,
+) {
+    if !ptr.is_null() {
+        unsafe {
+            drop(Box::from_raw(ptr));
+        }
+    }
+}
+
+/// Get the `enabled` field from a `PreprocessingOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_preprocessing_options_update_enabled(
+    ptr: *const html_to_markdown_rs::options::PreprocessingOptionsUpdate,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.enabled {
+        Some(val) => *val as i32,
+        None => 0,
+    }
+}
+
+/// Get the `preset` field from a `PreprocessingOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_preprocessing_options_update_preset(
+    ptr: *const html_to_markdown_rs::options::PreprocessingOptionsUpdate,
+) -> *mut html_to_markdown_rs::PreprocessingPreset {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.preset {
+        Some(val) => Box::into_raw(Box::new(val.clone())),
+        None => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `remove_navigation` field from a `PreprocessingOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_preprocessing_options_update_remove_navigation(
+    ptr: *const html_to_markdown_rs::options::PreprocessingOptionsUpdate,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.remove_navigation {
+        Some(val) => *val as i32,
+        None => 0,
+    }
+}
+
+/// Get the `remove_forms` field from a `PreprocessingOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_preprocessing_options_update_remove_forms(
+    ptr: *const html_to_markdown_rs::options::PreprocessingOptionsUpdate,
+) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.remove_forms {
+        Some(val) => *val as i32,
+        None => 0,
+    }
+}
+
+/// Free a `ConversionResult` handle.
+/// # Safety
+/// Pointer must have been returned by this library, or be null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_result_free(ptr: *mut html_to_markdown_rs::types::ConversionResult) {
+    if !ptr.is_null() {
+        unsafe {
+            drop(Box::from_raw(ptr));
+        }
+    }
+}
+
+/// Get the `content` field from a `ConversionResult`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_result_content(
+    ptr: *const html_to_markdown_rs::types::ConversionResult,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.content {
+        Some(val) => match CString::new(val.to_string()) {
+            Ok(cs) => cs.into_raw(),
+            Err(_) => std::ptr::null_mut(),
+        },
+        None => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `document` field from a `ConversionResult`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_result_document(
+    ptr: *const html_to_markdown_rs::types::ConversionResult,
+) -> *mut html_to_markdown_rs::DocumentStructure {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.document {
+        Some(val) => Box::into_raw(Box::new(val.clone())),
+        None => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `metadata` field from a `ConversionResult`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_result_metadata(
+    ptr: *const html_to_markdown_rs::types::ConversionResult,
+) -> *mut html_to_markdown_rs::metadata::HtmlMetadata {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    Box::into_raw(Box::new(obj.metadata.clone()))
+}
+
+/// Get the `tables` field from a `ConversionResult`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_result_tables(
+    ptr: *const html_to_markdown_rs::types::ConversionResult,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match serde_json::to_string(&obj.tables) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(_) => std::ptr::null_mut(),
+        },
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `warnings` field from a `ConversionResult`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_result_warnings(
+    ptr: *const html_to_markdown_rs::types::ConversionResult,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match serde_json::to_string(&obj.warnings) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(_) => std::ptr::null_mut(),
+        },
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Create a `DocumentStructure` from a JSON string. Returns null on failure.
+/// # Safety
+/// JSON string must be valid UTF-8 and null-terminated.
+/// Returned handle must be freed with `htm_document_structure_free`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_document_structure_from_json(
+    json: *const c_char,
+) -> *mut html_to_markdown_rs::types::DocumentStructure {
+    clear_last_error();
+    if json.is_null() {
+        set_last_error(1, "Null pointer passed for JSON string");
+        return std::ptr::null_mut();
+    }
+    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in JSON string");
+            return std::ptr::null_mut();
+        }
+    };
+    match serde_json::from_str::<html_to_markdown_rs::types::DocumentStructure>(c_str) {
+        Ok(val) => Box::into_raw(Box::new(val)),
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// Serialize a `DocumentStructure` to a JSON string. Returns null on failure.
+/// # Safety
+/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
+/// The returned string must be freed with `htm_free_string`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_document_structure_to_json(
+    ptr: *const html_to_markdown_rs::types::DocumentStructure,
+) -> *mut c_char {
+    clear_last_error();
+    if ptr.is_null() {
+        set_last_error(1, "Null pointer passed to to_json");
+        return std::ptr::null_mut();
+    }
+    let val = unsafe { &*ptr };
+    match serde_json::to_string(val) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(e) => {
+                set_last_error(2, &e.to_string());
+                std::ptr::null_mut()
+            }
+        },
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// Free a `DocumentStructure` handle.
+/// # Safety
+/// Pointer must have been returned by this library, or be null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_document_structure_free(ptr: *mut html_to_markdown_rs::types::DocumentStructure) {
+    if !ptr.is_null() {
+        unsafe {
+            drop(Box::from_raw(ptr));
+        }
+    }
+}
+
+/// Get the `nodes` field from a `DocumentStructure`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_document_structure_nodes(
+    ptr: *const html_to_markdown_rs::types::DocumentStructure,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match serde_json::to_string(&obj.nodes) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(_) => std::ptr::null_mut(),
+        },
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `source_format` field from a `DocumentStructure`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_document_structure_source_format(
+    ptr: *const html_to_markdown_rs::types::DocumentStructure,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.source_format {
+        Some(val) => match CString::new(val.to_string()) {
+            Ok(cs) => cs.into_raw(),
+            Err(_) => std::ptr::null_mut(),
+        },
+        None => std::ptr::null_mut(),
+    }
+}
+
+/// Create a `DocumentNode` from a JSON string. Returns null on failure.
+/// # Safety
+/// JSON string must be valid UTF-8 and null-terminated.
+/// Returned handle must be freed with `htm_document_node_free`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_document_node_from_json(
+    json: *const c_char,
+) -> *mut html_to_markdown_rs::types::DocumentNode {
+    clear_last_error();
+    if json.is_null() {
+        set_last_error(1, "Null pointer passed for JSON string");
+        return std::ptr::null_mut();
+    }
+    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in JSON string");
+            return std::ptr::null_mut();
+        }
+    };
+    match serde_json::from_str::<html_to_markdown_rs::types::DocumentNode>(c_str) {
+        Ok(val) => Box::into_raw(Box::new(val)),
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// Serialize a `DocumentNode` to a JSON string. Returns null on failure.
+/// # Safety
+/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
+/// The returned string must be freed with `htm_free_string`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_document_node_to_json(
+    ptr: *const html_to_markdown_rs::types::DocumentNode,
+) -> *mut c_char {
+    clear_last_error();
+    if ptr.is_null() {
+        set_last_error(1, "Null pointer passed to to_json");
+        return std::ptr::null_mut();
+    }
+    let val = unsafe { &*ptr };
+    match serde_json::to_string(val) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(e) => {
+                set_last_error(2, &e.to_string());
+                std::ptr::null_mut()
+            }
+        },
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// Free a `DocumentNode` handle.
+/// # Safety
+/// Pointer must have been returned by this library, or be null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_document_node_free(ptr: *mut html_to_markdown_rs::types::DocumentNode) {
+    if !ptr.is_null() {
+        unsafe {
+            drop(Box::from_raw(ptr));
+        }
+    }
+}
+
+/// Get the `id` field from a `DocumentNode`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_document_node_id(
+    ptr: *const html_to_markdown_rs::types::DocumentNode,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match CString::new(obj.id.to_string()) {
+        Ok(cs) => cs.into_raw(),
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `content` field from a `DocumentNode`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_document_node_content(
+    ptr: *const html_to_markdown_rs::types::DocumentNode,
+) -> *mut html_to_markdown_rs::NodeContent {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    Box::into_raw(Box::new(obj.content.clone()))
+}
+
+/// Get the `parent` field from a `DocumentNode`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_document_node_parent(ptr: *const html_to_markdown_rs::types::DocumentNode) -> u32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.parent {
+        Some(val) => *val,
+        None => 0,
+    }
+}
+
+/// Get the `children` field from a `DocumentNode`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_document_node_children(
+    ptr: *const html_to_markdown_rs::types::DocumentNode,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match serde_json::to_string(&obj.children) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(_) => std::ptr::null_mut(),
+        },
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `annotations` field from a `DocumentNode`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_document_node_annotations(
+    ptr: *const html_to_markdown_rs::types::DocumentNode,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match serde_json::to_string(&obj.annotations) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(_) => std::ptr::null_mut(),
+        },
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `attributes` field from a `DocumentNode`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_document_node_attributes(
+    ptr: *const html_to_markdown_rs::types::DocumentNode,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.attributes {
+        Some(val) => match serde_json::to_string(&val) {
+            Ok(s) => match CString::new(s) {
+                Ok(cs) => cs.into_raw(),
+                Err(_) => std::ptr::null_mut(),
+            },
+            Err(_) => std::ptr::null_mut(),
+        },
+        None => std::ptr::null_mut(),
+    }
+}
+
+/// Create a `TextAnnotation` from a JSON string. Returns null on failure.
+/// # Safety
+/// JSON string must be valid UTF-8 and null-terminated.
+/// Returned handle must be freed with `htm_text_annotation_free`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_text_annotation_from_json(
+    json: *const c_char,
+) -> *mut html_to_markdown_rs::types::TextAnnotation {
+    clear_last_error();
+    if json.is_null() {
+        set_last_error(1, "Null pointer passed for JSON string");
+        return std::ptr::null_mut();
+    }
+    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in JSON string");
+            return std::ptr::null_mut();
+        }
+    };
+    match serde_json::from_str::<html_to_markdown_rs::types::TextAnnotation>(c_str) {
+        Ok(val) => Box::into_raw(Box::new(val)),
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// Serialize a `TextAnnotation` to a JSON string. Returns null on failure.
+/// # Safety
+/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
+/// The returned string must be freed with `htm_free_string`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_text_annotation_to_json(
+    ptr: *const html_to_markdown_rs::types::TextAnnotation,
+) -> *mut c_char {
+    clear_last_error();
+    if ptr.is_null() {
+        set_last_error(1, "Null pointer passed to to_json");
+        return std::ptr::null_mut();
+    }
+    let val = unsafe { &*ptr };
+    match serde_json::to_string(val) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(e) => {
+                set_last_error(2, &e.to_string());
+                std::ptr::null_mut()
+            }
+        },
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// Free a `TextAnnotation` handle.
+/// # Safety
+/// Pointer must have been returned by this library, or be null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_text_annotation_free(ptr: *mut html_to_markdown_rs::types::TextAnnotation) {
+    if !ptr.is_null() {
+        unsafe {
+            drop(Box::from_raw(ptr));
+        }
+    }
+}
+
+/// Get the `start` field from a `TextAnnotation`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_text_annotation_start(
+    ptr: *const html_to_markdown_rs::types::TextAnnotation,
+) -> u32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.start
+}
+
+/// Get the `end` field from a `TextAnnotation`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_text_annotation_end(ptr: *const html_to_markdown_rs::types::TextAnnotation) -> u32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.end
+}
+
+/// Get the `kind` field from a `TextAnnotation`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_text_annotation_kind(
+    ptr: *const html_to_markdown_rs::types::TextAnnotation,
+) -> *mut html_to_markdown_rs::AnnotationKind {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    Box::into_raw(Box::new(obj.kind.clone()))
+}
+
+/// Create a `TableGrid` from a JSON string. Returns null on failure.
+/// # Safety
+/// JSON string must be valid UTF-8 and null-terminated.
+/// Returned handle must be freed with `htm_table_grid_free`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_table_grid_from_json(json: *const c_char) -> *mut html_to_markdown_rs::types::TableGrid {
+    clear_last_error();
+    if json.is_null() {
+        set_last_error(1, "Null pointer passed for JSON string");
+        return std::ptr::null_mut();
+    }
+    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in JSON string");
+            return std::ptr::null_mut();
+        }
+    };
+    match serde_json::from_str::<html_to_markdown_rs::types::TableGrid>(c_str) {
+        Ok(val) => Box::into_raw(Box::new(val)),
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// Serialize a `TableGrid` to a JSON string. Returns null on failure.
+/// # Safety
+/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
+/// The returned string must be freed with `htm_free_string`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_table_grid_to_json(ptr: *const html_to_markdown_rs::types::TableGrid) -> *mut c_char {
+    clear_last_error();
+    if ptr.is_null() {
+        set_last_error(1, "Null pointer passed to to_json");
+        return std::ptr::null_mut();
+    }
+    let val = unsafe { &*ptr };
+    match serde_json::to_string(val) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(e) => {
+                set_last_error(2, &e.to_string());
+                std::ptr::null_mut()
+            }
+        },
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// Free a `TableGrid` handle.
+/// # Safety
+/// Pointer must have been returned by this library, or be null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_table_grid_free(ptr: *mut html_to_markdown_rs::types::TableGrid) {
+    if !ptr.is_null() {
+        unsafe {
+            drop(Box::from_raw(ptr));
+        }
+    }
+}
+
+/// Get the `rows` field from a `TableGrid`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_table_grid_rows(ptr: *const html_to_markdown_rs::types::TableGrid) -> u32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.rows
+}
+
+/// Get the `cols` field from a `TableGrid`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_table_grid_cols(ptr: *const html_to_markdown_rs::types::TableGrid) -> u32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.cols
+}
+
+/// Get the `cells` field from a `TableGrid`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_table_grid_cells(
+    ptr: *const html_to_markdown_rs::types::TableGrid,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match serde_json::to_string(&obj.cells) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(_) => std::ptr::null_mut(),
+        },
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Create a `GridCell` from a JSON string. Returns null on failure.
+/// # Safety
+/// JSON string must be valid UTF-8 and null-terminated.
+/// Returned handle must be freed with `htm_grid_cell_free`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_grid_cell_from_json(json: *const c_char) -> *mut html_to_markdown_rs::types::GridCell {
+    clear_last_error();
+    if json.is_null() {
+        set_last_error(1, "Null pointer passed for JSON string");
+        return std::ptr::null_mut();
+    }
+    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in JSON string");
+            return std::ptr::null_mut();
+        }
+    };
+    match serde_json::from_str::<html_to_markdown_rs::types::GridCell>(c_str) {
+        Ok(val) => Box::into_raw(Box::new(val)),
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// Serialize a `GridCell` to a JSON string. Returns null on failure.
+/// # Safety
+/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
+/// The returned string must be freed with `htm_free_string`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_grid_cell_to_json(ptr: *const html_to_markdown_rs::types::GridCell) -> *mut c_char {
+    clear_last_error();
+    if ptr.is_null() {
+        set_last_error(1, "Null pointer passed to to_json");
+        return std::ptr::null_mut();
+    }
+    let val = unsafe { &*ptr };
+    match serde_json::to_string(val) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(e) => {
+                set_last_error(2, &e.to_string());
+                std::ptr::null_mut()
+            }
+        },
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// Free a `GridCell` handle.
+/// # Safety
+/// Pointer must have been returned by this library, or be null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_grid_cell_free(ptr: *mut html_to_markdown_rs::types::GridCell) {
+    if !ptr.is_null() {
+        unsafe {
+            drop(Box::from_raw(ptr));
+        }
+    }
+}
+
+/// Get the `content` field from a `GridCell`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_grid_cell_content(
+    ptr: *const html_to_markdown_rs::types::GridCell,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match CString::new(obj.content.to_string()) {
+        Ok(cs) => cs.into_raw(),
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `row` field from a `GridCell`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_grid_cell_row(ptr: *const html_to_markdown_rs::types::GridCell) -> u32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.row
+}
+
+/// Get the `col` field from a `GridCell`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_grid_cell_col(ptr: *const html_to_markdown_rs::types::GridCell) -> u32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.col
+}
+
+/// Get the `row_span` field from a `GridCell`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_grid_cell_row_span(ptr: *const html_to_markdown_rs::types::GridCell) -> u32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.row_span
+}
+
+/// Get the `col_span` field from a `GridCell`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_grid_cell_col_span(ptr: *const html_to_markdown_rs::types::GridCell) -> u32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.col_span
+}
+
+/// Get the `is_header` field from a `GridCell`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub const unsafe extern "C" fn htm_grid_cell_is_header(ptr: *const html_to_markdown_rs::types::GridCell) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.is_header as i32
+}
+
+/// Create a `TableData` from a JSON string. Returns null on failure.
+/// # Safety
+/// JSON string must be valid UTF-8 and null-terminated.
+/// Returned handle must be freed with `htm_table_data_free`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_table_data_from_json(json: *const c_char) -> *mut html_to_markdown_rs::types::TableData {
+    clear_last_error();
+    if json.is_null() {
+        set_last_error(1, "Null pointer passed for JSON string");
+        return std::ptr::null_mut();
+    }
+    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in JSON string");
+            return std::ptr::null_mut();
+        }
+    };
+    match serde_json::from_str::<html_to_markdown_rs::types::TableData>(c_str) {
+        Ok(val) => Box::into_raw(Box::new(val)),
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// Serialize a `TableData` to a JSON string. Returns null on failure.
+/// # Safety
+/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
+/// The returned string must be freed with `htm_free_string`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_table_data_to_json(ptr: *const html_to_markdown_rs::types::TableData) -> *mut c_char {
+    clear_last_error();
+    if ptr.is_null() {
+        set_last_error(1, "Null pointer passed to to_json");
+        return std::ptr::null_mut();
+    }
+    let val = unsafe { &*ptr };
+    match serde_json::to_string(val) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(e) => {
+                set_last_error(2, &e.to_string());
+                std::ptr::null_mut()
+            }
+        },
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// Free a `TableData` handle.
+/// # Safety
+/// Pointer must have been returned by this library, or be null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_table_data_free(ptr: *mut html_to_markdown_rs::types::TableData) {
+    if !ptr.is_null() {
+        unsafe {
+            drop(Box::from_raw(ptr));
+        }
+    }
+}
+
+/// Get the `grid` field from a `TableData`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_table_data_grid(
+    ptr: *const html_to_markdown_rs::types::TableData,
+) -> *mut html_to_markdown_rs::TableGrid {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    Box::into_raw(Box::new(obj.grid.clone()))
+}
+
+/// Get the `markdown` field from a `TableData`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_table_data_markdown(
+    ptr: *const html_to_markdown_rs::types::TableData,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match CString::new(obj.markdown.to_string()) {
+        Ok(cs) => cs.into_raw(),
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Create a `ProcessingWarning` from a JSON string. Returns null on failure.
+/// # Safety
+/// JSON string must be valid UTF-8 and null-terminated.
+/// Returned handle must be freed with `htm_processing_warning_free`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_processing_warning_from_json(
+    json: *const c_char,
+) -> *mut html_to_markdown_rs::types::ProcessingWarning {
+    clear_last_error();
+    if json.is_null() {
+        set_last_error(1, "Null pointer passed for JSON string");
+        return std::ptr::null_mut();
+    }
+    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in JSON string");
+            return std::ptr::null_mut();
+        }
+    };
+    match serde_json::from_str::<html_to_markdown_rs::types::ProcessingWarning>(c_str) {
+        Ok(val) => Box::into_raw(Box::new(val)),
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// Serialize a `ProcessingWarning` to a JSON string. Returns null on failure.
+/// # Safety
+/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
+/// The returned string must be freed with `htm_free_string`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_processing_warning_to_json(
+    ptr: *const html_to_markdown_rs::types::ProcessingWarning,
+) -> *mut c_char {
+    clear_last_error();
+    if ptr.is_null() {
+        set_last_error(1, "Null pointer passed to to_json");
+        return std::ptr::null_mut();
+    }
+    let val = unsafe { &*ptr };
+    match serde_json::to_string(val) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(e) => {
+                set_last_error(2, &e.to_string());
+                std::ptr::null_mut()
+            }
+        },
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// Free a `ProcessingWarning` handle.
+/// # Safety
+/// Pointer must have been returned by this library, or be null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_processing_warning_free(ptr: *mut html_to_markdown_rs::types::ProcessingWarning) {
+    if !ptr.is_null() {
+        unsafe {
+            drop(Box::from_raw(ptr));
+        }
+    }
+}
+
+/// Get the `message` field from a `ProcessingWarning`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_processing_warning_message(
+    ptr: *const html_to_markdown_rs::types::ProcessingWarning,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match CString::new(obj.message.to_string()) {
+        Ok(cs) => cs.into_raw(),
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `kind` field from a `ProcessingWarning`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_processing_warning_kind(
+    ptr: *const html_to_markdown_rs::types::ProcessingWarning,
+) -> *mut html_to_markdown_rs::WarningKind {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    Box::into_raw(Box::new(obj.kind.clone()))
+}
+
+/// Convert an integer to a `TextDirection` variant. Returns -1 on invalid input.
+/// # Safety
+/// Caller must ensure all pointer arguments are valid or null.
+/// Returned pointers must be freed with the appropriate free function.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_text_direction_from_i32(value: i32) -> i32 {
+    match value {
+        0 => 0, // LeftToRight
+        1 => 1, // RightToLeft
+        2 => 2, // Auto
+        _ => {
+            set_last_error(1, "Invalid TextDirection variant");
+            -1
+        }
+    }
+}
+
+/// Convert a `TextDirection` variant name (C string) to its integer value. Returns -1 on invalid input.
+/// # Safety
+/// Caller must ensure `ptr` is a valid pointer to a `c_char` or null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_text_direction_from_str(name: *const c_char) -> i32 {
+    if name.is_null() {
+        set_last_error(1, "Null pointer passed for enum name");
+        return -1;
+    }
+    let s = match unsafe { CStr::from_ptr(name) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in enum name");
+            return -1;
+        }
+    };
+    match s {
+        "LeftToRight" => 0,
+        "RightToLeft" => 1,
+        "Auto" => 2,
+        _ => {
+            set_last_error(1, "Unknown TextDirection variant");
+            -1
+        }
+    }
+}
+
+/// Convert an integer to a `LinkType` variant. Returns -1 on invalid input.
+/// # Safety
+/// Caller must ensure all pointer arguments are valid or null.
+/// Returned pointers must be freed with the appropriate free function.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_link_type_from_i32(value: i32) -> i32 {
+    match value {
+        0 => 0, // Anchor
+        1 => 1, // Internal
+        2 => 2, // External
+        3 => 3, // Email
+        4 => 4, // Phone
+        5 => 5, // Other
+        _ => {
+            set_last_error(1, "Invalid LinkType variant");
+            -1
+        }
+    }
+}
+
+/// Convert a `LinkType` variant name (C string) to its integer value. Returns -1 on invalid input.
+/// # Safety
+/// Caller must ensure `ptr` is a valid pointer to a `c_char` or null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_link_type_from_str(name: *const c_char) -> i32 {
+    if name.is_null() {
+        set_last_error(1, "Null pointer passed for enum name");
+        return -1;
+    }
+    let s = match unsafe { CStr::from_ptr(name) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in enum name");
+            return -1;
+        }
+    };
+    match s {
+        "Anchor" => 0,
+        "Internal" => 1,
+        "External" => 2,
+        "Email" => 3,
+        "Phone" => 4,
+        "Other" => 5,
+        _ => {
+            set_last_error(1, "Unknown LinkType variant");
+            -1
+        }
+    }
+}
+
+/// Convert an integer to a `ImageType` variant. Returns -1 on invalid input.
+/// # Safety
+/// Caller must ensure all pointer arguments are valid or null.
+/// Returned pointers must be freed with the appropriate free function.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_image_type_from_i32(value: i32) -> i32 {
+    match value {
+        0 => 0, // DataUri
+        1 => 1, // InlineSvg
+        2 => 2, // External
+        3 => 3, // Relative
+        _ => {
+            set_last_error(1, "Invalid ImageType variant");
+            -1
+        }
+    }
+}
+
+/// Convert a `ImageType` variant name (C string) to its integer value. Returns -1 on invalid input.
+/// # Safety
+/// Caller must ensure `ptr` is a valid pointer to a `c_char` or null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_image_type_from_str(name: *const c_char) -> i32 {
+    if name.is_null() {
+        set_last_error(1, "Null pointer passed for enum name");
+        return -1;
+    }
+    let s = match unsafe { CStr::from_ptr(name) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in enum name");
+            return -1;
+        }
+    };
+    match s {
+        "DataUri" => 0,
+        "InlineSvg" => 1,
+        "External" => 2,
+        "Relative" => 3,
+        _ => {
+            set_last_error(1, "Unknown ImageType variant");
+            -1
+        }
+    }
+}
+
+/// Convert an integer to a `StructuredDataType` variant. Returns -1 on invalid input.
+/// # Safety
+/// Caller must ensure all pointer arguments are valid or null.
+/// Returned pointers must be freed with the appropriate free function.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_structured_data_type_from_i32(value: i32) -> i32 {
+    match value {
+        0 => 0, // JsonLd
+        1 => 1, // Microdata
+        2 => 2, // RDFa
+        _ => {
+            set_last_error(1, "Invalid StructuredDataType variant");
+            -1
+        }
+    }
+}
+
+/// Convert a `StructuredDataType` variant name (C string) to its integer value. Returns -1 on invalid input.
+/// # Safety
+/// Caller must ensure `ptr` is a valid pointer to a `c_char` or null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_structured_data_type_from_str(name: *const c_char) -> i32 {
+    if name.is_null() {
+        set_last_error(1, "Null pointer passed for enum name");
+        return -1;
+    }
+    let s = match unsafe { CStr::from_ptr(name) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in enum name");
+            return -1;
+        }
+    };
+    match s {
+        "JsonLd" => 0,
+        "Microdata" => 1,
+        "RDFa" => 2,
+        _ => {
+            set_last_error(1, "Unknown StructuredDataType variant");
+            -1
+        }
     }
 }
 
@@ -4790,190 +4465,6 @@ pub unsafe extern "C" fn htm_warning_kind_from_str(name: *const c_char) -> i32 {
     }
 }
 
-/// Convert an integer to a `TextDirection` variant. Returns -1 on invalid input.
-/// # Safety
-/// Caller must ensure all pointer arguments are valid or null.
-/// Returned pointers must be freed with the appropriate free function.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_text_direction_from_i32(value: i32) -> i32 {
-    match value {
-        0 => 0, // LeftToRight
-        1 => 1, // RightToLeft
-        2 => 2, // Auto
-        _ => {
-            set_last_error(1, "Invalid TextDirection variant");
-            -1
-        }
-    }
-}
-
-/// Convert a `TextDirection` variant name (C string) to its integer value. Returns -1 on invalid input.
-/// # Safety
-/// Caller must ensure `ptr` is a valid pointer to a `c_char` or null.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_text_direction_from_str(name: *const c_char) -> i32 {
-    if name.is_null() {
-        set_last_error(1, "Null pointer passed for enum name");
-        return -1;
-    }
-    let s = match unsafe { CStr::from_ptr(name) }.to_str() {
-        Ok(s) => s,
-        Err(_) => {
-            set_last_error(1, "Invalid UTF-8 in enum name");
-            return -1;
-        }
-    };
-    match s {
-        "LeftToRight" => 0,
-        "RightToLeft" => 1,
-        "Auto" => 2,
-        _ => {
-            set_last_error(1, "Unknown TextDirection variant");
-            -1
-        }
-    }
-}
-
-/// Convert an integer to a `LinkType` variant. Returns -1 on invalid input.
-/// # Safety
-/// Caller must ensure all pointer arguments are valid or null.
-/// Returned pointers must be freed with the appropriate free function.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_link_type_from_i32(value: i32) -> i32 {
-    match value {
-        0 => 0, // Anchor
-        1 => 1, // Internal
-        2 => 2, // External
-        3 => 3, // Email
-        4 => 4, // Phone
-        5 => 5, // Other
-        _ => {
-            set_last_error(1, "Invalid LinkType variant");
-            -1
-        }
-    }
-}
-
-/// Convert a `LinkType` variant name (C string) to its integer value. Returns -1 on invalid input.
-/// # Safety
-/// Caller must ensure `ptr` is a valid pointer to a `c_char` or null.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_link_type_from_str(name: *const c_char) -> i32 {
-    if name.is_null() {
-        set_last_error(1, "Null pointer passed for enum name");
-        return -1;
-    }
-    let s = match unsafe { CStr::from_ptr(name) }.to_str() {
-        Ok(s) => s,
-        Err(_) => {
-            set_last_error(1, "Invalid UTF-8 in enum name");
-            return -1;
-        }
-    };
-    match s {
-        "Anchor" => 0,
-        "Internal" => 1,
-        "External" => 2,
-        "Email" => 3,
-        "Phone" => 4,
-        "Other" => 5,
-        _ => {
-            set_last_error(1, "Unknown LinkType variant");
-            -1
-        }
-    }
-}
-
-/// Convert an integer to a `ImageType` variant. Returns -1 on invalid input.
-/// # Safety
-/// Caller must ensure all pointer arguments are valid or null.
-/// Returned pointers must be freed with the appropriate free function.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_image_type_from_i32(value: i32) -> i32 {
-    match value {
-        0 => 0, // DataUri
-        1 => 1, // InlineSvg
-        2 => 2, // External
-        3 => 3, // Relative
-        _ => {
-            set_last_error(1, "Invalid ImageType variant");
-            -1
-        }
-    }
-}
-
-/// Convert a `ImageType` variant name (C string) to its integer value. Returns -1 on invalid input.
-/// # Safety
-/// Caller must ensure `ptr` is a valid pointer to a `c_char` or null.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_image_type_from_str(name: *const c_char) -> i32 {
-    if name.is_null() {
-        set_last_error(1, "Null pointer passed for enum name");
-        return -1;
-    }
-    let s = match unsafe { CStr::from_ptr(name) }.to_str() {
-        Ok(s) => s,
-        Err(_) => {
-            set_last_error(1, "Invalid UTF-8 in enum name");
-            return -1;
-        }
-    };
-    match s {
-        "DataUri" => 0,
-        "InlineSvg" => 1,
-        "External" => 2,
-        "Relative" => 3,
-        _ => {
-            set_last_error(1, "Unknown ImageType variant");
-            -1
-        }
-    }
-}
-
-/// Convert an integer to a `StructuredDataType` variant. Returns -1 on invalid input.
-/// # Safety
-/// Caller must ensure all pointer arguments are valid or null.
-/// Returned pointers must be freed with the appropriate free function.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_structured_data_type_from_i32(value: i32) -> i32 {
-    match value {
-        0 => 0, // JsonLd
-        1 => 1, // Microdata
-        2 => 2, // RDFa
-        _ => {
-            set_last_error(1, "Invalid StructuredDataType variant");
-            -1
-        }
-    }
-}
-
-/// Convert a `StructuredDataType` variant name (C string) to its integer value. Returns -1 on invalid input.
-/// # Safety
-/// Caller must ensure `ptr` is a valid pointer to a `c_char` or null.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn htm_structured_data_type_from_str(name: *const c_char) -> i32 {
-    if name.is_null() {
-        set_last_error(1, "Null pointer passed for enum name");
-        return -1;
-    }
-    let s = match unsafe { CStr::from_ptr(name) }.to_str() {
-        Ok(s) => s,
-        Err(_) => {
-            set_last_error(1, "Invalid UTF-8 in enum name");
-            return -1;
-        }
-    };
-    match s {
-        "JsonLd" => 0,
-        "Microdata" => 1,
-        "RDFa" => 2,
-        _ => {
-            set_last_error(1, "Unknown StructuredDataType variant");
-            -1
-        }
-    }
-}
-
 /// Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images,
 /// and warnings.
 ///
@@ -5018,9 +4509,9 @@ pub unsafe extern "C" fn htm_convert(
     let options_rs = if options.is_null() {
         None
     } else {
-        Some(unsafe { &*(options as *const html_to_markdown_rs::ConversionOptions) }.clone())
+        Some(unsafe { &*options }.clone())
     };
-    let result = html_to_markdown_rs::convert(&html_rs, options_rs);
+    let result = html_to_markdown_rs::convert_api::convert(&html_rs, options_rs);
     match result {
         Ok(val) => Box::into_raw(Box::new(val.clone())),
         Err(e) => {

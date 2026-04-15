@@ -6,17 +6,17 @@ license = "MIT"
 description = "High-performance HTML to Markdown converter"
 repository = "https://github.com/kreuzberg-dev/html-to-markdown"
 
-[package.metadata.wasm-pack.profile.release]
-wasm-opt = false
-
-[package.metadata.cargo-machete]
-ignored = ["wasm-bindgen-futures"]
-
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
 html-to-markdown-rs = { path = "../html-to-markdown", features = ["full", "metadata", "visitor", "serde", "inline-images"] }
-serde-wasm-bindgen = "0.6"
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
+serde-wasm-bindgen = "0.6"
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false
+
+[package.metadata.cargo-machete]
+ignored = ["wasm-bindgen-futures"]

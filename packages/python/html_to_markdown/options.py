@@ -8,6 +8,14 @@ from enum import Enum
 from typing import Any
 
 
+class TextDirection(str, Enum):
+    """Text directionality of document content."""
+
+    LEFT_TO_RIGHT = "left_to_right"
+    RIGHT_TO_LEFT = "right_to_left"
+    AUTO = "auto"
+
+
 class PreprocessingPreset(str, Enum):
     """HTML preprocessing aggressiveness level."""
 
@@ -77,14 +85,6 @@ class OutputFormat(str, Enum):
     PLAIN = "plain"
 
 
-class TextDirection(str, Enum):
-    """Text directionality of document content."""
-
-    LEFT_TO_RIGHT = "left_to_right"
-    RIGHT_TO_LEFT = "right_to_left"
-    AUTO = "auto"
-
-
 class DocumentStructure:
     """Placeholder for DocumentStructure type."""
 
@@ -110,6 +110,64 @@ class MetadataConfig:
 
     max_structured_data_size: int = 0
     """Maximum total size of structured data to collect (bytes)."""
+
+
+@dataclass
+class DocumentMetadata:
+    """Document-level metadata extracted from `<head>` and top-level elements."""
+
+    title: str | None = None
+    """Document title from `<title>` tag"""
+
+    description: str | None = None
+    """Document description from `<meta name="description">` tag"""
+
+    keywords: list[str] = field(default_factory=list)
+    """Document keywords from `<meta name="keywords">` tag, split on commas"""
+
+    author: str | None = None
+    """Document author from `<meta name="author">` tag"""
+
+    canonical_url: str | None = None
+    """Canonical URL from `<link rel="canonical">` tag"""
+
+    base_href: str | None = None
+    """Base URL from `<base href="">` tag for resolving relative URLs"""
+
+    language: str | None = None
+    """Document language from `lang` attribute"""
+
+    text_direction: str | None = None
+    """Document text direction from `dir` attribute"""
+
+    open_graph: dict[str, str] = field(default_factory=dict)
+    """Open Graph metadata (og:* properties) for social media"""
+
+    twitter_card: dict[str, str] = field(default_factory=dict)
+    """Twitter Card metadata (twitter:* properties)"""
+
+    meta_tags: dict[str, str] = field(default_factory=dict)
+    """Additional meta tags not covered by specific fields"""
+
+
+@dataclass
+class HtmlMetadata:
+    """Comprehensive metadata extraction result from HTML document."""
+
+    document: Any | None = None
+    """Document-level metadata (title, description, canonical, etc.)"""
+
+    headers: list[Any] = field(default_factory=list)
+    """Extracted header elements with hierarchy"""
+
+    links: list[Any] = field(default_factory=list)
+    """Extracted hyperlinks with type classification"""
+
+    images: list[Any] = field(default_factory=list)
+    """Extracted images with source and dimensions"""
+
+    structured_data: list[Any] = field(default_factory=list)
+    """Extracted structured data blocks"""
 
 
 @dataclass
@@ -285,59 +343,3 @@ class TableGrid:
     """All cells in the table (may be fewer than rows*cols due to spans)."""
 
 
-@dataclass
-class DocumentMetadata:
-    """Document-level metadata extracted from `<head>` and top-level elements."""
-
-    title: str | None = None
-    """Document title from `<title>` tag"""
-
-    description: str | None = None
-    """Document description from `<meta name="description">` tag"""
-
-    keywords: list[str] = field(default_factory=list)
-    """Document keywords from `<meta name="keywords">` tag, split on commas"""
-
-    author: str | None = None
-    """Document author from `<meta name="author">` tag"""
-
-    canonical_url: str | None = None
-    """Canonical URL from `<link rel="canonical">` tag"""
-
-    base_href: str | None = None
-    """Base URL from `<base href="">` tag for resolving relative URLs"""
-
-    language: str | None = None
-    """Document language from `lang` attribute"""
-
-    text_direction: str | None = None
-    """Document text direction from `dir` attribute"""
-
-    open_graph: dict[str, str] = field(default_factory=dict)
-    """Open Graph metadata (og:* properties) for social media"""
-
-    twitter_card: dict[str, str] = field(default_factory=dict)
-    """Twitter Card metadata (twitter:* properties)"""
-
-    meta_tags: dict[str, str] = field(default_factory=dict)
-    """Additional meta tags not covered by specific fields"""
-
-
-@dataclass
-class HtmlMetadata:
-    """Comprehensive metadata extraction result from HTML document."""
-
-    document: Any | None = None
-    """Document-level metadata (title, description, canonical, etc.)"""
-
-    headers: list[Any] = field(default_factory=list)
-    """Extracted header elements with hierarchy"""
-
-    links: list[Any] = field(default_factory=list)
-    """Extracted hyperlinks with type classification"""
-
-    images: list[Any] = field(default_factory=list)
-    """Extracted images with source and dimensions"""
-
-    structured_data: list[Any] = field(default_factory=list)
-    """Extracted structured data blocks"""

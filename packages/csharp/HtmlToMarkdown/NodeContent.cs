@@ -118,10 +118,7 @@ internal sealed class NodeContentJsonConverter : JsonConverter<NodeContent>
         using var doc = JsonDocument.ParseValue(ref reader);
         var root = doc.RootElement;
         if (!root.TryGetProperty("node_type", out var tagEl))
-        {
             throw new JsonException("NodeContent: missing \"node_type\" discriminator");
-        }
-
         var tag = tagEl.GetString();
         var json = root.GetRawText();
         return tag switch
@@ -167,13 +164,7 @@ internal sealed class NodeContentJsonConverter : JsonConverter<NodeContent>
                 writer.WriteStartObject();
                 writer.WriteString("node_type", "heading");
                 foreach (var prop in doc.RootElement.EnumerateObject())
-                {
-                    if (prop.Name != "node_type")
-                    {
-                        prop.WriteTo(writer);
-                    }
-                }
-
+                    if (prop.Name != "node_type") prop.WriteTo(writer);
                 writer.WriteEndObject();
                 break;
             }
@@ -183,13 +174,7 @@ internal sealed class NodeContentJsonConverter : JsonConverter<NodeContent>
                 writer.WriteStartObject();
                 writer.WriteString("node_type", "paragraph");
                 foreach (var prop in doc.RootElement.EnumerateObject())
-                {
-                    if (prop.Name != "node_type")
-                    {
-                        prop.WriteTo(writer);
-                    }
-                }
-
+                    if (prop.Name != "node_type") prop.WriteTo(writer);
                 writer.WriteEndObject();
                 break;
             }
@@ -199,13 +184,7 @@ internal sealed class NodeContentJsonConverter : JsonConverter<NodeContent>
                 writer.WriteStartObject();
                 writer.WriteString("node_type", "list");
                 foreach (var prop in doc.RootElement.EnumerateObject())
-                {
-                    if (prop.Name != "node_type")
-                    {
-                        prop.WriteTo(writer);
-                    }
-                }
-
+                    if (prop.Name != "node_type") prop.WriteTo(writer);
                 writer.WriteEndObject();
                 break;
             }
@@ -215,13 +194,7 @@ internal sealed class NodeContentJsonConverter : JsonConverter<NodeContent>
                 writer.WriteStartObject();
                 writer.WriteString("node_type", "list_item");
                 foreach (var prop in doc.RootElement.EnumerateObject())
-                {
-                    if (prop.Name != "node_type")
-                    {
-                        prop.WriteTo(writer);
-                    }
-                }
-
+                    if (prop.Name != "node_type") prop.WriteTo(writer);
                 writer.WriteEndObject();
                 break;
             }
@@ -231,13 +204,7 @@ internal sealed class NodeContentJsonConverter : JsonConverter<NodeContent>
                 writer.WriteStartObject();
                 writer.WriteString("node_type", "table");
                 foreach (var prop in doc.RootElement.EnumerateObject())
-                {
-                    if (prop.Name != "node_type")
-                    {
-                        prop.WriteTo(writer);
-                    }
-                }
-
+                    if (prop.Name != "node_type") prop.WriteTo(writer);
                 writer.WriteEndObject();
                 break;
             }
@@ -247,13 +214,7 @@ internal sealed class NodeContentJsonConverter : JsonConverter<NodeContent>
                 writer.WriteStartObject();
                 writer.WriteString("node_type", "image");
                 foreach (var prop in doc.RootElement.EnumerateObject())
-                {
-                    if (prop.Name != "node_type")
-                    {
-                        prop.WriteTo(writer);
-                    }
-                }
-
+                    if (prop.Name != "node_type") prop.WriteTo(writer);
                 writer.WriteEndObject();
                 break;
             }
@@ -263,13 +224,7 @@ internal sealed class NodeContentJsonConverter : JsonConverter<NodeContent>
                 writer.WriteStartObject();
                 writer.WriteString("node_type", "code");
                 foreach (var prop in doc.RootElement.EnumerateObject())
-                {
-                    if (prop.Name != "node_type")
-                    {
-                        prop.WriteTo(writer);
-                    }
-                }
-
+                    if (prop.Name != "node_type") prop.WriteTo(writer);
                 writer.WriteEndObject();
                 break;
             }
@@ -279,13 +234,7 @@ internal sealed class NodeContentJsonConverter : JsonConverter<NodeContent>
                 writer.WriteStartObject();
                 writer.WriteString("node_type", "quote");
                 foreach (var prop in doc.RootElement.EnumerateObject())
-                {
-                    if (prop.Name != "node_type")
-                    {
-                        prop.WriteTo(writer);
-                    }
-                }
-
+                    if (prop.Name != "node_type") prop.WriteTo(writer);
                 writer.WriteEndObject();
                 break;
             }
@@ -295,13 +244,7 @@ internal sealed class NodeContentJsonConverter : JsonConverter<NodeContent>
                 writer.WriteStartObject();
                 writer.WriteString("node_type", "definition_list");
                 foreach (var prop in doc.RootElement.EnumerateObject())
-                {
-                    if (prop.Name != "node_type")
-                    {
-                        prop.WriteTo(writer);
-                    }
-                }
-
+                    if (prop.Name != "node_type") prop.WriteTo(writer);
                 writer.WriteEndObject();
                 break;
             }
@@ -311,13 +254,7 @@ internal sealed class NodeContentJsonConverter : JsonConverter<NodeContent>
                 writer.WriteStartObject();
                 writer.WriteString("node_type", "definition_item");
                 foreach (var prop in doc.RootElement.EnumerateObject())
-                {
-                    if (prop.Name != "node_type")
-                    {
-                        prop.WriteTo(writer);
-                    }
-                }
-
+                    if (prop.Name != "node_type") prop.WriteTo(writer);
                 writer.WriteEndObject();
                 break;
             }
@@ -327,13 +264,7 @@ internal sealed class NodeContentJsonConverter : JsonConverter<NodeContent>
                 writer.WriteStartObject();
                 writer.WriteString("node_type", "raw_block");
                 foreach (var prop in doc.RootElement.EnumerateObject())
-                {
-                    if (prop.Name != "node_type")
-                    {
-                        prop.WriteTo(writer);
-                    }
-                }
-
+                    if (prop.Name != "node_type") prop.WriteTo(writer);
                 writer.WriteEndObject();
                 break;
             }
@@ -343,13 +274,7 @@ internal sealed class NodeContentJsonConverter : JsonConverter<NodeContent>
                 writer.WriteStartObject();
                 writer.WriteString("node_type", "metadata_block");
                 foreach (var prop in doc.RootElement.EnumerateObject())
-                {
-                    if (prop.Name != "node_type")
-                    {
-                        prop.WriteTo(writer);
-                    }
-                }
-
+                    if (prop.Name != "node_type") prop.WriteTo(writer);
                 writer.WriteEndObject();
                 break;
             }
@@ -359,18 +284,11 @@ internal sealed class NodeContentJsonConverter : JsonConverter<NodeContent>
                 writer.WriteStartObject();
                 writer.WriteString("node_type", "group");
                 foreach (var prop in doc.RootElement.EnumerateObject())
-                {
-                    if (prop.Name != "node_type")
-                    {
-                        prop.WriteTo(writer);
-                    }
-                }
-
+                    if (prop.Name != "node_type") prop.WriteTo(writer);
                 writer.WriteEndObject();
                 break;
             }
-            default:
-                throw new JsonException($"Unknown NodeContent subtype: {value.GetType().Name}");
+            default: throw new JsonException($"Unknown NodeContent subtype: {value.GetType().Name}");
         }
     }
 }

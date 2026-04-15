@@ -2,9 +2,91 @@
 title: "Configuration Reference"
 ---
 
-## Configuration Reference
+# Configuration Reference
 
 This page documents all configuration types and their defaults across all languages.
+
+## TableScan
+
+Scan results for a table element.
+
+Contains metadata about table structure to determine optimal rendering:
+- Row counts for consistency checking
+- Presence of headers, captions, and nested tables
+- Presence of colspan/rowspan (spanning cells)
+- Link and text content counts
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `row_counts` | `list[int]` | `[]` | Number of cells in each row |
+| `has_span` | `bool` | — | Whether any cells have colspan or rowspan attributes |
+| `has_header` | `bool` | — | Whether the table has header cells (th elements or role="head") |
+| `has_caption` | `bool` | — | Whether the table has a caption element |
+| `nested_table_count` | `int` | — | Number of nested tables found inside this table |
+| `link_count` | `int` | — | Count of anchor elements in the table |
+| `has_text` | `bool` | — | Whether the table contains text content (not empty) |
+
+---
+
+## MetadataConfig
+
+Configuration for metadata extraction granularity.
+
+Controls which metadata types are extracted and size limits for safety.
+Enables selective extraction of different metadata categories from HTML documents,
+allowing fine-grained control over which types of information to collect during
+the HTML-to-Markdown conversion process.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `extract_document` | `bool` | `True` | Extract document-level metadata (title, description, author, etc.). When enabled, collects metadata from `<head>` section including: - `<title>` element content - `<meta name="description">` and other standard meta tags - Open Graph (og:*) properties for social media optimization - Twitter Card (twitter:*) properties - Language and text direction attributes - Canonical URL and base href references |
+| `extract_headers` | `bool` | `True` | Extract h1-h6 header elements and their hierarchy. When enabled, collects all heading elements with: - Header level (1-6) - Text content (normalized) - HTML id attribute if present - Document tree depth for hierarchy tracking - Byte offset in original HTML for positioning |
+| `extract_links` | `bool` | `True` | Extract anchor (a) elements as links with type classification. When enabled, collects all hyperlinks with: - href attribute value - Link text content - Title attribute (tooltip text) - Automatic link type classification (anchor, internal, external, email, phone, other) - Rel attribute values - Additional custom attributes |
+| `extract_images` | `bool` | `True` | Extract image elements and data URIs. When enabled, collects all image elements with: - Source URL or data URI - Alt text for accessibility - Title attribute - Dimensions (width, height) if available - Automatic image type classification (data URI, external, relative, inline SVG) - Additional custom attributes |
+| `extract_structured_data` | `bool` | `True` | Extract structured data (JSON-LD, Microdata, RDFa). When enabled, collects machine-readable structured data including: - JSON-LD script blocks with schema detection - Microdata attributes (itemscope, itemtype, itemprop) - RDFa markup - Extracted schema type if detectable |
+| `max_structured_data_size` | `int` | — | Maximum total size of structured data to collect (bytes). Prevents memory exhaustion attacks on malformed or adversarial documents containing excessively large structured data blocks. When the accumulated size of structured data exceeds this limit, further collection stops. Default: `1_000_000` bytes (1 MB) |
+
+---
+
+## DocumentMetadata
+
+Document-level metadata extracted from `<head>` and top-level elements.
+
+Contains all metadata typically used by search engines, social media platforms,
+and browsers for document indexing and presentation.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `title` | `str | None` | `None` | Document title from `<title>` tag |
+| `description` | `str | None` | `None` | Document description from `<meta name="description">` tag |
+| `keywords` | `list[str]` | `[]` | Document keywords from `<meta name="keywords">` tag, split on commas |
+| `author` | `str | None` | `None` | Document author from `<meta name="author">` tag |
+| `canonical_url` | `str | None` | `None` | Canonical URL from `<link rel="canonical">` tag |
+| `base_href` | `str | None` | `None` | Base URL from `<base href="">` tag for resolving relative URLs |
+| `language` | `str | None` | `None` | Document language from `lang` attribute |
+| `text_direction` | `TextDirection | None` | `None` | Document text direction from `dir` attribute |
+| `open_graph` | `dict[str, str]` | `{}` | Open Graph metadata (og:* properties) for social media Keys like "title", "description", "image", "url", etc. |
+| `twitter_card` | `dict[str, str]` | `{}` | Twitter Card metadata (twitter:* properties) Keys like "card", "site", "creator", "title", "description", "image", etc. |
+| `meta_tags` | `dict[str, str]` | `{}` | Additional meta tags not covered by specific fields Keys are meta name/property attributes, values are content |
+
+---
+
+## HtmlMetadata
+
+Comprehensive metadata extraction result from HTML document.
+
+Contains all extracted metadata types in a single structure,
+suitable for serialization and transmission across language boundaries.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `document` | `DocumentMetadata` | — | Document-level metadata (title, description, canonical, etc.) |
+| `headers` | `list[HeaderMetadata]` | `[]` | Extracted header elements with hierarchy |
+| `links` | `list[LinkMetadata]` | `[]` | Extracted hyperlinks with type classification |
+| `images` | `list[ImageMetadata]` | `[]` | Extracted images with source and dimensions |
+| `structured_data` | `list[StructuredData]` | `[]` | Extracted structured data blocks |
+
+---
 
 ## ConversionOptions
 
@@ -39,7 +121,7 @@ Use `ConversionOptions.builder()` to construct, or `the default constructor` for
 | `newline_style` | `NewlineStyle` | `NewlineStyle.SPACES` | How to encode hard line breaks (`<br>`) in Markdown. |
 | `code_block_style` | `CodeBlockStyle` | `CodeBlockStyle.BACKTICKS` | Style used for fenced code blocks (backticks or tilde). |
 | `keep_inline_images_in` | `list[str]` | `[]` | HTML tag names whose `<img>` children are kept inline instead of block. |
-| `preprocessing` | `PreprocessingOptions` | `None` | Pre-processing options applied to the HTML before conversion. |
+| `preprocessing` | `PreprocessingOptions` | — | Pre-processing options applied to the HTML before conversion. |
 | `encoding` | `str` | `"utf-8"` | Expected character encoding of the input HTML (default `"utf-8"`). |
 | `debug` | `bool` | `False` | Emit debug information during conversion. |
 | `strip_tags` | `list[str]` | `[]` | HTML tag names whose content is stripped from the output entirely. |
@@ -55,6 +137,19 @@ Use `ConversionOptions.builder()` to construct, or `the default constructor` for
 
 ---
 
+## InlineImageConfig
+
+Inline image configuration that specifies contexts where images remain as markdown links.
+
+This is a wrapper type that provides semantic clarity for the vector of element
+names where inline images should be preserved.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `keep_inline_images_in` | `list[str]` | `[]` | HTML elements where images should remain as markdown links (not converted to alt text) |
+
+---
+
 ## PreprocessingOptions
 
 HTML preprocessing options for document cleanup before conversion.
@@ -67,3 +162,34 @@ HTML preprocessing options for document cleanup before conversion.
 | `remove_forms` | `bool` | `True` | Remove form elements (forms, inputs, buttons, etc.) |
 
 ---
+
+## ConversionResult
+
+The primary result of HTML conversion and extraction.
+
+Contains the converted text output, optional structured document tree,
+metadata, extracted tables, images, and processing warnings.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `content` | `str | None` | `None` | Converted text output (markdown, djot, or plain text). `None` when `output_format` is set to `OutputFormat.None`, indicating extraction-only mode. |
+| `document` | `DocumentStructure | None` | `None` | Structured document tree with semantic elements. Populated when `include_document_structure` is `True` in options. |
+| `metadata` | `HtmlMetadata` | — | Extracted HTML metadata (title, OG, links, images, structured data). |
+| `tables` | `list[TableData]` | `[]` | Extracted tables with structured cell data and markdown representation. |
+| `images` | `list[InlineImage]` | `[]` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `True` in options. |
+| `warnings` | `list[ProcessingWarning]` | `[]` | Non-fatal processing warnings. |
+
+---
+
+## TableGrid
+
+A structured table grid with cell-level data including spans.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `rows` | `int` | — | Number of rows. |
+| `cols` | `int` | — | Number of columns. |
+| `cells` | `list[GridCell]` | `[]` | All cells in the table (may be fewer than rows*cols due to spans). |
+
+---
+

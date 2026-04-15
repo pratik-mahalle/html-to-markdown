@@ -9,8 +9,9 @@ public record MetadataConfig(
     @JsonProperty("extract_links") boolean extractLinks,
     @JsonProperty("extract_images") boolean extractImages,
     @JsonProperty("extract_structured_data") boolean extractStructuredData,
-    @JsonProperty("max_structured_data_size") long maxStructuredDataSize) {
-  public static MetadataConfigBuilder builder() {
-    return new MetadataConfigBuilder();
-  }
+    @JsonProperty("max_structured_data_size") long maxStructuredDataSize
+) {
+    public static MetadataConfigBuilder builder() {
+        return new MetadataConfigBuilder();
+    }
 }

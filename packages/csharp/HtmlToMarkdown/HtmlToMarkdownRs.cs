@@ -50,14 +50,7 @@ public static class HtmlToMarkdownRs
             html,
             optionsHandle
         );
-        if (result == IntPtr.Zero)
-        {
-            var err = GetLastError();
-            if (err.Code != 0)
-            {
-                throw err;
-            }
-        }
+        if (result == IntPtr.Zero) { var err = GetLastError(); if (err.Code != 0) throw err; }
         var jsonPtr = NativeMethods.ConversionResultToJson(result);
         var json = Marshal.PtrToStringUTF8(jsonPtr);
         NativeMethods.FreeString(jsonPtr);
@@ -131,38 +124,6 @@ public static class HtmlToMarkdownRs
         return returnValue;
     }
 
-    public static ConversionOptions ConversionOptionsDefault()
-    {
-        var result = NativeMethods.ConversionOptionsDefault();
-        var jsonPtr = NativeMethods.ConversionOptionsToJson(result);
-        var json = Marshal.PtrToStringUTF8(jsonPtr);
-        NativeMethods.FreeString(jsonPtr);
-        NativeMethods.ConversionOptionsFree(result);
-        var returnValue = JsonSerializer.Deserialize<ConversionOptions>(json ?? "null", JsonOptions)!;
-        return returnValue;
-    }
-
-    /// <summary>
-    /// Create a new builder with default values.
-    /// </summary>
-    public static ConversionOptionsBuilder ConversionOptionsBuilder()
-    {
-        var result = NativeMethods.ConversionOptionsBuilder();
-        var returnValue = new ConversionOptionsBuilder(result);
-        return returnValue;
-    }
-
-    public static PreprocessingOptions PreprocessingOptionsDefault()
-    {
-        var result = NativeMethods.PreprocessingOptionsDefault();
-        var jsonPtr = NativeMethods.PreprocessingOptionsToJson(result);
-        var json = Marshal.PtrToStringUTF8(jsonPtr);
-        NativeMethods.FreeString(jsonPtr);
-        NativeMethods.PreprocessingOptionsFree(result);
-        var returnValue = JsonSerializer.Deserialize<PreprocessingOptions>(json ?? "null", JsonOptions)!;
-        return returnValue;
-    }
-
     /// <summary>
     /// Validate that the header level is within valid range (1-6).
     ///
@@ -231,6 +192,38 @@ public static class HtmlToMarkdownRs
         var json = Marshal.PtrToStringUTF8(result);
         NativeMethods.FreeString(result);
         var returnValue = JsonSerializer.Deserialize<LinkType>(json ?? "null", JsonOptions)!;
+        return returnValue;
+    }
+
+    public static ConversionOptions ConversionOptionsDefault()
+    {
+        var result = NativeMethods.ConversionOptionsDefault();
+        var jsonPtr = NativeMethods.ConversionOptionsToJson(result);
+        var json = Marshal.PtrToStringUTF8(jsonPtr);
+        NativeMethods.FreeString(jsonPtr);
+        NativeMethods.ConversionOptionsFree(result);
+        var returnValue = JsonSerializer.Deserialize<ConversionOptions>(json ?? "null", JsonOptions)!;
+        return returnValue;
+    }
+
+    /// <summary>
+    /// Create a new builder with default values.
+    /// </summary>
+    public static ConversionOptionsBuilder ConversionOptionsBuilder()
+    {
+        var result = NativeMethods.ConversionOptionsBuilder();
+        var returnValue = new ConversionOptionsBuilder(result);
+        return returnValue;
+    }
+
+    public static PreprocessingOptions PreprocessingOptionsDefault()
+    {
+        var result = NativeMethods.PreprocessingOptionsDefault();
+        var jsonPtr = NativeMethods.PreprocessingOptionsToJson(result);
+        var json = Marshal.PtrToStringUTF8(jsonPtr);
+        NativeMethods.FreeString(jsonPtr);
+        NativeMethods.PreprocessingOptionsFree(result);
+        var returnValue = JsonSerializer.Deserialize<PreprocessingOptions>(json ?? "null", JsonOptions)!;
         return returnValue;
     }
 

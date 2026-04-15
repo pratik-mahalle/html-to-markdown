@@ -5,38 +5,44 @@ import java.util.List;
 
 public class HtmlMetadataBuilder {
 
-  private DocumentMetadata document = null;
-  private List<HeaderMetadata> headers = List.of();
-  private List<LinkMetadata> links = List.of();
-  private List<ImageMetadata> images = List.of();
-  private List<StructuredData> structuredData = List.of();
+    private DocumentMetadata document = null;
+    private List<HeaderMetadata> headers = List.of();
+    private List<LinkMetadata> links = List.of();
+    private List<ImageMetadata> images = List.of();
+    private List<StructuredData> structuredData = List.of();
 
-  public HtmlMetadataBuilder withDocument(DocumentMetadata value) {
-    this.document = value;
-    return this;
-  }
+    public HtmlMetadataBuilder withDocument(DocumentMetadata value) {
+        this.document = value;
+        return this;
+    }
 
-  public HtmlMetadataBuilder withHeaders(List<HeaderMetadata> value) {
-    this.headers = value;
-    return this;
-  }
+    public HtmlMetadataBuilder withHeaders(List<HeaderMetadata> value) {
+        this.headers = value;
+        return this;
+    }
 
-  public HtmlMetadataBuilder withLinks(List<LinkMetadata> value) {
-    this.links = value;
-    return this;
-  }
+    public HtmlMetadataBuilder withLinks(List<LinkMetadata> value) {
+        this.links = value;
+        return this;
+    }
 
-  public HtmlMetadataBuilder withImages(List<ImageMetadata> value) {
-    this.images = value;
-    return this;
-  }
+    public HtmlMetadataBuilder withImages(List<ImageMetadata> value) {
+        this.images = value;
+        return this;
+    }
 
-  public HtmlMetadataBuilder withStructuredData(List<StructuredData> value) {
-    this.structuredData = value;
-    return this;
-  }
+    public HtmlMetadataBuilder withStructuredData(List<StructuredData> value) {
+        this.structuredData = value;
+        return this;
+    }
 
-  public HtmlMetadata build() {
-    return new HtmlMetadata(document, headers, links, images, structuredData);
-  }
+    public HtmlMetadata build() {
+        return new HtmlMetadata(
+            document,
+            headers,
+            links,
+            images,
+            structuredData
+        );
+    }
 }

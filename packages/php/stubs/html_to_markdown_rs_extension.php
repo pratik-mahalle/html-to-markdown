@@ -143,6 +143,329 @@ class MetadataConfigUpdate
 }
 
 /**
+ * Document-level metadata extracted from `<head>` and top-level elements.
+ *
+ * Contains all metadata typically used by search engines, social media platforms,
+ * and browsers for document indexing and presentation.
+ *
+ * # Examples
+ *
+ * ```
+ * # use html_to_markdown_rs::metadata::DocumentMetadata;
+ * let doc = DocumentMetadata {
+ *     title: Some("My Article".to_string()),
+ *     description: Some("A great article about Rust".to_string()),
+ *     keywords: vec!["rust".to_string(), "programming".to_string()],
+ *     ..Default::default()
+ * };
+ *
+ * assert_eq!(doc.title, Some("My Article".to_string()));
+ * ```
+ */
+class DocumentMetadata
+{
+    public ?string $title;
+    public ?string $description;
+    /** @var array<string> */
+    public array $keywords;
+    public ?string $author;
+    public ?string $canonical_url;
+    public ?string $base_href;
+    public ?string $language;
+    public ?TextDirection $text_direction;
+    /** @var array<string, string> */
+    public array $open_graph;
+    /** @var array<string, string> */
+    public array $twitter_card;
+    /** @var array<string, string> */
+    public array $meta_tags;
+
+    /**
+     * @param array<string> $keywords
+     * @param array<string, string> $open_graph
+     * @param array<string, string> $twitter_card
+     * @param array<string, string> $meta_tags
+     */
+    public function __construct(
+        array $keywords,
+        array $open_graph,
+        array $twitter_card,
+        array $meta_tags,
+        ?string $title = null,
+        ?string $description = null,
+        ?string $author = null,
+        ?string $canonical_url = null,
+        ?string $base_href = null,
+        ?string $language = null,
+        ?TextDirection $text_direction = null
+    ) { }
+
+    public function getTitle(): ?string { }
+    public function getDescription(): ?string { }
+    /** @return array<string> */
+    public function getKeywords(): array { }
+    public function getAuthor(): ?string { }
+    public function getCanonicalUrl(): ?string { }
+    public function getBaseHref(): ?string { }
+    public function getLanguage(): ?string { }
+    public function getTextDirection(): ?TextDirection { }
+    /** @return array<string, string> */
+    public function getOpenGraph(): array { }
+    /** @return array<string, string> */
+    public function getTwitterCard(): array { }
+    /** @return array<string, string> */
+    public function getMetaTags(): array { }
+}
+
+/**
+ * Header element metadata with hierarchy tracking.
+ *
+ * Captures heading elements (h1-h6) with their text content, identifiers,
+ * and position in the document structure.
+ *
+ * # Examples
+ *
+ * ```
+ * # use html_to_markdown_rs::metadata::HeaderMetadata;
+ * let header = HeaderMetadata {
+ *     level: 1,
+ *     text: "Main Title".to_string(),
+ *     id: Some("main-title".to_string()),
+ *     depth: 0,
+ *     html_offset: 145,
+ * };
+ *
+ * assert_eq!(header.level, 1);
+ * assert!(header.is_valid());
+ * ```
+ */
+class HeaderMetadata
+{
+    public int $level;
+    public string $text;
+    public ?string $id;
+    public int $depth;
+    public int $html_offset;
+
+    public function __construct(
+        int $level,
+        string $text,
+        int $depth,
+        int $html_offset,
+        ?string $id = null
+    ) { }
+
+    public function getLevel(): int { }
+    public function getText(): string { }
+    public function getId(): ?string { }
+    public function getDepth(): int { }
+    public function getHtmlOffset(): int { }
+}
+
+/**
+ * Hyperlink metadata with categorization and attributes.
+ *
+ * Represents `<a>` elements with parsed href values, text content, and link type classification.
+ *
+ * # Examples
+ *
+ * ```
+ * # use html_to_markdown_rs::metadata::{LinkMetadata, LinkType};
+ * let link = LinkMetadata {
+ *     href: "https://example.com".to_string(),
+ *     text: "Example".to_string(),
+ *     title: Some("Visit Example".to_string()),
+ *     link_type: LinkType::External,
+ *     rel: vec!["nofollow".to_string()],
+ *     attributes: Default::default(),
+ * };
+ *
+ * assert_eq!(link.link_type, LinkType::External);
+ * assert_eq!(link.text, "Example");
+ * ```
+ */
+class LinkMetadata
+{
+    public string $href;
+    public string $text;
+    public ?string $title;
+    public LinkType $link_type;
+    /** @var array<string> */
+    public array $rel;
+    /** @var array<string, string> */
+    public array $attributes;
+
+    /**
+     * @param array<string> $rel
+     * @param array<string, string> $attributes
+     */
+    public function __construct(
+        string $href,
+        string $text,
+        LinkType $link_type,
+        array $rel,
+        array $attributes,
+        ?string $title = null
+    ) { }
+
+    public function getHref(): string { }
+    public function getText(): string { }
+    public function getTitle(): ?string { }
+    public function getLinkType(): LinkType { }
+    /** @return array<string> */
+    public function getRel(): array { }
+    /** @return array<string, string> */
+    public function getAttributes(): array { }
+}
+
+/**
+ * Image metadata with source and dimensions.
+ *
+ * Captures `<img>` elements and inline `<svg>` elements with metadata
+ * for image analysis and optimization.
+ *
+ * # Examples
+ *
+ * ```
+ * # use html_to_markdown_rs::metadata::{ImageMetadata, ImageType};
+ * let img = ImageMetadata {
+ *     src: "https://example.com/image.jpg".to_string(),
+ *     alt: Some("An example image".to_string()),
+ *     title: Some("Example".to_string()),
+ *     dimensions: Some((800, 600)),
+ *     image_type: ImageType::External,
+ *     attributes: Default::default(),
+ * };
+ *
+ * assert_eq!(img.image_type, ImageType::External);
+ * ```
+ */
+class ImageMetadata
+{
+    public string $src;
+    public ?string $alt;
+    public ?string $title;
+    public ?string $dimensions;
+    public ImageType $image_type;
+    /** @var array<string, string> */
+    public array $attributes;
+
+    /**
+     * @param array<string, string> $attributes
+     */
+    public function __construct(
+        string $src,
+        ImageType $image_type,
+        array $attributes,
+        ?string $alt = null,
+        ?string $title = null,
+        ?string $dimensions = null
+    ) { }
+
+    public function getSrc(): string { }
+    public function getAlt(): ?string { }
+    public function getTitle(): ?string { }
+    public function getDimensions(): ?string { }
+    public function getImageType(): ImageType { }
+    /** @return array<string, string> */
+    public function getAttributes(): array { }
+}
+
+/**
+ * Structured data block (JSON-LD, Microdata, or RDFa).
+ *
+ * Represents machine-readable structured data found in the document.
+ * JSON-LD blocks are collected as raw JSON strings for flexibility.
+ *
+ * # Examples
+ *
+ * ```
+ * # use html_to_markdown_rs::metadata::{StructuredData, StructuredDataType};
+ * let schema = StructuredData {
+ *     data_type: StructuredDataType::JsonLd,
+ *     raw_json: r#"{"@context":"https://schema.org","@type":"Article"}"#.to_string(),
+ *     schema_type: Some("Article".to_string()),
+ * };
+ *
+ * assert_eq!(schema.data_type, StructuredDataType::JsonLd);
+ * ```
+ */
+class StructuredData
+{
+    public StructuredDataType $data_type;
+    public string $raw_json;
+    public ?string $schema_type;
+
+    public function __construct(
+        StructuredDataType $data_type,
+        string $raw_json,
+        ?string $schema_type = null
+    ) { }
+
+    public function getDataType(): StructuredDataType { }
+    public function getRawJson(): string { }
+    public function getSchemaType(): ?string { }
+}
+
+/**
+ * Comprehensive metadata extraction result from HTML document.
+ *
+ * Contains all extracted metadata types in a single structure,
+ * suitable for serialization and transmission across language boundaries.
+ *
+ * # Examples
+ *
+ * ```
+ * # use html_to_markdown_rs::metadata::HtmlMetadata;
+ * let metadata = HtmlMetadata {
+ *     document: Default::default(),
+ *     headers: Vec::new(),
+ *     links: Vec::new(),
+ *     images: Vec::new(),
+ *     structured_data: Vec::new(),
+ * };
+ *
+ * assert!(metadata.headers.is_empty());
+ * ```
+ */
+class HtmlMetadata
+{
+    public DocumentMetadata $document;
+    /** @var array<HeaderMetadata> */
+    public array $headers;
+    /** @var array<LinkMetadata> */
+    public array $links;
+    /** @var array<ImageMetadata> */
+    public array $images;
+    /** @var array<StructuredData> */
+    public array $structured_data;
+
+    /**
+     * @param array<HeaderMetadata> $headers
+     * @param array<LinkMetadata> $links
+     * @param array<ImageMetadata> $images
+     * @param array<StructuredData> $structured_data
+     */
+    public function __construct(
+        DocumentMetadata $document,
+        array $headers,
+        array $links,
+        array $images,
+        array $structured_data
+    ) { }
+
+    public function getDocument(): DocumentMetadata { }
+    /** @return array<HeaderMetadata> */
+    public function getHeaders(): array { }
+    /** @return array<LinkMetadata> */
+    public function getLinks(): array { }
+    /** @return array<ImageMetadata> */
+    public function getImages(): array { }
+    /** @return array<StructuredData> */
+    public function getStructuredData(): array { }
+}
+
+/**
  * Main conversion options for HTML to Markdown conversion.
  *
  * Use [`ConversionOptions::builder()`] to construct, or [`Default::default()`] for defaults.
@@ -708,327 +1031,36 @@ class ProcessingWarning
     public function getKind(): WarningKind { }
 }
 
-/**
- * Document-level metadata extracted from `<head>` and top-level elements.
- *
- * Contains all metadata typically used by search engines, social media platforms,
- * and browsers for document indexing and presentation.
- *
- * # Examples
- *
- * ```
- * # use html_to_markdown_rs::metadata::DocumentMetadata;
- * let doc = DocumentMetadata {
- *     title: Some("My Article".to_string()),
- *     description: Some("A great article about Rust".to_string()),
- *     keywords: vec!["rust".to_string(), "programming".to_string()],
- *     ..Default::default()
- * };
- *
- * assert_eq!(doc.title, Some("My Article".to_string()));
- * ```
- */
-class DocumentMetadata
+enum TextDirection: string
 {
-    public ?string $title;
-    public ?string $description;
-    /** @var array<string> */
-    public array $keywords;
-    public ?string $author;
-    public ?string $canonical_url;
-    public ?string $base_href;
-    public ?string $language;
-    public ?TextDirection $text_direction;
-    /** @var array<string, string> */
-    public array $open_graph;
-    /** @var array<string, string> */
-    public array $twitter_card;
-    /** @var array<string, string> */
-    public array $meta_tags;
-
-    /**
-     * @param array<string> $keywords
-     * @param array<string, string> $open_graph
-     * @param array<string, string> $twitter_card
-     * @param array<string, string> $meta_tags
-     */
-    public function __construct(
-        array $keywords,
-        array $open_graph,
-        array $twitter_card,
-        array $meta_tags,
-        ?string $title = null,
-        ?string $description = null,
-        ?string $author = null,
-        ?string $canonical_url = null,
-        ?string $base_href = null,
-        ?string $language = null,
-        ?TextDirection $text_direction = null
-    ) { }
-
-    public function getTitle(): ?string { }
-    public function getDescription(): ?string { }
-    /** @return array<string> */
-    public function getKeywords(): array { }
-    public function getAuthor(): ?string { }
-    public function getCanonicalUrl(): ?string { }
-    public function getBaseHref(): ?string { }
-    public function getLanguage(): ?string { }
-    public function getTextDirection(): ?TextDirection { }
-    /** @return array<string, string> */
-    public function getOpenGraph(): array { }
-    /** @return array<string, string> */
-    public function getTwitterCard(): array { }
-    /** @return array<string, string> */
-    public function getMetaTags(): array { }
+    case LeftToRight = 'LeftToRight';
+    case RightToLeft = 'RightToLeft';
+    case Auto = 'Auto';
 }
 
-/**
- * Header element metadata with hierarchy tracking.
- *
- * Captures heading elements (h1-h6) with their text content, identifiers,
- * and position in the document structure.
- *
- * # Examples
- *
- * ```
- * # use html_to_markdown_rs::metadata::HeaderMetadata;
- * let header = HeaderMetadata {
- *     level: 1,
- *     text: "Main Title".to_string(),
- *     id: Some("main-title".to_string()),
- *     depth: 0,
- *     html_offset: 145,
- * };
- *
- * assert_eq!(header.level, 1);
- * assert!(header.is_valid());
- * ```
- */
-class HeaderMetadata
+enum LinkType: string
 {
-    public int $level;
-    public string $text;
-    public ?string $id;
-    public int $depth;
-    public int $html_offset;
-
-    public function __construct(
-        int $level,
-        string $text,
-        int $depth,
-        int $html_offset,
-        ?string $id = null
-    ) { }
-
-    public function getLevel(): int { }
-    public function getText(): string { }
-    public function getId(): ?string { }
-    public function getDepth(): int { }
-    public function getHtmlOffset(): int { }
+    case Anchor = 'Anchor';
+    case Internal = 'Internal';
+    case External = 'External';
+    case Email = 'Email';
+    case Phone = 'Phone';
+    case Other = 'Other';
 }
 
-/**
- * Hyperlink metadata with categorization and attributes.
- *
- * Represents `<a>` elements with parsed href values, text content, and link type classification.
- *
- * # Examples
- *
- * ```
- * # use html_to_markdown_rs::metadata::{LinkMetadata, LinkType};
- * let link = LinkMetadata {
- *     href: "https://example.com".to_string(),
- *     text: "Example".to_string(),
- *     title: Some("Visit Example".to_string()),
- *     link_type: LinkType::External,
- *     rel: vec!["nofollow".to_string()],
- *     attributes: Default::default(),
- * };
- *
- * assert_eq!(link.link_type, LinkType::External);
- * assert_eq!(link.text, "Example");
- * ```
- */
-class LinkMetadata
+enum ImageType: string
 {
-    public string $href;
-    public string $text;
-    public ?string $title;
-    public LinkType $link_type;
-    /** @var array<string> */
-    public array $rel;
-    /** @var array<string, string> */
-    public array $attributes;
-
-    /**
-     * @param array<string> $rel
-     * @param array<string, string> $attributes
-     */
-    public function __construct(
-        string $href,
-        string $text,
-        LinkType $link_type,
-        array $rel,
-        array $attributes,
-        ?string $title = null
-    ) { }
-
-    public function getHref(): string { }
-    public function getText(): string { }
-    public function getTitle(): ?string { }
-    public function getLinkType(): LinkType { }
-    /** @return array<string> */
-    public function getRel(): array { }
-    /** @return array<string, string> */
-    public function getAttributes(): array { }
+    case DataUri = 'DataUri';
+    case InlineSvg = 'InlineSvg';
+    case External = 'External';
+    case Relative = 'Relative';
 }
 
-/**
- * Image metadata with source and dimensions.
- *
- * Captures `<img>` elements and inline `<svg>` elements with metadata
- * for image analysis and optimization.
- *
- * # Examples
- *
- * ```
- * # use html_to_markdown_rs::metadata::{ImageMetadata, ImageType};
- * let img = ImageMetadata {
- *     src: "https://example.com/image.jpg".to_string(),
- *     alt: Some("An example image".to_string()),
- *     title: Some("Example".to_string()),
- *     dimensions: Some((800, 600)),
- *     image_type: ImageType::External,
- *     attributes: Default::default(),
- * };
- *
- * assert_eq!(img.image_type, ImageType::External);
- * ```
- */
-class ImageMetadata
+enum StructuredDataType: string
 {
-    public string $src;
-    public ?string $alt;
-    public ?string $title;
-    public ?string $dimensions;
-    public ImageType $image_type;
-    /** @var array<string, string> */
-    public array $attributes;
-
-    /**
-     * @param array<string, string> $attributes
-     */
-    public function __construct(
-        string $src,
-        ImageType $image_type,
-        array $attributes,
-        ?string $alt = null,
-        ?string $title = null,
-        ?string $dimensions = null
-    ) { }
-
-    public function getSrc(): string { }
-    public function getAlt(): ?string { }
-    public function getTitle(): ?string { }
-    public function getDimensions(): ?string { }
-    public function getImageType(): ImageType { }
-    /** @return array<string, string> */
-    public function getAttributes(): array { }
-}
-
-/**
- * Structured data block (JSON-LD, Microdata, or RDFa).
- *
- * Represents machine-readable structured data found in the document.
- * JSON-LD blocks are collected as raw JSON strings for flexibility.
- *
- * # Examples
- *
- * ```
- * # use html_to_markdown_rs::metadata::{StructuredData, StructuredDataType};
- * let schema = StructuredData {
- *     data_type: StructuredDataType::JsonLd,
- *     raw_json: r#"{"@context":"https://schema.org","@type":"Article"}"#.to_string(),
- *     schema_type: Some("Article".to_string()),
- * };
- *
- * assert_eq!(schema.data_type, StructuredDataType::JsonLd);
- * ```
- */
-class StructuredData
-{
-    public StructuredDataType $data_type;
-    public string $raw_json;
-    public ?string $schema_type;
-
-    public function __construct(
-        StructuredDataType $data_type,
-        string $raw_json,
-        ?string $schema_type = null
-    ) { }
-
-    public function getDataType(): StructuredDataType { }
-    public function getRawJson(): string { }
-    public function getSchemaType(): ?string { }
-}
-
-/**
- * Comprehensive metadata extraction result from HTML document.
- *
- * Contains all extracted metadata types in a single structure,
- * suitable for serialization and transmission across language boundaries.
- *
- * # Examples
- *
- * ```
- * # use html_to_markdown_rs::metadata::HtmlMetadata;
- * let metadata = HtmlMetadata {
- *     document: Default::default(),
- *     headers: Vec::new(),
- *     links: Vec::new(),
- *     images: Vec::new(),
- *     structured_data: Vec::new(),
- * };
- *
- * assert!(metadata.headers.is_empty());
- * ```
- */
-class HtmlMetadata
-{
-    public DocumentMetadata $document;
-    /** @var array<HeaderMetadata> */
-    public array $headers;
-    /** @var array<LinkMetadata> */
-    public array $links;
-    /** @var array<ImageMetadata> */
-    public array $images;
-    /** @var array<StructuredData> */
-    public array $structured_data;
-
-    /**
-     * @param array<HeaderMetadata> $headers
-     * @param array<LinkMetadata> $links
-     * @param array<ImageMetadata> $images
-     * @param array<StructuredData> $structured_data
-     */
-    public function __construct(
-        DocumentMetadata $document,
-        array $headers,
-        array $links,
-        array $images,
-        array $structured_data
-    ) { }
-
-    public function getDocument(): DocumentMetadata { }
-    /** @return array<HeaderMetadata> */
-    public function getHeaders(): array { }
-    /** @return array<LinkMetadata> */
-    public function getLinks(): array { }
-    /** @return array<ImageMetadata> */
-    public function getImages(): array { }
-    /** @return array<StructuredData> */
-    public function getStructuredData(): array { }
+    case JsonLd = 'JsonLd';
+    case Microdata = 'Microdata';
+    case RDFa = 'RDFa';
 }
 
 enum PreprocessingPreset: string
@@ -1128,38 +1160,6 @@ enum WarningKind: string
     case TruncatedInput = 'TruncatedInput';
     case MalformedHtml = 'MalformedHtml';
     case SanitizationApplied = 'SanitizationApplied';
-}
-
-enum TextDirection: string
-{
-    case LeftToRight = 'LeftToRight';
-    case RightToLeft = 'RightToLeft';
-    case Auto = 'Auto';
-}
-
-enum LinkType: string
-{
-    case Anchor = 'Anchor';
-    case Internal = 'Internal';
-    case External = 'External';
-    case Email = 'Email';
-    case Phone = 'Phone';
-    case Other = 'Other';
-}
-
-enum ImageType: string
-{
-    case DataUri = 'DataUri';
-    case InlineSvg = 'InlineSvg';
-    case External = 'External';
-    case Relative = 'Relative';
-}
-
-enum StructuredDataType: string
-{
-    case JsonLd = 'JsonLd';
-    case Microdata = 'Microdata';
-    case RDFa = 'RDFa';
 }
 
 class HtmlToMarkdownRsApi

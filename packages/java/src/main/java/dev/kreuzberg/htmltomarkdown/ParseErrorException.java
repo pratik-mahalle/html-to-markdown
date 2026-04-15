@@ -3,11 +3,11 @@ package dev.kreuzberg.htmltomarkdown;
 
 /** HTML parsing error */
 public class ParseErrorException extends ConversionErrorException {
-  public ParseErrorException(String message) {
-    super(message);
-  }
+    public ParseErrorException(String message) {
+        super(message);
+    }
 
-  public ParseErrorException(String message, Throwable cause) {
-    super(message, cause);
-  }
+    public ParseErrorException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

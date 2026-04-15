@@ -40,6 +40,111 @@ class MetadataConfigUpdate:
         max_structured_data_size: int | None = None,
     ) -> None: ...
 
+class DocumentMetadata:
+    title: str | None
+    description: str | None
+    keywords: list[str]
+    author: str | None
+    canonical_url: str | None
+    base_href: str | None
+    language: str | None
+    text_direction: TextDirection | None
+    open_graph: dict[str, str]
+    twitter_card: dict[str, str]
+    meta_tags: dict[str, str]
+    def __init__(
+        self,
+        keywords: list[str],
+        open_graph: dict[str, str],
+        twitter_card: dict[str, str],
+        meta_tags: dict[str, str],
+        title: str | None = None,
+        description: str | None = None,
+        author: str | None = None,
+        canonical_url: str | None = None,
+        base_href: str | None = None,
+        language: str | None = None,
+        text_direction: TextDirection | str | None = None,
+    ) -> None: ...
+
+class HeaderMetadata:
+    level: int
+    text: str
+    id: str | None
+    depth: int
+    html_offset: int
+    def __init__(
+        self,
+        level: int,
+        text: str,
+        depth: int,
+        html_offset: int,
+        id: str | None = None,  # noqa: A002
+    ) -> None: ...
+    def is_valid(self) -> bool: ...
+
+class LinkMetadata:
+    href: str
+    text: str
+    title: str | None
+    link_type: LinkType
+    rel: list[str]
+    attributes: dict[str, str]
+    def __init__(
+        self,
+        href: str,
+        text: str,
+        link_type: LinkType | str,
+        rel: list[str],
+        attributes: dict[str, str],
+        title: str | None = None,
+    ) -> None: ...
+    @staticmethod
+    def classify_link(href: str) -> LinkType: ...
+
+class ImageMetadata:
+    src: str
+    alt: str | None
+    title: str | None
+    dimensions: str | None
+    image_type: ImageType
+    attributes: dict[str, str]
+    def __init__(
+        self,
+        src: str,
+        image_type: ImageType | str,
+        attributes: dict[str, str],
+        alt: str | None = None,
+        title: str | None = None,
+        dimensions: str | None = None,
+    ) -> None: ...
+
+class StructuredData:
+    data_type: StructuredDataType
+    raw_json: str
+    schema_type: str | None
+    def __init__(
+        self,
+        data_type: StructuredDataType | str,
+        raw_json: str,
+        schema_type: str | None = None,
+    ) -> None: ...
+
+class HtmlMetadata:
+    document: DocumentMetadata
+    headers: list[HeaderMetadata]
+    links: list[LinkMetadata]
+    images: list[ImageMetadata]
+    structured_data: list[StructuredData]
+    def __init__(
+        self,
+        document: DocumentMetadata,
+        headers: list[HeaderMetadata],
+        links: list[LinkMetadata],
+        images: list[ImageMetadata],
+        structured_data: list[StructuredData],
+    ) -> None: ...
+
 class ConversionOptions:
     heading_style: HeadingStyle
     list_indent_type: ListIndentType
@@ -319,110 +424,33 @@ class ProcessingWarning:
     kind: WarningKind
     def __init__(self, message: str, kind: WarningKind | str) -> None: ...
 
-class DocumentMetadata:
-    title: str | None
-    description: str | None
-    keywords: list[str]
-    author: str | None
-    canonical_url: str | None
-    base_href: str | None
-    language: str | None
-    text_direction: TextDirection | None
-    open_graph: dict[str, str]
-    twitter_card: dict[str, str]
-    meta_tags: dict[str, str]
-    def __init__(
-        self,
-        keywords: list[str],
-        open_graph: dict[str, str],
-        twitter_card: dict[str, str],
-        meta_tags: dict[str, str],
-        title: str | None = None,
-        description: str | None = None,
-        author: str | None = None,
-        canonical_url: str | None = None,
-        base_href: str | None = None,
-        language: str | None = None,
-        text_direction: TextDirection | str | None = None,
-    ) -> None: ...
+class TextDirection:
+    LeftToRight: TextDirection = ...
+    RightToLeft: TextDirection = ...
+    Auto: TextDirection = ...
+    def __init__(self, value: int | str) -> None: ...
 
-class HeaderMetadata:
-    level: int
-    text: str
-    id: str | None
-    depth: int
-    html_offset: int
-    def __init__(
-        self,
-        level: int,
-        text: str,
-        depth: int,
-        html_offset: int,
-        id: str | None = None,  # noqa: A002
-    ) -> None: ...
-    def is_valid(self) -> bool: ...
+class LinkType:
+    Anchor: LinkType = ...
+    Internal: LinkType = ...
+    External: LinkType = ...
+    Email: LinkType = ...
+    Phone: LinkType = ...
+    Other: LinkType = ...
+    def __init__(self, value: int | str) -> None: ...
 
-class LinkMetadata:
-    href: str
-    text: str
-    title: str | None
-    link_type: LinkType
-    rel: list[str]
-    attributes: dict[str, str]
-    def __init__(
-        self,
-        href: str,
-        text: str,
-        link_type: LinkType | str,
-        rel: list[str],
-        attributes: dict[str, str],
-        title: str | None = None,
-    ) -> None: ...
-    @staticmethod
-    def classify_link(href: str) -> LinkType: ...
+class ImageType:
+    DataUri: ImageType = ...
+    InlineSvg: ImageType = ...
+    External: ImageType = ...
+    Relative: ImageType = ...
+    def __init__(self, value: int | str) -> None: ...
 
-class ImageMetadata:
-    src: str
-    alt: str | None
-    title: str | None
-    dimensions: str | None
-    image_type: ImageType
-    attributes: dict[str, str]
-    def __init__(
-        self,
-        src: str,
-        image_type: ImageType | str,
-        attributes: dict[str, str],
-        alt: str | None = None,
-        title: str | None = None,
-        dimensions: str | None = None,
-    ) -> None: ...
-
-class StructuredData:
-    data_type: StructuredDataType
-    raw_json: str
-    schema_type: str | None
-    def __init__(
-        self,
-        data_type: StructuredDataType | str,
-        raw_json: str,
-        schema_type: str | None = None,
-    ) -> None: ...
-
-class HtmlMetadata:
-    document: DocumentMetadata
-    headers: list[HeaderMetadata]
-    links: list[LinkMetadata]
-    images: list[ImageMetadata]
-    structured_data: list[StructuredData]
-    def __init__(
-        self,
-        document: DocumentMetadata,
-        headers: list[HeaderMetadata],
-        links: list[LinkMetadata],
-        images: list[ImageMetadata],
-        structured_data: list[StructuredData],
-    ) -> None: ...
+class StructuredDataType:
+    JsonLd: StructuredDataType = ...
+    Microdata: StructuredDataType = ...
+    RDFa: StructuredDataType = ...
+    def __init__(self, value: int | str) -> None: ...
 
 class PreprocessingPreset:
     Minimal: PreprocessingPreset = ...
@@ -487,34 +515,6 @@ class WarningKind:
     TruncatedInput: WarningKind = ...
     MalformedHtml: WarningKind = ...
     SanitizationApplied: WarningKind = ...
-    def __init__(self, value: int | str) -> None: ...
-
-class TextDirection:
-    LeftToRight: TextDirection = ...
-    RightToLeft: TextDirection = ...
-    Auto: TextDirection = ...
-    def __init__(self, value: int | str) -> None: ...
-
-class LinkType:
-    Anchor: LinkType = ...
-    Internal: LinkType = ...
-    External: LinkType = ...
-    Email: LinkType = ...
-    Phone: LinkType = ...
-    Other: LinkType = ...
-    def __init__(self, value: int | str) -> None: ...
-
-class ImageType:
-    DataUri: ImageType = ...
-    InlineSvg: ImageType = ...
-    External: ImageType = ...
-    Relative: ImageType = ...
-    def __init__(self, value: int | str) -> None: ...
-
-class StructuredDataType:
-    JsonLd: StructuredDataType = ...
-    Microdata: StructuredDataType = ...
-    RDFa: StructuredDataType = ...
     def __init__(self, value: int | str) -> None: ...
 
 def convert(html: str, options: ConversionOptions | None = None) -> ConversionResult: ...
