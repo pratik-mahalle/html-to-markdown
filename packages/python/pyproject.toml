@@ -3,7 +3,7 @@ build-backend = "maturin"
 requires = [ "maturin>=1,<2" ]
 
 [project]
-name = "html-to-markdown-rs"
+name = "html-to-markdown"
 version = "3.2.0"
 description = "High-performance HTML to Markdown converter"
 keywords = [ "converter", "html", "markdown" ]
@@ -21,7 +21,7 @@ classifiers = [
 urls.repository = "https://github.com/kreuzberg-dev/html-to-markdown"
 
 [tool.maturin]
-module-name = "html_to_markdown_rs._html_to_markdown"
+module-name = "html_to_markdown._html_to_markdown"
 manifest-path = "../../crates/html-to-markdown-py/Cargo.toml"
 features = [ "pyo3/extension-module" ]
-python-packages = [ "html_to_markdown_rs" ]
+python-packages = [ "html_to_markdown" ]
