@@ -1,18 +1,34 @@
 $schema: https://raw.githubusercontent.com/Goldziher/ai-rulez/main/schema/ai-rules-v3.schema.json
-description: High-performance HTML→Markdown converter with Rust core and polyglot bindings (Python, TypeScript, Ruby, PHP). Focus on performance, accuracy, and language parity.
-gitignore: true
 name: html-to-markdown
+description: >-
+  High-performance HTML to Markdown converter with Rust core and polyglot bindings
+  (Python, TypeScript, Ruby, PHP, Go, Java, C#, Elixir, R, WebAssembly, C FFI).
+gitignore: true
 
-# Include shared ai-rulez configuration from git repository
+header:
+  style: minimal
+
 includes:
   - name: kreuzberg-core
     source: https://github.com/kreuzberg-dev/ai-rulez.git
     path: modules/core
     merge_strategy: local-override
+    local_override: ../ai-rulez
   - name: kreuzberg-cicd
     source: https://github.com/kreuzberg-dev/ai-rulez.git
     path: modules/cicd
     merge_strategy: local-override
+    local_override: ../ai-rulez
+  - name: kreuzberg-infrastructure
+    source: https://github.com/kreuzberg-dev/ai-rulez.git
+    path: modules/infrastructure
+    merge_strategy: local-override
+    local_override: ../ai-rulez
+  - name: kreuzberg-e2e-generator
+    source: https://github.com/kreuzberg-dev/ai-rulez.git
+    path: modules/e2e-generator
+    merge_strategy: local-override
+    local_override: ../ai-rulez
 
 builtins:
   - rust

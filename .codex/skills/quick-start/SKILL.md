@@ -21,8 +21,7 @@ description: "Developer quick start guide with prerequisites, setup, and workflo
 ## Quick Setup
 
 ```bash
-git clone https://github.com/kreuzberg-dev/your-project.git
-cd your-project
+# Clone the project repository and cd into it
 
 # Install all dependencies
 task setup

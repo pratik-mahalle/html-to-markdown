@@ -12,8 +12,8 @@ description: "Common task runner commands for build, test, lint, and format work
 | **Test** | `task test:all`, `task rust:test`, `task python:test`, `task node:test`, `task go:test`, `task java:test`, `task ruby:test`, `task e2e:all` |
 | **Lint** | `task lint:all`, `task lint:check` (CI), `task rust:clippy`, `task python:lint`, `task node:lint` |
 | **Format** | `task format`, `task format:check`, `task rust:fmt`, `task python:format`, `task node:format` |
-| **Utils** | `task clean`, `task version:sync`, `task pre-commit`, `task pdfium:install`, `task smoke` |
+| **Utils** | `task clean`, `task version:sync`, `task pre-commit`, `task smoke` |
 
 Build commands respect `BUILD_PROFILE` (dev/release/ci). Append `:dev` or `:release` for explicit mode.
 
-**E2E Generation**: `cargo run -p kreuzberg-e2e-generator -- generate --lang <rust|python|typescript|ruby|java|go|elixir>`
+**E2E Generation**: `task generate:e2e` (regenerates all language test suites from fixtures)
