@@ -38,7 +38,7 @@ html-to-markdown [OPTIONS] [FILE]
 |------|-------|--------|---------|-------------|
 | `--list-indent-type <TYPE>` | | `spaces`, `tabs` | `spaces` | Indentation type for nested lists. |
 | `--list-indent-width <N>` | | 1–8 | `2` | Spaces per indent level. Ignored with `tabs`. |
-| `--bullets <CHARS>` | `-b` | string | `"-"` | Bullet characters cycling through nesting levels. E.g. `"*+-"`. |
+| `--bullets <CHARS>` | `-b` | string | `"-*+"` | Bullet characters cycling through nesting levels. E.g. `"*+-"`. |
 
 ## Text Formatting
 
@@ -57,7 +57,7 @@ html-to-markdown [OPTIONS] [FILE]
 
 | Flag | Short | Values | Default | Description |
 |------|-------|--------|---------|-------------|
-| `--code-block-style <STYLE>` | | `indented`, `backticks`, `tildes` | `indented` | Code block fence style. |
+| `--code-block-style <STYLE>` | | `backticks`, `indented`, `tildes` | `backticks` | Code block fence style. |
 | `--code-language <LANG>` | `-l` | string | `""` | Default language for fenced code blocks. |
 
 ## Links

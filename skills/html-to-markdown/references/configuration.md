@@ -13,7 +13,7 @@ In TypeScript/Node.js, use `JsConversionOptions` interface (camelCase).
 | `heading_style` | `heading_style` | `headingStyle` | enum | `atx` | Heading format: `atx` (`# h1`), `underlined` (`===`), `atxClosed` (`# h1 #`) |
 | `list_indent_type` | `list_indent_type` | `listIndentType` | enum | `spaces` | List indentation: `spaces` or `tabs` |
 | `list_indent_width` | `list_indent_width` | `listIndentWidth` | int | `2` | Spaces per list indent level (ignored when `list_indent_type = tabs`) |
-| `bullets` | `bullets` | `bullets` | string | `"-"` (Python default: `"-*+"`) | Bullet characters cycling through nesting levels. Default `"-"` in Rust/Node; Python default is `"-*+"`. Use `"*+-"` for varying per level. |
+| `bullets` | `bullets` | `bullets` | string | `"-*+"` | Bullet characters cycling through nesting levels. Characters cycle across nesting levels. Use `"*+-"` for a different order. |
 | `strong_em_symbol` | `strong_em_symbol` | `strongEmSymbol` | char | `'*'` | Symbol for bold/italic emphasis: `'*'` or `'_'` |
 | `escape_asterisks` | `escape_asterisks` | `escapeAsterisks` | bool | `false` | Escape `*` in plain text to prevent unintended formatting |
 | `escape_underscores` | `escape_underscores` | `escapeUnderscores` | bool | `false` | Escape `_` in plain text |
@@ -33,7 +33,7 @@ In TypeScript/Node.js, use `JsConversionOptions` interface (camelCase).
 | `sub_symbol` | `sub_symbol` | `subSymbol` | string | `""` | Symbol wrapping `<sub>` text. E.g. `"~"` → `~text~`. Empty = no wrapping. |
 | `sup_symbol` | `sup_symbol` | `supSymbol` | string | `""` | Symbol wrapping `<sup>` text. E.g. `"^"` → `^text^`. Empty = no wrapping. |
 | `newline_style` | `newline_style` | `newlineStyle` | enum | `spaces` | `<br>` representation: `spaces` (two trailing spaces + newline) or `backslash` (`\` + newline) |
-| `code_block_style` | `code_block_style` | `codeBlockStyle` | enum | `indented` (Python default: `backticks`) | Code block style: `indented` (4 spaces), `backticks` (```), `tildes` (~~~). Python default is `backticks`. |
+| `code_block_style` | `code_block_style` | `codeBlockStyle` | enum | `backticks` | Code block style: `backticks` (```), `indented` (4 spaces), `tildes` (~~~). |
 | `keep_inline_images_in` | `keep_inline_images_in` | `keepInlineImagesIn` | list/array | `[]` | HTML tag names where `<img>` children remain as Markdown (not converted to alt text) |
 | `preprocessing` | (separate param) | `preprocessing` | object | see below | HTML preprocessing config. In Python, pass as separate `PreprocessingOptions` argument. |
 | `encoding` | `encoding` | `encoding` | string | `"utf-8"` | Expected character encoding for input HTML |
@@ -54,7 +54,7 @@ Preprocessing runs before conversion to clean noisy HTML (ads, navigation, forms
 
 | Rust Field | Python | TypeScript | Type | Default | Description |
 |------------|--------|------------|------|---------|-------------|
-| `enabled` | `enabled` | `enabled` | bool | `false` (Rust) / `true` (Python) | Enable HTML preprocessing globally |
+| `enabled` | `enabled` | `enabled` | bool | `true` | Enable HTML preprocessing globally |
 | `preset` | `preset` | `preset` | enum | `standard` | Aggressiveness: `minimal`, `standard`, `aggressive` |
 | `remove_navigation` | `remove_navigation` | `removeNavigation` | bool | `true` | Remove `<nav>`, breadcrumbs, menus, sidebars |
 | `remove_forms` | `remove_forms` | `removeForms` | bool | `true` | Remove `<form>`, `<input>`, `<button>`, etc. |

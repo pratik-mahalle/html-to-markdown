@@ -9,7 +9,7 @@ description: >-
 license: MIT
 metadata:
   author: kreuzberg-dev
-  version: "1.0"
+  version: "3.2.0"
   repository: https://github.com/kreuzberg-dev/html-to-markdown
 ---
 
@@ -77,7 +77,7 @@ composer require kreuzberg-dev/html-to-markdown
 <dependency>
   <groupId>dev.kreuzberg</groupId>
   <artifactId>html-to-markdown</artifactId>
-  <version>3.0.0</version>
+  <version>3.2.0</version>
 </dependency>
 ```
 
