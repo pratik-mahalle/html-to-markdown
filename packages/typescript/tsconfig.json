@@ -11,6 +11,7 @@
 		"exactOptionalPropertyTypes": true,
 		"types": ["node"],
 		"verbatimModuleSyntax": false,
+		"isolatedModules": false,
 		"paths": {
 			"@kreuzberg/html-to-markdown-node": ["../../crates/html-to-markdown-node/index.d.ts"]
 		}
