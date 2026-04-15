@@ -82,6 +82,7 @@ wasm = "crates/html-to-markdown-wasm/src/"
 
 [python]
 module_name = "_html_to_markdown"
+pip_name = "html-to-markdown"
 
 [python.stubs]
 output = "packages/python/html_to_markdown/"
