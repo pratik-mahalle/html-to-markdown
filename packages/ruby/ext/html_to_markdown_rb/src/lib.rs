@@ -5,6 +5,36 @@ use magnus::{Error, IntoValueFromNative, Ruby, function, method, prelude::*, try
 use std::collections::HashMap;
 use std::sync::Arc;
 
+fn json_to_ruby(handle: &Ruby, val: serde_json::Value) -> magnus::Value {
+    use magnus::IntoValue;
+    match val {
+        serde_json::Value::Null => handle.qnil().into_value_with(handle),
+        serde_json::Value::Bool(b) => b.into_value_with(handle),
+        serde_json::Value::Number(n) => {
+            if let Some(i) = n.as_i64() {
+                i.into_value_with(handle)
+            } else if let Some(u) = n.as_u64() {
+                u.into_value_with(handle)
+            } else {
+                n.as_f64().unwrap_or(0.0).into_value_with(handle)
+            }
+        }
+        serde_json::Value::String(s) => s.into_value_with(handle),
+        serde_json::Value::Array(arr) => {
+            let ruby_vals: Vec<magnus::Value> =
+                arr.into_iter().map(|v| json_to_ruby(handle, v)).collect();
+            handle.ary_new_from_values(&ruby_vals).into_value_with(handle)
+        }
+        serde_json::Value::Object(map) => {
+            let hash = handle.hash_new();
+            for (k, v) in map {
+                hash.aset(k, json_to_ruby(handle, v)).ok();
+            }
+            hash.into_value_with(handle)
+        }
+    }
+}
+
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::MetadataConfig")]
 #[serde(default)]
@@ -2364,13 +2394,17 @@ impl Default for NodeContent {
 
 impl magnus::IntoValue for NodeContent {
     fn into_value_with(self, handle: &Ruby) -> magnus::Value {
-        serde_magnus::serialize(handle, &self).unwrap_or_else(|_| handle.qnil().into_value_with(handle))
+        use magnus::IntoValue;
+        serde_json::to_value(&self)
+            .map(|v| json_to_ruby(handle, v))
+            .unwrap_or_else(|_| handle.qnil().into_value_with(handle))
     }
 }
 
 impl magnus::TryConvert for NodeContent {
     fn try_convert(val: magnus::Value) -> Result<Self, magnus::Error> {
-        serde_magnus::deserialize(&magnus::Ruby::get().unwrap(), val)
+        let json_str: String = magnus::TryConvert::try_convert(val)?;
+        serde_json::from_str(&json_str)
             .map_err(|e| magnus::Error::new(magnus::exception::type_error(), e.to_string()))
     }
 }
@@ -2400,13 +2434,17 @@ impl Default for AnnotationKind {
 
 impl magnus::IntoValue for AnnotationKind {
     fn into_value_with(self, handle: &Ruby) -> magnus::Value {
-        serde_magnus::serialize(handle, &self).unwrap_or_else(|_| handle.qnil().into_value_with(handle))
+        use magnus::IntoValue;
+        serde_json::to_value(&self)
+            .map(|v| json_to_ruby(handle, v))
+            .unwrap_or_else(|_| handle.qnil().into_value_with(handle))
     }
 }
 
 impl magnus::TryConvert for AnnotationKind {
     fn try_convert(val: magnus::Value) -> Result<Self, magnus::Error> {
-        serde_magnus::deserialize(&magnus::Ruby::get().unwrap(), val)
+        let json_str: String = magnus::TryConvert::try_convert(val)?;
+        serde_json::from_str(&json_str)
             .map_err(|e| magnus::Error::new(magnus::exception::type_error(), e.to_string()))
     }
 }

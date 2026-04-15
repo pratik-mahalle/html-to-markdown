@@ -14,4 +14,3 @@ html-to-markdown-rs = { path = "../../../../crates/html-to-markdown", features =
 magnus = "0.8"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-serde_magnus = "0.9"
