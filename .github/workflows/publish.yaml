@@ -1645,11 +1645,6 @@ jobs:
         if: ${{ steps.maven_check.outputs.exists != 'true' }}
         uses: kreuzberg-dev/actions/setup-rust@v1
 
-      - name: Patch legacy Maven GPG arguments
-        if: ${{ steps.maven_check.outputs.exists != 'true' }}
-        run: scripts/publish/maven/patch-legacy-gpg-args.sh packages/java/pom.xml
-        shell: bash
-
       - name: Setup Java
         if: ${{ steps.maven_check.outputs.exists != 'true' }}
         env:
