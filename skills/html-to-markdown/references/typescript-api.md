@@ -1,20 +1,20 @@
 # TypeScript / Node.js API Reference
 
-Package: `@kreuzberg/html-to-markdown`
-The TypeScript package re-exports everything from `@kreuzberg/html-to-markdown-node` (the native NAPI-RS binding) and adds file/stream helpers.
+Package: `@kreuzberg/html-to-markdown-node`
+The TypeScript package (`@kreuzberg/html-to-markdown`) re-exports everything from `@kreuzberg/html-to-markdown-node` (the native NAPI-RS binding) and adds file/stream helpers.
 
 ## Installation
 
 ```bash
-npm install @kreuzberg/html-to-markdown
+npm install @kreuzberg/html-to-markdown-node
 # or
-pnpm add @kreuzberg/html-to-markdown
+pnpm add @kreuzberg/html-to-markdown-node
 ```
 
 ## Primary Function
 
 ```typescript
-import { convert } from '@kreuzberg/html-to-markdown';
+import { convert } from '@kreuzberg/html-to-markdown-node';
 
 // convert() returns a JSON string — always JSON.parse() the result
 const result = JSON.parse(convert(html, options?));
@@ -33,14 +33,6 @@ console.log(result.metadata);   // metadata object or null
 ```typescript
 // Primary conversion — returns JSON string, always JSON.parse() the result
 function convert(html: string, options?: JsConversionOptions): string;
-
-// Convert Buffer/Uint8Array (avoids intermediate JS string)
-function convertBuffer(html: Buffer, options?: JsConversionOptions): string;
-
-// Pre-parsed options handle (reuse for many conversions)
-function createConversionOptionsHandle(options?: JsConversionOptions): External<RustConversionOptions>;
-function convertWithOptionsHandle(html: string, handle: External<RustConversionOptions>): string;
-function convertBufferWithOptionsHandle(html: Buffer, handle: External<RustConversionOptions>): string;
 ```
 
 ### File and Stream Helpers (from `@kreuzberg/html-to-markdown`)
@@ -52,7 +44,7 @@ import {
     wrapVisitorCallback,
     wrapVisitorCallbacks,
     hasMetadataSupport,
-} from '@kreuzberg/html-to-markdown';
+} from '@kreuzberg/html-to-markdown-node';
 import type { Readable } from 'node:stream';
 
 // File helpers (async, return JSON string — JSON.parse() the result)
@@ -120,27 +112,16 @@ interface JsPreprocessingOptions {
 
 ### JsMetadataConfig
 
-Fields use `snake_case` (matching the actual `.d.ts`):
+Fields use camelCase (matching the NAPI-RS binding):
 
 ```typescript
 interface JsMetadataConfig {
-    extract_document?: boolean;
-    extract_headers?: boolean;
-    extract_links?: boolean;
-    extract_images?: boolean;
-    extract_structured_data?: boolean;
-    max_structured_data_size?: number;
-}
-```
-
-### JsInlineImageConfig
-
-```typescript
-interface JsInlineImageConfig {
-    maxDecodedSizeBytes?: bigint;   // BigInt
-    filenamePrefix?: string | null;
-    captureSvg?: boolean;
-    inferDimensions?: boolean;
+    extractDocument?: boolean;
+    extractHeaders?: boolean;
+    extractLinks?: boolean;
+    extractImages?: boolean;
+    extractStructuredData?: boolean;
+    maxStructuredDataSize?: number;
 }
 ```
 
@@ -188,8 +169,8 @@ interface ConversionResult {
 The visitor is passed as a third argument to `convert()`:
 
 ```typescript
-import { convert } from '@kreuzberg/html-to-markdown';
-import { wrapVisitorCallbacks } from '@kreuzberg/html-to-markdown';
+import { convert } from '@kreuzberg/html-to-markdown-node';
+import { wrapVisitorCallbacks } from '@kreuzberg/html-to-markdown-node';
 
 const visitor = wrapVisitorCallbacks({
     visitElementStart: (ctx) => {
@@ -210,7 +191,7 @@ Visitor return types: `{ type: 'continue' }` | `{ type: 'skip' }` | `{ type: 'pr
 
 ```typescript
 // Simple conversion
-import { convert } from '@kreuzberg/html-to-markdown';
+import { convert } from '@kreuzberg/html-to-markdown-node';
 const result = JSON.parse(convert('<h1>Hello</h1>'));
 console.log(result.content); // "# Hello\n"
 
@@ -232,14 +213,8 @@ for (const image of result4.images) {
 }
 
 // File conversion
-import { convertFile } from '@kreuzberg/html-to-markdown';
+import { convertFile } from '@kreuzberg/html-to-markdown-node';
 const json = await convertFile('./page.html', { headingStyle: 'Atx' });
 const fileResult = JSON.parse(json);
 console.log(fileResult.content);
-
-// Buffer conversion (avoids string overhead)
-import { convertBuffer } from '@kreuzberg/html-to-markdown-node';
-const html = Buffer.from('<h1>Hello</h1>', 'utf8');
-const json2 = convertBuffer(html, { headingStyle: 'Atx' });
-const bufResult = JSON.parse(json2);
 ```

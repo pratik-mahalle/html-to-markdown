@@ -10,63 +10,47 @@ Python requirement: 3.10+
 def convert(
     html: str,
     options: ConversionOptions | None = None,
-    preprocessing: PreprocessingOptions | None = None,
-) -> ExtractionResult:
+) -> ConversionResult:
     ...
 ```
 
-Returns an `ExtractionResult` TypedDict (dict) with all extracted data in a single pass.
+Returns a `ConversionResult` dataclass with all extracted data in a single pass. Pass `PreprocessingOptions` via `ConversionOptions.preprocessing`.
 
 ```python
 from html_to_markdown import convert, ConversionOptions, PreprocessingOptions
 
 # Simple
 result = convert("<h1>Hello</h1><p>World</p>")
-print(result["content"])        # "# Hello\n\nWorld\n"
-print(result["tables"])         # []
-print(result["warnings"])       # []
-print(result["metadata"])       # dict with document, headers, links, images, structured_data
+print(result.content)        # "# Hello\n\nWorld\n"
+print(result.tables)         # []
+print(result.warnings)       # []
+print(result.metadata)       # HtmlMetadata or None
 
 # With options
 result = convert(
     html,
-    options=ConversionOptions(heading_style="atx", code_block_style="backticks"),
-    preprocessing=PreprocessingOptions(enabled=True, preset="aggressive"),
+    options=ConversionOptions(
+        heading_style="atx",
+        code_block_style="backticks",
+        preprocessing=PreprocessingOptions(enabled=True, preset="aggressive"),
+    ),
 )
-print(result["content"])
+print(result.content)
 ```
 
-## ExtractionResult (TypedDict)
+## ConversionResult (dataclass)
 
 ```python
-class ExtractionResult(TypedDict):
-    content: str | None                   # Converted markdown/djot/plain text
-    document: None                        # Document structure (not yet wired)
-    metadata: dict | None                 # HtmlMetadata dict (or None if unavailable)
-    tables: list[ExtractedTable]          # Extracted tables
-    images: list                          # Extracted inline images (if extract_images=True)
-    warnings: list[ProcessingWarning]     # Non-fatal warnings
+from html_to_markdown import ConversionResult
 
-class ExtractedTable(TypedDict):
-    grid: TableGrid
-    markdown: str
-
-class TableGrid(TypedDict):
-    rows: int
-    cols: int
-    cells: list[GridCell]
-
-class GridCell(TypedDict):
-    content: str
-    row: int
-    col: int
-    row_span: int
-    col_span: int
-    is_header: bool
-
-class ProcessingWarning(TypedDict):
-    message: str
-    kind: str           # "image_extraction_failed" | "encoding_fallback" | ...
+@dataclass
+class ConversionResult:
+    content: str | None = None           # Converted markdown/djot/plain text
+    document: Any | None = None          # Document structure (populated when include_document_structure=True)
+    metadata: Any | None = None          # HtmlMetadata or None
+    tables: list[Any] = field(default_factory=list)   # Extracted tables
+    images: list[str] = field(default_factory=list)   # Extracted inline images (if extract_images=True)
+    warnings: list[Any] = field(default_factory=list) # Non-fatal warnings
 ```
 
 ## ConversionOptions (dataclass)
@@ -77,15 +61,15 @@ from html_to_markdown import ConversionOptions
 @dataclass
 class ConversionOptions:
     # Headings
-    heading_style: Literal["underlined", "atx", "atx_closed"] = "atx"
+    heading_style: str = "atx"           # "underlined" | "atx" | "atx_closed"
 
     # Lists
-    list_indent_type: Literal["spaces", "tabs"] = "spaces"
+    list_indent_type: str = "spaces"     # "spaces" | "tabs"
     list_indent_width: int = 2
     bullets: str = "-*+"
 
     # Emphasis
-    strong_em_symbol: Literal["*", "_"] = "*"
+    strong_em_symbol: str = "*"          # "*" or "_"
 
     # Escaping
     escape_asterisks: bool = False
@@ -95,14 +79,15 @@ class ConversionOptions:
 
     # Code
     code_language: str = ""
-    code_block_style: Literal["indented", "backticks", "tildes"] = "backticks"
+    code_block_style: str = "backticks"  # "indented" | "backticks" | "tildes"
 
     # Links
     autolinks: bool = True
     default_title: bool = False
+    link_style: str = "inline"           # "inline" | "reference"
 
     # Images
-    keep_inline_images_in: set[str] | None = None
+    keep_inline_images_in: list[str] = field(default_factory=list)
     skip_images: bool = False
     extract_images: bool = False
     max_image_size: int = 5_242_880     # 5 MiB
@@ -113,13 +98,13 @@ class ConversionOptions:
     br_in_tables: bool = False
 
     # Highlight
-    highlight_style: Literal["double-equal", "html", "bold"] = "double-equal"
+    highlight_style: str = "double_equal"  # "double_equal" | "html" | "bold" | "none"
 
     # Metadata
     extract_metadata: bool = True
 
     # Whitespace
-    whitespace_mode: Literal["normalized", "strict"] = "normalized"
+    whitespace_mode: str = "normalized"  # "normalized" | "strict"
     strip_newlines: bool = False
 
     # Wrapping
@@ -127,8 +112,8 @@ class ConversionOptions:
     wrap_width: int = 80
 
     # Element handling
-    strip_tags: set[str] | None = None
-    preserve_tags: set[str] | None = None
+    strip_tags: list[str] = field(default_factory=list)
+    preserve_tags: list[str] = field(default_factory=list)
     convert_as_inline: bool = False
 
     # Subscript / superscript
@@ -136,13 +121,16 @@ class ConversionOptions:
     sup_symbol: str = ""
 
     # Newlines
-    newline_style: Literal["spaces", "backslash"] = "spaces"
+    newline_style: str = "spaces"        # "spaces" | "backslash"
 
     # Output format
-    output_format: Literal["markdown", "djot"] = "markdown"
+    output_format: str = "markdown"      # "markdown" | "djot" | "plain"
 
     # Document structure
     include_document_structure: bool = False
+
+    # Preprocessing (pass PreprocessingOptions instance)
+    preprocessing: Any | None = None
 
     # Encoding and debug
     encoding: str = "utf-8"
@@ -157,60 +145,70 @@ from html_to_markdown import PreprocessingOptions
 @dataclass
 class PreprocessingOptions:
     enabled: bool = True
-    preset: Literal["minimal", "standard", "aggressive"] = "standard"
+    preset: str = "standard"             # "minimal" | "standard" | "aggressive"
     remove_navigation: bool = True
     remove_forms: bool = True
 ```
 
+## New Public Types in v3.2.0
+
+The following types are now exported from `html_to_markdown` directly:
+
+```python
+from html_to_markdown import (
+    CodeBlockStyle,        # Enum: INDENTED, BACKTICKS, TILDES
+    ConversionResult,      # Dataclass: result of convert()
+    DocumentMetadata,      # Dataclass: document-level metadata
+    HeadingStyle,          # Enum: UNDERLINED, ATX, ATX_CLOSED
+    HighlightStyle,        # Enum: DOUBLE_EQUAL, HTML, BOLD, NONE
+    HtmlMetadata,          # Dataclass: full metadata extraction result
+    LinkStyle,             # Enum: INLINE, REFERENCE
+    ListIndentType,        # Enum: SPACES, TABS
+    MetadataConfig,        # Dataclass: metadata extraction configuration
+    NewlineStyle,          # Enum: SPACES, BACKSLASH
+    OutputFormat,          # Enum: MARKDOWN, DJOT, PLAIN
+    PreprocessingPreset,   # Enum: MINIMAL, STANDARD, AGGRESSIVE
+    TableGrid,             # Dataclass: table grid structure
+    TextDirection,         # Enum: LEFT_TO_RIGHT, RIGHT_TO_LEFT, AUTO
+    WhitespaceMode,        # Enum: NORMALIZED, STRICT
+)
+```
+
 ## Accessing Metadata, Tables, and Images
 
-All structured data is in the `ExtractionResult` dict returned by `convert()`. Use `ConversionOptions` fields to control what is extracted:
+All structured data is in the `ConversionResult` dataclass returned by `convert()`. Use `ConversionOptions` fields to control what is extracted:
 
 ```python
 from html_to_markdown import convert, ConversionOptions
 
 # Metadata — enabled by default
 result = convert(html)
-meta = result["metadata"]
-print(meta["document"]["title"])
-print(meta["headers"])
-print(meta["links"])
+meta = result.metadata
+print(meta.document.title)
+print(meta.headers)
+print(meta.links)
 
 # Tables — always present in result
-for table in result["tables"]:
-    print(table["markdown"])
-    for cell in table["grid"]["cells"]:
-        print(cell["content"])
+for table in result.tables:
+    print(table.markdown)
 
 # Inline images — set extract_images=True
 result = convert(html, ConversionOptions(extract_images=True))
-for image in result["images"]:
-    print(image["format"], image["filename"])
+for image in result.images:
+    print(image)
 
 # Document structure — set include_document_structure=True
 result = convert(html, ConversionOptions(include_document_structure=True))
-doc = result["document"]
+doc = result.document
 
 # Plain string output
-markdown: str = result["content"]
+markdown: str = result.content
 ```
-
-## Performance Handles (reuse parsed options)
-
-```python
-def create_options_handle(
-    options: ConversionOptions | None = None,
-    preprocessing: PreprocessingOptions | None = None,
-) -> ConversionOptionsHandle:
-    ...
-```
-
-Use handles when converting many documents with the same options — avoids re-parsing options on each call. Pass the handle as the `options` argument to `convert()`.
 
 ## MetadataConfig
 
 ```python
-from html_to_markdown._html_to_markdown import MetadataConfig
+from html_to_markdown import MetadataConfig
 
 config = MetadataConfig(
     extract_document=True,
@@ -218,48 +216,33 @@ config = MetadataConfig(
     extract_links=True,
     extract_images=True,
     extract_structured_data=True,
-    max_structured_data_size=10_000,
+    max_structured_data_size=0,   # 0 = unlimited
 )
-```
-
-## InlineImageConfig
-
-```python
-from html_to_markdown._html_to_markdown import InlineImageConfig
-
-config = InlineImageConfig(
-    max_decoded_size_bytes=5_242_880,   # 5 MiB
-    filename_prefix=None,
-    capture_svg=False,
-    infer_dimensions=True,
-)
-```
-
-## InlineImage (TypedDict)
-
-```python
-class InlineImage(TypedDict):
-    data: bytes
-    format: str              # "png" | "jpg" | "gif" | "webp" | "svg"
-    filename: str | None
-    description: str | None  # alt text
-    dimensions: tuple[int, int] | None
-    source: Literal["img_data_uri", "svg_element"]
-    attributes: dict[str, str]
 ```
 
 ## Error Handling
 
 ```python
 from html_to_markdown import convert
-from html_to_markdown.exceptions import ConversionError
+from html_to_markdown.exceptions import (
+    ConversionError,       # Base exception for all conversion errors
+    ParseError,            # HTML parsing error
+    SanitizationError,     # HTML sanitization error
+    ConfigError,           # Invalid configuration
+    IoError,               # I/O error
+    PanicError,            # Panic caught during conversion
+    InvalidInputError,     # Invalid input data (binary data, invalid UTF-8)
+    OtherError,            # Generic conversion error
+)
 
 try:
     result = convert(html)
+except InvalidInputError as e:
+    print(f"Invalid input: {e}")
+except ConfigError as e:
+    print(f"Bad options: {e}")
 except ConversionError as e:
     print(f"Conversion failed: {e}")
-except ValueError as e:
-    print(f"Invalid input: {e}")
 ```
 
 ## Async Tip

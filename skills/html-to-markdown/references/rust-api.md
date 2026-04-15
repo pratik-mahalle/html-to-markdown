@@ -44,7 +44,10 @@ let result = convert("<h1>Hello</h1>", Some(opts))?;
 
 ## ConversionResult
 
+`ConversionResult` derives `Serialize` and `Deserialize` (always, not gated on a feature).
+
 ```rust
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ConversionResult {
     /// Converted text output (Markdown, Djot, or plain text).
     /// None only when output_format is OutputFormat::None (extraction-only mode).
@@ -71,7 +74,7 @@ pub struct ConversionResult {
 
 ## ConversionOptions Builder
 
-`ConversionOptions::builder()` returns `ConversionOptionsBuilder`. Call `.build()` to produce final options.
+`ConversionOptions::builder()` returns `ConversionOptionsBuilder` (now public, exported from crate root). Call `.build()` to produce final options.
 
 ```rust
 use html_to_markdown_rs::{
@@ -91,9 +94,9 @@ let options = ConversionOptions::builder()
     .heading_style(HeadingStyle::Atx)           // Atx | Underlined | AtxClosed
     .list_indent_type(ListIndentType::Spaces)   // Spaces | Tabs
     .list_indent_width(2usize)
-    .bullets("-")                                // default "-"; cycles per nesting level
+    .bullets("-*+")                               // default "-*+"; cycles per nesting level
     .strong_em_symbol('*')                       // '*' or '_'
-    .code_block_style(CodeBlockStyle::Indented) // Indented | Backticks | Tildes
+    .code_block_style(CodeBlockStyle::Backticks) // Indented | Backticks | Tildes (default: Backticks)
     .newline_style(NewlineStyle::Spaces)         // Spaces | Backslash
     .highlight_style(HighlightStyle::DoubleEqual) // DoubleEqual | Html | Bold | None
     .code_language("")                           // default language for fenced code blocks
@@ -248,11 +251,17 @@ pub struct TextAnnotation {
     pub kind: AnnotationKind,
 }
 
+// AnnotationKind implements Default (default variant: Bold)
+#[derive(Default)]
 pub enum AnnotationKind {
+    #[default]
     Bold, Italic, Underline, Strikethrough, Code,
     Subscript, Superscript, Highlight,
     Link { url: String, title: Option<String> },
 }
+
+// NodeContent implements Default (default: Heading { level: 1, text: String::new() })
+pub enum NodeContent { ... }
 ```
 
 ## Error Types
@@ -309,6 +318,8 @@ pub struct MetadataConfig {
 ```
 
 ## TableData Types
+
+`TableData` is exported from the crate root (`use html_to_markdown_rs::TableData`).
 
 ```rust
 pub struct TableData {
