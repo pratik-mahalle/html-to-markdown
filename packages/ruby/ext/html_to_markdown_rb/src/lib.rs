@@ -2975,6 +2975,19 @@ impl From<html_to_markdown_rs::options::PreprocessingOptionsUpdate> for Preproce
     }
 }
 
+impl From<html_to_markdown_rs::types::ConversionResult> for ConversionResult {
+    fn from(val: html_to_markdown_rs::types::ConversionResult) -> Self {
+        Self {
+            content: val.content,
+            document: val.document.map(Into::into),
+            metadata: val.metadata.into(),
+            tables: val.tables.into_iter().map(Into::into).collect(),
+            images: val.images.iter().map(|i| format!("{:?}", i)).collect(),
+            warnings: val.warnings.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
 impl From<html_to_markdown_rs::types::DocumentStructure> for DocumentStructure {
     fn from(val: html_to_markdown_rs::types::DocumentStructure) -> Self {
         Self {
