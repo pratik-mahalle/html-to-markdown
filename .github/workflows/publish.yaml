@@ -1262,8 +1262,8 @@ jobs:
 
   publish-crates:
     name: Publish crates.io packages
-    needs: [prepare, upload-release-artifacts, check-cratesio]
-    if: ${{ needs.prepare.result == 'success' && needs.prepare.outputs.tag && needs.prepare.outputs.dry_run != 'true' && needs.prepare.outputs.is_tag == 'true' && needs.check-cratesio.outputs.all_exist != 'true' }}
+    needs: [prepare, cargo-packages, check-cratesio]
+    if: ${{ always() && needs.cargo-packages.result == 'success' && needs.prepare.outputs.dry_run != 'true' && needs.prepare.outputs.is_tag == 'true' && needs.check-cratesio.outputs.all_exist != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -1360,8 +1360,8 @@ jobs:
 
   publish-rubygems:
     name: Publish Ruby gems
-    needs: [prepare, upload-release-artifacts, check-rubygems]
-    if: ${{ needs.prepare.result == 'success' && needs.prepare.outputs.tag && needs.prepare.outputs.is_tag == 'true' && (needs.prepare.outputs.dry_run == 'true' || needs.check-rubygems.outputs.exists != 'true') }}
+    needs: [prepare, ruby-gem, check-rubygems]
+    if: ${{ always() && needs.ruby-gem.result == 'success' && needs.prepare.outputs.is_tag == 'true' && (needs.prepare.outputs.dry_run == 'true' || needs.check-rubygems.outputs.exists != 'true') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -1701,8 +1701,8 @@ jobs:
 
   publish-node:
     name: Publish Node packages
-    needs: [prepare, upload-release-artifacts, check-npm]
-    if: ${{ needs.prepare.result == 'success' && needs.prepare.outputs.tag && needs.prepare.outputs.dry_run != 'true' && needs.prepare.outputs.is_tag == 'true' && needs.check-npm.outputs.node_exists != 'true' }}
+    needs: [prepare, node-bindings, node-typescript-defs, check-npm]
+    if: ${{ always() && needs.node-bindings.result == 'success' && needs.node-typescript-defs.result == 'success' && needs.prepare.outputs.dry_run != 'true' && needs.prepare.outputs.is_tag == 'true' && needs.check-npm.outputs.node_exists != 'true' }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -1830,8 +1830,8 @@ jobs:
 
   publish-wasm:
     name: Publish WASM package
-    needs: [prepare, upload-release-artifacts, check-npm]
-    if: ${{ needs.prepare.result == 'success' && needs.prepare.outputs.tag && needs.prepare.outputs.dry_run != 'true' && needs.prepare.outputs.is_tag == 'true' && (needs.check-npm.outputs.wasm_exists != 'true' || needs.prepare.outputs.force_republish_wasm == 'true') }}
+    needs: [prepare, wasm-bindings, check-npm]
+    if: ${{ always() && needs.wasm-bindings.result == 'success' && needs.prepare.outputs.dry_run != 'true' && needs.prepare.outputs.is_tag == 'true' && (needs.check-npm.outputs.wasm_exists != 'true' || needs.prepare.outputs.force_republish_wasm == 'true') }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write

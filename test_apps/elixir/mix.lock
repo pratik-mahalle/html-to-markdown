@@ -1,6 +1,6 @@
 %{
-  "html_to_markdown": {:hex, :html_to_markdown, "2.28.2", "21024bcf68a6c858b3882e8f8e0156d674dc608046562735d73df21e8a8a446e", [:mix], [{:jason, "~> 1.4", [hex: :jason, repo: "hexpm", optional: false]}, {:rustler, "~> 0.33.0", [hex: :rustler, repo: "hexpm", optional: false]}], "hexpm", "b8c8f2875745a03322db01978a0e3358b23a081c3216bf871f34929a67c3615a"},
+  "html_to_markdown": {:hex, :html_to_markdown, "3.2.0", "85e7645045d506544d09007a16748d663ae9a4bd7455d992ff866540a0e4308a", [:mix], [{:rustler, "~> 0.34", [hex: :rustler, repo: "hexpm", optional: false]}], "hexpm", "64e1ad1d58bb47d90440ef75a48043b870df1283d99fd0aad367c32f33297dfb"},
   "jason": {:hex, :jason, "1.4.4", "b9226785a9aa77b6857ca22832cffa5d5011a667207eb2a0ad56adb5db443b8a", [:mix], [{:decimal, "~> 1.0 or ~> 2.0", [hex: :decimal, repo: "hexpm", optional: true]}], "hexpm", "c5eb0cab91f094599f94d55bc63409236a8ec69a21a67814529e8d5f6cc90b3b"},
-  "rustler": {:hex, :rustler, "0.33.0", "4a5b0a7a7b0b51549bea49947beff6fae9bc5d5326104dcd4531261e876b5619", [:mix], [{:jason, "~> 1.0", [hex: :jason, repo: "hexpm", optional: false]}, {:toml, "~> 0.6", [hex: :toml, repo: "hexpm", optional: false]}], "hexpm", "7c4752728fee59a815ffd20c3429c55b644041f25129b29cdeb5c470b80ec5fd"},
+  "rustler": {:hex, :rustler, "0.37.3", "5f4e6634d43b26f0a69834dd1d3ed4e1710b022a053bf4a670220c9540c92602", [:mix], [{:jason, "~> 1.0", [hex: :jason, repo: "hexpm", optional: false]}], "hexpm", "a6872c6f53dcf00486d1e7f9e046e20e01bf1654bdacc4193016c2e8002b32a2"},
   "toml": {:hex, :toml, "0.7.0", "fbcd773caa937d0c7a02c301a1feea25612720ac3fa1ccb8bfd9d30d822911de", [:mix], [], "hexpm", "0690246a2478c1defd100b0c9b89b4ea280a22be9a7b313a8a058a2408a2fa70"},
 }
