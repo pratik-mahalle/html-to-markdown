@@ -1613,45 +1613,54 @@ jobs:
   publish-maven:
     name: Publish Maven package
     needs: [prepare, check-maven, java-ffi]
-    if: ${{ needs.prepare.result == 'success' && needs.prepare.outputs.tag && needs.prepare.outputs.dry_run != 'true' && needs.prepare.outputs.is_tag == 'true' && (needs.check-maven.outputs.exists != 'true' || needs.prepare.outputs.force_republish_java == 'true') }}
+    if: |
+      always() &&
+      needs.prepare.outputs.dry_run != 'true' &&
+      needs.prepare.outputs.is_tag == 'true' &&
+      (needs.check-maven.outputs.exists != 'true' || needs.prepare.outputs.force_republish_java == 'true') &&
+      needs.java-ffi.result == 'success'
     runs-on: ubuntu-latest
-    env:
-      MAVEN_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
-      MAVEN_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6 # v6
+        uses: actions/checkout@v6
         with:
           ref: ${{ needs.prepare.outputs.ref }}
 
+      - name: Check Maven Central for existing release
+        id: maven_check
+        uses: kreuzberg-dev/actions/check-registry@v1
+        with:
+          registry: maven
+          package: "dev.kreuzberg:html-to-markdown"
+          version: ${{ needs.prepare.outputs.version }}
+
       - name: Download Java FFI artifacts
-        uses: actions/download-artifact@v8 # v8
+        if: ${{ steps.maven_check.outputs.exists != 'true' }}
+        uses: actions/download-artifact@v8
         with:
           pattern: java-ffi-*
           path: java-ffi-artifacts
           merge-multiple: true
 
-      - name: Verify Central credentials
-        shell: bash
-        run: |
-          : "${MAVEN_USERNAME:?Set MAVEN_USERNAME to your Sonatype Central token user (namecode)}"
-          : "${MAVEN_PASSWORD:?Set MAVEN_PASSWORD to your Sonatype Central token password}"
-
-      - name: Install Maven (latest)
-        shell: bash
-        run: bash scripts/common/install-maven-latest.sh
+      - name: Setup Rust
+        if: ${{ steps.maven_check.outputs.exists != 'true' }}
+        uses: kreuzberg-dev/actions/setup-rust@v1
 
       - name: Patch legacy Maven GPG arguments
-        run: scripts/publish/maven/patch-legacy-gpg-args.sh
+        if: ${{ steps.maven_check.outputs.exists != 'true' }}
+        run: scripts/publish/maven/patch-legacy-gpg-args.sh packages/java/pom.xml
         shell: bash
 
       - name: Setup Java
+        if: ${{ steps.maven_check.outputs.exists != 'true' }}
         env:
+          MAVEN_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-        uses: actions/setup-java@v5 # v5
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: "25.0.2+10"
+          java-version: '25'
           cache: maven
           server-id: ossrh
           server-username: MAVEN_USERNAME
@@ -1659,63 +1668,23 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
-      - name: Configure GPG for non-interactive signing
-        shell: bash
-        env:
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-        run: |
-          mkdir -p ~/.gnupg
-          chmod 700 ~/.gnupg
-          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
-          gpgconf --kill gpg-agent || true
-
-          echo "::group::GPG debug info"
-          gpg --version
-          gpg --list-secret-keys
-          echo "Available pinentry programs:"
-          ls -la /usr/bin/pinentry* 2>/dev/null || echo "No pinentry in /usr/bin"
-          which pinentry 2>/dev/null || echo "pinentry not on PATH"
-          echo "Passphrase env var set: $([ -n "$MAVEN_GPG_PASSPHRASE" ] && echo 'YES' || echo 'NO')"
-          echo "gpg-agent.conf:"
-          cat ~/.gnupg/gpg-agent.conf
-          echo "gpg.conf (if exists):"
-          cat ~/.gnupg/gpg.conf 2>/dev/null || echo "(none)"
-          echo "::endgroup::"
-
-          echo "Testing GPG sign with loopback..."
-          echo "test" > /tmp/gpg-test.txt
-          echo "$MAVEN_GPG_PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 --armor --detach-sign /tmp/gpg-test.txt
-          echo "GPG test sign succeeded!"
-          rm -f /tmp/gpg-test.txt /tmp/gpg-test.txt.asc
-
-      - name: Setup Rust
-        uses: kreuzberg-dev/actions/setup-rust@v1 # v1
+      - name: Setup Maven
+        if: ${{ steps.maven_check.outputs.exists != 'true' }}
+        uses: kreuzberg-dev/actions/setup-maven@v1
 
       - name: Prefer gpg2 binary
+        if: ${{ steps.maven_check.outputs.exists != 'true' }}
         run: scripts/publish/maven/prefer-gpg2.sh
         shell: bash
 
       - name: Copy native libraries into resources
+        if: ${{ steps.maven_check.outputs.exists != 'true' }}
         shell: bash
-        run: |
-          if [[ -d "java-ffi-artifacts" ]]; then
-            echo "Copying native libraries from java-ffi-artifacts..."
-            scripts/publish/java/copy-native-libs.sh java-ffi-artifacts
-          else
-            echo "Warning: java-ffi-artifacts directory not found"
-          fi
-
-      - name: Re-check Maven Central before publish
-        id: recheck
-        uses: kreuzberg-dev/actions/check-registry@v1 # v1
-        with:
-          registry: maven
-          package: "dev.kreuzberg:html-to-markdown"
-          version: ${{ needs.prepare.outputs.version }}
+        run: scripts/publish/java/copy-native-libs.sh java-ffi-artifacts
 
       - name: Release Maven package
-        if: ${{ steps.recheck.outputs.exists != 'true' }}
-        uses: kreuzberg-dev/actions/publish-maven@v1 # v1
+        if: ${{ steps.maven_check.outputs.exists != 'true' }}
+        uses: kreuzberg-dev/actions/publish-maven@v1
         with:
           pom-file: packages/java/pom.xml
           maven-profile: publish
@@ -1725,6 +1694,10 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Maven already published summary
+        if: ${{ steps.maven_check.outputs.exists == 'true' }}
+        run: echo "Maven package version ${{ needs.prepare.outputs.version }} already published; skipping." >> "$GITHUB_STEP_SUMMARY"
 
   publish-node:
     name: Publish Node packages
