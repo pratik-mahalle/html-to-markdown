@@ -1187,7 +1187,7 @@ jobs:
         c-ffi-libraries,
         cargo-packages,
       ]
-    if: ${{ needs.prepare.outputs.dry_run != 'true' && needs.prepare.outputs.is_tag == 'true' }}
+    if: ${{ always() && needs.prepare.outputs.dry_run != 'true' && needs.prepare.outputs.is_tag == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -1311,8 +1311,8 @@ jobs:
 
   publish-pypi:
     name: Publish Python packages to PyPI
-    needs: [prepare, upload-release-artifacts, check-pypi]
-    if: ${{ needs.prepare.result == 'success' && needs.prepare.outputs.tag && needs.prepare.outputs.dry_run != 'true' && needs.prepare.outputs.is_tag == 'true' && needs.check-pypi.outputs.exists != 'true' }}
+    needs: [prepare, python-wheels, python-sdist, check-pypi]
+    if: ${{ always() && needs.python-wheels.result == 'success' && needs.python-sdist.result == 'success' && needs.prepare.outputs.dry_run != 'true' && needs.prepare.outputs.is_tag == 'true' && needs.check-pypi.outputs.exists != 'true' }}
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
