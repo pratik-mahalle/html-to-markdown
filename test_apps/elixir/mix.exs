@@ -1,24 +1,18 @@
-defmodule HtmlToMarkdownTestApp.MixProject do
+defmodule E2eElixir.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :html_to_markdown_test_app,
-      version: "1.0.0",
-      elixir: "~> 1.15",
-      start_permanent: Mix.env() == :prod,
+      app: :e2e_elixir,
+      version: "0.1.0",
+      elixir: "~> 1.14",
       deps: deps()
     ]
   end
 
-  def application do
-    [extra_applications: [:logger]]
-  end
-
   defp deps do
     [
-      {:html_to_markdown, "~> 2.28.3"},
-      {:jason, "~> 1.4"}
+      {:html_to_markdown, "~> 3.2"}
     ]
   end
 end

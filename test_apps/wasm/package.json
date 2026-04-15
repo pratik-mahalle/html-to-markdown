@@ -1,19 +1,15 @@
 {
-  "name": "html-to-markdown-wasm-test-app",
-  "version": "3.1.0",
-  "description": "Test app for html-to-markdown WASM package (validates published npm package)",
+  "name": "@kreuzberg/html-to-markdown-wasm-e2e-wasm",
+  "version": "0.1.0",
+  "private": true,
   "type": "module",
   "scripts": {
-    "test": "vitest run",
-    "test:smoke": "vitest run smoke.spec.ts",
-    "test:comprehensive": "vitest run comprehensive.spec.ts"
-  },
-  "dependencies": {
-    "@kreuzberg/html-to-markdown-wasm": "file:../../../packages/wasm"
+    "test": "vitest run"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "typescript": "^5.0.0",
-    "vitest": "^4.0.18"
+    "@kreuzberg/html-to-markdown-wasm": "^3.2.0",
+    "vite-plugin-top-level-await": "^1.4.0",
+    "vite-plugin-wasm": "^3.4.0",
+    "vitest": "^3.0.0"
   }
 }

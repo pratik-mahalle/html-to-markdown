@@ -1,7 +1,5 @@
-module github.com/kreuzberg-dev/html-to-markdown-test-app
+module e2e_go
 
-go 1.26
+go 1.23
 
-require github.com/kreuzberg-dev/html-to-markdown/packages/go/v3 v3.0.0-rc.1
-
-replace github.com/kreuzberg-dev/html-to-markdown/packages/go/v3 => ../../../packages/go/v3
+require github.com/kreuzberg-dev/html-to-markdown-go v3.2.0

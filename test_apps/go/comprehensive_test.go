@@ -2,11 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	htmltomarkdown "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
-	htmltomarkdown "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown"
 )
 
 type TestCase struct {

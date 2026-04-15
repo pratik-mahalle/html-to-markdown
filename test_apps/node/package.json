@@ -1,21 +1,13 @@
 {
-  "name": "html-to-markdown-test-app",
-  "version": "3.1.0",
-  "description": "Test app for html-to-markdown npm package",
+  "name": "@kreuzberg/html-to-markdown-node-e2e-typescript",
+  "version": "0.1.0",
+  "private": true,
   "type": "module",
   "scripts": {
-    "test": "vitest run",
-    "test:smoke": "vitest run smoke.spec.ts",
-    "test:comprehensive": "vitest run comprehensive.spec.ts",
-    "test:features": "vitest run features.spec.ts",
-    "test:all": "vitest run"
-  },
-  "dependencies": {
-    "@kreuzberg/html-to-markdown": "file:../../../packages/typescript"
+    "test": "vitest run"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "typescript": "^5.0.0",
-    "vitest": "^4.0.16"
+    "@kreuzberg/html-to-markdown-node": "^3.2.0",
+    "vitest": "^3.0.0"
   }
 }

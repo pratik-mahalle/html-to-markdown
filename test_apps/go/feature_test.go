@@ -2,9 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	htmltomarkdown "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown"
 	"strings"
 	"testing"
-	htmltomarkdown "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown"
 )
 
 // getContent extracts the content string from a ConversionResult.
@@ -488,23 +488,23 @@ func TestFFIVersionInfo(t *testing.T) {
 // TestRegressionHTMLPreservation tests that HTML structure is preserved in conversion.
 func TestRegressionHTMLPreservation(t *testing.T) {
 	testCases := []struct {
-		name            string
-		html            string
+		name             string
+		html             string
 		expectedIncludes []string
 	}{
 		{
-			name: "multiple paragraphs",
-			html: "<p>First</p><p>Second</p><p>Third</p>",
+			name:             "multiple paragraphs",
+			html:             "<p>First</p><p>Second</p><p>Third</p>",
 			expectedIncludes: []string{"First", "Second", "Third"},
 		},
 		{
-			name: "mixed list types",
-			html: "<ul><li>Bullet 1</li></ul><ol><li>Number 1</li></ol>",
+			name:             "mixed list types",
+			html:             "<ul><li>Bullet 1</li></ul><ol><li>Number 1</li></ol>",
 			expectedIncludes: []string{"Bullet 1", "Number 1"},
 		},
 		{
-			name: "nested emphasis",
-			html: "<p><strong><em>Bold and italic</em></strong></p>",
+			name:             "nested emphasis",
+			html:             "<p><strong><em>Bold and italic</em></strong></p>",
 			expectedIncludes: []string{"Bold", "italic"},
 		},
 	}
