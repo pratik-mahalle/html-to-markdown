@@ -53,11 +53,11 @@ describe('conversion', () => {
 
   it('code_inline_in_paragraph: Inline code element nested inside a paragraph', () => {
     const result = convert("<p>Call the <code>initialize()</code> method first.</p>");
-    expect(result.content).toContain("\`initialize()\`");
+    expect(result.content).toContain("`initialize()`");
   });
 
   it('code_with_backticks_in_content: Inline code containing backtick characters is properly escaped', () => {
-    const result = convert("<p>Use <code>\`backtick\` here</code> carefully.</p>");
+    const result = convert("<p>Use <code>`backtick` here</code> carefully.</p>");
     expect(result.content.length).toBeGreaterThan(0);
     expect(result.content).toContain("backtick");
   });
@@ -175,7 +175,7 @@ describe('conversion', () => {
 
   it('inline_code: Inline code', () => {
     const result = convert("<p>Use <code>console.log()</code> to debug</p>");
-    expect(result.content).toContain("\`console.log()\`");
+    expect(result.content).toContain("`console.log()`");
   });
 
   it('italic_em: Em tag converts to italic', () => {

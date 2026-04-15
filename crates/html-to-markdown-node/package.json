@@ -53,6 +53,6 @@
 		"clean": "rm -rf *.node"
 	},
 	"devDependencies": {
-		"@napi-rs/cli": "^3.2.0"
+		"@napi-rs/cli": "^3.6.2"
 	}
 }

@@ -37,17 +37,17 @@
 		]
 	},
 	"devDependencies": {
-		"@napi-rs/cli": "^3.0.0"
+		"@napi-rs/cli": "^3.6.2"
 	},
 	"optionalDependencies": {
 		"@kreuzberg/html-to-markdown-node-darwin-arm64": "3.2.0",
 		"@kreuzberg/html-to-markdown-node-darwin-x64": "3.2.0",
+		"@kreuzberg/html-to-markdown-node-linux-arm-gnueabihf": "3.2.0",
 		"@kreuzberg/html-to-markdown-node-linux-arm64-gnu": "3.2.0",
 		"@kreuzberg/html-to-markdown-node-linux-arm64-musl": "3.2.0",
 		"@kreuzberg/html-to-markdown-node-linux-x64-gnu": "3.2.0",
 		"@kreuzberg/html-to-markdown-node-linux-x64-musl": "3.2.0",
-		"@kreuzberg/html-to-markdown-node-linux-arm-gnueabihf": "3.2.0",
-		"@kreuzberg/html-to-markdown-node-win32-x64-msvc": "3.2.0",
-		"@kreuzberg/html-to-markdown-node-win32-arm64-msvc": "3.2.0"
+		"@kreuzberg/html-to-markdown-node-win32-arm64-msvc": "3.2.0",
+		"@kreuzberg/html-to-markdown-node-win32-x64-msvc": "3.2.0"
 	}
 }
