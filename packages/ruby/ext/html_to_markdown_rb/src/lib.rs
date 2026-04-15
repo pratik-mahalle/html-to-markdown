@@ -13,22 +13,26 @@ fn json_to_ruby(handle: &Ruby, val: serde_json::Value) -> magnus::Value {
         serde_json::Value::Number(n) => {
             if let Some(i) = n.as_i64() {
                 i.into_value_with(handle)
-            } else if let Some(u) = n.as_u64() {
-                u.into_value_with(handle)
+            } else if let Some(f) = n.as_f64() {
+                f.into_value_with(handle)
             } else {
-                n.as_f64().unwrap_or(0.0).into_value_with(handle)
+                handle.qnil().into_value_with(handle)
             }
         }
         serde_json::Value::String(s) => s.into_value_with(handle),
         serde_json::Value::Array(arr) => {
-            let ruby_vals: Vec<magnus::Value> =
-                arr.into_iter().map(|v| json_to_ruby(handle, v)).collect();
-            handle.ary_new_from_values(&ruby_vals).into_value_with(handle)
+            let ruby_arr = handle.ary_new_capa(arr.len());
+            for item in arr {
+                let _ = ruby_arr.push(json_to_ruby(handle, item));
+            }
+            ruby_arr.into_value_with(handle)
         }
         serde_json::Value::Object(map) => {
             let hash = handle.hash_new();
             for (k, v) in map {
-                hash.aset(k, json_to_ruby(handle, v)).ok();
+                let key = handle.to_symbol(&k);
+                let val = json_to_ruby(handle, v);
+                let _ = hash.aset(key, val);
             }
             hash.into_value_with(handle)
         }
@@ -2394,18 +2398,17 @@ impl Default for NodeContent {
 
 impl magnus::IntoValue for NodeContent {
     fn into_value_with(self, handle: &Ruby) -> magnus::Value {
-        use magnus::IntoValue;
-        serde_json::to_value(&self)
-            .map(|v| json_to_ruby(handle, v))
-            .unwrap_or_else(|_| handle.qnil().into_value_with(handle))
+        match serde_json::to_value(&self) {
+            Ok(v) => json_to_ruby(handle, v),
+            Err(_) => handle.qnil().into_value_with(handle),
+        }
     }
 }
 
 impl magnus::TryConvert for NodeContent {
     fn try_convert(val: magnus::Value) -> Result<Self, magnus::Error> {
-        let json_str: String = magnus::TryConvert::try_convert(val)?;
-        serde_json::from_str(&json_str)
-            .map_err(|e| magnus::Error::new(magnus::exception::type_error(), e.to_string()))
+        let s: String = magnus::TryConvert::try_convert(val)?;
+        serde_json::from_str(&s).map_err(|e| magnus::Error::new(magnus::exception::type_error(), e.to_string()))
     }
 }
 
@@ -2434,18 +2437,17 @@ impl Default for AnnotationKind {
 
 impl magnus::IntoValue for AnnotationKind {
     fn into_value_with(self, handle: &Ruby) -> magnus::Value {
-        use magnus::IntoValue;
-        serde_json::to_value(&self)
-            .map(|v| json_to_ruby(handle, v))
-            .unwrap_or_else(|_| handle.qnil().into_value_with(handle))
+        match serde_json::to_value(&self) {
+            Ok(v) => json_to_ruby(handle, v),
+            Err(_) => handle.qnil().into_value_with(handle),
+        }
     }
 }
 
 impl magnus::TryConvert for AnnotationKind {
     fn try_convert(val: magnus::Value) -> Result<Self, magnus::Error> {
-        let json_str: String = magnus::TryConvert::try_convert(val)?;
-        serde_json::from_str(&json_str)
-            .map_err(|e| magnus::Error::new(magnus::exception::type_error(), e.to_string()))
+        let s: String = magnus::TryConvert::try_convert(val)?;
+        serde_json::from_str(&s).map_err(|e| magnus::Error::new(magnus::exception::type_error(), e.to_string()))
     }
 }
 
@@ -2972,34 +2974,6 @@ impl From<html_to_markdown_rs::PreprocessingOptionsUpdate> for PreprocessingOpti
             preset: val.preset.map(Into::into),
             remove_navigation: val.remove_navigation,
             remove_forms: val.remove_forms,
-        }
-    }
-}
-
-#[allow(clippy::needless_update)]
-impl From<ConversionResult> for html_to_markdown_rs::ConversionResult {
-    fn from(val: ConversionResult) -> Self {
-        Self {
-            content: val.content,
-            document: val.document.map(Into::into),
-            metadata: val.metadata.into(),
-            tables: val.tables.into_iter().map(Into::into).collect(),
-            images: Default::default(),
-            warnings: val.warnings.into_iter().map(Into::into).collect(),
-            ..Default::default()
-        }
-    }
-}
-
-impl From<html_to_markdown_rs::ConversionResult> for ConversionResult {
-    fn from(val: html_to_markdown_rs::ConversionResult) -> Self {
-        Self {
-            content: val.content,
-            document: val.document.map(Into::into),
-            metadata: val.metadata.into(),
-            tables: val.tables.into_iter().map(Into::into).collect(),
-            images: val.images.iter().map(|i| format!("{:?}", i)).collect(),
-            warnings: val.warnings.into_iter().map(Into::into).collect(),
         }
     }
 }
@@ -3540,7 +3514,9 @@ impl From<html_to_markdown_rs::NodeContent> for NodeContent {
                 Self::DefinitionItem { term, definition }
             }
             html_to_markdown_rs::NodeContent::RawBlock { format, content } => Self::RawBlock { format, content },
-            html_to_markdown_rs::NodeContent::MetadataBlock { entries } => Self::MetadataBlock { entries },
+            html_to_markdown_rs::NodeContent::MetadataBlock { entries } => Self::MetadataBlock {
+                entries: serde_json::to_string(&entries).unwrap_or_default(),
+            },
             html_to_markdown_rs::NodeContent::Group {
                 label,
                 heading_level,
