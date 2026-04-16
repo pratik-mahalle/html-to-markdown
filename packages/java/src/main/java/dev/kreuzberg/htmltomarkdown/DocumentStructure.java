@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record DocumentStructure(List<DocumentNode> nodes,
-		@JsonProperty("source_format") Optional<String> sourceFormat) {
+public record DocumentStructure(
+    List<DocumentNode> nodes,
+    @JsonProperty("source_format") Optional<String> sourceFormat
+) {
 }

@@ -5,6 +5,12 @@ import java.util.Map;
 import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record ImageMetadata(String src, Optional<String> alt, Optional<String> title, Optional<String> dimensions,
-		@JsonProperty("image_type") ImageType imageType, Map<String, String> attributes) {
+public record ImageMetadata(
+    String src,
+    Optional<String> alt,
+    Optional<String> title,
+    Optional<String> dimensions,
+    @JsonProperty("image_type") ImageType imageType,
+    Map<String, String> attributes
+) {
 }

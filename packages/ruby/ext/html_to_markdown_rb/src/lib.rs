@@ -40,9 +40,8 @@ fn json_to_ruby(handle: &Ruby, val: serde_json::Value) -> magnus::Value {
     }
 }
 
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::MetadataConfig")]
-#[serde(default)]
 pub struct MetadataConfig {
     pub extract_document: bool,
     pub extract_headers: bool,
@@ -131,9 +130,8 @@ impl MetadataConfig {
     }
 }
 
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::MetadataConfigUpdate")]
-#[serde(default)]
 pub struct MetadataConfigUpdate {
     pub extract_document: Option<bool>,
     pub extract_headers: Option<bool>,
@@ -210,9 +208,8 @@ impl MetadataConfigUpdate {
     }
 }
 
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, Default)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::DocumentMetadata")]
-#[serde(default)]
 pub struct DocumentMetadata {
     pub title: Option<String>,
     pub description: Option<String>,
@@ -236,24 +233,6 @@ impl magnus::TryConvert for DocumentMetadata {
     }
 }
 unsafe impl TryConvertOwned for DocumentMetadata {}
-
-impl Default for DocumentMetadata {
-    fn default() -> Self {
-        Self {
-            title: Default::default(),
-            description: Default::default(),
-            keywords: Default::default(),
-            author: Default::default(),
-            canonical_url: Default::default(),
-            base_href: Default::default(),
-            language: Default::default(),
-            text_direction: Default::default(),
-            open_graph: Default::default(),
-            twitter_card: Default::default(),
-            meta_tags: Default::default(),
-        }
-    }
-}
 
 impl DocumentMetadata {
     fn new(
@@ -329,7 +308,7 @@ impl DocumentMetadata {
     }
 }
 
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::HeaderMetadata")]
 pub struct HeaderMetadata {
     pub level: u8,
@@ -392,7 +371,7 @@ impl HeaderMetadata {
     }
 }
 
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::LinkMetadata")]
 pub struct LinkMetadata {
     pub href: String,
@@ -457,7 +436,7 @@ impl LinkMetadata {
     }
 }
 
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::ImageMetadata")]
 pub struct ImageMetadata {
     pub src: String,
@@ -522,7 +501,7 @@ impl ImageMetadata {
     }
 }
 
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::StructuredData")]
 pub struct StructuredData {
     pub data_type: StructuredDataType,
@@ -562,9 +541,8 @@ impl StructuredData {
     }
 }
 
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, Default)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::HtmlMetadata")]
-#[serde(default)]
 pub struct HtmlMetadata {
     pub document: DocumentMetadata,
     pub headers: Vec<HeaderMetadata>,
@@ -582,18 +560,6 @@ impl magnus::TryConvert for HtmlMetadata {
     }
 }
 unsafe impl TryConvertOwned for HtmlMetadata {}
-
-impl Default for HtmlMetadata {
-    fn default() -> Self {
-        Self {
-            document: Default::default(),
-            headers: Default::default(),
-            links: Default::default(),
-            images: Default::default(),
-            structured_data: Default::default(),
-        }
-    }
-}
 
 impl HtmlMetadata {
     fn new(
@@ -633,9 +599,8 @@ impl HtmlMetadata {
     }
 }
 
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, Default)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::ConversionOptions")]
-#[serde(default)]
 pub struct ConversionOptions {
     pub heading_style: HeadingStyle,
     pub list_indent_type: ListIndentType,
@@ -686,51 +651,6 @@ impl magnus::TryConvert for ConversionOptions {
     }
 }
 unsafe impl TryConvertOwned for ConversionOptions {}
-
-impl Default for ConversionOptions {
-    fn default() -> Self {
-        Self {
-            heading_style: Default::default(),
-            list_indent_type: Default::default(),
-            list_indent_width: Default::default(),
-            bullets: Default::default(),
-            strong_em_symbol: Default::default(),
-            escape_asterisks: Default::default(),
-            escape_underscores: Default::default(),
-            escape_misc: Default::default(),
-            escape_ascii: Default::default(),
-            code_language: Default::default(),
-            autolinks: Default::default(),
-            default_title: Default::default(),
-            br_in_tables: Default::default(),
-            highlight_style: Default::default(),
-            extract_metadata: Default::default(),
-            whitespace_mode: Default::default(),
-            strip_newlines: Default::default(),
-            wrap: Default::default(),
-            wrap_width: Default::default(),
-            convert_as_inline: Default::default(),
-            sub_symbol: Default::default(),
-            sup_symbol: Default::default(),
-            newline_style: Default::default(),
-            code_block_style: Default::default(),
-            keep_inline_images_in: Default::default(),
-            preprocessing: Default::default(),
-            encoding: Default::default(),
-            debug: Default::default(),
-            strip_tags: Default::default(),
-            preserve_tags: Default::default(),
-            skip_images: Default::default(),
-            link_style: Default::default(),
-            output_format: Default::default(),
-            include_document_structure: Default::default(),
-            extract_images: Default::default(),
-            max_image_size: Default::default(),
-            capture_svg: Default::default(),
-            infer_dimensions: Default::default(),
-        }
-    }
-}
 
 impl ConversionOptions {
     fn new(kwargs: magnus::RHash) -> Result<Self, magnus::Error> {
@@ -1090,9 +1010,8 @@ impl ConversionOptionsBuilder {
     }
 }
 
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, Default)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::ConversionOptionsUpdate")]
-#[serde(default)]
 pub struct ConversionOptionsUpdate {
     pub heading_style: Option<HeadingStyle>,
     pub list_indent_type: Option<ListIndentType>,
@@ -1143,51 +1062,6 @@ impl magnus::TryConvert for ConversionOptionsUpdate {
     }
 }
 unsafe impl TryConvertOwned for ConversionOptionsUpdate {}
-
-impl Default for ConversionOptionsUpdate {
-    fn default() -> Self {
-        Self {
-            heading_style: Default::default(),
-            list_indent_type: Default::default(),
-            list_indent_width: Default::default(),
-            bullets: Default::default(),
-            strong_em_symbol: Default::default(),
-            escape_asterisks: Default::default(),
-            escape_underscores: Default::default(),
-            escape_misc: Default::default(),
-            escape_ascii: Default::default(),
-            code_language: Default::default(),
-            autolinks: Default::default(),
-            default_title: Default::default(),
-            br_in_tables: Default::default(),
-            highlight_style: Default::default(),
-            extract_metadata: Default::default(),
-            whitespace_mode: Default::default(),
-            strip_newlines: Default::default(),
-            wrap: Default::default(),
-            wrap_width: Default::default(),
-            convert_as_inline: Default::default(),
-            sub_symbol: Default::default(),
-            sup_symbol: Default::default(),
-            newline_style: Default::default(),
-            code_block_style: Default::default(),
-            keep_inline_images_in: Default::default(),
-            preprocessing: Default::default(),
-            encoding: Default::default(),
-            debug: Default::default(),
-            strip_tags: Default::default(),
-            preserve_tags: Default::default(),
-            skip_images: Default::default(),
-            link_style: Default::default(),
-            output_format: Default::default(),
-            include_document_structure: Default::default(),
-            extract_images: Default::default(),
-            max_image_size: Default::default(),
-            capture_svg: Default::default(),
-            infer_dimensions: Default::default(),
-        }
-    }
-}
 
 impl ConversionOptionsUpdate {
     fn new(kwargs: magnus::RHash) -> Result<Self, magnus::Error> {
@@ -1463,9 +1337,8 @@ impl ConversionOptionsUpdate {
     }
 }
 
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, Default)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::PreprocessingOptions")]
-#[serde(default)]
 pub struct PreprocessingOptions {
     pub enabled: bool,
     pub preset: PreprocessingPreset,
@@ -1482,17 +1355,6 @@ impl magnus::TryConvert for PreprocessingOptions {
     }
 }
 unsafe impl TryConvertOwned for PreprocessingOptions {}
-
-impl Default for PreprocessingOptions {
-    fn default() -> Self {
-        Self {
-            enabled: Default::default(),
-            preset: Default::default(),
-            remove_navigation: Default::default(),
-            remove_forms: Default::default(),
-        }
-    }
-}
 
 impl PreprocessingOptions {
     fn new(
@@ -1526,9 +1388,8 @@ impl PreprocessingOptions {
     }
 }
 
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, Default)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::PreprocessingOptionsUpdate")]
-#[serde(default)]
 pub struct PreprocessingOptionsUpdate {
     pub enabled: Option<bool>,
     pub preset: Option<PreprocessingPreset>,
@@ -1545,17 +1406,6 @@ impl magnus::TryConvert for PreprocessingOptionsUpdate {
     }
 }
 unsafe impl TryConvertOwned for PreprocessingOptionsUpdate {}
-
-impl Default for PreprocessingOptionsUpdate {
-    fn default() -> Self {
-        Self {
-            enabled: Default::default(),
-            preset: Default::default(),
-            remove_navigation: Default::default(),
-            remove_forms: Default::default(),
-        }
-    }
-}
 
 impl PreprocessingOptionsUpdate {
     fn new(
@@ -1721,9 +1571,8 @@ impl TextAnnotation {
     }
 }
 
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, Default)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::ConversionResult")]
-#[serde(default)]
 pub struct ConversionResult {
     pub content: Option<String>,
     pub document: Option<DocumentStructure>,
@@ -1742,19 +1591,6 @@ impl magnus::TryConvert for ConversionResult {
     }
 }
 unsafe impl TryConvertOwned for ConversionResult {}
-
-impl Default for ConversionResult {
-    fn default() -> Self {
-        Self {
-            content: Default::default(),
-            document: Default::default(),
-            metadata: Default::default(),
-            tables: Default::default(),
-            images: Default::default(),
-            warnings: Default::default(),
-        }
-    }
-}
 
 impl ConversionResult {
     fn new(
@@ -1800,7 +1636,7 @@ impl ConversionResult {
     }
 }
 
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize, Default)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::TableGrid")]
 #[serde(default)]
 pub struct TableGrid {
@@ -1818,16 +1654,6 @@ impl magnus::TryConvert for TableGrid {
     }
 }
 unsafe impl TryConvertOwned for TableGrid {}
-
-impl Default for TableGrid {
-    fn default() -> Self {
-        Self {
-            rows: Default::default(),
-            cols: Default::default(),
-            cells: Default::default(),
-        }
-    }
-}
 
 impl TableGrid {
     fn new(rows: Option<u32>, cols: Option<u32>, cells: Option<Vec<GridCell>>) -> Self {
@@ -2594,7 +2420,8 @@ impl magnus::IntoValue for NodeContent {
 impl magnus::TryConvert for NodeContent {
     fn try_convert(val: magnus::Value) -> Result<Self, magnus::Error> {
         let s: String = magnus::TryConvert::try_convert(val)?;
-        serde_json::from_str(&s).map_err(|e| magnus::Error::new(magnus::exception::type_error(), e.to_string()))
+        serde_json::from_str(&s)
+            .map_err(|e| magnus::Error::new(unsafe { Ruby::get_unchecked() }.exception_type_error(), e.to_string()))
     }
 }
 
@@ -2633,7 +2460,8 @@ impl magnus::IntoValue for AnnotationKind {
 impl magnus::TryConvert for AnnotationKind {
     fn try_convert(val: magnus::Value) -> Result<Self, magnus::Error> {
         let s: String = magnus::TryConvert::try_convert(val)?;
-        serde_json::from_str(&s).map_err(|e| magnus::Error::new(magnus::exception::type_error(), e.to_string()))
+        serde_json::from_str(&s)
+            .map_err(|e| magnus::Error::new(unsafe { Ruby::get_unchecked() }.exception_type_error(), e.to_string()))
     }
 }
 
@@ -2693,13 +2521,18 @@ fn convert(html: String, options: Option<String>) -> Result<ConversionResult, Er
         .as_deref()
         .filter(|s| *s != "nil")
         .map(|s| {
-            let core: html_to_markdown_rs::ConversionOptions = serde_json::from_str(s)
-                .map_err(|e| magnus::Error::new(magnus::exception::type_error(), e.to_string()))?;
+            let core: html_to_markdown_rs::ConversionOptions = serde_json::from_str(s).map_err(|e| {
+                magnus::Error::new(unsafe { Ruby::get_unchecked() }.exception_type_error(), e.to_string())
+            })?;
             Ok::<_, magnus::Error>(core.into())
         })
         .transpose()?;
-    let result = html_to_markdown_rs::convert(&html, options.map(Into::into))
-        .map_err(|e| magnus::Error::new(magnus::exception::runtime_error(), e.to_string()))?;
+    let result = html_to_markdown_rs::convert(&html, options.map(Into::into)).map_err(|e| {
+        magnus::Error::new(
+            unsafe { Ruby::get_unchecked() }.exception_runtime_error(),
+            e.to_string(),
+        )
+    })?;
     Ok(result.into())
 }
 
@@ -3640,7 +3473,7 @@ impl From<html_to_markdown_rs::WarningKind> for WarningKind {
 #[allow(dead_code)]
 fn conversion_error_to_magnus_err(e: html_to_markdown_rs::error::ConversionError) -> magnus::Error {
     let msg = e.to_string();
-    magnus::Error::new(magnus::exception::runtime_error(), msg)
+    magnus::Error::new(unsafe { magnus::Ruby::get_unchecked() }.exception_runtime_error(), msg)
 }
 
 #[magnus::init]

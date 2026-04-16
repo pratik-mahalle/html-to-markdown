@@ -5,26 +5,28 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum HeadingStyle {
-	Underlined("underlined"), Atx("atx"), AtxClosed("atxclosed");
+    Underlined("underlined"),
+    Atx("atx"),
+    AtxClosed("atxclosed");
 
-	private final String value;
+    private final String value;
 
-	HeadingStyle(String value) {
-		this.value = value;
-	}
+    HeadingStyle(String value) {
+        this.value = value;
+    }
 
-	@JsonValue
-	public String getValue() {
-		return value;
-	}
+    @JsonValue
+    public String getValue() {
+        return value;
+    }
 
-	@JsonCreator
-	public static HeadingStyle fromValue(String value) {
-		for (HeadingStyle e : values()) {
-			if (e.value.equalsIgnoreCase(value)) {
-				return e;
-			}
-		}
-		throw new IllegalArgumentException("Unknown value: " + value);
-	}
+    @JsonCreator
+    public static HeadingStyle fromValue(String value) {
+        for (HeadingStyle e : values()) {
+            if (e.value.equalsIgnoreCase(value)) {
+                return e;
+            }
+        }
+        throw new IllegalArgumentException("Unknown value: " + value);
+    }
 }

@@ -5,26 +5,28 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum CodeBlockStyle {
-	Indented("indented"), Backticks("backticks"), Tildes("tildes");
+    Indented("indented"),
+    Backticks("backticks"),
+    Tildes("tildes");
 
-	private final String value;
+    private final String value;
 
-	CodeBlockStyle(String value) {
-		this.value = value;
-	}
+    CodeBlockStyle(String value) {
+        this.value = value;
+    }
 
-	@JsonValue
-	public String getValue() {
-		return value;
-	}
+    @JsonValue
+    public String getValue() {
+        return value;
+    }
 
-	@JsonCreator
-	public static CodeBlockStyle fromValue(String value) {
-		for (CodeBlockStyle e : values()) {
-			if (e.value.equalsIgnoreCase(value)) {
-				return e;
-			}
-		}
-		throw new IllegalArgumentException("Unknown value: " + value);
-	}
+    @JsonCreator
+    public static CodeBlockStyle fromValue(String value) {
+        for (CodeBlockStyle e : values()) {
+            if (e.value.equalsIgnoreCase(value)) {
+                return e;
+            }
+        }
+        throw new IllegalArgumentException("Unknown value: " + value);
+    }
 }

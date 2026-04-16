@@ -6,14 +6,20 @@ import java.util.Map;
 import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record DocumentMetadata(Optional<String> title, Optional<String> description, List<String> keywords,
-		Optional<String> author, @JsonProperty("canonical_url") Optional<String> canonicalUrl,
-		@JsonProperty("base_href") Optional<String> baseHref, Optional<String> language,
-		@JsonProperty("text_direction") Optional<TextDirection> textDirection,
-		@JsonProperty("open_graph") Map<String, String> openGraph,
-		@JsonProperty("twitter_card") Map<String, String> twitterCard,
-		@JsonProperty("meta_tags") Map<String, String> metaTags) {
-	public static DocumentMetadataBuilder builder() {
-		return new DocumentMetadataBuilder();
-	}
+public record DocumentMetadata(
+    Optional<String> title,
+    Optional<String> description,
+    List<String> keywords,
+    Optional<String> author,
+    @JsonProperty("canonical_url") Optional<String> canonicalUrl,
+    @JsonProperty("base_href") Optional<String> baseHref,
+    Optional<String> language,
+    @JsonProperty("text_direction") Optional<TextDirection> textDirection,
+    @JsonProperty("open_graph") Map<String, String> openGraph,
+    @JsonProperty("twitter_card") Map<String, String> twitterCard,
+    @JsonProperty("meta_tags") Map<String, String> metaTags
+) {
+    public static DocumentMetadataBuilder builder() {
+        return new DocumentMetadataBuilder();
+    }
 }

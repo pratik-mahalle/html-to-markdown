@@ -2,38 +2,38 @@
 package dev.kreuzberg.htmltomarkdown;
 
 public final class HtmlToMarkdown {
-	private HtmlToMarkdown() {
-	}
+    private HtmlToMarkdown() { }
 
-	/**
-	 * Convert HTML to Markdown, returning a [`ConversionResult`] with content,
-	 * metadata, images, and warnings.
-	 *
-	 * # Arguments
-	 *
-	 * * `html` - The HTML string to convert * `options` - Optional conversion
-	 * options (defaults to `ConversionOptions::default()`)
-	 *
-	 * # Example
-	 *
-	 * ``` use html_to_markdown_rs::{convert, ConversionOptions};
-	 *
-	 * let html = "
-	 * <h1>Hello World</h1>"; let result = convert(html, None).unwrap();
-	 * assert!(result.content.as_deref().unwrap_or("").contains("Hello World")); ```
-	 *
-	 * # Errors
-	 *
-	 * Returns an error if HTML parsing fails or if the input contains invalid
-	 * UTF-8.
-	 */
-	public static ConversionResult convert(String html, ConversionOptions options) throws HtmlToMarkdownRsException {
-		java.util.Objects.requireNonNull(html, "html must not be null");
-		return HtmlToMarkdownRs.convert(html, options);
-	}
+    /**
+     * Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images,
+     * and warnings.
+     *
+     * # Arguments
+     *
+     * * `html` - The HTML string to convert
+     * * `options` - Optional conversion options (defaults to `ConversionOptions::default()`)
+     *
+     * # Example
+     *
+     * ```
+     * use html_to_markdown_rs::{convert, ConversionOptions};
+     *
+     * let html = "<h1>Hello World</h1>";
+     * let result = convert(html, None).unwrap();
+     * assert!(result.content.as_deref().unwrap_or("").contains("Hello World"));
+     * ```
+     *
+     * # Errors
+     *
+     * Returns an error if HTML parsing fails or if the input contains invalid UTF-8.
+     */
+    public static ConversionResult convert(String html, ConversionOptions options) throws HtmlToMarkdownRsException {
+        java.util.Objects.requireNonNull(html, "html must not be null");
+        return HtmlToMarkdownRs.convert(html, options);
+    }
 
-	public static ConversionResult convert(String html) throws HtmlToMarkdownRsException {
-		return convert(html, null);
-	}
+    public static ConversionResult convert(String html) throws HtmlToMarkdownRsException {
+        return convert(html, null);
+    }
 
 }

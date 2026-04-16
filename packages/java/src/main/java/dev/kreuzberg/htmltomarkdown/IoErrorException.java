@@ -3,11 +3,11 @@ package dev.kreuzberg.htmltomarkdown;
 
 /** I/O error */
 public class IoErrorException extends ConversionErrorException {
-	public IoErrorException(String message) {
-		super(message);
-	}
+    public IoErrorException(String message) {
+        super(message);
+    }
 
-	public IoErrorException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    public IoErrorException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

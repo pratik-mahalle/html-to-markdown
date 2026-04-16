@@ -5,26 +5,29 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum ImageType {
-	DataUri("data_uri"), InlineSvg("inline_svg"), External("external"), Relative("relative");
+    DataUri("data_uri"),
+    InlineSvg("inline_svg"),
+    External("external"),
+    Relative("relative");
 
-	private final String value;
+    private final String value;
 
-	ImageType(String value) {
-		this.value = value;
-	}
+    ImageType(String value) {
+        this.value = value;
+    }
 
-	@JsonValue
-	public String getValue() {
-		return value;
-	}
+    @JsonValue
+    public String getValue() {
+        return value;
+    }
 
-	@JsonCreator
-	public static ImageType fromValue(String value) {
-		for (ImageType e : values()) {
-			if (e.value.equalsIgnoreCase(value)) {
-				return e;
-			}
-		}
-		throw new IllegalArgumentException("Unknown value: " + value);
-	}
+    @JsonCreator
+    public static ImageType fromValue(String value) {
+        for (ImageType e : values()) {
+            if (e.value.equalsIgnoreCase(value)) {
+                return e;
+            }
+        }
+        throw new IllegalArgumentException("Unknown value: " + value);
+    }
 }
