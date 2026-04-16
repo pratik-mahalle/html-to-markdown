@@ -2,19 +2,19 @@
 package dev.kreuzberg.htmltomarkdown;
 
 public class HtmlToMarkdownRsException extends Exception {
-    private final int code;
+	private final int code;
 
-    public HtmlToMarkdownRsException(int code, String message) {
-        super(message);
-        this.code = code;
-    }
+	public HtmlToMarkdownRsException(int code, String message) {
+		super(message);
+		this.code = code;
+	}
 
-    public HtmlToMarkdownRsException(String message, Throwable cause) {
-        super(message, cause);
-        this.code = -1;
-    }
+	public HtmlToMarkdownRsException(String message, Throwable cause) {
+		super(message, cause);
+		this.code = -1;
+	}
 
-    public int getCode() {
-        return code;
-    }
+	public int getCode() {
+		return code;
+	}
 }

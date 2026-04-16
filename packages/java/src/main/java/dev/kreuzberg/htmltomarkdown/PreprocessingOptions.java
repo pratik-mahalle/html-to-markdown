@@ -3,13 +3,10 @@ package dev.kreuzberg.htmltomarkdown;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record PreprocessingOptions(
-    boolean enabled,
-    PreprocessingPreset preset,
-    @JsonProperty("remove_navigation") boolean removeNavigation,
-    @JsonProperty("remove_forms") boolean removeForms
-) {
-    public static PreprocessingOptionsBuilder builder() {
-        return new PreprocessingOptionsBuilder();
-    }
+public record PreprocessingOptions(boolean enabled, PreprocessingPreset preset,
+		@JsonProperty("remove_navigation") boolean removeNavigation,
+		@JsonProperty("remove_forms") boolean removeForms) {
+	public static PreprocessingOptionsBuilder builder() {
+		return new PreprocessingOptionsBuilder();
+	}
 }

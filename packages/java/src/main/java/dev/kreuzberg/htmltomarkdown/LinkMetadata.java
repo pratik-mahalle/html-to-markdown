@@ -6,12 +6,6 @@ import java.util.Map;
 import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record LinkMetadata(
-    String href,
-    String text,
-    Optional<String> title,
-    @JsonProperty("link_type") LinkType linkType,
-    List<String> rel,
-    Map<String, String> attributes
-) {
+public record LinkMetadata(String href, String text, Optional<String> title,
+		@JsonProperty("link_type") LinkType linkType, List<String> rel, Map<String, String> attributes) {
 }

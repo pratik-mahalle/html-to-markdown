@@ -4,47 +4,30 @@ package dev.kreuzberg.htmltomarkdown;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record ConversionOptions(
-    @JsonProperty("heading_style") HeadingStyle headingStyle,
-    @JsonProperty("list_indent_type") ListIndentType listIndentType,
-    @JsonProperty("list_indent_width") long listIndentWidth,
-    String bullets,
-    @JsonProperty("strong_em_symbol") String strongEmSymbol,
-    @JsonProperty("escape_asterisks") boolean escapeAsterisks,
-    @JsonProperty("escape_underscores") boolean escapeUnderscores,
-    @JsonProperty("escape_misc") boolean escapeMisc,
-    @JsonProperty("escape_ascii") boolean escapeAscii,
-    @JsonProperty("code_language") String codeLanguage,
-    boolean autolinks,
-    @JsonProperty("default_title") boolean defaultTitle,
-    @JsonProperty("br_in_tables") boolean brInTables,
-    @JsonProperty("highlight_style") HighlightStyle highlightStyle,
-    @JsonProperty("extract_metadata") boolean extractMetadata,
-    @JsonProperty("whitespace_mode") WhitespaceMode whitespaceMode,
-    @JsonProperty("strip_newlines") boolean stripNewlines,
-    boolean wrap,
-    @JsonProperty("wrap_width") long wrapWidth,
-    @JsonProperty("convert_as_inline") boolean convertAsInline,
-    @JsonProperty("sub_symbol") String subSymbol,
-    @JsonProperty("sup_symbol") String supSymbol,
-    @JsonProperty("newline_style") NewlineStyle newlineStyle,
-    @JsonProperty("code_block_style") CodeBlockStyle codeBlockStyle,
-    @JsonProperty("keep_inline_images_in") List<String> keepInlineImagesIn,
-    PreprocessingOptions preprocessing,
-    String encoding,
-    boolean debug,
-    @JsonProperty("strip_tags") List<String> stripTags,
-    @JsonProperty("preserve_tags") List<String> preserveTags,
-    @JsonProperty("skip_images") boolean skipImages,
-    @JsonProperty("link_style") LinkStyle linkStyle,
-    @JsonProperty("output_format") OutputFormat outputFormat,
-    @JsonProperty("include_document_structure") boolean includeDocumentStructure,
-    @JsonProperty("extract_images") boolean extractImages,
-    @JsonProperty("max_image_size") long maxImageSize,
-    @JsonProperty("capture_svg") boolean captureSvg,
-    @JsonProperty("infer_dimensions") boolean inferDimensions
-) {
-    public static ConversionOptionsBuilder builder() {
-        return new ConversionOptionsBuilder();
-    }
+public record ConversionOptions(@JsonProperty("heading_style") HeadingStyle headingStyle,
+		@JsonProperty("list_indent_type") ListIndentType listIndentType,
+		@JsonProperty("list_indent_width") long listIndentWidth, String bullets,
+		@JsonProperty("strong_em_symbol") String strongEmSymbol,
+		@JsonProperty("escape_asterisks") boolean escapeAsterisks,
+		@JsonProperty("escape_underscores") boolean escapeUnderscores, @JsonProperty("escape_misc") boolean escapeMisc,
+		@JsonProperty("escape_ascii") boolean escapeAscii, @JsonProperty("code_language") String codeLanguage,
+		boolean autolinks, @JsonProperty("default_title") boolean defaultTitle,
+		@JsonProperty("br_in_tables") boolean brInTables,
+		@JsonProperty("highlight_style") HighlightStyle highlightStyle,
+		@JsonProperty("extract_metadata") boolean extractMetadata,
+		@JsonProperty("whitespace_mode") WhitespaceMode whitespaceMode,
+		@JsonProperty("strip_newlines") boolean stripNewlines, boolean wrap, @JsonProperty("wrap_width") long wrapWidth,
+		@JsonProperty("convert_as_inline") boolean convertAsInline, @JsonProperty("sub_symbol") String subSymbol,
+		@JsonProperty("sup_symbol") String supSymbol, @JsonProperty("newline_style") NewlineStyle newlineStyle,
+		@JsonProperty("code_block_style") CodeBlockStyle codeBlockStyle,
+		@JsonProperty("keep_inline_images_in") List<String> keepInlineImagesIn, PreprocessingOptions preprocessing,
+		String encoding, boolean debug, @JsonProperty("strip_tags") List<String> stripTags,
+		@JsonProperty("preserve_tags") List<String> preserveTags, @JsonProperty("skip_images") boolean skipImages,
+		@JsonProperty("link_style") LinkStyle linkStyle, @JsonProperty("output_format") OutputFormat outputFormat,
+		@JsonProperty("include_document_structure") boolean includeDocumentStructure,
+		@JsonProperty("extract_images") boolean extractImages, @JsonProperty("max_image_size") long maxImageSize,
+		@JsonProperty("capture_svg") boolean captureSvg, @JsonProperty("infer_dimensions") boolean inferDimensions) {
+	public static ConversionOptionsBuilder builder() {
+		return new ConversionOptionsBuilder();
+	}
 }

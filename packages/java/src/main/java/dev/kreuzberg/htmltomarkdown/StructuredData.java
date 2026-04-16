@@ -4,9 +4,6 @@ package dev.kreuzberg.htmltomarkdown;
 import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record StructuredData(
-    @JsonProperty("data_type") StructuredDataType dataType,
-    @JsonProperty("raw_json") String rawJson,
-    @JsonProperty("schema_type") Optional<String> schemaType
-) {
+public record StructuredData(@JsonProperty("data_type") StructuredDataType dataType,
+		@JsonProperty("raw_json") String rawJson, @JsonProperty("schema_type") Optional<String> schemaType) {
 }

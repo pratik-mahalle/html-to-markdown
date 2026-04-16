@@ -543,7 +543,7 @@ public static function handleCode(NodeHandle $nodeHandle, HtmlTag $tag, Parser $
 
 ---
 
-#### handlePre()
+##### handlePre()
 
 Handle a `<pre>` element and convert to Markdown.
 
@@ -579,7 +579,7 @@ public static function handlePre(NodeHandle $nodeHandle, HtmlTag $tag, Parser $p
 
 ---
 
-#### handleGraphic()
+##### handleGraphic()
 
 Handle a `<graphic>` element and convert to Markdown.
 
@@ -615,7 +615,7 @@ public static function handleGraphic(NodeHandle $nodeHandle, HtmlTag $tag, Parse
 
 ---
 
-#### handleImg()
+##### handleImg()
 
 Handle an `<img>` element and convert to Markdown.
 
@@ -651,7 +651,7 @@ public static function handleImg(NodeHandle $nodeHandle, HtmlTag $tag, Parser $p
 
 ---
 
-#### handleLink()
+##### handleLink()
 
 Handle an `<a>` (link) element and convert to Markdown.
 
@@ -689,7 +689,7 @@ public static function handleLink(NodeHandle $nodeHandle, HtmlTag $tag, Parser $
 
 ---
 
-#### dispatchInlineHandler()
+##### dispatchInlineHandler()
 
 Dispatches inline element handling to the appropriate handler.
 
@@ -840,7 +840,7 @@ public static function isLooseList(NodeHandle $nodeHandle, Parser $parser, DomCo
 
 ---
 
-#### addListContinuationIndent()
+##### addListContinuationIndent()
 
 Add list continuation indentation to output.
 
@@ -867,7 +867,7 @@ public static function addListContinuationIndent(string $output, int $listDepth,
 
 ---
 
-#### continuationIndentString()
+##### continuationIndentString()
 
 Calculate the indentation string for list continuations based on depth and options.
 
@@ -889,7 +889,7 @@ public static function continuationIndentString(int $listDepth, ConversionOption
 
 ---
 
-#### addListLeadingSeparator()
+##### addListLeadingSeparator()
 
 Add appropriate leading separator before a list.
 
@@ -917,7 +917,7 @@ public static function addListLeadingSeparator(string $output, Context $ctx): vo
 
 ---
 
-#### addNestedListTrailingSeparator()
+##### addNestedListTrailingSeparator()
 
 Add appropriate trailing separator after a nested list.
 
@@ -942,7 +942,7 @@ public static function addNestedListTrailingSeparator(string $output, Context $c
 
 ---
 
-#### calculateListNestingDepth()
+##### calculateListNestingDepth()
 
 Calculate the nesting depth for a list.
 
@@ -967,7 +967,7 @@ public static function calculateListNestingDepth(Context $ctx): int
 
 ---
 
-#### isListItem()
+##### isListItem()
 
 Check if a node is a list item element.
 
@@ -990,7 +990,7 @@ public static function isListItem(NodeHandle $nodeHandle, Parser $parser, DomCon
 
 ---
 
-#### processListChildren()
+##### processListChildren()
 
 Process a list's children, tracking which items had block elements.
 
@@ -1024,7 +1024,7 @@ public static function processListChildren(NodeHandle $nodeHandle, Parser $parse
 
 ---
 
-#### dispatchListHandler()
+##### dispatchListHandler()
 
 Dispatches list element handling to the appropriate handler.
 
@@ -1118,7 +1118,7 @@ public static function convertHtmlWithVisitor(string $html, ConversionOptions $o
 
 ---
 
-#### dispatchMediaHandler()
+##### dispatchMediaHandler()
 
 Dispatches media element handling to the appropriate handler.
 
@@ -1903,7 +1903,7 @@ public static function escapeMalformedAngleBrackets(string $input): Str
 
 ---
 
-#### trimLineEndWhitespace()
+##### trimLineEndWhitespace()
 
 Remove trailing spaces/tabs from every line while preserving newlines.
 
@@ -1924,7 +1924,7 @@ public static function trimLineEndWhitespace(string $output): void
 
 ---
 
-#### truncateAtCharBoundary()
+##### truncateAtCharBoundary()
 
 Truncate a string at a valid UTF-8 boundary.
 
@@ -1946,7 +1946,7 @@ public static function truncateAtCharBoundary(string $value, int $maxLen): void
 
 ---
 
-#### normalizeHeadingText()
+##### normalizeHeadingText()
 
 Normalize heading text by replacing newlines and extra whitespace.
 
@@ -1970,7 +1970,7 @@ public static function normalizeHeadingText(string $text): Str
 
 ---
 
-#### dedentCodeBlock()
+##### dedentCodeBlock()
 
 Remove common leading whitespace from all lines in a code block.
 
@@ -1994,7 +1994,7 @@ public static function dedentCodeBlock(string $content): string
 
 ---
 
-#### floorCharBoundary()
+##### floorCharBoundary()
 
 Returns the largest valid char boundary index at or before `index`.
 
@@ -2020,7 +2020,7 @@ public static function floorCharBoundary(string $s, int $index): int
 
 ---
 
-#### handleVisitorElementStart()
+##### handleVisitorElementStart()
 
 Handles visitor callback for element start (before processing).
 
@@ -2066,7 +2066,7 @@ public static function handleVisitorElementStart(VisitorHandle $visitorHandle, s
 
 ---
 
-#### handleVisitorElementEnd()
+##### handleVisitorElementEnd()
 
 Handles visitor callback for element end (after processing).
 
@@ -2104,7 +2104,7 @@ public static function handleVisitorElementEnd(VisitorHandle $visitorHandle, str
 
 ---
 
-#### escape()
+##### escape()
 
 Escape Markdown special characters in text.
 
@@ -2133,7 +2133,7 @@ public static function escape(string $text, bool $escapeMisc, bool $escapeAsteri
 
 ---
 
-#### chomp()
+##### chomp()
 
 Extract boundary whitespace from text (chomp).
 
@@ -2160,7 +2160,7 @@ public static function chomp(string $text): StrStrStr
 
 ---
 
-#### normalizeWhitespace()
+##### normalizeWhitespace()
 
 Normalize whitespace by collapsing consecutive spaces and tabs.
 
@@ -2189,7 +2189,7 @@ public static function normalizeWhitespace(string $text): string
 
 ---
 
-#### normalizeWhitespaceCow()
+##### normalizeWhitespaceCow()
 
 Normalize whitespace in text, returning borrowed or owned result as needed.
 
@@ -2220,7 +2220,7 @@ public static function normalizeWhitespaceCow(string $text): Str
 
 ---
 
-#### decodeHtmlEntities()
+##### decodeHtmlEntities()
 
 Decode common HTML entities.
 
@@ -2253,7 +2253,7 @@ public static function decodeHtmlEntities(string $text): string
 
 ---
 
-#### decodeHtmlEntitiesCow()
+##### decodeHtmlEntitiesCow()
 
 Decode HTML entities in text, returning borrowed or owned result as needed.
 
@@ -2290,7 +2290,7 @@ public static function decodeHtmlEntitiesCow(string $text): Str
 
 ---
 
-#### underline()
+##### underline()
 
 Underline text with a character.
 
@@ -2312,7 +2312,7 @@ public static function underline(string $text, string $padChar): string
 
 ---
 
-#### indent()
+##### indent()
 
 Indent text with a string prefix.
 
@@ -2335,7 +2335,7 @@ public static function indent(string $text, int $level, string $indentStr): stri
 
 ---
 
-#### buildDocumentStructure()
+##### buildDocumentStructure()
 
 Build a `DocumentStructure` from an already-parsed `tl::VDom`.
 
@@ -2360,7 +2360,7 @@ public static function buildDocumentStructure(VDom $dom): DocumentStructure
 
 ---
 
-#### buildNodeContext()
+##### buildNodeContext()
 
 Build a `NodeContext` from current parsing state.
 
@@ -2474,7 +2474,7 @@ public static function convertWithVisitor(string $html, ?ConversionOptions $opti
 
 ---
 
-#### conversionOptionsFromJson()
+##### conversionOptionsFromJson()
 
 Parse JSON string into `ConversionOptions`.
 
@@ -2508,7 +2508,7 @@ public static function conversionOptionsFromJson(string $json): ConversionOption
 
 ---
 
-#### conversionOptionsUpdateFromJson()
+##### conversionOptionsUpdateFromJson()
 
 Parse JSON string into partial `ConversionOptions` update.
 
@@ -2542,7 +2542,7 @@ public static function conversionOptionsUpdateFromJson(string $json): Conversion
 
 ---
 
-#### inlineImageConfigFromJson()
+##### inlineImageConfigFromJson()
 
 Parse JSON string into `InlineImageConfig` (requires `inline-images` feature).
 
@@ -2576,7 +2576,7 @@ public static function inlineImageConfigFromJson(string $json): InlineImageConfi
 
 ---
 
-#### metadataConfigFromJson()
+##### metadataConfigFromJson()
 
 Parse JSON string into `MetadataConfig` (requires `metadata` feature).
 
@@ -2610,9 +2610,9 @@ public static function metadataConfigFromJson(string $json): MetadataConfig
 
 ---
 
-### Types
+#### Types
 
-#### ConversionOptions
+##### ConversionOptions
 
 Main conversion options for HTML to Markdown conversion.
 
@@ -2659,7 +2659,7 @@ Use `ConversionOptions::builder()` to construct, or `the default constructor` fo
 | `captureSvg` | `bool` | `false` | Capture SVG elements as images. |
 | `inferDimensions` | `bool` | `true` | Infer image dimensions from data. |
 
-##### Methods
+###### Methods
 
 ###### default()
 
@@ -2710,7 +2710,7 @@ public static function from(ConversionOptionsUpdate $update): ConversionOptions
 
 ---
 
-#### ConversionResult
+##### ConversionResult
 
 The primary result of HTML conversion and extraction.
 
@@ -2729,7 +2729,7 @@ metadata, extracted tables, images, and processing warnings.
 
 ---
 
-#### Context
+##### Context
 
 Conversion context that tracks state during HTML to Markdown conversion.
 
@@ -2739,13 +2739,13 @@ about the current position in the document tree, nesting levels, and enabled fea
 
 ---
 
-#### ConversionOptionsBuilder
+##### ConversionOptionsBuilder
 
 Builder for `ConversionOptions`.
 
 All fields start with default values. Call `.build()` to produce the final options.
 
-##### Methods
+###### Methods
 
 ###### stripTags()
 
@@ -2800,11 +2800,11 @@ public function build(): ConversionOptions
 
 ---
 
-#### DjotRenderer
+##### DjotRenderer
 
 Renderer for Djot lightweight markup output.
 
-##### Methods
+###### Methods
 
 ###### emphasis()
 
@@ -2889,7 +2889,7 @@ public function isDjot(): bool
 
 ---
 
-#### DocumentMetadata
+##### DocumentMetadata
 
 Document-level metadata extracted from `<head>` and top-level elements.
 
@@ -2913,7 +2913,7 @@ and browsers for document indexing and presentation.
 
 ---
 
-#### DocumentNode
+##### DocumentNode
 
 A single node in the document tree.
 
@@ -2929,7 +2929,7 @@ A single node in the document tree.
 
 ---
 
-#### DocumentStructure
+##### DocumentStructure
 
 A structured document tree representing the semantic content of an HTML document.
 
@@ -2943,7 +2943,7 @@ Uses a flat node array with index-based parent/child references for efficient tr
 
 ---
 
-#### DomContext
+##### DomContext
 
 DOM context that provides efficient access to parent/child relationships and text content.
 
@@ -2953,14 +2953,14 @@ via precomputed maps. It also includes an LRU cache for text content extraction.
 
 ---
 
-#### FormatRenderer
+##### FormatRenderer
 
 Trait for format-specific rendering of inline elements.
 
 Implementations provide the syntax for emphasis, strong, strikethrough, etc.
 in their respective output formats.
 
-##### Methods
+###### Methods
 
 ###### emphasis()
 
@@ -3065,7 +3065,7 @@ public function isDjot(): bool
 
 ---
 
-#### GridCell
+##### GridCell
 
 A single cell in a table grid.
 
@@ -3081,7 +3081,7 @@ A single cell in a table grid.
 
 ---
 
-#### HeaderMetadata
+##### HeaderMetadata
 
 Header element metadata with hierarchy tracking.
 
@@ -3096,7 +3096,7 @@ and position in the document structure.
 | `depth` | `int` | — | Document tree depth at the header element |
 | `htmlOffset` | `int` | — | Byte offset in original HTML document |
 
-##### Methods
+###### Methods
 
 ###### isValid()
 
@@ -3115,7 +3115,7 @@ public function isValid(): bool
 
 ---
 
-#### HtmlMetadata
+##### HtmlMetadata
 
 Comprehensive metadata extraction result from HTML document.
 
@@ -3133,7 +3133,7 @@ suitable for serialization and transmission across language boundaries.
 
 ---
 
-#### HtmlVisitor
+##### HtmlVisitor
 
 Visitor trait for HTML→Markdown conversion.
 
@@ -3574,7 +3574,7 @@ public function visitFigureEnd(NodeContext $ctx, string $output): VisitResult
 
 ---
 
-#### ImageMetadata
+##### ImageMetadata
 
 Image metadata with source and dimensions.
 
@@ -3593,21 +3593,21 @@ for image analysis and optimization.
 
 ---
 
-#### ImageMetadataPayload
+##### ImageMetadataPayload
 
 Payload type for image metadata extraction.
 
 
 ---
 
-#### InlineCollectorHandle
+##### InlineCollectorHandle
 
 Handle type for inline image collector when feature is enabled.
 
 
 ---
 
-#### InlineImageConfig
+##### InlineImageConfig
 
 Inline image configuration that specifies contexts where images remain as markdown links.
 
@@ -3618,7 +3618,7 @@ names where inline images should be preserved.
 |-------|------|---------|-------------|
 | `keepInlineImagesIn` | `array<string>` | `[]` | HTML elements where images should remain as markdown links (not converted to alt text) |
 
-##### Methods
+###### Methods
 
 ###### fromElements()
 
@@ -3665,7 +3665,7 @@ public static function default(): InlineImageConfig
 
 ---
 
-#### LinkMetadata
+##### LinkMetadata
 
 Hyperlink metadata with categorization and attributes.
 
@@ -3680,7 +3680,7 @@ Represents `<a>` elements with parsed href values, text content, and link type c
 | `rel` | `array<string>` | — | Rel attribute values (e.g., "nofollow", "stylesheet", "canonical") |
 | `attributes` | `array<string, string>` | — | Additional HTML attributes |
 
-##### Methods
+###### Methods
 
 ###### classifyLink()
 
@@ -3699,11 +3699,11 @@ public static function classifyLink(string $href): LinkType
 
 ---
 
-#### MarkdownRenderer
+##### MarkdownRenderer
 
 Renderer for standard Markdown output.
 
-##### Methods
+###### Methods
 
 ###### emphasis()
 
@@ -3788,7 +3788,7 @@ public function isDjot(): bool
 
 ---
 
-#### MetadataCollector
+##### MetadataCollector
 
 Internal metadata collector for single-pass extraction.
 
@@ -3906,7 +3906,7 @@ public static function from(MetadataConfigUpdate $update): MetadataConfig
 
 ---
 
-#### NodeContext
+##### NodeContext
 
 Context information passed to all visitor methods.
 
@@ -3926,7 +3926,7 @@ including its type, attributes, position in the DOM tree, and parent context.
 
 ---
 
-#### PreprocessingOptions
+##### PreprocessingOptions
 
 HTML preprocessing options for document cleanup before conversion.
 
@@ -3937,7 +3937,7 @@ HTML preprocessing options for document cleanup before conversion.
 | `removeNavigation` | `bool` | `true` | Remove navigation elements (nav, breadcrumbs, menus, sidebars) |
 | `removeForms` | `bool` | `true` | Remove form elements (forms, inputs, buttons, etc.) |
 
-##### Methods
+###### Methods
 
 ###### default()
 
@@ -3988,7 +3988,7 @@ public static function from(PreprocessingOptionsUpdate $update): PreprocessingOp
 
 ---
 
-#### ProcessingWarning
+##### ProcessingWarning
 
 A non-fatal warning generated during HTML processing.
 
@@ -4000,12 +4000,12 @@ A non-fatal warning generated during HTML processing.
 
 ---
 
-#### ReferenceCollector
+##### ReferenceCollector
 
 Collects link/image references during conversion and produces a reference
 definitions section at the end of the document.
 
-##### Methods
+###### Methods
 
 ###### getOrInsert()
 
@@ -4034,18 +4034,18 @@ public function finish(): string
 
 ---
 
-#### ReferenceCollectorHandle
+##### ReferenceCollectorHandle
 
 Shared handle for passing the collector through the conversion context.
 
 
 ---
 
-#### StructureCollector
+##### StructureCollector
 
 Incremental builder for `DocumentStructure` during a single DOM walk.
 
-##### Methods
+###### Methods
 
 ###### pushHeading()
 
@@ -4200,14 +4200,14 @@ public static function default(): StructureCollector
 
 ---
 
-#### StructureCollectorHandle
+##### StructureCollectorHandle
 
 Shared mutable handle used in `crate::converter::Context`.
 
 
 ---
 
-#### StructuredData
+##### StructuredData
 
 Structured data block (JSON-LD, Microdata, or RDFa).
 
@@ -4223,7 +4223,7 @@ JSON-LD blocks are collected as raw JSON strings for flexibility.
 
 ---
 
-#### TableData
+##### TableData
 
 A top-level extracted table with both structured data and markdown representation.
 
@@ -4235,7 +4235,7 @@ A top-level extracted table with both structured data and markdown representatio
 
 ---
 
-#### TableGrid
+##### TableGrid
 
 A structured table grid with cell-level data including spans.
 
@@ -4248,7 +4248,7 @@ A structured table grid with cell-level data including spans.
 
 ---
 
-#### TableScan
+##### TableScan
 
 Scan results for a table element.
 
@@ -4272,7 +4272,7 @@ Contains metadata about table structure to determine optimal rendering:
 
 ---
 
-#### TextAnnotation
+##### TextAnnotation
 
 An inline text annotation with byte-range offsets.
 
@@ -4287,7 +4287,7 @@ Annotations describe formatting (bold, italic, etc.) and links within a node's t
 
 ---
 
-#### VisitorHandle
+##### VisitorHandle
 
 Type alias for a visitor handle (Rc-wrapped `RefCell` for interior mutability).
 
@@ -4296,9 +4296,9 @@ This allows visitors to be passed around and shared while still being mutable.
 
 ---
 
-### Enums
+#### Enums
 
-#### VisitAction
+##### VisitAction
 
 Result of visitor element start callback indicating what should happen next.
 
@@ -4312,7 +4312,7 @@ Result of visitor element start callback indicating what should happen next.
 
 ---
 
-#### TextDirection
+##### TextDirection
 
 Text directionality of document content.
 
@@ -4327,7 +4327,7 @@ Corresponds to the HTML `dir` attribute and `bdi` element directionality.
 
 ---
 
-#### LinkType
+##### LinkType
 
 Link classification based on href value and document context.
 
@@ -4345,7 +4345,7 @@ Used to categorize links during extraction for filtering and analysis.
 
 ---
 
-#### ImageType
+##### ImageType
 
 Image source classification for proper handling and processing.
 
@@ -4361,7 +4361,7 @@ Determines whether an image is embedded (data URI), inline SVG, external, or rel
 
 ---
 
-#### StructuredDataType
+##### StructuredDataType
 
 Structured data format type.
 
@@ -4376,7 +4376,7 @@ Identifies the schema/format used for structured data markup.
 
 ---
 
-#### PreprocessingPreset
+##### PreprocessingPreset
 
 HTML preprocessing aggressiveness level.
 
@@ -4391,7 +4391,7 @@ Controls the extent of cleanup performed before conversion. Higher levels remove
 
 ---
 
-#### HeadingStyle
+##### HeadingStyle
 
 Heading style options for Markdown output.
 
@@ -4406,7 +4406,7 @@ Controls how headings (h1-h6) are rendered in the output Markdown.
 
 ---
 
-#### ListIndentType
+##### ListIndentType
 
 List indentation character type.
 
@@ -4420,7 +4420,7 @@ Controls whether list items are indented with spaces or tabs.
 
 ---
 
-#### WhitespaceMode
+##### WhitespaceMode
 
 Whitespace handling strategy during conversion.
 
@@ -4434,7 +4434,7 @@ Determines how sequences of whitespace characters (spaces, tabs, newlines) are p
 
 ---
 
-#### NewlineStyle
+##### NewlineStyle
 
 Line break syntax in Markdown output.
 
@@ -4448,7 +4448,7 @@ Controls how soft line breaks (from `<br>` or line breaks in source) are rendere
 
 ---
 
-#### CodeBlockStyle
+##### CodeBlockStyle
 
 Code block fence style in Markdown output.
 
@@ -4463,7 +4463,7 @@ Determines how code blocks (`<pre><code>`) are rendered in Markdown.
 
 ---
 
-#### HighlightStyle
+##### HighlightStyle
 
 Highlight rendering style for `<mark>` elements.
 
@@ -4479,7 +4479,7 @@ Controls how highlighted text is rendered in Markdown output.
 
 ---
 
-#### LinkStyle
+##### LinkStyle
 
 Link rendering style in Markdown output.
 
@@ -4494,7 +4494,7 @@ reference-style `[text][1]` syntax with definitions collected at the end.
 
 ---
 
-#### OutputFormat
+##### OutputFormat
 
 Output format for conversion.
 
@@ -4509,7 +4509,7 @@ Specifies the target markup language format for the conversion output.
 
 ---
 
-#### NodeContent
+##### NodeContent
 
 The semantic content type of a document node.
 
@@ -4534,7 +4534,7 @@ Uses internally tagged representation (`"node_type": "heading"`) for JSON serial
 
 ---
 
-#### AnnotationKind
+##### AnnotationKind
 
 The type of an inline text annotation.
 
@@ -4555,7 +4555,7 @@ Uses internally tagged representation (`"annotation_type": "bold"`) for JSON ser
 
 ---
 
-#### WarningKind
+##### WarningKind
 
 Categories of processing warnings.
 
@@ -4570,7 +4570,7 @@ Categories of processing warnings.
 
 ---
 
-#### NodeType
+##### NodeType
 
 Node type enumeration covering all HTML element types.
 
@@ -4671,7 +4671,7 @@ providing a coarse-grained classification for visitor dispatch.
 
 ---
 
-#### VisitResult
+##### VisitResult
 
 Result of a visitor callback.
 
@@ -4690,7 +4690,7 @@ preserving HTML, or signaling errors.
 
 ---
 
-#### VisitorDispatch
+##### VisitorDispatch
 
 Result of dispatching a visitor callback.
 
@@ -4708,9 +4708,9 @@ raw `VisitResult` type.
 
 ---
 
-### Errors
+#### Errors
 
-#### ConversionError
+##### ConversionError
 
 Errors that can occur during HTML to Markdown conversion.
 

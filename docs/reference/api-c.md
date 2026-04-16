@@ -543,7 +543,7 @@ void htm_handle_code(HtmNodeHandle node_handle, HtmHtmlTag tag, HtmParser parser
 
 ---
 
-#### htm_handle_pre()
+##### htm_handle_pre()
 
 Handle a `<pre>` element and convert to Markdown.
 
@@ -579,7 +579,7 @@ void htm_handle_pre(HtmNodeHandle node_handle, HtmHtmlTag tag, HtmParser parser,
 
 ---
 
-#### htm_handle_graphic()
+##### htm_handle_graphic()
 
 Handle a `<graphic>` element and convert to Markdown.
 
@@ -615,7 +615,7 @@ void htm_handle_graphic(HtmNodeHandle node_handle, HtmHtmlTag tag, HtmParser par
 
 ---
 
-#### htm_handle_img()
+##### htm_handle_img()
 
 Handle an `<img>` element and convert to Markdown.
 
@@ -651,7 +651,7 @@ void htm_handle_img(HtmNodeHandle node_handle, HtmHtmlTag tag, HtmParser parser,
 
 ---
 
-#### htm_handle_link()
+##### htm_handle_link()
 
 Handle an `<a>` (link) element and convert to Markdown.
 
@@ -689,7 +689,7 @@ void htm_handle_link(HtmNodeHandle node_handle, HtmHtmlTag tag, HtmParser parser
 
 ---
 
-#### htm_dispatch_inline_handler()
+##### htm_dispatch_inline_handler()
 
 Dispatches inline element handling to the appropriate handler.
 
@@ -840,7 +840,7 @@ bool htm_is_loose_list(HtmNodeHandle node_handle, HtmParser parser, HtmDomContex
 
 ---
 
-#### htm_add_list_continuation_indent()
+##### htm_add_list_continuation_indent()
 
 Add list continuation indentation to output.
 
@@ -867,7 +867,7 @@ void htm_add_list_continuation_indent(const char* output, uintptr_t list_depth, 
 
 ---
 
-#### htm_continuation_indent_string()
+##### htm_continuation_indent_string()
 
 Calculate the indentation string for list continuations based on depth and options.
 
@@ -889,7 +889,7 @@ const char** htm_continuation_indent_string(uintptr_t list_depth, HtmConversionO
 
 ---
 
-#### htm_add_list_leading_separator()
+##### htm_add_list_leading_separator()
 
 Add appropriate leading separator before a list.
 
@@ -917,7 +917,7 @@ void htm_add_list_leading_separator(const char* output, HtmContext ctx);
 
 ---
 
-#### htm_add_nested_list_trailing_separator()
+##### htm_add_nested_list_trailing_separator()
 
 Add appropriate trailing separator after a nested list.
 
@@ -942,7 +942,7 @@ void htm_add_nested_list_trailing_separator(const char* output, HtmContext ctx);
 
 ---
 
-#### htm_calculate_list_nesting_depth()
+##### htm_calculate_list_nesting_depth()
 
 Calculate the nesting depth for a list.
 
@@ -967,7 +967,7 @@ uintptr_t htm_calculate_list_nesting_depth(HtmContext ctx);
 
 ---
 
-#### htm_is_list_item()
+##### htm_is_list_item()
 
 Check if a node is a list item element.
 
@@ -990,7 +990,7 @@ bool htm_is_list_item(HtmNodeHandle node_handle, HtmParser parser, HtmDomContext
 
 ---
 
-#### htm_process_list_children()
+##### htm_process_list_children()
 
 Process a list's children, tracking which items had block elements.
 
@@ -1024,7 +1024,7 @@ void htm_process_list_children(HtmNodeHandle node_handle, HtmParser parser, cons
 
 ---
 
-#### htm_dispatch_list_handler()
+##### htm_dispatch_list_handler()
 
 Dispatches list element handling to the appropriate handler.
 
@@ -1118,7 +1118,7 @@ const char* htm_convert_html_with_visitor(const char* html, HtmConversionOptions
 
 ---
 
-#### htm_dispatch_media_handler()
+##### htm_dispatch_media_handler()
 
 Dispatches media element handling to the appropriate handler.
 
@@ -1903,7 +1903,7 @@ HtmStr* htm_escape_malformed_angle_brackets(const char* input);
 
 ---
 
-#### htm_trim_line_end_whitespace()
+##### htm_trim_line_end_whitespace()
 
 Remove trailing spaces/tabs from every line while preserving newlines.
 
@@ -1924,7 +1924,7 @@ void htm_trim_line_end_whitespace(const char* output);
 
 ---
 
-#### htm_truncate_at_char_boundary()
+##### htm_truncate_at_char_boundary()
 
 Truncate a string at a valid UTF-8 boundary.
 
@@ -1946,7 +1946,7 @@ void htm_truncate_at_char_boundary(const char* value, uintptr_t max_len);
 
 ---
 
-#### htm_normalize_heading_text()
+##### htm_normalize_heading_text()
 
 Normalize heading text by replacing newlines and extra whitespace.
 
@@ -1970,7 +1970,7 @@ HtmStr* htm_normalize_heading_text(const char* text);
 
 ---
 
-#### htm_dedent_code_block()
+##### htm_dedent_code_block()
 
 Remove common leading whitespace from all lines in a code block.
 
@@ -1994,7 +1994,7 @@ const char* htm_dedent_code_block(const char* content);
 
 ---
 
-#### htm_floor_char_boundary()
+##### htm_floor_char_boundary()
 
 Returns the largest valid char boundary index at or before `index`.
 
@@ -2020,7 +2020,7 @@ uintptr_t htm_floor_char_boundary(const char* s, uintptr_t index);
 
 ---
 
-#### htm_handle_visitor_element_start()
+##### htm_handle_visitor_element_start()
 
 Handles visitor callback for element start (before processing).
 
@@ -2066,7 +2066,7 @@ HtmVisitAction* htm_handle_visitor_element_start(HtmVisitorHandle visitor_handle
 
 ---
 
-#### htm_handle_visitor_element_end()
+##### htm_handle_visitor_element_end()
 
 Handles visitor callback for element end (after processing).
 
@@ -2104,7 +2104,7 @@ void htm_handle_visitor_element_end(HtmVisitorHandle visitor_handle, const char*
 
 ---
 
-#### htm_escape()
+##### htm_escape()
 
 Escape Markdown special characters in text.
 
@@ -2133,7 +2133,7 @@ HtmStr* htm_escape(const char* text, bool escape_misc, bool escape_asterisks, bo
 
 ---
 
-#### htm_chomp()
+##### htm_chomp()
 
 Extract boundary whitespace from text (chomp).
 
@@ -2160,7 +2160,7 @@ HtmStrStrStr* htm_chomp(const char* text);
 
 ---
 
-#### htm_normalize_whitespace()
+##### htm_normalize_whitespace()
 
 Normalize whitespace by collapsing consecutive spaces and tabs.
 
@@ -2189,7 +2189,7 @@ const char* htm_normalize_whitespace(const char* text);
 
 ---
 
-#### htm_normalize_whitespace_cow()
+##### htm_normalize_whitespace_cow()
 
 Normalize whitespace in text, returning borrowed or owned result as needed.
 
@@ -2220,7 +2220,7 @@ HtmStr* htm_normalize_whitespace_cow(const char* text);
 
 ---
 
-#### htm_decode_html_entities()
+##### htm_decode_html_entities()
 
 Decode common HTML entities.
 
@@ -2253,7 +2253,7 @@ const char* htm_decode_html_entities(const char* text);
 
 ---
 
-#### htm_decode_html_entities_cow()
+##### htm_decode_html_entities_cow()
 
 Decode HTML entities in text, returning borrowed or owned result as needed.
 
@@ -2290,7 +2290,7 @@ HtmStr* htm_decode_html_entities_cow(const char* text);
 
 ---
 
-#### htm_underline()
+##### htm_underline()
 
 Underline text with a character.
 
@@ -2312,7 +2312,7 @@ const char* htm_underline(const char* text, const char* pad_char);
 
 ---
 
-#### htm_indent()
+##### htm_indent()
 
 Indent text with a string prefix.
 
@@ -2335,7 +2335,7 @@ const char* htm_indent(const char* text, uintptr_t level, const char* indent_str
 
 ---
 
-#### htm_build_document_structure()
+##### htm_build_document_structure()
 
 Build a `DocumentStructure` from an already-parsed `tl.VDom`.
 
@@ -2360,7 +2360,7 @@ HtmDocumentStructure* htm_build_document_structure(HtmVDom dom);
 
 ---
 
-#### htm_build_node_context()
+##### htm_build_node_context()
 
 Build a `NodeContext` from current parsing state.
 
@@ -2474,7 +2474,7 @@ const char* htm_convert_with_visitor(const char* html, HtmConversionOptions opti
 
 ---
 
-#### htm_conversion_options_from_json()
+##### htm_conversion_options_from_json()
 
 Parse JSON string into `ConversionOptions`.
 
@@ -2508,7 +2508,7 @@ HtmConversionOptions* htm_conversion_options_from_json(const char* json);
 
 ---
 
-#### htm_conversion_options_update_from_json()
+##### htm_conversion_options_update_from_json()
 
 Parse JSON string into partial `ConversionOptions` update.
 
@@ -2542,7 +2542,7 @@ HtmConversionOptionsUpdate* htm_conversion_options_update_from_json(const char* 
 
 ---
 
-#### htm_inline_image_config_from_json()
+##### htm_inline_image_config_from_json()
 
 Parse JSON string into `InlineImageConfig` (requires `inline-images` feature).
 
@@ -2576,7 +2576,7 @@ HtmInlineImageConfig* htm_inline_image_config_from_json(const char* json);
 
 ---
 
-#### htm_metadata_config_from_json()
+##### htm_metadata_config_from_json()
 
 Parse JSON string into `MetadataConfig` (requires `metadata` feature).
 
@@ -2610,9 +2610,9 @@ HtmMetadataConfig* htm_metadata_config_from_json(const char* json);
 
 ---
 
-### Types
+#### Types
 
-#### HtmConversionOptions
+##### HtmConversionOptions
 
 Main conversion options for HTML to Markdown conversion.
 
@@ -2659,7 +2659,7 @@ Use `ConversionOptions.builder()` to construct, or `the default constructor` for
 | `capture_svg` | `bool` | `false` | Capture SVG elements as images. |
 | `infer_dimensions` | `bool` | `true` | Infer image dimensions from data. |
 
-##### Methods
+###### Methods
 
 ###### htm_default()
 
@@ -2710,7 +2710,7 @@ HtmConversionOptions htm_from(HtmConversionOptionsUpdate update);
 
 ---
 
-#### HtmConversionResult
+##### HtmConversionResult
 
 The primary result of HTML conversion and extraction.
 
@@ -2729,7 +2729,7 @@ metadata, extracted tables, images, and processing warnings.
 
 ---
 
-#### HtmContext
+##### HtmContext
 
 Conversion context that tracks state during HTML to Markdown conversion.
 
@@ -2739,13 +2739,13 @@ about the current position in the document tree, nesting levels, and enabled fea
 
 ---
 
-#### HtmConversionOptionsBuilder
+##### HtmConversionOptionsBuilder
 
 Builder for `ConversionOptions`.
 
 All fields start with default values. Call `.build()` to produce the final options.
 
-##### Methods
+###### Methods
 
 ###### htm_strip_tags()
 
@@ -2800,11 +2800,11 @@ HtmConversionOptions htm_build();
 
 ---
 
-#### HtmDjotRenderer
+##### HtmDjotRenderer
 
 Renderer for Djot lightweight markup output.
 
-##### Methods
+###### Methods
 
 ###### htm_emphasis()
 
@@ -2889,7 +2889,7 @@ bool htm_is_djot();
 
 ---
 
-#### HtmDocumentMetadata
+##### HtmDocumentMetadata
 
 Document-level metadata extracted from `<head>` and top-level elements.
 
@@ -2913,7 +2913,7 @@ and browsers for document indexing and presentation.
 
 ---
 
-#### HtmDocumentNode
+##### HtmDocumentNode
 
 A single node in the document tree.
 
@@ -2929,7 +2929,7 @@ A single node in the document tree.
 
 ---
 
-#### HtmDocumentStructure
+##### HtmDocumentStructure
 
 A structured document tree representing the semantic content of an HTML document.
 
@@ -2943,7 +2943,7 @@ Uses a flat node array with index-based parent/child references for efficient tr
 
 ---
 
-#### HtmDomContext
+##### HtmDomContext
 
 DOM context that provides efficient access to parent/child relationships and text content.
 
@@ -2953,14 +2953,14 @@ via precomputed maps. It also includes an LRU cache for text content extraction.
 
 ---
 
-#### HtmFormatRenderer
+##### HtmFormatRenderer
 
 Trait for format-specific rendering of inline elements.
 
 Implementations provide the syntax for emphasis, strong, strikethrough, etc.
 in their respective output formats.
 
-##### Methods
+###### Methods
 
 ###### htm_emphasis()
 
@@ -3065,7 +3065,7 @@ bool htm_is_djot();
 
 ---
 
-#### HtmGridCell
+##### HtmGridCell
 
 A single cell in a table grid.
 
@@ -3081,7 +3081,7 @@ A single cell in a table grid.
 
 ---
 
-#### HtmHeaderMetadata
+##### HtmHeaderMetadata
 
 Header element metadata with hierarchy tracking.
 
@@ -3096,7 +3096,7 @@ and position in the document structure.
 | `depth` | `uintptr_t` | — | Document tree depth at the header element |
 | `html_offset` | `uintptr_t` | — | Byte offset in original HTML document |
 
-##### Methods
+###### Methods
 
 ###### htm_is_valid()
 
@@ -3115,7 +3115,7 @@ bool htm_is_valid();
 
 ---
 
-#### HtmHtmlMetadata
+##### HtmHtmlMetadata
 
 Comprehensive metadata extraction result from HTML document.
 
@@ -3133,7 +3133,7 @@ suitable for serialization and transmission across language boundaries.
 
 ---
 
-#### HtmHtmlVisitor
+##### HtmHtmlVisitor
 
 Visitor trait for HTML→Markdown conversion.
 
@@ -3574,7 +3574,7 @@ HtmVisitResult htm_visit_figure_end(HtmNodeContext ctx, const char* output);
 
 ---
 
-#### HtmImageMetadata
+##### HtmImageMetadata
 
 Image metadata with source and dimensions.
 
@@ -3593,21 +3593,21 @@ for image analysis and optimization.
 
 ---
 
-#### HtmImageMetadataPayload
+##### HtmImageMetadataPayload
 
 Payload type for image metadata extraction.
 
 
 ---
 
-#### HtmInlineCollectorHandle
+##### HtmInlineCollectorHandle
 
 Handle type for inline image collector when feature is enabled.
 
 
 ---
 
-#### HtmInlineImageConfig
+##### HtmInlineImageConfig
 
 Inline image configuration that specifies contexts where images remain as markdown links.
 
@@ -3618,7 +3618,7 @@ names where inline images should be preserved.
 |-------|------|---------|-------------|
 | `keep_inline_images_in` | `const char**` | `NULL` | HTML elements where images should remain as markdown links (not converted to alt text) |
 
-##### Methods
+###### Methods
 
 ###### htm_from_elements()
 
@@ -3665,7 +3665,7 @@ HtmInlineImageConfig htm_default();
 
 ---
 
-#### HtmLinkMetadata
+##### HtmLinkMetadata
 
 Hyperlink metadata with categorization and attributes.
 
@@ -3680,7 +3680,7 @@ Represents `<a>` elements with parsed href values, text content, and link type c
 | `rel` | `const char**` | — | Rel attribute values (e.g., "nofollow", "stylesheet", "canonical") |
 | `attributes` | `void*` | — | Additional HTML attributes |
 
-##### Methods
+###### Methods
 
 ###### htm_classify_link()
 
@@ -3699,11 +3699,11 @@ HtmLinkType htm_classify_link(const char* href);
 
 ---
 
-#### HtmMarkdownRenderer
+##### HtmMarkdownRenderer
 
 Renderer for standard Markdown output.
 
-##### Methods
+###### Methods
 
 ###### htm_emphasis()
 
@@ -3788,7 +3788,7 @@ bool htm_is_djot();
 
 ---
 
-#### HtmMetadataCollector
+##### HtmMetadataCollector
 
 Internal metadata collector for single-pass extraction.
 
@@ -3906,7 +3906,7 @@ HtmMetadataConfig htm_from(HtmMetadataConfigUpdate update);
 
 ---
 
-#### HtmNodeContext
+##### HtmNodeContext
 
 Context information passed to all visitor methods.
 
@@ -3926,7 +3926,7 @@ including its type, attributes, position in the DOM tree, and parent context.
 
 ---
 
-#### HtmPreprocessingOptions
+##### HtmPreprocessingOptions
 
 HTML preprocessing options for document cleanup before conversion.
 
@@ -3937,7 +3937,7 @@ HTML preprocessing options for document cleanup before conversion.
 | `remove_navigation` | `bool` | `true` | Remove navigation elements (nav, breadcrumbs, menus, sidebars) |
 | `remove_forms` | `bool` | `true` | Remove form elements (forms, inputs, buttons, etc.) |
 
-##### Methods
+###### Methods
 
 ###### htm_default()
 
@@ -3988,7 +3988,7 @@ HtmPreprocessingOptions htm_from(HtmPreprocessingOptionsUpdate update);
 
 ---
 
-#### HtmProcessingWarning
+##### HtmProcessingWarning
 
 A non-fatal warning generated during HTML processing.
 
@@ -4000,12 +4000,12 @@ A non-fatal warning generated during HTML processing.
 
 ---
 
-#### HtmReferenceCollector
+##### HtmReferenceCollector
 
 Collects link/image references during conversion and produces a reference
 definitions section at the end of the document.
 
-##### Methods
+###### Methods
 
 ###### htm_get_or_insert()
 
@@ -4034,18 +4034,18 @@ const char* htm_finish();
 
 ---
 
-#### HtmReferenceCollectorHandle
+##### HtmReferenceCollectorHandle
 
 Shared handle for passing the collector through the conversion context.
 
 
 ---
 
-#### HtmStructureCollector
+##### HtmStructureCollector
 
 Incremental builder for `DocumentStructure` during a single DOM walk.
 
-##### Methods
+###### Methods
 
 ###### htm_push_heading()
 
@@ -4200,14 +4200,14 @@ HtmStructureCollector htm_default();
 
 ---
 
-#### HtmStructureCollectorHandle
+##### HtmStructureCollectorHandle
 
 Shared mutable handle used in `crate.converter.Context`.
 
 
 ---
 
-#### HtmStructuredData
+##### HtmStructuredData
 
 Structured data block (JSON-LD, Microdata, or RDFa).
 
@@ -4223,7 +4223,7 @@ JSON-LD blocks are collected as raw JSON strings for flexibility.
 
 ---
 
-#### HtmTableData
+##### HtmTableData
 
 A top-level extracted table with both structured data and markdown representation.
 
@@ -4235,7 +4235,7 @@ A top-level extracted table with both structured data and markdown representatio
 
 ---
 
-#### HtmTableGrid
+##### HtmTableGrid
 
 A structured table grid with cell-level data including spans.
 
@@ -4248,7 +4248,7 @@ A structured table grid with cell-level data including spans.
 
 ---
 
-#### HtmTableScan
+##### HtmTableScan
 
 Scan results for a table element.
 
@@ -4272,7 +4272,7 @@ Contains metadata about table structure to determine optimal rendering:
 
 ---
 
-#### HtmTextAnnotation
+##### HtmTextAnnotation
 
 An inline text annotation with byte-range offsets.
 
@@ -4287,7 +4287,7 @@ Annotations describe formatting (bold, italic, etc.) and links within a node's t
 
 ---
 
-#### HtmVisitorHandle
+##### HtmVisitorHandle
 
 Type alias for a visitor handle (Rc-wrapped `RefCell` for interior mutability).
 
@@ -4296,9 +4296,9 @@ This allows visitors to be passed around and shared while still being mutable.
 
 ---
 
-### Enums
+#### Enums
 
-#### HtmVisitAction
+##### HtmVisitAction
 
 Result of visitor element start callback indicating what should happen next.
 
@@ -4312,7 +4312,7 @@ Result of visitor element start callback indicating what should happen next.
 
 ---
 
-#### HtmTextDirection
+##### HtmTextDirection
 
 Text directionality of document content.
 
@@ -4327,7 +4327,7 @@ Corresponds to the HTML `dir` attribute and `bdi` element directionality.
 
 ---
 
-#### HtmLinkType
+##### HtmLinkType
 
 Link classification based on href value and document context.
 
@@ -4345,7 +4345,7 @@ Used to categorize links during extraction for filtering and analysis.
 
 ---
 
-#### HtmImageType
+##### HtmImageType
 
 Image source classification for proper handling and processing.
 
@@ -4361,7 +4361,7 @@ Determines whether an image is embedded (data URI), inline SVG, external, or rel
 
 ---
 
-#### HtmStructuredDataType
+##### HtmStructuredDataType
 
 Structured data format type.
 
@@ -4376,7 +4376,7 @@ Identifies the schema/format used for structured data markup.
 
 ---
 
-#### HtmPreprocessingPreset
+##### HtmPreprocessingPreset
 
 HTML preprocessing aggressiveness level.
 
@@ -4391,7 +4391,7 @@ Controls the extent of cleanup performed before conversion. Higher levels remove
 
 ---
 
-#### HtmHeadingStyle
+##### HtmHeadingStyle
 
 Heading style options for Markdown output.
 
@@ -4406,7 +4406,7 @@ Controls how headings (h1-h6) are rendered in the output Markdown.
 
 ---
 
-#### HtmListIndentType
+##### HtmListIndentType
 
 List indentation character type.
 
@@ -4420,7 +4420,7 @@ Controls whether list items are indented with spaces or tabs.
 
 ---
 
-#### HtmWhitespaceMode
+##### HtmWhitespaceMode
 
 Whitespace handling strategy during conversion.
 
@@ -4434,7 +4434,7 @@ Determines how sequences of whitespace characters (spaces, tabs, newlines) are p
 
 ---
 
-#### HtmNewlineStyle
+##### HtmNewlineStyle
 
 Line break syntax in Markdown output.
 
@@ -4448,7 +4448,7 @@ Controls how soft line breaks (from `<br>` or line breaks in source) are rendere
 
 ---
 
-#### HtmCodeBlockStyle
+##### HtmCodeBlockStyle
 
 Code block fence style in Markdown output.
 
@@ -4463,7 +4463,7 @@ Determines how code blocks (`<pre><code>`) are rendered in Markdown.
 
 ---
 
-#### HtmHighlightStyle
+##### HtmHighlightStyle
 
 Highlight rendering style for `<mark>` elements.
 
@@ -4479,7 +4479,7 @@ Controls how highlighted text is rendered in Markdown output.
 
 ---
 
-#### HtmLinkStyle
+##### HtmLinkStyle
 
 Link rendering style in Markdown output.
 
@@ -4494,7 +4494,7 @@ reference-style `[text][1]` syntax with definitions collected at the end.
 
 ---
 
-#### HtmOutputFormat
+##### HtmOutputFormat
 
 Output format for conversion.
 
@@ -4509,7 +4509,7 @@ Specifies the target markup language format for the conversion output.
 
 ---
 
-#### HtmNodeContent
+##### HtmNodeContent
 
 The semantic content type of a document node.
 
@@ -4534,7 +4534,7 @@ Uses internally tagged representation (`"node_type": "heading"`) for JSON serial
 
 ---
 
-#### HtmAnnotationKind
+##### HtmAnnotationKind
 
 The type of an inline text annotation.
 
@@ -4555,7 +4555,7 @@ Uses internally tagged representation (`"annotation_type": "bold"`) for JSON ser
 
 ---
 
-#### HtmWarningKind
+##### HtmWarningKind
 
 Categories of processing warnings.
 
@@ -4570,7 +4570,7 @@ Categories of processing warnings.
 
 ---
 
-#### HtmNodeType
+##### HtmNodeType
 
 Node type enumeration covering all HTML element types.
 
@@ -4671,7 +4671,7 @@ providing a coarse-grained classification for visitor dispatch.
 
 ---
 
-#### HtmVisitResult
+##### HtmVisitResult
 
 Result of a visitor callback.
 
@@ -4690,7 +4690,7 @@ preserving HTML, or signaling errors.
 
 ---
 
-#### HtmVisitorDispatch
+##### HtmVisitorDispatch
 
 Result of dispatching a visitor callback.
 
@@ -4708,9 +4708,9 @@ raw `VisitResult` type.
 
 ---
 
-### Errors
+#### Errors
 
-#### HtmConversionError
+##### HtmConversionError
 
 Errors that can occur during HTML to Markdown conversion.
 

@@ -4,11 +4,6 @@ package dev.kreuzberg.htmltomarkdown;
 import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record HeaderMetadata(
-    byte level,
-    String text,
-    Optional<String> id,
-    long depth,
-    @JsonProperty("html_offset") long htmlOffset
-) {
+public record HeaderMetadata(byte level, String text, Optional<String> id, long depth,
+		@JsonProperty("html_offset") long htmlOffset) {
 }

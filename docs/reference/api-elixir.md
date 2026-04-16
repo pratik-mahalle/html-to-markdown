@@ -559,7 +559,7 @@ def handle_code(node_handle, tag, parser, output, options, ctx, depth, dom_ctx)
 
 ---
 
-#### handle_pre()
+##### handle_pre()
 
 Handle a `<pre>` element and convert to Markdown.
 
@@ -596,7 +596,7 @@ def handle_pre(node_handle, tag, parser, output, options, ctx, depth, dom_ctx)
 
 ---
 
-#### handle_graphic()
+##### handle_graphic()
 
 Handle a `<graphic>` element and convert to Markdown.
 
@@ -633,7 +633,7 @@ def handle_graphic(node_handle, tag, parser, output, options, ctx, depth, dom_ct
 
 ---
 
-#### handle_img()
+##### handle_img()
 
 Handle an `<img>` element and convert to Markdown.
 
@@ -670,7 +670,7 @@ def handle_img(node_handle, tag, parser, output, options, ctx, depth, dom_ctx)
 
 ---
 
-#### handle_link()
+##### handle_link()
 
 Handle an `<a>` (link) element and convert to Markdown.
 
@@ -709,7 +709,7 @@ def handle_link(node_handle, tag, parser, output, options, ctx, depth, dom_ctx)
 
 ---
 
-#### dispatch_inline_handler()
+##### dispatch_inline_handler()
 
 Dispatches inline element handling to the appropriate handler.
 
@@ -863,7 +863,7 @@ def is_loose_list(node_handle, parser, dom_ctx)
 
 ---
 
-#### add_list_continuation_indent()
+##### add_list_continuation_indent()
 
 Add list continuation indentation to output.
 
@@ -891,7 +891,7 @@ def add_list_continuation_indent(output, list_depth, blank_line, options)
 
 ---
 
-#### continuation_indent_string()
+##### continuation_indent_string()
 
 Calculate the indentation string for list continuations based on depth and options.
 
@@ -914,7 +914,7 @@ def continuation_indent_string(list_depth, options)
 
 ---
 
-#### add_list_leading_separator()
+##### add_list_leading_separator()
 
 Add appropriate leading separator before a list.
 
@@ -943,7 +943,7 @@ def add_list_leading_separator(output, ctx)
 
 ---
 
-#### add_nested_list_trailing_separator()
+##### add_nested_list_trailing_separator()
 
 Add appropriate trailing separator after a nested list.
 
@@ -969,7 +969,7 @@ def add_nested_list_trailing_separator(output, ctx)
 
 ---
 
-#### calculate_list_nesting_depth()
+##### calculate_list_nesting_depth()
 
 Calculate the nesting depth for a list.
 
@@ -995,7 +995,7 @@ def calculate_list_nesting_depth(ctx)
 
 ---
 
-#### is_list_item()
+##### is_list_item()
 
 Check if a node is a list item element.
 
@@ -1019,7 +1019,7 @@ def is_list_item(node_handle, parser, dom_ctx)
 
 ---
 
-#### process_list_children()
+##### process_list_children()
 
 Process a list's children, tracking which items had block elements.
 
@@ -1054,7 +1054,7 @@ def process_list_children(node_handle, parser, output, options, ctx, depth, is_o
 
 ---
 
-#### dispatch_list_handler()
+##### dispatch_list_handler()
 
 Dispatches list element handling to the appropriate handler.
 
@@ -1151,7 +1151,7 @@ def convert_html_with_visitor(html, options, visitor)
 
 ---
 
-#### dispatch_media_handler()
+##### dispatch_media_handler()
 
 Dispatches media element handling to the appropriate handler.
 
@@ -1956,7 +1956,7 @@ def escape_malformed_angle_brackets(input)
 
 ---
 
-#### trim_line_end_whitespace()
+##### trim_line_end_whitespace()
 
 Remove trailing spaces/tabs from every line while preserving newlines.
 
@@ -1978,7 +1978,7 @@ def trim_line_end_whitespace(output)
 
 ---
 
-#### truncate_at_char_boundary()
+##### truncate_at_char_boundary()
 
 Truncate a string at a valid UTF-8 boundary.
 
@@ -2001,7 +2001,7 @@ def truncate_at_char_boundary(value, max_len)
 
 ---
 
-#### normalize_heading_text()
+##### normalize_heading_text()
 
 Normalize heading text by replacing newlines and extra whitespace.
 
@@ -2026,7 +2026,7 @@ def normalize_heading_text(text)
 
 ---
 
-#### dedent_code_block()
+##### dedent_code_block()
 
 Remove common leading whitespace from all lines in a code block.
 
@@ -2051,7 +2051,7 @@ def dedent_code_block(content)
 
 ---
 
-#### floor_char_boundary()
+##### floor_char_boundary()
 
 Returns the largest valid char boundary index at or before `index`.
 
@@ -2078,7 +2078,7 @@ def floor_char_boundary(s, index)
 
 ---
 
-#### handle_visitor_element_start()
+##### handle_visitor_element_start()
 
 Handles visitor callback for element start (before processing).
 
@@ -2125,7 +2125,7 @@ def handle_visitor_element_start(visitor_handle, tag_name, node_handle, tag, par
 
 ---
 
-#### handle_visitor_element_end()
+##### handle_visitor_element_end()
 
 Handles visitor callback for element end (after processing).
 
@@ -2164,7 +2164,7 @@ def handle_visitor_element_end(visitor_handle, tag_name, node_handle, tag, parse
 
 ---
 
-#### escape()
+##### escape()
 
 Escape Markdown special characters in text.
 
@@ -2194,7 +2194,7 @@ def escape(text, escape_misc, escape_asterisks, escape_underscores, escape_ascii
 
 ---
 
-#### chomp()
+##### chomp()
 
 Extract boundary whitespace from text (chomp).
 
@@ -2222,7 +2222,7 @@ def chomp(text)
 
 ---
 
-#### normalize_whitespace()
+##### normalize_whitespace()
 
 Normalize whitespace by collapsing consecutive spaces and tabs.
 
@@ -2252,7 +2252,7 @@ def normalize_whitespace(text)
 
 ---
 
-#### normalize_whitespace_cow()
+##### normalize_whitespace_cow()
 
 Normalize whitespace in text, returning borrowed or owned result as needed.
 
@@ -2284,7 +2284,7 @@ def normalize_whitespace_cow(text)
 
 ---
 
-#### decode_html_entities()
+##### decode_html_entities()
 
 Decode common HTML entities.
 
@@ -2318,7 +2318,7 @@ def decode_html_entities(text)
 
 ---
 
-#### decode_html_entities_cow()
+##### decode_html_entities_cow()
 
 Decode HTML entities in text, returning borrowed or owned result as needed.
 
@@ -2356,7 +2356,7 @@ def decode_html_entities_cow(text)
 
 ---
 
-#### underline()
+##### underline()
 
 Underline text with a character.
 
@@ -2379,7 +2379,7 @@ def underline(text, pad_char)
 
 ---
 
-#### indent()
+##### indent()
 
 Indent text with a string prefix.
 
@@ -2403,7 +2403,7 @@ def indent(text, level, indent_str)
 
 ---
 
-#### build_document_structure()
+##### build_document_structure()
 
 Build a `DocumentStructure` from an already-parsed `tl.VDom`.
 
@@ -2429,7 +2429,7 @@ def build_document_structure(dom)
 
 ---
 
-#### build_node_context()
+##### build_node_context()
 
 Build a `NodeContext` from current parsing state.
 
@@ -2546,7 +2546,7 @@ def convert_with_visitor(html, options, visitor)
 
 ---
 
-#### conversion_options_from_json()
+##### conversion_options_from_json()
 
 Parse JSON string into `ConversionOptions`.
 
@@ -2581,7 +2581,7 @@ def conversion_options_from_json(json)
 
 ---
 
-#### conversion_options_update_from_json()
+##### conversion_options_update_from_json()
 
 Parse JSON string into partial `ConversionOptions` update.
 
@@ -2616,7 +2616,7 @@ def conversion_options_update_from_json(json)
 
 ---
 
-#### inline_image_config_from_json()
+##### inline_image_config_from_json()
 
 Parse JSON string into `InlineImageConfig` (requires `inline-images` feature).
 
@@ -2651,7 +2651,7 @@ def inline_image_config_from_json(json)
 
 ---
 
-#### metadata_config_from_json()
+##### metadata_config_from_json()
 
 Parse JSON string into `MetadataConfig` (requires `metadata` feature).
 
@@ -2686,9 +2686,9 @@ def metadata_config_from_json(json)
 
 ---
 
-### Types
+#### Types
 
-#### ConversionOptions
+##### ConversionOptions
 
 Main conversion options for HTML to Markdown conversion.
 
@@ -2735,7 +2735,7 @@ Use `ConversionOptions.builder()` to construct, or `the default constructor` for
 | `capture_svg` | `boolean()` | `false` | Capture SVG elements as images. |
 | `infer_dimensions` | `boolean()` | `true` | Infer image dimensions from data. |
 
-##### Functions
+###### Functions
 
 ###### default()
 
@@ -2786,7 +2786,7 @@ def from(update)
 
 ---
 
-#### ConversionResult
+##### ConversionResult
 
 The primary result of HTML conversion and extraction.
 
@@ -2805,7 +2805,7 @@ metadata, extracted tables, images, and processing warnings.
 
 ---
 
-#### Context
+##### Context
 
 Conversion context that tracks state during HTML to Markdown conversion.
 
@@ -2815,13 +2815,13 @@ about the current position in the document tree, nesting levels, and enabled fea
 
 ---
 
-#### ConversionOptionsBuilder
+##### ConversionOptionsBuilder
 
 Builder for `ConversionOptions`.
 
 All fields start with default values. Call `.build()` to produce the final options.
 
-##### Functions
+###### Functions
 
 ###### strip_tags()
 
@@ -2876,11 +2876,11 @@ def build()
 
 ---
 
-#### DjotRenderer
+##### DjotRenderer
 
 Renderer for Djot lightweight markup output.
 
-##### Functions
+###### Functions
 
 ###### emphasis()
 
@@ -2965,7 +2965,7 @@ def is_djot()
 
 ---
 
-#### DocumentMetadata
+##### DocumentMetadata
 
 Document-level metadata extracted from `<head>` and top-level elements.
 
@@ -2989,7 +2989,7 @@ and browsers for document indexing and presentation.
 
 ---
 
-#### DocumentNode
+##### DocumentNode
 
 A single node in the document tree.
 
@@ -3005,7 +3005,7 @@ A single node in the document tree.
 
 ---
 
-#### DocumentStructure
+##### DocumentStructure
 
 A structured document tree representing the semantic content of an HTML document.
 
@@ -3019,7 +3019,7 @@ Uses a flat node array with index-based parent/child references for efficient tr
 
 ---
 
-#### DomContext
+##### DomContext
 
 DOM context that provides efficient access to parent/child relationships and text content.
 
@@ -3029,14 +3029,14 @@ via precomputed maps. It also includes an LRU cache for text content extraction.
 
 ---
 
-#### FormatRenderer
+##### FormatRenderer
 
 Trait for format-specific rendering of inline elements.
 
 Implementations provide the syntax for emphasis, strong, strikethrough, etc.
 in their respective output formats.
 
-##### Functions
+###### Functions
 
 ###### emphasis()
 
@@ -3141,7 +3141,7 @@ def is_djot()
 
 ---
 
-#### GridCell
+##### GridCell
 
 A single cell in a table grid.
 
@@ -3157,7 +3157,7 @@ A single cell in a table grid.
 
 ---
 
-#### HeaderMetadata
+##### HeaderMetadata
 
 Header element metadata with hierarchy tracking.
 
@@ -3172,7 +3172,7 @@ and position in the document structure.
 | `depth` | `integer()` | — | Document tree depth at the header element |
 | `html_offset` | `integer()` | — | Byte offset in original HTML document |
 
-##### Functions
+###### Functions
 
 ###### is_valid()
 
@@ -3191,7 +3191,7 @@ def is_valid()
 
 ---
 
-#### HtmlMetadata
+##### HtmlMetadata
 
 Comprehensive metadata extraction result from HTML document.
 
@@ -3209,7 +3209,7 @@ suitable for serialization and transmission across language boundaries.
 
 ---
 
-#### HtmlVisitor
+##### HtmlVisitor
 
 Visitor trait for HTML→Markdown conversion.
 
@@ -3650,7 +3650,7 @@ def visit_figure_end(ctx, output)
 
 ---
 
-#### ImageMetadata
+##### ImageMetadata
 
 Image metadata with source and dimensions.
 
@@ -3669,21 +3669,21 @@ for image analysis and optimization.
 
 ---
 
-#### ImageMetadataPayload
+##### ImageMetadataPayload
 
 Payload type for image metadata extraction.
 
 
 ---
 
-#### InlineCollectorHandle
+##### InlineCollectorHandle
 
 Handle type for inline image collector when feature is enabled.
 
 
 ---
 
-#### InlineImageConfig
+##### InlineImageConfig
 
 Inline image configuration that specifies contexts where images remain as markdown links.
 
@@ -3694,7 +3694,7 @@ names where inline images should be preserved.
 |-------|------|---------|-------------|
 | `keep_inline_images_in` | `list(String.t())` | `[]` | HTML elements where images should remain as markdown links (not converted to alt text) |
 
-##### Functions
+###### Functions
 
 ###### from_elements()
 
@@ -3741,7 +3741,7 @@ def default()
 
 ---
 
-#### LinkMetadata
+##### LinkMetadata
 
 Hyperlink metadata with categorization and attributes.
 
@@ -3756,7 +3756,7 @@ Represents `<a>` elements with parsed href values, text content, and link type c
 | `rel` | `list(String.t())` | — | Rel attribute values (e.g., "nofollow", "stylesheet", "canonical") |
 | `attributes` | `map()` | — | Additional HTML attributes |
 
-##### Functions
+###### Functions
 
 ###### classify_link()
 
@@ -3775,11 +3775,11 @@ def classify_link(href)
 
 ---
 
-#### MarkdownRenderer
+##### MarkdownRenderer
 
 Renderer for standard Markdown output.
 
-##### Functions
+###### Functions
 
 ###### emphasis()
 
@@ -3864,7 +3864,7 @@ def is_djot()
 
 ---
 
-#### MetadataCollector
+##### MetadataCollector
 
 Internal metadata collector for single-pass extraction.
 
@@ -3982,7 +3982,7 @@ def from(update)
 
 ---
 
-#### NodeContext
+##### NodeContext
 
 Context information passed to all visitor methods.
 
@@ -4002,7 +4002,7 @@ including its type, attributes, position in the DOM tree, and parent context.
 
 ---
 
-#### PreprocessingOptions
+##### PreprocessingOptions
 
 HTML preprocessing options for document cleanup before conversion.
 
@@ -4013,7 +4013,7 @@ HTML preprocessing options for document cleanup before conversion.
 | `remove_navigation` | `boolean()` | `true` | Remove navigation elements (nav, breadcrumbs, menus, sidebars) |
 | `remove_forms` | `boolean()` | `true` | Remove form elements (forms, inputs, buttons, etc.) |
 
-##### Functions
+###### Functions
 
 ###### default()
 
@@ -4064,7 +4064,7 @@ def from(update)
 
 ---
 
-#### ProcessingWarning
+##### ProcessingWarning
 
 A non-fatal warning generated during HTML processing.
 
@@ -4076,12 +4076,12 @@ A non-fatal warning generated during HTML processing.
 
 ---
 
-#### ReferenceCollector
+##### ReferenceCollector
 
 Collects link/image references during conversion and produces a reference
 definitions section at the end of the document.
 
-##### Functions
+###### Functions
 
 ###### get_or_insert()
 
@@ -4110,18 +4110,18 @@ def finish()
 
 ---
 
-#### ReferenceCollectorHandle
+##### ReferenceCollectorHandle
 
 Shared handle for passing the collector through the conversion context.
 
 
 ---
 
-#### StructureCollector
+##### StructureCollector
 
 Incremental builder for `DocumentStructure` during a single DOM walk.
 
-##### Functions
+###### Functions
 
 ###### push_heading()
 
@@ -4276,14 +4276,14 @@ def default()
 
 ---
 
-#### StructureCollectorHandle
+##### StructureCollectorHandle
 
 Shared mutable handle used in `crate.converter.Context`.
 
 
 ---
 
-#### StructuredData
+##### StructuredData
 
 Structured data block (JSON-LD, Microdata, or RDFa).
 
@@ -4299,7 +4299,7 @@ JSON-LD blocks are collected as raw JSON strings for flexibility.
 
 ---
 
-#### TableData
+##### TableData
 
 A top-level extracted table with both structured data and markdown representation.
 
@@ -4311,7 +4311,7 @@ A top-level extracted table with both structured data and markdown representatio
 
 ---
 
-#### TableGrid
+##### TableGrid
 
 A structured table grid with cell-level data including spans.
 
@@ -4324,7 +4324,7 @@ A structured table grid with cell-level data including spans.
 
 ---
 
-#### TableScan
+##### TableScan
 
 Scan results for a table element.
 
@@ -4348,7 +4348,7 @@ Contains metadata about table structure to determine optimal rendering:
 
 ---
 
-#### TextAnnotation
+##### TextAnnotation
 
 An inline text annotation with byte-range offsets.
 
@@ -4363,7 +4363,7 @@ Annotations describe formatting (bold, italic, etc.) and links within a node's t
 
 ---
 
-#### VisitorHandle
+##### VisitorHandle
 
 Type alias for a visitor handle (Rc-wrapped `RefCell` for interior mutability).
 
@@ -4372,9 +4372,9 @@ This allows visitors to be passed around and shared while still being mutable.
 
 ---
 
-### Enums
+#### Enums
 
-#### VisitAction
+##### VisitAction
 
 Result of visitor element start callback indicating what should happen next.
 
@@ -4388,7 +4388,7 @@ Result of visitor element start callback indicating what should happen next.
 
 ---
 
-#### TextDirection
+##### TextDirection
 
 Text directionality of document content.
 
@@ -4403,7 +4403,7 @@ Corresponds to the HTML `dir` attribute and `bdi` element directionality.
 
 ---
 
-#### LinkType
+##### LinkType
 
 Link classification based on href value and document context.
 
@@ -4421,7 +4421,7 @@ Used to categorize links during extraction for filtering and analysis.
 
 ---
 
-#### ImageType
+##### ImageType
 
 Image source classification for proper handling and processing.
 
@@ -4437,7 +4437,7 @@ Determines whether an image is embedded (data URI), inline SVG, external, or rel
 
 ---
 
-#### StructuredDataType
+##### StructuredDataType
 
 Structured data format type.
 
@@ -4452,7 +4452,7 @@ Identifies the schema/format used for structured data markup.
 
 ---
 
-#### PreprocessingPreset
+##### PreprocessingPreset
 
 HTML preprocessing aggressiveness level.
 
@@ -4467,7 +4467,7 @@ Controls the extent of cleanup performed before conversion. Higher levels remove
 
 ---
 
-#### HeadingStyle
+##### HeadingStyle
 
 Heading style options for Markdown output.
 
@@ -4482,7 +4482,7 @@ Controls how headings (h1-h6) are rendered in the output Markdown.
 
 ---
 
-#### ListIndentType
+##### ListIndentType
 
 List indentation character type.
 
@@ -4496,7 +4496,7 @@ Controls whether list items are indented with spaces or tabs.
 
 ---
 
-#### WhitespaceMode
+##### WhitespaceMode
 
 Whitespace handling strategy during conversion.
 
@@ -4510,7 +4510,7 @@ Determines how sequences of whitespace characters (spaces, tabs, newlines) are p
 
 ---
 
-#### NewlineStyle
+##### NewlineStyle
 
 Line break syntax in Markdown output.
 
@@ -4524,7 +4524,7 @@ Controls how soft line breaks (from `<br>` or line breaks in source) are rendere
 
 ---
 
-#### CodeBlockStyle
+##### CodeBlockStyle
 
 Code block fence style in Markdown output.
 
@@ -4539,7 +4539,7 @@ Determines how code blocks (`<pre><code>`) are rendered in Markdown.
 
 ---
 
-#### HighlightStyle
+##### HighlightStyle
 
 Highlight rendering style for `<mark>` elements.
 
@@ -4555,7 +4555,7 @@ Controls how highlighted text is rendered in Markdown output.
 
 ---
 
-#### LinkStyle
+##### LinkStyle
 
 Link rendering style in Markdown output.
 
@@ -4570,7 +4570,7 @@ reference-style `[text][1]` syntax with definitions collected at the end.
 
 ---
 
-#### OutputFormat
+##### OutputFormat
 
 Output format for conversion.
 
@@ -4585,7 +4585,7 @@ Specifies the target markup language format for the conversion output.
 
 ---
 
-#### NodeContent
+##### NodeContent
 
 The semantic content type of a document node.
 
@@ -4610,7 +4610,7 @@ Uses internally tagged representation (`"node_type": "heading"`) for JSON serial
 
 ---
 
-#### AnnotationKind
+##### AnnotationKind
 
 The type of an inline text annotation.
 
@@ -4631,7 +4631,7 @@ Uses internally tagged representation (`"annotation_type": "bold"`) for JSON ser
 
 ---
 
-#### WarningKind
+##### WarningKind
 
 Categories of processing warnings.
 
@@ -4646,7 +4646,7 @@ Categories of processing warnings.
 
 ---
 
-#### NodeType
+##### NodeType
 
 Node type enumeration covering all HTML element types.
 
@@ -4747,7 +4747,7 @@ providing a coarse-grained classification for visitor dispatch.
 
 ---
 
-#### VisitResult
+##### VisitResult
 
 Result of a visitor callback.
 
@@ -4766,7 +4766,7 @@ preserving HTML, or signaling errors.
 
 ---
 
-#### VisitorDispatch
+##### VisitorDispatch
 
 Result of dispatching a visitor callback.
 
@@ -4784,9 +4784,9 @@ raw `VisitResult` type.
 
 ---
 
-### Errors
+#### Errors
 
-#### ConversionError
+##### ConversionError
 
 Errors that can occur during HTML to Markdown conversion.
 

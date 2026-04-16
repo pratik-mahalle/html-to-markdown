@@ -4,14 +4,9 @@ package dev.kreuzberg.htmltomarkdown;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record HtmlMetadata(
-    DocumentMetadata document,
-    List<HeaderMetadata> headers,
-    List<LinkMetadata> links,
-    List<ImageMetadata> images,
-    @JsonProperty("structured_data") List<StructuredData> structuredData
-) {
-    public static HtmlMetadataBuilder builder() {
-        return new HtmlMetadataBuilder();
-    }
+public record HtmlMetadata(DocumentMetadata document, List<HeaderMetadata> headers, List<LinkMetadata> links,
+		List<ImageMetadata> images, @JsonProperty("structured_data") List<StructuredData> structuredData) {
+	public static HtmlMetadataBuilder builder() {
+		return new HtmlMetadataBuilder();
+	}
 }

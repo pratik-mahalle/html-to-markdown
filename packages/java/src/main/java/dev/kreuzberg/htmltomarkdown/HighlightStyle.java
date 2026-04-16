@@ -5,29 +5,26 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum HighlightStyle {
-    DoubleEqual("doubleequal"),
-    Html("html"),
-    Bold("bold"),
-    None("none");
+	DoubleEqual("doubleequal"), Html("html"), Bold("bold"), None("none");
 
-    private final String value;
+	private final String value;
 
-    HighlightStyle(String value) {
-        this.value = value;
-    }
+	HighlightStyle(String value) {
+		this.value = value;
+	}
 
-    @JsonValue
-    public String getValue() {
-        return value;
-    }
+	@JsonValue
+	public String getValue() {
+		return value;
+	}
 
-    @JsonCreator
-    public static HighlightStyle fromValue(String value) {
-        for (HighlightStyle e : values()) {
-            if (e.value.equalsIgnoreCase(value)) {
-                return e;
-            }
-        }
-        throw new IllegalArgumentException("Unknown value: " + value);
-    }
+	@JsonCreator
+	public static HighlightStyle fromValue(String value) {
+		for (HighlightStyle e : values()) {
+			if (e.value.equalsIgnoreCase(value)) {
+				return e;
+			}
+		}
+		throw new IllegalArgumentException("Unknown value: " + value);
+	}
 }

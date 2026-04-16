@@ -5,12 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public record DocumentNode(
-    String id,
-    NodeContent content,
-    Optional<Integer> parent,
-    List<Integer> children,
-    List<TextAnnotation> annotations,
-    Optional<Map<String, String>> attributes
-) {
+public record DocumentNode(String id, NodeContent content, Optional<Integer> parent, List<Integer> children,
+		List<TextAnnotation> annotations, Optional<Map<String, String>> attributes) {
 }

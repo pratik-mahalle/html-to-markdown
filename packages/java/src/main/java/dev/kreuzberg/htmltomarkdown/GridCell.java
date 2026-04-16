@@ -3,12 +3,6 @@ package dev.kreuzberg.htmltomarkdown;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record GridCell(
-    String content,
-    int row,
-    int col,
-    @JsonProperty("row_span") int rowSpan,
-    @JsonProperty("col_span") int colSpan,
-    @JsonProperty("is_header") boolean isHeader
-) {
+public record GridCell(String content, int row, int col, @JsonProperty("row_span") int rowSpan,
+		@JsonProperty("col_span") int colSpan, @JsonProperty("is_header") boolean isHeader) {
 }

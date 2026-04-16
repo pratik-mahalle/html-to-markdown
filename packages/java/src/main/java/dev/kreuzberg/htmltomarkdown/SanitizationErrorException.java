@@ -3,11 +3,11 @@ package dev.kreuzberg.htmltomarkdown;
 
 /** HTML sanitization error */
 public class SanitizationErrorException extends ConversionErrorException {
-    public SanitizationErrorException(String message) {
-        super(message);
-    }
+	public SanitizationErrorException(String message) {
+		super(message);
+	}
 
-    public SanitizationErrorException(String message, Throwable cause) {
-        super(message, cause);
-    }
+	public SanitizationErrorException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }

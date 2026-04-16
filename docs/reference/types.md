@@ -252,7 +252,7 @@ and browsers for document indexing and presentation.
 
 ---
 
-#### HeaderMetadata
+##### HeaderMetadata
 
 Header element metadata with hierarchy tracking.
 
@@ -269,7 +269,7 @@ and position in the document structure.
 
 ---
 
-#### LinkMetadata
+##### LinkMetadata
 
 Hyperlink metadata with categorization and attributes.
 
@@ -286,7 +286,7 @@ Represents `<a>` elements with parsed href values, text content, and link type c
 
 ---
 
-#### ImageMetadata
+##### ImageMetadata
 
 Image metadata with source and dimensions.
 
@@ -304,7 +304,7 @@ for image analysis and optimization.
 
 ---
 
-#### HtmlMetadata
+##### HtmlMetadata
 
 Comprehensive metadata extraction result from HTML document.
 
@@ -321,9 +321,9 @@ suitable for serialization and transmission across language boundaries.
 
 ---
 
-### Document Structure
+#### Document Structure
 
-#### DocumentStructure
+##### DocumentStructure
 
 A structured document tree representing the semantic content of an HTML document.
 
@@ -336,7 +336,7 @@ Uses a flat node array with index-based parent/child references for efficient tr
 
 ---
 
-#### DocumentNode
+##### DocumentNode
 
 A single node in the document tree.
 
@@ -351,7 +351,7 @@ A single node in the document tree.
 
 ---
 
-#### GridCell
+##### GridCell
 
 A single cell in a table grid.
 
@@ -366,7 +366,7 @@ A single cell in a table grid.
 
 ---
 
-#### TableData
+##### TableData
 
 A top-level extracted table with both structured data and markdown representation.
 
@@ -377,7 +377,7 @@ A top-level extracted table with both structured data and markdown representatio
 
 ---
 
-#### NodeContext
+##### NodeContext
 
 Context information passed to all visitor methods.
 
@@ -396,9 +396,9 @@ including its type, attributes, position in the DOM tree, and parent context.
 
 ---
 
-### Other Types
+#### Other Types
 
-#### InlineCollectorHandle
+##### InlineCollectorHandle
 
 Handle type for inline image collector when feature is enabled.
 
@@ -406,7 +406,7 @@ Handle type for inline image collector when feature is enabled.
 
 ---
 
-#### Context
+##### Context
 
 Conversion context that tracks state during HTML to Markdown conversion.
 
@@ -417,7 +417,7 @@ about the current position in the document tree, nesting levels, and enabled fea
 
 ---
 
-#### DomContext
+##### DomContext
 
 DOM context that provides efficient access to parent/child relationships and text content.
 
@@ -428,7 +428,7 @@ via precomputed maps. It also includes an LRU cache for text content extraction.
 
 ---
 
-#### FormatRenderer
+##### FormatRenderer
 
 Trait for format-specific rendering of inline elements.
 
@@ -439,7 +439,7 @@ in their respective output formats.
 
 ---
 
-#### ReferenceCollectorHandle
+##### ReferenceCollectorHandle
 
 Shared handle for passing the collector through the conversion context.
 
@@ -447,7 +447,7 @@ Shared handle for passing the collector through the conversion context.
 
 ---
 
-#### StructuredData
+##### StructuredData
 
 Structured data block (JSON-LD, Microdata, or RDFa).
 
@@ -462,7 +462,7 @@ JSON-LD blocks are collected as raw JSON strings for flexibility.
 
 ---
 
-#### ConversionOptionsBuilder
+##### ConversionOptionsBuilder
 
 Builder for `ConversionOptions`.
 
@@ -472,7 +472,7 @@ All fields start with default values. Call `.build()` to produce the final optio
 
 ---
 
-#### TextAnnotation
+##### TextAnnotation
 
 An inline text annotation with byte-range offsets.
 
@@ -486,7 +486,7 @@ Annotations describe formatting (bold, italic, etc.) and links within a node's t
 
 ---
 
-#### StructureCollectorHandle
+##### StructureCollectorHandle
 
 Shared mutable handle used in `crate.converter.Context`.
 
@@ -494,7 +494,7 @@ Shared mutable handle used in `crate.converter.Context`.
 
 ---
 
-#### ProcessingWarning
+##### ProcessingWarning
 
 A non-fatal warning generated during HTML processing.
 
@@ -505,7 +505,7 @@ A non-fatal warning generated during HTML processing.
 
 ---
 
-#### VisitorHandle
+##### VisitorHandle
 
 Type alias for a visitor handle (Rc-wrapped `RefCell` for interior mutability).
 
@@ -515,7 +515,7 @@ This allows visitors to be passed around and shared while still being mutable.
 
 ---
 
-#### HtmlVisitor
+##### HtmlVisitor
 
 Visitor trait for HTML→Markdown conversion.
 

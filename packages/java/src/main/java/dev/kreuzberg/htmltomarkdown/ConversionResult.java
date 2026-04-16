@@ -4,15 +4,9 @@ package dev.kreuzberg.htmltomarkdown;
 import java.util.List;
 import java.util.Optional;
 
-public record ConversionResult(
-    Optional<String> content,
-    Optional<DocumentStructure> document,
-    HtmlMetadata metadata,
-    List<TableData> tables,
-    List<String> images,
-    List<ProcessingWarning> warnings
-) {
-    public static ConversionResultBuilder builder() {
-        return new ConversionResultBuilder();
-    }
+public record ConversionResult(Optional<String> content, Optional<DocumentStructure> document, HtmlMetadata metadata,
+		List<TableData> tables, List<String> images, List<ProcessingWarning> warnings) {
+	public static ConversionResultBuilder builder() {
+		return new ConversionResultBuilder();
+	}
 }

@@ -5,28 +5,26 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum TextDirection {
-    LeftToRight("ltr"),
-    RightToLeft("rtl"),
-    Auto("auto");
+	LeftToRight("ltr"), RightToLeft("rtl"), Auto("auto");
 
-    private final String value;
+	private final String value;
 
-    TextDirection(String value) {
-        this.value = value;
-    }
+	TextDirection(String value) {
+		this.value = value;
+	}
 
-    @JsonValue
-    public String getValue() {
-        return value;
-    }
+	@JsonValue
+	public String getValue() {
+		return value;
+	}
 
-    @JsonCreator
-    public static TextDirection fromValue(String value) {
-        for (TextDirection e : values()) {
-            if (e.value.equalsIgnoreCase(value)) {
-                return e;
-            }
-        }
-        throw new IllegalArgumentException("Unknown value: " + value);
-    }
+	@JsonCreator
+	public static TextDirection fromValue(String value) {
+		for (TextDirection e : values()) {
+			if (e.value.equalsIgnoreCase(value)) {
+				return e;
+			}
+		}
+		throw new IllegalArgumentException("Unknown value: " + value);
+	}
 }
