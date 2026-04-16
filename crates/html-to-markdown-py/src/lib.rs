@@ -1037,60 +1037,6 @@ impl PreprocessingOptionsUpdate {
     }
 }
 
-#[derive(Clone, Default, serde::Serialize)]
-#[pyclass(frozen, from_py_object)]
-pub struct ConversionResult {
-    /// Converted text output (markdown, djot, or plain text).
-    ///
-    /// `None` when `output_format` is set to `OutputFormat::None`,
-    /// indicating extraction-only mode.
-    #[pyo3(get)]
-    pub content: Option<String>,
-    /// Structured document tree with semantic elements.
-    ///
-    /// Populated when `include_document_structure` is `true` in options.
-    #[pyo3(get)]
-    pub document: Option<DocumentStructure>,
-    /// Extracted HTML metadata (title, OG, links, images, structured data).
-    #[pyo3(get)]
-    pub metadata: HtmlMetadata,
-    /// Extracted tables with structured cell data and markdown representation.
-    #[pyo3(get)]
-    pub tables: Vec<TableData>,
-    /// Extracted inline images (data URIs and SVGs).
-    ///
-    /// Populated when `extract_images` is `true` in options.
-    #[pyo3(get)]
-    pub images: Vec<String>,
-    /// Non-fatal processing warnings.
-    #[pyo3(get)]
-    pub warnings: Vec<ProcessingWarning>,
-}
-
-#[pymethods]
-impl ConversionResult {
-    #[must_use]
-    #[pyo3(signature = (metadata=None, tables=None, images=None, warnings=None, content=None, document=None))]
-    #[new]
-    pub fn new(
-        metadata: Option<HtmlMetadata>,
-        tables: Option<Vec<TableData>>,
-        images: Option<Vec<String>>,
-        warnings: Option<Vec<ProcessingWarning>>,
-        content: Option<String>,
-        document: Option<DocumentStructure>,
-    ) -> Self {
-        Self {
-            content,
-            document,
-            metadata: metadata.unwrap_or_default(),
-            tables: tables.unwrap_or_default(),
-            images: images.unwrap_or_default(),
-            warnings: warnings.unwrap_or_default(),
-        }
-    }
-}
-
 #[derive(Clone, serde::Serialize)]
 #[pyclass(frozen, from_py_object)]
 pub struct DocumentStructure {
@@ -1180,6 +1126,60 @@ impl TextAnnotation {
     #[new]
     pub fn new(start: u32, end: u32, kind: AnnotationKind) -> Self {
         Self { start, end, kind }
+    }
+}
+
+#[derive(Clone, Default, serde::Serialize)]
+#[pyclass(frozen, from_py_object)]
+pub struct ConversionResult {
+    /// Converted text output (markdown, djot, or plain text).
+    ///
+    /// `None` when `output_format` is set to `OutputFormat::None`,
+    /// indicating extraction-only mode.
+    #[pyo3(get)]
+    pub content: Option<String>,
+    /// Structured document tree with semantic elements.
+    ///
+    /// Populated when `include_document_structure` is `true` in options.
+    #[pyo3(get)]
+    pub document: Option<DocumentStructure>,
+    /// Extracted HTML metadata (title, OG, links, images, structured data).
+    #[pyo3(get)]
+    pub metadata: HtmlMetadata,
+    /// Extracted tables with structured cell data and markdown representation.
+    #[pyo3(get)]
+    pub tables: Vec<TableData>,
+    /// Extracted inline images (data URIs and SVGs).
+    ///
+    /// Populated when `extract_images` is `true` in options.
+    #[pyo3(get)]
+    pub images: Vec<String>,
+    /// Non-fatal processing warnings.
+    #[pyo3(get)]
+    pub warnings: Vec<ProcessingWarning>,
+}
+
+#[pymethods]
+impl ConversionResult {
+    #[must_use]
+    #[pyo3(signature = (metadata=None, tables=None, images=None, warnings=None, content=None, document=None))]
+    #[new]
+    pub fn new(
+        metadata: Option<HtmlMetadata>,
+        tables: Option<Vec<TableData>>,
+        images: Option<Vec<String>>,
+        warnings: Option<Vec<ProcessingWarning>>,
+        content: Option<String>,
+        document: Option<DocumentStructure>,
+    ) -> Self {
+        Self {
+            content,
+            document,
+            metadata: metadata.unwrap_or_default(),
+            tables: tables.unwrap_or_default(),
+            images: images.unwrap_or_default(),
+            warnings: warnings.unwrap_or_default(),
+        }
     }
 }
 
@@ -1495,7 +1495,7 @@ impl Default for OutputFormat {
 #[derive(Clone)]
 #[pyclass(frozen)]
 pub struct NodeContent {
-    pub(crate) inner: html_to_markdown_rs::types::NodeContent,
+    pub(crate) inner: html_to_markdown_rs::NodeContent,
 }
 
 #[pymethods]
@@ -1504,20 +1504,20 @@ impl NodeContent {
     fn new(py: Python<'_>, value: &Bound<'_, pyo3::types::PyDict>) -> PyResult<Self> {
         let json_mod = py.import("json")?;
         let json_str: String = json_mod.call_method1("dumps", (value,))?.extract()?;
-        let inner: html_to_markdown_rs::types::NodeContent = serde_json::from_str(&json_str)
+        let inner: html_to_markdown_rs::NodeContent = serde_json::from_str(&json_str)
             .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Invalid NodeContent: {e}")))?;
         Ok(Self { inner })
     }
 }
 
-impl From<NodeContent> for html_to_markdown_rs::types::NodeContent {
+impl From<NodeContent> for html_to_markdown_rs::NodeContent {
     fn from(val: NodeContent) -> Self {
         val.inner
     }
 }
 
-impl From<html_to_markdown_rs::types::NodeContent> for NodeContent {
-    fn from(val: html_to_markdown_rs::types::NodeContent) -> Self {
+impl From<html_to_markdown_rs::NodeContent> for NodeContent {
+    fn from(val: html_to_markdown_rs::NodeContent) -> Self {
         Self { inner: val }
     }
 }
@@ -1539,7 +1539,7 @@ impl Default for NodeContent {
 #[derive(Clone)]
 #[pyclass(frozen)]
 pub struct AnnotationKind {
-    pub(crate) inner: html_to_markdown_rs::types::AnnotationKind,
+    pub(crate) inner: html_to_markdown_rs::AnnotationKind,
 }
 
 #[pymethods]
@@ -1548,20 +1548,20 @@ impl AnnotationKind {
     fn new(py: Python<'_>, value: &Bound<'_, pyo3::types::PyDict>) -> PyResult<Self> {
         let json_mod = py.import("json")?;
         let json_str: String = json_mod.call_method1("dumps", (value,))?.extract()?;
-        let inner: html_to_markdown_rs::types::AnnotationKind = serde_json::from_str(&json_str)
+        let inner: html_to_markdown_rs::AnnotationKind = serde_json::from_str(&json_str)
             .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Invalid AnnotationKind: {e}")))?;
         Ok(Self { inner })
     }
 }
 
-impl From<AnnotationKind> for html_to_markdown_rs::types::AnnotationKind {
+impl From<AnnotationKind> for html_to_markdown_rs::AnnotationKind {
     fn from(val: AnnotationKind) -> Self {
         val.inner
     }
 }
 
-impl From<html_to_markdown_rs::types::AnnotationKind> for AnnotationKind {
-    fn from(val: html_to_markdown_rs::types::AnnotationKind) -> Self {
+impl From<html_to_markdown_rs::AnnotationKind> for AnnotationKind {
+    fn from(val: html_to_markdown_rs::AnnotationKind) -> Self {
         Self { inner: val }
     }
 }
@@ -1602,7 +1602,7 @@ impl Default for WarningKind {
 #[pyo3(signature = (html, options=None))]
 pub fn convert(html: String, options: Option<ConversionOptions>) -> PyResult<ConversionResult> {
     let options_core = options.map(Into::into);
-    html_to_markdown_rs::convert_api::convert(&html, options_core)
+    html_to_markdown_rs::convert(&html, options_core)
         .map(|val| val.into())
         .map_err(|e| pyo3::exceptions::PyRuntimeError::new_err(e.to_string()))
 }
@@ -1633,6 +1633,19 @@ fn conversion_error_to_py_err(e: html_to_markdown_rs::error::ConversionError) ->
     }
 }
 
+impl From<MetadataConfig> for html_to_markdown_rs::metadata::MetadataConfig {
+    fn from(val: MetadataConfig) -> Self {
+        Self {
+            extract_document: val.extract_document,
+            extract_headers: val.extract_headers,
+            extract_links: val.extract_links,
+            extract_images: val.extract_images,
+            extract_structured_data: val.extract_structured_data,
+            max_structured_data_size: val.max_structured_data_size,
+        }
+    }
+}
+
 impl From<html_to_markdown_rs::metadata::MetadataConfig> for MetadataConfig {
     fn from(val: html_to_markdown_rs::metadata::MetadataConfig) -> Self {
         Self {
@@ -1659,6 +1672,24 @@ impl From<html_to_markdown_rs::metadata::MetadataConfigUpdate> for MetadataConfi
     }
 }
 
+impl From<DocumentMetadata> for html_to_markdown_rs::metadata::DocumentMetadata {
+    fn from(val: DocumentMetadata) -> Self {
+        Self {
+            title: val.title,
+            description: val.description,
+            keywords: val.keywords,
+            author: val.author,
+            canonical_url: val.canonical_url,
+            base_href: val.base_href,
+            language: val.language,
+            text_direction: val.text_direction.map(Into::into),
+            open_graph: val.open_graph.into_iter().collect(),
+            twitter_card: val.twitter_card.into_iter().collect(),
+            meta_tags: val.meta_tags.into_iter().collect(),
+        }
+    }
+}
+
 impl From<html_to_markdown_rs::metadata::DocumentMetadata> for DocumentMetadata {
     fn from(val: html_to_markdown_rs::metadata::DocumentMetadata) -> Self {
         Self {
@@ -1677,6 +1708,18 @@ impl From<html_to_markdown_rs::metadata::DocumentMetadata> for DocumentMetadata 
     }
 }
 
+impl From<HeaderMetadata> for html_to_markdown_rs::metadata::HeaderMetadata {
+    fn from(val: HeaderMetadata) -> Self {
+        Self {
+            level: val.level,
+            text: val.text,
+            id: val.id,
+            depth: val.depth,
+            html_offset: val.html_offset,
+        }
+    }
+}
+
 impl From<html_to_markdown_rs::metadata::HeaderMetadata> for HeaderMetadata {
     fn from(val: html_to_markdown_rs::metadata::HeaderMetadata) -> Self {
         Self {
@@ -1689,6 +1732,19 @@ impl From<html_to_markdown_rs::metadata::HeaderMetadata> for HeaderMetadata {
     }
 }
 
+impl From<LinkMetadata> for html_to_markdown_rs::metadata::LinkMetadata {
+    fn from(val: LinkMetadata) -> Self {
+        Self {
+            href: val.href,
+            text: val.text,
+            title: val.title,
+            link_type: val.link_type.into(),
+            rel: val.rel,
+            attributes: val.attributes.into_iter().collect(),
+        }
+    }
+}
+
 impl From<html_to_markdown_rs::metadata::LinkMetadata> for LinkMetadata {
     fn from(val: html_to_markdown_rs::metadata::LinkMetadata) -> Self {
         Self {
@@ -1697,6 +1753,19 @@ impl From<html_to_markdown_rs::metadata::LinkMetadata> for LinkMetadata {
             title: val.title,
             link_type: val.link_type.into(),
             rel: val.rel,
+            attributes: val.attributes.into_iter().collect(),
+        }
+    }
+}
+
+impl From<ImageMetadata> for html_to_markdown_rs::metadata::ImageMetadata {
+    fn from(val: ImageMetadata) -> Self {
+        Self {
+            src: val.src,
+            alt: val.alt,
+            title: val.title,
+            dimensions: Default::default(),
+            image_type: val.image_type.into(),
             attributes: val.attributes.into_iter().collect(),
         }
     }
@@ -1715,12 +1784,34 @@ impl From<html_to_markdown_rs::metadata::ImageMetadata> for ImageMetadata {
     }
 }
 
+impl From<StructuredData> for html_to_markdown_rs::metadata::StructuredData {
+    fn from(val: StructuredData) -> Self {
+        Self {
+            data_type: val.data_type.into(),
+            raw_json: val.raw_json,
+            schema_type: val.schema_type,
+        }
+    }
+}
+
 impl From<html_to_markdown_rs::metadata::StructuredData> for StructuredData {
     fn from(val: html_to_markdown_rs::metadata::StructuredData) -> Self {
         Self {
             data_type: val.data_type.into(),
             raw_json: val.raw_json,
             schema_type: val.schema_type,
+        }
+    }
+}
+
+impl From<HtmlMetadata> for html_to_markdown_rs::metadata::HtmlMetadata {
+    fn from(val: HtmlMetadata) -> Self {
+        Self {
+            document: val.document.into(),
+            headers: val.headers.into_iter().map(Into::into).collect(),
+            links: val.links.into_iter().map(Into::into).collect(),
+            images: val.images.into_iter().map(Into::into).collect(),
+            structured_data: val.structured_data.into_iter().map(Into::into).collect(),
         }
     }
 }
@@ -1905,8 +1996,8 @@ impl From<html_to_markdown_rs::options::PreprocessingOptionsUpdate> for Preproce
     }
 }
 
-impl From<html_to_markdown_rs::types::DocumentStructure> for DocumentStructure {
-    fn from(val: html_to_markdown_rs::types::DocumentStructure) -> Self {
+impl From<DocumentStructure> for html_to_markdown_rs::DocumentStructure {
+    fn from(val: DocumentStructure) -> Self {
         Self {
             nodes: val.nodes.into_iter().map(Into::into).collect(),
             source_format: val.source_format,
@@ -1914,8 +2005,17 @@ impl From<html_to_markdown_rs::types::DocumentStructure> for DocumentStructure {
     }
 }
 
-impl From<html_to_markdown_rs::types::DocumentNode> for DocumentNode {
-    fn from(val: html_to_markdown_rs::types::DocumentNode) -> Self {
+impl From<html_to_markdown_rs::DocumentStructure> for DocumentStructure {
+    fn from(val: html_to_markdown_rs::DocumentStructure) -> Self {
+        Self {
+            nodes: val.nodes.into_iter().map(Into::into).collect(),
+            source_format: val.source_format,
+        }
+    }
+}
+
+impl From<DocumentNode> for html_to_markdown_rs::DocumentNode {
+    fn from(val: DocumentNode) -> Self {
         Self {
             id: val.id,
             content: val.content.into(),
@@ -1927,8 +2027,21 @@ impl From<html_to_markdown_rs::types::DocumentNode> for DocumentNode {
     }
 }
 
-impl From<html_to_markdown_rs::types::TextAnnotation> for TextAnnotation {
-    fn from(val: html_to_markdown_rs::types::TextAnnotation) -> Self {
+impl From<html_to_markdown_rs::DocumentNode> for DocumentNode {
+    fn from(val: html_to_markdown_rs::DocumentNode) -> Self {
+        Self {
+            id: val.id,
+            content: val.content.into(),
+            parent: val.parent,
+            children: val.children,
+            annotations: val.annotations.into_iter().map(Into::into).collect(),
+            attributes: val.attributes.map(|m| m.into_iter().collect()),
+        }
+    }
+}
+
+impl From<TextAnnotation> for html_to_markdown_rs::TextAnnotation {
+    fn from(val: TextAnnotation) -> Self {
         Self {
             start: val.start,
             end: val.end,
@@ -1937,8 +2050,46 @@ impl From<html_to_markdown_rs::types::TextAnnotation> for TextAnnotation {
     }
 }
 
-impl From<html_to_markdown_rs::types::TableGrid> for TableGrid {
-    fn from(val: html_to_markdown_rs::types::TableGrid) -> Self {
+impl From<html_to_markdown_rs::TextAnnotation> for TextAnnotation {
+    fn from(val: html_to_markdown_rs::TextAnnotation) -> Self {
+        Self {
+            start: val.start,
+            end: val.end,
+            kind: val.kind.into(),
+        }
+    }
+}
+
+#[allow(clippy::needless_update)]
+impl From<ConversionResult> for html_to_markdown_rs::ConversionResult {
+    fn from(val: ConversionResult) -> Self {
+        Self {
+            content: val.content,
+            document: val.document.map(Into::into),
+            metadata: val.metadata.into(),
+            tables: val.tables.into_iter().map(Into::into).collect(),
+            images: Default::default(),
+            warnings: val.warnings.into_iter().map(Into::into).collect(),
+            ..Default::default()
+        }
+    }
+}
+
+impl From<html_to_markdown_rs::ConversionResult> for ConversionResult {
+    fn from(val: html_to_markdown_rs::ConversionResult) -> Self {
+        Self {
+            content: val.content,
+            document: val.document.map(Into::into),
+            metadata: val.metadata.into(),
+            tables: val.tables.into_iter().map(Into::into).collect(),
+            images: val.images.iter().map(|i| format!("{:?}", i)).collect(),
+            warnings: val.warnings.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+impl From<TableGrid> for html_to_markdown_rs::TableGrid {
+    fn from(val: TableGrid) -> Self {
         Self {
             rows: val.rows,
             cols: val.cols,
@@ -1947,8 +2098,18 @@ impl From<html_to_markdown_rs::types::TableGrid> for TableGrid {
     }
 }
 
-impl From<html_to_markdown_rs::types::GridCell> for GridCell {
-    fn from(val: html_to_markdown_rs::types::GridCell) -> Self {
+impl From<html_to_markdown_rs::TableGrid> for TableGrid {
+    fn from(val: html_to_markdown_rs::TableGrid) -> Self {
+        Self {
+            rows: val.rows,
+            cols: val.cols,
+            cells: val.cells.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+impl From<GridCell> for html_to_markdown_rs::GridCell {
+    fn from(val: GridCell) -> Self {
         Self {
             content: val.content,
             row: val.row,
@@ -1960,8 +2121,21 @@ impl From<html_to_markdown_rs::types::GridCell> for GridCell {
     }
 }
 
-impl From<html_to_markdown_rs::types::TableData> for TableData {
-    fn from(val: html_to_markdown_rs::types::TableData) -> Self {
+impl From<html_to_markdown_rs::GridCell> for GridCell {
+    fn from(val: html_to_markdown_rs::GridCell) -> Self {
+        Self {
+            content: val.content,
+            row: val.row,
+            col: val.col,
+            row_span: val.row_span,
+            col_span: val.col_span,
+            is_header: val.is_header,
+        }
+    }
+}
+
+impl From<TableData> for html_to_markdown_rs::TableData {
+    fn from(val: TableData) -> Self {
         Self {
             grid: val.grid.into(),
             markdown: val.markdown,
@@ -1969,11 +2143,39 @@ impl From<html_to_markdown_rs::types::TableData> for TableData {
     }
 }
 
-impl From<html_to_markdown_rs::types::ProcessingWarning> for ProcessingWarning {
-    fn from(val: html_to_markdown_rs::types::ProcessingWarning) -> Self {
+impl From<html_to_markdown_rs::TableData> for TableData {
+    fn from(val: html_to_markdown_rs::TableData) -> Self {
+        Self {
+            grid: val.grid.into(),
+            markdown: val.markdown,
+        }
+    }
+}
+
+impl From<ProcessingWarning> for html_to_markdown_rs::ProcessingWarning {
+    fn from(val: ProcessingWarning) -> Self {
         Self {
             message: val.message,
             kind: val.kind.into(),
+        }
+    }
+}
+
+impl From<html_to_markdown_rs::ProcessingWarning> for ProcessingWarning {
+    fn from(val: html_to_markdown_rs::ProcessingWarning) -> Self {
+        Self {
+            message: val.message,
+            kind: val.kind.into(),
+        }
+    }
+}
+
+impl From<TextDirection> for html_to_markdown_rs::metadata::TextDirection {
+    fn from(val: TextDirection) -> Self {
+        match val {
+            TextDirection::LeftToRight => Self::LeftToRight,
+            TextDirection::RightToLeft => Self::RightToLeft,
+            TextDirection::Auto => Self::Auto,
         }
     }
 }
@@ -1984,6 +2186,19 @@ impl From<html_to_markdown_rs::metadata::TextDirection> for TextDirection {
             html_to_markdown_rs::metadata::TextDirection::LeftToRight => Self::LeftToRight,
             html_to_markdown_rs::metadata::TextDirection::RightToLeft => Self::RightToLeft,
             html_to_markdown_rs::metadata::TextDirection::Auto => Self::Auto,
+        }
+    }
+}
+
+impl From<LinkType> for html_to_markdown_rs::metadata::LinkType {
+    fn from(val: LinkType) -> Self {
+        match val {
+            LinkType::Anchor => Self::Anchor,
+            LinkType::Internal => Self::Internal,
+            LinkType::External => Self::External,
+            LinkType::Email => Self::Email,
+            LinkType::Phone => Self::Phone,
+            LinkType::Other => Self::Other,
         }
     }
 }
@@ -2001,6 +2216,17 @@ impl From<html_to_markdown_rs::metadata::LinkType> for LinkType {
     }
 }
 
+impl From<ImageType> for html_to_markdown_rs::metadata::ImageType {
+    fn from(val: ImageType) -> Self {
+        match val {
+            ImageType::DataUri => Self::DataUri,
+            ImageType::InlineSvg => Self::InlineSvg,
+            ImageType::External => Self::External,
+            ImageType::Relative => Self::Relative,
+        }
+    }
+}
+
 impl From<html_to_markdown_rs::metadata::ImageType> for ImageType {
     fn from(val: html_to_markdown_rs::metadata::ImageType) -> Self {
         match val {
@@ -2008,6 +2234,16 @@ impl From<html_to_markdown_rs::metadata::ImageType> for ImageType {
             html_to_markdown_rs::metadata::ImageType::InlineSvg => Self::InlineSvg,
             html_to_markdown_rs::metadata::ImageType::External => Self::External,
             html_to_markdown_rs::metadata::ImageType::Relative => Self::Relative,
+        }
+    }
+}
+
+impl From<StructuredDataType> for html_to_markdown_rs::metadata::StructuredDataType {
+    fn from(val: StructuredDataType) -> Self {
+        match val {
+            StructuredDataType::JsonLd => Self::JsonLd,
+            StructuredDataType::Microdata => Self::Microdata,
+            StructuredDataType::RDFa => Self::RDFa,
         }
     }
 }
@@ -2196,14 +2432,26 @@ impl From<html_to_markdown_rs::options::OutputFormat> for OutputFormat {
     }
 }
 
-impl From<html_to_markdown_rs::types::WarningKind> for WarningKind {
-    fn from(val: html_to_markdown_rs::types::WarningKind) -> Self {
+impl From<WarningKind> for html_to_markdown_rs::WarningKind {
+    fn from(val: WarningKind) -> Self {
         match val {
-            html_to_markdown_rs::types::WarningKind::ImageExtractionFailed => Self::ImageExtractionFailed,
-            html_to_markdown_rs::types::WarningKind::EncodingFallback => Self::EncodingFallback,
-            html_to_markdown_rs::types::WarningKind::TruncatedInput => Self::TruncatedInput,
-            html_to_markdown_rs::types::WarningKind::MalformedHtml => Self::MalformedHtml,
-            html_to_markdown_rs::types::WarningKind::SanitizationApplied => Self::SanitizationApplied,
+            WarningKind::ImageExtractionFailed => Self::ImageExtractionFailed,
+            WarningKind::EncodingFallback => Self::EncodingFallback,
+            WarningKind::TruncatedInput => Self::TruncatedInput,
+            WarningKind::MalformedHtml => Self::MalformedHtml,
+            WarningKind::SanitizationApplied => Self::SanitizationApplied,
+        }
+    }
+}
+
+impl From<html_to_markdown_rs::WarningKind> for WarningKind {
+    fn from(val: html_to_markdown_rs::WarningKind) -> Self {
+        match val {
+            html_to_markdown_rs::WarningKind::ImageExtractionFailed => Self::ImageExtractionFailed,
+            html_to_markdown_rs::WarningKind::EncodingFallback => Self::EncodingFallback,
+            html_to_markdown_rs::WarningKind::TruncatedInput => Self::TruncatedInput,
+            html_to_markdown_rs::WarningKind::MalformedHtml => Self::MalformedHtml,
+            html_to_markdown_rs::WarningKind::SanitizationApplied => Self::SanitizationApplied,
         }
     }
 }
@@ -2223,10 +2471,10 @@ pub fn _html_to_markdown(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<ConversionOptionsUpdate>()?;
     m.add_class::<PreprocessingOptions>()?;
     m.add_class::<PreprocessingOptionsUpdate>()?;
-    m.add_class::<ConversionResult>()?;
     m.add_class::<DocumentStructure>()?;
     m.add_class::<DocumentNode>()?;
     m.add_class::<TextAnnotation>()?;
+    m.add_class::<ConversionResult>()?;
     m.add_class::<TableGrid>()?;
     m.add_class::<GridCell>()?;
     m.add_class::<TableData>()?;

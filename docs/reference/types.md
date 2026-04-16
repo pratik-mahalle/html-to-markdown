@@ -52,6 +52,22 @@ Contains metadata about table structure to determine optimal rendering:
 
 ---
 
+### DjotRenderer
+
+Renderer for Djot lightweight markup output.
+
+*Opaque type — fields are not directly accessible.*
+
+---
+
+### MarkdownRenderer
+
+Renderer for standard Markdown output.
+
+*Opaque type — fields are not directly accessible.*
+
+---
+
 ### ReferenceCollector
 
 Collects link/image references during conversion and produces a reference
@@ -358,6 +374,25 @@ A top-level extracted table with both structured data and markdown representatio
 
 ---
 
+### NodeContext
+
+Context information passed to all visitor methods.
+
+Provides comprehensive metadata about the current node being visited,
+including its type, attributes, position in the DOM tree, and parent context.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `node_type` | `NodeType` | — | Coarse-grained node type classification |
+| `tag_name` | `String` | — | Raw HTML tag name (e.g., "div", "h1", "custom-element") |
+| `attributes` | `HashMap<String, String>` | — | All HTML attributes as key-value pairs |
+| `depth` | `usize` | — | Depth in the DOM tree (0 = root) |
+| `index_in_parent` | `usize` | — | Index among siblings (0-based) |
+| `parent_tag` | `Option<String>` | `None` | Parent element's tag name (None if root) |
+| `is_inline` | `bool` | — | Whether this element is treated as inline vs block |
+
+---
+
 ## Other Types
 
 ### InlineCollectorHandle
@@ -434,14 +469,6 @@ All fields start with default values. Call `.build()` to produce the final optio
 
 ---
 
-### StructureCollectorHandle
-
-Shared mutable handle used in `crate.converter.Context`.
-
-*Opaque type — fields are not directly accessible.*
-
----
-
 ### TextAnnotation
 
 An inline text annotation with byte-range offsets.
@@ -456,6 +483,14 @@ Annotations describe formatting (bold, italic, etc.) and links within a node's t
 
 ---
 
+### StructureCollectorHandle
+
+Shared mutable handle used in `crate.converter.Context`.
+
+*Opaque type — fields are not directly accessible.*
+
+---
+
 ### ProcessingWarning
 
 A non-fatal warning generated during HTML processing.
@@ -464,6 +499,49 @@ A non-fatal warning generated during HTML processing.
 |-------|------|---------|-------------|
 | `message` | `String` | — | Human-readable warning message. |
 | `kind` | `WarningKind` | — | The category of warning. |
+
+---
+
+### VisitorHandle
+
+Type alias for a visitor handle (Rc-wrapped `RefCell` for interior mutability).
+
+This allows visitors to be passed around and shared while still being mutable.
+
+*Opaque type — fields are not directly accessible.*
+
+---
+
+### HtmlVisitor
+
+Visitor trait for HTML→Markdown conversion.
+
+Implement this trait to customize the conversion behavior for any HTML element type.
+All methods have default implementations that return `VisitResult.Continue`, allowing
+selective override of only the elements you care about.
+
+# Method Naming Convention
+
+- `visit_*_start`: Called before entering an element (pre-order traversal)
+- `visit_*_end`: Called after exiting an element (post-order traversal)
+- `visit_*`: Called for specific element types (e.g., `visit_link`, `visit_image`)
+
+# Execution Order
+
+For a typical element like `<div><p>text</p></div>`:
+1. `visit_element_start` for `<div>`
+2. `visit_element_start` for `<p>`
+3. `visit_text` for "text"
+4. `visit_element_end` for `<p>`
+5. `visit_element_end` for `</div>`
+
+# Performance Notes
+
+- `visit_text` is the most frequently called method (~100+ times per document)
+- Return `VisitResult.Continue` quickly for elements you don't need to customize
+- Avoid heavy computation in visitor methods; consider caching if needed
+
+*Opaque type — fields are not directly accessible.*
 
 ---
 

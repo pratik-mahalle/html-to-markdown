@@ -1825,6 +1825,152 @@ def self.dispatch_semantic_handler(tag_name, node_handle, parser, output, option
 
 ---
 
+### escape_link_label()
+
+Escape special characters in link labels.
+
+Markdown link labels can contain brackets, which need careful escaping to avoid
+being interpreted as nested links. This function escapes unescaped closing brackets
+that would break the link syntax.
+
+**Signature:**
+
+```ruby
+def self.escape_link_label(text)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `text` | `String` | Yes | The text |
+
+**Returns:** `String`
+
+
+---
+
+### escape_malformed_angle_brackets()
+
+Escape malformed angle brackets in markdown output.
+
+Markdown uses `<...>` for automatic links. Angle brackets that don't form valid
+link syntax should be escaped as `&lt;` to prevent parser confusion.
+
+A valid tag must have:
+- `<!` followed by `-` or alphabetic character (for comments/declarations)
+- `</` followed by alphabetic character (for closing tags)
+- `<?` (for processing instructions)
+- `<` followed by alphabetic character (for opening tags)
+
+**Signature:**
+
+```ruby
+def self.escape_malformed_angle_brackets(input)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `input` | `String` | Yes | The input data |
+
+**Returns:** `Str`
+
+
+---
+
+### trim_line_end_whitespace()
+
+Remove trailing spaces/tabs from every line while preserving newlines.
+
+**Signature:**
+
+```ruby
+def self.trim_line_end_whitespace(output)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `output` | `String` | Yes | The output destination |
+
+**Returns:** `nil`
+
+
+---
+
+### truncate_at_char_boundary()
+
+Truncate a string at a valid UTF-8 boundary.
+
+**Signature:**
+
+```ruby
+def self.truncate_at_char_boundary(value, max_len)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `value` | `String` | Yes | The value |
+| `max_len` | `Integer` | Yes | The max len |
+
+**Returns:** `nil`
+
+
+---
+
+### normalize_heading_text()
+
+Normalize heading text by replacing newlines and extra whitespace.
+
+Heading text should be on a single line in Markdown. This function collapses
+any newlines and multiple spaces into single spaces.
+
+**Signature:**
+
+```ruby
+def self.normalize_heading_text(text)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `text` | `String` | Yes | The text |
+
+**Returns:** `Str`
+
+
+---
+
+### dedent_code_block()
+
+Remove common leading whitespace from all lines in a code block.
+
+This is useful when HTML authors indent `<pre>` content for readability,
+so we can strip the shared indentation without touching meaningful spacing.
+
+**Signature:**
+
+```ruby
+def self.dedent_code_block(content)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `content` | `String` | Yes | The content to process |
+
+**Returns:** `String`
+
+
+---
+
 ### floor_char_boundary()
 
 Returns the largest valid char boundary index at or before `index`.
@@ -2624,6 +2770,95 @@ def build()
 
 ---
 
+### DjotRenderer
+
+Renderer for Djot lightweight markup output.
+
+#### Methods
+
+##### emphasis()
+
+**Signature:**
+
+```ruby
+def emphasis(content)
+```
+
+##### strong()
+
+**Signature:**
+
+```ruby
+def strong(content, symbol)
+```
+
+##### strikethrough()
+
+**Signature:**
+
+```ruby
+def strikethrough(content)
+```
+
+##### highlight()
+
+**Signature:**
+
+```ruby
+def highlight(content)
+```
+
+##### inserted()
+
+**Signature:**
+
+```ruby
+def inserted(content)
+```
+
+##### subscript()
+
+**Signature:**
+
+```ruby
+def subscript(content, custom_symbol)
+```
+
+##### superscript()
+
+**Signature:**
+
+```ruby
+def superscript(content, custom_symbol)
+```
+
+##### span_with_attributes()
+
+**Signature:**
+
+```ruby
+def span_with_attributes(content, classes, id)
+```
+
+##### div_with_attributes()
+
+**Signature:**
+
+```ruby
+def div_with_attributes(content, classes)
+```
+
+##### is_djot()
+
+**Signature:**
+
+```ruby
+def is_djot()
+```
+
+
+---
+
 ### DocumentMetadata
 
 Document-level metadata extracted from `<head>` and top-level elements.
@@ -2868,6 +3103,446 @@ suitable for serialization and transmission across language boundaries.
 
 ---
 
+### HtmlVisitor
+
+Visitor trait for HTML→Markdown conversion.
+
+Implement this trait to customize the conversion behavior for any HTML element type.
+All methods have default implementations that return `VisitResult.Continue`, allowing
+selective override of only the elements you care about.
+
+# Method Naming Convention
+
+- `visit_*_start`: Called before entering an element (pre-order traversal)
+- `visit_*_end`: Called after exiting an element (post-order traversal)
+- `visit_*`: Called for specific element types (e.g., `visit_link`, `visit_image`)
+
+# Execution Order
+
+For a typical element like `<div><p>text</p></div>`:
+1. `visit_element_start` for `<div>`
+2. `visit_element_start` for `<p>`
+3. `visit_text` for "text"
+4. `visit_element_end` for `<p>`
+5. `visit_element_end` for `</div>`
+
+# Performance Notes
+
+- `visit_text` is the most frequently called method (~100+ times per document)
+- Return `VisitResult.Continue` quickly for elements you don't need to customize
+- Avoid heavy computation in visitor methods; consider caching if needed
+
+#### Methods
+
+##### visit_element_start()
+
+Called before entering any element.
+
+This is the first callback invoked for every HTML element, allowing
+visitors to implement generic element handling before tag-specific logic.
+
+**Signature:**
+
+```ruby
+def visit_element_start(ctx)
+```
+
+##### visit_element_end()
+
+Called after exiting any element.
+
+Receives the default markdown output that would be generated.
+Visitors can inspect or replace this output.
+
+**Signature:**
+
+```ruby
+def visit_element_end(ctx, output)
+```
+
+##### visit_text()
+
+Visit text nodes (most frequent callback - ~100+ per document).
+
+**Signature:**
+
+```ruby
+def visit_text(ctx, text)
+```
+
+##### visit_link()
+
+Visit anchor links `<a href="...">`.
+
+**Signature:**
+
+```ruby
+def visit_link(ctx, href, text, title)
+```
+
+##### visit_image()
+
+Visit images `<img src="...">`.
+
+**Signature:**
+
+```ruby
+def visit_image(ctx, src, alt, title)
+```
+
+##### visit_heading()
+
+Visit heading elements `<h1>` through `<h6>`.
+
+**Signature:**
+
+```ruby
+def visit_heading(ctx, level, text, id)
+```
+
+##### visit_code_block()
+
+Visit code blocks `<pre><code>`.
+
+**Signature:**
+
+```ruby
+def visit_code_block(ctx, lang, code)
+```
+
+##### visit_code_inline()
+
+Visit inline code `<code>`.
+
+**Signature:**
+
+```ruby
+def visit_code_inline(ctx, code)
+```
+
+##### visit_list_item()
+
+Visit list items `<li>`.
+
+**Signature:**
+
+```ruby
+def visit_list_item(ctx, ordered, marker, text)
+```
+
+##### visit_list_start()
+
+Called before processing a list `<ul>` or `<ol>`.
+
+**Signature:**
+
+```ruby
+def visit_list_start(ctx, ordered)
+```
+
+##### visit_list_end()
+
+Called after processing a list `</ul>` or `</ol>`.
+
+**Signature:**
+
+```ruby
+def visit_list_end(ctx, ordered, output)
+```
+
+##### visit_table_start()
+
+Called before processing a table `<table>`.
+
+**Signature:**
+
+```ruby
+def visit_table_start(ctx)
+```
+
+##### visit_table_row()
+
+Visit table rows `<tr>`.
+
+**Signature:**
+
+```ruby
+def visit_table_row(ctx, cells, is_header)
+```
+
+##### visit_table_end()
+
+Called after processing a table `</table>`.
+
+**Signature:**
+
+```ruby
+def visit_table_end(ctx, output)
+```
+
+##### visit_blockquote()
+
+Visit blockquote elements `<blockquote>`.
+
+**Signature:**
+
+```ruby
+def visit_blockquote(ctx, content, depth)
+```
+
+##### visit_strong()
+
+Visit strong/bold elements `<strong>`, `<b>`.
+
+**Signature:**
+
+```ruby
+def visit_strong(ctx, text)
+```
+
+##### visit_emphasis()
+
+Visit emphasis/italic elements `<em>`, `<i>`.
+
+**Signature:**
+
+```ruby
+def visit_emphasis(ctx, text)
+```
+
+##### visit_strikethrough()
+
+Visit strikethrough elements `<s>`, `<del>`, `<strike>`.
+
+**Signature:**
+
+```ruby
+def visit_strikethrough(ctx, text)
+```
+
+##### visit_underline()
+
+Visit underline elements `<u>`, `<ins>`.
+
+**Signature:**
+
+```ruby
+def visit_underline(ctx, text)
+```
+
+##### visit_subscript()
+
+Visit subscript elements `<sub>`.
+
+**Signature:**
+
+```ruby
+def visit_subscript(ctx, text)
+```
+
+##### visit_superscript()
+
+Visit superscript elements `<sup>`.
+
+**Signature:**
+
+```ruby
+def visit_superscript(ctx, text)
+```
+
+##### visit_mark()
+
+Visit mark/highlight elements `<mark>`.
+
+**Signature:**
+
+```ruby
+def visit_mark(ctx, text)
+```
+
+##### visit_line_break()
+
+Visit line break elements `<br>`.
+
+**Signature:**
+
+```ruby
+def visit_line_break(ctx)
+```
+
+##### visit_horizontal_rule()
+
+Visit horizontal rule elements `<hr>`.
+
+**Signature:**
+
+```ruby
+def visit_horizontal_rule(ctx)
+```
+
+##### visit_custom_element()
+
+Visit custom elements (web components) or unknown tags.
+
+**Signature:**
+
+```ruby
+def visit_custom_element(ctx, tag_name, html)
+```
+
+##### visit_definition_list_start()
+
+Visit definition list `<dl>`.
+
+**Signature:**
+
+```ruby
+def visit_definition_list_start(ctx)
+```
+
+##### visit_definition_term()
+
+Visit definition term `<dt>`.
+
+**Signature:**
+
+```ruby
+def visit_definition_term(ctx, text)
+```
+
+##### visit_definition_description()
+
+Visit definition description `<dd>`.
+
+**Signature:**
+
+```ruby
+def visit_definition_description(ctx, text)
+```
+
+##### visit_definition_list_end()
+
+Called after processing a definition list `</dl>`.
+
+**Signature:**
+
+```ruby
+def visit_definition_list_end(ctx, output)
+```
+
+##### visit_form()
+
+Visit form elements `<form>`.
+
+**Signature:**
+
+```ruby
+def visit_form(ctx, action, method)
+```
+
+##### visit_input()
+
+Visit input elements `<input>`.
+
+**Signature:**
+
+```ruby
+def visit_input(ctx, input_type, name, value)
+```
+
+##### visit_button()
+
+Visit button elements `<button>`.
+
+**Signature:**
+
+```ruby
+def visit_button(ctx, text)
+```
+
+##### visit_audio()
+
+Visit audio elements `<audio>`.
+
+**Signature:**
+
+```ruby
+def visit_audio(ctx, src)
+```
+
+##### visit_video()
+
+Visit video elements `<video>`.
+
+**Signature:**
+
+```ruby
+def visit_video(ctx, src)
+```
+
+##### visit_iframe()
+
+Visit iframe elements `<iframe>`.
+
+**Signature:**
+
+```ruby
+def visit_iframe(ctx, src)
+```
+
+##### visit_details()
+
+Visit details elements `<details>`.
+
+**Signature:**
+
+```ruby
+def visit_details(ctx, open)
+```
+
+##### visit_summary()
+
+Visit summary elements `<summary>`.
+
+**Signature:**
+
+```ruby
+def visit_summary(ctx, text)
+```
+
+##### visit_figure_start()
+
+Visit figure elements `<figure>`.
+
+**Signature:**
+
+```ruby
+def visit_figure_start(ctx)
+```
+
+##### visit_figcaption()
+
+Visit figcaption elements `<figcaption>`.
+
+**Signature:**
+
+```ruby
+def visit_figcaption(ctx, text)
+```
+
+##### visit_figure_end()
+
+Called after processing a figure `</figure>`.
+
+**Signature:**
+
+```ruby
+def visit_figure_end(ctx, output)
+```
+
+
+---
+
 ### ImageMetadata
 
 Image metadata with source and dimensions.
@@ -2993,6 +3668,95 @@ def self.classify_link(href)
 
 ---
 
+### MarkdownRenderer
+
+Renderer for standard Markdown output.
+
+#### Methods
+
+##### emphasis()
+
+**Signature:**
+
+```ruby
+def emphasis(content)
+```
+
+##### strong()
+
+**Signature:**
+
+```ruby
+def strong(content, symbol)
+```
+
+##### strikethrough()
+
+**Signature:**
+
+```ruby
+def strikethrough(content)
+```
+
+##### highlight()
+
+**Signature:**
+
+```ruby
+def highlight(content)
+```
+
+##### inserted()
+
+**Signature:**
+
+```ruby
+def inserted(content)
+```
+
+##### subscript()
+
+**Signature:**
+
+```ruby
+def subscript(content, custom_symbol)
+```
+
+##### superscript()
+
+**Signature:**
+
+```ruby
+def superscript(content, custom_symbol)
+```
+
+##### span_with_attributes()
+
+**Signature:**
+
+```ruby
+def span_with_attributes(content, classes, id)
+```
+
+##### div_with_attributes()
+
+**Signature:**
+
+```ruby
+def div_with_attributes(content, classes)
+```
+
+##### is_djot()
+
+**Signature:**
+
+```ruby
+def is_djot()
+```
+
+
+---
+
 ### MetadataCollector
 
 Internal metadata collector for single-pass extraction.
@@ -3105,6 +3869,26 @@ def self.from_update(update)
 ```ruby
 def self.from(update)
 ```
+
+
+---
+
+### NodeContext
+
+Context information passed to all visitor methods.
+
+Provides comprehensive metadata about the current node being visited,
+including its type, attributes, position in the DOM tree, and parent context.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `node_type` | `NodeType` | — | Coarse-grained node type classification |
+| `tag_name` | `String` | — | Raw HTML tag name (e.g., "div", "h1", "custom-element") |
+| `attributes` | `Hash{String=>String}` | — | All HTML attributes as key-value pairs |
+| `depth` | `Integer` | — | Depth in the DOM tree (0 = root) |
+| `index_in_parent` | `Integer` | — | Index among siblings (0-based) |
+| `parent_tag` | `String?` | `nil` | Parent element's tag name (None if root) |
+| `is_inline` | `Boolean` | — | Whether this element is treated as inline vs block |
 
 
 ---
@@ -3469,6 +4253,15 @@ Annotations describe formatting (bold, italic, etc.) and links within a node's t
 
 ---
 
+### VisitorHandle
+
+Type alias for a visitor handle (Rc-wrapped `RefCell` for interior mutability).
+
+This allows visitors to be passed around and shared while still being mutable.
+
+
+---
+
 ## Enums
 
 ### VisitAction
@@ -3682,24 +4475,6 @@ Specifies the target markup language format for the conversion output.
 
 ---
 
-### VisitorDispatch
-
-Result of dispatching a visitor callback.
-
-This enum represents the outcome of a visitor callback dispatch,
-providing a more ergonomic interface for control flow than the
-raw `VisitResult` type.
-
-| Value | Description |
-|-------|-------------|
-| `continue` | Continue with default conversion behavior |
-| `custom` | Replace default output with custom markdown — Fields: `0`: `String` |
-| `skip` | Skip this element entirely (don't output anything) |
-| `preserve_html` | Preserve original HTML (don't convert to markdown) |
-
-
----
-
 ### NodeContent
 
 The semantic content type of a document node.
@@ -3757,6 +4532,144 @@ Categories of processing warnings.
 | `truncated_input` | The input was truncated due to size limits. |
 | `malformed_html` | The HTML was malformed but processing continued with best effort. |
 | `sanitization_applied` | Sanitization was applied to remove potentially unsafe content. |
+
+
+---
+
+### NodeType
+
+Node type enumeration covering all HTML element types.
+
+This enum categorizes all HTML elements that the converter recognizes,
+providing a coarse-grained classification for visitor dispatch.
+
+| Value | Description |
+|-------|-------------|
+| `text` | Text node (most frequent - 100+ per document) |
+| `element` | Generic element node |
+| `heading` | Heading elements (h1-h6) |
+| `paragraph` | Paragraph element |
+| `div` | Generic div container |
+| `blockquote` | Blockquote element |
+| `pre` | Preformatted text block |
+| `hr` | Horizontal rule |
+| `list` | Ordered or unordered list (ul, ol) |
+| `list_item` | List item (li) |
+| `definition_list` | Definition list (dl) |
+| `definition_term` | Definition term (dt) |
+| `definition_description` | Definition description (dd) |
+| `table` | Table element |
+| `table_row` | Table row (tr) |
+| `table_cell` | Table cell (td, th) |
+| `table_header` | Table header cell (th) |
+| `table_body` | Table body (tbody) |
+| `table_head` | Table head (thead) |
+| `table_foot` | Table foot (tfoot) |
+| `link` | Anchor link (a) |
+| `image` | Image (img) |
+| `strong` | Strong/bold (strong, b) |
+| `em` | Emphasis/italic (em, i) |
+| `code` | Inline code (code) |
+| `strikethrough` | Strikethrough (s, del, strike) |
+| `underline` | Underline (u, ins) |
+| `subscript` | Subscript (sub) |
+| `superscript` | Superscript (sup) |
+| `mark` | Mark/highlight (mark) |
+| `small` | Small text (small) |
+| `br` | Line break (br) |
+| `span` | Span element |
+| `article` | Article element |
+| `section` | Section element |
+| `nav` | Navigation element |
+| `aside` | Aside element |
+| `header` | Header element |
+| `footer` | Footer element |
+| `main` | Main element |
+| `figure` | Figure element |
+| `figcaption` | Figure caption |
+| `time` | Time element |
+| `details` | Details element |
+| `summary` | Summary element |
+| `form` | Form element |
+| `input` | Input element |
+| `select` | Select element |
+| `option` | Option element |
+| `button` | Button element |
+| `textarea` | Textarea element |
+| `label` | Label element |
+| `fieldset` | Fieldset element |
+| `legend` | Legend element |
+| `audio` | Audio element |
+| `video` | Video element |
+| `picture` | Picture element |
+| `source` | Source element |
+| `iframe` | Iframe element |
+| `svg` | SVG element |
+| `canvas` | Canvas element |
+| `ruby` | Ruby annotation |
+| `rt` | Ruby text |
+| `rp` | Ruby parenthesis |
+| `abbr` | Abbreviation |
+| `kbd` | Keyboard input |
+| `samp` | Sample output |
+| `var` | Variable |
+| `cite` | Citation |
+| `q` | Quote |
+| `del` | Deleted text |
+| `ins` | Inserted text |
+| `data` | Data element |
+| `meter` | Meter element |
+| `progress` | Progress element |
+| `output` | Output element |
+| `template` | Template element |
+| `slot` | Slot element |
+| `html` | HTML root element |
+| `head` | Head element |
+| `body` | Body element |
+| `title` | Title element |
+| `meta` | Meta element |
+| `link_tag` | Link element (not anchor) |
+| `style` | Style element |
+| `script` | Script element |
+| `base` | Base element |
+| `custom` | Custom element (web components) or unknown tag |
+
+
+---
+
+### VisitResult
+
+Result of a visitor callback.
+
+Allows visitors to control the conversion flow by either proceeding
+with default behavior, providing custom output, skipping elements,
+preserving HTML, or signaling errors.
+
+| Value | Description |
+|-------|-------------|
+| `continue` | Continue with default conversion behavior |
+| `custom` | Replace default output with custom markdown The visitor takes full responsibility for the markdown output of this node and its children. — Fields: `0`: `String` |
+| `skip` | Skip this element entirely (don't output anything) The element and all its children are ignored in the output. |
+| `preserve_html` | Preserve original HTML (don't convert to markdown) The element's raw HTML is included verbatim in the output. |
+| `error` | Stop conversion with an error The conversion process halts and returns this error message. — Fields: `0`: `String` |
+
+
+---
+
+### VisitorDispatch
+
+Result of dispatching a visitor callback.
+
+This enum represents the outcome of a visitor callback dispatch,
+providing a more ergonomic interface for control flow than the
+raw `VisitResult` type.
+
+| Value | Description |
+|-------|-------------|
+| `continue` | Continue with default conversion behavior |
+| `custom` | Replace default output with custom markdown — Fields: `0`: `String` |
+| `skip` | Skip this element entirely (don't output anything) |
+| `preserve_html` | Preserve original HTML (don't convert to markdown) |
 
 
 ---

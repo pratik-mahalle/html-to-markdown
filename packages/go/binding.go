@@ -1362,6 +1362,47 @@ type PreprocessingOptionsUpdate struct {
 }
 
 
+// A structured document tree representing the semantic content of an HTML document.
+//
+// Uses a flat node array with index-based parent/child references for efficient traversal.
+type DocumentStructure struct {
+    // All nodes in document reading order.
+    Nodes []DocumentNode `json:"nodes,omitempty"`
+    // The source format (always "html" for this crate).
+    SourceFormat *string `json:"source_format,omitempty"`
+}
+
+
+// A single node in the document tree.
+type DocumentNode struct {
+    // Deterministic node identifier.
+    Id string `json:"id"`
+    // The semantic content of this node.
+    Content NodeContent `json:"content"`
+    // Index of the parent node (None for root nodes).
+    Parent *uint32 `json:"parent,omitempty"`
+    // Indices of child nodes in reading order.
+    Children []uint32 `json:"children,omitempty"`
+    // Inline formatting annotations (bold, italic, links, etc.) with byte offsets into the text.
+    Annotations []TextAnnotation `json:"annotations,omitempty"`
+    // Format-specific attributes (e.g. class, id, data-* attributes).
+    Attributes *map[string]string `json:"attributes,omitempty"`
+}
+
+
+// An inline text annotation with byte-range offsets.
+//
+// Annotations describe formatting (bold, italic, etc.) and links within a node's text content.
+type TextAnnotation struct {
+    // Start byte offset (inclusive) into the parent node's text.
+    Start uint32 `json:"start"`
+    // End byte offset (exclusive) into the parent node's text.
+    End uint32 `json:"end"`
+    // The type of annotation.
+    Kind AnnotationKind `json:"kind"`
+}
+
+
 // The primary result of HTML conversion and extraction.
 //
 // Contains the converted text output, optional structured document tree,
@@ -1446,47 +1487,6 @@ func NewConversionResult(opts ...ConversionResultOption) *ConversionResult {
         opt(c)
     }
     return c
-}
-
-
-// A structured document tree representing the semantic content of an HTML document.
-//
-// Uses a flat node array with index-based parent/child references for efficient traversal.
-type DocumentStructure struct {
-    // All nodes in document reading order.
-    Nodes []DocumentNode `json:"nodes,omitempty"`
-    // The source format (always "html" for this crate).
-    SourceFormat *string `json:"source_format,omitempty"`
-}
-
-
-// A single node in the document tree.
-type DocumentNode struct {
-    // Deterministic node identifier.
-    Id string `json:"id"`
-    // The semantic content of this node.
-    Content NodeContent `json:"content"`
-    // Index of the parent node (None for root nodes).
-    Parent *uint32 `json:"parent,omitempty"`
-    // Indices of child nodes in reading order.
-    Children []uint32 `json:"children,omitempty"`
-    // Inline formatting annotations (bold, italic, links, etc.) with byte offsets into the text.
-    Annotations []TextAnnotation `json:"annotations,omitempty"`
-    // Format-specific attributes (e.g. class, id, data-* attributes).
-    Attributes *map[string]string `json:"attributes,omitempty"`
-}
-
-
-// An inline text annotation with byte-range offsets.
-//
-// Annotations describe formatting (bold, italic, etc.) and links within a node's text content.
-type TextAnnotation struct {
-    // Start byte offset (inclusive) into the parent node's text.
-    Start uint32 `json:"start"`
-    // End byte offset (exclusive) into the parent node's text.
-    End uint32 `json:"end"`
-    // The type of annotation.
-    Kind AnnotationKind `json:"kind"`
 }
 
 

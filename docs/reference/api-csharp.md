@@ -1825,6 +1825,152 @@ public static bool DispatchSemanticHandler(string tagName, NodeHandle nodeHandle
 
 ---
 
+### EscapeLinkLabel()
+
+Escape special characters in link labels.
+
+Markdown link labels can contain brackets, which need careful escaping to avoid
+being interpreted as nested links. This function escapes unescaped closing brackets
+that would break the link syntax.
+
+**Signature:**
+
+```csharp
+public static string EscapeLinkLabel(string text)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `Text` | `string` | Yes | The text |
+
+**Returns:** `string`
+
+
+---
+
+### EscapeMalformedAngleBrackets()
+
+Escape malformed angle brackets in markdown output.
+
+Markdown uses `<...>` for automatic links. Angle brackets that don't form valid
+link syntax should be escaped as `&lt;` to prevent parser confusion.
+
+A valid tag must have:
+- `<!` followed by `-` or alphabetic character (for comments/declarations)
+- `</` followed by alphabetic character (for closing tags)
+- `<?` (for processing instructions)
+- `<` followed by alphabetic character (for opening tags)
+
+**Signature:**
+
+```csharp
+public static Str EscapeMalformedAngleBrackets(string input)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `Input` | `string` | Yes | The input data |
+
+**Returns:** `Str`
+
+
+---
+
+### TrimLineEndWhitespace()
+
+Remove trailing spaces/tabs from every line while preserving newlines.
+
+**Signature:**
+
+```csharp
+public static void TrimLineEndWhitespace(string output)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `Output` | `string` | Yes | The output destination |
+
+**Returns:** `void`
+
+
+---
+
+### TruncateAtCharBoundary()
+
+Truncate a string at a valid UTF-8 boundary.
+
+**Signature:**
+
+```csharp
+public static void TruncateAtCharBoundary(string value, nuint maxLen)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `Value` | `string` | Yes | The value |
+| `MaxLen` | `nuint` | Yes | The max len |
+
+**Returns:** `void`
+
+
+---
+
+### NormalizeHeadingText()
+
+Normalize heading text by replacing newlines and extra whitespace.
+
+Heading text should be on a single line in Markdown. This function collapses
+any newlines and multiple spaces into single spaces.
+
+**Signature:**
+
+```csharp
+public static Str NormalizeHeadingText(string text)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `Text` | `string` | Yes | The text |
+
+**Returns:** `Str`
+
+
+---
+
+### DedentCodeBlock()
+
+Remove common leading whitespace from all lines in a code block.
+
+This is useful when HTML authors indent `<pre>` content for readability,
+so we can strip the shared indentation without touching meaningful spacing.
+
+**Signature:**
+
+```csharp
+public static string DedentCodeBlock(string content)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `Content` | `string` | Yes | The content to process |
+
+**Returns:** `string`
+
+
+---
+
 ### FloorCharBoundary()
 
 Returns the largest valid char boundary index at or before `index`.
@@ -2624,6 +2770,95 @@ public ConversionOptions Build()
 
 ---
 
+### DjotRenderer
+
+Renderer for Djot lightweight markup output.
+
+#### Methods
+
+##### Emphasis()
+
+**Signature:**
+
+```csharp
+public string Emphasis(string content)
+```
+
+##### Strong()
+
+**Signature:**
+
+```csharp
+public string Strong(string content, string symbol)
+```
+
+##### Strikethrough()
+
+**Signature:**
+
+```csharp
+public string Strikethrough(string content)
+```
+
+##### Highlight()
+
+**Signature:**
+
+```csharp
+public string Highlight(string content)
+```
+
+##### Inserted()
+
+**Signature:**
+
+```csharp
+public string Inserted(string content)
+```
+
+##### Subscript()
+
+**Signature:**
+
+```csharp
+public string Subscript(string content, string customSymbol)
+```
+
+##### Superscript()
+
+**Signature:**
+
+```csharp
+public string Superscript(string content, string customSymbol)
+```
+
+##### SpanWithAttributes()
+
+**Signature:**
+
+```csharp
+public string SpanWithAttributes(string content, List<string> classes, string id)
+```
+
+##### DivWithAttributes()
+
+**Signature:**
+
+```csharp
+public string DivWithAttributes(string content, List<string> classes)
+```
+
+##### IsDjot()
+
+**Signature:**
+
+```csharp
+public bool IsDjot()
+```
+
+
+---
+
 ### DocumentMetadata
 
 Document-level metadata extracted from `<head>` and top-level elements.
@@ -2868,6 +3103,446 @@ suitable for serialization and transmission across language boundaries.
 
 ---
 
+### HtmlVisitor
+
+Visitor trait for HTML→Markdown conversion.
+
+Implement this trait to customize the conversion behavior for any HTML element type.
+All methods have default implementations that return `VisitResult.Continue`, allowing
+selective override of only the elements you care about.
+
+# Method Naming Convention
+
+- `visit_*_start`: Called before entering an element (pre-order traversal)
+- `visit_*_end`: Called after exiting an element (post-order traversal)
+- `visit_*`: Called for specific element types (e.g., `visit_link`, `visit_image`)
+
+# Execution Order
+
+For a typical element like `<div><p>text</p></div>`:
+1. `visit_element_start` for `<div>`
+2. `visit_element_start` for `<p>`
+3. `visit_text` for "text"
+4. `visit_element_end` for `<p>`
+5. `visit_element_end` for `</div>`
+
+# Performance Notes
+
+- `visit_text` is the most frequently called method (~100+ times per document)
+- Return `VisitResult.Continue` quickly for elements you don't need to customize
+- Avoid heavy computation in visitor methods; consider caching if needed
+
+#### Methods
+
+##### VisitElementStart()
+
+Called before entering any element.
+
+This is the first callback invoked for every HTML element, allowing
+visitors to implement generic element handling before tag-specific logic.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitElementStart(NodeContext ctx)
+```
+
+##### VisitElementEnd()
+
+Called after exiting any element.
+
+Receives the default markdown output that would be generated.
+Visitors can inspect or replace this output.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitElementEnd(NodeContext ctx, string output)
+```
+
+##### VisitText()
+
+Visit text nodes (most frequent callback - ~100+ per document).
+
+**Signature:**
+
+```csharp
+public VisitResult VisitText(NodeContext ctx, string text)
+```
+
+##### VisitLink()
+
+Visit anchor links `<a href="...">`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitLink(NodeContext ctx, string href, string text, string title)
+```
+
+##### VisitImage()
+
+Visit images `<img src="...">`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitImage(NodeContext ctx, string src, string alt, string title)
+```
+
+##### VisitHeading()
+
+Visit heading elements `<h1>` through `<h6>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitHeading(NodeContext ctx, uint level, string text, string id)
+```
+
+##### VisitCodeBlock()
+
+Visit code blocks `<pre><code>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitCodeBlock(NodeContext ctx, string lang, string code)
+```
+
+##### VisitCodeInline()
+
+Visit inline code `<code>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitCodeInline(NodeContext ctx, string code)
+```
+
+##### VisitListItem()
+
+Visit list items `<li>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitListItem(NodeContext ctx, bool ordered, string marker, string text)
+```
+
+##### VisitListStart()
+
+Called before processing a list `<ul>` or `<ol>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitListStart(NodeContext ctx, bool ordered)
+```
+
+##### VisitListEnd()
+
+Called after processing a list `</ul>` or `</ol>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitListEnd(NodeContext ctx, bool ordered, string output)
+```
+
+##### VisitTableStart()
+
+Called before processing a table `<table>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitTableStart(NodeContext ctx)
+```
+
+##### VisitTableRow()
+
+Visit table rows `<tr>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitTableRow(NodeContext ctx, List<string> cells, bool isHeader)
+```
+
+##### VisitTableEnd()
+
+Called after processing a table `</table>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitTableEnd(NodeContext ctx, string output)
+```
+
+##### VisitBlockquote()
+
+Visit blockquote elements `<blockquote>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitBlockquote(NodeContext ctx, string content, nuint depth)
+```
+
+##### VisitStrong()
+
+Visit strong/bold elements `<strong>`, `<b>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitStrong(NodeContext ctx, string text)
+```
+
+##### VisitEmphasis()
+
+Visit emphasis/italic elements `<em>`, `<i>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitEmphasis(NodeContext ctx, string text)
+```
+
+##### VisitStrikethrough()
+
+Visit strikethrough elements `<s>`, `<del>`, `<strike>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitStrikethrough(NodeContext ctx, string text)
+```
+
+##### VisitUnderline()
+
+Visit underline elements `<u>`, `<ins>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitUnderline(NodeContext ctx, string text)
+```
+
+##### VisitSubscript()
+
+Visit subscript elements `<sub>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitSubscript(NodeContext ctx, string text)
+```
+
+##### VisitSuperscript()
+
+Visit superscript elements `<sup>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitSuperscript(NodeContext ctx, string text)
+```
+
+##### VisitMark()
+
+Visit mark/highlight elements `<mark>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitMark(NodeContext ctx, string text)
+```
+
+##### VisitLineBreak()
+
+Visit line break elements `<br>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitLineBreak(NodeContext ctx)
+```
+
+##### VisitHorizontalRule()
+
+Visit horizontal rule elements `<hr>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitHorizontalRule(NodeContext ctx)
+```
+
+##### VisitCustomElement()
+
+Visit custom elements (web components) or unknown tags.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitCustomElement(NodeContext ctx, string tagName, string html)
+```
+
+##### VisitDefinitionListStart()
+
+Visit definition list `<dl>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitDefinitionListStart(NodeContext ctx)
+```
+
+##### VisitDefinitionTerm()
+
+Visit definition term `<dt>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitDefinitionTerm(NodeContext ctx, string text)
+```
+
+##### VisitDefinitionDescription()
+
+Visit definition description `<dd>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitDefinitionDescription(NodeContext ctx, string text)
+```
+
+##### VisitDefinitionListEnd()
+
+Called after processing a definition list `</dl>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitDefinitionListEnd(NodeContext ctx, string output)
+```
+
+##### VisitForm()
+
+Visit form elements `<form>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitForm(NodeContext ctx, string action, string method)
+```
+
+##### VisitInput()
+
+Visit input elements `<input>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitInput(NodeContext ctx, string inputType, string name, string value)
+```
+
+##### VisitButton()
+
+Visit button elements `<button>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitButton(NodeContext ctx, string text)
+```
+
+##### VisitAudio()
+
+Visit audio elements `<audio>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitAudio(NodeContext ctx, string src)
+```
+
+##### VisitVideo()
+
+Visit video elements `<video>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitVideo(NodeContext ctx, string src)
+```
+
+##### VisitIframe()
+
+Visit iframe elements `<iframe>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitIframe(NodeContext ctx, string src)
+```
+
+##### VisitDetails()
+
+Visit details elements `<details>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitDetails(NodeContext ctx, bool open)
+```
+
+##### VisitSummary()
+
+Visit summary elements `<summary>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitSummary(NodeContext ctx, string text)
+```
+
+##### VisitFigureStart()
+
+Visit figure elements `<figure>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitFigureStart(NodeContext ctx)
+```
+
+##### VisitFigcaption()
+
+Visit figcaption elements `<figcaption>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitFigcaption(NodeContext ctx, string text)
+```
+
+##### VisitFigureEnd()
+
+Called after processing a figure `</figure>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitFigureEnd(NodeContext ctx, string output)
+```
+
+
+---
+
 ### ImageMetadata
 
 Image metadata with source and dimensions.
@@ -2993,6 +3668,95 @@ public LinkType ClassifyLink(string href)
 
 ---
 
+### MarkdownRenderer
+
+Renderer for standard Markdown output.
+
+#### Methods
+
+##### Emphasis()
+
+**Signature:**
+
+```csharp
+public string Emphasis(string content)
+```
+
+##### Strong()
+
+**Signature:**
+
+```csharp
+public string Strong(string content, string symbol)
+```
+
+##### Strikethrough()
+
+**Signature:**
+
+```csharp
+public string Strikethrough(string content)
+```
+
+##### Highlight()
+
+**Signature:**
+
+```csharp
+public string Highlight(string content)
+```
+
+##### Inserted()
+
+**Signature:**
+
+```csharp
+public string Inserted(string content)
+```
+
+##### Subscript()
+
+**Signature:**
+
+```csharp
+public string Subscript(string content, string customSymbol)
+```
+
+##### Superscript()
+
+**Signature:**
+
+```csharp
+public string Superscript(string content, string customSymbol)
+```
+
+##### SpanWithAttributes()
+
+**Signature:**
+
+```csharp
+public string SpanWithAttributes(string content, List<string> classes, string id)
+```
+
+##### DivWithAttributes()
+
+**Signature:**
+
+```csharp
+public string DivWithAttributes(string content, List<string> classes)
+```
+
+##### IsDjot()
+
+**Signature:**
+
+```csharp
+public bool IsDjot()
+```
+
+
+---
+
 ### MetadataCollector
 
 Internal metadata collector for single-pass extraction.
@@ -3105,6 +3869,26 @@ public MetadataConfig FromUpdate(MetadataConfigUpdate update)
 ```csharp
 public MetadataConfig From(MetadataConfigUpdate update)
 ```
+
+
+---
+
+### NodeContext
+
+Context information passed to all visitor methods.
+
+Provides comprehensive metadata about the current node being visited,
+including its type, attributes, position in the DOM tree, and parent context.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `NodeType` | `NodeType` | — | Coarse-grained node type classification |
+| `TagName` | `string` | — | Raw HTML tag name (e.g., "div", "h1", "custom-element") |
+| `Attributes` | `Dictionary<string, string>` | — | All HTML attributes as key-value pairs |
+| `Depth` | `nuint` | — | Depth in the DOM tree (0 = root) |
+| `IndexInParent` | `nuint` | — | Index among siblings (0-based) |
+| `ParentTag` | `string?` | `null` | Parent element's tag name (None if root) |
+| `IsInline` | `bool` | — | Whether this element is treated as inline vs block |
 
 
 ---
@@ -3469,6 +4253,15 @@ Annotations describe formatting (bold, italic, etc.) and links within a node's t
 
 ---
 
+### VisitorHandle
+
+Type alias for a visitor handle (Rc-wrapped `RefCell` for interior mutability).
+
+This allows visitors to be passed around and shared while still being mutable.
+
+
+---
+
 ## Enums
 
 ### VisitAction
@@ -3682,24 +4475,6 @@ Specifies the target markup language format for the conversion output.
 
 ---
 
-### VisitorDispatch
-
-Result of dispatching a visitor callback.
-
-This enum represents the outcome of a visitor callback dispatch,
-providing a more ergonomic interface for control flow than the
-raw `VisitResult` type.
-
-| Value | Description |
-|-------|-------------|
-| `Continue` | Continue with default conversion behavior |
-| `Custom` | Replace default output with custom markdown — Fields: `0`: `string` |
-| `Skip` | Skip this element entirely (don't output anything) |
-| `PreserveHtml` | Preserve original HTML (don't convert to markdown) |
-
-
----
-
 ### NodeContent
 
 The semantic content type of a document node.
@@ -3757,6 +4532,144 @@ Categories of processing warnings.
 | `TruncatedInput` | The input was truncated due to size limits. |
 | `MalformedHtml` | The HTML was malformed but processing continued with best effort. |
 | `SanitizationApplied` | Sanitization was applied to remove potentially unsafe content. |
+
+
+---
+
+### NodeType
+
+Node type enumeration covering all HTML element types.
+
+This enum categorizes all HTML elements that the converter recognizes,
+providing a coarse-grained classification for visitor dispatch.
+
+| Value | Description |
+|-------|-------------|
+| `Text` | Text node (most frequent - 100+ per document) |
+| `Element` | Generic element node |
+| `Heading` | Heading elements (h1-h6) |
+| `Paragraph` | Paragraph element |
+| `Div` | Generic div container |
+| `Blockquote` | Blockquote element |
+| `Pre` | Preformatted text block |
+| `Hr` | Horizontal rule |
+| `List` | Ordered or unordered list (ul, ol) |
+| `ListItem` | List item (li) |
+| `DefinitionList` | Definition list (dl) |
+| `DefinitionTerm` | Definition term (dt) |
+| `DefinitionDescription` | Definition description (dd) |
+| `Table` | Table element |
+| `TableRow` | Table row (tr) |
+| `TableCell` | Table cell (td, th) |
+| `TableHeader` | Table header cell (th) |
+| `TableBody` | Table body (tbody) |
+| `TableHead` | Table head (thead) |
+| `TableFoot` | Table foot (tfoot) |
+| `Link` | Anchor link (a) |
+| `Image` | Image (img) |
+| `Strong` | Strong/bold (strong, b) |
+| `Em` | Emphasis/italic (em, i) |
+| `Code` | Inline code (code) |
+| `Strikethrough` | Strikethrough (s, del, strike) |
+| `Underline` | Underline (u, ins) |
+| `Subscript` | Subscript (sub) |
+| `Superscript` | Superscript (sup) |
+| `Mark` | Mark/highlight (mark) |
+| `Small` | Small text (small) |
+| `Br` | Line break (br) |
+| `Span` | Span element |
+| `Article` | Article element |
+| `Section` | Section element |
+| `Nav` | Navigation element |
+| `Aside` | Aside element |
+| `Header` | Header element |
+| `Footer` | Footer element |
+| `Main` | Main element |
+| `Figure` | Figure element |
+| `Figcaption` | Figure caption |
+| `Time` | Time element |
+| `Details` | Details element |
+| `Summary` | Summary element |
+| `Form` | Form element |
+| `Input` | Input element |
+| `Select` | Select element |
+| `Option` | Option element |
+| `Button` | Button element |
+| `Textarea` | Textarea element |
+| `Label` | Label element |
+| `Fieldset` | Fieldset element |
+| `Legend` | Legend element |
+| `Audio` | Audio element |
+| `Video` | Video element |
+| `Picture` | Picture element |
+| `Source` | Source element |
+| `Iframe` | Iframe element |
+| `Svg` | SVG element |
+| `Canvas` | Canvas element |
+| `Ruby` | Ruby annotation |
+| `Rt` | Ruby text |
+| `Rp` | Ruby parenthesis |
+| `Abbr` | Abbreviation |
+| `Kbd` | Keyboard input |
+| `Samp` | Sample output |
+| `Var` | Variable |
+| `Cite` | Citation |
+| `Q` | Quote |
+| `Del` | Deleted text |
+| `Ins` | Inserted text |
+| `Data` | Data element |
+| `Meter` | Meter element |
+| `Progress` | Progress element |
+| `Output` | Output element |
+| `Template` | Template element |
+| `Slot` | Slot element |
+| `Html` | HTML root element |
+| `Head` | Head element |
+| `Body` | Body element |
+| `Title` | Title element |
+| `Meta` | Meta element |
+| `LinkTag` | Link element (not anchor) |
+| `Style` | Style element |
+| `Script` | Script element |
+| `Base` | Base element |
+| `Custom` | Custom element (web components) or unknown tag |
+
+
+---
+
+### VisitResult
+
+Result of a visitor callback.
+
+Allows visitors to control the conversion flow by either proceeding
+with default behavior, providing custom output, skipping elements,
+preserving HTML, or signaling errors.
+
+| Value | Description |
+|-------|-------------|
+| `Continue` | Continue with default conversion behavior |
+| `Custom` | Replace default output with custom markdown The visitor takes full responsibility for the markdown output of this node and its children. — Fields: `0`: `string` |
+| `Skip` | Skip this element entirely (don't output anything) The element and all its children are ignored in the output. |
+| `PreserveHtml` | Preserve original HTML (don't convert to markdown) The element's raw HTML is included verbatim in the output. |
+| `Error` | Stop conversion with an error The conversion process halts and returns this error message. — Fields: `0`: `string` |
+
+
+---
+
+### VisitorDispatch
+
+Result of dispatching a visitor callback.
+
+This enum represents the outcome of a visitor callback dispatch,
+providing a more ergonomic interface for control flow than the
+raw `VisitResult` type.
+
+| Value | Description |
+|-------|-------------|
+| `Continue` | Continue with default conversion behavior |
+| `Custom` | Replace default output with custom markdown — Fields: `0`: `string` |
+| `Skip` | Skip this element entirely (don't output anything) |
+| `PreserveHtml` | Preserve original HTML (don't convert to markdown) |
 
 
 ---

@@ -1825,6 +1825,152 @@ public static function dispatchSemanticHandler(string $tagName, NodeHandle $node
 
 ---
 
+### escapeLinkLabel()
+
+Escape special characters in link labels.
+
+Markdown link labels can contain brackets, which need careful escaping to avoid
+being interpreted as nested links. This function escapes unescaped closing brackets
+that would break the link syntax.
+
+**Signature:**
+
+```php
+public static function escapeLinkLabel(string $text): string
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `text` | `string` | Yes | The text |
+
+**Returns:** `string`
+
+
+---
+
+### escapeMalformedAngleBrackets()
+
+Escape malformed angle brackets in markdown output.
+
+Markdown uses `<...>` for automatic links. Angle brackets that don't form valid
+link syntax should be escaped as `&lt;` to prevent parser confusion.
+
+A valid tag must have:
+- `<!` followed by `-` or alphabetic character (for comments/declarations)
+- `</` followed by alphabetic character (for closing tags)
+- `<?` (for processing instructions)
+- `<` followed by alphabetic character (for opening tags)
+
+**Signature:**
+
+```php
+public static function escapeMalformedAngleBrackets(string $input): Str
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `input` | `string` | Yes | The input data |
+
+**Returns:** `Str`
+
+
+---
+
+### trimLineEndWhitespace()
+
+Remove trailing spaces/tabs from every line while preserving newlines.
+
+**Signature:**
+
+```php
+public static function trimLineEndWhitespace(string $output): void
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `output` | `string` | Yes | The output destination |
+
+**Returns:** `void`
+
+
+---
+
+### truncateAtCharBoundary()
+
+Truncate a string at a valid UTF-8 boundary.
+
+**Signature:**
+
+```php
+public static function truncateAtCharBoundary(string $value, int $maxLen): void
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `value` | `string` | Yes | The value |
+| `maxLen` | `int` | Yes | The max len |
+
+**Returns:** `void`
+
+
+---
+
+### normalizeHeadingText()
+
+Normalize heading text by replacing newlines and extra whitespace.
+
+Heading text should be on a single line in Markdown. This function collapses
+any newlines and multiple spaces into single spaces.
+
+**Signature:**
+
+```php
+public static function normalizeHeadingText(string $text): Str
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `text` | `string` | Yes | The text |
+
+**Returns:** `Str`
+
+
+---
+
+### dedentCodeBlock()
+
+Remove common leading whitespace from all lines in a code block.
+
+This is useful when HTML authors indent `<pre>` content for readability,
+so we can strip the shared indentation without touching meaningful spacing.
+
+**Signature:**
+
+```php
+public static function dedentCodeBlock(string $content): string
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `content` | `string` | Yes | The content to process |
+
+**Returns:** `string`
+
+
+---
+
 ### floorCharBoundary()
 
 Returns the largest valid char boundary index at or before `index`.
@@ -2624,6 +2770,95 @@ public function build(): ConversionOptions
 
 ---
 
+### DjotRenderer
+
+Renderer for Djot lightweight markup output.
+
+#### Methods
+
+##### emphasis()
+
+**Signature:**
+
+```php
+public function emphasis(string $content): string
+```
+
+##### strong()
+
+**Signature:**
+
+```php
+public function strong(string $content, string $symbol): string
+```
+
+##### strikethrough()
+
+**Signature:**
+
+```php
+public function strikethrough(string $content): string
+```
+
+##### highlight()
+
+**Signature:**
+
+```php
+public function highlight(string $content): string
+```
+
+##### inserted()
+
+**Signature:**
+
+```php
+public function inserted(string $content): string
+```
+
+##### subscript()
+
+**Signature:**
+
+```php
+public function subscript(string $content, string $customSymbol): string
+```
+
+##### superscript()
+
+**Signature:**
+
+```php
+public function superscript(string $content, string $customSymbol): string
+```
+
+##### spanWithAttributes()
+
+**Signature:**
+
+```php
+public function spanWithAttributes(string $content, array<string> $classes, string $id): string
+```
+
+##### divWithAttributes()
+
+**Signature:**
+
+```php
+public function divWithAttributes(string $content, array<string> $classes): string
+```
+
+##### isDjot()
+
+**Signature:**
+
+```php
+public function isDjot(): bool
+```
+
+
+---
+
 ### DocumentMetadata
 
 Document-level metadata extracted from `<head>` and top-level elements.
@@ -2868,6 +3103,446 @@ suitable for serialization and transmission across language boundaries.
 
 ---
 
+### HtmlVisitor
+
+Visitor trait for HTML→Markdown conversion.
+
+Implement this trait to customize the conversion behavior for any HTML element type.
+All methods have default implementations that return `VisitResult::Continue`, allowing
+selective override of only the elements you care about.
+
+# Method Naming Convention
+
+- `visit_*_start`: Called before entering an element (pre-order traversal)
+- `visit_*_end`: Called after exiting an element (post-order traversal)
+- `visit_*`: Called for specific element types (e.g., `visit_link`, `visit_image`)
+
+# Execution Order
+
+For a typical element like `<div><p>text</p></div>`:
+1. `visit_element_start` for `<div>`
+2. `visit_element_start` for `<p>`
+3. `visit_text` for "text"
+4. `visit_element_end` for `<p>`
+5. `visit_element_end` for `</div>`
+
+# Performance Notes
+
+- `visit_text` is the most frequently called method (~100+ times per document)
+- Return `VisitResult::Continue` quickly for elements you don't need to customize
+- Avoid heavy computation in visitor methods; consider caching if needed
+
+#### Methods
+
+##### visitElementStart()
+
+Called before entering any element.
+
+This is the first callback invoked for every HTML element, allowing
+visitors to implement generic element handling before tag-specific logic.
+
+**Signature:**
+
+```php
+public function visitElementStart(NodeContext $ctx): VisitResult
+```
+
+##### visitElementEnd()
+
+Called after exiting any element.
+
+Receives the default markdown output that would be generated.
+Visitors can inspect or replace this output.
+
+**Signature:**
+
+```php
+public function visitElementEnd(NodeContext $ctx, string $output): VisitResult
+```
+
+##### visitText()
+
+Visit text nodes (most frequent callback - ~100+ per document).
+
+**Signature:**
+
+```php
+public function visitText(NodeContext $ctx, string $text): VisitResult
+```
+
+##### visitLink()
+
+Visit anchor links `<a href="...">`.
+
+**Signature:**
+
+```php
+public function visitLink(NodeContext $ctx, string $href, string $text, string $title): VisitResult
+```
+
+##### visitImage()
+
+Visit images `<img src="...">`.
+
+**Signature:**
+
+```php
+public function visitImage(NodeContext $ctx, string $src, string $alt, string $title): VisitResult
+```
+
+##### visitHeading()
+
+Visit heading elements `<h1>` through `<h6>`.
+
+**Signature:**
+
+```php
+public function visitHeading(NodeContext $ctx, int $level, string $text, string $id): VisitResult
+```
+
+##### visitCodeBlock()
+
+Visit code blocks `<pre><code>`.
+
+**Signature:**
+
+```php
+public function visitCodeBlock(NodeContext $ctx, string $lang, string $code): VisitResult
+```
+
+##### visitCodeInline()
+
+Visit inline code `<code>`.
+
+**Signature:**
+
+```php
+public function visitCodeInline(NodeContext $ctx, string $code): VisitResult
+```
+
+##### visitListItem()
+
+Visit list items `<li>`.
+
+**Signature:**
+
+```php
+public function visitListItem(NodeContext $ctx, bool $ordered, string $marker, string $text): VisitResult
+```
+
+##### visitListStart()
+
+Called before processing a list `<ul>` or `<ol>`.
+
+**Signature:**
+
+```php
+public function visitListStart(NodeContext $ctx, bool $ordered): VisitResult
+```
+
+##### visitListEnd()
+
+Called after processing a list `</ul>` or `</ol>`.
+
+**Signature:**
+
+```php
+public function visitListEnd(NodeContext $ctx, bool $ordered, string $output): VisitResult
+```
+
+##### visitTableStart()
+
+Called before processing a table `<table>`.
+
+**Signature:**
+
+```php
+public function visitTableStart(NodeContext $ctx): VisitResult
+```
+
+##### visitTableRow()
+
+Visit table rows `<tr>`.
+
+**Signature:**
+
+```php
+public function visitTableRow(NodeContext $ctx, array<string> $cells, bool $isHeader): VisitResult
+```
+
+##### visitTableEnd()
+
+Called after processing a table `</table>`.
+
+**Signature:**
+
+```php
+public function visitTableEnd(NodeContext $ctx, string $output): VisitResult
+```
+
+##### visitBlockquote()
+
+Visit blockquote elements `<blockquote>`.
+
+**Signature:**
+
+```php
+public function visitBlockquote(NodeContext $ctx, string $content, int $depth): VisitResult
+```
+
+##### visitStrong()
+
+Visit strong/bold elements `<strong>`, `<b>`.
+
+**Signature:**
+
+```php
+public function visitStrong(NodeContext $ctx, string $text): VisitResult
+```
+
+##### visitEmphasis()
+
+Visit emphasis/italic elements `<em>`, `<i>`.
+
+**Signature:**
+
+```php
+public function visitEmphasis(NodeContext $ctx, string $text): VisitResult
+```
+
+##### visitStrikethrough()
+
+Visit strikethrough elements `<s>`, `<del>`, `<strike>`.
+
+**Signature:**
+
+```php
+public function visitStrikethrough(NodeContext $ctx, string $text): VisitResult
+```
+
+##### visitUnderline()
+
+Visit underline elements `<u>`, `<ins>`.
+
+**Signature:**
+
+```php
+public function visitUnderline(NodeContext $ctx, string $text): VisitResult
+```
+
+##### visitSubscript()
+
+Visit subscript elements `<sub>`.
+
+**Signature:**
+
+```php
+public function visitSubscript(NodeContext $ctx, string $text): VisitResult
+```
+
+##### visitSuperscript()
+
+Visit superscript elements `<sup>`.
+
+**Signature:**
+
+```php
+public function visitSuperscript(NodeContext $ctx, string $text): VisitResult
+```
+
+##### visitMark()
+
+Visit mark/highlight elements `<mark>`.
+
+**Signature:**
+
+```php
+public function visitMark(NodeContext $ctx, string $text): VisitResult
+```
+
+##### visitLineBreak()
+
+Visit line break elements `<br>`.
+
+**Signature:**
+
+```php
+public function visitLineBreak(NodeContext $ctx): VisitResult
+```
+
+##### visitHorizontalRule()
+
+Visit horizontal rule elements `<hr>`.
+
+**Signature:**
+
+```php
+public function visitHorizontalRule(NodeContext $ctx): VisitResult
+```
+
+##### visitCustomElement()
+
+Visit custom elements (web components) or unknown tags.
+
+**Signature:**
+
+```php
+public function visitCustomElement(NodeContext $ctx, string $tagName, string $html): VisitResult
+```
+
+##### visitDefinitionListStart()
+
+Visit definition list `<dl>`.
+
+**Signature:**
+
+```php
+public function visitDefinitionListStart(NodeContext $ctx): VisitResult
+```
+
+##### visitDefinitionTerm()
+
+Visit definition term `<dt>`.
+
+**Signature:**
+
+```php
+public function visitDefinitionTerm(NodeContext $ctx, string $text): VisitResult
+```
+
+##### visitDefinitionDescription()
+
+Visit definition description `<dd>`.
+
+**Signature:**
+
+```php
+public function visitDefinitionDescription(NodeContext $ctx, string $text): VisitResult
+```
+
+##### visitDefinitionListEnd()
+
+Called after processing a definition list `</dl>`.
+
+**Signature:**
+
+```php
+public function visitDefinitionListEnd(NodeContext $ctx, string $output): VisitResult
+```
+
+##### visitForm()
+
+Visit form elements `<form>`.
+
+**Signature:**
+
+```php
+public function visitForm(NodeContext $ctx, string $action, string $method): VisitResult
+```
+
+##### visitInput()
+
+Visit input elements `<input>`.
+
+**Signature:**
+
+```php
+public function visitInput(NodeContext $ctx, string $inputType, string $name, string $value): VisitResult
+```
+
+##### visitButton()
+
+Visit button elements `<button>`.
+
+**Signature:**
+
+```php
+public function visitButton(NodeContext $ctx, string $text): VisitResult
+```
+
+##### visitAudio()
+
+Visit audio elements `<audio>`.
+
+**Signature:**
+
+```php
+public function visitAudio(NodeContext $ctx, string $src): VisitResult
+```
+
+##### visitVideo()
+
+Visit video elements `<video>`.
+
+**Signature:**
+
+```php
+public function visitVideo(NodeContext $ctx, string $src): VisitResult
+```
+
+##### visitIframe()
+
+Visit iframe elements `<iframe>`.
+
+**Signature:**
+
+```php
+public function visitIframe(NodeContext $ctx, string $src): VisitResult
+```
+
+##### visitDetails()
+
+Visit details elements `<details>`.
+
+**Signature:**
+
+```php
+public function visitDetails(NodeContext $ctx, bool $open): VisitResult
+```
+
+##### visitSummary()
+
+Visit summary elements `<summary>`.
+
+**Signature:**
+
+```php
+public function visitSummary(NodeContext $ctx, string $text): VisitResult
+```
+
+##### visitFigureStart()
+
+Visit figure elements `<figure>`.
+
+**Signature:**
+
+```php
+public function visitFigureStart(NodeContext $ctx): VisitResult
+```
+
+##### visitFigcaption()
+
+Visit figcaption elements `<figcaption>`.
+
+**Signature:**
+
+```php
+public function visitFigcaption(NodeContext $ctx, string $text): VisitResult
+```
+
+##### visitFigureEnd()
+
+Called after processing a figure `</figure>`.
+
+**Signature:**
+
+```php
+public function visitFigureEnd(NodeContext $ctx, string $output): VisitResult
+```
+
+
+---
+
 ### ImageMetadata
 
 Image metadata with source and dimensions.
@@ -2993,6 +3668,95 @@ public static function classifyLink(string $href): LinkType
 
 ---
 
+### MarkdownRenderer
+
+Renderer for standard Markdown output.
+
+#### Methods
+
+##### emphasis()
+
+**Signature:**
+
+```php
+public function emphasis(string $content): string
+```
+
+##### strong()
+
+**Signature:**
+
+```php
+public function strong(string $content, string $symbol): string
+```
+
+##### strikethrough()
+
+**Signature:**
+
+```php
+public function strikethrough(string $content): string
+```
+
+##### highlight()
+
+**Signature:**
+
+```php
+public function highlight(string $content): string
+```
+
+##### inserted()
+
+**Signature:**
+
+```php
+public function inserted(string $content): string
+```
+
+##### subscript()
+
+**Signature:**
+
+```php
+public function subscript(string $content, string $customSymbol): string
+```
+
+##### superscript()
+
+**Signature:**
+
+```php
+public function superscript(string $content, string $customSymbol): string
+```
+
+##### spanWithAttributes()
+
+**Signature:**
+
+```php
+public function spanWithAttributes(string $content, array<string> $classes, string $id): string
+```
+
+##### divWithAttributes()
+
+**Signature:**
+
+```php
+public function divWithAttributes(string $content, array<string> $classes): string
+```
+
+##### isDjot()
+
+**Signature:**
+
+```php
+public function isDjot(): bool
+```
+
+
+---
+
 ### MetadataCollector
 
 Internal metadata collector for single-pass extraction.
@@ -3105,6 +3869,26 @@ public static function fromUpdate(MetadataConfigUpdate $update): MetadataConfig
 ```php
 public static function from(MetadataConfigUpdate $update): MetadataConfig
 ```
+
+
+---
+
+### NodeContext
+
+Context information passed to all visitor methods.
+
+Provides comprehensive metadata about the current node being visited,
+including its type, attributes, position in the DOM tree, and parent context.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `nodeType` | `NodeType` | — | Coarse-grained node type classification |
+| `tagName` | `string` | — | Raw HTML tag name (e.g., "div", "h1", "custom-element") |
+| `attributes` | `array<string, string>` | — | All HTML attributes as key-value pairs |
+| `depth` | `int` | — | Depth in the DOM tree (0 = root) |
+| `indexInParent` | `int` | — | Index among siblings (0-based) |
+| `parentTag` | `?string` | `null` | Parent element's tag name (None if root) |
+| `isInline` | `bool` | — | Whether this element is treated as inline vs block |
 
 
 ---
@@ -3469,6 +4253,15 @@ Annotations describe formatting (bold, italic, etc.) and links within a node's t
 
 ---
 
+### VisitorHandle
+
+Type alias for a visitor handle (Rc-wrapped `RefCell` for interior mutability).
+
+This allows visitors to be passed around and shared while still being mutable.
+
+
+---
+
 ## Enums
 
 ### VisitAction
@@ -3682,24 +4475,6 @@ Specifies the target markup language format for the conversion output.
 
 ---
 
-### VisitorDispatch
-
-Result of dispatching a visitor callback.
-
-This enum represents the outcome of a visitor callback dispatch,
-providing a more ergonomic interface for control flow than the
-raw `VisitResult` type.
-
-| Value | Description |
-|-------|-------------|
-| `Continue` | Continue with default conversion behavior |
-| `Custom` | Replace default output with custom markdown — Fields: `0`: `string` |
-| `Skip` | Skip this element entirely (don't output anything) |
-| `PreserveHtml` | Preserve original HTML (don't convert to markdown) |
-
-
----
-
 ### NodeContent
 
 The semantic content type of a document node.
@@ -3757,6 +4532,144 @@ Categories of processing warnings.
 | `TruncatedInput` | The input was truncated due to size limits. |
 | `MalformedHtml` | The HTML was malformed but processing continued with best effort. |
 | `SanitizationApplied` | Sanitization was applied to remove potentially unsafe content. |
+
+
+---
+
+### NodeType
+
+Node type enumeration covering all HTML element types.
+
+This enum categorizes all HTML elements that the converter recognizes,
+providing a coarse-grained classification for visitor dispatch.
+
+| Value | Description |
+|-------|-------------|
+| `Text` | Text node (most frequent - 100+ per document) |
+| `Element` | Generic element node |
+| `Heading` | Heading elements (h1-h6) |
+| `Paragraph` | Paragraph element |
+| `Div` | Generic div container |
+| `Blockquote` | Blockquote element |
+| `Pre` | Preformatted text block |
+| `Hr` | Horizontal rule |
+| `List` | Ordered or unordered list (ul, ol) |
+| `ListItem` | List item (li) |
+| `DefinitionList` | Definition list (dl) |
+| `DefinitionTerm` | Definition term (dt) |
+| `DefinitionDescription` | Definition description (dd) |
+| `Table` | Table element |
+| `TableRow` | Table row (tr) |
+| `TableCell` | Table cell (td, th) |
+| `TableHeader` | Table header cell (th) |
+| `TableBody` | Table body (tbody) |
+| `TableHead` | Table head (thead) |
+| `TableFoot` | Table foot (tfoot) |
+| `Link` | Anchor link (a) |
+| `Image` | Image (img) |
+| `Strong` | Strong/bold (strong, b) |
+| `Em` | Emphasis/italic (em, i) |
+| `Code` | Inline code (code) |
+| `Strikethrough` | Strikethrough (s, del, strike) |
+| `Underline` | Underline (u, ins) |
+| `Subscript` | Subscript (sub) |
+| `Superscript` | Superscript (sup) |
+| `Mark` | Mark/highlight (mark) |
+| `Small` | Small text (small) |
+| `Br` | Line break (br) |
+| `Span` | Span element |
+| `Article` | Article element |
+| `Section` | Section element |
+| `Nav` | Navigation element |
+| `Aside` | Aside element |
+| `Header` | Header element |
+| `Footer` | Footer element |
+| `Main` | Main element |
+| `Figure` | Figure element |
+| `Figcaption` | Figure caption |
+| `Time` | Time element |
+| `Details` | Details element |
+| `Summary` | Summary element |
+| `Form` | Form element |
+| `Input` | Input element |
+| `Select` | Select element |
+| `Option` | Option element |
+| `Button` | Button element |
+| `Textarea` | Textarea element |
+| `Label` | Label element |
+| `Fieldset` | Fieldset element |
+| `Legend` | Legend element |
+| `Audio` | Audio element |
+| `Video` | Video element |
+| `Picture` | Picture element |
+| `Source` | Source element |
+| `Iframe` | Iframe element |
+| `Svg` | SVG element |
+| `Canvas` | Canvas element |
+| `Ruby` | Ruby annotation |
+| `Rt` | Ruby text |
+| `Rp` | Ruby parenthesis |
+| `Abbr` | Abbreviation |
+| `Kbd` | Keyboard input |
+| `Samp` | Sample output |
+| `Var` | Variable |
+| `Cite` | Citation |
+| `Q` | Quote |
+| `Del` | Deleted text |
+| `Ins` | Inserted text |
+| `Data` | Data element |
+| `Meter` | Meter element |
+| `Progress` | Progress element |
+| `Output` | Output element |
+| `Template` | Template element |
+| `Slot` | Slot element |
+| `Html` | HTML root element |
+| `Head` | Head element |
+| `Body` | Body element |
+| `Title` | Title element |
+| `Meta` | Meta element |
+| `LinkTag` | Link element (not anchor) |
+| `Style` | Style element |
+| `Script` | Script element |
+| `Base` | Base element |
+| `Custom` | Custom element (web components) or unknown tag |
+
+
+---
+
+### VisitResult
+
+Result of a visitor callback.
+
+Allows visitors to control the conversion flow by either proceeding
+with default behavior, providing custom output, skipping elements,
+preserving HTML, or signaling errors.
+
+| Value | Description |
+|-------|-------------|
+| `Continue` | Continue with default conversion behavior |
+| `Custom` | Replace default output with custom markdown The visitor takes full responsibility for the markdown output of this node and its children. — Fields: `0`: `string` |
+| `Skip` | Skip this element entirely (don't output anything) The element and all its children are ignored in the output. |
+| `PreserveHtml` | Preserve original HTML (don't convert to markdown) The element's raw HTML is included verbatim in the output. |
+| `Error` | Stop conversion with an error The conversion process halts and returns this error message. — Fields: `0`: `string` |
+
+
+---
+
+### VisitorDispatch
+
+Result of dispatching a visitor callback.
+
+This enum represents the outcome of a visitor callback dispatch,
+providing a more ergonomic interface for control flow than the
+raw `VisitResult` type.
+
+| Value | Description |
+|-------|-------------|
+| `Continue` | Continue with default conversion behavior |
+| `Custom` | Replace default output with custom markdown — Fields: `0`: `string` |
+| `Skip` | Skip this element entirely (don't output anything) |
+| `PreserveHtml` | Preserve original HTML (don't convert to markdown) |
 
 
 ---

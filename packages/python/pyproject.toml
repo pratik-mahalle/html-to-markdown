@@ -24,7 +24,7 @@ keywords = ["html", "markdown", "converter"]
 repository = "https://github.com/kreuzberg-dev/html-to-markdown"
 
 [tool.maturin]
-module-name = "html_to_markdown_rs._html_to_markdown"
+module-name = "html_to_markdown._html_to_markdown"
 manifest-path = "../../crates/html-to-markdown-py/Cargo.toml"
 features = ["pyo3/extension-module"]
-python-packages = ["html_to_markdown_rs"]
+python-packages = ["html_to_markdown"]

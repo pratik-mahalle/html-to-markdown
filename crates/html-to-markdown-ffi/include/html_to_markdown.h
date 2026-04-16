@@ -1706,48 +1706,6 @@ int32_t htm_preprocessing_options_update_remove_navigation(const HTMPreprocessin
 int32_t htm_preprocessing_options_update_remove_forms(const HTMPreprocessingOptionsUpdate *ptr);
 
 /**
- * Free a `ConversionResult` handle.
- * # Safety
- * Pointer must have been returned by this library, or be null.
- */
-void htm_conversion_result_free(HTMConversionResult *ptr);
-
-/**
- * Get the `content` field from a `ConversionResult`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-char *htm_conversion_result_content(const HTMConversionResult *ptr);
-
-/**
- * Get the `document` field from a `ConversionResult`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-HTMDocumentStructure *htm_conversion_result_document(const HTMConversionResult *ptr);
-
-/**
- * Get the `metadata` field from a `ConversionResult`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-HTMHtmlMetadata *htm_conversion_result_metadata(const HTMConversionResult *ptr);
-
-/**
- * Get the `tables` field from a `ConversionResult`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-char *htm_conversion_result_tables(const HTMConversionResult *ptr);
-
-/**
- * Get the `warnings` field from a `ConversionResult`.
- * # Safety
- * Pointer must be a valid handle returned by this library.
- */
-char *htm_conversion_result_warnings(const HTMConversionResult *ptr);
-
-/**
  * Create a `DocumentStructure` from a JSON string. Returns null on failure.
  * # Safety
  * JSON string must be valid UTF-8 and null-terminated.
@@ -1892,6 +1850,48 @@ uint32_t htm_text_annotation_end(const HTMTextAnnotation *ptr);
  * Pointer must be a valid handle returned by this library.
  */
 HTMAnnotationKind *htm_text_annotation_kind(const HTMTextAnnotation *ptr);
+
+/**
+ * Free a `ConversionResult` handle.
+ * # Safety
+ * Pointer must have been returned by this library, or be null.
+ */
+void htm_conversion_result_free(HTMConversionResult *ptr);
+
+/**
+ * Get the `content` field from a `ConversionResult`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_conversion_result_content(const HTMConversionResult *ptr);
+
+/**
+ * Get the `document` field from a `ConversionResult`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+HTMDocumentStructure *htm_conversion_result_document(const HTMConversionResult *ptr);
+
+/**
+ * Get the `metadata` field from a `ConversionResult`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+HTMHtmlMetadata *htm_conversion_result_metadata(const HTMConversionResult *ptr);
+
+/**
+ * Get the `tables` field from a `ConversionResult`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_conversion_result_tables(const HTMConversionResult *ptr);
+
+/**
+ * Get the `warnings` field from a `ConversionResult`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_conversion_result_warnings(const HTMConversionResult *ptr);
 
 /**
  * Create a `TableGrid` from a JSON string. Returns null on failure.

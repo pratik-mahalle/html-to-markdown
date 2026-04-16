@@ -792,60 +792,6 @@ impl PreprocessingOptionsUpdate {
     }
 }
 
-#[derive(Clone, serde::Serialize, serde::Deserialize, Default)]
-#[php_class]
-#[php(name = "Html\\To\\Markdown\\Rs\\ConversionResult")]
-pub struct ConversionResult {
-    /// Converted text output (markdown, djot, or plain text).
-    ///
-    /// `None` when `output_format` is set to `OutputFormat::None`,
-    /// indicating extraction-only mode.
-    #[php(prop, name = "content")]
-    pub content: Option<String>,
-    /// Structured document tree with semantic elements.
-    ///
-    /// Populated when `include_document_structure` is `true` in options.
-    pub document: Option<DocumentStructure>,
-    /// Extracted HTML metadata (title, OG, links, images, structured data).
-    pub metadata: HtmlMetadata,
-    /// Extracted tables with structured cell data and markdown representation.
-    pub tables: Vec<TableData>,
-    /// Extracted inline images (data URIs and SVGs).
-    ///
-    /// Populated when `extract_images` is `true` in options.
-    #[php(prop, name = "images")]
-    pub images: Vec<String>,
-    /// Non-fatal processing warnings.
-    pub warnings: Vec<ProcessingWarning>,
-}
-
-#[php_impl]
-impl ConversionResult {
-    pub fn from_json(json: String) -> PhpResult<Self> {
-        serde_json::from_str(&json).map_err(|e| PhpException::default(e.to_string()))
-    }
-
-    #[php(getter)]
-    pub fn get_document(&self) -> Option<DocumentStructure> {
-        self.document.clone()
-    }
-
-    #[php(getter)]
-    pub fn get_metadata(&self) -> HtmlMetadata {
-        self.metadata.clone()
-    }
-
-    #[php(getter)]
-    pub fn get_tables(&self) -> Vec<TableData> {
-        self.tables.clone()
-    }
-
-    #[php(getter)]
-    pub fn get_warnings(&self) -> Vec<ProcessingWarning> {
-        self.warnings.clone()
-    }
-}
-
 #[derive(Clone, serde::Serialize, serde::Deserialize)]
 #[php_class]
 #[php(name = "Html\\To\\Markdown\\Rs\\DocumentStructure")]
@@ -927,6 +873,60 @@ pub struct TextAnnotation {
 impl TextAnnotation {
     pub fn from_json(json: String) -> PhpResult<Self> {
         serde_json::from_str(&json).map_err(|e| PhpException::default(e.to_string()))
+    }
+}
+
+#[derive(Clone, serde::Serialize, serde::Deserialize, Default)]
+#[php_class]
+#[php(name = "Html\\To\\Markdown\\Rs\\ConversionResult")]
+pub struct ConversionResult {
+    /// Converted text output (markdown, djot, or plain text).
+    ///
+    /// `None` when `output_format` is set to `OutputFormat::None`,
+    /// indicating extraction-only mode.
+    #[php(prop, name = "content")]
+    pub content: Option<String>,
+    /// Structured document tree with semantic elements.
+    ///
+    /// Populated when `include_document_structure` is `true` in options.
+    pub document: Option<DocumentStructure>,
+    /// Extracted HTML metadata (title, OG, links, images, structured data).
+    pub metadata: HtmlMetadata,
+    /// Extracted tables with structured cell data and markdown representation.
+    pub tables: Vec<TableData>,
+    /// Extracted inline images (data URIs and SVGs).
+    ///
+    /// Populated when `extract_images` is `true` in options.
+    #[php(prop, name = "images")]
+    pub images: Vec<String>,
+    /// Non-fatal processing warnings.
+    pub warnings: Vec<ProcessingWarning>,
+}
+
+#[php_impl]
+impl ConversionResult {
+    pub fn from_json(json: String) -> PhpResult<Self> {
+        serde_json::from_str(&json).map_err(|e| PhpException::default(e.to_string()))
+    }
+
+    #[php(getter)]
+    pub fn get_document(&self) -> Option<DocumentStructure> {
+        self.document.clone()
+    }
+
+    #[php(getter)]
+    pub fn get_metadata(&self) -> HtmlMetadata {
+        self.metadata.clone()
+    }
+
+    #[php(getter)]
+    pub fn get_tables(&self) -> Vec<TableData> {
+        self.tables.clone()
+    }
+
+    #[php(getter)]
+    pub fn get_warnings(&self) -> Vec<ProcessingWarning> {
+        self.warnings.clone()
     }
 }
 
@@ -1145,9 +1145,22 @@ pub struct HtmlToMarkdownRsApi;
 impl HtmlToMarkdownRsApi {
     pub fn convert(html: String, options: Option<&ConversionOptions>) -> PhpResult<ConversionResult> {
         let options_core: Option<html_to_markdown_rs::ConversionOptions> = options.map(|v| v.clone().into());
-        let result = html_to_markdown_rs::convert_api::convert(&html, options_core)
+        let result = html_to_markdown_rs::convert(&html, options_core)
             .map_err(|e| ext_php_rs::exception::PhpException::default(e.to_string()))?;
         Ok(result.into())
+    }
+}
+
+impl From<MetadataConfig> for html_to_markdown_rs::metadata::MetadataConfig {
+    fn from(val: MetadataConfig) -> Self {
+        Self {
+            extract_document: val.extract_document,
+            extract_headers: val.extract_headers,
+            extract_links: val.extract_links,
+            extract_images: val.extract_images,
+            extract_structured_data: val.extract_structured_data,
+            max_structured_data_size: val.max_structured_data_size as usize,
+        }
     }
 }
 
@@ -1177,6 +1190,13 @@ impl From<html_to_markdown_rs::metadata::MetadataConfigUpdate> for MetadataConfi
     }
 }
 
+impl From<DocumentMetadata> for html_to_markdown_rs::metadata::DocumentMetadata {
+    fn from(val: DocumentMetadata) -> Self {
+        let json = serde_json::to_string(&val).expect("alef: serialize binding type");
+        serde_json::from_str(&json).expect("alef: deserialize to core type")
+    }
+}
+
 impl From<html_to_markdown_rs::metadata::DocumentMetadata> for DocumentMetadata {
     fn from(val: html_to_markdown_rs::metadata::DocumentMetadata) -> Self {
         Self {
@@ -1200,6 +1220,18 @@ impl From<html_to_markdown_rs::metadata::DocumentMetadata> for DocumentMetadata 
     }
 }
 
+impl From<HeaderMetadata> for html_to_markdown_rs::metadata::HeaderMetadata {
+    fn from(val: HeaderMetadata) -> Self {
+        Self {
+            level: val.level,
+            text: val.text,
+            id: val.id,
+            depth: val.depth as usize,
+            html_offset: val.html_offset as usize,
+        }
+    }
+}
+
 impl From<html_to_markdown_rs::metadata::HeaderMetadata> for HeaderMetadata {
     fn from(val: html_to_markdown_rs::metadata::HeaderMetadata) -> Self {
         Self {
@@ -1209,6 +1241,13 @@ impl From<html_to_markdown_rs::metadata::HeaderMetadata> for HeaderMetadata {
             depth: val.depth as i64,
             html_offset: val.html_offset as i64,
         }
+    }
+}
+
+impl From<LinkMetadata> for html_to_markdown_rs::metadata::LinkMetadata {
+    fn from(val: LinkMetadata) -> Self {
+        let json = serde_json::to_string(&val).expect("alef: serialize binding type");
+        serde_json::from_str(&json).expect("alef: deserialize to core type")
     }
 }
 
@@ -1228,6 +1267,13 @@ impl From<html_to_markdown_rs::metadata::LinkMetadata> for LinkMetadata {
     }
 }
 
+impl From<ImageMetadata> for html_to_markdown_rs::metadata::ImageMetadata {
+    fn from(val: ImageMetadata) -> Self {
+        let json = serde_json::to_string(&val).expect("alef: serialize binding type");
+        serde_json::from_str(&json).expect("alef: deserialize to core type")
+    }
+}
+
 impl From<html_to_markdown_rs::metadata::ImageMetadata> for ImageMetadata {
     fn from(val: html_to_markdown_rs::metadata::ImageMetadata) -> Self {
         Self {
@@ -1244,6 +1290,13 @@ impl From<html_to_markdown_rs::metadata::ImageMetadata> for ImageMetadata {
     }
 }
 
+impl From<StructuredData> for html_to_markdown_rs::metadata::StructuredData {
+    fn from(val: StructuredData) -> Self {
+        let json = serde_json::to_string(&val).expect("alef: serialize binding type");
+        serde_json::from_str(&json).expect("alef: deserialize to core type")
+    }
+}
+
 impl From<html_to_markdown_rs::metadata::StructuredData> for StructuredData {
     fn from(val: html_to_markdown_rs::metadata::StructuredData) -> Self {
         Self {
@@ -1254,6 +1307,13 @@ impl From<html_to_markdown_rs::metadata::StructuredData> for StructuredData {
             raw_json: val.raw_json,
             schema_type: val.schema_type,
         }
+    }
+}
+
+impl From<HtmlMetadata> for html_to_markdown_rs::metadata::HtmlMetadata {
+    fn from(val: HtmlMetadata) -> Self {
+        let json = serde_json::to_string(&val).expect("alef: serialize binding type");
+        serde_json::from_str(&json).expect("alef: deserialize to core type")
     }
 }
 
@@ -1467,8 +1527,15 @@ impl From<html_to_markdown_rs::options::PreprocessingOptionsUpdate> for Preproce
     }
 }
 
-impl From<html_to_markdown_rs::types::DocumentStructure> for DocumentStructure {
-    fn from(val: html_to_markdown_rs::types::DocumentStructure) -> Self {
+impl From<DocumentStructure> for html_to_markdown_rs::DocumentStructure {
+    fn from(val: DocumentStructure) -> Self {
+        let json = serde_json::to_string(&val).expect("alef: serialize binding type");
+        serde_json::from_str(&json).expect("alef: deserialize to core type")
+    }
+}
+
+impl From<html_to_markdown_rs::DocumentStructure> for DocumentStructure {
+    fn from(val: html_to_markdown_rs::DocumentStructure) -> Self {
         Self {
             nodes: val.nodes.into_iter().map(Into::into).collect(),
             source_format: val.source_format,
@@ -1476,8 +1543,15 @@ impl From<html_to_markdown_rs::types::DocumentStructure> for DocumentStructure {
     }
 }
 
-impl From<html_to_markdown_rs::types::DocumentNode> for DocumentNode {
-    fn from(val: html_to_markdown_rs::types::DocumentNode) -> Self {
+impl From<DocumentNode> for html_to_markdown_rs::DocumentNode {
+    fn from(val: DocumentNode) -> Self {
+        let json = serde_json::to_string(&val).expect("alef: serialize binding type");
+        serde_json::from_str(&json).expect("alef: deserialize to core type")
+    }
+}
+
+impl From<html_to_markdown_rs::DocumentNode> for DocumentNode {
+    fn from(val: html_to_markdown_rs::DocumentNode) -> Self {
         Self {
             id: val.id,
             content: serde_json::to_value(val.content)
@@ -1492,8 +1566,15 @@ impl From<html_to_markdown_rs::types::DocumentNode> for DocumentNode {
     }
 }
 
-impl From<html_to_markdown_rs::types::TextAnnotation> for TextAnnotation {
-    fn from(val: html_to_markdown_rs::types::TextAnnotation) -> Self {
+impl From<TextAnnotation> for html_to_markdown_rs::TextAnnotation {
+    fn from(val: TextAnnotation) -> Self {
+        let json = serde_json::to_string(&val).expect("alef: serialize binding type");
+        serde_json::from_str(&json).expect("alef: deserialize to core type")
+    }
+}
+
+impl From<html_to_markdown_rs::TextAnnotation> for TextAnnotation {
+    fn from(val: html_to_markdown_rs::TextAnnotation) -> Self {
         Self {
             start: val.start,
             end: val.end,
@@ -1505,8 +1586,28 @@ impl From<html_to_markdown_rs::types::TextAnnotation> for TextAnnotation {
     }
 }
 
-impl From<html_to_markdown_rs::types::TableGrid> for TableGrid {
-    fn from(val: html_to_markdown_rs::types::TableGrid) -> Self {
+impl From<ConversionResult> for html_to_markdown_rs::ConversionResult {
+    fn from(val: ConversionResult) -> Self {
+        let json = serde_json::to_string(&val).expect("alef: serialize binding type");
+        serde_json::from_str(&json).expect("alef: deserialize to core type")
+    }
+}
+
+impl From<html_to_markdown_rs::ConversionResult> for ConversionResult {
+    fn from(val: html_to_markdown_rs::ConversionResult) -> Self {
+        Self {
+            content: val.content,
+            document: val.document.map(Into::into),
+            metadata: val.metadata.into(),
+            tables: val.tables.into_iter().map(Into::into).collect(),
+            images: val.images.iter().map(|i| format!("{:?}", i)).collect(),
+            warnings: val.warnings.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+impl From<TableGrid> for html_to_markdown_rs::TableGrid {
+    fn from(val: TableGrid) -> Self {
         Self {
             rows: val.rows,
             cols: val.cols,
@@ -1515,8 +1616,18 @@ impl From<html_to_markdown_rs::types::TableGrid> for TableGrid {
     }
 }
 
-impl From<html_to_markdown_rs::types::GridCell> for GridCell {
-    fn from(val: html_to_markdown_rs::types::GridCell) -> Self {
+impl From<html_to_markdown_rs::TableGrid> for TableGrid {
+    fn from(val: html_to_markdown_rs::TableGrid) -> Self {
+        Self {
+            rows: val.rows,
+            cols: val.cols,
+            cells: val.cells.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+impl From<GridCell> for html_to_markdown_rs::GridCell {
+    fn from(val: GridCell) -> Self {
         Self {
             content: val.content,
             row: val.row,
@@ -1528,8 +1639,21 @@ impl From<html_to_markdown_rs::types::GridCell> for GridCell {
     }
 }
 
-impl From<html_to_markdown_rs::types::TableData> for TableData {
-    fn from(val: html_to_markdown_rs::types::TableData) -> Self {
+impl From<html_to_markdown_rs::GridCell> for GridCell {
+    fn from(val: html_to_markdown_rs::GridCell) -> Self {
+        Self {
+            content: val.content,
+            row: val.row,
+            col: val.col,
+            row_span: val.row_span,
+            col_span: val.col_span,
+            is_header: val.is_header,
+        }
+    }
+}
+
+impl From<TableData> for html_to_markdown_rs::TableData {
+    fn from(val: TableData) -> Self {
         Self {
             grid: val.grid.into(),
             markdown: val.markdown,
@@ -1537,8 +1661,24 @@ impl From<html_to_markdown_rs::types::TableData> for TableData {
     }
 }
 
-impl From<html_to_markdown_rs::types::ProcessingWarning> for ProcessingWarning {
-    fn from(val: html_to_markdown_rs::types::ProcessingWarning) -> Self {
+impl From<html_to_markdown_rs::TableData> for TableData {
+    fn from(val: html_to_markdown_rs::TableData) -> Self {
+        Self {
+            grid: val.grid.into(),
+            markdown: val.markdown,
+        }
+    }
+}
+
+impl From<ProcessingWarning> for html_to_markdown_rs::ProcessingWarning {
+    fn from(val: ProcessingWarning) -> Self {
+        let json = serde_json::to_string(&val).expect("alef: serialize binding type");
+        serde_json::from_str(&json).expect("alef: deserialize to core type")
+    }
+}
+
+impl From<html_to_markdown_rs::ProcessingWarning> for ProcessingWarning {
+    fn from(val: html_to_markdown_rs::ProcessingWarning) -> Self {
         Self {
             message: val.message,
             kind: serde_json::to_value(val.kind)
@@ -1596,10 +1736,10 @@ pub fn get_module(module: ModuleBuilder) -> ModuleBuilder {
         .class::<ConversionOptionsUpdate>()
         .class::<PreprocessingOptions>()
         .class::<PreprocessingOptionsUpdate>()
-        .class::<ConversionResult>()
         .class::<DocumentStructure>()
         .class::<DocumentNode>()
         .class::<TextAnnotation>()
+        .class::<ConversionResult>()
         .class::<TableGrid>()
         .class::<GridCell>()
         .class::<TableData>()

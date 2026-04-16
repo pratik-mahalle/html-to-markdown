@@ -1825,6 +1825,152 @@ public static boolean dispatchSemanticHandler(String tagName, NodeHandle nodeHan
 
 ---
 
+### escapeLinkLabel()
+
+Escape special characters in link labels.
+
+Markdown link labels can contain brackets, which need careful escaping to avoid
+being interpreted as nested links. This function escapes unescaped closing brackets
+that would break the link syntax.
+
+**Signature:**
+
+```java
+public static String escapeLinkLabel(String text)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `text` | `String` | Yes | The text |
+
+**Returns:** `String`
+
+
+---
+
+### escapeMalformedAngleBrackets()
+
+Escape malformed angle brackets in markdown output.
+
+Markdown uses `<...>` for automatic links. Angle brackets that don't form valid
+link syntax should be escaped as `&lt;` to prevent parser confusion.
+
+A valid tag must have:
+- `<!` followed by `-` or alphabetic character (for comments/declarations)
+- `</` followed by alphabetic character (for closing tags)
+- `<?` (for processing instructions)
+- `<` followed by alphabetic character (for opening tags)
+
+**Signature:**
+
+```java
+public static Str escapeMalformedAngleBrackets(String input)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `input` | `String` | Yes | The input data |
+
+**Returns:** `Str`
+
+
+---
+
+### trimLineEndWhitespace()
+
+Remove trailing spaces/tabs from every line while preserving newlines.
+
+**Signature:**
+
+```java
+public static void trimLineEndWhitespace(String output)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `output` | `String` | Yes | The output destination |
+
+**Returns:** `void`
+
+
+---
+
+### truncateAtCharBoundary()
+
+Truncate a string at a valid UTF-8 boundary.
+
+**Signature:**
+
+```java
+public static void truncateAtCharBoundary(String value, long maxLen)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `value` | `String` | Yes | The value |
+| `maxLen` | `long` | Yes | The max len |
+
+**Returns:** `void`
+
+
+---
+
+### normalizeHeadingText()
+
+Normalize heading text by replacing newlines and extra whitespace.
+
+Heading text should be on a single line in Markdown. This function collapses
+any newlines and multiple spaces into single spaces.
+
+**Signature:**
+
+```java
+public static Str normalizeHeadingText(String text)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `text` | `String` | Yes | The text |
+
+**Returns:** `Str`
+
+
+---
+
+### dedentCodeBlock()
+
+Remove common leading whitespace from all lines in a code block.
+
+This is useful when HTML authors indent `<pre>` content for readability,
+so we can strip the shared indentation without touching meaningful spacing.
+
+**Signature:**
+
+```java
+public static String dedentCodeBlock(String content)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `content` | `String` | Yes | The content to process |
+
+**Returns:** `String`
+
+
+---
+
 ### floorCharBoundary()
 
 Returns the largest valid char boundary index at or before `index`.
@@ -2624,6 +2770,95 @@ public ConversionOptions build()
 
 ---
 
+### DjotRenderer
+
+Renderer for Djot lightweight markup output.
+
+#### Methods
+
+##### emphasis()
+
+**Signature:**
+
+```java
+public String emphasis(String content)
+```
+
+##### strong()
+
+**Signature:**
+
+```java
+public String strong(String content, String symbol)
+```
+
+##### strikethrough()
+
+**Signature:**
+
+```java
+public String strikethrough(String content)
+```
+
+##### highlight()
+
+**Signature:**
+
+```java
+public String highlight(String content)
+```
+
+##### inserted()
+
+**Signature:**
+
+```java
+public String inserted(String content)
+```
+
+##### subscript()
+
+**Signature:**
+
+```java
+public String subscript(String content, String customSymbol)
+```
+
+##### superscript()
+
+**Signature:**
+
+```java
+public String superscript(String content, String customSymbol)
+```
+
+##### spanWithAttributes()
+
+**Signature:**
+
+```java
+public String spanWithAttributes(String content, List<String> classes, String id)
+```
+
+##### divWithAttributes()
+
+**Signature:**
+
+```java
+public String divWithAttributes(String content, List<String> classes)
+```
+
+##### isDjot()
+
+**Signature:**
+
+```java
+public boolean isDjot()
+```
+
+
+---
+
 ### DocumentMetadata
 
 Document-level metadata extracted from `<head>` and top-level elements.
@@ -2868,6 +3103,446 @@ suitable for serialization and transmission across language boundaries.
 
 ---
 
+### HtmlVisitor
+
+Visitor trait for HTML→Markdown conversion.
+
+Implement this trait to customize the conversion behavior for any HTML element type.
+All methods have default implementations that return `VisitResult.Continue`, allowing
+selective override of only the elements you care about.
+
+# Method Naming Convention
+
+- `visit_*_start`: Called before entering an element (pre-order traversal)
+- `visit_*_end`: Called after exiting an element (post-order traversal)
+- `visit_*`: Called for specific element types (e.g., `visit_link`, `visit_image`)
+
+# Execution Order
+
+For a typical element like `<div><p>text</p></div>`:
+1. `visit_element_start` for `<div>`
+2. `visit_element_start` for `<p>`
+3. `visit_text` for "text"
+4. `visit_element_end` for `<p>`
+5. `visit_element_end` for `</div>`
+
+# Performance Notes
+
+- `visit_text` is the most frequently called method (~100+ times per document)
+- Return `VisitResult.Continue` quickly for elements you don't need to customize
+- Avoid heavy computation in visitor methods; consider caching if needed
+
+#### Methods
+
+##### visitElementStart()
+
+Called before entering any element.
+
+This is the first callback invoked for every HTML element, allowing
+visitors to implement generic element handling before tag-specific logic.
+
+**Signature:**
+
+```java
+public VisitResult visitElementStart(NodeContext ctx)
+```
+
+##### visitElementEnd()
+
+Called after exiting any element.
+
+Receives the default markdown output that would be generated.
+Visitors can inspect or replace this output.
+
+**Signature:**
+
+```java
+public VisitResult visitElementEnd(NodeContext ctx, String output)
+```
+
+##### visitText()
+
+Visit text nodes (most frequent callback - ~100+ per document).
+
+**Signature:**
+
+```java
+public VisitResult visitText(NodeContext ctx, String text)
+```
+
+##### visitLink()
+
+Visit anchor links `<a href="...">`.
+
+**Signature:**
+
+```java
+public VisitResult visitLink(NodeContext ctx, String href, String text, String title)
+```
+
+##### visitImage()
+
+Visit images `<img src="...">`.
+
+**Signature:**
+
+```java
+public VisitResult visitImage(NodeContext ctx, String src, String alt, String title)
+```
+
+##### visitHeading()
+
+Visit heading elements `<h1>` through `<h6>`.
+
+**Signature:**
+
+```java
+public VisitResult visitHeading(NodeContext ctx, int level, String text, String id)
+```
+
+##### visitCodeBlock()
+
+Visit code blocks `<pre><code>`.
+
+**Signature:**
+
+```java
+public VisitResult visitCodeBlock(NodeContext ctx, String lang, String code)
+```
+
+##### visitCodeInline()
+
+Visit inline code `<code>`.
+
+**Signature:**
+
+```java
+public VisitResult visitCodeInline(NodeContext ctx, String code)
+```
+
+##### visitListItem()
+
+Visit list items `<li>`.
+
+**Signature:**
+
+```java
+public VisitResult visitListItem(NodeContext ctx, boolean ordered, String marker, String text)
+```
+
+##### visitListStart()
+
+Called before processing a list `<ul>` or `<ol>`.
+
+**Signature:**
+
+```java
+public VisitResult visitListStart(NodeContext ctx, boolean ordered)
+```
+
+##### visitListEnd()
+
+Called after processing a list `</ul>` or `</ol>`.
+
+**Signature:**
+
+```java
+public VisitResult visitListEnd(NodeContext ctx, boolean ordered, String output)
+```
+
+##### visitTableStart()
+
+Called before processing a table `<table>`.
+
+**Signature:**
+
+```java
+public VisitResult visitTableStart(NodeContext ctx)
+```
+
+##### visitTableRow()
+
+Visit table rows `<tr>`.
+
+**Signature:**
+
+```java
+public VisitResult visitTableRow(NodeContext ctx, List<String> cells, boolean isHeader)
+```
+
+##### visitTableEnd()
+
+Called after processing a table `</table>`.
+
+**Signature:**
+
+```java
+public VisitResult visitTableEnd(NodeContext ctx, String output)
+```
+
+##### visitBlockquote()
+
+Visit blockquote elements `<blockquote>`.
+
+**Signature:**
+
+```java
+public VisitResult visitBlockquote(NodeContext ctx, String content, long depth)
+```
+
+##### visitStrong()
+
+Visit strong/bold elements `<strong>`, `<b>`.
+
+**Signature:**
+
+```java
+public VisitResult visitStrong(NodeContext ctx, String text)
+```
+
+##### visitEmphasis()
+
+Visit emphasis/italic elements `<em>`, `<i>`.
+
+**Signature:**
+
+```java
+public VisitResult visitEmphasis(NodeContext ctx, String text)
+```
+
+##### visitStrikethrough()
+
+Visit strikethrough elements `<s>`, `<del>`, `<strike>`.
+
+**Signature:**
+
+```java
+public VisitResult visitStrikethrough(NodeContext ctx, String text)
+```
+
+##### visitUnderline()
+
+Visit underline elements `<u>`, `<ins>`.
+
+**Signature:**
+
+```java
+public VisitResult visitUnderline(NodeContext ctx, String text)
+```
+
+##### visitSubscript()
+
+Visit subscript elements `<sub>`.
+
+**Signature:**
+
+```java
+public VisitResult visitSubscript(NodeContext ctx, String text)
+```
+
+##### visitSuperscript()
+
+Visit superscript elements `<sup>`.
+
+**Signature:**
+
+```java
+public VisitResult visitSuperscript(NodeContext ctx, String text)
+```
+
+##### visitMark()
+
+Visit mark/highlight elements `<mark>`.
+
+**Signature:**
+
+```java
+public VisitResult visitMark(NodeContext ctx, String text)
+```
+
+##### visitLineBreak()
+
+Visit line break elements `<br>`.
+
+**Signature:**
+
+```java
+public VisitResult visitLineBreak(NodeContext ctx)
+```
+
+##### visitHorizontalRule()
+
+Visit horizontal rule elements `<hr>`.
+
+**Signature:**
+
+```java
+public VisitResult visitHorizontalRule(NodeContext ctx)
+```
+
+##### visitCustomElement()
+
+Visit custom elements (web components) or unknown tags.
+
+**Signature:**
+
+```java
+public VisitResult visitCustomElement(NodeContext ctx, String tagName, String html)
+```
+
+##### visitDefinitionListStart()
+
+Visit definition list `<dl>`.
+
+**Signature:**
+
+```java
+public VisitResult visitDefinitionListStart(NodeContext ctx)
+```
+
+##### visitDefinitionTerm()
+
+Visit definition term `<dt>`.
+
+**Signature:**
+
+```java
+public VisitResult visitDefinitionTerm(NodeContext ctx, String text)
+```
+
+##### visitDefinitionDescription()
+
+Visit definition description `<dd>`.
+
+**Signature:**
+
+```java
+public VisitResult visitDefinitionDescription(NodeContext ctx, String text)
+```
+
+##### visitDefinitionListEnd()
+
+Called after processing a definition list `</dl>`.
+
+**Signature:**
+
+```java
+public VisitResult visitDefinitionListEnd(NodeContext ctx, String output)
+```
+
+##### visitForm()
+
+Visit form elements `<form>`.
+
+**Signature:**
+
+```java
+public VisitResult visitForm(NodeContext ctx, String action, String method)
+```
+
+##### visitInput()
+
+Visit input elements `<input>`.
+
+**Signature:**
+
+```java
+public VisitResult visitInput(NodeContext ctx, String inputType, String name, String value)
+```
+
+##### visitButton()
+
+Visit button elements `<button>`.
+
+**Signature:**
+
+```java
+public VisitResult visitButton(NodeContext ctx, String text)
+```
+
+##### visitAudio()
+
+Visit audio elements `<audio>`.
+
+**Signature:**
+
+```java
+public VisitResult visitAudio(NodeContext ctx, String src)
+```
+
+##### visitVideo()
+
+Visit video elements `<video>`.
+
+**Signature:**
+
+```java
+public VisitResult visitVideo(NodeContext ctx, String src)
+```
+
+##### visitIframe()
+
+Visit iframe elements `<iframe>`.
+
+**Signature:**
+
+```java
+public VisitResult visitIframe(NodeContext ctx, String src)
+```
+
+##### visitDetails()
+
+Visit details elements `<details>`.
+
+**Signature:**
+
+```java
+public VisitResult visitDetails(NodeContext ctx, boolean open)
+```
+
+##### visitSummary()
+
+Visit summary elements `<summary>`.
+
+**Signature:**
+
+```java
+public VisitResult visitSummary(NodeContext ctx, String text)
+```
+
+##### visitFigureStart()
+
+Visit figure elements `<figure>`.
+
+**Signature:**
+
+```java
+public VisitResult visitFigureStart(NodeContext ctx)
+```
+
+##### visitFigcaption()
+
+Visit figcaption elements `<figcaption>`.
+
+**Signature:**
+
+```java
+public VisitResult visitFigcaption(NodeContext ctx, String text)
+```
+
+##### visitFigureEnd()
+
+Called after processing a figure `</figure>`.
+
+**Signature:**
+
+```java
+public VisitResult visitFigureEnd(NodeContext ctx, String output)
+```
+
+
+---
+
 ### ImageMetadata
 
 Image metadata with source and dimensions.
@@ -2993,6 +3668,95 @@ public static LinkType classifyLink(String href)
 
 ---
 
+### MarkdownRenderer
+
+Renderer for standard Markdown output.
+
+#### Methods
+
+##### emphasis()
+
+**Signature:**
+
+```java
+public String emphasis(String content)
+```
+
+##### strong()
+
+**Signature:**
+
+```java
+public String strong(String content, String symbol)
+```
+
+##### strikethrough()
+
+**Signature:**
+
+```java
+public String strikethrough(String content)
+```
+
+##### highlight()
+
+**Signature:**
+
+```java
+public String highlight(String content)
+```
+
+##### inserted()
+
+**Signature:**
+
+```java
+public String inserted(String content)
+```
+
+##### subscript()
+
+**Signature:**
+
+```java
+public String subscript(String content, String customSymbol)
+```
+
+##### superscript()
+
+**Signature:**
+
+```java
+public String superscript(String content, String customSymbol)
+```
+
+##### spanWithAttributes()
+
+**Signature:**
+
+```java
+public String spanWithAttributes(String content, List<String> classes, String id)
+```
+
+##### divWithAttributes()
+
+**Signature:**
+
+```java
+public String divWithAttributes(String content, List<String> classes)
+```
+
+##### isDjot()
+
+**Signature:**
+
+```java
+public boolean isDjot()
+```
+
+
+---
+
 ### MetadataCollector
 
 Internal metadata collector for single-pass extraction.
@@ -3105,6 +3869,26 @@ public static MetadataConfig fromUpdate(MetadataConfigUpdate update)
 ```java
 public static MetadataConfig from(MetadataConfigUpdate update)
 ```
+
+
+---
+
+### NodeContext
+
+Context information passed to all visitor methods.
+
+Provides comprehensive metadata about the current node being visited,
+including its type, attributes, position in the DOM tree, and parent context.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `nodeType` | `NodeType` | — | Coarse-grained node type classification |
+| `tagName` | `String` | — | Raw HTML tag name (e.g., "div", "h1", "custom-element") |
+| `attributes` | `Map<String, String>` | — | All HTML attributes as key-value pairs |
+| `depth` | `long` | — | Depth in the DOM tree (0 = root) |
+| `indexInParent` | `long` | — | Index among siblings (0-based) |
+| `parentTag` | `Optional<String>` | `null` | Parent element's tag name (None if root) |
+| `isInline` | `boolean` | — | Whether this element is treated as inline vs block |
 
 
 ---
@@ -3469,6 +4253,15 @@ Annotations describe formatting (bold, italic, etc.) and links within a node's t
 
 ---
 
+### VisitorHandle
+
+Type alias for a visitor handle (Rc-wrapped `RefCell` for interior mutability).
+
+This allows visitors to be passed around and shared while still being mutable.
+
+
+---
+
 ## Enums
 
 ### VisitAction
@@ -3682,24 +4475,6 @@ Specifies the target markup language format for the conversion output.
 
 ---
 
-### VisitorDispatch
-
-Result of dispatching a visitor callback.
-
-This enum represents the outcome of a visitor callback dispatch,
-providing a more ergonomic interface for control flow than the
-raw `VisitResult` type.
-
-| Value | Description |
-|-------|-------------|
-| `CONTINUE` | Continue with default conversion behavior |
-| `CUSTOM` | Replace default output with custom markdown — Fields: `0`: `String` |
-| `SKIP` | Skip this element entirely (don't output anything) |
-| `PRESERVE_HTML` | Preserve original HTML (don't convert to markdown) |
-
-
----
-
 ### NodeContent
 
 The semantic content type of a document node.
@@ -3757,6 +4532,144 @@ Categories of processing warnings.
 | `TRUNCATED_INPUT` | The input was truncated due to size limits. |
 | `MALFORMED_HTML` | The HTML was malformed but processing continued with best effort. |
 | `SANITIZATION_APPLIED` | Sanitization was applied to remove potentially unsafe content. |
+
+
+---
+
+### NodeType
+
+Node type enumeration covering all HTML element types.
+
+This enum categorizes all HTML elements that the converter recognizes,
+providing a coarse-grained classification for visitor dispatch.
+
+| Value | Description |
+|-------|-------------|
+| `TEXT` | Text node (most frequent - 100+ per document) |
+| `ELEMENT` | Generic element node |
+| `HEADING` | Heading elements (h1-h6) |
+| `PARAGRAPH` | Paragraph element |
+| `DIV` | Generic div container |
+| `BLOCKQUOTE` | Blockquote element |
+| `PRE` | Preformatted text block |
+| `HR` | Horizontal rule |
+| `LIST` | Ordered or unordered list (ul, ol) |
+| `LIST_ITEM` | List item (li) |
+| `DEFINITION_LIST` | Definition list (dl) |
+| `DEFINITION_TERM` | Definition term (dt) |
+| `DEFINITION_DESCRIPTION` | Definition description (dd) |
+| `TABLE` | Table element |
+| `TABLE_ROW` | Table row (tr) |
+| `TABLE_CELL` | Table cell (td, th) |
+| `TABLE_HEADER` | Table header cell (th) |
+| `TABLE_BODY` | Table body (tbody) |
+| `TABLE_HEAD` | Table head (thead) |
+| `TABLE_FOOT` | Table foot (tfoot) |
+| `LINK` | Anchor link (a) |
+| `IMAGE` | Image (img) |
+| `STRONG` | Strong/bold (strong, b) |
+| `EM` | Emphasis/italic (em, i) |
+| `CODE` | Inline code (code) |
+| `STRIKETHROUGH` | Strikethrough (s, del, strike) |
+| `UNDERLINE` | Underline (u, ins) |
+| `SUBSCRIPT` | Subscript (sub) |
+| `SUPERSCRIPT` | Superscript (sup) |
+| `MARK` | Mark/highlight (mark) |
+| `SMALL` | Small text (small) |
+| `BR` | Line break (br) |
+| `SPAN` | Span element |
+| `ARTICLE` | Article element |
+| `SECTION` | Section element |
+| `NAV` | Navigation element |
+| `ASIDE` | Aside element |
+| `HEADER` | Header element |
+| `FOOTER` | Footer element |
+| `MAIN` | Main element |
+| `FIGURE` | Figure element |
+| `FIGCAPTION` | Figure caption |
+| `TIME` | Time element |
+| `DETAILS` | Details element |
+| `SUMMARY` | Summary element |
+| `FORM` | Form element |
+| `INPUT` | Input element |
+| `SELECT` | Select element |
+| `OPTION` | Option element |
+| `BUTTON` | Button element |
+| `TEXTAREA` | Textarea element |
+| `LABEL` | Label element |
+| `FIELDSET` | Fieldset element |
+| `LEGEND` | Legend element |
+| `AUDIO` | Audio element |
+| `VIDEO` | Video element |
+| `PICTURE` | Picture element |
+| `SOURCE` | Source element |
+| `IFRAME` | Iframe element |
+| `SVG` | SVG element |
+| `CANVAS` | Canvas element |
+| `RUBY` | Ruby annotation |
+| `RT` | Ruby text |
+| `RP` | Ruby parenthesis |
+| `ABBR` | Abbreviation |
+| `KBD` | Keyboard input |
+| `SAMP` | Sample output |
+| `VAR` | Variable |
+| `CITE` | Citation |
+| `Q` | Quote |
+| `DEL` | Deleted text |
+| `INS` | Inserted text |
+| `DATA` | Data element |
+| `METER` | Meter element |
+| `PROGRESS` | Progress element |
+| `OUTPUT` | Output element |
+| `TEMPLATE` | Template element |
+| `SLOT` | Slot element |
+| `HTML` | HTML root element |
+| `HEAD` | Head element |
+| `BODY` | Body element |
+| `TITLE` | Title element |
+| `META` | Meta element |
+| `LINK_TAG` | Link element (not anchor) |
+| `STYLE` | Style element |
+| `SCRIPT` | Script element |
+| `BASE` | Base element |
+| `CUSTOM` | Custom element (web components) or unknown tag |
+
+
+---
+
+### VisitResult
+
+Result of a visitor callback.
+
+Allows visitors to control the conversion flow by either proceeding
+with default behavior, providing custom output, skipping elements,
+preserving HTML, or signaling errors.
+
+| Value | Description |
+|-------|-------------|
+| `CONTINUE` | Continue with default conversion behavior |
+| `CUSTOM` | Replace default output with custom markdown The visitor takes full responsibility for the markdown output of this node and its children. — Fields: `0`: `String` |
+| `SKIP` | Skip this element entirely (don't output anything) The element and all its children are ignored in the output. |
+| `PRESERVE_HTML` | Preserve original HTML (don't convert to markdown) The element's raw HTML is included verbatim in the output. |
+| `ERROR` | Stop conversion with an error The conversion process halts and returns this error message. — Fields: `0`: `String` |
+
+
+---
+
+### VisitorDispatch
+
+Result of dispatching a visitor callback.
+
+This enum represents the outcome of a visitor callback dispatch,
+providing a more ergonomic interface for control flow than the
+raw `VisitResult` type.
+
+| Value | Description |
+|-------|-------------|
+| `CONTINUE` | Continue with default conversion behavior |
+| `CUSTOM` | Replace default output with custom markdown — Fields: `0`: `String` |
+| `SKIP` | Skip this element entirely (don't output anything) |
+| `PRESERVE_HTML` | Preserve original HTML (don't convert to markdown) |
 
 
 ---

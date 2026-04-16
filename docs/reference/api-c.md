@@ -1825,6 +1825,152 @@ bool htm_dispatch_semantic_handler(const char* tag_name, HtmNodeHandle node_hand
 
 ---
 
+### htm_escape_link_label()
+
+Escape special characters in link labels.
+
+Markdown link labels can contain brackets, which need careful escaping to avoid
+being interpreted as nested links. This function escapes unescaped closing brackets
+that would break the link syntax.
+
+**Signature:**
+
+```c
+const char* htm_escape_link_label(const char* text);
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `text` | `const char*` | Yes | The text |
+
+**Returns:** `const char*`
+
+
+---
+
+### htm_escape_malformed_angle_brackets()
+
+Escape malformed angle brackets in markdown output.
+
+Markdown uses `<...>` for automatic links. Angle brackets that don't form valid
+link syntax should be escaped as `&lt;` to prevent parser confusion.
+
+A valid tag must have:
+- `<!` followed by `-` or alphabetic character (for comments/declarations)
+- `</` followed by alphabetic character (for closing tags)
+- `<?` (for processing instructions)
+- `<` followed by alphabetic character (for opening tags)
+
+**Signature:**
+
+```c
+HtmStr* htm_escape_malformed_angle_brackets(const char* input);
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `input` | `const char*` | Yes | The input data |
+
+**Returns:** `HtmStr`
+
+
+---
+
+### htm_trim_line_end_whitespace()
+
+Remove trailing spaces/tabs from every line while preserving newlines.
+
+**Signature:**
+
+```c
+void htm_trim_line_end_whitespace(const char* output);
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `output` | `const char*` | Yes | The output destination |
+
+**Returns:** `void`
+
+
+---
+
+### htm_truncate_at_char_boundary()
+
+Truncate a string at a valid UTF-8 boundary.
+
+**Signature:**
+
+```c
+void htm_truncate_at_char_boundary(const char* value, uintptr_t max_len);
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `value` | `const char*` | Yes | The value |
+| `max_len` | `uintptr_t` | Yes | The max len |
+
+**Returns:** `void`
+
+
+---
+
+### htm_normalize_heading_text()
+
+Normalize heading text by replacing newlines and extra whitespace.
+
+Heading text should be on a single line in Markdown. This function collapses
+any newlines and multiple spaces into single spaces.
+
+**Signature:**
+
+```c
+HtmStr* htm_normalize_heading_text(const char* text);
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `text` | `const char*` | Yes | The text |
+
+**Returns:** `HtmStr`
+
+
+---
+
+### htm_dedent_code_block()
+
+Remove common leading whitespace from all lines in a code block.
+
+This is useful when HTML authors indent `<pre>` content for readability,
+so we can strip the shared indentation without touching meaningful spacing.
+
+**Signature:**
+
+```c
+const char* htm_dedent_code_block(const char* content);
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `content` | `const char*` | Yes | The content to process |
+
+**Returns:** `const char*`
+
+
+---
+
 ### htm_floor_char_boundary()
 
 Returns the largest valid char boundary index at or before `index`.
@@ -2624,6 +2770,95 @@ HtmConversionOptions htm_build();
 
 ---
 
+### HtmDjotRenderer
+
+Renderer for Djot lightweight markup output.
+
+#### Methods
+
+##### htm_emphasis()
+
+**Signature:**
+
+```c
+const char* htm_emphasis(const char* content);
+```
+
+##### htm_strong()
+
+**Signature:**
+
+```c
+const char* htm_strong(const char* content, const char* symbol);
+```
+
+##### htm_strikethrough()
+
+**Signature:**
+
+```c
+const char* htm_strikethrough(const char* content);
+```
+
+##### htm_highlight()
+
+**Signature:**
+
+```c
+const char* htm_highlight(const char* content);
+```
+
+##### htm_inserted()
+
+**Signature:**
+
+```c
+const char* htm_inserted(const char* content);
+```
+
+##### htm_subscript()
+
+**Signature:**
+
+```c
+const char* htm_subscript(const char* content, const char* custom_symbol);
+```
+
+##### htm_superscript()
+
+**Signature:**
+
+```c
+const char* htm_superscript(const char* content, const char* custom_symbol);
+```
+
+##### htm_span_with_attributes()
+
+**Signature:**
+
+```c
+const char* htm_span_with_attributes(const char* content, const char** classes, const char* id);
+```
+
+##### htm_div_with_attributes()
+
+**Signature:**
+
+```c
+const char* htm_div_with_attributes(const char* content, const char** classes);
+```
+
+##### htm_is_djot()
+
+**Signature:**
+
+```c
+bool htm_is_djot();
+```
+
+
+---
+
 ### HtmDocumentMetadata
 
 Document-level metadata extracted from `<head>` and top-level elements.
@@ -2868,6 +3103,446 @@ suitable for serialization and transmission across language boundaries.
 
 ---
 
+### HtmHtmlVisitor
+
+Visitor trait for HTML→Markdown conversion.
+
+Implement this trait to customize the conversion behavior for any HTML element type.
+All methods have default implementations that return `VisitResult.Continue`, allowing
+selective override of only the elements you care about.
+
+# Method Naming Convention
+
+- `visit_*_start`: Called before entering an element (pre-order traversal)
+- `visit_*_end`: Called after exiting an element (post-order traversal)
+- `visit_*`: Called for specific element types (e.g., `visit_link`, `visit_image`)
+
+# Execution Order
+
+For a typical element like `<div><p>text</p></div>`:
+1. `visit_element_start` for `<div>`
+2. `visit_element_start` for `<p>`
+3. `visit_text` for "text"
+4. `visit_element_end` for `<p>`
+5. `visit_element_end` for `</div>`
+
+# Performance Notes
+
+- `visit_text` is the most frequently called method (~100+ times per document)
+- Return `VisitResult.Continue` quickly for elements you don't need to customize
+- Avoid heavy computation in visitor methods; consider caching if needed
+
+#### Methods
+
+##### htm_visit_element_start()
+
+Called before entering any element.
+
+This is the first callback invoked for every HTML element, allowing
+visitors to implement generic element handling before tag-specific logic.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_element_start(HtmNodeContext ctx);
+```
+
+##### htm_visit_element_end()
+
+Called after exiting any element.
+
+Receives the default markdown output that would be generated.
+Visitors can inspect or replace this output.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_element_end(HtmNodeContext ctx, const char* output);
+```
+
+##### htm_visit_text()
+
+Visit text nodes (most frequent callback - ~100+ per document).
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_text(HtmNodeContext ctx, const char* text);
+```
+
+##### htm_visit_link()
+
+Visit anchor links `<a href="...">`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_link(HtmNodeContext ctx, const char* href, const char* text, const char* title);
+```
+
+##### htm_visit_image()
+
+Visit images `<img src="...">`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_image(HtmNodeContext ctx, const char* src, const char* alt, const char* title);
+```
+
+##### htm_visit_heading()
+
+Visit heading elements `<h1>` through `<h6>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_heading(HtmNodeContext ctx, uint32_t level, const char* text, const char* id);
+```
+
+##### htm_visit_code_block()
+
+Visit code blocks `<pre><code>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_code_block(HtmNodeContext ctx, const char* lang, const char* code);
+```
+
+##### htm_visit_code_inline()
+
+Visit inline code `<code>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_code_inline(HtmNodeContext ctx, const char* code);
+```
+
+##### htm_visit_list_item()
+
+Visit list items `<li>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_list_item(HtmNodeContext ctx, bool ordered, const char* marker, const char* text);
+```
+
+##### htm_visit_list_start()
+
+Called before processing a list `<ul>` or `<ol>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_list_start(HtmNodeContext ctx, bool ordered);
+```
+
+##### htm_visit_list_end()
+
+Called after processing a list `</ul>` or `</ol>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_list_end(HtmNodeContext ctx, bool ordered, const char* output);
+```
+
+##### htm_visit_table_start()
+
+Called before processing a table `<table>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_table_start(HtmNodeContext ctx);
+```
+
+##### htm_visit_table_row()
+
+Visit table rows `<tr>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_table_row(HtmNodeContext ctx, const char** cells, bool is_header);
+```
+
+##### htm_visit_table_end()
+
+Called after processing a table `</table>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_table_end(HtmNodeContext ctx, const char* output);
+```
+
+##### htm_visit_blockquote()
+
+Visit blockquote elements `<blockquote>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_blockquote(HtmNodeContext ctx, const char* content, uintptr_t depth);
+```
+
+##### htm_visit_strong()
+
+Visit strong/bold elements `<strong>`, `<b>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_strong(HtmNodeContext ctx, const char* text);
+```
+
+##### htm_visit_emphasis()
+
+Visit emphasis/italic elements `<em>`, `<i>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_emphasis(HtmNodeContext ctx, const char* text);
+```
+
+##### htm_visit_strikethrough()
+
+Visit strikethrough elements `<s>`, `<del>`, `<strike>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_strikethrough(HtmNodeContext ctx, const char* text);
+```
+
+##### htm_visit_underline()
+
+Visit underline elements `<u>`, `<ins>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_underline(HtmNodeContext ctx, const char* text);
+```
+
+##### htm_visit_subscript()
+
+Visit subscript elements `<sub>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_subscript(HtmNodeContext ctx, const char* text);
+```
+
+##### htm_visit_superscript()
+
+Visit superscript elements `<sup>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_superscript(HtmNodeContext ctx, const char* text);
+```
+
+##### htm_visit_mark()
+
+Visit mark/highlight elements `<mark>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_mark(HtmNodeContext ctx, const char* text);
+```
+
+##### htm_visit_line_break()
+
+Visit line break elements `<br>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_line_break(HtmNodeContext ctx);
+```
+
+##### htm_visit_horizontal_rule()
+
+Visit horizontal rule elements `<hr>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_horizontal_rule(HtmNodeContext ctx);
+```
+
+##### htm_visit_custom_element()
+
+Visit custom elements (web components) or unknown tags.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_custom_element(HtmNodeContext ctx, const char* tag_name, const char* html);
+```
+
+##### htm_visit_definition_list_start()
+
+Visit definition list `<dl>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_definition_list_start(HtmNodeContext ctx);
+```
+
+##### htm_visit_definition_term()
+
+Visit definition term `<dt>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_definition_term(HtmNodeContext ctx, const char* text);
+```
+
+##### htm_visit_definition_description()
+
+Visit definition description `<dd>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_definition_description(HtmNodeContext ctx, const char* text);
+```
+
+##### htm_visit_definition_list_end()
+
+Called after processing a definition list `</dl>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_definition_list_end(HtmNodeContext ctx, const char* output);
+```
+
+##### htm_visit_form()
+
+Visit form elements `<form>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_form(HtmNodeContext ctx, const char* action, const char* method);
+```
+
+##### htm_visit_input()
+
+Visit input elements `<input>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_input(HtmNodeContext ctx, const char* input_type, const char* name, const char* value);
+```
+
+##### htm_visit_button()
+
+Visit button elements `<button>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_button(HtmNodeContext ctx, const char* text);
+```
+
+##### htm_visit_audio()
+
+Visit audio elements `<audio>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_audio(HtmNodeContext ctx, const char* src);
+```
+
+##### htm_visit_video()
+
+Visit video elements `<video>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_video(HtmNodeContext ctx, const char* src);
+```
+
+##### htm_visit_iframe()
+
+Visit iframe elements `<iframe>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_iframe(HtmNodeContext ctx, const char* src);
+```
+
+##### htm_visit_details()
+
+Visit details elements `<details>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_details(HtmNodeContext ctx, bool open);
+```
+
+##### htm_visit_summary()
+
+Visit summary elements `<summary>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_summary(HtmNodeContext ctx, const char* text);
+```
+
+##### htm_visit_figure_start()
+
+Visit figure elements `<figure>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_figure_start(HtmNodeContext ctx);
+```
+
+##### htm_visit_figcaption()
+
+Visit figcaption elements `<figcaption>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_figcaption(HtmNodeContext ctx, const char* text);
+```
+
+##### htm_visit_figure_end()
+
+Called after processing a figure `</figure>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_figure_end(HtmNodeContext ctx, const char* output);
+```
+
+
+---
+
 ### HtmImageMetadata
 
 Image metadata with source and dimensions.
@@ -2993,6 +3668,95 @@ HtmLinkType htm_classify_link(const char* href);
 
 ---
 
+### HtmMarkdownRenderer
+
+Renderer for standard Markdown output.
+
+#### Methods
+
+##### htm_emphasis()
+
+**Signature:**
+
+```c
+const char* htm_emphasis(const char* content);
+```
+
+##### htm_strong()
+
+**Signature:**
+
+```c
+const char* htm_strong(const char* content, const char* symbol);
+```
+
+##### htm_strikethrough()
+
+**Signature:**
+
+```c
+const char* htm_strikethrough(const char* content);
+```
+
+##### htm_highlight()
+
+**Signature:**
+
+```c
+const char* htm_highlight(const char* content);
+```
+
+##### htm_inserted()
+
+**Signature:**
+
+```c
+const char* htm_inserted(const char* content);
+```
+
+##### htm_subscript()
+
+**Signature:**
+
+```c
+const char* htm_subscript(const char* content, const char* custom_symbol);
+```
+
+##### htm_superscript()
+
+**Signature:**
+
+```c
+const char* htm_superscript(const char* content, const char* custom_symbol);
+```
+
+##### htm_span_with_attributes()
+
+**Signature:**
+
+```c
+const char* htm_span_with_attributes(const char* content, const char** classes, const char* id);
+```
+
+##### htm_div_with_attributes()
+
+**Signature:**
+
+```c
+const char* htm_div_with_attributes(const char* content, const char** classes);
+```
+
+##### htm_is_djot()
+
+**Signature:**
+
+```c
+bool htm_is_djot();
+```
+
+
+---
+
 ### HtmMetadataCollector
 
 Internal metadata collector for single-pass extraction.
@@ -3105,6 +3869,26 @@ HtmMetadataConfig htm_from_update(HtmMetadataConfigUpdate update);
 ```c
 HtmMetadataConfig htm_from(HtmMetadataConfigUpdate update);
 ```
+
+
+---
+
+### HtmNodeContext
+
+Context information passed to all visitor methods.
+
+Provides comprehensive metadata about the current node being visited,
+including its type, attributes, position in the DOM tree, and parent context.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `node_type` | `HtmNodeType` | — | Coarse-grained node type classification |
+| `tag_name` | `const char*` | — | Raw HTML tag name (e.g., "div", "h1", "custom-element") |
+| `attributes` | `void*` | — | All HTML attributes as key-value pairs |
+| `depth` | `uintptr_t` | — | Depth in the DOM tree (0 = root) |
+| `index_in_parent` | `uintptr_t` | — | Index among siblings (0-based) |
+| `parent_tag` | `const char**` | `NULL` | Parent element's tag name (None if root) |
+| `is_inline` | `bool` | — | Whether this element is treated as inline vs block |
 
 
 ---
@@ -3469,6 +4253,15 @@ Annotations describe formatting (bold, italic, etc.) and links within a node's t
 
 ---
 
+### HtmVisitorHandle
+
+Type alias for a visitor handle (Rc-wrapped `RefCell` for interior mutability).
+
+This allows visitors to be passed around and shared while still being mutable.
+
+
+---
+
 ## Enums
 
 ### HtmVisitAction
@@ -3682,24 +4475,6 @@ Specifies the target markup language format for the conversion output.
 
 ---
 
-### HtmVisitorDispatch
-
-Result of dispatching a visitor callback.
-
-This enum represents the outcome of a visitor callback dispatch,
-providing a more ergonomic interface for control flow than the
-raw `VisitResult` type.
-
-| Value | Description |
-|-------|-------------|
-| `HTM_CONTINUE` | Continue with default conversion behavior |
-| `HTM_CUSTOM` | Replace default output with custom markdown — Fields: `0`: `const char*` |
-| `HTM_SKIP` | Skip this element entirely (don't output anything) |
-| `HTM_PRESERVE_HTML` | Preserve original HTML (don't convert to markdown) |
-
-
----
-
 ### HtmNodeContent
 
 The semantic content type of a document node.
@@ -3757,6 +4532,144 @@ Categories of processing warnings.
 | `HTM_TRUNCATED_INPUT` | The input was truncated due to size limits. |
 | `HTM_MALFORMED_HTML` | The HTML was malformed but processing continued with best effort. |
 | `HTM_SANITIZATION_APPLIED` | Sanitization was applied to remove potentially unsafe content. |
+
+
+---
+
+### HtmNodeType
+
+Node type enumeration covering all HTML element types.
+
+This enum categorizes all HTML elements that the converter recognizes,
+providing a coarse-grained classification for visitor dispatch.
+
+| Value | Description |
+|-------|-------------|
+| `HTM_TEXT` | Text node (most frequent - 100+ per document) |
+| `HTM_ELEMENT` | Generic element node |
+| `HTM_HEADING` | Heading elements (h1-h6) |
+| `HTM_PARAGRAPH` | Paragraph element |
+| `HTM_DIV` | Generic div container |
+| `HTM_BLOCKQUOTE` | Blockquote element |
+| `HTM_PRE` | Preformatted text block |
+| `HTM_HR` | Horizontal rule |
+| `HTM_LIST` | Ordered or unordered list (ul, ol) |
+| `HTM_LIST_ITEM` | List item (li) |
+| `HTM_DEFINITION_LIST` | Definition list (dl) |
+| `HTM_DEFINITION_TERM` | Definition term (dt) |
+| `HTM_DEFINITION_DESCRIPTION` | Definition description (dd) |
+| `HTM_TABLE` | Table element |
+| `HTM_TABLE_ROW` | Table row (tr) |
+| `HTM_TABLE_CELL` | Table cell (td, th) |
+| `HTM_TABLE_HEADER` | Table header cell (th) |
+| `HTM_TABLE_BODY` | Table body (tbody) |
+| `HTM_TABLE_HEAD` | Table head (thead) |
+| `HTM_TABLE_FOOT` | Table foot (tfoot) |
+| `HTM_LINK` | Anchor link (a) |
+| `HTM_IMAGE` | Image (img) |
+| `HTM_STRONG` | Strong/bold (strong, b) |
+| `HTM_EM` | Emphasis/italic (em, i) |
+| `HTM_CODE` | Inline code (code) |
+| `HTM_STRIKETHROUGH` | Strikethrough (s, del, strike) |
+| `HTM_UNDERLINE` | Underline (u, ins) |
+| `HTM_SUBSCRIPT` | Subscript (sub) |
+| `HTM_SUPERSCRIPT` | Superscript (sup) |
+| `HTM_MARK` | Mark/highlight (mark) |
+| `HTM_SMALL` | Small text (small) |
+| `HTM_BR` | Line break (br) |
+| `HTM_SPAN` | Span element |
+| `HTM_ARTICLE` | Article element |
+| `HTM_SECTION` | Section element |
+| `HTM_NAV` | Navigation element |
+| `HTM_ASIDE` | Aside element |
+| `HTM_HEADER` | Header element |
+| `HTM_FOOTER` | Footer element |
+| `HTM_MAIN` | Main element |
+| `HTM_FIGURE` | Figure element |
+| `HTM_FIGCAPTION` | Figure caption |
+| `HTM_TIME` | Time element |
+| `HTM_DETAILS` | Details element |
+| `HTM_SUMMARY` | Summary element |
+| `HTM_FORM` | Form element |
+| `HTM_INPUT` | Input element |
+| `HTM_SELECT` | Select element |
+| `HTM_OPTION` | Option element |
+| `HTM_BUTTON` | Button element |
+| `HTM_TEXTAREA` | Textarea element |
+| `HTM_LABEL` | Label element |
+| `HTM_FIELDSET` | Fieldset element |
+| `HTM_LEGEND` | Legend element |
+| `HTM_AUDIO` | Audio element |
+| `HTM_VIDEO` | Video element |
+| `HTM_PICTURE` | Picture element |
+| `HTM_SOURCE` | Source element |
+| `HTM_IFRAME` | Iframe element |
+| `HTM_SVG` | SVG element |
+| `HTM_CANVAS` | Canvas element |
+| `HTM_RUBY` | Ruby annotation |
+| `HTM_RT` | Ruby text |
+| `HTM_RP` | Ruby parenthesis |
+| `HTM_ABBR` | Abbreviation |
+| `HTM_KBD` | Keyboard input |
+| `HTM_SAMP` | Sample output |
+| `HTM_VAR` | Variable |
+| `HTM_CITE` | Citation |
+| `HTM_Q` | Quote |
+| `HTM_DEL` | Deleted text |
+| `HTM_INS` | Inserted text |
+| `HTM_DATA` | Data element |
+| `HTM_METER` | Meter element |
+| `HTM_PROGRESS` | Progress element |
+| `HTM_OUTPUT` | Output element |
+| `HTM_TEMPLATE` | Template element |
+| `HTM_SLOT` | Slot element |
+| `HTM_HTML` | HTML root element |
+| `HTM_HEAD` | Head element |
+| `HTM_BODY` | Body element |
+| `HTM_TITLE` | Title element |
+| `HTM_META` | Meta element |
+| `HTM_LINK_TAG` | Link element (not anchor) |
+| `HTM_STYLE` | Style element |
+| `HTM_SCRIPT` | Script element |
+| `HTM_BASE` | Base element |
+| `HTM_CUSTOM` | Custom element (web components) or unknown tag |
+
+
+---
+
+### HtmVisitResult
+
+Result of a visitor callback.
+
+Allows visitors to control the conversion flow by either proceeding
+with default behavior, providing custom output, skipping elements,
+preserving HTML, or signaling errors.
+
+| Value | Description |
+|-------|-------------|
+| `HTM_CONTINUE` | Continue with default conversion behavior |
+| `HTM_CUSTOM` | Replace default output with custom markdown The visitor takes full responsibility for the markdown output of this node and its children. — Fields: `0`: `const char*` |
+| `HTM_SKIP` | Skip this element entirely (don't output anything) The element and all its children are ignored in the output. |
+| `HTM_PRESERVE_HTML` | Preserve original HTML (don't convert to markdown) The element's raw HTML is included verbatim in the output. |
+| `HTM_ERROR` | Stop conversion with an error The conversion process halts and returns this error message. — Fields: `0`: `const char*` |
+
+
+---
+
+### HtmVisitorDispatch
+
+Result of dispatching a visitor callback.
+
+This enum represents the outcome of a visitor callback dispatch,
+providing a more ergonomic interface for control flow than the
+raw `VisitResult` type.
+
+| Value | Description |
+|-------|-------------|
+| `HTM_CONTINUE` | Continue with default conversion behavior |
+| `HTM_CUSTOM` | Replace default output with custom markdown — Fields: `0`: `const char*` |
+| `HTM_SKIP` | Skip this element entirely (don't output anything) |
+| `HTM_PRESERVE_HTML` | Preserve original HTML (don't convert to markdown) |
 
 
 ---

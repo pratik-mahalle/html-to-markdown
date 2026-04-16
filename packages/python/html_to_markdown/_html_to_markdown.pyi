@@ -346,23 +346,6 @@ class PreprocessingOptionsUpdate:
         remove_forms: bool | None = None,
     ) -> None: ...
 
-class ConversionResult:
-    content: str | None
-    document: DocumentStructure | None
-    metadata: HtmlMetadata
-    tables: list[TableData]
-    images: list[str]
-    warnings: list[ProcessingWarning]
-    def __init__(
-        self,
-        metadata: HtmlMetadata,
-        tables: list[TableData],
-        images: list[str],
-        warnings: list[ProcessingWarning],
-        content: str | None = None,
-        document: DocumentStructure | None = None,
-    ) -> None: ...
-
 class DocumentStructure:
     nodes: list[DocumentNode]
     source_format: str | None
@@ -390,6 +373,23 @@ class TextAnnotation:
     end: int
     kind: AnnotationKind
     def __init__(self, start: int, end: int, kind: AnnotationKind | dict[str, Any]) -> None: ...
+
+class ConversionResult:
+    content: str | None
+    document: DocumentStructure | None
+    metadata: HtmlMetadata
+    tables: list[TableData]
+    images: list[str]
+    warnings: list[ProcessingWarning]
+    def __init__(
+        self,
+        metadata: HtmlMetadata,
+        tables: list[TableData],
+        images: list[str],
+        warnings: list[ProcessingWarning],
+        content: str | None = None,
+        document: DocumentStructure | None = None,
+    ) -> None: ...
 
 class TableGrid:
     rows: int

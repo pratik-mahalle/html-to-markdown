@@ -1825,6 +1825,152 @@ function dispatchSemanticHandler(tagName: string, nodeHandle: NodeHandle, parser
 
 ---
 
+### escapeLinkLabel()
+
+Escape special characters in link labels.
+
+Markdown link labels can contain brackets, which need careful escaping to avoid
+being interpreted as nested links. This function escapes unescaped closing brackets
+that would break the link syntax.
+
+**Signature:**
+
+```typescript
+function escapeLinkLabel(text: string): string
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `text` | `string` | Yes | The text |
+
+**Returns:** `string`
+
+
+---
+
+### escapeMalformedAngleBrackets()
+
+Escape malformed angle brackets in markdown output.
+
+Markdown uses `<...>` for automatic links. Angle brackets that don't form valid
+link syntax should be escaped as `&lt;` to prevent parser confusion.
+
+A valid tag must have:
+- `<!` followed by `-` or alphabetic character (for comments/declarations)
+- `</` followed by alphabetic character (for closing tags)
+- `<?` (for processing instructions)
+- `<` followed by alphabetic character (for opening tags)
+
+**Signature:**
+
+```typescript
+function escapeMalformedAngleBrackets(input: string): Str
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `input` | `string` | Yes | The input data |
+
+**Returns:** `Str`
+
+
+---
+
+### trimLineEndWhitespace()
+
+Remove trailing spaces/tabs from every line while preserving newlines.
+
+**Signature:**
+
+```typescript
+function trimLineEndWhitespace(output: string): void
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `output` | `string` | Yes | The output destination |
+
+**Returns:** `void`
+
+
+---
+
+### truncateAtCharBoundary()
+
+Truncate a string at a valid UTF-8 boundary.
+
+**Signature:**
+
+```typescript
+function truncateAtCharBoundary(value: string, maxLen: number): void
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `value` | `string` | Yes | The value |
+| `maxLen` | `number` | Yes | The max len |
+
+**Returns:** `void`
+
+
+---
+
+### normalizeHeadingText()
+
+Normalize heading text by replacing newlines and extra whitespace.
+
+Heading text should be on a single line in Markdown. This function collapses
+any newlines and multiple spaces into single spaces.
+
+**Signature:**
+
+```typescript
+function normalizeHeadingText(text: string): Str
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `text` | `string` | Yes | The text |
+
+**Returns:** `Str`
+
+
+---
+
+### dedentCodeBlock()
+
+Remove common leading whitespace from all lines in a code block.
+
+This is useful when HTML authors indent `<pre>` content for readability,
+so we can strip the shared indentation without touching meaningful spacing.
+
+**Signature:**
+
+```typescript
+function dedentCodeBlock(content: string): string
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `content` | `string` | Yes | The content to process |
+
+**Returns:** `string`
+
+
+---
+
 ### floorCharBoundary()
 
 Returns the largest valid char boundary index at or before `index`.
@@ -2624,6 +2770,95 @@ build(): ConversionOptions
 
 ---
 
+### DjotRenderer
+
+Renderer for Djot lightweight markup output.
+
+#### Methods
+
+##### emphasis()
+
+**Signature:**
+
+```typescript
+emphasis(content: string): string
+```
+
+##### strong()
+
+**Signature:**
+
+```typescript
+strong(content: string, symbol: string): string
+```
+
+##### strikethrough()
+
+**Signature:**
+
+```typescript
+strikethrough(content: string): string
+```
+
+##### highlight()
+
+**Signature:**
+
+```typescript
+highlight(content: string): string
+```
+
+##### inserted()
+
+**Signature:**
+
+```typescript
+inserted(content: string): string
+```
+
+##### subscript()
+
+**Signature:**
+
+```typescript
+subscript(content: string, customSymbol: string): string
+```
+
+##### superscript()
+
+**Signature:**
+
+```typescript
+superscript(content: string, customSymbol: string): string
+```
+
+##### spanWithAttributes()
+
+**Signature:**
+
+```typescript
+spanWithAttributes(content: string, classes: Array<string>, id: string): string
+```
+
+##### divWithAttributes()
+
+**Signature:**
+
+```typescript
+divWithAttributes(content: string, classes: Array<string>): string
+```
+
+##### isDjot()
+
+**Signature:**
+
+```typescript
+isDjot(): boolean
+```
+
+
+---
+
 ### DocumentMetadata
 
 Document-level metadata extracted from `<head>` and top-level elements.
@@ -2868,6 +3103,446 @@ suitable for serialization and transmission across language boundaries.
 
 ---
 
+### HtmlVisitor
+
+Visitor trait for HTML→Markdown conversion.
+
+Implement this trait to customize the conversion behavior for any HTML element type.
+All methods have default implementations that return `VisitResult.Continue`, allowing
+selective override of only the elements you care about.
+
+# Method Naming Convention
+
+- `visit_*_start`: Called before entering an element (pre-order traversal)
+- `visit_*_end`: Called after exiting an element (post-order traversal)
+- `visit_*`: Called for specific element types (e.g., `visit_link`, `visit_image`)
+
+# Execution Order
+
+For a typical element like `<div><p>text</p></div>`:
+1. `visit_element_start` for `<div>`
+2. `visit_element_start` for `<p>`
+3. `visit_text` for "text"
+4. `visit_element_end` for `<p>`
+5. `visit_element_end` for `</div>`
+
+# Performance Notes
+
+- `visit_text` is the most frequently called method (~100+ times per document)
+- Return `VisitResult.Continue` quickly for elements you don't need to customize
+- Avoid heavy computation in visitor methods; consider caching if needed
+
+#### Methods
+
+##### visitElementStart()
+
+Called before entering any element.
+
+This is the first callback invoked for every HTML element, allowing
+visitors to implement generic element handling before tag-specific logic.
+
+**Signature:**
+
+```typescript
+visitElementStart(ctx: NodeContext): VisitResult
+```
+
+##### visitElementEnd()
+
+Called after exiting any element.
+
+Receives the default markdown output that would be generated.
+Visitors can inspect or replace this output.
+
+**Signature:**
+
+```typescript
+visitElementEnd(ctx: NodeContext, output: string): VisitResult
+```
+
+##### visitText()
+
+Visit text nodes (most frequent callback - ~100+ per document).
+
+**Signature:**
+
+```typescript
+visitText(ctx: NodeContext, text: string): VisitResult
+```
+
+##### visitLink()
+
+Visit anchor links `<a href="...">`.
+
+**Signature:**
+
+```typescript
+visitLink(ctx: NodeContext, href: string, text: string, title: string): VisitResult
+```
+
+##### visitImage()
+
+Visit images `<img src="...">`.
+
+**Signature:**
+
+```typescript
+visitImage(ctx: NodeContext, src: string, alt: string, title: string): VisitResult
+```
+
+##### visitHeading()
+
+Visit heading elements `<h1>` through `<h6>`.
+
+**Signature:**
+
+```typescript
+visitHeading(ctx: NodeContext, level: number, text: string, id: string): VisitResult
+```
+
+##### visitCodeBlock()
+
+Visit code blocks `<pre><code>`.
+
+**Signature:**
+
+```typescript
+visitCodeBlock(ctx: NodeContext, lang: string, code: string): VisitResult
+```
+
+##### visitCodeInline()
+
+Visit inline code `<code>`.
+
+**Signature:**
+
+```typescript
+visitCodeInline(ctx: NodeContext, code: string): VisitResult
+```
+
+##### visitListItem()
+
+Visit list items `<li>`.
+
+**Signature:**
+
+```typescript
+visitListItem(ctx: NodeContext, ordered: boolean, marker: string, text: string): VisitResult
+```
+
+##### visitListStart()
+
+Called before processing a list `<ul>` or `<ol>`.
+
+**Signature:**
+
+```typescript
+visitListStart(ctx: NodeContext, ordered: boolean): VisitResult
+```
+
+##### visitListEnd()
+
+Called after processing a list `</ul>` or `</ol>`.
+
+**Signature:**
+
+```typescript
+visitListEnd(ctx: NodeContext, ordered: boolean, output: string): VisitResult
+```
+
+##### visitTableStart()
+
+Called before processing a table `<table>`.
+
+**Signature:**
+
+```typescript
+visitTableStart(ctx: NodeContext): VisitResult
+```
+
+##### visitTableRow()
+
+Visit table rows `<tr>`.
+
+**Signature:**
+
+```typescript
+visitTableRow(ctx: NodeContext, cells: Array<string>, isHeader: boolean): VisitResult
+```
+
+##### visitTableEnd()
+
+Called after processing a table `</table>`.
+
+**Signature:**
+
+```typescript
+visitTableEnd(ctx: NodeContext, output: string): VisitResult
+```
+
+##### visitBlockquote()
+
+Visit blockquote elements `<blockquote>`.
+
+**Signature:**
+
+```typescript
+visitBlockquote(ctx: NodeContext, content: string, depth: number): VisitResult
+```
+
+##### visitStrong()
+
+Visit strong/bold elements `<strong>`, `<b>`.
+
+**Signature:**
+
+```typescript
+visitStrong(ctx: NodeContext, text: string): VisitResult
+```
+
+##### visitEmphasis()
+
+Visit emphasis/italic elements `<em>`, `<i>`.
+
+**Signature:**
+
+```typescript
+visitEmphasis(ctx: NodeContext, text: string): VisitResult
+```
+
+##### visitStrikethrough()
+
+Visit strikethrough elements `<s>`, `<del>`, `<strike>`.
+
+**Signature:**
+
+```typescript
+visitStrikethrough(ctx: NodeContext, text: string): VisitResult
+```
+
+##### visitUnderline()
+
+Visit underline elements `<u>`, `<ins>`.
+
+**Signature:**
+
+```typescript
+visitUnderline(ctx: NodeContext, text: string): VisitResult
+```
+
+##### visitSubscript()
+
+Visit subscript elements `<sub>`.
+
+**Signature:**
+
+```typescript
+visitSubscript(ctx: NodeContext, text: string): VisitResult
+```
+
+##### visitSuperscript()
+
+Visit superscript elements `<sup>`.
+
+**Signature:**
+
+```typescript
+visitSuperscript(ctx: NodeContext, text: string): VisitResult
+```
+
+##### visitMark()
+
+Visit mark/highlight elements `<mark>`.
+
+**Signature:**
+
+```typescript
+visitMark(ctx: NodeContext, text: string): VisitResult
+```
+
+##### visitLineBreak()
+
+Visit line break elements `<br>`.
+
+**Signature:**
+
+```typescript
+visitLineBreak(ctx: NodeContext): VisitResult
+```
+
+##### visitHorizontalRule()
+
+Visit horizontal rule elements `<hr>`.
+
+**Signature:**
+
+```typescript
+visitHorizontalRule(ctx: NodeContext): VisitResult
+```
+
+##### visitCustomElement()
+
+Visit custom elements (web components) or unknown tags.
+
+**Signature:**
+
+```typescript
+visitCustomElement(ctx: NodeContext, tagName: string, html: string): VisitResult
+```
+
+##### visitDefinitionListStart()
+
+Visit definition list `<dl>`.
+
+**Signature:**
+
+```typescript
+visitDefinitionListStart(ctx: NodeContext): VisitResult
+```
+
+##### visitDefinitionTerm()
+
+Visit definition term `<dt>`.
+
+**Signature:**
+
+```typescript
+visitDefinitionTerm(ctx: NodeContext, text: string): VisitResult
+```
+
+##### visitDefinitionDescription()
+
+Visit definition description `<dd>`.
+
+**Signature:**
+
+```typescript
+visitDefinitionDescription(ctx: NodeContext, text: string): VisitResult
+```
+
+##### visitDefinitionListEnd()
+
+Called after processing a definition list `</dl>`.
+
+**Signature:**
+
+```typescript
+visitDefinitionListEnd(ctx: NodeContext, output: string): VisitResult
+```
+
+##### visitForm()
+
+Visit form elements `<form>`.
+
+**Signature:**
+
+```typescript
+visitForm(ctx: NodeContext, action: string, method: string): VisitResult
+```
+
+##### visitInput()
+
+Visit input elements `<input>`.
+
+**Signature:**
+
+```typescript
+visitInput(ctx: NodeContext, inputType: string, name: string, value: string): VisitResult
+```
+
+##### visitButton()
+
+Visit button elements `<button>`.
+
+**Signature:**
+
+```typescript
+visitButton(ctx: NodeContext, text: string): VisitResult
+```
+
+##### visitAudio()
+
+Visit audio elements `<audio>`.
+
+**Signature:**
+
+```typescript
+visitAudio(ctx: NodeContext, src: string): VisitResult
+```
+
+##### visitVideo()
+
+Visit video elements `<video>`.
+
+**Signature:**
+
+```typescript
+visitVideo(ctx: NodeContext, src: string): VisitResult
+```
+
+##### visitIframe()
+
+Visit iframe elements `<iframe>`.
+
+**Signature:**
+
+```typescript
+visitIframe(ctx: NodeContext, src: string): VisitResult
+```
+
+##### visitDetails()
+
+Visit details elements `<details>`.
+
+**Signature:**
+
+```typescript
+visitDetails(ctx: NodeContext, open: boolean): VisitResult
+```
+
+##### visitSummary()
+
+Visit summary elements `<summary>`.
+
+**Signature:**
+
+```typescript
+visitSummary(ctx: NodeContext, text: string): VisitResult
+```
+
+##### visitFigureStart()
+
+Visit figure elements `<figure>`.
+
+**Signature:**
+
+```typescript
+visitFigureStart(ctx: NodeContext): VisitResult
+```
+
+##### visitFigcaption()
+
+Visit figcaption elements `<figcaption>`.
+
+**Signature:**
+
+```typescript
+visitFigcaption(ctx: NodeContext, text: string): VisitResult
+```
+
+##### visitFigureEnd()
+
+Called after processing a figure `</figure>`.
+
+**Signature:**
+
+```typescript
+visitFigureEnd(ctx: NodeContext, output: string): VisitResult
+```
+
+
+---
+
 ### ImageMetadata
 
 Image metadata with source and dimensions.
@@ -2993,6 +3668,95 @@ static classifyLink(href: string): LinkType
 
 ---
 
+### MarkdownRenderer
+
+Renderer for standard Markdown output.
+
+#### Methods
+
+##### emphasis()
+
+**Signature:**
+
+```typescript
+emphasis(content: string): string
+```
+
+##### strong()
+
+**Signature:**
+
+```typescript
+strong(content: string, symbol: string): string
+```
+
+##### strikethrough()
+
+**Signature:**
+
+```typescript
+strikethrough(content: string): string
+```
+
+##### highlight()
+
+**Signature:**
+
+```typescript
+highlight(content: string): string
+```
+
+##### inserted()
+
+**Signature:**
+
+```typescript
+inserted(content: string): string
+```
+
+##### subscript()
+
+**Signature:**
+
+```typescript
+subscript(content: string, customSymbol: string): string
+```
+
+##### superscript()
+
+**Signature:**
+
+```typescript
+superscript(content: string, customSymbol: string): string
+```
+
+##### spanWithAttributes()
+
+**Signature:**
+
+```typescript
+spanWithAttributes(content: string, classes: Array<string>, id: string): string
+```
+
+##### divWithAttributes()
+
+**Signature:**
+
+```typescript
+divWithAttributes(content: string, classes: Array<string>): string
+```
+
+##### isDjot()
+
+**Signature:**
+
+```typescript
+isDjot(): boolean
+```
+
+
+---
+
 ### MetadataCollector
 
 Internal metadata collector for single-pass extraction.
@@ -3105,6 +3869,26 @@ static fromUpdate(update: MetadataConfigUpdate): MetadataConfig
 ```typescript
 static from(update: MetadataConfigUpdate): MetadataConfig
 ```
+
+
+---
+
+### NodeContext
+
+Context information passed to all visitor methods.
+
+Provides comprehensive metadata about the current node being visited,
+including its type, attributes, position in the DOM tree, and parent context.
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `nodeType` | `NodeType` | — | Coarse-grained node type classification |
+| `tagName` | `string` | — | Raw HTML tag name (e.g., "div", "h1", "custom-element") |
+| `attributes` | `Record<string, string>` | — | All HTML attributes as key-value pairs |
+| `depth` | `number` | — | Depth in the DOM tree (0 = root) |
+| `indexInParent` | `number` | — | Index among siblings (0-based) |
+| `parentTag` | `string | null` | `null` | Parent element's tag name (None if root) |
+| `isInline` | `boolean` | — | Whether this element is treated as inline vs block |
 
 
 ---
@@ -3469,6 +4253,15 @@ Annotations describe formatting (bold, italic, etc.) and links within a node's t
 
 ---
 
+### VisitorHandle
+
+Type alias for a visitor handle (Rc-wrapped `RefCell` for interior mutability).
+
+This allows visitors to be passed around and shared while still being mutable.
+
+
+---
+
 ## Enums
 
 ### VisitAction
@@ -3682,24 +4475,6 @@ Specifies the target markup language format for the conversion output.
 
 ---
 
-### VisitorDispatch
-
-Result of dispatching a visitor callback.
-
-This enum represents the outcome of a visitor callback dispatch,
-providing a more ergonomic interface for control flow than the
-raw `VisitResult` type.
-
-| Value | Description |
-|-------|-------------|
-| `Continue` | Continue with default conversion behavior |
-| `Custom` | Replace default output with custom markdown — Fields: `0`: `string` |
-| `Skip` | Skip this element entirely (don't output anything) |
-| `PreserveHtml` | Preserve original HTML (don't convert to markdown) |
-
-
----
-
 ### NodeContent
 
 The semantic content type of a document node.
@@ -3757,6 +4532,144 @@ Categories of processing warnings.
 | `TruncatedInput` | The input was truncated due to size limits. |
 | `MalformedHtml` | The HTML was malformed but processing continued with best effort. |
 | `SanitizationApplied` | Sanitization was applied to remove potentially unsafe content. |
+
+
+---
+
+### NodeType
+
+Node type enumeration covering all HTML element types.
+
+This enum categorizes all HTML elements that the converter recognizes,
+providing a coarse-grained classification for visitor dispatch.
+
+| Value | Description |
+|-------|-------------|
+| `Text` | Text node (most frequent - 100+ per document) |
+| `Element` | Generic element node |
+| `Heading` | Heading elements (h1-h6) |
+| `Paragraph` | Paragraph element |
+| `Div` | Generic div container |
+| `Blockquote` | Blockquote element |
+| `Pre` | Preformatted text block |
+| `Hr` | Horizontal rule |
+| `List` | Ordered or unordered list (ul, ol) |
+| `ListItem` | List item (li) |
+| `DefinitionList` | Definition list (dl) |
+| `DefinitionTerm` | Definition term (dt) |
+| `DefinitionDescription` | Definition description (dd) |
+| `Table` | Table element |
+| `TableRow` | Table row (tr) |
+| `TableCell` | Table cell (td, th) |
+| `TableHeader` | Table header cell (th) |
+| `TableBody` | Table body (tbody) |
+| `TableHead` | Table head (thead) |
+| `TableFoot` | Table foot (tfoot) |
+| `Link` | Anchor link (a) |
+| `Image` | Image (img) |
+| `Strong` | Strong/bold (strong, b) |
+| `Em` | Emphasis/italic (em, i) |
+| `Code` | Inline code (code) |
+| `Strikethrough` | Strikethrough (s, del, strike) |
+| `Underline` | Underline (u, ins) |
+| `Subscript` | Subscript (sub) |
+| `Superscript` | Superscript (sup) |
+| `Mark` | Mark/highlight (mark) |
+| `Small` | Small text (small) |
+| `Br` | Line break (br) |
+| `Span` | Span element |
+| `Article` | Article element |
+| `Section` | Section element |
+| `Nav` | Navigation element |
+| `Aside` | Aside element |
+| `Header` | Header element |
+| `Footer` | Footer element |
+| `Main` | Main element |
+| `Figure` | Figure element |
+| `Figcaption` | Figure caption |
+| `Time` | Time element |
+| `Details` | Details element |
+| `Summary` | Summary element |
+| `Form` | Form element |
+| `Input` | Input element |
+| `Select` | Select element |
+| `Option` | Option element |
+| `Button` | Button element |
+| `Textarea` | Textarea element |
+| `Label` | Label element |
+| `Fieldset` | Fieldset element |
+| `Legend` | Legend element |
+| `Audio` | Audio element |
+| `Video` | Video element |
+| `Picture` | Picture element |
+| `Source` | Source element |
+| `Iframe` | Iframe element |
+| `Svg` | SVG element |
+| `Canvas` | Canvas element |
+| `Ruby` | Ruby annotation |
+| `Rt` | Ruby text |
+| `Rp` | Ruby parenthesis |
+| `Abbr` | Abbreviation |
+| `Kbd` | Keyboard input |
+| `Samp` | Sample output |
+| `Var` | Variable |
+| `Cite` | Citation |
+| `Q` | Quote |
+| `Del` | Deleted text |
+| `Ins` | Inserted text |
+| `Data` | Data element |
+| `Meter` | Meter element |
+| `Progress` | Progress element |
+| `Output` | Output element |
+| `Template` | Template element |
+| `Slot` | Slot element |
+| `Html` | HTML root element |
+| `Head` | Head element |
+| `Body` | Body element |
+| `Title` | Title element |
+| `Meta` | Meta element |
+| `LinkTag` | Link element (not anchor) |
+| `Style` | Style element |
+| `Script` | Script element |
+| `Base` | Base element |
+| `Custom` | Custom element (web components) or unknown tag |
+
+
+---
+
+### VisitResult
+
+Result of a visitor callback.
+
+Allows visitors to control the conversion flow by either proceeding
+with default behavior, providing custom output, skipping elements,
+preserving HTML, or signaling errors.
+
+| Value | Description |
+|-------|-------------|
+| `Continue` | Continue with default conversion behavior |
+| `Custom` | Replace default output with custom markdown The visitor takes full responsibility for the markdown output of this node and its children. — Fields: `0`: `string` |
+| `Skip` | Skip this element entirely (don't output anything) The element and all its children are ignored in the output. |
+| `PreserveHtml` | Preserve original HTML (don't convert to markdown) The element's raw HTML is included verbatim in the output. |
+| `Error` | Stop conversion with an error The conversion process halts and returns this error message. — Fields: `0`: `string` |
+
+
+---
+
+### VisitorDispatch
+
+Result of dispatching a visitor callback.
+
+This enum represents the outcome of a visitor callback dispatch,
+providing a more ergonomic interface for control flow than the
+raw `VisitResult` type.
+
+| Value | Description |
+|-------|-------------|
+| `Continue` | Continue with default conversion behavior |
+| `Custom` | Replace default output with custom markdown — Fields: `0`: `string` |
+| `Skip` | Skip this element entirely (don't output anything) |
+| `PreserveHtml` | Preserve original HTML (don't convert to markdown) |
 
 
 ---

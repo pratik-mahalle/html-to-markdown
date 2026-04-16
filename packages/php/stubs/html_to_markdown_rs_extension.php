@@ -805,59 +805,6 @@ class PreprocessingOptionsUpdate
 }
 
 /**
- * The primary result of HTML conversion and extraction.
- *
- * Contains the converted text output, optional structured document tree,
- * metadata, extracted tables, images, and processing warnings.
- *
- * # Example
- *
- * ```text
- * use html_to_markdown_rs::{convert, ConversionOptions};
- *
- * let result = convert("<h1>Hello</h1><p>World</p>", None)?;
- * assert!(result.content.is_some());
- * assert!(result.warnings.is_empty());
- * ```
- */
-class ConversionResult
-{
-    public ?string $content;
-    public ?DocumentStructure $document;
-    public HtmlMetadata $metadata;
-    /** @var array<TableData> */
-    public array $tables;
-    /** @var array<string> */
-    public array $images;
-    /** @var array<ProcessingWarning> */
-    public array $warnings;
-
-    /**
-     * @param array<TableData> $tables
-     * @param array<string> $images
-     * @param array<ProcessingWarning> $warnings
-     */
-    public function __construct(
-        HtmlMetadata $metadata,
-        array $tables,
-        array $images,
-        array $warnings,
-        ?string $content = null,
-        ?DocumentStructure $document = null
-    ) { }
-
-    public function getContent(): ?string { }
-    public function getDocument(): ?DocumentStructure { }
-    public function getMetadata(): HtmlMetadata { }
-    /** @return array<TableData> */
-    public function getTables(): array { }
-    /** @return array<string> */
-    public function getImages(): array { }
-    /** @return array<ProcessingWarning> */
-    public function getWarnings(): array { }
-}
-
-/**
  * A structured document tree representing the semantic content of an HTML document.
  *
  * Uses a flat node array with index-based parent/child references for efficient traversal.
@@ -941,6 +888,59 @@ class TextAnnotation
     public function getStart(): int { }
     public function getEnd(): int { }
     public function getKind(): AnnotationKind { }
+}
+
+/**
+ * The primary result of HTML conversion and extraction.
+ *
+ * Contains the converted text output, optional structured document tree,
+ * metadata, extracted tables, images, and processing warnings.
+ *
+ * # Example
+ *
+ * ```text
+ * use html_to_markdown_rs::{convert, ConversionOptions};
+ *
+ * let result = convert("<h1>Hello</h1><p>World</p>", None)?;
+ * assert!(result.content.is_some());
+ * assert!(result.warnings.is_empty());
+ * ```
+ */
+class ConversionResult
+{
+    public ?string $content;
+    public ?DocumentStructure $document;
+    public HtmlMetadata $metadata;
+    /** @var array<TableData> */
+    public array $tables;
+    /** @var array<string> */
+    public array $images;
+    /** @var array<ProcessingWarning> */
+    public array $warnings;
+
+    /**
+     * @param array<TableData> $tables
+     * @param array<string> $images
+     * @param array<ProcessingWarning> $warnings
+     */
+    public function __construct(
+        HtmlMetadata $metadata,
+        array $tables,
+        array $images,
+        array $warnings,
+        ?string $content = null,
+        ?DocumentStructure $document = null
+    ) { }
+
+    public function getContent(): ?string { }
+    public function getDocument(): ?DocumentStructure { }
+    public function getMetadata(): HtmlMetadata { }
+    /** @return array<TableData> */
+    public function getTables(): array { }
+    /** @return array<string> */
+    public function getImages(): array { }
+    /** @return array<ProcessingWarning> */
+    public function getWarnings(): array { }
 }
 
 /**

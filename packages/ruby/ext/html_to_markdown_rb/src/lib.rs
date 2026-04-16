@@ -1590,85 +1590,6 @@ impl PreprocessingOptionsUpdate {
 }
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
-#[magnus::wrap(class = "HtmlToMarkdownRs::ConversionResult")]
-#[serde(default)]
-pub struct ConversionResult {
-    pub content: Option<String>,
-    pub document: Option<DocumentStructure>,
-    pub metadata: HtmlMetadata,
-    pub tables: Vec<TableData>,
-    pub images: Vec<String>,
-    pub warnings: Vec<ProcessingWarning>,
-}
-
-unsafe impl IntoValueFromNative for ConversionResult {}
-
-impl magnus::TryConvert for ConversionResult {
-    fn try_convert(val: magnus::Value) -> Result<Self, magnus::Error> {
-        let r: &ConversionResult = magnus::TryConvert::try_convert(val)?;
-        Ok(r.clone())
-    }
-}
-unsafe impl TryConvertOwned for ConversionResult {}
-
-impl Default for ConversionResult {
-    fn default() -> Self {
-        Self {
-            content: Default::default(),
-            document: Default::default(),
-            metadata: Default::default(),
-            tables: Default::default(),
-            images: Default::default(),
-            warnings: Default::default(),
-        }
-    }
-}
-
-impl ConversionResult {
-    fn new(
-        content: Option<String>,
-        document: Option<DocumentStructure>,
-        metadata: Option<HtmlMetadata>,
-        tables: Option<Vec<TableData>>,
-        images: Option<Vec<String>>,
-        warnings: Option<Vec<ProcessingWarning>>,
-    ) -> Self {
-        Self {
-            content,
-            document,
-            metadata: metadata.unwrap_or_default(),
-            tables: tables.unwrap_or_default(),
-            images: images.unwrap_or_default(),
-            warnings: warnings.unwrap_or_default(),
-        }
-    }
-
-    fn content(&self) -> Option<String> {
-        self.content.clone()
-    }
-
-    fn document(&self) -> Option<DocumentStructure> {
-        self.document.clone()
-    }
-
-    fn metadata(&self) -> HtmlMetadata {
-        self.metadata.clone()
-    }
-
-    fn tables(&self) -> Vec<TableData> {
-        self.tables.clone()
-    }
-
-    fn images(&self) -> Vec<String> {
-        self.images.clone()
-    }
-
-    fn warnings(&self) -> Vec<ProcessingWarning> {
-        self.warnings.clone()
-    }
-}
-
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::DocumentStructure")]
 pub struct DocumentStructure {
     pub nodes: Vec<DocumentNode>,
@@ -1797,6 +1718,85 @@ impl TextAnnotation {
 
     fn kind(&self) -> AnnotationKind {
         self.kind.clone()
+    }
+}
+
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[magnus::wrap(class = "HtmlToMarkdownRs::ConversionResult")]
+#[serde(default)]
+pub struct ConversionResult {
+    pub content: Option<String>,
+    pub document: Option<DocumentStructure>,
+    pub metadata: HtmlMetadata,
+    pub tables: Vec<TableData>,
+    pub images: Vec<String>,
+    pub warnings: Vec<ProcessingWarning>,
+}
+
+unsafe impl IntoValueFromNative for ConversionResult {}
+
+impl magnus::TryConvert for ConversionResult {
+    fn try_convert(val: magnus::Value) -> Result<Self, magnus::Error> {
+        let r: &ConversionResult = magnus::TryConvert::try_convert(val)?;
+        Ok(r.clone())
+    }
+}
+unsafe impl TryConvertOwned for ConversionResult {}
+
+impl Default for ConversionResult {
+    fn default() -> Self {
+        Self {
+            content: Default::default(),
+            document: Default::default(),
+            metadata: Default::default(),
+            tables: Default::default(),
+            images: Default::default(),
+            warnings: Default::default(),
+        }
+    }
+}
+
+impl ConversionResult {
+    fn new(
+        content: Option<String>,
+        document: Option<DocumentStructure>,
+        metadata: Option<HtmlMetadata>,
+        tables: Option<Vec<TableData>>,
+        images: Option<Vec<String>>,
+        warnings: Option<Vec<ProcessingWarning>>,
+    ) -> Self {
+        Self {
+            content,
+            document,
+            metadata: metadata.unwrap_or_default(),
+            tables: tables.unwrap_or_default(),
+            images: images.unwrap_or_default(),
+            warnings: warnings.unwrap_or_default(),
+        }
+    }
+
+    fn content(&self) -> Option<String> {
+        self.content.clone()
+    }
+
+    fn document(&self) -> Option<DocumentStructure> {
+        self.document.clone()
+    }
+
+    fn metadata(&self) -> HtmlMetadata {
+        self.metadata.clone()
+    }
+
+    fn tables(&self) -> Vec<TableData> {
+        self.tables.clone()
+    }
+
+    fn images(&self) -> Vec<String> {
+        self.images.clone()
+    }
+
+    fn warnings(&self) -> Vec<ProcessingWarning> {
+        self.warnings.clone()
     }
 }
 
@@ -2698,9 +2698,22 @@ fn convert(html: String, options: Option<String>) -> Result<ConversionResult, Er
             Ok::<_, magnus::Error>(core.into())
         })
         .transpose()?;
-    let result = html_to_markdown_rs::convert_api::convert(&html, options.map(Into::into))
+    let result = html_to_markdown_rs::convert(&html, options.map(Into::into))
         .map_err(|e| magnus::Error::new(magnus::exception::runtime_error(), e.to_string()))?;
     Ok(result.into())
+}
+
+impl From<MetadataConfig> for html_to_markdown_rs::metadata::MetadataConfig {
+    fn from(val: MetadataConfig) -> Self {
+        Self {
+            extract_document: val.extract_document,
+            extract_headers: val.extract_headers,
+            extract_links: val.extract_links,
+            extract_images: val.extract_images,
+            extract_structured_data: val.extract_structured_data,
+            max_structured_data_size: val.max_structured_data_size,
+        }
+    }
 }
 
 impl From<html_to_markdown_rs::metadata::MetadataConfig> for MetadataConfig {
@@ -2729,6 +2742,24 @@ impl From<html_to_markdown_rs::metadata::MetadataConfigUpdate> for MetadataConfi
     }
 }
 
+impl From<DocumentMetadata> for html_to_markdown_rs::metadata::DocumentMetadata {
+    fn from(val: DocumentMetadata) -> Self {
+        Self {
+            title: val.title,
+            description: val.description,
+            keywords: val.keywords,
+            author: val.author,
+            canonical_url: val.canonical_url,
+            base_href: val.base_href,
+            language: val.language,
+            text_direction: val.text_direction.map(Into::into),
+            open_graph: val.open_graph.into_iter().collect(),
+            twitter_card: val.twitter_card.into_iter().collect(),
+            meta_tags: val.meta_tags.into_iter().collect(),
+        }
+    }
+}
+
 impl From<html_to_markdown_rs::metadata::DocumentMetadata> for DocumentMetadata {
     fn from(val: html_to_markdown_rs::metadata::DocumentMetadata) -> Self {
         Self {
@@ -2747,6 +2778,18 @@ impl From<html_to_markdown_rs::metadata::DocumentMetadata> for DocumentMetadata 
     }
 }
 
+impl From<HeaderMetadata> for html_to_markdown_rs::metadata::HeaderMetadata {
+    fn from(val: HeaderMetadata) -> Self {
+        Self {
+            level: val.level,
+            text: val.text,
+            id: val.id,
+            depth: val.depth,
+            html_offset: val.html_offset,
+        }
+    }
+}
+
 impl From<html_to_markdown_rs::metadata::HeaderMetadata> for HeaderMetadata {
     fn from(val: html_to_markdown_rs::metadata::HeaderMetadata) -> Self {
         Self {
@@ -2759,6 +2802,19 @@ impl From<html_to_markdown_rs::metadata::HeaderMetadata> for HeaderMetadata {
     }
 }
 
+impl From<LinkMetadata> for html_to_markdown_rs::metadata::LinkMetadata {
+    fn from(val: LinkMetadata) -> Self {
+        Self {
+            href: val.href,
+            text: val.text,
+            title: val.title,
+            link_type: val.link_type.into(),
+            rel: val.rel,
+            attributes: val.attributes.into_iter().collect(),
+        }
+    }
+}
+
 impl From<html_to_markdown_rs::metadata::LinkMetadata> for LinkMetadata {
     fn from(val: html_to_markdown_rs::metadata::LinkMetadata) -> Self {
         Self {
@@ -2767,6 +2823,19 @@ impl From<html_to_markdown_rs::metadata::LinkMetadata> for LinkMetadata {
             title: val.title,
             link_type: val.link_type.into(),
             rel: val.rel,
+            attributes: val.attributes.into_iter().collect(),
+        }
+    }
+}
+
+impl From<ImageMetadata> for html_to_markdown_rs::metadata::ImageMetadata {
+    fn from(val: ImageMetadata) -> Self {
+        Self {
+            src: val.src,
+            alt: val.alt,
+            title: val.title,
+            dimensions: Default::default(),
+            image_type: val.image_type.into(),
             attributes: val.attributes.into_iter().collect(),
         }
     }
@@ -2785,12 +2854,34 @@ impl From<html_to_markdown_rs::metadata::ImageMetadata> for ImageMetadata {
     }
 }
 
+impl From<StructuredData> for html_to_markdown_rs::metadata::StructuredData {
+    fn from(val: StructuredData) -> Self {
+        Self {
+            data_type: val.data_type.into(),
+            raw_json: val.raw_json,
+            schema_type: val.schema_type,
+        }
+    }
+}
+
 impl From<html_to_markdown_rs::metadata::StructuredData> for StructuredData {
     fn from(val: html_to_markdown_rs::metadata::StructuredData) -> Self {
         Self {
             data_type: val.data_type.into(),
             raw_json: val.raw_json,
             schema_type: val.schema_type,
+        }
+    }
+}
+
+impl From<HtmlMetadata> for html_to_markdown_rs::metadata::HtmlMetadata {
+    fn from(val: HtmlMetadata) -> Self {
+        Self {
+            document: val.document.into(),
+            headers: val.headers.into_iter().map(Into::into).collect(),
+            links: val.links.into_iter().map(Into::into).collect(),
+            images: val.images.into_iter().map(Into::into).collect(),
+            structured_data: val.structured_data.into_iter().map(Into::into).collect(),
         }
     }
 }
@@ -2975,21 +3066,8 @@ impl From<html_to_markdown_rs::options::PreprocessingOptionsUpdate> for Preproce
     }
 }
 
-impl From<html_to_markdown_rs::types::ConversionResult> for ConversionResult {
-    fn from(val: html_to_markdown_rs::types::ConversionResult) -> Self {
-        Self {
-            content: val.content,
-            document: val.document.map(Into::into),
-            metadata: val.metadata.into(),
-            tables: val.tables.into_iter().map(Into::into).collect(),
-            images: val.images.iter().map(|i| format!("{:?}", i)).collect(),
-            warnings: val.warnings.into_iter().map(Into::into).collect(),
-        }
-    }
-}
-
-impl From<html_to_markdown_rs::types::DocumentStructure> for DocumentStructure {
-    fn from(val: html_to_markdown_rs::types::DocumentStructure) -> Self {
+impl From<DocumentStructure> for html_to_markdown_rs::DocumentStructure {
+    fn from(val: DocumentStructure) -> Self {
         Self {
             nodes: val.nodes.into_iter().map(Into::into).collect(),
             source_format: val.source_format,
@@ -2997,8 +3075,17 @@ impl From<html_to_markdown_rs::types::DocumentStructure> for DocumentStructure {
     }
 }
 
-impl From<html_to_markdown_rs::types::DocumentNode> for DocumentNode {
-    fn from(val: html_to_markdown_rs::types::DocumentNode) -> Self {
+impl From<html_to_markdown_rs::DocumentStructure> for DocumentStructure {
+    fn from(val: html_to_markdown_rs::DocumentStructure) -> Self {
+        Self {
+            nodes: val.nodes.into_iter().map(Into::into).collect(),
+            source_format: val.source_format,
+        }
+    }
+}
+
+impl From<DocumentNode> for html_to_markdown_rs::DocumentNode {
+    fn from(val: DocumentNode) -> Self {
         Self {
             id: val.id,
             content: val.content.into(),
@@ -3010,8 +3097,21 @@ impl From<html_to_markdown_rs::types::DocumentNode> for DocumentNode {
     }
 }
 
-impl From<html_to_markdown_rs::types::TextAnnotation> for TextAnnotation {
-    fn from(val: html_to_markdown_rs::types::TextAnnotation) -> Self {
+impl From<html_to_markdown_rs::DocumentNode> for DocumentNode {
+    fn from(val: html_to_markdown_rs::DocumentNode) -> Self {
+        Self {
+            id: val.id,
+            content: val.content.into(),
+            parent: val.parent,
+            children: val.children,
+            annotations: val.annotations.into_iter().map(Into::into).collect(),
+            attributes: val.attributes.map(|m| m.into_iter().collect()),
+        }
+    }
+}
+
+impl From<TextAnnotation> for html_to_markdown_rs::TextAnnotation {
+    fn from(val: TextAnnotation) -> Self {
         Self {
             start: val.start,
             end: val.end,
@@ -3020,8 +3120,46 @@ impl From<html_to_markdown_rs::types::TextAnnotation> for TextAnnotation {
     }
 }
 
-impl From<html_to_markdown_rs::types::TableGrid> for TableGrid {
-    fn from(val: html_to_markdown_rs::types::TableGrid) -> Self {
+impl From<html_to_markdown_rs::TextAnnotation> for TextAnnotation {
+    fn from(val: html_to_markdown_rs::TextAnnotation) -> Self {
+        Self {
+            start: val.start,
+            end: val.end,
+            kind: val.kind.into(),
+        }
+    }
+}
+
+#[allow(clippy::needless_update)]
+impl From<ConversionResult> for html_to_markdown_rs::ConversionResult {
+    fn from(val: ConversionResult) -> Self {
+        Self {
+            content: val.content,
+            document: val.document.map(Into::into),
+            metadata: val.metadata.into(),
+            tables: val.tables.into_iter().map(Into::into).collect(),
+            images: Default::default(),
+            warnings: val.warnings.into_iter().map(Into::into).collect(),
+            ..Default::default()
+        }
+    }
+}
+
+impl From<html_to_markdown_rs::ConversionResult> for ConversionResult {
+    fn from(val: html_to_markdown_rs::ConversionResult) -> Self {
+        Self {
+            content: val.content,
+            document: val.document.map(Into::into),
+            metadata: val.metadata.into(),
+            tables: val.tables.into_iter().map(Into::into).collect(),
+            images: val.images.iter().map(|i| format!("{:?}", i)).collect(),
+            warnings: val.warnings.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+impl From<TableGrid> for html_to_markdown_rs::TableGrid {
+    fn from(val: TableGrid) -> Self {
         Self {
             rows: val.rows,
             cols: val.cols,
@@ -3030,8 +3168,18 @@ impl From<html_to_markdown_rs::types::TableGrid> for TableGrid {
     }
 }
 
-impl From<html_to_markdown_rs::types::GridCell> for GridCell {
-    fn from(val: html_to_markdown_rs::types::GridCell) -> Self {
+impl From<html_to_markdown_rs::TableGrid> for TableGrid {
+    fn from(val: html_to_markdown_rs::TableGrid) -> Self {
+        Self {
+            rows: val.rows,
+            cols: val.cols,
+            cells: val.cells.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+impl From<GridCell> for html_to_markdown_rs::GridCell {
+    fn from(val: GridCell) -> Self {
         Self {
             content: val.content,
             row: val.row,
@@ -3043,8 +3191,21 @@ impl From<html_to_markdown_rs::types::GridCell> for GridCell {
     }
 }
 
-impl From<html_to_markdown_rs::types::TableData> for TableData {
-    fn from(val: html_to_markdown_rs::types::TableData) -> Self {
+impl From<html_to_markdown_rs::GridCell> for GridCell {
+    fn from(val: html_to_markdown_rs::GridCell) -> Self {
+        Self {
+            content: val.content,
+            row: val.row,
+            col: val.col,
+            row_span: val.row_span,
+            col_span: val.col_span,
+            is_header: val.is_header,
+        }
+    }
+}
+
+impl From<TableData> for html_to_markdown_rs::TableData {
+    fn from(val: TableData) -> Self {
         Self {
             grid: val.grid.into(),
             markdown: val.markdown,
@@ -3052,11 +3213,39 @@ impl From<html_to_markdown_rs::types::TableData> for TableData {
     }
 }
 
-impl From<html_to_markdown_rs::types::ProcessingWarning> for ProcessingWarning {
-    fn from(val: html_to_markdown_rs::types::ProcessingWarning) -> Self {
+impl From<html_to_markdown_rs::TableData> for TableData {
+    fn from(val: html_to_markdown_rs::TableData) -> Self {
+        Self {
+            grid: val.grid.into(),
+            markdown: val.markdown,
+        }
+    }
+}
+
+impl From<ProcessingWarning> for html_to_markdown_rs::ProcessingWarning {
+    fn from(val: ProcessingWarning) -> Self {
         Self {
             message: val.message,
             kind: val.kind.into(),
+        }
+    }
+}
+
+impl From<html_to_markdown_rs::ProcessingWarning> for ProcessingWarning {
+    fn from(val: html_to_markdown_rs::ProcessingWarning) -> Self {
+        Self {
+            message: val.message,
+            kind: val.kind.into(),
+        }
+    }
+}
+
+impl From<TextDirection> for html_to_markdown_rs::metadata::TextDirection {
+    fn from(val: TextDirection) -> Self {
+        match val {
+            TextDirection::LeftToRight => Self::LeftToRight,
+            TextDirection::RightToLeft => Self::RightToLeft,
+            TextDirection::Auto => Self::Auto,
         }
     }
 }
@@ -3067,6 +3256,19 @@ impl From<html_to_markdown_rs::metadata::TextDirection> for TextDirection {
             html_to_markdown_rs::metadata::TextDirection::LeftToRight => Self::LeftToRight,
             html_to_markdown_rs::metadata::TextDirection::RightToLeft => Self::RightToLeft,
             html_to_markdown_rs::metadata::TextDirection::Auto => Self::Auto,
+        }
+    }
+}
+
+impl From<LinkType> for html_to_markdown_rs::metadata::LinkType {
+    fn from(val: LinkType) -> Self {
+        match val {
+            LinkType::Anchor => Self::Anchor,
+            LinkType::Internal => Self::Internal,
+            LinkType::External => Self::External,
+            LinkType::Email => Self::Email,
+            LinkType::Phone => Self::Phone,
+            LinkType::Other => Self::Other,
         }
     }
 }
@@ -3084,6 +3286,17 @@ impl From<html_to_markdown_rs::metadata::LinkType> for LinkType {
     }
 }
 
+impl From<ImageType> for html_to_markdown_rs::metadata::ImageType {
+    fn from(val: ImageType) -> Self {
+        match val {
+            ImageType::DataUri => Self::DataUri,
+            ImageType::InlineSvg => Self::InlineSvg,
+            ImageType::External => Self::External,
+            ImageType::Relative => Self::Relative,
+        }
+    }
+}
+
 impl From<html_to_markdown_rs::metadata::ImageType> for ImageType {
     fn from(val: html_to_markdown_rs::metadata::ImageType) -> Self {
         match val {
@@ -3091,6 +3304,16 @@ impl From<html_to_markdown_rs::metadata::ImageType> for ImageType {
             html_to_markdown_rs::metadata::ImageType::InlineSvg => Self::InlineSvg,
             html_to_markdown_rs::metadata::ImageType::External => Self::External,
             html_to_markdown_rs::metadata::ImageType::Relative => Self::Relative,
+        }
+    }
+}
+
+impl From<StructuredDataType> for html_to_markdown_rs::metadata::StructuredDataType {
+    fn from(val: StructuredDataType) -> Self {
+        match val {
+            StructuredDataType::JsonLd => Self::JsonLd,
+            StructuredDataType::Microdata => Self::Microdata,
+            StructuredDataType::RDFa => Self::RDFa,
         }
     }
 }
@@ -3279,15 +3502,15 @@ impl From<html_to_markdown_rs::options::OutputFormat> for OutputFormat {
     }
 }
 
-impl From<html_to_markdown_rs::types::NodeContent> for NodeContent {
-    fn from(val: html_to_markdown_rs::types::NodeContent) -> Self {
+impl From<NodeContent> for html_to_markdown_rs::NodeContent {
+    fn from(val: NodeContent) -> Self {
         match val {
-            html_to_markdown_rs::types::NodeContent::Heading { level, text } => Self::Heading { level, text },
-            html_to_markdown_rs::types::NodeContent::Paragraph { text } => Self::Paragraph { text },
-            html_to_markdown_rs::types::NodeContent::List { ordered } => Self::List { ordered },
-            html_to_markdown_rs::types::NodeContent::ListItem { text } => Self::ListItem { text },
-            html_to_markdown_rs::types::NodeContent::Table { grid } => Self::Table { grid: grid.into() },
-            html_to_markdown_rs::types::NodeContent::Image {
+            NodeContent::Heading { level, text } => Self::Heading { level, text },
+            NodeContent::Paragraph { text } => Self::Paragraph { text },
+            NodeContent::List { ordered } => Self::List { ordered },
+            NodeContent::ListItem { text } => Self::ListItem { text },
+            NodeContent::Table { grid } => Self::Table { grid: grid.into() },
+            NodeContent::Image {
                 description,
                 src,
                 image_index,
@@ -3296,17 +3519,13 @@ impl From<html_to_markdown_rs::types::NodeContent> for NodeContent {
                 src,
                 image_index,
             },
-            html_to_markdown_rs::types::NodeContent::Code { text, language } => Self::Code { text, language },
-            html_to_markdown_rs::types::NodeContent::Quote => Self::Quote,
-            html_to_markdown_rs::types::NodeContent::DefinitionList => Self::DefinitionList,
-            html_to_markdown_rs::types::NodeContent::DefinitionItem { term, definition } => {
-                Self::DefinitionItem { term, definition }
-            }
-            html_to_markdown_rs::types::NodeContent::RawBlock { format, content } => Self::RawBlock { format, content },
-            html_to_markdown_rs::types::NodeContent::MetadataBlock { entries } => Self::MetadataBlock {
-                entries: serde_json::to_string(&entries).unwrap_or_default(),
-            },
-            html_to_markdown_rs::types::NodeContent::Group {
+            NodeContent::Code { text, language } => Self::Code { text, language },
+            NodeContent::Quote => Self::Quote,
+            NodeContent::DefinitionList => Self::DefinitionList,
+            NodeContent::DefinitionItem { term, definition } => Self::DefinitionItem { term, definition },
+            NodeContent::RawBlock { format, content } => Self::RawBlock { format, content },
+            NodeContent::MetadataBlock { entries } => Self::MetadataBlock { entries },
+            NodeContent::Group {
                 label,
                 heading_level,
                 heading_text,
@@ -3319,30 +3538,98 @@ impl From<html_to_markdown_rs::types::NodeContent> for NodeContent {
     }
 }
 
-impl From<html_to_markdown_rs::types::AnnotationKind> for AnnotationKind {
-    fn from(val: html_to_markdown_rs::types::AnnotationKind) -> Self {
+impl From<html_to_markdown_rs::NodeContent> for NodeContent {
+    fn from(val: html_to_markdown_rs::NodeContent) -> Self {
         match val {
-            html_to_markdown_rs::types::AnnotationKind::Bold => Self::Bold,
-            html_to_markdown_rs::types::AnnotationKind::Italic => Self::Italic,
-            html_to_markdown_rs::types::AnnotationKind::Underline => Self::Underline,
-            html_to_markdown_rs::types::AnnotationKind::Strikethrough => Self::Strikethrough,
-            html_to_markdown_rs::types::AnnotationKind::Code => Self::Code,
-            html_to_markdown_rs::types::AnnotationKind::Subscript => Self::Subscript,
-            html_to_markdown_rs::types::AnnotationKind::Superscript => Self::Superscript,
-            html_to_markdown_rs::types::AnnotationKind::Highlight => Self::Highlight,
-            html_to_markdown_rs::types::AnnotationKind::Link { url, title } => Self::Link { url, title },
+            html_to_markdown_rs::NodeContent::Heading { level, text } => Self::Heading { level, text },
+            html_to_markdown_rs::NodeContent::Paragraph { text } => Self::Paragraph { text },
+            html_to_markdown_rs::NodeContent::List { ordered } => Self::List { ordered },
+            html_to_markdown_rs::NodeContent::ListItem { text } => Self::ListItem { text },
+            html_to_markdown_rs::NodeContent::Table { grid } => Self::Table { grid: grid.into() },
+            html_to_markdown_rs::NodeContent::Image {
+                description,
+                src,
+                image_index,
+            } => Self::Image {
+                description,
+                src,
+                image_index,
+            },
+            html_to_markdown_rs::NodeContent::Code { text, language } => Self::Code { text, language },
+            html_to_markdown_rs::NodeContent::Quote => Self::Quote,
+            html_to_markdown_rs::NodeContent::DefinitionList => Self::DefinitionList,
+            html_to_markdown_rs::NodeContent::DefinitionItem { term, definition } => {
+                Self::DefinitionItem { term, definition }
+            }
+            html_to_markdown_rs::NodeContent::RawBlock { format, content } => Self::RawBlock { format, content },
+            html_to_markdown_rs::NodeContent::MetadataBlock { entries } => Self::MetadataBlock {
+                entries: serde_json::to_string(&entries).unwrap_or_default(),
+            },
+            html_to_markdown_rs::NodeContent::Group {
+                label,
+                heading_level,
+                heading_text,
+            } => Self::Group {
+                label,
+                heading_level,
+                heading_text,
+            },
         }
     }
 }
 
-impl From<html_to_markdown_rs::types::WarningKind> for WarningKind {
-    fn from(val: html_to_markdown_rs::types::WarningKind) -> Self {
+impl From<AnnotationKind> for html_to_markdown_rs::AnnotationKind {
+    fn from(val: AnnotationKind) -> Self {
         match val {
-            html_to_markdown_rs::types::WarningKind::ImageExtractionFailed => Self::ImageExtractionFailed,
-            html_to_markdown_rs::types::WarningKind::EncodingFallback => Self::EncodingFallback,
-            html_to_markdown_rs::types::WarningKind::TruncatedInput => Self::TruncatedInput,
-            html_to_markdown_rs::types::WarningKind::MalformedHtml => Self::MalformedHtml,
-            html_to_markdown_rs::types::WarningKind::SanitizationApplied => Self::SanitizationApplied,
+            AnnotationKind::Bold => Self::Bold,
+            AnnotationKind::Italic => Self::Italic,
+            AnnotationKind::Underline => Self::Underline,
+            AnnotationKind::Strikethrough => Self::Strikethrough,
+            AnnotationKind::Code => Self::Code,
+            AnnotationKind::Subscript => Self::Subscript,
+            AnnotationKind::Superscript => Self::Superscript,
+            AnnotationKind::Highlight => Self::Highlight,
+            AnnotationKind::Link { url, title } => Self::Link { url, title },
+        }
+    }
+}
+
+impl From<html_to_markdown_rs::AnnotationKind> for AnnotationKind {
+    fn from(val: html_to_markdown_rs::AnnotationKind) -> Self {
+        match val {
+            html_to_markdown_rs::AnnotationKind::Bold => Self::Bold,
+            html_to_markdown_rs::AnnotationKind::Italic => Self::Italic,
+            html_to_markdown_rs::AnnotationKind::Underline => Self::Underline,
+            html_to_markdown_rs::AnnotationKind::Strikethrough => Self::Strikethrough,
+            html_to_markdown_rs::AnnotationKind::Code => Self::Code,
+            html_to_markdown_rs::AnnotationKind::Subscript => Self::Subscript,
+            html_to_markdown_rs::AnnotationKind::Superscript => Self::Superscript,
+            html_to_markdown_rs::AnnotationKind::Highlight => Self::Highlight,
+            html_to_markdown_rs::AnnotationKind::Link { url, title } => Self::Link { url, title },
+        }
+    }
+}
+
+impl From<WarningKind> for html_to_markdown_rs::WarningKind {
+    fn from(val: WarningKind) -> Self {
+        match val {
+            WarningKind::ImageExtractionFailed => Self::ImageExtractionFailed,
+            WarningKind::EncodingFallback => Self::EncodingFallback,
+            WarningKind::TruncatedInput => Self::TruncatedInput,
+            WarningKind::MalformedHtml => Self::MalformedHtml,
+            WarningKind::SanitizationApplied => Self::SanitizationApplied,
+        }
+    }
+}
+
+impl From<html_to_markdown_rs::WarningKind> for WarningKind {
+    fn from(val: html_to_markdown_rs::WarningKind) -> Self {
+        match val {
+            html_to_markdown_rs::WarningKind::ImageExtractionFailed => Self::ImageExtractionFailed,
+            html_to_markdown_rs::WarningKind::EncodingFallback => Self::EncodingFallback,
+            html_to_markdown_rs::WarningKind::TruncatedInput => Self::TruncatedInput,
+            html_to_markdown_rs::WarningKind::MalformedHtml => Self::MalformedHtml,
+            html_to_markdown_rs::WarningKind::SanitizationApplied => Self::SanitizationApplied,
         }
     }
 }
@@ -3592,15 +3879,6 @@ fn init(ruby: &Ruby) -> Result<(), Error> {
     )?;
     class.define_method("remove_forms", method!(PreprocessingOptionsUpdate::remove_forms, 0))?;
 
-    let class = module.define_class("ConversionResult", ruby.class_object())?;
-    class.define_singleton_method("new", function!(ConversionResult::new, 6))?;
-    class.define_method("content", method!(ConversionResult::content, 0))?;
-    class.define_method("document", method!(ConversionResult::document, 0))?;
-    class.define_method("metadata", method!(ConversionResult::metadata, 0))?;
-    class.define_method("tables", method!(ConversionResult::tables, 0))?;
-    class.define_method("images", method!(ConversionResult::images, 0))?;
-    class.define_method("warnings", method!(ConversionResult::warnings, 0))?;
-
     let class = module.define_class("DocumentStructure", ruby.class_object())?;
     class.define_singleton_method("new", function!(DocumentStructure::new, 2))?;
     class.define_method("nodes", method!(DocumentStructure::nodes, 0))?;
@@ -3620,6 +3898,15 @@ fn init(ruby: &Ruby) -> Result<(), Error> {
     class.define_method("start", method!(TextAnnotation::start, 0))?;
     class.define_method("end", method!(TextAnnotation::end, 0))?;
     class.define_method("kind", method!(TextAnnotation::kind, 0))?;
+
+    let class = module.define_class("ConversionResult", ruby.class_object())?;
+    class.define_singleton_method("new", function!(ConversionResult::new, 6))?;
+    class.define_method("content", method!(ConversionResult::content, 0))?;
+    class.define_method("document", method!(ConversionResult::document, 0))?;
+    class.define_method("metadata", method!(ConversionResult::metadata, 0))?;
+    class.define_method("tables", method!(ConversionResult::tables, 0))?;
+    class.define_method("images", method!(ConversionResult::images, 0))?;
+    class.define_method("warnings", method!(ConversionResult::warnings, 0))?;
 
     let class = module.define_class("TableGrid", ruby.class_object())?;
     class.define_singleton_method("new", function!(TableGrid::new, 3))?;

@@ -43,5 +43,4 @@ export type {
   JsTableGrid,
   JsTextAnnotation,
 } from '@kreuzberg/html-to-markdown-node';
-
 export * from './helpers';
