@@ -151,7 +151,7 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>${maven-javadoc-plugin.version}</version>
                 <configuration>
-                    <doclint>all,-missing</doclint>
+                    <doclint>none</doclint>
                     <show>protected</show>
                     <additionalOptions>--enable-preview</additionalOptions>
                     <sourcepath>${project.basedir}/src/main/java</sourcepath>

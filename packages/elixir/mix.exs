@@ -6,7 +6,6 @@ defmodule Html_to_markdown.MixProject do
       app: :html_to_markdown,
       version: "3.2.0",
       elixir: "~> 1.14",
-      compilers: [:rustler] ++ Mix.compilers(),
       description: "High-performance HTML to Markdown converter",
       package: package(),
       deps: deps()
