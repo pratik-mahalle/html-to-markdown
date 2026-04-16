@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.2] - 2026-04-16
+
+### Fixed
+
+- **Ruby binding compilation** — fixed serde derive errors and Default trait conflicts by conditionally deriving serde traits only when all field types support it, and generating Default derives for kwargs constructors.
+- **Ruby deprecated Magnus API** — replaced `magnus::exception::type_error()` / `runtime_error()` with `Ruby::exception_type_error()` / `Ruby::exception_runtime_error()` (Magnus 0.7+ API).
+- **PHP e2e tests** — fixed missing class import causing "Class not found" fatal error.
+- **Cargo.toml metadata** — added missing `readme`, `keywords`, `categories`, `description` fields to binding crate Cargo.toml files.
+- **C# dotnet format** — auto-formatted generated C# bindings.
+
 ## [3.2.1] - 2026-04-16
 
 ### Fixed
