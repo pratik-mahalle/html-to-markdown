@@ -7,7 +7,7 @@ use wasm_bindgen::prelude::*;
 
 #[derive(Clone, Default)]
 #[wasm_bindgen]
-pub struct JsMetadataConfig {
+pub struct WasmMetadataConfig {
     extract_document: bool,
     extract_headers: bool,
     extract_links: bool,
@@ -17,7 +17,7 @@ pub struct JsMetadataConfig {
 }
 
 #[wasm_bindgen]
-impl JsMetadataConfig {
+impl WasmMetadataConfig {
     #[wasm_bindgen(constructor)]
     pub fn new(
         extract_document: Option<bool>,
@@ -26,8 +26,8 @@ impl JsMetadataConfig {
         extract_images: Option<bool>,
         extract_structured_data: Option<bool>,
         max_structured_data_size: Option<usize>,
-    ) -> JsMetadataConfig {
-        JsMetadataConfig {
+    ) -> WasmMetadataConfig {
+        WasmMetadataConfig {
             extract_document: extract_document.unwrap_or(true),
             extract_headers: extract_headers.unwrap_or(true),
             extract_links: extract_links.unwrap_or(true),
@@ -99,7 +99,7 @@ impl JsMetadataConfig {
 
     #[allow(clippy::should_implement_trait)]
     #[wasm_bindgen]
-    pub fn default() -> JsMetadataConfig {
+    pub fn default() -> WasmMetadataConfig {
         html_to_markdown_rs::MetadataConfig::default().into()
     }
 
@@ -111,7 +111,7 @@ impl JsMetadataConfig {
 
 #[derive(Clone, Default)]
 #[wasm_bindgen]
-pub struct JsMetadataConfigUpdate {
+pub struct WasmMetadataConfigUpdate {
     extract_document: Option<bool>,
     extract_headers: Option<bool>,
     extract_links: Option<bool>,
@@ -121,7 +121,7 @@ pub struct JsMetadataConfigUpdate {
 }
 
 #[wasm_bindgen]
-impl JsMetadataConfigUpdate {
+impl WasmMetadataConfigUpdate {
     #[wasm_bindgen(constructor)]
     pub fn new(
         extract_document: Option<bool>,
@@ -130,8 +130,8 @@ impl JsMetadataConfigUpdate {
         extract_images: Option<bool>,
         extract_structured_data: Option<bool>,
         max_structured_data_size: Option<usize>,
-    ) -> JsMetadataConfigUpdate {
-        JsMetadataConfigUpdate {
+    ) -> WasmMetadataConfigUpdate {
+        WasmMetadataConfigUpdate {
             extract_document,
             extract_headers,
             extract_links,
@@ -204,7 +204,7 @@ impl JsMetadataConfigUpdate {
 
 #[derive(Clone, Default)]
 #[wasm_bindgen]
-pub struct JsDocumentMetadata {
+pub struct WasmDocumentMetadata {
     title: Option<String>,
     description: Option<String>,
     keywords: Vec<String>,
@@ -212,14 +212,14 @@ pub struct JsDocumentMetadata {
     canonical_url: Option<String>,
     base_href: Option<String>,
     language: Option<String>,
-    text_direction: Option<JsTextDirection>,
+    text_direction: Option<WasmTextDirection>,
     open_graph: JsValue,
     twitter_card: JsValue,
     meta_tags: JsValue,
 }
 
 #[wasm_bindgen]
-impl JsDocumentMetadata {
+impl WasmDocumentMetadata {
     #[allow(clippy::too_many_arguments)]
     #[wasm_bindgen(constructor)]
     pub fn new(
@@ -233,9 +233,9 @@ impl JsDocumentMetadata {
         canonical_url: Option<String>,
         base_href: Option<String>,
         language: Option<String>,
-        text_direction: Option<JsTextDirection>,
-    ) -> JsDocumentMetadata {
-        JsDocumentMetadata {
+        text_direction: Option<WasmTextDirection>,
+    ) -> WasmDocumentMetadata {
+        WasmDocumentMetadata {
             title,
             description,
             keywords: keywords.unwrap_or_default(),
@@ -321,12 +321,12 @@ impl JsDocumentMetadata {
     }
 
     #[wasm_bindgen(getter, js_name = "textDirection")]
-    pub fn text_direction(&self) -> Option<JsTextDirection> {
+    pub fn text_direction(&self) -> Option<WasmTextDirection> {
         self.text_direction
     }
 
     #[wasm_bindgen(setter, js_name = "textDirection")]
-    pub fn set_text_direction(&mut self, value: Option<JsTextDirection>) {
+    pub fn set_text_direction(&mut self, value: Option<WasmTextDirection>) {
         self.text_direction = value;
     }
 
@@ -363,7 +363,7 @@ impl JsDocumentMetadata {
 
 #[derive(Clone)]
 #[wasm_bindgen]
-pub struct JsHeaderMetadata {
+pub struct WasmHeaderMetadata {
     level: u8,
     text: String,
     id: Option<String>,
@@ -372,10 +372,10 @@ pub struct JsHeaderMetadata {
 }
 
 #[wasm_bindgen]
-impl JsHeaderMetadata {
+impl WasmHeaderMetadata {
     #[wasm_bindgen(constructor)]
-    pub fn new(level: u8, text: String, depth: usize, html_offset: usize, id: Option<String>) -> JsHeaderMetadata {
-        JsHeaderMetadata {
+    pub fn new(level: u8, text: String, depth: usize, html_offset: usize, id: Option<String>) -> WasmHeaderMetadata {
+        WasmHeaderMetadata {
             level,
             text,
             id,
@@ -442,27 +442,27 @@ impl JsHeaderMetadata {
 
 #[derive(Clone)]
 #[wasm_bindgen]
-pub struct JsLinkMetadata {
+pub struct WasmLinkMetadata {
     href: String,
     text: String,
     title: Option<String>,
-    link_type: JsLinkType,
+    link_type: WasmLinkType,
     rel: Vec<String>,
     attributes: JsValue,
 }
 
 #[wasm_bindgen]
-impl JsLinkMetadata {
+impl WasmLinkMetadata {
     #[wasm_bindgen(constructor)]
     pub fn new(
         href: String,
         text: String,
-        link_type: JsLinkType,
+        link_type: WasmLinkType,
         rel: Vec<String>,
         attributes: JsValue,
         title: Option<String>,
-    ) -> JsLinkMetadata {
-        JsLinkMetadata {
+    ) -> WasmLinkMetadata {
+        WasmLinkMetadata {
             href,
             text,
             title,
@@ -503,12 +503,12 @@ impl JsLinkMetadata {
     }
 
     #[wasm_bindgen(getter, js_name = "linkType")]
-    pub fn link_type(&self) -> JsLinkType {
+    pub fn link_type(&self) -> WasmLinkType {
         self.link_type
     }
 
     #[wasm_bindgen(setter, js_name = "linkType")]
-    pub fn set_link_type(&mut self, value: JsLinkType) {
+    pub fn set_link_type(&mut self, value: WasmLinkType) {
         self.link_type = value;
     }
 
@@ -533,34 +533,34 @@ impl JsLinkMetadata {
     }
 
     #[wasm_bindgen(js_name = "classifyLink")]
-    pub fn classify_link(href: String) -> JsLinkType {
+    pub fn classify_link(href: String) -> WasmLinkType {
         html_to_markdown_rs::LinkMetadata::classify_link(&href).into()
     }
 }
 
 #[derive(Clone)]
 #[wasm_bindgen]
-pub struct JsImageMetadata {
+pub struct WasmImageMetadata {
     src: String,
     alt: Option<String>,
     title: Option<String>,
     dimensions: Option<String>,
-    image_type: JsImageType,
+    image_type: WasmImageType,
     attributes: JsValue,
 }
 
 #[wasm_bindgen]
-impl JsImageMetadata {
+impl WasmImageMetadata {
     #[wasm_bindgen(constructor)]
     pub fn new(
         src: String,
-        image_type: JsImageType,
+        image_type: WasmImageType,
         attributes: JsValue,
         alt: Option<String>,
         title: Option<String>,
         dimensions: Option<String>,
-    ) -> JsImageMetadata {
-        JsImageMetadata {
+    ) -> WasmImageMetadata {
+        WasmImageMetadata {
             src,
             alt,
             title,
@@ -611,12 +611,12 @@ impl JsImageMetadata {
     }
 
     #[wasm_bindgen(getter, js_name = "imageType")]
-    pub fn image_type(&self) -> JsImageType {
+    pub fn image_type(&self) -> WasmImageType {
         self.image_type
     }
 
     #[wasm_bindgen(setter, js_name = "imageType")]
-    pub fn set_image_type(&mut self, value: JsImageType) {
+    pub fn set_image_type(&mut self, value: WasmImageType) {
         self.image_type = value;
     }
 
@@ -633,17 +633,17 @@ impl JsImageMetadata {
 
 #[derive(Clone)]
 #[wasm_bindgen]
-pub struct JsStructuredData {
-    data_type: JsStructuredDataType,
+pub struct WasmStructuredData {
+    data_type: WasmStructuredDataType,
     raw_json: String,
     schema_type: Option<String>,
 }
 
 #[wasm_bindgen]
-impl JsStructuredData {
+impl WasmStructuredData {
     #[wasm_bindgen(constructor)]
-    pub fn new(data_type: JsStructuredDataType, raw_json: String, schema_type: Option<String>) -> JsStructuredData {
-        JsStructuredData {
+    pub fn new(data_type: WasmStructuredDataType, raw_json: String, schema_type: Option<String>) -> WasmStructuredData {
+        WasmStructuredData {
             data_type,
             raw_json,
             schema_type,
@@ -651,12 +651,12 @@ impl JsStructuredData {
     }
 
     #[wasm_bindgen(getter, js_name = "dataType")]
-    pub fn data_type(&self) -> JsStructuredDataType {
+    pub fn data_type(&self) -> WasmStructuredDataType {
         self.data_type
     }
 
     #[wasm_bindgen(setter, js_name = "dataType")]
-    pub fn set_data_type(&mut self, value: JsStructuredDataType) {
+    pub fn set_data_type(&mut self, value: WasmStructuredDataType) {
         self.data_type = value;
     }
 
@@ -683,25 +683,25 @@ impl JsStructuredData {
 
 #[derive(Clone, Default)]
 #[wasm_bindgen]
-pub struct JsHtmlMetadata {
-    document: JsDocumentMetadata,
-    headers: Vec<JsHeaderMetadata>,
-    links: Vec<JsLinkMetadata>,
-    images: Vec<JsImageMetadata>,
-    structured_data: Vec<JsStructuredData>,
+pub struct WasmHtmlMetadata {
+    document: WasmDocumentMetadata,
+    headers: Vec<WasmHeaderMetadata>,
+    links: Vec<WasmLinkMetadata>,
+    images: Vec<WasmImageMetadata>,
+    structured_data: Vec<WasmStructuredData>,
 }
 
 #[wasm_bindgen]
-impl JsHtmlMetadata {
+impl WasmHtmlMetadata {
     #[wasm_bindgen(constructor)]
     pub fn new(
-        document: Option<JsDocumentMetadata>,
-        headers: Option<Vec<JsHeaderMetadata>>,
-        links: Option<Vec<JsLinkMetadata>>,
-        images: Option<Vec<JsImageMetadata>>,
-        structured_data: Option<Vec<JsStructuredData>>,
-    ) -> JsHtmlMetadata {
-        JsHtmlMetadata {
+        document: Option<WasmDocumentMetadata>,
+        headers: Option<Vec<WasmHeaderMetadata>>,
+        links: Option<Vec<WasmLinkMetadata>>,
+        images: Option<Vec<WasmImageMetadata>>,
+        structured_data: Option<Vec<WasmStructuredData>>,
+    ) -> WasmHtmlMetadata {
+        WasmHtmlMetadata {
             document: document.unwrap_or_default(),
             headers: headers.unwrap_or_default(),
             links: links.unwrap_or_default(),
@@ -711,61 +711,61 @@ impl JsHtmlMetadata {
     }
 
     #[wasm_bindgen(getter)]
-    pub fn document(&self) -> JsDocumentMetadata {
+    pub fn document(&self) -> WasmDocumentMetadata {
         self.document.clone()
     }
 
     #[wasm_bindgen(setter)]
-    pub fn set_document(&mut self, value: JsDocumentMetadata) {
+    pub fn set_document(&mut self, value: WasmDocumentMetadata) {
         self.document = value;
     }
 
     #[wasm_bindgen(getter)]
-    pub fn headers(&self) -> Vec<JsHeaderMetadata> {
+    pub fn headers(&self) -> Vec<WasmHeaderMetadata> {
         self.headers.clone()
     }
 
     #[wasm_bindgen(setter)]
-    pub fn set_headers(&mut self, value: Vec<JsHeaderMetadata>) {
+    pub fn set_headers(&mut self, value: Vec<WasmHeaderMetadata>) {
         self.headers = value;
     }
 
     #[wasm_bindgen(getter)]
-    pub fn links(&self) -> Vec<JsLinkMetadata> {
+    pub fn links(&self) -> Vec<WasmLinkMetadata> {
         self.links.clone()
     }
 
     #[wasm_bindgen(setter)]
-    pub fn set_links(&mut self, value: Vec<JsLinkMetadata>) {
+    pub fn set_links(&mut self, value: Vec<WasmLinkMetadata>) {
         self.links = value;
     }
 
     #[wasm_bindgen(getter)]
-    pub fn images(&self) -> Vec<JsImageMetadata> {
+    pub fn images(&self) -> Vec<WasmImageMetadata> {
         self.images.clone()
     }
 
     #[wasm_bindgen(setter)]
-    pub fn set_images(&mut self, value: Vec<JsImageMetadata>) {
+    pub fn set_images(&mut self, value: Vec<WasmImageMetadata>) {
         self.images = value;
     }
 
     #[wasm_bindgen(getter, js_name = "structuredData")]
-    pub fn structured_data(&self) -> Vec<JsStructuredData> {
+    pub fn structured_data(&self) -> Vec<WasmStructuredData> {
         self.structured_data.clone()
     }
 
     #[wasm_bindgen(setter, js_name = "structuredData")]
-    pub fn set_structured_data(&mut self, value: Vec<JsStructuredData>) {
+    pub fn set_structured_data(&mut self, value: Vec<WasmStructuredData>) {
         self.structured_data = value;
     }
 }
 
 #[derive(Clone, Default)]
 #[wasm_bindgen]
-pub struct JsConversionOptions {
-    heading_style: JsHeadingStyle,
-    list_indent_type: JsListIndentType,
+pub struct WasmConversionOptions {
+    heading_style: WasmHeadingStyle,
+    list_indent_type: WasmListIndentType,
     list_indent_width: usize,
     bullets: String,
     strong_em_symbol: String,
@@ -777,26 +777,26 @@ pub struct JsConversionOptions {
     autolinks: bool,
     default_title: bool,
     br_in_tables: bool,
-    highlight_style: JsHighlightStyle,
+    highlight_style: WasmHighlightStyle,
     extract_metadata: bool,
-    whitespace_mode: JsWhitespaceMode,
+    whitespace_mode: WasmWhitespaceMode,
     strip_newlines: bool,
     wrap: bool,
     wrap_width: usize,
     convert_as_inline: bool,
     sub_symbol: String,
     sup_symbol: String,
-    newline_style: JsNewlineStyle,
-    code_block_style: JsCodeBlockStyle,
+    newline_style: WasmNewlineStyle,
+    code_block_style: WasmCodeBlockStyle,
     keep_inline_images_in: Vec<String>,
-    preprocessing: JsPreprocessingOptions,
+    preprocessing: WasmPreprocessingOptions,
     encoding: String,
     debug: bool,
     strip_tags: Vec<String>,
     preserve_tags: Vec<String>,
     skip_images: bool,
-    link_style: JsLinkStyle,
-    output_format: JsOutputFormat,
+    link_style: WasmLinkStyle,
+    output_format: WasmOutputFormat,
     include_document_structure: bool,
     extract_images: bool,
     max_image_size: u64,
@@ -805,12 +805,12 @@ pub struct JsConversionOptions {
 }
 
 #[wasm_bindgen]
-impl JsConversionOptions {
+impl WasmConversionOptions {
     #[allow(clippy::too_many_arguments)]
     #[wasm_bindgen(constructor)]
     pub fn new(
-        heading_style: Option<JsHeadingStyle>,
-        list_indent_type: Option<JsListIndentType>,
+        heading_style: Option<WasmHeadingStyle>,
+        list_indent_type: Option<WasmListIndentType>,
         list_indent_width: Option<usize>,
         bullets: Option<String>,
         strong_em_symbol: Option<String>,
@@ -822,33 +822,33 @@ impl JsConversionOptions {
         autolinks: Option<bool>,
         default_title: Option<bool>,
         br_in_tables: Option<bool>,
-        highlight_style: Option<JsHighlightStyle>,
+        highlight_style: Option<WasmHighlightStyle>,
         extract_metadata: Option<bool>,
-        whitespace_mode: Option<JsWhitespaceMode>,
+        whitespace_mode: Option<WasmWhitespaceMode>,
         strip_newlines: Option<bool>,
         wrap: Option<bool>,
         wrap_width: Option<usize>,
         convert_as_inline: Option<bool>,
         sub_symbol: Option<String>,
         sup_symbol: Option<String>,
-        newline_style: Option<JsNewlineStyle>,
-        code_block_style: Option<JsCodeBlockStyle>,
+        newline_style: Option<WasmNewlineStyle>,
+        code_block_style: Option<WasmCodeBlockStyle>,
         keep_inline_images_in: Option<Vec<String>>,
-        preprocessing: Option<JsPreprocessingOptions>,
+        preprocessing: Option<WasmPreprocessingOptions>,
         encoding: Option<String>,
         debug: Option<bool>,
         strip_tags: Option<Vec<String>>,
         preserve_tags: Option<Vec<String>>,
         skip_images: Option<bool>,
-        link_style: Option<JsLinkStyle>,
-        output_format: Option<JsOutputFormat>,
+        link_style: Option<WasmLinkStyle>,
+        output_format: Option<WasmOutputFormat>,
         include_document_structure: Option<bool>,
         extract_images: Option<bool>,
         max_image_size: Option<u64>,
         capture_svg: Option<bool>,
         infer_dimensions: Option<bool>,
-    ) -> JsConversionOptions {
-        JsConversionOptions {
+    ) -> WasmConversionOptions {
+        WasmConversionOptions {
             heading_style: heading_style.unwrap_or_default(),
             list_indent_type: list_indent_type.unwrap_or_default(),
             list_indent_width: list_indent_width.unwrap_or(2),
@@ -891,22 +891,22 @@ impl JsConversionOptions {
     }
 
     #[wasm_bindgen(getter, js_name = "headingStyle")]
-    pub fn heading_style(&self) -> JsHeadingStyle {
+    pub fn heading_style(&self) -> WasmHeadingStyle {
         self.heading_style
     }
 
     #[wasm_bindgen(setter, js_name = "headingStyle")]
-    pub fn set_heading_style(&mut self, value: JsHeadingStyle) {
+    pub fn set_heading_style(&mut self, value: WasmHeadingStyle) {
         self.heading_style = value;
     }
 
     #[wasm_bindgen(getter, js_name = "listIndentType")]
-    pub fn list_indent_type(&self) -> JsListIndentType {
+    pub fn list_indent_type(&self) -> WasmListIndentType {
         self.list_indent_type
     }
 
     #[wasm_bindgen(setter, js_name = "listIndentType")]
-    pub fn set_list_indent_type(&mut self, value: JsListIndentType) {
+    pub fn set_list_indent_type(&mut self, value: WasmListIndentType) {
         self.list_indent_type = value;
     }
 
@@ -1021,12 +1021,12 @@ impl JsConversionOptions {
     }
 
     #[wasm_bindgen(getter, js_name = "highlightStyle")]
-    pub fn highlight_style(&self) -> JsHighlightStyle {
+    pub fn highlight_style(&self) -> WasmHighlightStyle {
         self.highlight_style
     }
 
     #[wasm_bindgen(setter, js_name = "highlightStyle")]
-    pub fn set_highlight_style(&mut self, value: JsHighlightStyle) {
+    pub fn set_highlight_style(&mut self, value: WasmHighlightStyle) {
         self.highlight_style = value;
     }
 
@@ -1041,12 +1041,12 @@ impl JsConversionOptions {
     }
 
     #[wasm_bindgen(getter, js_name = "whitespaceMode")]
-    pub fn whitespace_mode(&self) -> JsWhitespaceMode {
+    pub fn whitespace_mode(&self) -> WasmWhitespaceMode {
         self.whitespace_mode
     }
 
     #[wasm_bindgen(setter, js_name = "whitespaceMode")]
-    pub fn set_whitespace_mode(&mut self, value: JsWhitespaceMode) {
+    pub fn set_whitespace_mode(&mut self, value: WasmWhitespaceMode) {
         self.whitespace_mode = value;
     }
 
@@ -1111,22 +1111,22 @@ impl JsConversionOptions {
     }
 
     #[wasm_bindgen(getter, js_name = "newlineStyle")]
-    pub fn newline_style(&self) -> JsNewlineStyle {
+    pub fn newline_style(&self) -> WasmNewlineStyle {
         self.newline_style
     }
 
     #[wasm_bindgen(setter, js_name = "newlineStyle")]
-    pub fn set_newline_style(&mut self, value: JsNewlineStyle) {
+    pub fn set_newline_style(&mut self, value: WasmNewlineStyle) {
         self.newline_style = value;
     }
 
     #[wasm_bindgen(getter, js_name = "codeBlockStyle")]
-    pub fn code_block_style(&self) -> JsCodeBlockStyle {
+    pub fn code_block_style(&self) -> WasmCodeBlockStyle {
         self.code_block_style
     }
 
     #[wasm_bindgen(setter, js_name = "codeBlockStyle")]
-    pub fn set_code_block_style(&mut self, value: JsCodeBlockStyle) {
+    pub fn set_code_block_style(&mut self, value: WasmCodeBlockStyle) {
         self.code_block_style = value;
     }
 
@@ -1141,12 +1141,12 @@ impl JsConversionOptions {
     }
 
     #[wasm_bindgen(getter)]
-    pub fn preprocessing(&self) -> JsPreprocessingOptions {
+    pub fn preprocessing(&self) -> WasmPreprocessingOptions {
         self.preprocessing.clone()
     }
 
     #[wasm_bindgen(setter)]
-    pub fn set_preprocessing(&mut self, value: JsPreprocessingOptions) {
+    pub fn set_preprocessing(&mut self, value: WasmPreprocessingOptions) {
         self.preprocessing = value;
     }
 
@@ -1201,22 +1201,22 @@ impl JsConversionOptions {
     }
 
     #[wasm_bindgen(getter, js_name = "linkStyle")]
-    pub fn link_style(&self) -> JsLinkStyle {
+    pub fn link_style(&self) -> WasmLinkStyle {
         self.link_style
     }
 
     #[wasm_bindgen(setter, js_name = "linkStyle")]
-    pub fn set_link_style(&mut self, value: JsLinkStyle) {
+    pub fn set_link_style(&mut self, value: WasmLinkStyle) {
         self.link_style = value;
     }
 
     #[wasm_bindgen(getter, js_name = "outputFormat")]
-    pub fn output_format(&self) -> JsOutputFormat {
+    pub fn output_format(&self) -> WasmOutputFormat {
         self.output_format
     }
 
     #[wasm_bindgen(setter, js_name = "outputFormat")]
-    pub fn set_output_format(&mut self, value: JsOutputFormat) {
+    pub fn set_output_format(&mut self, value: WasmOutputFormat) {
         self.output_format = value;
     }
 
@@ -1272,13 +1272,13 @@ impl JsConversionOptions {
 
     #[allow(clippy::should_implement_trait)]
     #[wasm_bindgen]
-    pub fn default() -> JsConversionOptions {
+    pub fn default() -> WasmConversionOptions {
         html_to_markdown_rs::ConversionOptions::default().into()
     }
 
     #[wasm_bindgen]
-    pub fn builder() -> JsConversionOptionsBuilder {
-        JsConversionOptionsBuilder {
+    pub fn builder() -> WasmConversionOptionsBuilder {
+        WasmConversionOptionsBuilder {
             inner: Arc::new(html_to_markdown_rs::ConversionOptions::builder()),
         }
     }
@@ -1286,51 +1286,51 @@ impl JsConversionOptions {
 
 #[derive(Clone)]
 #[wasm_bindgen]
-pub struct JsConversionOptionsBuilder {
+pub struct WasmConversionOptionsBuilder {
     inner: Arc<html_to_markdown_rs::options::ConversionOptionsBuilder>,
 }
 
 #[wasm_bindgen]
-impl JsConversionOptionsBuilder {
+impl WasmConversionOptionsBuilder {
     #[wasm_bindgen(js_name = "stripTags")]
-    pub fn strip_tags(&self, tags: Vec<String>) -> JsConversionOptionsBuilder {
+    pub fn strip_tags(&self, tags: Vec<String>) -> WasmConversionOptionsBuilder {
         Self {
             inner: Arc::new((*self.inner).clone().strip_tags(tags)),
         }
     }
 
     #[wasm_bindgen(js_name = "preserveTags")]
-    pub fn preserve_tags(&self, tags: Vec<String>) -> JsConversionOptionsBuilder {
+    pub fn preserve_tags(&self, tags: Vec<String>) -> WasmConversionOptionsBuilder {
         Self {
             inner: Arc::new((*self.inner).clone().preserve_tags(tags)),
         }
     }
 
     #[wasm_bindgen(js_name = "keepInlineImagesIn")]
-    pub fn keep_inline_images_in(&self, tags: Vec<String>) -> JsConversionOptionsBuilder {
+    pub fn keep_inline_images_in(&self, tags: Vec<String>) -> WasmConversionOptionsBuilder {
         Self {
             inner: Arc::new((*self.inner).clone().keep_inline_images_in(tags)),
         }
     }
 
     #[wasm_bindgen]
-    pub fn preprocessing(&self, preprocessing: JsPreprocessingOptions) -> JsConversionOptionsBuilder {
+    pub fn preprocessing(&self, preprocessing: WasmPreprocessingOptions) -> WasmConversionOptionsBuilder {
         Self {
             inner: Arc::new((*self.inner).clone().preprocessing(preprocessing.into())),
         }
     }
 
     #[wasm_bindgen]
-    pub fn build(&self) -> JsConversionOptions {
+    pub fn build(&self) -> WasmConversionOptions {
         (*self.inner).clone().build().into()
     }
 }
 
 #[derive(Clone, Default)]
 #[wasm_bindgen]
-pub struct JsConversionOptionsUpdate {
-    heading_style: Option<JsHeadingStyle>,
-    list_indent_type: Option<JsListIndentType>,
+pub struct WasmConversionOptionsUpdate {
+    heading_style: Option<WasmHeadingStyle>,
+    list_indent_type: Option<WasmListIndentType>,
     list_indent_width: Option<usize>,
     bullets: Option<String>,
     strong_em_symbol: Option<String>,
@@ -1342,26 +1342,26 @@ pub struct JsConversionOptionsUpdate {
     autolinks: Option<bool>,
     default_title: Option<bool>,
     br_in_tables: Option<bool>,
-    highlight_style: Option<JsHighlightStyle>,
+    highlight_style: Option<WasmHighlightStyle>,
     extract_metadata: Option<bool>,
-    whitespace_mode: Option<JsWhitespaceMode>,
+    whitespace_mode: Option<WasmWhitespaceMode>,
     strip_newlines: Option<bool>,
     wrap: Option<bool>,
     wrap_width: Option<usize>,
     convert_as_inline: Option<bool>,
     sub_symbol: Option<String>,
     sup_symbol: Option<String>,
-    newline_style: Option<JsNewlineStyle>,
-    code_block_style: Option<JsCodeBlockStyle>,
+    newline_style: Option<WasmNewlineStyle>,
+    code_block_style: Option<WasmCodeBlockStyle>,
     keep_inline_images_in: Option<Vec<String>>,
-    preprocessing: Option<JsPreprocessingOptionsUpdate>,
+    preprocessing: Option<WasmPreprocessingOptionsUpdate>,
     encoding: Option<String>,
     debug: Option<bool>,
     strip_tags: Option<Vec<String>>,
     preserve_tags: Option<Vec<String>>,
     skip_images: Option<bool>,
-    link_style: Option<JsLinkStyle>,
-    output_format: Option<JsOutputFormat>,
+    link_style: Option<WasmLinkStyle>,
+    output_format: Option<WasmOutputFormat>,
     include_document_structure: Option<bool>,
     extract_images: Option<bool>,
     max_image_size: Option<u64>,
@@ -1370,12 +1370,12 @@ pub struct JsConversionOptionsUpdate {
 }
 
 #[wasm_bindgen]
-impl JsConversionOptionsUpdate {
+impl WasmConversionOptionsUpdate {
     #[allow(clippy::too_many_arguments)]
     #[wasm_bindgen(constructor)]
     pub fn new(
-        heading_style: Option<JsHeadingStyle>,
-        list_indent_type: Option<JsListIndentType>,
+        heading_style: Option<WasmHeadingStyle>,
+        list_indent_type: Option<WasmListIndentType>,
         list_indent_width: Option<usize>,
         bullets: Option<String>,
         strong_em_symbol: Option<String>,
@@ -1387,33 +1387,33 @@ impl JsConversionOptionsUpdate {
         autolinks: Option<bool>,
         default_title: Option<bool>,
         br_in_tables: Option<bool>,
-        highlight_style: Option<JsHighlightStyle>,
+        highlight_style: Option<WasmHighlightStyle>,
         extract_metadata: Option<bool>,
-        whitespace_mode: Option<JsWhitespaceMode>,
+        whitespace_mode: Option<WasmWhitespaceMode>,
         strip_newlines: Option<bool>,
         wrap: Option<bool>,
         wrap_width: Option<usize>,
         convert_as_inline: Option<bool>,
         sub_symbol: Option<String>,
         sup_symbol: Option<String>,
-        newline_style: Option<JsNewlineStyle>,
-        code_block_style: Option<JsCodeBlockStyle>,
+        newline_style: Option<WasmNewlineStyle>,
+        code_block_style: Option<WasmCodeBlockStyle>,
         keep_inline_images_in: Option<Vec<String>>,
-        preprocessing: Option<JsPreprocessingOptionsUpdate>,
+        preprocessing: Option<WasmPreprocessingOptionsUpdate>,
         encoding: Option<String>,
         debug: Option<bool>,
         strip_tags: Option<Vec<String>>,
         preserve_tags: Option<Vec<String>>,
         skip_images: Option<bool>,
-        link_style: Option<JsLinkStyle>,
-        output_format: Option<JsOutputFormat>,
+        link_style: Option<WasmLinkStyle>,
+        output_format: Option<WasmOutputFormat>,
         include_document_structure: Option<bool>,
         extract_images: Option<bool>,
         max_image_size: Option<u64>,
         capture_svg: Option<bool>,
         infer_dimensions: Option<bool>,
-    ) -> JsConversionOptionsUpdate {
-        JsConversionOptionsUpdate {
+    ) -> WasmConversionOptionsUpdate {
+        WasmConversionOptionsUpdate {
             heading_style,
             list_indent_type,
             list_indent_width,
@@ -1456,22 +1456,22 @@ impl JsConversionOptionsUpdate {
     }
 
     #[wasm_bindgen(getter, js_name = "headingStyle")]
-    pub fn heading_style(&self) -> Option<JsHeadingStyle> {
+    pub fn heading_style(&self) -> Option<WasmHeadingStyle> {
         self.heading_style
     }
 
     #[wasm_bindgen(setter, js_name = "headingStyle")]
-    pub fn set_heading_style(&mut self, value: Option<JsHeadingStyle>) {
+    pub fn set_heading_style(&mut self, value: Option<WasmHeadingStyle>) {
         self.heading_style = value;
     }
 
     #[wasm_bindgen(getter, js_name = "listIndentType")]
-    pub fn list_indent_type(&self) -> Option<JsListIndentType> {
+    pub fn list_indent_type(&self) -> Option<WasmListIndentType> {
         self.list_indent_type
     }
 
     #[wasm_bindgen(setter, js_name = "listIndentType")]
-    pub fn set_list_indent_type(&mut self, value: Option<JsListIndentType>) {
+    pub fn set_list_indent_type(&mut self, value: Option<WasmListIndentType>) {
         self.list_indent_type = value;
     }
 
@@ -1586,12 +1586,12 @@ impl JsConversionOptionsUpdate {
     }
 
     #[wasm_bindgen(getter, js_name = "highlightStyle")]
-    pub fn highlight_style(&self) -> Option<JsHighlightStyle> {
+    pub fn highlight_style(&self) -> Option<WasmHighlightStyle> {
         self.highlight_style
     }
 
     #[wasm_bindgen(setter, js_name = "highlightStyle")]
-    pub fn set_highlight_style(&mut self, value: Option<JsHighlightStyle>) {
+    pub fn set_highlight_style(&mut self, value: Option<WasmHighlightStyle>) {
         self.highlight_style = value;
     }
 
@@ -1606,12 +1606,12 @@ impl JsConversionOptionsUpdate {
     }
 
     #[wasm_bindgen(getter, js_name = "whitespaceMode")]
-    pub fn whitespace_mode(&self) -> Option<JsWhitespaceMode> {
+    pub fn whitespace_mode(&self) -> Option<WasmWhitespaceMode> {
         self.whitespace_mode
     }
 
     #[wasm_bindgen(setter, js_name = "whitespaceMode")]
-    pub fn set_whitespace_mode(&mut self, value: Option<JsWhitespaceMode>) {
+    pub fn set_whitespace_mode(&mut self, value: Option<WasmWhitespaceMode>) {
         self.whitespace_mode = value;
     }
 
@@ -1676,22 +1676,22 @@ impl JsConversionOptionsUpdate {
     }
 
     #[wasm_bindgen(getter, js_name = "newlineStyle")]
-    pub fn newline_style(&self) -> Option<JsNewlineStyle> {
+    pub fn newline_style(&self) -> Option<WasmNewlineStyle> {
         self.newline_style
     }
 
     #[wasm_bindgen(setter, js_name = "newlineStyle")]
-    pub fn set_newline_style(&mut self, value: Option<JsNewlineStyle>) {
+    pub fn set_newline_style(&mut self, value: Option<WasmNewlineStyle>) {
         self.newline_style = value;
     }
 
     #[wasm_bindgen(getter, js_name = "codeBlockStyle")]
-    pub fn code_block_style(&self) -> Option<JsCodeBlockStyle> {
+    pub fn code_block_style(&self) -> Option<WasmCodeBlockStyle> {
         self.code_block_style
     }
 
     #[wasm_bindgen(setter, js_name = "codeBlockStyle")]
-    pub fn set_code_block_style(&mut self, value: Option<JsCodeBlockStyle>) {
+    pub fn set_code_block_style(&mut self, value: Option<WasmCodeBlockStyle>) {
         self.code_block_style = value;
     }
 
@@ -1706,12 +1706,12 @@ impl JsConversionOptionsUpdate {
     }
 
     #[wasm_bindgen(getter)]
-    pub fn preprocessing(&self) -> Option<JsPreprocessingOptionsUpdate> {
+    pub fn preprocessing(&self) -> Option<WasmPreprocessingOptionsUpdate> {
         self.preprocessing.clone()
     }
 
     #[wasm_bindgen(setter)]
-    pub fn set_preprocessing(&mut self, value: Option<JsPreprocessingOptionsUpdate>) {
+    pub fn set_preprocessing(&mut self, value: Option<WasmPreprocessingOptionsUpdate>) {
         self.preprocessing = value;
     }
 
@@ -1766,22 +1766,22 @@ impl JsConversionOptionsUpdate {
     }
 
     #[wasm_bindgen(getter, js_name = "linkStyle")]
-    pub fn link_style(&self) -> Option<JsLinkStyle> {
+    pub fn link_style(&self) -> Option<WasmLinkStyle> {
         self.link_style
     }
 
     #[wasm_bindgen(setter, js_name = "linkStyle")]
-    pub fn set_link_style(&mut self, value: Option<JsLinkStyle>) {
+    pub fn set_link_style(&mut self, value: Option<WasmLinkStyle>) {
         self.link_style = value;
     }
 
     #[wasm_bindgen(getter, js_name = "outputFormat")]
-    pub fn output_format(&self) -> Option<JsOutputFormat> {
+    pub fn output_format(&self) -> Option<WasmOutputFormat> {
         self.output_format
     }
 
     #[wasm_bindgen(setter, js_name = "outputFormat")]
-    pub fn set_output_format(&mut self, value: Option<JsOutputFormat>) {
+    pub fn set_output_format(&mut self, value: Option<WasmOutputFormat>) {
         self.output_format = value;
     }
 
@@ -1838,23 +1838,23 @@ impl JsConversionOptionsUpdate {
 
 #[derive(Clone, Default)]
 #[wasm_bindgen]
-pub struct JsPreprocessingOptions {
+pub struct WasmPreprocessingOptions {
     enabled: bool,
-    preset: JsPreprocessingPreset,
+    preset: WasmPreprocessingPreset,
     remove_navigation: bool,
     remove_forms: bool,
 }
 
 #[wasm_bindgen]
-impl JsPreprocessingOptions {
+impl WasmPreprocessingOptions {
     #[wasm_bindgen(constructor)]
     pub fn new(
         enabled: Option<bool>,
-        preset: Option<JsPreprocessingPreset>,
+        preset: Option<WasmPreprocessingPreset>,
         remove_navigation: Option<bool>,
         remove_forms: Option<bool>,
-    ) -> JsPreprocessingOptions {
-        JsPreprocessingOptions {
+    ) -> WasmPreprocessingOptions {
+        WasmPreprocessingOptions {
             enabled: enabled.unwrap_or(true),
             preset: preset.unwrap_or_default(),
             remove_navigation: remove_navigation.unwrap_or(true),
@@ -1873,12 +1873,12 @@ impl JsPreprocessingOptions {
     }
 
     #[wasm_bindgen(getter)]
-    pub fn preset(&self) -> JsPreprocessingPreset {
+    pub fn preset(&self) -> WasmPreprocessingPreset {
         self.preset
     }
 
     #[wasm_bindgen(setter)]
-    pub fn set_preset(&mut self, value: JsPreprocessingPreset) {
+    pub fn set_preset(&mut self, value: WasmPreprocessingPreset) {
         self.preset = value;
     }
 
@@ -1904,30 +1904,30 @@ impl JsPreprocessingOptions {
 
     #[allow(clippy::should_implement_trait)]
     #[wasm_bindgen]
-    pub fn default() -> JsPreprocessingOptions {
+    pub fn default() -> WasmPreprocessingOptions {
         html_to_markdown_rs::PreprocessingOptions::default().into()
     }
 }
 
 #[derive(Clone, Default)]
 #[wasm_bindgen]
-pub struct JsPreprocessingOptionsUpdate {
+pub struct WasmPreprocessingOptionsUpdate {
     enabled: Option<bool>,
-    preset: Option<JsPreprocessingPreset>,
+    preset: Option<WasmPreprocessingPreset>,
     remove_navigation: Option<bool>,
     remove_forms: Option<bool>,
 }
 
 #[wasm_bindgen]
-impl JsPreprocessingOptionsUpdate {
+impl WasmPreprocessingOptionsUpdate {
     #[wasm_bindgen(constructor)]
     pub fn new(
         enabled: Option<bool>,
-        preset: Option<JsPreprocessingPreset>,
+        preset: Option<WasmPreprocessingPreset>,
         remove_navigation: Option<bool>,
         remove_forms: Option<bool>,
-    ) -> JsPreprocessingOptionsUpdate {
-        JsPreprocessingOptionsUpdate {
+    ) -> WasmPreprocessingOptionsUpdate {
+        WasmPreprocessingOptionsUpdate {
             enabled,
             preset,
             remove_navigation,
@@ -1946,12 +1946,12 @@ impl JsPreprocessingOptionsUpdate {
     }
 
     #[wasm_bindgen(getter)]
-    pub fn preset(&self) -> Option<JsPreprocessingPreset> {
+    pub fn preset(&self) -> Option<WasmPreprocessingPreset> {
         self.preset
     }
 
     #[wasm_bindgen(setter)]
-    pub fn set_preset(&mut self, value: Option<JsPreprocessingPreset>) {
+    pub fn set_preset(&mut self, value: Option<WasmPreprocessingPreset>) {
         self.preset = value;
     }
 
@@ -1978,25 +1978,25 @@ impl JsPreprocessingOptionsUpdate {
 
 #[derive(Clone)]
 #[wasm_bindgen]
-pub struct JsDocumentStructure {
-    nodes: Vec<JsDocumentNode>,
+pub struct WasmDocumentStructure {
+    nodes: Vec<WasmDocumentNode>,
     source_format: Option<String>,
 }
 
 #[wasm_bindgen]
-impl JsDocumentStructure {
+impl WasmDocumentStructure {
     #[wasm_bindgen(constructor)]
-    pub fn new(nodes: Vec<JsDocumentNode>, source_format: Option<String>) -> JsDocumentStructure {
-        JsDocumentStructure { nodes, source_format }
+    pub fn new(nodes: Vec<WasmDocumentNode>, source_format: Option<String>) -> WasmDocumentStructure {
+        WasmDocumentStructure { nodes, source_format }
     }
 
     #[wasm_bindgen(getter)]
-    pub fn nodes(&self) -> Vec<JsDocumentNode> {
+    pub fn nodes(&self) -> Vec<WasmDocumentNode> {
         self.nodes.clone()
     }
 
     #[wasm_bindgen(setter)]
-    pub fn set_nodes(&mut self, value: Vec<JsDocumentNode>) {
+    pub fn set_nodes(&mut self, value: Vec<WasmDocumentNode>) {
         self.nodes = value;
     }
 
@@ -2013,27 +2013,27 @@ impl JsDocumentStructure {
 
 #[derive(Clone)]
 #[wasm_bindgen]
-pub struct JsDocumentNode {
+pub struct WasmDocumentNode {
     id: String,
-    content: JsNodeContent,
+    content: WasmNodeContent,
     parent: Option<u32>,
     children: Vec<u32>,
-    annotations: Vec<JsTextAnnotation>,
+    annotations: Vec<WasmTextAnnotation>,
     attributes: Option<JsValue>,
 }
 
 #[wasm_bindgen]
-impl JsDocumentNode {
+impl WasmDocumentNode {
     #[wasm_bindgen(constructor)]
     pub fn new(
         id: String,
-        content: JsNodeContent,
+        content: WasmNodeContent,
         children: Vec<u32>,
-        annotations: Vec<JsTextAnnotation>,
+        annotations: Vec<WasmTextAnnotation>,
         parent: Option<u32>,
         attributes: Option<JsValue>,
-    ) -> JsDocumentNode {
-        JsDocumentNode {
+    ) -> WasmDocumentNode {
+        WasmDocumentNode {
             id,
             content,
             parent,
@@ -2054,12 +2054,12 @@ impl JsDocumentNode {
     }
 
     #[wasm_bindgen(getter)]
-    pub fn content(&self) -> JsNodeContent {
+    pub fn content(&self) -> WasmNodeContent {
         self.content
     }
 
     #[wasm_bindgen(setter)]
-    pub fn set_content(&mut self, value: JsNodeContent) {
+    pub fn set_content(&mut self, value: WasmNodeContent) {
         self.content = value;
     }
 
@@ -2084,12 +2084,12 @@ impl JsDocumentNode {
     }
 
     #[wasm_bindgen(getter)]
-    pub fn annotations(&self) -> Vec<JsTextAnnotation> {
+    pub fn annotations(&self) -> Vec<WasmTextAnnotation> {
         self.annotations.clone()
     }
 
     #[wasm_bindgen(setter)]
-    pub fn set_annotations(&mut self, value: Vec<JsTextAnnotation>) {
+    pub fn set_annotations(&mut self, value: Vec<WasmTextAnnotation>) {
         self.annotations = value;
     }
 
@@ -2106,17 +2106,17 @@ impl JsDocumentNode {
 
 #[derive(Clone)]
 #[wasm_bindgen]
-pub struct JsTextAnnotation {
+pub struct WasmTextAnnotation {
     start: u32,
     end: u32,
-    kind: JsAnnotationKind,
+    kind: WasmAnnotationKind,
 }
 
 #[wasm_bindgen]
-impl JsTextAnnotation {
+impl WasmTextAnnotation {
     #[wasm_bindgen(constructor)]
-    pub fn new(start: u32, end: u32, kind: JsAnnotationKind) -> JsTextAnnotation {
-        JsTextAnnotation { start, end, kind }
+    pub fn new(start: u32, end: u32, kind: WasmAnnotationKind) -> WasmTextAnnotation {
+        WasmTextAnnotation { start, end, kind }
     }
 
     #[wasm_bindgen(getter)]
@@ -2140,39 +2140,39 @@ impl JsTextAnnotation {
     }
 
     #[wasm_bindgen(getter)]
-    pub fn kind(&self) -> JsAnnotationKind {
+    pub fn kind(&self) -> WasmAnnotationKind {
         self.kind
     }
 
     #[wasm_bindgen(setter)]
-    pub fn set_kind(&mut self, value: JsAnnotationKind) {
+    pub fn set_kind(&mut self, value: WasmAnnotationKind) {
         self.kind = value;
     }
 }
 
 #[derive(Clone, Default)]
 #[wasm_bindgen]
-pub struct JsConversionResult {
+pub struct WasmConversionResult {
     content: Option<String>,
-    document: Option<JsDocumentStructure>,
-    metadata: JsHtmlMetadata,
-    tables: Vec<JsTableData>,
+    document: Option<WasmDocumentStructure>,
+    metadata: WasmHtmlMetadata,
+    tables: Vec<WasmTableData>,
     images: Vec<String>,
-    warnings: Vec<JsProcessingWarning>,
+    warnings: Vec<WasmProcessingWarning>,
 }
 
 #[wasm_bindgen]
-impl JsConversionResult {
+impl WasmConversionResult {
     #[wasm_bindgen(constructor)]
     pub fn new(
-        metadata: Option<JsHtmlMetadata>,
-        tables: Option<Vec<JsTableData>>,
+        metadata: Option<WasmHtmlMetadata>,
+        tables: Option<Vec<WasmTableData>>,
         images: Option<Vec<String>>,
-        warnings: Option<Vec<JsProcessingWarning>>,
+        warnings: Option<Vec<WasmProcessingWarning>>,
         content: Option<String>,
-        document: Option<JsDocumentStructure>,
-    ) -> JsConversionResult {
-        JsConversionResult {
+        document: Option<WasmDocumentStructure>,
+    ) -> WasmConversionResult {
+        WasmConversionResult {
             content,
             document,
             metadata: metadata.unwrap_or_default(),
@@ -2193,32 +2193,32 @@ impl JsConversionResult {
     }
 
     #[wasm_bindgen(getter)]
-    pub fn document(&self) -> Option<JsDocumentStructure> {
+    pub fn document(&self) -> Option<WasmDocumentStructure> {
         self.document.clone()
     }
 
     #[wasm_bindgen(setter)]
-    pub fn set_document(&mut self, value: Option<JsDocumentStructure>) {
+    pub fn set_document(&mut self, value: Option<WasmDocumentStructure>) {
         self.document = value;
     }
 
     #[wasm_bindgen(getter)]
-    pub fn metadata(&self) -> JsHtmlMetadata {
+    pub fn metadata(&self) -> WasmHtmlMetadata {
         self.metadata.clone()
     }
 
     #[wasm_bindgen(setter)]
-    pub fn set_metadata(&mut self, value: JsHtmlMetadata) {
+    pub fn set_metadata(&mut self, value: WasmHtmlMetadata) {
         self.metadata = value;
     }
 
     #[wasm_bindgen(getter)]
-    pub fn tables(&self) -> Vec<JsTableData> {
+    pub fn tables(&self) -> Vec<WasmTableData> {
         self.tables.clone()
     }
 
     #[wasm_bindgen(setter)]
-    pub fn set_tables(&mut self, value: Vec<JsTableData>) {
+    pub fn set_tables(&mut self, value: Vec<WasmTableData>) {
         self.tables = value;
     }
 
@@ -2233,29 +2233,29 @@ impl JsConversionResult {
     }
 
     #[wasm_bindgen(getter)]
-    pub fn warnings(&self) -> Vec<JsProcessingWarning> {
+    pub fn warnings(&self) -> Vec<WasmProcessingWarning> {
         self.warnings.clone()
     }
 
     #[wasm_bindgen(setter)]
-    pub fn set_warnings(&mut self, value: Vec<JsProcessingWarning>) {
+    pub fn set_warnings(&mut self, value: Vec<WasmProcessingWarning>) {
         self.warnings = value;
     }
 }
 
 #[derive(Clone, Default)]
 #[wasm_bindgen]
-pub struct JsTableGrid {
+pub struct WasmTableGrid {
     rows: u32,
     cols: u32,
-    cells: Vec<JsGridCell>,
+    cells: Vec<WasmGridCell>,
 }
 
 #[wasm_bindgen]
-impl JsTableGrid {
+impl WasmTableGrid {
     #[wasm_bindgen(constructor)]
-    pub fn new(rows: Option<u32>, cols: Option<u32>, cells: Option<Vec<JsGridCell>>) -> JsTableGrid {
-        JsTableGrid {
+    pub fn new(rows: Option<u32>, cols: Option<u32>, cells: Option<Vec<WasmGridCell>>) -> WasmTableGrid {
+        WasmTableGrid {
             rows: rows.unwrap_or_default(),
             cols: cols.unwrap_or_default(),
             cells: cells.unwrap_or_default(),
@@ -2283,19 +2283,19 @@ impl JsTableGrid {
     }
 
     #[wasm_bindgen(getter)]
-    pub fn cells(&self) -> Vec<JsGridCell> {
+    pub fn cells(&self) -> Vec<WasmGridCell> {
         self.cells.clone()
     }
 
     #[wasm_bindgen(setter)]
-    pub fn set_cells(&mut self, value: Vec<JsGridCell>) {
+    pub fn set_cells(&mut self, value: Vec<WasmGridCell>) {
         self.cells = value;
     }
 }
 
 #[derive(Clone)]
 #[wasm_bindgen]
-pub struct JsGridCell {
+pub struct WasmGridCell {
     content: String,
     row: u32,
     col: u32,
@@ -2305,10 +2305,10 @@ pub struct JsGridCell {
 }
 
 #[wasm_bindgen]
-impl JsGridCell {
+impl WasmGridCell {
     #[wasm_bindgen(constructor)]
-    pub fn new(content: String, row: u32, col: u32, row_span: u32, col_span: u32, is_header: bool) -> JsGridCell {
-        JsGridCell {
+    pub fn new(content: String, row: u32, col: u32, row_span: u32, col_span: u32, is_header: bool) -> WasmGridCell {
+        WasmGridCell {
             content,
             row,
             col,
@@ -2381,25 +2381,25 @@ impl JsGridCell {
 
 #[derive(Clone)]
 #[wasm_bindgen]
-pub struct JsTableData {
-    grid: JsTableGrid,
+pub struct WasmTableData {
+    grid: WasmTableGrid,
     markdown: String,
 }
 
 #[wasm_bindgen]
-impl JsTableData {
+impl WasmTableData {
     #[wasm_bindgen(constructor)]
-    pub fn new(grid: JsTableGrid, markdown: String) -> JsTableData {
-        JsTableData { grid, markdown }
+    pub fn new(grid: WasmTableGrid, markdown: String) -> WasmTableData {
+        WasmTableData { grid, markdown }
     }
 
     #[wasm_bindgen(getter)]
-    pub fn grid(&self) -> JsTableGrid {
+    pub fn grid(&self) -> WasmTableGrid {
         self.grid.clone()
     }
 
     #[wasm_bindgen(setter)]
-    pub fn set_grid(&mut self, value: JsTableGrid) {
+    pub fn set_grid(&mut self, value: WasmTableGrid) {
         self.grid = value;
     }
 
@@ -2416,16 +2416,16 @@ impl JsTableData {
 
 #[derive(Clone)]
 #[wasm_bindgen]
-pub struct JsProcessingWarning {
+pub struct WasmProcessingWarning {
     message: String,
-    kind: JsWarningKind,
+    kind: WasmWarningKind,
 }
 
 #[wasm_bindgen]
-impl JsProcessingWarning {
+impl WasmProcessingWarning {
     #[wasm_bindgen(constructor)]
-    pub fn new(message: String, kind: JsWarningKind) -> JsProcessingWarning {
-        JsProcessingWarning { message, kind }
+    pub fn new(message: String, kind: WasmWarningKind) -> WasmProcessingWarning {
+        WasmProcessingWarning { message, kind }
     }
 
     #[wasm_bindgen(getter)]
@@ -2439,26 +2439,26 @@ impl JsProcessingWarning {
     }
 
     #[wasm_bindgen(getter)]
-    pub fn kind(&self) -> JsWarningKind {
+    pub fn kind(&self) -> WasmWarningKind {
         self.kind
     }
 
     #[wasm_bindgen(setter)]
-    pub fn set_kind(&mut self, value: JsWarningKind) {
+    pub fn set_kind(&mut self, value: WasmWarningKind) {
         self.kind = value;
     }
 }
 
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub enum JsTextDirection {
+pub enum WasmTextDirection {
     LeftToRight = 0,
     RightToLeft = 1,
     Auto = 2,
 }
 
 #[allow(clippy::derivable_impls)]
-impl Default for JsTextDirection {
+impl Default for WasmTextDirection {
     fn default() -> Self {
         Self::LeftToRight
     }
@@ -2466,7 +2466,7 @@ impl Default for JsTextDirection {
 
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub enum JsLinkType {
+pub enum WasmLinkType {
     Anchor = 0,
     Internal = 1,
     External = 2,
@@ -2476,7 +2476,7 @@ pub enum JsLinkType {
 }
 
 #[allow(clippy::derivable_impls)]
-impl Default for JsLinkType {
+impl Default for WasmLinkType {
     fn default() -> Self {
         Self::Anchor
     }
@@ -2484,7 +2484,7 @@ impl Default for JsLinkType {
 
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub enum JsImageType {
+pub enum WasmImageType {
     DataUri = 0,
     InlineSvg = 1,
     External = 2,
@@ -2492,7 +2492,7 @@ pub enum JsImageType {
 }
 
 #[allow(clippy::derivable_impls)]
-impl Default for JsImageType {
+impl Default for WasmImageType {
     fn default() -> Self {
         Self::DataUri
     }
@@ -2500,14 +2500,14 @@ impl Default for JsImageType {
 
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub enum JsStructuredDataType {
+pub enum WasmStructuredDataType {
     JsonLd = 0,
     Microdata = 1,
     RDFa = 2,
 }
 
 #[allow(clippy::derivable_impls)]
-impl Default for JsStructuredDataType {
+impl Default for WasmStructuredDataType {
     fn default() -> Self {
         Self::JsonLd
     }
@@ -2515,14 +2515,14 @@ impl Default for JsStructuredDataType {
 
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub enum JsPreprocessingPreset {
+pub enum WasmPreprocessingPreset {
     Minimal = 0,
     Standard = 1,
     Aggressive = 2,
 }
 
 #[allow(clippy::derivable_impls)]
-impl Default for JsPreprocessingPreset {
+impl Default for WasmPreprocessingPreset {
     fn default() -> Self {
         Self::Minimal
     }
@@ -2530,14 +2530,14 @@ impl Default for JsPreprocessingPreset {
 
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub enum JsHeadingStyle {
+pub enum WasmHeadingStyle {
     Underlined = 0,
     Atx = 1,
     AtxClosed = 2,
 }
 
 #[allow(clippy::derivable_impls)]
-impl Default for JsHeadingStyle {
+impl Default for WasmHeadingStyle {
     fn default() -> Self {
         Self::Underlined
     }
@@ -2545,13 +2545,13 @@ impl Default for JsHeadingStyle {
 
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub enum JsListIndentType {
+pub enum WasmListIndentType {
     Spaces = 0,
     Tabs = 1,
 }
 
 #[allow(clippy::derivable_impls)]
-impl Default for JsListIndentType {
+impl Default for WasmListIndentType {
     fn default() -> Self {
         Self::Spaces
     }
@@ -2559,13 +2559,13 @@ impl Default for JsListIndentType {
 
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub enum JsWhitespaceMode {
+pub enum WasmWhitespaceMode {
     Normalized = 0,
     Strict = 1,
 }
 
 #[allow(clippy::derivable_impls)]
-impl Default for JsWhitespaceMode {
+impl Default for WasmWhitespaceMode {
     fn default() -> Self {
         Self::Normalized
     }
@@ -2573,13 +2573,13 @@ impl Default for JsWhitespaceMode {
 
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub enum JsNewlineStyle {
+pub enum WasmNewlineStyle {
     Spaces = 0,
     Backslash = 1,
 }
 
 #[allow(clippy::derivable_impls)]
-impl Default for JsNewlineStyle {
+impl Default for WasmNewlineStyle {
     fn default() -> Self {
         Self::Spaces
     }
@@ -2587,14 +2587,14 @@ impl Default for JsNewlineStyle {
 
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub enum JsCodeBlockStyle {
+pub enum WasmCodeBlockStyle {
     Indented = 0,
     Backticks = 1,
     Tildes = 2,
 }
 
 #[allow(clippy::derivable_impls)]
-impl Default for JsCodeBlockStyle {
+impl Default for WasmCodeBlockStyle {
     fn default() -> Self {
         Self::Indented
     }
@@ -2602,7 +2602,7 @@ impl Default for JsCodeBlockStyle {
 
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub enum JsHighlightStyle {
+pub enum WasmHighlightStyle {
     DoubleEqual = 0,
     Html = 1,
     Bold = 2,
@@ -2610,7 +2610,7 @@ pub enum JsHighlightStyle {
 }
 
 #[allow(clippy::derivable_impls)]
-impl Default for JsHighlightStyle {
+impl Default for WasmHighlightStyle {
     fn default() -> Self {
         Self::DoubleEqual
     }
@@ -2618,13 +2618,13 @@ impl Default for JsHighlightStyle {
 
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub enum JsLinkStyle {
+pub enum WasmLinkStyle {
     Inline = 0,
     Reference = 1,
 }
 
 #[allow(clippy::derivable_impls)]
-impl Default for JsLinkStyle {
+impl Default for WasmLinkStyle {
     fn default() -> Self {
         Self::Inline
     }
@@ -2632,14 +2632,14 @@ impl Default for JsLinkStyle {
 
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub enum JsOutputFormat {
+pub enum WasmOutputFormat {
     Markdown = 0,
     Djot = 1,
     Plain = 2,
 }
 
 #[allow(clippy::derivable_impls)]
-impl Default for JsOutputFormat {
+impl Default for WasmOutputFormat {
     fn default() -> Self {
         Self::Markdown
     }
@@ -2647,7 +2647,7 @@ impl Default for JsOutputFormat {
 
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub enum JsNodeContent {
+pub enum WasmNodeContent {
     Heading = 0,
     Paragraph = 1,
     List = 2,
@@ -2664,7 +2664,7 @@ pub enum JsNodeContent {
 }
 
 #[allow(clippy::derivable_impls)]
-impl Default for JsNodeContent {
+impl Default for WasmNodeContent {
     fn default() -> Self {
         Self::Heading
     }
@@ -2672,7 +2672,7 @@ impl Default for JsNodeContent {
 
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub enum JsAnnotationKind {
+pub enum WasmAnnotationKind {
     Bold = 0,
     Italic = 1,
     Underline = 2,
@@ -2685,7 +2685,7 @@ pub enum JsAnnotationKind {
 }
 
 #[allow(clippy::derivable_impls)]
-impl Default for JsAnnotationKind {
+impl Default for WasmAnnotationKind {
     fn default() -> Self {
         Self::Bold
     }
@@ -2693,7 +2693,7 @@ impl Default for JsAnnotationKind {
 
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub enum JsWarningKind {
+pub enum WasmWarningKind {
     ImageExtractionFailed = 0,
     EncodingFallback = 1,
     TruncatedInput = 2,
@@ -2702,7 +2702,7 @@ pub enum JsWarningKind {
 }
 
 #[allow(clippy::derivable_impls)]
-impl Default for JsWarningKind {
+impl Default for WasmWarningKind {
     fn default() -> Self {
         Self::ImageExtractionFailed
     }
@@ -2710,14 +2710,14 @@ impl Default for JsWarningKind {
 
 #[allow(clippy::missing_errors_doc)]
 #[wasm_bindgen]
-pub fn convert(html: String, options: Option<JsConversionOptions>) -> Result<JsConversionResult, JsValue> {
+pub fn convert(html: String, options: Option<WasmConversionOptions>) -> Result<WasmConversionResult, JsValue> {
     let result =
         html_to_markdown_rs::convert(&html, options.map(Into::into)).map_err(|e| JsValue::from_str(&e.to_string()))?;
     Ok(result.into())
 }
 
-impl From<JsMetadataConfig> for html_to_markdown_rs::metadata::MetadataConfig {
-    fn from(val: JsMetadataConfig) -> Self {
+impl From<WasmMetadataConfig> for html_to_markdown_rs::metadata::MetadataConfig {
+    fn from(val: WasmMetadataConfig) -> Self {
         Self {
             extract_document: val.extract_document,
             extract_headers: val.extract_headers,
@@ -2729,7 +2729,7 @@ impl From<JsMetadataConfig> for html_to_markdown_rs::metadata::MetadataConfig {
     }
 }
 
-impl From<html_to_markdown_rs::metadata::MetadataConfig> for JsMetadataConfig {
+impl From<html_to_markdown_rs::metadata::MetadataConfig> for WasmMetadataConfig {
     fn from(val: html_to_markdown_rs::metadata::MetadataConfig) -> Self {
         Self {
             extract_document: val.extract_document,
@@ -2742,7 +2742,7 @@ impl From<html_to_markdown_rs::metadata::MetadataConfig> for JsMetadataConfig {
     }
 }
 
-impl From<html_to_markdown_rs::metadata::MetadataConfigUpdate> for JsMetadataConfigUpdate {
+impl From<html_to_markdown_rs::metadata::MetadataConfigUpdate> for WasmMetadataConfigUpdate {
     fn from(val: html_to_markdown_rs::metadata::MetadataConfigUpdate) -> Self {
         Self {
             extract_document: val.extract_document,
@@ -2755,8 +2755,8 @@ impl From<html_to_markdown_rs::metadata::MetadataConfigUpdate> for JsMetadataCon
     }
 }
 
-impl From<JsDocumentMetadata> for html_to_markdown_rs::metadata::DocumentMetadata {
-    fn from(val: JsDocumentMetadata) -> Self {
+impl From<WasmDocumentMetadata> for html_to_markdown_rs::metadata::DocumentMetadata {
+    fn from(val: WasmDocumentMetadata) -> Self {
         Self {
             title: val.title,
             description: val.description,
@@ -2773,7 +2773,7 @@ impl From<JsDocumentMetadata> for html_to_markdown_rs::metadata::DocumentMetadat
     }
 }
 
-impl From<html_to_markdown_rs::metadata::DocumentMetadata> for JsDocumentMetadata {
+impl From<html_to_markdown_rs::metadata::DocumentMetadata> for WasmDocumentMetadata {
     fn from(val: html_to_markdown_rs::metadata::DocumentMetadata) -> Self {
         Self {
             title: val.title,
@@ -2791,8 +2791,8 @@ impl From<html_to_markdown_rs::metadata::DocumentMetadata> for JsDocumentMetadat
     }
 }
 
-impl From<JsHeaderMetadata> for html_to_markdown_rs::metadata::HeaderMetadata {
-    fn from(val: JsHeaderMetadata) -> Self {
+impl From<WasmHeaderMetadata> for html_to_markdown_rs::metadata::HeaderMetadata {
+    fn from(val: WasmHeaderMetadata) -> Self {
         Self {
             level: val.level,
             text: val.text,
@@ -2803,7 +2803,7 @@ impl From<JsHeaderMetadata> for html_to_markdown_rs::metadata::HeaderMetadata {
     }
 }
 
-impl From<html_to_markdown_rs::metadata::HeaderMetadata> for JsHeaderMetadata {
+impl From<html_to_markdown_rs::metadata::HeaderMetadata> for WasmHeaderMetadata {
     fn from(val: html_to_markdown_rs::metadata::HeaderMetadata) -> Self {
         Self {
             level: val.level,
@@ -2815,8 +2815,8 @@ impl From<html_to_markdown_rs::metadata::HeaderMetadata> for JsHeaderMetadata {
     }
 }
 
-impl From<JsLinkMetadata> for html_to_markdown_rs::metadata::LinkMetadata {
-    fn from(val: JsLinkMetadata) -> Self {
+impl From<WasmLinkMetadata> for html_to_markdown_rs::metadata::LinkMetadata {
+    fn from(val: WasmLinkMetadata) -> Self {
         Self {
             href: val.href,
             text: val.text,
@@ -2828,7 +2828,7 @@ impl From<JsLinkMetadata> for html_to_markdown_rs::metadata::LinkMetadata {
     }
 }
 
-impl From<html_to_markdown_rs::metadata::LinkMetadata> for JsLinkMetadata {
+impl From<html_to_markdown_rs::metadata::LinkMetadata> for WasmLinkMetadata {
     fn from(val: html_to_markdown_rs::metadata::LinkMetadata) -> Self {
         Self {
             href: val.href,
@@ -2841,8 +2841,8 @@ impl From<html_to_markdown_rs::metadata::LinkMetadata> for JsLinkMetadata {
     }
 }
 
-impl From<JsImageMetadata> for html_to_markdown_rs::metadata::ImageMetadata {
-    fn from(val: JsImageMetadata) -> Self {
+impl From<WasmImageMetadata> for html_to_markdown_rs::metadata::ImageMetadata {
+    fn from(val: WasmImageMetadata) -> Self {
         Self {
             src: val.src,
             alt: val.alt,
@@ -2854,7 +2854,7 @@ impl From<JsImageMetadata> for html_to_markdown_rs::metadata::ImageMetadata {
     }
 }
 
-impl From<html_to_markdown_rs::metadata::ImageMetadata> for JsImageMetadata {
+impl From<html_to_markdown_rs::metadata::ImageMetadata> for WasmImageMetadata {
     fn from(val: html_to_markdown_rs::metadata::ImageMetadata) -> Self {
         Self {
             src: val.src,
@@ -2867,8 +2867,8 @@ impl From<html_to_markdown_rs::metadata::ImageMetadata> for JsImageMetadata {
     }
 }
 
-impl From<JsStructuredData> for html_to_markdown_rs::metadata::StructuredData {
-    fn from(val: JsStructuredData) -> Self {
+impl From<WasmStructuredData> for html_to_markdown_rs::metadata::StructuredData {
+    fn from(val: WasmStructuredData) -> Self {
         Self {
             data_type: val.data_type.into(),
             raw_json: val.raw_json,
@@ -2877,7 +2877,7 @@ impl From<JsStructuredData> for html_to_markdown_rs::metadata::StructuredData {
     }
 }
 
-impl From<html_to_markdown_rs::metadata::StructuredData> for JsStructuredData {
+impl From<html_to_markdown_rs::metadata::StructuredData> for WasmStructuredData {
     fn from(val: html_to_markdown_rs::metadata::StructuredData) -> Self {
         Self {
             data_type: val.data_type.into(),
@@ -2887,8 +2887,8 @@ impl From<html_to_markdown_rs::metadata::StructuredData> for JsStructuredData {
     }
 }
 
-impl From<JsHtmlMetadata> for html_to_markdown_rs::metadata::HtmlMetadata {
-    fn from(val: JsHtmlMetadata) -> Self {
+impl From<WasmHtmlMetadata> for html_to_markdown_rs::metadata::HtmlMetadata {
+    fn from(val: WasmHtmlMetadata) -> Self {
         Self {
             document: val.document.into(),
             headers: val.headers.into_iter().map(Into::into).collect(),
@@ -2899,7 +2899,7 @@ impl From<JsHtmlMetadata> for html_to_markdown_rs::metadata::HtmlMetadata {
     }
 }
 
-impl From<html_to_markdown_rs::metadata::HtmlMetadata> for JsHtmlMetadata {
+impl From<html_to_markdown_rs::metadata::HtmlMetadata> for WasmHtmlMetadata {
     fn from(val: html_to_markdown_rs::metadata::HtmlMetadata) -> Self {
         Self {
             document: val.document.into(),
@@ -2911,8 +2911,8 @@ impl From<html_to_markdown_rs::metadata::HtmlMetadata> for JsHtmlMetadata {
     }
 }
 
-impl From<JsConversionOptions> for html_to_markdown_rs::options::ConversionOptions {
-    fn from(val: JsConversionOptions) -> Self {
+impl From<WasmConversionOptions> for html_to_markdown_rs::options::ConversionOptions {
+    fn from(val: WasmConversionOptions) -> Self {
         Self {
             heading_style: val.heading_style.into(),
             list_indent_type: val.list_indent_type.into(),
@@ -2956,7 +2956,7 @@ impl From<JsConversionOptions> for html_to_markdown_rs::options::ConversionOptio
     }
 }
 
-impl From<html_to_markdown_rs::options::ConversionOptions> for JsConversionOptions {
+impl From<html_to_markdown_rs::options::ConversionOptions> for WasmConversionOptions {
     fn from(val: html_to_markdown_rs::options::ConversionOptions) -> Self {
         Self {
             heading_style: val.heading_style.into(),
@@ -3001,7 +3001,7 @@ impl From<html_to_markdown_rs::options::ConversionOptions> for JsConversionOptio
     }
 }
 
-impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for JsConversionOptionsUpdate {
+impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for WasmConversionOptionsUpdate {
     fn from(val: html_to_markdown_rs::options::ConversionOptionsUpdate) -> Self {
         Self {
             heading_style: val.heading_style.map(Into::into),
@@ -3046,8 +3046,8 @@ impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for JsConversio
     }
 }
 
-impl From<JsPreprocessingOptions> for html_to_markdown_rs::options::PreprocessingOptions {
-    fn from(val: JsPreprocessingOptions) -> Self {
+impl From<WasmPreprocessingOptions> for html_to_markdown_rs::options::PreprocessingOptions {
+    fn from(val: WasmPreprocessingOptions) -> Self {
         Self {
             enabled: val.enabled,
             preset: val.preset.into(),
@@ -3057,7 +3057,7 @@ impl From<JsPreprocessingOptions> for html_to_markdown_rs::options::Preprocessin
     }
 }
 
-impl From<html_to_markdown_rs::options::PreprocessingOptions> for JsPreprocessingOptions {
+impl From<html_to_markdown_rs::options::PreprocessingOptions> for WasmPreprocessingOptions {
     fn from(val: html_to_markdown_rs::options::PreprocessingOptions) -> Self {
         Self {
             enabled: val.enabled,
@@ -3068,7 +3068,7 @@ impl From<html_to_markdown_rs::options::PreprocessingOptions> for JsPreprocessin
     }
 }
 
-impl From<html_to_markdown_rs::options::PreprocessingOptionsUpdate> for JsPreprocessingOptionsUpdate {
+impl From<html_to_markdown_rs::options::PreprocessingOptionsUpdate> for WasmPreprocessingOptionsUpdate {
     fn from(val: html_to_markdown_rs::options::PreprocessingOptionsUpdate) -> Self {
         Self {
             enabled: val.enabled,
@@ -3079,8 +3079,8 @@ impl From<html_to_markdown_rs::options::PreprocessingOptionsUpdate> for JsPrepro
     }
 }
 
-impl From<JsDocumentStructure> for html_to_markdown_rs::DocumentStructure {
-    fn from(val: JsDocumentStructure) -> Self {
+impl From<WasmDocumentStructure> for html_to_markdown_rs::DocumentStructure {
+    fn from(val: WasmDocumentStructure) -> Self {
         Self {
             nodes: val.nodes.into_iter().map(Into::into).collect(),
             source_format: val.source_format,
@@ -3088,7 +3088,7 @@ impl From<JsDocumentStructure> for html_to_markdown_rs::DocumentStructure {
     }
 }
 
-impl From<html_to_markdown_rs::DocumentStructure> for JsDocumentStructure {
+impl From<html_to_markdown_rs::DocumentStructure> for WasmDocumentStructure {
     fn from(val: html_to_markdown_rs::DocumentStructure) -> Self {
         Self {
             nodes: val.nodes.into_iter().map(Into::into).collect(),
@@ -3097,8 +3097,8 @@ impl From<html_to_markdown_rs::DocumentStructure> for JsDocumentStructure {
     }
 }
 
-impl From<JsDocumentNode> for html_to_markdown_rs::DocumentNode {
-    fn from(val: JsDocumentNode) -> Self {
+impl From<WasmDocumentNode> for html_to_markdown_rs::DocumentNode {
+    fn from(val: WasmDocumentNode) -> Self {
         Self {
             id: val.id,
             content: val.content.into(),
@@ -3113,7 +3113,7 @@ impl From<JsDocumentNode> for html_to_markdown_rs::DocumentNode {
     }
 }
 
-impl From<html_to_markdown_rs::DocumentNode> for JsDocumentNode {
+impl From<html_to_markdown_rs::DocumentNode> for WasmDocumentNode {
     fn from(val: html_to_markdown_rs::DocumentNode) -> Self {
         Self {
             id: val.id,
@@ -3129,8 +3129,8 @@ impl From<html_to_markdown_rs::DocumentNode> for JsDocumentNode {
     }
 }
 
-impl From<JsTextAnnotation> for html_to_markdown_rs::TextAnnotation {
-    fn from(val: JsTextAnnotation) -> Self {
+impl From<WasmTextAnnotation> for html_to_markdown_rs::TextAnnotation {
+    fn from(val: WasmTextAnnotation) -> Self {
         Self {
             start: val.start,
             end: val.end,
@@ -3139,7 +3139,7 @@ impl From<JsTextAnnotation> for html_to_markdown_rs::TextAnnotation {
     }
 }
 
-impl From<html_to_markdown_rs::TextAnnotation> for JsTextAnnotation {
+impl From<html_to_markdown_rs::TextAnnotation> for WasmTextAnnotation {
     fn from(val: html_to_markdown_rs::TextAnnotation) -> Self {
         Self {
             start: val.start,
@@ -3150,8 +3150,8 @@ impl From<html_to_markdown_rs::TextAnnotation> for JsTextAnnotation {
 }
 
 #[allow(clippy::needless_update)]
-impl From<JsConversionResult> for html_to_markdown_rs::ConversionResult {
-    fn from(val: JsConversionResult) -> Self {
+impl From<WasmConversionResult> for html_to_markdown_rs::ConversionResult {
+    fn from(val: WasmConversionResult) -> Self {
         Self {
             content: val.content,
             document: val.document.map(Into::into),
@@ -3164,7 +3164,7 @@ impl From<JsConversionResult> for html_to_markdown_rs::ConversionResult {
     }
 }
 
-impl From<html_to_markdown_rs::ConversionResult> for JsConversionResult {
+impl From<html_to_markdown_rs::ConversionResult> for WasmConversionResult {
     fn from(val: html_to_markdown_rs::ConversionResult) -> Self {
         Self {
             content: val.content,
@@ -3177,8 +3177,8 @@ impl From<html_to_markdown_rs::ConversionResult> for JsConversionResult {
     }
 }
 
-impl From<JsTableGrid> for html_to_markdown_rs::TableGrid {
-    fn from(val: JsTableGrid) -> Self {
+impl From<WasmTableGrid> for html_to_markdown_rs::TableGrid {
+    fn from(val: WasmTableGrid) -> Self {
         Self {
             rows: val.rows,
             cols: val.cols,
@@ -3187,7 +3187,7 @@ impl From<JsTableGrid> for html_to_markdown_rs::TableGrid {
     }
 }
 
-impl From<html_to_markdown_rs::TableGrid> for JsTableGrid {
+impl From<html_to_markdown_rs::TableGrid> for WasmTableGrid {
     fn from(val: html_to_markdown_rs::TableGrid) -> Self {
         Self {
             rows: val.rows,
@@ -3197,8 +3197,8 @@ impl From<html_to_markdown_rs::TableGrid> for JsTableGrid {
     }
 }
 
-impl From<JsGridCell> for html_to_markdown_rs::GridCell {
-    fn from(val: JsGridCell) -> Self {
+impl From<WasmGridCell> for html_to_markdown_rs::GridCell {
+    fn from(val: WasmGridCell) -> Self {
         Self {
             content: val.content,
             row: val.row,
@@ -3210,7 +3210,7 @@ impl From<JsGridCell> for html_to_markdown_rs::GridCell {
     }
 }
 
-impl From<html_to_markdown_rs::GridCell> for JsGridCell {
+impl From<html_to_markdown_rs::GridCell> for WasmGridCell {
     fn from(val: html_to_markdown_rs::GridCell) -> Self {
         Self {
             content: val.content,
@@ -3223,8 +3223,8 @@ impl From<html_to_markdown_rs::GridCell> for JsGridCell {
     }
 }
 
-impl From<JsTableData> for html_to_markdown_rs::TableData {
-    fn from(val: JsTableData) -> Self {
+impl From<WasmTableData> for html_to_markdown_rs::TableData {
+    fn from(val: WasmTableData) -> Self {
         Self {
             grid: val.grid.into(),
             markdown: val.markdown,
@@ -3232,7 +3232,7 @@ impl From<JsTableData> for html_to_markdown_rs::TableData {
     }
 }
 
-impl From<html_to_markdown_rs::TableData> for JsTableData {
+impl From<html_to_markdown_rs::TableData> for WasmTableData {
     fn from(val: html_to_markdown_rs::TableData) -> Self {
         Self {
             grid: val.grid.into(),
@@ -3241,8 +3241,8 @@ impl From<html_to_markdown_rs::TableData> for JsTableData {
     }
 }
 
-impl From<JsProcessingWarning> for html_to_markdown_rs::ProcessingWarning {
-    fn from(val: JsProcessingWarning) -> Self {
+impl From<WasmProcessingWarning> for html_to_markdown_rs::ProcessingWarning {
+    fn from(val: WasmProcessingWarning) -> Self {
         Self {
             message: val.message,
             kind: val.kind.into(),
@@ -3250,7 +3250,7 @@ impl From<JsProcessingWarning> for html_to_markdown_rs::ProcessingWarning {
     }
 }
 
-impl From<html_to_markdown_rs::ProcessingWarning> for JsProcessingWarning {
+impl From<html_to_markdown_rs::ProcessingWarning> for WasmProcessingWarning {
     fn from(val: html_to_markdown_rs::ProcessingWarning) -> Self {
         Self {
             message: val.message,
@@ -3259,17 +3259,17 @@ impl From<html_to_markdown_rs::ProcessingWarning> for JsProcessingWarning {
     }
 }
 
-impl From<JsTextDirection> for html_to_markdown_rs::metadata::TextDirection {
-    fn from(val: JsTextDirection) -> Self {
+impl From<WasmTextDirection> for html_to_markdown_rs::metadata::TextDirection {
+    fn from(val: WasmTextDirection) -> Self {
         match val {
-            JsTextDirection::LeftToRight => Self::LeftToRight,
-            JsTextDirection::RightToLeft => Self::RightToLeft,
-            JsTextDirection::Auto => Self::Auto,
+            WasmTextDirection::LeftToRight => Self::LeftToRight,
+            WasmTextDirection::RightToLeft => Self::RightToLeft,
+            WasmTextDirection::Auto => Self::Auto,
         }
     }
 }
 
-impl From<html_to_markdown_rs::metadata::TextDirection> for JsTextDirection {
+impl From<html_to_markdown_rs::metadata::TextDirection> for WasmTextDirection {
     fn from(val: html_to_markdown_rs::metadata::TextDirection) -> Self {
         match val {
             html_to_markdown_rs::metadata::TextDirection::LeftToRight => Self::LeftToRight,
@@ -3279,20 +3279,20 @@ impl From<html_to_markdown_rs::metadata::TextDirection> for JsTextDirection {
     }
 }
 
-impl From<JsLinkType> for html_to_markdown_rs::metadata::LinkType {
-    fn from(val: JsLinkType) -> Self {
+impl From<WasmLinkType> for html_to_markdown_rs::metadata::LinkType {
+    fn from(val: WasmLinkType) -> Self {
         match val {
-            JsLinkType::Anchor => Self::Anchor,
-            JsLinkType::Internal => Self::Internal,
-            JsLinkType::External => Self::External,
-            JsLinkType::Email => Self::Email,
-            JsLinkType::Phone => Self::Phone,
-            JsLinkType::Other => Self::Other,
+            WasmLinkType::Anchor => Self::Anchor,
+            WasmLinkType::Internal => Self::Internal,
+            WasmLinkType::External => Self::External,
+            WasmLinkType::Email => Self::Email,
+            WasmLinkType::Phone => Self::Phone,
+            WasmLinkType::Other => Self::Other,
         }
     }
 }
 
-impl From<html_to_markdown_rs::metadata::LinkType> for JsLinkType {
+impl From<html_to_markdown_rs::metadata::LinkType> for WasmLinkType {
     fn from(val: html_to_markdown_rs::metadata::LinkType) -> Self {
         match val {
             html_to_markdown_rs::metadata::LinkType::Anchor => Self::Anchor,
@@ -3305,18 +3305,18 @@ impl From<html_to_markdown_rs::metadata::LinkType> for JsLinkType {
     }
 }
 
-impl From<JsImageType> for html_to_markdown_rs::metadata::ImageType {
-    fn from(val: JsImageType) -> Self {
+impl From<WasmImageType> for html_to_markdown_rs::metadata::ImageType {
+    fn from(val: WasmImageType) -> Self {
         match val {
-            JsImageType::DataUri => Self::DataUri,
-            JsImageType::InlineSvg => Self::InlineSvg,
-            JsImageType::External => Self::External,
-            JsImageType::Relative => Self::Relative,
+            WasmImageType::DataUri => Self::DataUri,
+            WasmImageType::InlineSvg => Self::InlineSvg,
+            WasmImageType::External => Self::External,
+            WasmImageType::Relative => Self::Relative,
         }
     }
 }
 
-impl From<html_to_markdown_rs::metadata::ImageType> for JsImageType {
+impl From<html_to_markdown_rs::metadata::ImageType> for WasmImageType {
     fn from(val: html_to_markdown_rs::metadata::ImageType) -> Self {
         match val {
             html_to_markdown_rs::metadata::ImageType::DataUri => Self::DataUri,
@@ -3327,17 +3327,17 @@ impl From<html_to_markdown_rs::metadata::ImageType> for JsImageType {
     }
 }
 
-impl From<JsStructuredDataType> for html_to_markdown_rs::metadata::StructuredDataType {
-    fn from(val: JsStructuredDataType) -> Self {
+impl From<WasmStructuredDataType> for html_to_markdown_rs::metadata::StructuredDataType {
+    fn from(val: WasmStructuredDataType) -> Self {
         match val {
-            JsStructuredDataType::JsonLd => Self::JsonLd,
-            JsStructuredDataType::Microdata => Self::Microdata,
-            JsStructuredDataType::RDFa => Self::RDFa,
+            WasmStructuredDataType::JsonLd => Self::JsonLd,
+            WasmStructuredDataType::Microdata => Self::Microdata,
+            WasmStructuredDataType::RDFa => Self::RDFa,
         }
     }
 }
 
-impl From<html_to_markdown_rs::metadata::StructuredDataType> for JsStructuredDataType {
+impl From<html_to_markdown_rs::metadata::StructuredDataType> for WasmStructuredDataType {
     fn from(val: html_to_markdown_rs::metadata::StructuredDataType) -> Self {
         match val {
             html_to_markdown_rs::metadata::StructuredDataType::JsonLd => Self::JsonLd,
@@ -3347,17 +3347,17 @@ impl From<html_to_markdown_rs::metadata::StructuredDataType> for JsStructuredDat
     }
 }
 
-impl From<JsPreprocessingPreset> for html_to_markdown_rs::options::PreprocessingPreset {
-    fn from(val: JsPreprocessingPreset) -> Self {
+impl From<WasmPreprocessingPreset> for html_to_markdown_rs::options::PreprocessingPreset {
+    fn from(val: WasmPreprocessingPreset) -> Self {
         match val {
-            JsPreprocessingPreset::Minimal => Self::Minimal,
-            JsPreprocessingPreset::Standard => Self::Standard,
-            JsPreprocessingPreset::Aggressive => Self::Aggressive,
+            WasmPreprocessingPreset::Minimal => Self::Minimal,
+            WasmPreprocessingPreset::Standard => Self::Standard,
+            WasmPreprocessingPreset::Aggressive => Self::Aggressive,
         }
     }
 }
 
-impl From<html_to_markdown_rs::options::PreprocessingPreset> for JsPreprocessingPreset {
+impl From<html_to_markdown_rs::options::PreprocessingPreset> for WasmPreprocessingPreset {
     fn from(val: html_to_markdown_rs::options::PreprocessingPreset) -> Self {
         match val {
             html_to_markdown_rs::options::PreprocessingPreset::Minimal => Self::Minimal,
@@ -3367,17 +3367,17 @@ impl From<html_to_markdown_rs::options::PreprocessingPreset> for JsPreprocessing
     }
 }
 
-impl From<JsHeadingStyle> for html_to_markdown_rs::options::HeadingStyle {
-    fn from(val: JsHeadingStyle) -> Self {
+impl From<WasmHeadingStyle> for html_to_markdown_rs::options::HeadingStyle {
+    fn from(val: WasmHeadingStyle) -> Self {
         match val {
-            JsHeadingStyle::Underlined => Self::Underlined,
-            JsHeadingStyle::Atx => Self::Atx,
-            JsHeadingStyle::AtxClosed => Self::AtxClosed,
+            WasmHeadingStyle::Underlined => Self::Underlined,
+            WasmHeadingStyle::Atx => Self::Atx,
+            WasmHeadingStyle::AtxClosed => Self::AtxClosed,
         }
     }
 }
 
-impl From<html_to_markdown_rs::options::HeadingStyle> for JsHeadingStyle {
+impl From<html_to_markdown_rs::options::HeadingStyle> for WasmHeadingStyle {
     fn from(val: html_to_markdown_rs::options::HeadingStyle) -> Self {
         match val {
             html_to_markdown_rs::options::HeadingStyle::Underlined => Self::Underlined,
@@ -3387,16 +3387,16 @@ impl From<html_to_markdown_rs::options::HeadingStyle> for JsHeadingStyle {
     }
 }
 
-impl From<JsListIndentType> for html_to_markdown_rs::options::ListIndentType {
-    fn from(val: JsListIndentType) -> Self {
+impl From<WasmListIndentType> for html_to_markdown_rs::options::ListIndentType {
+    fn from(val: WasmListIndentType) -> Self {
         match val {
-            JsListIndentType::Spaces => Self::Spaces,
-            JsListIndentType::Tabs => Self::Tabs,
+            WasmListIndentType::Spaces => Self::Spaces,
+            WasmListIndentType::Tabs => Self::Tabs,
         }
     }
 }
 
-impl From<html_to_markdown_rs::options::ListIndentType> for JsListIndentType {
+impl From<html_to_markdown_rs::options::ListIndentType> for WasmListIndentType {
     fn from(val: html_to_markdown_rs::options::ListIndentType) -> Self {
         match val {
             html_to_markdown_rs::options::ListIndentType::Spaces => Self::Spaces,
@@ -3405,16 +3405,16 @@ impl From<html_to_markdown_rs::options::ListIndentType> for JsListIndentType {
     }
 }
 
-impl From<JsWhitespaceMode> for html_to_markdown_rs::options::WhitespaceMode {
-    fn from(val: JsWhitespaceMode) -> Self {
+impl From<WasmWhitespaceMode> for html_to_markdown_rs::options::WhitespaceMode {
+    fn from(val: WasmWhitespaceMode) -> Self {
         match val {
-            JsWhitespaceMode::Normalized => Self::Normalized,
-            JsWhitespaceMode::Strict => Self::Strict,
+            WasmWhitespaceMode::Normalized => Self::Normalized,
+            WasmWhitespaceMode::Strict => Self::Strict,
         }
     }
 }
 
-impl From<html_to_markdown_rs::options::WhitespaceMode> for JsWhitespaceMode {
+impl From<html_to_markdown_rs::options::WhitespaceMode> for WasmWhitespaceMode {
     fn from(val: html_to_markdown_rs::options::WhitespaceMode) -> Self {
         match val {
             html_to_markdown_rs::options::WhitespaceMode::Normalized => Self::Normalized,
@@ -3423,16 +3423,16 @@ impl From<html_to_markdown_rs::options::WhitespaceMode> for JsWhitespaceMode {
     }
 }
 
-impl From<JsNewlineStyle> for html_to_markdown_rs::options::NewlineStyle {
-    fn from(val: JsNewlineStyle) -> Self {
+impl From<WasmNewlineStyle> for html_to_markdown_rs::options::NewlineStyle {
+    fn from(val: WasmNewlineStyle) -> Self {
         match val {
-            JsNewlineStyle::Spaces => Self::Spaces,
-            JsNewlineStyle::Backslash => Self::Backslash,
+            WasmNewlineStyle::Spaces => Self::Spaces,
+            WasmNewlineStyle::Backslash => Self::Backslash,
         }
     }
 }
 
-impl From<html_to_markdown_rs::options::NewlineStyle> for JsNewlineStyle {
+impl From<html_to_markdown_rs::options::NewlineStyle> for WasmNewlineStyle {
     fn from(val: html_to_markdown_rs::options::NewlineStyle) -> Self {
         match val {
             html_to_markdown_rs::options::NewlineStyle::Spaces => Self::Spaces,
@@ -3441,17 +3441,17 @@ impl From<html_to_markdown_rs::options::NewlineStyle> for JsNewlineStyle {
     }
 }
 
-impl From<JsCodeBlockStyle> for html_to_markdown_rs::options::CodeBlockStyle {
-    fn from(val: JsCodeBlockStyle) -> Self {
+impl From<WasmCodeBlockStyle> for html_to_markdown_rs::options::CodeBlockStyle {
+    fn from(val: WasmCodeBlockStyle) -> Self {
         match val {
-            JsCodeBlockStyle::Indented => Self::Indented,
-            JsCodeBlockStyle::Backticks => Self::Backticks,
-            JsCodeBlockStyle::Tildes => Self::Tildes,
+            WasmCodeBlockStyle::Indented => Self::Indented,
+            WasmCodeBlockStyle::Backticks => Self::Backticks,
+            WasmCodeBlockStyle::Tildes => Self::Tildes,
         }
     }
 }
 
-impl From<html_to_markdown_rs::options::CodeBlockStyle> for JsCodeBlockStyle {
+impl From<html_to_markdown_rs::options::CodeBlockStyle> for WasmCodeBlockStyle {
     fn from(val: html_to_markdown_rs::options::CodeBlockStyle) -> Self {
         match val {
             html_to_markdown_rs::options::CodeBlockStyle::Indented => Self::Indented,
@@ -3461,18 +3461,18 @@ impl From<html_to_markdown_rs::options::CodeBlockStyle> for JsCodeBlockStyle {
     }
 }
 
-impl From<JsHighlightStyle> for html_to_markdown_rs::options::HighlightStyle {
-    fn from(val: JsHighlightStyle) -> Self {
+impl From<WasmHighlightStyle> for html_to_markdown_rs::options::HighlightStyle {
+    fn from(val: WasmHighlightStyle) -> Self {
         match val {
-            JsHighlightStyle::DoubleEqual => Self::DoubleEqual,
-            JsHighlightStyle::Html => Self::Html,
-            JsHighlightStyle::Bold => Self::Bold,
-            JsHighlightStyle::None => Self::None,
+            WasmHighlightStyle::DoubleEqual => Self::DoubleEqual,
+            WasmHighlightStyle::Html => Self::Html,
+            WasmHighlightStyle::Bold => Self::Bold,
+            WasmHighlightStyle::None => Self::None,
         }
     }
 }
 
-impl From<html_to_markdown_rs::options::HighlightStyle> for JsHighlightStyle {
+impl From<html_to_markdown_rs::options::HighlightStyle> for WasmHighlightStyle {
     fn from(val: html_to_markdown_rs::options::HighlightStyle) -> Self {
         match val {
             html_to_markdown_rs::options::HighlightStyle::DoubleEqual => Self::DoubleEqual,
@@ -3483,16 +3483,16 @@ impl From<html_to_markdown_rs::options::HighlightStyle> for JsHighlightStyle {
     }
 }
 
-impl From<JsLinkStyle> for html_to_markdown_rs::options::LinkStyle {
-    fn from(val: JsLinkStyle) -> Self {
+impl From<WasmLinkStyle> for html_to_markdown_rs::options::LinkStyle {
+    fn from(val: WasmLinkStyle) -> Self {
         match val {
-            JsLinkStyle::Inline => Self::Inline,
-            JsLinkStyle::Reference => Self::Reference,
+            WasmLinkStyle::Inline => Self::Inline,
+            WasmLinkStyle::Reference => Self::Reference,
         }
     }
 }
 
-impl From<html_to_markdown_rs::options::LinkStyle> for JsLinkStyle {
+impl From<html_to_markdown_rs::options::LinkStyle> for WasmLinkStyle {
     fn from(val: html_to_markdown_rs::options::LinkStyle) -> Self {
         match val {
             html_to_markdown_rs::options::LinkStyle::Inline => Self::Inline,
@@ -3501,17 +3501,17 @@ impl From<html_to_markdown_rs::options::LinkStyle> for JsLinkStyle {
     }
 }
 
-impl From<JsOutputFormat> for html_to_markdown_rs::options::OutputFormat {
-    fn from(val: JsOutputFormat) -> Self {
+impl From<WasmOutputFormat> for html_to_markdown_rs::options::OutputFormat {
+    fn from(val: WasmOutputFormat) -> Self {
         match val {
-            JsOutputFormat::Markdown => Self::Markdown,
-            JsOutputFormat::Djot => Self::Djot,
-            JsOutputFormat::Plain => Self::Plain,
+            WasmOutputFormat::Markdown => Self::Markdown,
+            WasmOutputFormat::Djot => Self::Djot,
+            WasmOutputFormat::Plain => Self::Plain,
         }
     }
 }
 
-impl From<html_to_markdown_rs::options::OutputFormat> for JsOutputFormat {
+impl From<html_to_markdown_rs::options::OutputFormat> for WasmOutputFormat {
     fn from(val: html_to_markdown_rs::options::OutputFormat) -> Self {
         match val {
             html_to_markdown_rs::options::OutputFormat::Markdown => Self::Markdown,
@@ -3521,48 +3521,48 @@ impl From<html_to_markdown_rs::options::OutputFormat> for JsOutputFormat {
     }
 }
 
-impl From<JsNodeContent> for html_to_markdown_rs::NodeContent {
-    fn from(val: JsNodeContent) -> Self {
+impl From<WasmNodeContent> for html_to_markdown_rs::NodeContent {
+    fn from(val: WasmNodeContent) -> Self {
         match val {
-            JsNodeContent::Heading => Self::Heading {
+            WasmNodeContent::Heading => Self::Heading {
                 level: Default::default(),
                 text: Default::default(),
             },
-            JsNodeContent::Paragraph => Self::Paragraph {
+            WasmNodeContent::Paragraph => Self::Paragraph {
                 text: Default::default(),
             },
-            JsNodeContent::List => Self::List {
+            WasmNodeContent::List => Self::List {
                 ordered: Default::default(),
             },
-            JsNodeContent::ListItem => Self::ListItem {
+            WasmNodeContent::ListItem => Self::ListItem {
                 text: Default::default(),
             },
-            JsNodeContent::Table => Self::Table {
+            WasmNodeContent::Table => Self::Table {
                 grid: Default::default(),
             },
-            JsNodeContent::Image => Self::Image {
+            WasmNodeContent::Image => Self::Image {
                 description: Default::default(),
                 src: Default::default(),
                 image_index: Default::default(),
             },
-            JsNodeContent::Code => Self::Code {
+            WasmNodeContent::Code => Self::Code {
                 text: Default::default(),
                 language: Default::default(),
             },
-            JsNodeContent::Quote => Self::Quote,
-            JsNodeContent::DefinitionList => Self::DefinitionList,
-            JsNodeContent::DefinitionItem => Self::DefinitionItem {
+            WasmNodeContent::Quote => Self::Quote,
+            WasmNodeContent::DefinitionList => Self::DefinitionList,
+            WasmNodeContent::DefinitionItem => Self::DefinitionItem {
                 term: Default::default(),
                 definition: Default::default(),
             },
-            JsNodeContent::RawBlock => Self::RawBlock {
+            WasmNodeContent::RawBlock => Self::RawBlock {
                 format: Default::default(),
                 content: Default::default(),
             },
-            JsNodeContent::MetadataBlock => Self::MetadataBlock {
+            WasmNodeContent::MetadataBlock => Self::MetadataBlock {
                 entries: Default::default(),
             },
-            JsNodeContent::Group => Self::Group {
+            WasmNodeContent::Group => Self::Group {
                 label: Default::default(),
                 heading_level: Default::default(),
                 heading_text: Default::default(),
@@ -3571,7 +3571,7 @@ impl From<JsNodeContent> for html_to_markdown_rs::NodeContent {
     }
 }
 
-impl From<html_to_markdown_rs::NodeContent> for JsNodeContent {
+impl From<html_to_markdown_rs::NodeContent> for WasmNodeContent {
     fn from(val: html_to_markdown_rs::NodeContent) -> Self {
         match val {
             html_to_markdown_rs::NodeContent::Heading { .. } => Self::Heading,
@@ -3591,18 +3591,18 @@ impl From<html_to_markdown_rs::NodeContent> for JsNodeContent {
     }
 }
 
-impl From<JsAnnotationKind> for html_to_markdown_rs::AnnotationKind {
-    fn from(val: JsAnnotationKind) -> Self {
+impl From<WasmAnnotationKind> for html_to_markdown_rs::AnnotationKind {
+    fn from(val: WasmAnnotationKind) -> Self {
         match val {
-            JsAnnotationKind::Bold => Self::Bold,
-            JsAnnotationKind::Italic => Self::Italic,
-            JsAnnotationKind::Underline => Self::Underline,
-            JsAnnotationKind::Strikethrough => Self::Strikethrough,
-            JsAnnotationKind::Code => Self::Code,
-            JsAnnotationKind::Subscript => Self::Subscript,
-            JsAnnotationKind::Superscript => Self::Superscript,
-            JsAnnotationKind::Highlight => Self::Highlight,
-            JsAnnotationKind::Link => Self::Link {
+            WasmAnnotationKind::Bold => Self::Bold,
+            WasmAnnotationKind::Italic => Self::Italic,
+            WasmAnnotationKind::Underline => Self::Underline,
+            WasmAnnotationKind::Strikethrough => Self::Strikethrough,
+            WasmAnnotationKind::Code => Self::Code,
+            WasmAnnotationKind::Subscript => Self::Subscript,
+            WasmAnnotationKind::Superscript => Self::Superscript,
+            WasmAnnotationKind::Highlight => Self::Highlight,
+            WasmAnnotationKind::Link => Self::Link {
                 url: Default::default(),
                 title: Default::default(),
             },
@@ -3610,7 +3610,7 @@ impl From<JsAnnotationKind> for html_to_markdown_rs::AnnotationKind {
     }
 }
 
-impl From<html_to_markdown_rs::AnnotationKind> for JsAnnotationKind {
+impl From<html_to_markdown_rs::AnnotationKind> for WasmAnnotationKind {
     fn from(val: html_to_markdown_rs::AnnotationKind) -> Self {
         match val {
             html_to_markdown_rs::AnnotationKind::Bold => Self::Bold,
@@ -3626,19 +3626,19 @@ impl From<html_to_markdown_rs::AnnotationKind> for JsAnnotationKind {
     }
 }
 
-impl From<JsWarningKind> for html_to_markdown_rs::WarningKind {
-    fn from(val: JsWarningKind) -> Self {
+impl From<WasmWarningKind> for html_to_markdown_rs::WarningKind {
+    fn from(val: WasmWarningKind) -> Self {
         match val {
-            JsWarningKind::ImageExtractionFailed => Self::ImageExtractionFailed,
-            JsWarningKind::EncodingFallback => Self::EncodingFallback,
-            JsWarningKind::TruncatedInput => Self::TruncatedInput,
-            JsWarningKind::MalformedHtml => Self::MalformedHtml,
-            JsWarningKind::SanitizationApplied => Self::SanitizationApplied,
+            WasmWarningKind::ImageExtractionFailed => Self::ImageExtractionFailed,
+            WasmWarningKind::EncodingFallback => Self::EncodingFallback,
+            WasmWarningKind::TruncatedInput => Self::TruncatedInput,
+            WasmWarningKind::MalformedHtml => Self::MalformedHtml,
+            WasmWarningKind::SanitizationApplied => Self::SanitizationApplied,
         }
     }
 }
 
-impl From<html_to_markdown_rs::WarningKind> for JsWarningKind {
+impl From<html_to_markdown_rs::WarningKind> for WasmWarningKind {
     fn from(val: html_to_markdown_rs::WarningKind) -> Self {
         match val {
             html_to_markdown_rs::WarningKind::ImageExtractionFailed => Self::ImageExtractionFailed,
