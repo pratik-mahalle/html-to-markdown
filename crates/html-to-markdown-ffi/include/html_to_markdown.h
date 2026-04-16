@@ -1852,6 +1852,22 @@ uint32_t htm_text_annotation_end(const HTMTextAnnotation *ptr);
 HTMAnnotationKind *htm_text_annotation_kind(const HTMTextAnnotation *ptr);
 
 /**
+ * Create a `ConversionResult` from a JSON string. Returns null on failure.
+ * # Safety
+ * JSON string must be valid UTF-8 and null-terminated.
+ * Returned handle must be freed with `htm_conversion_result_free`.
+ */
+HTMConversionResult *htm_conversion_result_from_json(const char *json);
+
+/**
+ * Serialize a `ConversionResult` to a JSON string. Returns null on failure.
+ * # Safety
+ * `ptr` must be a valid, non-null pointer returned by a `htm` function.
+ * The returned string must be freed with `htm_free_string`.
+ */
+char *htm_conversion_result_to_json(const HTMConversionResult *ptr);
+
+/**
  * Free a `ConversionResult` handle.
  * # Safety
  * Pointer must have been returned by this library, or be null.

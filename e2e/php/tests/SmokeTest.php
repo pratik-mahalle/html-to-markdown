@@ -13,21 +13,21 @@ final class SmokeTest extends TestCase
     /** Empty string produces empty output */
     public function test_smoke_empty_string(): void
     {
-        $result = html_to_markdown_convert("");
+        $result = HtmlToMarkdown::convert("");
         $this->assertEquals("", trim($result));
     }
 
     /** H1 heading converts to ATX markdown */
     public function test_smoke_simple_heading(): void
     {
-        $result = html_to_markdown_convert("<h1>Title</h1>");
+        $result = HtmlToMarkdown::convert("<h1>Title</h1>");
         $this->assertStringContainsString("# Title", $result);
     }
 
     /** Simple paragraph converts correctly */
     public function test_smoke_simple_paragraph(): void
     {
-        $result = html_to_markdown_convert("<p>Hello World</p>");
+        $result = HtmlToMarkdown::convert("<p>Hello World</p>");
         $this->assertEquals("Hello World", trim($result));
         $this->assertNotEmpty($result);
     }

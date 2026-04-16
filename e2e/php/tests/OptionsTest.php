@@ -13,7 +13,7 @@ final class OptionsTest extends TestCase
     /** Backticks code block style uses triple backtick fences */
     public function test_options_code_block_backticks(): void
     {
-        $result = html_to_markdown_convert("<pre><code class=\"language-js\">console.log('hi');</code></pre>", ["code_block_style" => "backticks"]);
+        $result = HtmlToMarkdown::convert("<pre><code class=\"language-js\">console.log('hi');</code></pre>", ["code_block_style" => "backticks"]);
         $this->assertStringContainsString("```", $result);
         $this->assertStringContainsString("console.log('hi');", $result);
     }
@@ -21,7 +21,7 @@ final class OptionsTest extends TestCase
     /** Tildes code block style uses triple tilde fences */
     public function test_options_code_block_tildes(): void
     {
-        $result = html_to_markdown_convert("<pre><code>some code</code></pre>", ["code_block_style" => "tildes"]);
+        $result = HtmlToMarkdown::convert("<pre><code>some code</code></pre>", ["code_block_style" => "tildes"]);
         $this->assertStringContainsString("~~~", $result);
         $this->assertStringContainsString("some code", $result);
     }
@@ -29,7 +29,7 @@ final class OptionsTest extends TestCase
     /** escape_asterisks option escapes asterisks in plain text */
     public function test_options_escape_asterisks(): void
     {
-        $result = html_to_markdown_convert("<p>Use 2*3 = 6 in math.</p>", ["escape_asterisks" => true]);
+        $result = HtmlToMarkdown::convert("<p>Use 2*3 = 6 in math.</p>", ["escape_asterisks" => true]);
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("2", $result);
         $this->assertStringContainsString("3", $result);
@@ -39,7 +39,7 @@ final class OptionsTest extends TestCase
     /** escape_misc option escapes miscellaneous markdown characters */
     public function test_options_escape_misc(): void
     {
-        $result = html_to_markdown_convert("<p>Use # and | and ~ in text.</p>", ["escape_misc" => true]);
+        $result = HtmlToMarkdown::convert("<p>Use # and | and ~ in text.</p>", ["escape_misc" => true]);
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("Use", $result);
         $this->assertStringContainsString("and", $result);
@@ -49,7 +49,7 @@ final class OptionsTest extends TestCase
     /** escape_underscores option escapes underscores in plain text */
     public function test_options_escape_underscores(): void
     {
-        $result = html_to_markdown_convert("<p>The variable_name is defined.</p>", ["escape_underscores" => true]);
+        $result = HtmlToMarkdown::convert("<p>The variable_name is defined.</p>", ["escape_underscores" => true]);
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("variable", $result);
         $this->assertStringContainsString("name", $result);
@@ -59,7 +59,7 @@ final class OptionsTest extends TestCase
     /** ATX heading style produces hash-prefixed headings */
     public function test_options_heading_style_atx(): void
     {
-        $result = html_to_markdown_convert("<h1>Title</h1><h2>Subtitle</h2>", ["heading_style" => "atx"]);
+        $result = HtmlToMarkdown::convert("<h1>Title</h1><h2>Subtitle</h2>", ["heading_style" => "atx"]);
         $this->assertStringContainsString("# Title", $result);
         $this->assertStringContainsString("## Subtitle", $result);
     }
@@ -67,14 +67,14 @@ final class OptionsTest extends TestCase
     /** ATX closed heading style adds closing hashes */
     public function test_options_heading_style_atx_closed(): void
     {
-        $result = html_to_markdown_convert("<h1>Closed Heading</h1>", ["heading_style" => "atx_closed"]);
+        $result = HtmlToMarkdown::convert("<h1>Closed Heading</h1>", ["heading_style" => "atx_closed"]);
         $this->assertStringContainsString("# Closed Heading #", $result);
     }
 
     /** Underlined heading style produces setext-style headings for h1 and h2 */
     public function test_options_heading_style_underlined(): void
     {
-        $result = html_to_markdown_convert("<h1>Main Title</h1>", ["heading_style" => "underlined"]);
+        $result = HtmlToMarkdown::convert("<h1>Main Title</h1>", ["heading_style" => "underlined"]);
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("Main Title", $result);
     }
@@ -82,7 +82,7 @@ final class OptionsTest extends TestCase
     /** Custom bullet character for unordered lists */
     public function test_options_list_custom_bullets(): void
     {
-        $result = html_to_markdown_convert("<ul><li>Item A</li><li>Item B</li></ul>", ["bullets" => "*"]);
+        $result = HtmlToMarkdown::convert("<ul><li>Item A</li><li>Item B</li></ul>", ["bullets" => "*"]);
         $this->assertStringContainsString("* Item A", $result);
         $this->assertStringContainsString("* Item B", $result);
     }
@@ -90,7 +90,7 @@ final class OptionsTest extends TestCase
     /** Tab indentation type for nested list items */
     public function test_options_list_indent_tabs(): void
     {
-        $result = html_to_markdown_convert("<ul><li>Parent<ul><li>Child</li></ul></li></ul>", ["list_indent_type" => "tabs"]);
+        $result = HtmlToMarkdown::convert("<ul><li>Parent<ul><li>Child</li></ul></li></ul>", ["list_indent_type" => "tabs"]);
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("Parent", $result);
         $this->assertStringContainsString("Child", $result);
@@ -99,7 +99,7 @@ final class OptionsTest extends TestCase
     /** Djot output format produces djot-compatible markup */
     public function test_options_output_format_djot(): void
     {
-        $result = html_to_markdown_convert("<p>Simple paragraph.</p>", ["output_format" => "djot"]);
+        $result = HtmlToMarkdown::convert("<p>Simple paragraph.</p>", ["output_format" => "djot"]);
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("Simple paragraph.", $result);
     }
@@ -107,7 +107,7 @@ final class OptionsTest extends TestCase
     /** Default markdown output format produces standard markdown */
     public function test_options_output_format_markdown(): void
     {
-        $result = html_to_markdown_convert("<h1>Title</h1><p>Some text.</p>", ["heading_style" => "atx", "output_format" => "markdown"]);
+        $result = HtmlToMarkdown::convert("<h1>Title</h1><p>Some text.</p>", ["heading_style" => "atx", "output_format" => "markdown"]);
         $this->assertStringContainsString("# Title", $result);
         $this->assertStringContainsString("Some text.", $result);
     }
@@ -115,7 +115,7 @@ final class OptionsTest extends TestCase
     /** Plain text output format strips markdown syntax */
     public function test_options_output_format_plain(): void
     {
-        $result = html_to_markdown_convert("<h1>Title</h1><p>Some <strong>bold</strong> text.</p>", ["output_format" => "plain"]);
+        $result = HtmlToMarkdown::convert("<h1>Title</h1><p>Some <strong>bold</strong> text.</p>", ["output_format" => "plain"]);
         $this->assertStringContainsString("Title", $result);
         $this->assertStringContainsString("bold", $result);
         $this->assertStringContainsString("text.", $result);
@@ -124,7 +124,7 @@ final class OptionsTest extends TestCase
     /** Normalized whitespace mode collapses multiple spaces */
     public function test_options_whitespace_normalized(): void
     {
-        $result = html_to_markdown_convert("<p>Text   with    extra   spaces.</p>", ["whitespace_mode" => "normalized"]);
+        $result = HtmlToMarkdown::convert("<p>Text   with    extra   spaces.</p>", ["whitespace_mode" => "normalized"]);
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("Text", $result);
         $this->assertStringContainsString("with", $result);
@@ -135,7 +135,7 @@ final class OptionsTest extends TestCase
     /** Strict whitespace mode preserves whitespace as-is */
     public function test_options_whitespace_strict(): void
     {
-        $result = html_to_markdown_convert("<p>Preserved   spacing.</p>", ["whitespace_mode" => "strict"]);
+        $result = HtmlToMarkdown::convert("<p>Preserved   spacing.</p>", ["whitespace_mode" => "strict"]);
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("Preserved", $result);
         $this->assertStringContainsString("spacing.", $result);
@@ -144,14 +144,14 @@ final class OptionsTest extends TestCase
     /** Wrap option disabled preserves long lines without breaking */
     public function test_options_wrap_disabled(): void
     {
-        $result = html_to_markdown_convert("<p>This is a long paragraph that should not be wrapped at all because wrapping is disabled.</p>", ["wrap" => false]);
+        $result = HtmlToMarkdown::convert("<p>This is a long paragraph that should not be wrapped at all because wrapping is disabled.</p>", ["wrap" => false]);
         $this->assertStringContainsString("This is a long paragraph that should not be wrapped at all because wrapping is disabled.", $result);
     }
 
     /** Wrap option enabled with custom width wraps long lines */
     public function test_options_wrap_enabled(): void
     {
-        $result = html_to_markdown_convert("<p>This is a long paragraph that should be wrapped at the specified column width when the wrap option is enabled.</p>", ["wrap" => true, "wrap_width" => 40]);
+        $result = HtmlToMarkdown::convert("<p>This is a long paragraph that should be wrapped at the specified column width when the wrap option is enabled.</p>", ["wrap" => true, "wrap_width" => 40]);
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("This is a long paragraph", $result);
     }

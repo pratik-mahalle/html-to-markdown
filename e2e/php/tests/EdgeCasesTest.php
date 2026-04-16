@@ -13,14 +13,14 @@ final class EdgeCasesTest extends TestCase
     /** Empty HTML document */
     public function test_empty_html(): void
     {
-        $result = html_to_markdown_convert("<html><head></head><body></body></html>");
+        $result = HtmlToMarkdown::convert("<html><head></head><body></body></html>");
         $this->assertEquals("", trim($result));
     }
 
     /** CJK (Chinese, Japanese, Korean) characters are preserved */
     public function test_encoding_cjk_characters(): void
     {
-        $result = html_to_markdown_convert("<p>中文内容</p><p>日本語テキスト</p><p>한국어 텍스트</p>");
+        $result = HtmlToMarkdown::convert("<p>中文内容</p><p>日本語テキスト</p><p>한국어 텍스트</p>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("中文内容", $result);
         $this->assertStringContainsString("日本語テキスト", $result);
@@ -30,7 +30,7 @@ final class EdgeCasesTest extends TestCase
     /** Common HTML entities are decoded in output */
     public function test_encoding_html_entities(): void
     {
-        $result = html_to_markdown_convert("<p>&amp; &lt; &gt; &nbsp; &quot; &apos;</p>");
+        $result = HtmlToMarkdown::convert("<p>&amp; &lt; &gt; &nbsp; &quot; &apos;</p>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("&", $result);
         $this->assertStringContainsString("<", $result);
@@ -40,7 +40,7 @@ final class EdgeCasesTest extends TestCase
     /** Named HTML entities like &mdash; and &hellip; are decoded */
     public function test_encoding_named_entities(): void
     {
-        $result = html_to_markdown_convert("<p>Em dash&mdash;used for parenthetical remarks&mdash;is common. Ellipsis&hellip; indicates omission. Non-breaking&nbsp;space.</p>");
+        $result = HtmlToMarkdown::convert("<p>Em dash&mdash;used for parenthetical remarks&mdash;is common. Ellipsis&hellip; indicates omission. Non-breaking&nbsp;space.</p>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("—", $result);
         $this->assertStringContainsString("…", $result);
@@ -49,7 +49,7 @@ final class EdgeCasesTest extends TestCase
     /** Numeric HTML entities (decimal and hex) are decoded */
     public function test_encoding_numeric_entities(): void
     {
-        $result = html_to_markdown_convert("<p>Copyright: &#169; Trade: &#174; Euro: &#8364; Hex: &#x00A9;</p>");
+        $result = HtmlToMarkdown::convert("<p>Copyright: &#169; Trade: &#174; Euro: &#8364; Hex: &#x00A9;</p>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("©", $result);
         $this->assertStringContainsString("®", $result);
@@ -59,7 +59,7 @@ final class EdgeCasesTest extends TestCase
     /** Emoji and Unicode characters are preserved */
     public function test_encoding_unicode_emoji(): void
     {
-        $result = html_to_markdown_convert("<p>Hello 🌍 World 🚀</p><p>Stars: ⭐ ✨</p>");
+        $result = HtmlToMarkdown::convert("<p>Hello 🌍 World 🚀</p><p>Stars: ⭐ ✨</p>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("🌍", $result);
         $this->assertStringContainsString("🚀", $result);
@@ -69,21 +69,21 @@ final class EdgeCasesTest extends TestCase
     /** Document containing only HTML comments produces empty output */
     public function test_html_comments_only(): void
     {
-        $result = html_to_markdown_convert("<!-- This is a comment --><!-- Another comment -->");
+        $result = HtmlToMarkdown::convert("<!-- This is a comment --><!-- Another comment -->");
         $this->assertEquals("", trim($result));
     }
 
     /** Input that is only whitespace characters (spaces, tabs, newlines) produces empty output */
     public function test_just_whitespace_input(): void
     {
-        $result = html_to_markdown_convert("   ");
+        $result = HtmlToMarkdown::convert("   ");
         $this->assertEquals("", trim($result));
     }
 
     /** Deeply nested elements (100 levels) are handled without stack overflow */
     public function test_malformed_deeply_nested_elements(): void
     {
-        $result = html_to_markdown_convert("<div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><p>Deeply nested content</p></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div>");
+        $result = HtmlToMarkdown::convert("<div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><p>Deeply nested content</p></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("Deeply nested content", $result);
     }
@@ -91,7 +91,7 @@ final class EdgeCasesTest extends TestCase
     /** Missing closing tags on block elements are auto-closed by parser */
     public function test_malformed_missing_block_closing_tags(): void
     {
-        $result = html_to_markdown_convert("<div><h1>Title<p>First paragraph<p>Second paragraph</div>");
+        $result = HtmlToMarkdown::convert("<div><h1>Title<p>First paragraph<p>Second paragraph</div>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("Title", $result);
         $this->assertStringContainsString("First paragraph", $result);
@@ -101,7 +101,7 @@ final class EdgeCasesTest extends TestCase
     /** Overlapping bold/italic tags are recovered by the HTML parser without panic */
     public function test_malformed_overlapping_tags(): void
     {
-        $result = html_to_markdown_convert("<p><b><i>bold and italic</b></i></p>");
+        $result = HtmlToMarkdown::convert("<p><b><i>bold and italic</b></i></p>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("bold and italic", $result);
     }
@@ -109,7 +109,7 @@ final class EdgeCasesTest extends TestCase
     /** Unclosed <p> tag is recovered gracefully and content is preserved */
     public function test_malformed_unclosed_paragraph(): void
     {
-        $result = html_to_markdown_convert("<p>This paragraph is never closed");
+        $result = HtmlToMarkdown::convert("<p>This paragraph is never closed");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("This paragraph is never closed", $result);
     }
@@ -117,28 +117,28 @@ final class EdgeCasesTest extends TestCase
     /** Document with only script tags produces empty output (scripts are stripped) */
     public function test_script_tags_only(): void
     {
-        $result = html_to_markdown_convert("<html><head><script>alert('xss')</script></head><body><script>document.write('hello')</script></body></html>");
+        $result = HtmlToMarkdown::convert("<html><head><script>alert('xss')</script></head><body><script>document.write('hello')</script></body></html>");
         $this->assertEquals("", trim($result));
     }
 
     /** Document with only style tags produces empty output (styles are stripped) */
     public function test_style_tags_only(): void
     {
-        $result = html_to_markdown_convert("<html><head><style>body { color: red; }</style></head><body><style>.foo { margin: 0; }</style></body></html>");
+        $result = HtmlToMarkdown::convert("<html><head><style>body { color: red; }</style></head><body><style>.foo { margin: 0; }</style></body></html>");
         $this->assertEquals("", trim($result));
     }
 
     /** Whitespace-only content */
     public function test_whitespace_only(): void
     {
-        $result = html_to_markdown_convert("<p>   </p>");
+        $result = HtmlToMarkdown::convert("<p>   </p>");
         $this->assertEquals("", trim($result));
     }
 
     /** onclick and other on* event handlers are removed from elements */
     public function test_xss_onclick_handler_removed(): void
     {
-        $result = html_to_markdown_convert("<p><a href=\"https://example.com\" onclick=\"alert('xss')\">Click me</a></p><button onmouseover=\"steal_data()\">Hover me</button>");
+        $result = HtmlToMarkdown::convert("<p><a href=\"https://example.com\" onclick=\"alert('xss')\">Click me</a></p><button onmouseover=\"steal_data()\">Hover me</button>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("Click me", $result);
     }
@@ -146,7 +146,7 @@ final class EdgeCasesTest extends TestCase
     /** Script tag content is stripped and does not appear in output */
     public function test_xss_script_tag_stripped(): void
     {
-        $result = html_to_markdown_convert("<p>Safe content.</p><script>alert('xss')</script><p>More safe content.</p>");
+        $result = HtmlToMarkdown::convert("<p>Safe content.</p><script>alert('xss')</script><p>More safe content.</p>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("Safe content", $result);
         $this->assertStringContainsString("More safe content", $result);
@@ -155,7 +155,7 @@ final class EdgeCasesTest extends TestCase
     /** Script tags nested inside SVG are stripped */
     public function test_xss_svg_nested_script_stripped(): void
     {
-        $result = html_to_markdown_convert("<p>Before SVG.</p><svg xmlns=\"http://www.w3.org/2000/svg\"><script>alert('svg-xss')</script><text>SVG text</text></svg><p>After SVG.</p>");
+        $result = HtmlToMarkdown::convert("<p>Before SVG.</p><svg xmlns=\"http://www.w3.org/2000/svg\"><script>alert('svg-xss')</script><text>SVG text</text></svg><p>After SVG.</p>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("Before SVG", $result);
         $this->assertStringContainsString("After SVG", $result);

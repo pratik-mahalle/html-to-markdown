@@ -13,7 +13,7 @@ final class StructureTest extends TestCase
     /** Fenced code block produces Code node */
     public function test_structure_code_block(): void
     {
-        $result = html_to_markdown_convert("<p>Example code:</p><pre><code class=\"language-rust\">fn main() { println!(\"Hello\"); }</code></pre>", ["include_document_structure" => true]);
+        $result = HtmlToMarkdown::convert("<p>Example code:</p><pre><code class=\"language-rust\">fn main() { println!(\"Hello\"); }</code></pre>", ["include_document_structure" => true]);
         $this->assertNotEmpty($result);
         // TODO: skipped (result_is_simple, field: document.nodes)
         // TODO: skipped (result_is_simple, field: document.nodes)
@@ -22,7 +22,7 @@ final class StructureTest extends TestCase
     /** H1 > H2 > H3 creates three levels of heading nesting */
     public function test_structure_deep_nesting_h1_h2_h3(): void
     {
-        $result = html_to_markdown_convert("<h1>Top Level</h1><p>Top intro.</p><h2>Mid Level</h2><p>Mid content.</p><h3>Deep Level</h3><p>Deep content.</p>", ["include_document_structure" => true]);
+        $result = HtmlToMarkdown::convert("<h1>Top Level</h1><p>Top intro.</p><h2>Mid Level</h2><p>Mid content.</p><h3>Deep Level</h3><p>Deep content.</p>", ["include_document_structure" => true]);
         $this->assertNotEmpty($result);
         // TODO: skipped (result_is_simple, field: document.nodes)
         // TODO: skipped (result_is_simple, field: document.nodes)
@@ -31,7 +31,7 @@ final class StructureTest extends TestCase
     /** H1 followed by H2 creates a nested group under the H1 */
     public function test_structure_h1_h2_nested_group(): void
     {
-        $result = html_to_markdown_convert("<h1>Chapter One</h1><p>Chapter intro.</p><h2>Section One</h2><p>Section content.</p>", ["include_document_structure" => true]);
+        $result = HtmlToMarkdown::convert("<h1>Chapter One</h1><p>Chapter intro.</p><h2>Section One</h2><p>Section content.</p>", ["include_document_structure" => true]);
         $this->assertNotEmpty($result);
         // TODO: skipped (result_is_simple, field: document.nodes)
         // TODO: skipped (result_is_simple, field: document.nodes)
@@ -40,7 +40,7 @@ final class StructureTest extends TestCase
     /** Simple heading followed by paragraph produces Heading and Paragraph nodes */
     public function test_structure_heading_paragraph(): void
     {
-        $result = html_to_markdown_convert("<h1>Title</h1><p>A paragraph of text.</p>", ["include_document_structure" => true]);
+        $result = HtmlToMarkdown::convert("<h1>Title</h1><p>A paragraph of text.</p>", ["include_document_structure" => true]);
         $this->assertNotEmpty($result);
         // TODO: skipped (result_is_simple, field: document.nodes)
         // TODO: skipped (result_is_simple, field: document.nodes)
@@ -49,7 +49,7 @@ final class StructureTest extends TestCase
     /** Unordered list produces List and ListItem nodes */
     public function test_structure_list(): void
     {
-        $result = html_to_markdown_convert("<p>Items:</p><ul><li>Alpha</li><li>Beta</li><li>Gamma</li></ul>", ["include_document_structure" => true]);
+        $result = HtmlToMarkdown::convert("<p>Items:</p><ul><li>Alpha</li><li>Beta</li><li>Gamma</li></ul>", ["include_document_structure" => true]);
         $this->assertNotEmpty($result);
         // TODO: skipped (result_is_simple, field: document.nodes)
         // TODO: skipped (result_is_simple, field: document.nodes)
@@ -58,7 +58,7 @@ final class StructureTest extends TestCase
     /** Multiple headings create multiple Heading nodes with correct levels */
     public function test_structure_multiple_headings(): void
     {
-        $result = html_to_markdown_convert("<h1>Main Title</h1><h2>Section One</h2><p>Section one content.</p><h2>Section Two</h2><p>Section two content.</p>", ["include_document_structure" => true]);
+        $result = HtmlToMarkdown::convert("<h1>Main Title</h1><h2>Section One</h2><p>Section one content.</p><h2>Section Two</h2><p>Section two content.</p>", ["include_document_structure" => true]);
         $this->assertNotEmpty($result);
         // TODO: skipped (result_is_simple, field: document.nodes)
         // TODO: skipped (result_is_simple, field: document.nodes)
@@ -67,7 +67,7 @@ final class StructureTest extends TestCase
     /** H1, H2, then another H1 creates two sibling top-level groups */
     public function test_structure_sibling_h1_groups(): void
     {
-        $result = html_to_markdown_convert("<h1>Chapter One</h1><h2>Section A</h2><p>Section A content.</p><h1>Chapter Two</h1><h2>Section B</h2><p>Section B content.</p>", ["include_document_structure" => true]);
+        $result = HtmlToMarkdown::convert("<h1>Chapter One</h1><h2>Section A</h2><p>Section A content.</p><h1>Chapter Two</h1><h2>Section B</h2><p>Section B content.</p>", ["include_document_structure" => true]);
         $this->assertNotEmpty($result);
         // TODO: skipped (result_is_simple, field: document.nodes)
         // TODO: skipped (result_is_simple, field: document.nodes)

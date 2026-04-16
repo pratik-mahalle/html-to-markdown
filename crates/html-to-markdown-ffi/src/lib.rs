@@ -2,7 +2,7 @@
 // Re-generate with: alef generate
 
 use std::cell::RefCell;
-use std::ffi::{CStr, CString, c_char};
+use std::ffi::{c_char, CStr, CString};
 
 thread_local! {
     static LAST_ERROR_CODE: RefCell<i32> = RefCell::new(0);
@@ -222,7 +222,11 @@ pub unsafe extern "C" fn htm_metadata_config_any_enabled(
     // SAFETY: null check above guarantees this is a valid pointer.
     let obj = unsafe { &*this };
     let result = obj.any_enabled();
-    if result { 1 } else { 0 }
+    if result {
+        1
+    } else {
+        0
+    }
 }
 
 /// Free a `MetadataConfigUpdate` handle.
@@ -700,7 +704,11 @@ pub unsafe extern "C" fn htm_header_metadata_is_valid(
     // SAFETY: null check above guarantees this is a valid pointer.
     let obj = unsafe { &*this };
     let result = obj.is_valid();
-    if result { 1 } else { 0 }
+    if result {
+        1
+    } else {
+        0
+    }
 }
 
 /// Free a `LinkMetadata` handle.
@@ -3155,6 +3163,64 @@ pub unsafe extern "C" fn htm_text_annotation_kind(
     }
     let obj = unsafe { &*ptr };
     Box::into_raw(Box::new(obj.kind.clone()))
+}
+
+/// Create a `ConversionResult` from a JSON string. Returns null on failure.
+/// # Safety
+/// JSON string must be valid UTF-8 and null-terminated.
+/// Returned handle must be freed with `htm_conversion_result_free`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_result_from_json(
+    json: *const c_char,
+) -> *mut html_to_markdown_rs::ConversionResult {
+    clear_last_error();
+    if json.is_null() {
+        set_last_error(1, "Null pointer passed for JSON string");
+        return std::ptr::null_mut();
+    }
+    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in JSON string");
+            return std::ptr::null_mut();
+        }
+    };
+    match serde_json::from_str::<html_to_markdown_rs::ConversionResult>(c_str) {
+        Ok(val) => Box::into_raw(Box::new(val)),
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// Serialize a `ConversionResult` to a JSON string. Returns null on failure.
+/// # Safety
+/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
+/// The returned string must be freed with `htm_free_string`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_result_to_json(
+    ptr: *const html_to_markdown_rs::ConversionResult,
+) -> *mut c_char {
+    clear_last_error();
+    if ptr.is_null() {
+        set_last_error(1, "Null pointer passed to to_json");
+        return std::ptr::null_mut();
+    }
+    let val = unsafe { &*ptr };
+    match serde_json::to_string(val) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(e) => {
+                set_last_error(2, &e.to_string());
+                std::ptr::null_mut()
+            }
+        },
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
 }
 
 /// Free a `ConversionResult` handle.

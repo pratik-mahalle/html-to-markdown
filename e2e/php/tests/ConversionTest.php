@@ -13,7 +13,7 @@ final class ConversionTest extends TestCase
     /** Blockquote with multiple paragraphs has each paragraph prefixed */
     public function test_blockquote_multiple_paragraphs(): void
     {
-        $result = html_to_markdown_convert("<blockquote><p>First paragraph.</p><p>Second paragraph.</p></blockquote>");
+        $result = HtmlToMarkdown::convert("<blockquote><p>First paragraph.</p><p>Second paragraph.</p></blockquote>");
         $this->assertStringContainsString("> First paragraph.", $result);
         $this->assertStringContainsString("> Second paragraph.", $result);
     }
@@ -21,7 +21,7 @@ final class ConversionTest extends TestCase
     /** Nested blockquote produces double-prefixed lines */
     public function test_blockquote_nested(): void
     {
-        $result = html_to_markdown_convert("<blockquote><p>Outer quote.</p><blockquote><p>Inner quote.</p></blockquote></blockquote>");
+        $result = HtmlToMarkdown::convert("<blockquote><p>Outer quote.</p><blockquote><p>Inner quote.</p></blockquote></blockquote>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("Outer quote.", $result);
         $this->assertStringContainsString("Inner quote.", $result);
@@ -30,14 +30,14 @@ final class ConversionTest extends TestCase
     /** Simple blockquote */
     public function test_blockquote_simple(): void
     {
-        $result = html_to_markdown_convert("<blockquote><p>Quote text</p></blockquote>");
+        $result = HtmlToMarkdown::convert("<blockquote><p>Quote text</p></blockquote>");
         $this->assertStringContainsString("> Quote text", $result);
     }
 
     /** Blockquote containing a list preserves list items inside quote */
     public function test_blockquote_with_list(): void
     {
-        $result = html_to_markdown_convert("<blockquote><p>Quote intro:</p><ul><li>Point one</li><li>Point two</li></ul></blockquote>");
+        $result = HtmlToMarkdown::convert("<blockquote><p>Quote intro:</p><ul><li>Point one</li><li>Point two</li></ul></blockquote>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("Quote intro:", $result);
         $this->assertStringContainsString("Point one", $result);
@@ -47,21 +47,21 @@ final class ConversionTest extends TestCase
     /** Nested bold and italic */
     public function test_bold_and_italic(): void
     {
-        $result = html_to_markdown_convert("<p><strong><em>both</em></strong></p>");
+        $result = HtmlToMarkdown::convert("<p><strong><em>both</em></strong></p>");
         $this->assertStringContainsString("***both***", $result);
     }
 
     /** Strong tag converts to bold */
     public function test_bold_strong(): void
     {
-        $result = html_to_markdown_convert("<p><strong>bold</strong></p>");
+        $result = HtmlToMarkdown::convert("<p><strong>bold</strong></p>");
         $this->assertStringContainsString("**bold**", $result);
     }
 
     /** Code block with language preserves content */
     public function test_code_block(): void
     {
-        $result = html_to_markdown_convert("<pre><code class=\"language-python\">print('hello')</code></pre>");
+        $result = HtmlToMarkdown::convert("<pre><code class=\"language-python\">print('hello')</code></pre>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("print('hello')", $result);
     }
@@ -69,7 +69,7 @@ final class ConversionTest extends TestCase
     /** Code block without a language class preserves content */
     public function test_code_block_no_language(): void
     {
-        $result = html_to_markdown_convert("<pre><code>plain code here</code></pre>");
+        $result = HtmlToMarkdown::convert("<pre><code>plain code here</code></pre>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("plain code here", $result);
     }
@@ -77,14 +77,14 @@ final class ConversionTest extends TestCase
     /** Inline code element nested inside a paragraph */
     public function test_code_inline_in_paragraph(): void
     {
-        $result = html_to_markdown_convert("<p>Call the <code>initialize()</code> method first.</p>");
+        $result = HtmlToMarkdown::convert("<p>Call the <code>initialize()</code> method first.</p>");
         $this->assertStringContainsString("`initialize()`", $result);
     }
 
     /** Inline code containing backtick characters is properly escaped */
     public function test_code_with_backticks_in_content(): void
     {
-        $result = html_to_markdown_convert("<p>Use <code>`backtick` here</code> carefully.</p>");
+        $result = HtmlToMarkdown::convert("<p>Use <code>`backtick` here</code> carefully.</p>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("backtick", $result);
     }
@@ -92,7 +92,7 @@ final class ConversionTest extends TestCase
     /** mark tag produces highlighted output */
     public function test_emphasis_mark_highlight(): void
     {
-        $result = html_to_markdown_convert("<p><mark>highlighted</mark></p>");
+        $result = HtmlToMarkdown::convert("<p><mark>highlighted</mark></p>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("highlighted", $result);
     }
@@ -100,21 +100,21 @@ final class ConversionTest extends TestCase
     /** del tag converts to GFM strikethrough */
     public function test_emphasis_strikethrough_del(): void
     {
-        $result = html_to_markdown_convert("<p><del>deleted text</del></p>");
+        $result = HtmlToMarkdown::convert("<p><del>deleted text</del></p>");
         $this->assertStringContainsString("~~deleted text~~", $result);
     }
 
     /** s tag converts to GFM strikethrough */
     public function test_emphasis_strikethrough_s(): void
     {
-        $result = html_to_markdown_convert("<p><s>strikethrough</s></p>");
+        $result = HtmlToMarkdown::convert("<p><s>strikethrough</s></p>");
         $this->assertStringContainsString("~~strikethrough~~", $result);
     }
 
     /** sub tag content is preserved */
     public function test_emphasis_subscript(): void
     {
-        $result = html_to_markdown_convert("<p>H<sub>2</sub>O</p>");
+        $result = HtmlToMarkdown::convert("<p>H<sub>2</sub>O</p>");
         $this->assertStringContainsString("H", $result);
         $this->assertStringContainsString("2", $result);
         $this->assertStringContainsString("O", $result);
@@ -123,7 +123,7 @@ final class ConversionTest extends TestCase
     /** sup tag content is preserved */
     public function test_emphasis_superscript(): void
     {
-        $result = html_to_markdown_convert("<p>x<sup>2</sup></p>");
+        $result = HtmlToMarkdown::convert("<p>x<sup>2</sup></p>");
         $this->assertStringContainsString("x", $result);
         $this->assertStringContainsString("2", $result);
     }
@@ -131,14 +131,14 @@ final class ConversionTest extends TestCase
     /** u tag content is preserved in output */
     public function test_emphasis_underline_u(): void
     {
-        $result = html_to_markdown_convert("<p><u>underlined</u></p>");
+        $result = HtmlToMarkdown::convert("<p><u>underlined</u></p>");
         $this->assertStringContainsString("underlined", $result);
     }
 
     /** Form input elements produce readable output without form mechanics */
     public function test_form_input_elements(): void
     {
-        $result = html_to_markdown_convert("<form><label for=\"name\">Name:</label><input type=\"text\" id=\"name\" placeholder=\"Enter name\"></form>");
+        $result = HtmlToMarkdown::convert("<form><label for=\"name\">Name:</label><input type=\"text\" id=\"name\" placeholder=\"Enter name\"></form>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("Name", $result);
     }
@@ -146,7 +146,7 @@ final class ConversionTest extends TestCase
     /** Select element with options produces readable output */
     public function test_form_select_options(): void
     {
-        $result = html_to_markdown_convert("<form><label>Color:</label><select><option value=\"red\">Red</option><option value=\"blue\" selected>Blue</option><option value=\"green\">Green</option></select></form>");
+        $result = HtmlToMarkdown::convert("<form><label>Color:</label><select><option value=\"red\">Red</option><option value=\"blue\" selected>Blue</option><option value=\"green\">Green</option></select></form>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("Color", $result);
     }
@@ -154,7 +154,7 @@ final class ConversionTest extends TestCase
     /** Textarea element produces readable output */
     public function test_form_textarea(): void
     {
-        $result = html_to_markdown_convert("<form><label>Message:</label><textarea>Default text content</textarea></form>");
+        $result = HtmlToMarkdown::convert("<form><label>Message:</label><textarea>Default text content</textarea></form>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("Message", $result);
     }
@@ -162,49 +162,49 @@ final class ConversionTest extends TestCase
     /** H1 heading */
     public function test_heading_h1(): void
     {
-        $result = html_to_markdown_convert("<h1>Heading 1</h1>");
+        $result = HtmlToMarkdown::convert("<h1>Heading 1</h1>");
         $this->assertEquals("# Heading 1", trim($result));
     }
 
     /** H2 heading */
     public function test_heading_h2(): void
     {
-        $result = html_to_markdown_convert("<h2>Heading 2</h2>");
+        $result = HtmlToMarkdown::convert("<h2>Heading 2</h2>");
         $this->assertEquals("## Heading 2", trim($result));
     }
 
     /** H3 heading */
     public function test_heading_h3(): void
     {
-        $result = html_to_markdown_convert("<h3>Heading 3</h3>");
+        $result = HtmlToMarkdown::convert("<h3>Heading 3</h3>");
         $this->assertEquals("### Heading 3", trim($result));
     }
 
     /** H4 heading */
     public function test_heading_h4(): void
     {
-        $result = html_to_markdown_convert("<h4>Heading 4</h4>");
+        $result = HtmlToMarkdown::convert("<h4>Heading 4</h4>");
         $this->assertEquals("#### Heading 4", trim($result));
     }
 
     /** H5 heading */
     public function test_heading_h5(): void
     {
-        $result = html_to_markdown_convert("<h5>Heading 5</h5>");
+        $result = HtmlToMarkdown::convert("<h5>Heading 5</h5>");
         $this->assertEquals("##### Heading 5", trim($result));
     }
 
     /** H6 heading */
     public function test_heading_h6(): void
     {
-        $result = html_to_markdown_convert("<h6>Heading 6</h6>");
+        $result = HtmlToMarkdown::convert("<h6>Heading 6</h6>");
         $this->assertEquals("###### Heading 6", trim($result));
     }
 
     /** Figure with figcaption preserves both image and caption */
     public function test_image_figure_figcaption(): void
     {
-        $result = html_to_markdown_convert("<figure><img src=\"sunset.jpg\" alt=\"A sunset\"><figcaption>Beautiful sunset over the ocean</figcaption></figure>");
+        $result = HtmlToMarkdown::convert("<figure><img src=\"sunset.jpg\" alt=\"A sunset\"><figcaption>Beautiful sunset over the ocean</figcaption></figure>");
         $this->assertStringContainsString("![A sunset](sunset.jpg)", $result);
         $this->assertStringContainsString("Beautiful sunset over the ocean", $result);
     }
@@ -212,7 +212,7 @@ final class ConversionTest extends TestCase
     /** Image inside an anchor produces a linked image */
     public function test_image_linked(): void
     {
-        $result = html_to_markdown_convert("<a href=\"https://example.com\"><img src=\"icon.png\" alt=\"Icon\"></a>");
+        $result = HtmlToMarkdown::convert("<a href=\"https://example.com\"><img src=\"icon.png\" alt=\"Icon\"></a>");
         $this->assertStringContainsString("![Icon](icon.png)", $result);
         $this->assertStringContainsString("https://example.com", $result);
     }
@@ -220,7 +220,7 @@ final class ConversionTest extends TestCase
     /** Image without alt text produces image markdown */
     public function test_image_no_alt(): void
     {
-        $result = html_to_markdown_convert("<img src=\"banner.jpg\">");
+        $result = HtmlToMarkdown::convert("<img src=\"banner.jpg\">");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("banner.jpg", $result);
     }
@@ -228,14 +228,14 @@ final class ConversionTest extends TestCase
     /** Image with alt text */
     public function test_image_simple(): void
     {
-        $result = html_to_markdown_convert("<img src=\"photo.jpg\" alt=\"A photo\">");
+        $result = HtmlToMarkdown::convert("<img src=\"photo.jpg\" alt=\"A photo\">");
         $this->assertStringContainsString("![A photo](photo.jpg)", $result);
     }
 
     /** Image with title attribute includes title in output */
     public function test_image_with_title(): void
     {
-        $result = html_to_markdown_convert("<img src=\"chart.png\" alt=\"Sales chart\" title=\"Q3 Sales\">");
+        $result = HtmlToMarkdown::convert("<img src=\"chart.png\" alt=\"Sales chart\" title=\"Q3 Sales\">");
         $this->assertStringContainsString("![Sales chart](chart.png", $result);
         $this->assertStringContainsString("Q3 Sales", $result);
     }
@@ -243,21 +243,21 @@ final class ConversionTest extends TestCase
     /** Inline code */
     public function test_inline_code(): void
     {
-        $result = html_to_markdown_convert("<p>Use <code>console.log()</code> to debug</p>");
+        $result = HtmlToMarkdown::convert("<p>Use <code>console.log()</code> to debug</p>");
         $this->assertStringContainsString("`console.log()`", $result);
     }
 
     /** Em tag converts to italic */
     public function test_italic_em(): void
     {
-        $result = html_to_markdown_convert("<p><em>italic</em></p>");
+        $result = HtmlToMarkdown::convert("<p><em>italic</em></p>");
         $this->assertStringContainsString("*italic*", $result);
     }
 
     /** Single br tag produces a line break in output */
     public function test_line_break_br_tag(): void
     {
-        $result = html_to_markdown_convert("<p>First line.<br>Second line.</p>");
+        $result = HtmlToMarkdown::convert("<p>First line.<br>Second line.</p>");
         $this->assertStringContainsString("First line.", $result);
         $this->assertStringContainsString("Second line.", $result);
     }
@@ -265,7 +265,7 @@ final class ConversionTest extends TestCase
     /** hr tag produces a horizontal separator between content */
     public function test_line_break_hr_tag(): void
     {
-        $result = html_to_markdown_convert("<p>Before rule.</p><hr><p>After rule.</p>");
+        $result = HtmlToMarkdown::convert("<p>Before rule.</p><hr><p>After rule.</p>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("Before rule.", $result);
         $this->assertStringContainsString("After rule.", $result);
@@ -274,7 +274,7 @@ final class ConversionTest extends TestCase
     /** Multiple consecutive br tags in sequence */
     public function test_line_break_multiple_br(): void
     {
-        $result = html_to_markdown_convert("<p>Start.<br><br>End.</p>");
+        $result = HtmlToMarkdown::convert("<p>Start.<br><br>End.</p>");
         $this->assertStringContainsString("Start.", $result);
         $this->assertStringContainsString("End.", $result);
     }
@@ -282,21 +282,21 @@ final class ConversionTest extends TestCase
     /** Fragment-only anchor link is preserved */
     public function test_link_anchor_fragment(): void
     {
-        $result = html_to_markdown_convert("<a href=\"#section\">Jump to section</a>");
+        $result = HtmlToMarkdown::convert("<a href=\"#section\">Jump to section</a>");
         $this->assertStringContainsString("[Jump to section](#section)", $result);
     }
 
     /** Link with empty href produces output with the link text */
     public function test_link_empty_href(): void
     {
-        $result = html_to_markdown_convert("<a href=\"\">No destination</a>");
+        $result = HtmlToMarkdown::convert("<a href=\"\">No destination</a>");
         $this->assertStringContainsString("No destination", $result);
     }
 
     /** Image inside a link produces a linked image */
     public function test_link_image_inside(): void
     {
-        $result = html_to_markdown_convert("<a href=\"https://example.com\"><img src=\"logo.png\" alt=\"Logo\"></a>");
+        $result = HtmlToMarkdown::convert("<a href=\"https://example.com\"><img src=\"logo.png\" alt=\"Logo\"></a>");
         $this->assertStringContainsString("![Logo](logo.png)", $result);
         $this->assertStringContainsString("https://example.com", $result);
     }
@@ -304,21 +304,21 @@ final class ConversionTest extends TestCase
     /** Mailto link is preserved with mailto: scheme */
     public function test_link_mailto(): void
     {
-        $result = html_to_markdown_convert("<a href=\"mailto:user@example.com\">Email us</a>");
+        $result = HtmlToMarkdown::convert("<a href=\"mailto:user@example.com\">Email us</a>");
         $this->assertStringContainsString("mailto:user@example.com", $result);
     }
 
     /** Simple link */
     public function test_link_simple(): void
     {
-        $result = html_to_markdown_convert("<a href=\"https://example.com\">Example</a>");
+        $result = HtmlToMarkdown::convert("<a href=\"https://example.com\">Example</a>");
         $this->assertStringContainsString("[Example](https://example.com)", $result);
     }
 
     /** Link containing bold text preserves formatting */
     public function test_link_with_bold_text(): void
     {
-        $result = html_to_markdown_convert("<a href=\"https://example.com\"><strong>Bold link</strong></a>");
+        $result = HtmlToMarkdown::convert("<a href=\"https://example.com\"><strong>Bold link</strong></a>");
         $this->assertStringContainsString("**Bold link**", $result);
         $this->assertStringContainsString("https://example.com", $result);
     }
@@ -326,7 +326,7 @@ final class ConversionTest extends TestCase
     /** Link with title attribute */
     public function test_link_with_title(): void
     {
-        $result = html_to_markdown_convert("<a href=\"https://example.com\" title=\"Example Site\">Example</a>");
+        $result = HtmlToMarkdown::convert("<a href=\"https://example.com\" title=\"Example Site\">Example</a>");
         $this->assertStringContainsString("[Example](https://example.com", $result);
         $this->assertStringContainsString("Example Site", $result);
     }
@@ -334,7 +334,7 @@ final class ConversionTest extends TestCase
     /** Definition list with dt and dd elements */
     public function test_list_definition_dl(): void
     {
-        $result = html_to_markdown_convert("<dl><dt>Term One</dt><dd>Definition of term one.</dd><dt>Term Two</dt><dd>Definition of term two.</dd></dl>");
+        $result = HtmlToMarkdown::convert("<dl><dt>Term One</dt><dd>Definition of term one.</dd><dt>Term Two</dt><dd>Definition of term two.</dd></dl>");
         $this->assertStringContainsString("Term One", $result);
         $this->assertStringContainsString("Definition of term one.", $result);
         $this->assertStringContainsString("Term Two", $result);
@@ -344,7 +344,7 @@ final class ConversionTest extends TestCase
     /** List item containing multiple paragraphs */
     public function test_list_item_multiple_paragraphs(): void
     {
-        $result = html_to_markdown_convert("<ul><li><p>First paragraph in item.</p><p>Second paragraph in item.</p></li><li>Simple item</li></ul>");
+        $result = HtmlToMarkdown::convert("<ul><li><p>First paragraph in item.</p><p>Second paragraph in item.</p></li><li>Simple item</li></ul>");
         $this->assertStringContainsString("First paragraph in item.", $result);
         $this->assertStringContainsString("Second paragraph in item.", $result);
         $this->assertStringContainsString("Simple item", $result);
@@ -353,7 +353,7 @@ final class ConversionTest extends TestCase
     /** Mixed list: ordered list nested inside unordered list */
     public function test_list_mixed_nested(): void
     {
-        $result = html_to_markdown_convert("<ul><li>Item A<ol><li>Sub 1</li><li>Sub 2</li></ol></li><li>Item B</li></ul>");
+        $result = HtmlToMarkdown::convert("<ul><li>Item A<ol><li>Sub 1</li><li>Sub 2</li></ol></li><li>Item B</li></ul>");
         $this->assertStringContainsString("Item A", $result);
         $this->assertStringContainsString("Sub 1", $result);
         $this->assertStringContainsString("Sub 2", $result);
@@ -363,7 +363,7 @@ final class ConversionTest extends TestCase
     /** Nested ordered list with two levels of depth */
     public function test_list_nested_ordered(): void
     {
-        $result = html_to_markdown_convert("<ol><li>Step 1<ol><li>Step 1a</li><li>Step 1b</li></ol></li><li>Step 2</li></ol>");
+        $result = HtmlToMarkdown::convert("<ol><li>Step 1<ol><li>Step 1a</li><li>Step 1b</li></ol></li><li>Step 2</li></ol>");
         $this->assertStringContainsString("Step 1", $result);
         $this->assertStringContainsString("Step 1a", $result);
         $this->assertStringContainsString("Step 1b", $result);
@@ -373,7 +373,7 @@ final class ConversionTest extends TestCase
     /** Nested unordered list with two levels of depth */
     public function test_list_nested_unordered(): void
     {
-        $result = html_to_markdown_convert("<ul><li>Parent A<ul><li>Child A1</li><li>Child A2</li></ul></li><li>Parent B</li></ul>");
+        $result = HtmlToMarkdown::convert("<ul><li>Parent A<ul><li>Child A1</li><li>Child A2</li></ul></li><li>Parent B</li></ul>");
         $this->assertStringContainsString("Parent A", $result);
         $this->assertStringContainsString("Child A1", $result);
         $this->assertStringContainsString("Child A2", $result);
@@ -383,7 +383,7 @@ final class ConversionTest extends TestCase
     /** Task list with checked and unchecked checkboxes */
     public function test_list_task_checkboxes(): void
     {
-        $result = html_to_markdown_convert("<ul><li><input type=\"checkbox\" checked> Done task</li><li><input type=\"checkbox\"> Pending task</li></ul>");
+        $result = HtmlToMarkdown::convert("<ul><li><input type=\"checkbox\" checked> Done task</li><li><input type=\"checkbox\"> Pending task</li></ul>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("Done task", $result);
         $this->assertStringContainsString("Pending task", $result);
@@ -392,7 +392,7 @@ final class ConversionTest extends TestCase
     /** Ordered list */
     public function test_ordered_list(): void
     {
-        $result = html_to_markdown_convert("<ol><li>First</li><li>Second</li><li>Third</li></ol>");
+        $result = HtmlToMarkdown::convert("<ol><li>First</li><li>Second</li><li>Third</li></ol>");
         $this->assertStringContainsString("1. First", $result);
         $this->assertStringContainsString("2. Second", $result);
         $this->assertStringContainsString("3. Third", $result);
@@ -401,7 +401,7 @@ final class ConversionTest extends TestCase
     /** Multiple paragraphs are separated by a blank line */
     public function test_paragraph_multiple(): void
     {
-        $result = html_to_markdown_convert("<p>First paragraph.</p><p>Second paragraph.</p>");
+        $result = HtmlToMarkdown::convert("<p>First paragraph.</p><p>Second paragraph.</p>");
         $this->assertStringContainsString("First paragraph.", $result);
         $this->assertStringContainsString("Second paragraph.", $result);
     }
@@ -409,21 +409,21 @@ final class ConversionTest extends TestCase
     /** Text nested inside divs is extracted correctly */
     public function test_paragraph_nested_divs(): void
     {
-        $result = html_to_markdown_convert("<div><div><p>Nested text</p></div></div>");
+        $result = HtmlToMarkdown::convert("<div><div><p>Nested text</p></div></div>");
         $this->assertStringContainsString("Nested text", $result);
     }
 
     /** Simple paragraph converts to plain text */
     public function test_paragraph_simple(): void
     {
-        $result = html_to_markdown_convert("<p>Hello World</p>");
+        $result = HtmlToMarkdown::convert("<p>Hello World</p>");
         $this->assertEquals("Hello World", trim($result));
     }
 
     /** Paragraph with bold, italic, and a link */
     public function test_paragraph_with_inline_formatting(): void
     {
-        $result = html_to_markdown_convert("<p>This has <strong>bold</strong>, <em>italic</em>, and a <a href=\"https://example.com\">link</a>.</p>");
+        $result = HtmlToMarkdown::convert("<p>This has <strong>bold</strong>, <em>italic</em>, and a <a href=\"https://example.com\">link</a>.</p>");
         $this->assertStringContainsString("**bold**", $result);
         $this->assertStringContainsString("*italic*", $result);
         $this->assertStringContainsString("[link](https://example.com)", $result);
@@ -432,7 +432,7 @@ final class ConversionTest extends TestCase
     /** Paragraph with br tags produces line breaks in output */
     public function test_paragraph_with_line_breaks(): void
     {
-        $result = html_to_markdown_convert("<p>Line one.<br>Line two.<br>Line three.</p>");
+        $result = HtmlToMarkdown::convert("<p>Line one.<br>Line two.<br>Line three.</p>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("Line one.", $result);
         $this->assertStringContainsString("Line two.", $result);
@@ -442,14 +442,14 @@ final class ConversionTest extends TestCase
     /** Abbreviation element text is preserved */
     public function test_semantic_abbr(): void
     {
-        $result = html_to_markdown_convert("<p>The <abbr title=\"World Wide Web\">WWW</abbr> is global.</p>");
+        $result = HtmlToMarkdown::convert("<p>The <abbr title=\"World Wide Web\">WWW</abbr> is global.</p>");
         $this->assertStringContainsString("WWW", $result);
     }
 
     /** Article element wrapping content preserves inner content */
     public function test_semantic_article(): void
     {
-        $result = html_to_markdown_convert("<article><h2>Article Title</h2><p>Article body.</p></article>");
+        $result = HtmlToMarkdown::convert("<article><h2>Article Title</h2><p>Article body.</p></article>");
         $this->assertStringContainsString("Article Title", $result);
         $this->assertStringContainsString("Article body.", $result);
     }
@@ -457,7 +457,7 @@ final class ConversionTest extends TestCase
     /** Definition list with term and description */
     public function test_semantic_definition_list(): void
     {
-        $result = html_to_markdown_convert("<dl><dt>HTML</dt><dd>HyperText Markup Language</dd><dt>CSS</dt><dd>Cascading Style Sheets</dd></dl>");
+        $result = HtmlToMarkdown::convert("<dl><dt>HTML</dt><dd>HyperText Markup Language</dd><dt>CSS</dt><dd>Cascading Style Sheets</dd></dl>");
         $this->assertStringContainsString("HTML", $result);
         $this->assertStringContainsString("HyperText Markup Language", $result);
         $this->assertStringContainsString("CSS", $result);
@@ -467,7 +467,7 @@ final class ConversionTest extends TestCase
     /** Details and summary elements produce readable output */
     public function test_semantic_details_summary(): void
     {
-        $result = html_to_markdown_convert("<details><summary>Click to expand</summary><p>Hidden content here.</p></details>");
+        $result = HtmlToMarkdown::convert("<details><summary>Click to expand</summary><p>Hidden content here.</p></details>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("Click to expand", $result);
     }
@@ -475,7 +475,7 @@ final class ConversionTest extends TestCase
     /** Horizontal rule produces a separator in output */
     public function test_semantic_hr(): void
     {
-        $result = html_to_markdown_convert("<p>Above</p><hr><p>Below</p>");
+        $result = HtmlToMarkdown::convert("<p>Above</p><hr><p>Below</p>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("Above", $result);
         $this->assertStringContainsString("Below", $result);
@@ -484,7 +484,7 @@ final class ConversionTest extends TestCase
     /** Mark tag produces highlighted output */
     public function test_semantic_mark_highlight(): void
     {
-        $result = html_to_markdown_convert("<p>This is <mark>highlighted text</mark> in a sentence.</p>");
+        $result = HtmlToMarkdown::convert("<p>This is <mark>highlighted text</mark> in a sentence.</p>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("highlighted text", $result);
     }
@@ -492,7 +492,7 @@ final class ConversionTest extends TestCase
     /** Section element with heading preserves structure */
     public function test_semantic_section_with_heading(): void
     {
-        $result = html_to_markdown_convert("<section><h3>Section Heading</h3><p>Section content.</p></section>");
+        $result = HtmlToMarkdown::convert("<section><h3>Section Heading</h3><p>Section content.</p></section>");
         $this->assertStringContainsString("Section Heading", $result);
         $this->assertStringContainsString("Section content.", $result);
     }
@@ -500,7 +500,7 @@ final class ConversionTest extends TestCase
     /** Subscript and superscript elements are preserved in output */
     public function test_semantic_sub_superscript(): void
     {
-        $result = html_to_markdown_convert("<p>H<sub>2</sub>O and E=mc<sup>2</sup></p>");
+        $result = HtmlToMarkdown::convert("<p>H<sub>2</sub>O and E=mc<sup>2</sup></p>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("H", $result);
         $this->assertStringContainsString("2", $result);
@@ -511,7 +511,7 @@ final class ConversionTest extends TestCase
     /** Simple table with header */
     public function test_simple_table(): void
     {
-        $result = html_to_markdown_convert("<table><thead><tr><th>Name</th><th>Age</th></tr></thead><tbody><tr><td>Alice</td><td>30</td></tr></tbody></table>");
+        $result = HtmlToMarkdown::convert("<table><thead><tr><th>Name</th><th>Age</th></tr></thead><tbody><tr><td>Alice</td><td>30</td></tr></tbody></table>");
         $this->assertStringContainsString("Name", $result);
         $this->assertStringContainsString("Age", $result);
         $this->assertStringContainsString("Alice", $result);
@@ -523,14 +523,14 @@ final class ConversionTest extends TestCase
     /** Empty table produces no output or minimal output */
     public function test_table_empty(): void
     {
-        $result = html_to_markdown_convert("<table></table>");
+        $result = HtmlToMarkdown::convert("<table></table>");
         $this->assertEquals("", trim($result));
     }
 
     /** Table without thead uses first row as implied header */
     public function test_table_no_thead(): void
     {
-        $result = html_to_markdown_convert("<table><tr><td>Product</td><td>Price</td></tr><tr><td>Apple</td><td>1.00</td></tr></table>");
+        $result = HtmlToMarkdown::convert("<table><tr><td>Product</td><td>Price</td></tr><tr><td>Apple</td><td>1.00</td></tr></table>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("Product", $result);
         $this->assertStringContainsString("Price", $result);
@@ -542,7 +542,7 @@ final class ConversionTest extends TestCase
     /** Table cells containing pipe characters are escaped in output */
     public function test_table_pipe_chars_in_content(): void
     {
-        $result = html_to_markdown_convert("<table><thead><tr><th>Expression</th><th>Result</th></tr></thead><tbody><tr><td>a | b</td><td>true</td></tr></tbody></table>");
+        $result = HtmlToMarkdown::convert("<table><thead><tr><th>Expression</th><th>Result</th></tr></thead><tbody><tr><td>a | b</td><td>true</td></tr></tbody></table>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("Expression", $result);
         $this->assertStringContainsString("Result", $result);
@@ -552,7 +552,7 @@ final class ConversionTest extends TestCase
     /** Table with column alignment attributes */
     public function test_table_with_alignment(): void
     {
-        $result = html_to_markdown_convert("<table><thead><tr><th align=\"left\">Left</th><th align=\"center\">Center</th><th align=\"right\">Right</th></tr></thead><tbody><tr><td>L</td><td>C</td><td>R</td></tr></tbody></table>");
+        $result = HtmlToMarkdown::convert("<table><thead><tr><th align=\"left\">Left</th><th align=\"center\">Center</th><th align=\"right\">Right</th></tr></thead><tbody><tr><td>L</td><td>C</td><td>R</td></tr></tbody></table>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("Left", $result);
         $this->assertStringContainsString("Center", $result);
@@ -566,7 +566,7 @@ final class ConversionTest extends TestCase
     /** Table with colspan attribute in a header cell */
     public function test_table_with_colspan(): void
     {
-        $result = html_to_markdown_convert("<table><thead><tr><th colspan=\"2\">Full Name</th></tr></thead><tbody><tr><td>John</td><td>Doe</td></tr></tbody></table>");
+        $result = HtmlToMarkdown::convert("<table><thead><tr><th colspan=\"2\">Full Name</th></tr></thead><tbody><tr><td>John</td><td>Doe</td></tr></tbody></table>");
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("Full Name", $result);
         $this->assertStringContainsString("John", $result);
@@ -576,7 +576,7 @@ final class ConversionTest extends TestCase
     /** Unordered list */
     public function test_unordered_list(): void
     {
-        $result = html_to_markdown_convert("<ul><li>Item 1</li><li>Item 2</li><li>Item 3</li></ul>");
+        $result = HtmlToMarkdown::convert("<ul><li>Item 1</li><li>Item 2</li><li>Item 3</li></ul>");
         $this->assertStringContainsString("- Item 1", $result);
         $this->assertStringContainsString("- Item 2", $result);
         $this->assertStringContainsString("- Item 3", $result);
