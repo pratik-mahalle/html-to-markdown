@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **FFI `from_json`/`to_json` functions** — `htm_conversion_options_from_json`, `htm_conversion_result_to_json`, etc. now generated for all serde-compatible types, fixing Java (Panama FFM) and Go (cgo) bindings.
 - **PHP e2e tests** — fixed function call generation to use correct `HtmlToMarkdownRs::convert()` pattern.
 - **Python `pyproject.toml`** — corrected `module-name` and `python-packages` to match `html-to-markdown` pip package name.
-- **`docs/llms.txt`** `extract_metadata` default corrected from `false` to `true` (#276, partial fix).
+- **`docs/llms.txt`** metadata defaults corrected from `false` to `true` for `extract_metadata`, `extract_document`, `extract_headers`, `extract_links`, `extract_images`, `extract_structured_data` (#276).
 
 ### Known Issues
 

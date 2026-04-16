@@ -1784,6 +1784,11 @@ jobs:
           version: ${{ needs.prepare.outputs.version }}
           max-attempts: "25"
 
+      - name: Prepare main Node package metadata
+        if: ${{ needs.prepare.outputs.dry_run != 'true' && steps.recheck.outputs.exists != 'true' }}
+        run: scripts/publish/node/prepublish-main-package.sh crates/html-to-markdown-node
+        shell: bash
+
       - name: Publish main Node package
         if: ${{ needs.prepare.outputs.dry_run != 'true' && steps.recheck.outputs.exists != 'true' }}
         uses: kreuzberg-dev/actions/publish-npm@v1 # v1
