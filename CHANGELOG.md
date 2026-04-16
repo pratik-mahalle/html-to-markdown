@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.1] - 2026-04-16
+
+### Fixed
+
+- **Node.js Docker/cross-platform installs** (#273) — platform-specific native packages (`@kreuzberg/html-to-markdown-node-linux-x64-gnu`, etc.) are now correctly published with `optionalDependencies` via NAPI prepublish, resolving cross-platform lockfile issues.
+- **Homebrew formula** (#304) — formula updated with correct source tarball SHA and bottle configuration.
+- **Ruby gem build failure** — fixed `NodeContent::MetadataBlock` type mismatch (`Vec<(String, String)>` → `String`) in binding-to-core conversion by deserializing sanitized fields from JSON.
+- **Maven Central publish** — aligned `pom.xml` with kreuzberg: GPG plugin in main build section, developer email, correct `groupId` (`dev.kreuzberg`), `pluginManagement` with pinned plugin versions.
+- **All binding compilation failures** — fixed private module path (`convert_api`) in generated bindings, missing `From` impls for function return types, glob import conflicts in PyO3/FFI backends, and cbindgen compatibility (removed `const extern fn`, updated to cbindgen 0.29).
+- **Elixir NIF compilation** — added `compilers: [:rustler] ++ Mix.compilers()` to `mix.exs` so Rustler compiles the NIF during `mix compile`.
+- **FFI `from_json`/`to_json` functions** — `htm_conversion_options_from_json`, `htm_conversion_result_to_json`, etc. now generated for all serde-compatible types, fixing Java (Panama FFM) and Go (cgo) bindings.
+- **PHP e2e tests** — fixed function call generation to use correct `HtmlToMarkdownRs::convert()` pattern.
+- **Python `pyproject.toml`** — corrected `module-name` and `python-packages` to match `html-to-markdown` pip package name.
+- **`docs/llms.txt`** `extract_metadata` default corrected from `false` to `true` (#276, partial fix).
+
+### Known Issues
+
+- **WASM type rename** (#303) — `WasmConversionOptions` renamed to `JsConversionOptions` as part of alef codegen unification. This is a breaking change for WASM users upgrading from v3.1.x.
+- **Python silent output cap** (#277) — `convert()` silently truncates output at ~439 KB on certain large HTML inputs. Under investigation.
+
 ## [3.2.0] - 2026-04-14
 
 ### Breaking Changes
@@ -22,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **TypeScript/Node.js**: npm package renamed from `@kreuzberg/html-to-markdown` to `@kreuzberg/html-to-markdown-node`.
 - **PHP**: Namespace changed from `HtmlToMarkdown\` to `Html\To\Markdown\Rs\`. Main class renamed from `HtmlToMarkdown` to `HtmlToMarkdownRs`.
-- **Java**: Maven coordinates changed from `dev.kreuzberg:html-to-markdown` to `dev.kreuzberg.htmltomarkdown:html-to-markdown-rs`.
+- **Java**: Maven coordinates remain `dev.kreuzberg:html-to-markdown`. Internal package namespace changed to `dev.kreuzberg.htmltomarkdown`.
 - **C FFI**: Function prefix changed from `html_to_markdown_` to `htm_` (e.g., `htm_convert`, `htm_last_error_code`). Header moved to `include/html_to_markdown.h`.
 - **C#**: Main class renamed from `HtmlToMarkdownConverter` to `HtmlToMarkdownRs`.
 
