@@ -5,8 +5,8 @@ use std::cell::RefCell;
 use std::ffi::{c_char, CStr, CString};
 
 thread_local! {
-    static LAST_ERROR_CODE: RefCell<i32> = RefCell::new(0);
-    static LAST_ERROR_CONTEXT: RefCell<Option<CString>> = RefCell::new(None);
+    static LAST_ERROR_CODE: RefCell<i32> = const { RefCell::new(0) };
+    static LAST_ERROR_CONTEXT: RefCell<Option<CString>> = const { RefCell::new(None) };
 }
 
 fn set_last_error(code: i32, message: &str) {
@@ -509,7 +509,7 @@ pub unsafe extern "C" fn htm_document_metadata_text_direction(
     }
     let obj = unsafe { &*ptr };
     match &obj.text_direction {
-        Some(val) => Box::into_raw(Box::new(val.clone())),
+        Some(val) => Box::into_raw(Box::new(*val)),
         None => std::ptr::null_mut(),
     }
 }
@@ -788,7 +788,7 @@ pub unsafe extern "C" fn htm_link_metadata_link_type(
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.link_type.clone()))
+    Box::into_raw(Box::new(obj.link_type))
 }
 
 /// Get the `rel` field from a `LinkMetadata`.
@@ -953,7 +953,7 @@ pub unsafe extern "C" fn htm_image_metadata_image_type(
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.image_type.clone()))
+    Box::into_raw(Box::new(obj.image_type))
 }
 
 /// Get the `attributes` field from a `ImageMetadata`.
@@ -999,7 +999,7 @@ pub unsafe extern "C" fn htm_structured_data_data_type(
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.data_type.clone()))
+    Box::into_raw(Box::new(obj.data_type))
 }
 
 /// Get the `raw_json` field from a `StructuredData`.
@@ -1168,7 +1168,7 @@ pub unsafe extern "C" fn htm_conversion_options_heading_style(
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.heading_style.clone()))
+    Box::into_raw(Box::new(obj.heading_style))
 }
 
 /// Get the `list_indent_type` field from a `ConversionOptions`.
@@ -1182,7 +1182,7 @@ pub unsafe extern "C" fn htm_conversion_options_list_indent_type(
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.list_indent_type.clone()))
+    Box::into_raw(Box::new(obj.list_indent_type))
 }
 
 /// Get the `list_indent_width` field from a `ConversionOptions`.
@@ -1359,7 +1359,7 @@ pub unsafe extern "C" fn htm_conversion_options_highlight_style(
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.highlight_style.clone()))
+    Box::into_raw(Box::new(obj.highlight_style))
 }
 
 /// Get the `extract_metadata` field from a `ConversionOptions`.
@@ -1387,7 +1387,7 @@ pub unsafe extern "C" fn htm_conversion_options_whitespace_mode(
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.whitespace_mode.clone()))
+    Box::into_raw(Box::new(obj.whitespace_mode))
 }
 
 /// Get the `strip_newlines` field from a `ConversionOptions`.
@@ -1491,7 +1491,7 @@ pub unsafe extern "C" fn htm_conversion_options_newline_style(
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.newline_style.clone()))
+    Box::into_raw(Box::new(obj.newline_style))
 }
 
 /// Get the `code_block_style` field from a `ConversionOptions`.
@@ -1505,7 +1505,7 @@ pub unsafe extern "C" fn htm_conversion_options_code_block_style(
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.code_block_style.clone()))
+    Box::into_raw(Box::new(obj.code_block_style))
 }
 
 /// Get the `keep_inline_images_in` field from a `ConversionOptions`.
@@ -1638,7 +1638,7 @@ pub unsafe extern "C" fn htm_conversion_options_link_style(
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.link_style.clone()))
+    Box::into_raw(Box::new(obj.link_style))
 }
 
 /// Get the `output_format` field from a `ConversionOptions`.
@@ -1652,7 +1652,7 @@ pub unsafe extern "C" fn htm_conversion_options_output_format(
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.output_format.clone()))
+    Box::into_raw(Box::new(obj.output_format))
 }
 
 /// Get the `include_document_structure` field from a `ConversionOptions`.
@@ -1945,7 +1945,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_heading_style(
     }
     let obj = unsafe { &*ptr };
     match &obj.heading_style {
-        Some(val) => Box::into_raw(Box::new(val.clone())),
+        Some(val) => Box::into_raw(Box::new(*val)),
         None => std::ptr::null_mut(),
     }
 }
@@ -1962,7 +1962,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_list_indent_type(
     }
     let obj = unsafe { &*ptr };
     match &obj.list_indent_type {
-        Some(val) => Box::into_raw(Box::new(val.clone())),
+        Some(val) => Box::into_raw(Box::new(*val)),
         None => std::ptr::null_mut(),
     }
 }
@@ -2175,7 +2175,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_highlight_style(
     }
     let obj = unsafe { &*ptr };
     match &obj.highlight_style {
-        Some(val) => Box::into_raw(Box::new(val.clone())),
+        Some(val) => Box::into_raw(Box::new(*val)),
         None => std::ptr::null_mut(),
     }
 }
@@ -2209,7 +2209,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_whitespace_mode(
     }
     let obj = unsafe { &*ptr };
     match &obj.whitespace_mode {
-        Some(val) => Box::into_raw(Box::new(val.clone())),
+        Some(val) => Box::into_raw(Box::new(*val)),
         None => std::ptr::null_mut(),
     }
 }
@@ -2334,7 +2334,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_newline_style(
     }
     let obj = unsafe { &*ptr };
     match &obj.newline_style {
-        Some(val) => Box::into_raw(Box::new(val.clone())),
+        Some(val) => Box::into_raw(Box::new(*val)),
         None => std::ptr::null_mut(),
     }
 }
@@ -2351,7 +2351,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_code_block_style(
     }
     let obj = unsafe { &*ptr };
     match &obj.code_block_style {
-        Some(val) => Box::into_raw(Box::new(val.clone())),
+        Some(val) => Box::into_raw(Box::new(*val)),
         None => std::ptr::null_mut(),
     }
 }
@@ -2508,7 +2508,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_link_style(
     }
     let obj = unsafe { &*ptr };
     match &obj.link_style {
-        Some(val) => Box::into_raw(Box::new(val.clone())),
+        Some(val) => Box::into_raw(Box::new(*val)),
         None => std::ptr::null_mut(),
     }
 }
@@ -2525,7 +2525,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_output_format(
     }
     let obj = unsafe { &*ptr };
     match &obj.output_format {
-        Some(val) => Box::into_raw(Box::new(val.clone())),
+        Some(val) => Box::into_raw(Box::new(*val)),
         None => std::ptr::null_mut(),
     }
 }
@@ -2652,7 +2652,7 @@ pub unsafe extern "C" fn htm_preprocessing_options_preset(
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.preset.clone()))
+    Box::into_raw(Box::new(obj.preset))
 }
 
 /// Get the `remove_navigation` field from a `PreprocessingOptions`.
@@ -2737,7 +2737,7 @@ pub unsafe extern "C" fn htm_preprocessing_options_update_preset(
     }
     let obj = unsafe { &*ptr };
     match &obj.preset {
-        Some(val) => Box::into_raw(Box::new(val.clone())),
+        Some(val) => Box::into_raw(Box::new(*val)),
         None => std::ptr::null_mut(),
     }
 }
@@ -3768,7 +3768,7 @@ pub unsafe extern "C" fn htm_processing_warning_kind(
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.kind.clone()))
+    Box::into_raw(Box::new(obj.kind))
 }
 
 /// Convert an integer to a `TextDirection` variant. Returns -1 on invalid input.

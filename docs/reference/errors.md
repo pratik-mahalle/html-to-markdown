@@ -2,11 +2,11 @@
 title: "Error Reference"
 ---
 
-# Error Reference
+## Error Reference
 
 All error types thrown by the library across all languages.
 
-## ConversionError
+### ConversionError
 
 Errors that can occur during HTML to Markdown conversion.
 
@@ -21,4 +21,3 @@ Errors that can occur during HTML to Markdown conversion.
 | `Other` | Conversion error: {0} | Generic conversion error |
 
 ---
-

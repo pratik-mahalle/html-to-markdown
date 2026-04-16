@@ -33,4 +33,3 @@ fn test_smoke_simple_paragraph() {
     assert_eq!(content.trim(), r#"Hello World"#, "equals assertion failed");
     assert!(!content.is_empty(), "expected non-empty value");
 }
-

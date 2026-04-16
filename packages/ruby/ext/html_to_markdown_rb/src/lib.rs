@@ -3524,7 +3524,9 @@ impl From<NodeContent> for html_to_markdown_rs::NodeContent {
             NodeContent::DefinitionList => Self::DefinitionList,
             NodeContent::DefinitionItem { term, definition } => Self::DefinitionItem { term, definition },
             NodeContent::RawBlock { format, content } => Self::RawBlock { format, content },
-            NodeContent::MetadataBlock { entries } => Self::MetadataBlock { entries },
+            NodeContent::MetadataBlock { entries } => Self::MetadataBlock {
+                entries: serde_json::from_str(&entries).unwrap_or_default(),
+            },
             NodeContent::Group {
                 label,
                 heading_level,

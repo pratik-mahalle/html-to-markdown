@@ -155,4 +155,3 @@ fn test_twitter_card_tags() {
     assert_eq!(metadata_document_twitter_card_title.trim(), r#"Twitter Card Title"#, "equals assertion failed");
     assert_eq!(metadata_document_twitter_card_description.trim(), r#"Twitter card description."#, "equals assertion failed");
 }
-

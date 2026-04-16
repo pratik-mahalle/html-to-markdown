@@ -135,5 +135,3 @@ def convert(html: str, options: ConversionOptions | None = None) -> _rust.Conver
     """Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images."""
     _rust_options = _to_rust_conversion_options(options)
     return _rust.convert(html, _rust_options)
-
-

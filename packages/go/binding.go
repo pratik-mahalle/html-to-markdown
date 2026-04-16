@@ -1767,4 +1767,3 @@ func (r *ConversionOptionsBuilder) Build() *ConversionOptions {
     ptr := C.htm_conversion_options_builder_build ((*C.HTMConversionOptionsBuilder)(unsafe.Pointer(r)))
     return (*ConversionOptions)(unsafe.Pointer(ptr))
 }
-

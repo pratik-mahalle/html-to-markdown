@@ -2,15 +2,16 @@
 title: "Configuration Reference"
 ---
 
-# Configuration Reference
+## Configuration Reference
 
 This page documents all configuration types and their defaults across all languages.
 
-## TableScan
+### TableScan
 
 Scan results for a table element.
 
 Contains metadata about table structure to determine optimal rendering:
+
 - Row counts for consistency checking
 - Presence of headers, captions, and nested tables
 - Presence of colspan/rowspan (spanning cells)
@@ -28,7 +29,7 @@ Contains metadata about table structure to determine optimal rendering:
 
 ---
 
-## MetadataConfig
+### MetadataConfig
 
 Configuration for metadata extraction granularity.
 
@@ -48,7 +49,7 @@ the HTML-to-Markdown conversion process.
 
 ---
 
-## DocumentMetadata
+### DocumentMetadata
 
 Document-level metadata extracted from `<head>` and top-level elements.
 
@@ -71,7 +72,7 @@ and browsers for document indexing and presentation.
 
 ---
 
-## HtmlMetadata
+### HtmlMetadata
 
 Comprehensive metadata extraction result from HTML document.
 
@@ -88,7 +89,7 @@ suitable for serialization and transmission across language boundaries.
 
 ---
 
-## ConversionOptions
+### ConversionOptions
 
 Main conversion options for HTML to Markdown conversion.
 
@@ -137,7 +138,7 @@ Use `ConversionOptions.builder()` to construct, or `the default constructor` for
 
 ---
 
-## InlineImageConfig
+### InlineImageConfig
 
 Inline image configuration that specifies contexts where images remain as markdown links.
 
@@ -150,7 +151,7 @@ names where inline images should be preserved.
 
 ---
 
-## PreprocessingOptions
+### PreprocessingOptions
 
 HTML preprocessing options for document cleanup before conversion.
 
@@ -163,7 +164,7 @@ HTML preprocessing options for document cleanup before conversion.
 
 ---
 
-## ConversionResult
+### ConversionResult
 
 The primary result of HTML conversion and extraction.
 
@@ -181,7 +182,7 @@ metadata, extracted tables, images, and processing warnings.
 
 ---
 
-## TableGrid
+### TableGrid
 
 A structured table grid with cell-level data including spans.
 
@@ -192,4 +193,3 @@ A structured table grid with cell-level data including spans.
 | `cells` | `list[GridCell]` | `[]` | All cells in the table (may be fewer than rows*cols due to spans). |
 
 ---
-

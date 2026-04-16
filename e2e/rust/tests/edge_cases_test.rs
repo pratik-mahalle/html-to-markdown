@@ -207,4 +207,3 @@ fn test_xss_svg_nested_script_stripped() {
     assert!(format!("{:?}", content).contains(r#"Before SVG"#), "expected to contain: {}", r#"Before SVG"#);
     assert!(format!("{:?}", content).contains(r#"After SVG"#), "expected to contain: {}", r#"After SVG"#);
 }
-

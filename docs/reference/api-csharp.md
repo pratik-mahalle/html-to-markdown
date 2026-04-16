@@ -2,11 +2,11 @@
 title: "C# API Reference"
 ---
 
-# C# API Reference <span class="version-badge">v3.2.0</span>
+## C# API Reference <span class="version-badge">v3.2.0</span>
 
-## Functions
+### Functions
 
-### TableTotalColumns()
+#### TableTotalColumns()
 
 Calculate total columns in a table.
 
@@ -35,7 +35,7 @@ public static nuint TableTotalColumns(NodeHandle nodeHandle, Parser parser, DomC
 
 ---
 
-### HandleTable()
+#### HandleTable()
 
 Convert an entire table element to Markdown.
 
@@ -67,7 +67,7 @@ public static void HandleTable(NodeHandle nodeHandle, Parser parser, string outp
 
 ---
 
-### HandleCaption()
+#### HandleCaption()
 
 Handles caption elements within tables.
 
@@ -97,7 +97,7 @@ public static void HandleCaption(NodeHandle nodeHandle, Parser parser, string ou
 
 ---
 
-### GetColspan()
+#### GetColspan()
 
 Get colspan attribute value from an element.
 
@@ -125,7 +125,7 @@ public static nuint GetColspan(NodeHandle nodeHandle, Parser parser)
 
 ---
 
-### GetColspanRowspan()
+#### GetColspanRowspan()
 
 Get both colspan and rowspan in a single lookup.
 
@@ -152,7 +152,7 @@ public static UsizeUsize GetColspanRowspan(NodeHandle nodeHandle, Parser parser)
 
 ---
 
-### CollectTableCells()
+#### CollectTableCells()
 
 Collect table cells (td/th) from a row element.
 
@@ -178,7 +178,7 @@ public static void CollectTableCells(NodeHandle nodeHandle, Parser parser, DomCo
 
 ---
 
-### ConvertTableCell()
+#### ConvertTableCell()
 
 Convert a table cell (td or th) to Markdown format.
 
@@ -208,7 +208,7 @@ public static void ConvertTableCell(NodeHandle nodeHandle, Parser parser, string
 
 ---
 
-### AppendLayoutRow()
+#### AppendLayoutRow()
 
 Append a layout table row as a list item.
 
@@ -237,7 +237,7 @@ public static void AppendLayoutRow(NodeHandle rowHandle, Parser parser, string o
 
 ---
 
-### ConvertTableRow()
+#### ConvertTableRow()
 
 Convert a table row (tr) to Markdown format.
 
@@ -274,11 +274,12 @@ public static void ConvertTableRow(NodeHandle nodeHandle, Parser parser, string 
 
 ---
 
-### ScanTable()
+#### ScanTable()
 
 Scan a table element for structural metadata.
 
 Analyzes the table to determine characteristics that influence rendering:
+
 - Whether to render as a Markdown table or layout table
 - If spanning cells are present
 - If the table has semantic meaning (headers, captions)
@@ -302,11 +303,12 @@ public static TableScan ScanTable(NodeHandle nodeHandle, Parser parser, DomConte
 
 ---
 
-### DispatchTableHandler()
+#### DispatchTableHandler()
 
 Dispatches table element handling to the main convert_table function.
 
-# Usage in converter.rs
+## Usage in converter.rs
+
 ```text
 if "table" == tag_name {
     crate::converter::block::table::handle_table(
@@ -354,7 +356,8 @@ This function is designed to be called from the main walk_node function
 in converter.rs once the module is refactored. It returns `true` if the
 element was handled, `false` otherwise.
 
-# Usage in converter.rs
+## Usage in converter.rs
+
 ```text
 if crate::converter::block::dispatch_block_handler(
     &tag_name,
@@ -424,7 +427,7 @@ public static void Handle(string tagName, NodeHandle nodeHandle, Parser parser, 
 
 ---
 
-### DispatchFormHandler()
+#### DispatchFormHandler()
 
 Dispatches form element handling to the appropriate handler.
 
@@ -432,9 +435,10 @@ This function routes form-related HTML elements to their specialized handlers
 based on tag name. It is designed to be called from the main `walk_node`
 function in `converter.rs`.
 
-# Routing Table
+## Routing Table
 
 The following tag routes are supported:
+
 - **Containers**: form, fieldset, legend, label
 - **Inputs**: input, textarea, select, option, optgroup, button
 - **Measurements**: progress, meter, output, datalist
@@ -473,6 +477,7 @@ public static bool DispatchFormHandler(string tagName, NodeHandle nodeHandle, Pa
 Handle a `<blockquote>` element and convert to Markdown.
 
 This handler processes blockquote elements including:
+
 - Converting inline blockquotes by processing children as inline
 - Handling nested blockquotes via blockquote_depth tracking
 - Processing citation URLs from cite attribute
@@ -503,11 +508,12 @@ public static void HandleBlockquote(NodeHandle nodeHandle, HtmlTag tag, Parser p
 
 ---
 
-### HandleCode()
+#### HandleCode()
 
 Handle an inline `<code>` element and convert to Markdown.
 
 This handler processes inline code elements including:
+
 - Extracting code content and applying backtick delimiters
 - Handling backticks in content by using multiple delimiters
 - Invoking visitor callbacks when the visitor feature is enabled
@@ -537,11 +543,12 @@ public static void HandleCode(NodeHandle nodeHandle, HtmlTag tag, Parser parser,
 
 ---
 
-### HandlePre()
+#### HandlePre()
 
 Handle a `<pre>` element and convert to Markdown.
 
 This handler processes code block elements including:
+
 - Extracting language information from class attributes
 - Processing whitespace and dedenting code content
 - Supporting multiple code block styles (indented, backticks, tildes)
@@ -572,11 +579,12 @@ public static void HandlePre(NodeHandle nodeHandle, HtmlTag tag, Parser parser, 
 
 ---
 
-### HandleGraphic()
+#### HandleGraphic()
 
 Handle a `<graphic>` element and convert to Markdown.
 
 This handler processes graphic elements including:
+
 - Extracting source from url, href, xlink:href, or src attributes
 - Using alt attribute, with fallback to filename
 - Collecting metadata when the metadata feature is enabled
@@ -607,11 +615,12 @@ public static void HandleGraphic(NodeHandle nodeHandle, HtmlTag tag, Parser pars
 
 ---
 
-### HandleImg()
+#### HandleImg()
 
 Handle an `<img>` element and convert to Markdown.
 
 This handler processes image elements including:
+
 - Extracting src, alt, and title attributes
 - Collecting metadata when the metadata feature is enabled
 - Handling inline data URIs when the inline-images feature is enabled
@@ -642,11 +651,12 @@ public static void HandleImg(NodeHandle nodeHandle, HtmlTag tag, Parser parser, 
 
 ---
 
-### HandleLink()
+#### HandleLink()
 
 Handle an `<a>` (link) element and convert to Markdown.
 
 This handler processes link elements including:
+
 - Extracting href and title attributes
 - Detecting autolinks (where text equals href)
 - Handling links that contain heading elements
@@ -679,7 +689,7 @@ public static void HandleLink(NodeHandle nodeHandle, HtmlTag tag, Parser parser,
 
 ---
 
-### DispatchInlineHandler()
+#### DispatchInlineHandler()
 
 Dispatches inline element handling to the appropriate handler.
 
@@ -687,7 +697,7 @@ This function routes inline HTML elements to their specialized handlers
 based on tag name. It is designed to be called from the main `walk_node`
 function in `converter.rs`.
 
-# Routing Table
+## Routing Table
 
 The following tag routes are supported:
 
@@ -700,14 +710,15 @@ The following tag routes are supported:
 | `mark`, `del`, `s`, `ins`, `u`, `small`, `sub`, `sup`, `var`, `dfn`, `abbr`, `span` | semantic | Semantic formatting |
 | `ruby`, `rb`, `rt`, `rp`, `rtc` | ruby | Ruby annotations (East Asian typography) |
 
-# Return Value
+## Return Value
 
 Returns `true` if the tag was recognized and handled, `false` otherwise.
 This allows the caller to distinguish between:
+
 - Handled inline elements (return `true`)
 - Unhandled elements (return `false`) that should be processed as text or passed through
 
-# Usage in converter.rs
+## Usage in converter.rs
 
 ```text
 if crate::converter::inline::dispatch_inline_handler(
@@ -725,24 +736,26 @@ if crate::converter::inline::dispatch_inline_handler(
 // Element was not handled, process as default inline element
 ```
 
-# Parameters
+## Parameters
 
-* `tag_name` - The normalized HTML tag name (lowercase)
-* `node_handle` - The DOM node handle from the parser
-* `parser` - Reference to the tl HTML parser
-* `output` - Output buffer to write converted content to
-* `options` - Conversion configuration options
-* `ctx` - Processing context with state tracking
-* `depth` - Current DOM tree depth for recursion tracking
-* `dom_ctx` - DOM context for accessing tree structure
+- `tag_name` - The normalized HTML tag name (lowercase)
+- `node_handle` - The DOM node handle from the parser
+- `parser` - Reference to the tl HTML parser
+- `output` - Output buffer to write converted content to
+- `options` - Conversion configuration options
+- `ctx` - Processing context with state tracking
+- `depth` - Current DOM tree depth for recursion tracking
+- `dom_ctx` - DOM context for accessing tree structure
 
 For `<strong>Bold text</strong>`, the dispatcher:
+
 1. Recognizes "strong" tag
 2. Routes to emphasis handler
 3. Returns `true`
 4. Emphasis handler outputs `**Bold text**` to output buffer
 
 For `<span>Normal text</span>`, the dispatcher:
+
 1. Fails to recognize "span" tag
 2. Returns `false`
 3. Caller processes as default inline content
@@ -778,6 +791,7 @@ Calculate indentation level for list item continuations.
 Returns the number of 4-space indent groups needed for list continuations.
 
 List continuations (block elements inside list items) need special indentation:
+
 - Base indentation: (depth - 1) groups (for the nesting level)
 - Content indentation: depth groups (for the list item content)
 - Combined formula: (2 * depth - 1) groups of 4 spaces each
@@ -799,7 +813,7 @@ public static nuint CalculateListContinuationIndent(nuint depth)
 
 ---
 
-### IsLooseList()
+#### IsLooseList()
 
 Check if a list (ul or ol) is "loose".
 
@@ -826,7 +840,7 @@ public static bool IsLooseList(NodeHandle nodeHandle, Parser parser, DomContext 
 
 ---
 
-### AddListContinuationIndent()
+#### AddListContinuationIndent()
 
 Add list continuation indentation to output.
 
@@ -853,7 +867,7 @@ public static void AddListContinuationIndent(string output, nuint listDepth, boo
 
 ---
 
-### ContinuationIndentString()
+#### ContinuationIndentString()
 
 Calculate the indentation string for list continuations based on depth and options.
 
@@ -875,11 +889,12 @@ public static string? ContinuationIndentString(nuint listDepth, ConversionOption
 
 ---
 
-### AddListLeadingSeparator()
+#### AddListLeadingSeparator()
 
 Add appropriate leading separator before a list.
 
 Lists need different separators depending on context:
+
 - In table cells: <br> tag if there's already content
 - Outside lists: blank line (\n\n) if needed
 - Inside list items: blank line before nested list
@@ -902,7 +917,7 @@ public static void AddListLeadingSeparator(string output, Context ctx)
 
 ---
 
-### AddNestedListTrailingSeparator()
+#### AddNestedListTrailingSeparator()
 
 Add appropriate trailing separator after a nested list.
 
@@ -927,7 +942,7 @@ public static void AddNestedListTrailingSeparator(string output, Context ctx)
 
 ---
 
-### CalculateListNestingDepth()
+#### CalculateListNestingDepth()
 
 Calculate the nesting depth for a list.
 
@@ -952,7 +967,7 @@ public static nuint CalculateListNestingDepth(Context ctx)
 
 ---
 
-### IsListItem()
+#### IsListItem()
 
 Check if a node is a list item element.
 
@@ -975,7 +990,7 @@ public static bool IsListItem(NodeHandle nodeHandle, Parser parser, DomContext d
 
 ---
 
-### ProcessListChildren()
+#### ProcessListChildren()
 
 Process a list's children, tracking which items had block elements.
 
@@ -1009,13 +1024,13 @@ public static void ProcessListChildren(NodeHandle nodeHandle, Parser parser, str
 
 ---
 
-### DispatchListHandler()
+#### DispatchListHandler()
 
 Dispatches list element handling to the appropriate handler.
 
 Returns `true` if the element was handled, `false` otherwise.
 
-# Supported Elements
+## Supported Elements
 
 - `ol`: Ordered list - routed to `ordered.handle`
 - `ul`: Unordered list - routed to `unordered.handle`
@@ -1075,7 +1090,7 @@ public static string ConvertHtml(string html, ConversionOptions options)
 
 ---
 
-### ConvertHtmlWithVisitor()
+#### ConvertHtmlWithVisitor()
 
 Converts HTML to Markdown with a custom visitor for callbacks during traversal.
 
@@ -1103,7 +1118,7 @@ public static string ConvertHtmlWithVisitor(string html, ConversionOptions optio
 
 ---
 
-### DispatchMediaHandler()
+#### DispatchMediaHandler()
 
 Dispatches media element handling to the appropriate handler.
 
@@ -1111,7 +1126,7 @@ This function routes media-related HTML elements to their specialized handlers
 based on tag name. It is designed to be called from the main `walk_node`
 function in `converter.rs`.
 
-# Routing Table
+## Routing Table
 
 The following tag routes are supported:
 
@@ -1124,7 +1139,7 @@ The following tag routes are supported:
 | `svg` | svg | SVG image elements |
 | `math` | svg | MathML elements |
 
-# Return Value
+## Return Value
 
 Returns `true` if the tag was recognized and handled, `false` otherwise.
 
@@ -1157,6 +1172,7 @@ public static bool DispatchMediaHandler(string tagName, NodeHandle nodeHandle, P
 Extract plain text from a parsed DOM tree.
 
 Walks the tree collecting visible text with structural whitespace:
+
 - Block elements get blank-line separation
 - `<br>` becomes a newline, `<hr>` a blank line
 - `<pre>` preserves internal whitespace
@@ -1184,7 +1200,7 @@ public static string ExtractPlainText(VDom dom, Parser parser, ConversionOptions
 
 ---
 
-### HandleDfn()
+#### HandleDfn()
 
 Handles the `<dfn>` element.
 
@@ -1192,7 +1208,7 @@ A dfn element marks a term that is being defined. The content represents
 the term, and its definition would typically appear in surrounding context.
 It is rendered as emphasized (italic) text.
 
-# Behavior
+## Behavior
 
 - Content is collected from children
 - Non-empty content is wrapped with the configured emphasis symbol (default: `*`)
@@ -1230,7 +1246,7 @@ An abbr element marks an abbreviation or acronym. The `title` attribute
 provides the expansion of the abbreviation, which is appended in parentheses
 if present.
 
-# Behavior
+## Behavior
 
 - Content is collected from children
 - Non-empty content is output as-is
@@ -1271,7 +1287,7 @@ and human-readable content in their text. For Markdown purposes, we output
 only the human-readable text content, as Markdown doesn't have a way to
 preserve machine-readable metadata.
 
-# Behavior
+## Behavior
 
 - Content is extracted from children and output as-is
 - Attributes (datetime, value) are not rendered in Markdown output
@@ -1307,7 +1323,7 @@ Handles the `<cite>` element.
 A cite element marks the title of a cited work (book, article, website, etc.).
 It is rendered as emphasized (italic) text in block mode, or as plain text in inline mode.
 
-# Behavior
+## Behavior
 
 - **Block mode**: Content is wrapped with emphasis markers (default: `*`)
 - **Inline mode**: Content is output as-is without formatting
@@ -1344,14 +1360,15 @@ A q element marks an inline quotation. In Markdown, it is rendered as
 quoted text enclosed in double quotes. Backslashes and quotes within
 the content are escaped.
 
-# Behavior
+## Behavior
 
 - **Block mode**: Content is wrapped in escaped double quotes: `"content"`
 - **Inline mode**: Content is output as-is without quotes
 
-# Escaping
+## Escaping
 
 Internal backslashes and double quotes are escaped:
+
 - `\` → `\\`
 - `"` → `\"`
 
@@ -1387,7 +1404,7 @@ An hgroup element groups related headings together (e.g., a title and subtitle).
 In Markdown, we simply process all children sequentially, allowing nested
 headings to maintain their individual formatting.
 
-# Behavior
+## Behavior
 
 - Children are processed sequentially in the current context
 - No special formatting is applied at the hgroup level
@@ -1424,7 +1441,7 @@ A definition list contains terms and their definitions. Terms and definitions
 are output as plain blocks without Pandoc-style colon syntax, since standard
 Markdown and GFM do not support definition lists.
 
-# Behavior
+## Behavior
 
 - **Inline mode**: Children are processed inline without block spacing
 - **Block mode**: Content is collected and wrapped with proper spacing
@@ -1460,7 +1477,7 @@ Handles the `<dt>` element.
 A dt element contains a term being defined. Terms are output on their own line,
 with definitions following on subsequent lines.
 
-# Behavior
+## Behavior
 
 - **Inline mode**: Content is output as-is
 - **Block mode**: Content is followed by a newline
@@ -1496,7 +1513,7 @@ Handles the `<dd>` element.
 A dd element contains the definition for a term. It is output as a plain
 block since standard Markdown and GFM do not support definition list syntax.
 
-# Behavior
+## Behavior
 
 - **Inline mode**: Content is output as-is
 - **Block mode**: Content is output as a block
@@ -1532,7 +1549,7 @@ Handles the `<menu>` element.
 A menu element is a semantic list, typically used for command menus or
 navigation. It is rendered as an unordered list with dashes.
 
-# Behavior
+## Behavior
 
 - **Inline mode**: Children are processed inline without list formatting
 - **Block mode**: Content is rendered as an unordered list
@@ -1570,17 +1587,18 @@ Handles the `<figure>` element.
 A figure element contains content (typically images) and optionally a figcaption.
 The handler collects all content and cleans up extra line breaks.
 
-# Behavior
+## Behavior
 
 - **Inline mode**: Children are processed inline without block spacing
 - **Block mode**: Content is collected, line breaks normalized, and wrapped with blank lines
 - **Image normalization**: Removes extra spaces before `![` to improve Markdown formatting
 
-# Implementation Details
+## Implementation Details
 
 The handler performs the following on the collected content:
+
 1. Normalizes newline + image sequences: `\n![` → `![`
-2. Normalizes space + image sequences: ` ![` → `![`
+2. Normalizes space + image sequences: `![` → `![`
 3. Trims the final content and wraps it with blank lines
 
 **Signature:**
@@ -1614,15 +1632,16 @@ Handles the `<figcaption>` element.
 A figcaption element contains text that describes or supplements the figure.
 It is rendered as emphasized (italic) text to distinguish it from regular content.
 
-# Behavior
+## Behavior
 
 - Content is collected and trimmed
 - Non-empty content is wrapped in `*text*` (emphasis) markers
 - Proper spacing is maintained around the caption
 
-# Implementation Details
+## Implementation Details
 
 The handler:
+
 1. Collects and processes all children
 2. Checks for existing output and adds spacing as needed
 3. Wraps content in emphasis markers: `*caption*`
@@ -1660,7 +1679,7 @@ A details element represents a disclosure widget that can be toggled
 to show/hide additional content. In Markdown, it's rendered as a block
 with all content visible.
 
-# Behavior
+## Behavior
 
 - **Inline mode**: Children are processed inline without block spacing
 - **Block mode**: Content is collected and wrapped with proper blank-line spacing
@@ -1697,15 +1716,16 @@ Handles the `<summary>` element.
 A summary element contains a caption for a details element.
 It is rendered as strong (bold) text to distinguish it from regular content.
 
-# Behavior
+## Behavior
 
 - **Inline mode**: Content is rendered inline without emphasis
 - **Block mode**: Content is wrapped in strong markers (e.g., `**text**`)
 - Uses the configured strong/emphasis symbol from ConversionOptions
 
-# Implementation Details
+## Implementation Details
 
 The handler:
+
 1. Creates a context with `in_strong: true` for nested formatting
 2. Collects content from all children
 3. Wraps non-empty content in strong markers (repeated twice per Markdown spec)
@@ -1741,15 +1761,16 @@ Handles the `<dialog>` element.
 A dialog element represents a modal dialog box. In Markdown, it's rendered
 as a block container with content visible.
 
-# Behavior
+## Behavior
 
 - **Inline mode**: Children are processed inline without block spacing
 - **Block mode**: Content is processed and wrapped with proper blank lines
 - Trailing whitespace is removed from collected content
 
-# Implementation Details
+## Implementation Details
 
 The handler:
+
 1. Marks the position in output before processing children
 2. Processes all children in the normal context
 3. Removes trailing spaces and tabs from the output
@@ -1787,9 +1808,10 @@ This function routes semantic HTML5 elements to their specialized handlers
 based on tag name. It is designed to be called from the main `walk_node`
 function in `converter.rs`.
 
-# Routing Table
+## Routing Table
 
 The following tag routes are supported:
+
 - **Sectioning**: article, section, nav, aside, header, footer, main
 - **Figure**: figure, figcaption
 - **Summary**: details, summary, dialog
@@ -1850,7 +1872,7 @@ public static string EscapeLinkLabel(string text)
 
 ---
 
-### EscapeMalformedAngleBrackets()
+#### EscapeMalformedAngleBrackets()
 
 Escape malformed angle brackets in markdown output.
 
@@ -1858,6 +1880,7 @@ Markdown uses `<...>` for automatic links. Angle brackets that don't form valid
 link syntax should be escaped as `&lt;` to prevent parser confusion.
 
 A valid tag must have:
+
 - `<!` followed by `-` or alphabetic character (for comments/declarations)
 - `</` followed by alphabetic character (for closing tags)
 - `<?` (for processing instructions)
@@ -1880,7 +1903,7 @@ public static Str EscapeMalformedAngleBrackets(string input)
 
 ---
 
-### TrimLineEndWhitespace()
+#### TrimLineEndWhitespace()
 
 Remove trailing spaces/tabs from every line while preserving newlines.
 
@@ -1901,7 +1924,7 @@ public static void TrimLineEndWhitespace(string output)
 
 ---
 
-### TruncateAtCharBoundary()
+#### TruncateAtCharBoundary()
 
 Truncate a string at a valid UTF-8 boundary.
 
@@ -1923,7 +1946,7 @@ public static void TruncateAtCharBoundary(string value, nuint maxLen)
 
 ---
 
-### NormalizeHeadingText()
+#### NormalizeHeadingText()
 
 Normalize heading text by replacing newlines and extra whitespace.
 
@@ -1947,7 +1970,7 @@ public static Str NormalizeHeadingText(string text)
 
 ---
 
-### DedentCodeBlock()
+#### DedentCodeBlock()
 
 Remove common leading whitespace from all lines in a code block.
 
@@ -1971,12 +1994,12 @@ public static string DedentCodeBlock(string content)
 
 ---
 
-### FloorCharBoundary()
+#### FloorCharBoundary()
 
 Returns the largest valid char boundary index at or before `index`.
 
 If `index` is already a char boundary it is returned unchanged.
-Otherwise it walks backwards to find one.  Returns 0 if no boundary
+Otherwise it walks backwards to find one. Returns 0 if no boundary
 is found before `index`.
 
 **Signature:**
@@ -1997,12 +2020,13 @@ public static nuint FloorCharBoundary(string s, nuint index)
 
 ---
 
-### HandleVisitorElementStart()
+#### HandleVisitorElementStart()
 
 Handles visitor callback for element start (before processing).
 
 This function is called when entering an element during tree traversal,
 before the element's content is processed. The visitor can:
+
 - Continue with normal processing (Continue)
 - Skip the element entirely (Skip)
 - Provide custom output to replace the element (Custom)
@@ -2011,6 +2035,7 @@ before the element's content is processed. The visitor can:
 **Returns:**
 
 `VisitAction` enum indicating what should happen next:
+
 - `VisitAction.Continue` - Process element normally
 - `VisitAction.Skip` - Skip element, don't process or call visit_element_end
 - `VisitAction.Custom(output)` - Use custom output, skip normal processing
@@ -2041,12 +2066,13 @@ public static VisitAction HandleVisitorElementStart(VisitorHandle visitorHandle,
 
 ---
 
-### HandleVisitorElementEnd()
+#### HandleVisitorElementEnd()
 
 Handles visitor callback for element end (after processing).
 
 This function is called when exiting an element after its content has been processed.
 The visitor can:
+
 - Accept the output normally (Continue)
 - Replace the output with custom content (Custom)
 - Remove the output entirely (Skip)
@@ -2078,7 +2104,7 @@ public static void HandleVisitorElementEnd(VisitorHandle visitorHandle, string t
 
 ---
 
-### Escape()
+#### Escape()
 
 Escape Markdown special characters in text.
 
@@ -2107,7 +2133,7 @@ public static Str Escape(string text, bool escapeMisc, bool escapeAsterisks, boo
 
 ---
 
-### Chomp()
+#### Chomp()
 
 Extract boundary whitespace from text (chomp).
 
@@ -2134,7 +2160,7 @@ public static StrStrStr Chomp(string text)
 
 ---
 
-### NormalizeWhitespace()
+#### NormalizeWhitespace()
 
 Normalize whitespace by collapsing consecutive spaces and tabs.
 
@@ -2163,7 +2189,7 @@ public static string NormalizeWhitespace(string text)
 
 ---
 
-### NormalizeWhitespaceCow()
+#### NormalizeWhitespaceCow()
 
 Normalize whitespace in text, returning borrowed or owned result as needed.
 
@@ -2194,11 +2220,12 @@ public static Str NormalizeWhitespaceCow(string text)
 
 ---
 
-### DecodeHtmlEntities()
+#### DecodeHtmlEntities()
 
 Decode common HTML entities.
 
 Decodes the most common HTML entities to their character equivalents:
+
 - `&quot;` → `"`
 - `&apos;` → `'`
 - `&lt;` → `<`
@@ -2226,7 +2253,7 @@ public static string DecodeHtmlEntities(string text)
 
 ---
 
-### DecodeHtmlEntitiesCow()
+#### DecodeHtmlEntitiesCow()
 
 Decode HTML entities in text, returning borrowed or owned result as needed.
 
@@ -2235,6 +2262,7 @@ entities are present, and only allocating a new string when entity decoding
 is necessary.
 
 Decodes common HTML entities like:
+
 - `&quot;` → `"`
 - `&apos;` → `'`
 - `&lt;` → `<`
@@ -2262,7 +2290,7 @@ public static Str DecodeHtmlEntitiesCow(string text)
 
 ---
 
-### Underline()
+#### Underline()
 
 Underline text with a character.
 
@@ -2284,7 +2312,7 @@ public static string Underline(string text, string padChar)
 
 ---
 
-### Indent()
+#### Indent()
 
 Indent text with a string prefix.
 
@@ -2307,7 +2335,7 @@ public static string Indent(string text, nuint level, string indentStr)
 
 ---
 
-### BuildDocumentStructure()
+#### BuildDocumentStructure()
 
 Build a `DocumentStructure` from an already-parsed `tl.VDom`.
 
@@ -2332,18 +2360,19 @@ public static DocumentStructure BuildDocumentStructure(VDom dom)
 
 ---
 
-### BuildNodeContext()
+#### BuildNodeContext()
 
 Build a `NodeContext` from current parsing state.
 
 Creates a complete `NodeContext` suitable for passing to visitor callbacks.
 This function collects metadata about the current node from various sources:
+
 - Tag name and attributes from the HTML element
 - Depth and parent information from the DOM tree
 - Index among siblings for positional awareness
 - Inline/block classification
 
-# Parameters
+## Parameters
 
 - `node_type`: Coarse-grained classification (Link, Image, Heading, etc.)
 - `tag_name`: Raw HTML tag name (e.g., "div", "h1", "custom-element")
@@ -2357,9 +2386,10 @@ This function collects metadata about the current node from various sources:
 
 A fully populated `NodeContext` ready for visitor dispatch.
 
-# Performance
+## Performance
 
 This function performs minimal allocations:
+
 - Clones `tag_name` (typically 2-10 bytes)
 - Clones `parent_tag` if present (typically 2-10 bytes)
 - Clones the attributes `BTreeMap` (heap allocation if non-empty)
@@ -2418,7 +2448,7 @@ public static ConversionResult Convert(string html, ConversionOptions? options =
 
 ---
 
-### ConvertWithVisitor()
+#### ConvertWithVisitor()
 
 Internal: convert with visitor support. Used by FFI crate.
 Will be removed when convert() accepts visitor parameter directly.
@@ -2444,7 +2474,7 @@ public static string ConvertWithVisitor(string html, ConversionOptions? options 
 
 ---
 
-### ConversionOptionsFromJson()
+#### ConversionOptionsFromJson()
 
 Parse JSON string into `ConversionOptions`.
 
@@ -2478,7 +2508,7 @@ public static ConversionOptions ConversionOptionsFromJson(string json)
 
 ---
 
-### ConversionOptionsUpdateFromJson()
+#### ConversionOptionsUpdateFromJson()
 
 Parse JSON string into partial `ConversionOptions` update.
 
@@ -2512,7 +2542,7 @@ public static ConversionOptionsUpdate ConversionOptionsUpdateFromJson(string jso
 
 ---
 
-### InlineImageConfigFromJson()
+#### InlineImageConfigFromJson()
 
 Parse JSON string into `InlineImageConfig` (requires `inline-images` feature).
 
@@ -2546,7 +2576,7 @@ public static InlineImageConfig InlineImageConfigFromJson(string json)
 
 ---
 
-### MetadataConfigFromJson()
+#### MetadataConfigFromJson()
 
 Parse JSON string into `MetadataConfig` (requires `metadata` feature).
 
@@ -2580,9 +2610,9 @@ public static MetadataConfig MetadataConfigFromJson(string json)
 
 ---
 
-## Types
+### Types
 
-### ConversionOptions
+#### ConversionOptions
 
 Main conversion options for HTML to Markdown conversion.
 
@@ -2629,9 +2659,9 @@ Use `ConversionOptions.builder()` to construct, or `the default constructor` for
 | `CaptureSvg` | `bool` | `false` | Capture SVG elements as images. |
 | `InferDimensions` | `bool` | `true` | Infer image dimensions from data. |
 
-#### Methods
+##### Methods
 
-##### CreateDefault()
+###### CreateDefault()
 
 **Signature:**
 
@@ -2639,7 +2669,7 @@ Use `ConversionOptions.builder()` to construct, or `the default constructor` for
 public ConversionOptions CreateDefault()
 ```
 
-##### Builder()
+###### Builder()
 
 Create a new builder with default values.
 
@@ -2649,7 +2679,7 @@ Create a new builder with default values.
 public ConversionOptionsBuilder Builder()
 ```
 
-##### ApplyUpdate()
+###### ApplyUpdate()
 
 Apply a partial update to these conversion options.
 
@@ -2659,7 +2689,7 @@ Apply a partial update to these conversion options.
 public void ApplyUpdate(ConversionOptionsUpdate update)
 ```
 
-##### FromUpdate()
+###### FromUpdate()
 
 Create from a partial update, applying to defaults.
 
@@ -2669,7 +2699,7 @@ Create from a partial update, applying to defaults.
 public ConversionOptions FromUpdate(ConversionOptionsUpdate update)
 ```
 
-##### From()
+###### From()
 
 **Signature:**
 
@@ -2680,7 +2710,7 @@ public ConversionOptions From(ConversionOptionsUpdate update)
 
 ---
 
-### ConversionResult
+#### ConversionResult
 
 The primary result of HTML conversion and extraction.
 
@@ -2699,7 +2729,7 @@ metadata, extracted tables, images, and processing warnings.
 
 ---
 
-### Context
+#### Context
 
 Conversion context that tracks state during HTML to Markdown conversion.
 
@@ -2709,15 +2739,15 @@ about the current position in the document tree, nesting levels, and enabled fea
 
 ---
 
-### ConversionOptionsBuilder
+#### ConversionOptionsBuilder
 
 Builder for `ConversionOptions`.
 
 All fields start with default values. Call `.build()` to produce the final options.
 
-#### Methods
+##### Methods
 
-##### StripTags()
+###### StripTags()
 
 Set the list of HTML tag names whose content is stripped from output.
 
@@ -2727,7 +2757,7 @@ Set the list of HTML tag names whose content is stripped from output.
 public ConversionOptionsBuilder StripTags(List<string> tags)
 ```
 
-##### PreserveTags()
+###### PreserveTags()
 
 Set the list of HTML tag names that are preserved verbatim in output.
 
@@ -2737,7 +2767,7 @@ Set the list of HTML tag names that are preserved verbatim in output.
 public ConversionOptionsBuilder PreserveTags(List<string> tags)
 ```
 
-##### KeepInlineImagesIn()
+###### KeepInlineImagesIn()
 
 Set the list of HTML tag names whose `<img>` children are kept inline.
 
@@ -2747,7 +2777,7 @@ Set the list of HTML tag names whose `<img>` children are kept inline.
 public ConversionOptionsBuilder KeepInlineImagesIn(List<string> tags)
 ```
 
-##### Preprocessing()
+###### Preprocessing()
 
 Set the pre-processing options applied to the HTML before conversion.
 
@@ -2757,7 +2787,7 @@ Set the pre-processing options applied to the HTML before conversion.
 public ConversionOptionsBuilder Preprocessing(PreprocessingOptions preprocessing)
 ```
 
-##### Build()
+###### Build()
 
 Build the final `ConversionOptions`.
 
@@ -2770,13 +2800,13 @@ public ConversionOptions Build()
 
 ---
 
-### DjotRenderer
+#### DjotRenderer
 
 Renderer for Djot lightweight markup output.
 
-#### Methods
+##### Methods
 
-##### Emphasis()
+###### Emphasis()
 
 **Signature:**
 
@@ -2784,7 +2814,7 @@ Renderer for Djot lightweight markup output.
 public string Emphasis(string content)
 ```
 
-##### Strong()
+###### Strong()
 
 **Signature:**
 
@@ -2792,7 +2822,7 @@ public string Emphasis(string content)
 public string Strong(string content, string symbol)
 ```
 
-##### Strikethrough()
+###### Strikethrough()
 
 **Signature:**
 
@@ -2800,7 +2830,7 @@ public string Strong(string content, string symbol)
 public string Strikethrough(string content)
 ```
 
-##### Highlight()
+###### Highlight()
 
 **Signature:**
 
@@ -2808,7 +2838,7 @@ public string Strikethrough(string content)
 public string Highlight(string content)
 ```
 
-##### Inserted()
+###### Inserted()
 
 **Signature:**
 
@@ -2816,7 +2846,7 @@ public string Highlight(string content)
 public string Inserted(string content)
 ```
 
-##### Subscript()
+###### Subscript()
 
 **Signature:**
 
@@ -2824,7 +2854,7 @@ public string Inserted(string content)
 public string Subscript(string content, string customSymbol)
 ```
 
-##### Superscript()
+###### Superscript()
 
 **Signature:**
 
@@ -2832,7 +2862,7 @@ public string Subscript(string content, string customSymbol)
 public string Superscript(string content, string customSymbol)
 ```
 
-##### SpanWithAttributes()
+###### SpanWithAttributes()
 
 **Signature:**
 
@@ -2840,7 +2870,7 @@ public string Superscript(string content, string customSymbol)
 public string SpanWithAttributes(string content, List<string> classes, string id)
 ```
 
-##### DivWithAttributes()
+###### DivWithAttributes()
 
 **Signature:**
 
@@ -2848,7 +2878,7 @@ public string SpanWithAttributes(string content, List<string> classes, string id
 public string DivWithAttributes(string content, List<string> classes)
 ```
 
-##### IsDjot()
+###### IsDjot()
 
 **Signature:**
 
@@ -2859,7 +2889,7 @@ public bool IsDjot()
 
 ---
 
-### DocumentMetadata
+#### DocumentMetadata
 
 Document-level metadata extracted from `<head>` and top-level elements.
 
@@ -2883,7 +2913,7 @@ and browsers for document indexing and presentation.
 
 ---
 
-### DocumentNode
+#### DocumentNode
 
 A single node in the document tree.
 
@@ -2899,7 +2929,7 @@ A single node in the document tree.
 
 ---
 
-### DocumentStructure
+#### DocumentStructure
 
 A structured document tree representing the semantic content of an HTML document.
 
@@ -2913,7 +2943,7 @@ Uses a flat node array with index-based parent/child references for efficient tr
 
 ---
 
-### DomContext
+#### DomContext
 
 DOM context that provides efficient access to parent/child relationships and text content.
 
@@ -2923,16 +2953,16 @@ via precomputed maps. It also includes an LRU cache for text content extraction.
 
 ---
 
-### FormatRenderer
+#### FormatRenderer
 
 Trait for format-specific rendering of inline elements.
 
 Implementations provide the syntax for emphasis, strong, strikethrough, etc.
 in their respective output formats.
 
-#### Methods
+##### Methods
 
-##### Emphasis()
+###### Emphasis()
 
 Render emphasis (em, i elements)
 
@@ -2942,7 +2972,7 @@ Render emphasis (em, i elements)
 public string Emphasis(string content)
 ```
 
-##### Strong()
+###### Strong()
 
 Render strong emphasis (strong, b elements)
 
@@ -2952,7 +2982,7 @@ Render strong emphasis (strong, b elements)
 public string Strong(string content, string symbol)
 ```
 
-##### Strikethrough()
+###### Strikethrough()
 
 Render strikethrough (del, s elements)
 
@@ -2962,7 +2992,7 @@ Render strikethrough (del, s elements)
 public string Strikethrough(string content)
 ```
 
-##### Highlight()
+###### Highlight()
 
 Render highlight (mark element)
 
@@ -2972,7 +3002,7 @@ Render highlight (mark element)
 public string Highlight(string content)
 ```
 
-##### Inserted()
+###### Inserted()
 
 Render inserted text (ins element)
 
@@ -2982,7 +3012,7 @@ Render inserted text (ins element)
 public string Inserted(string content)
 ```
 
-##### Subscript()
+###### Subscript()
 
 Render subscript (sub element)
 
@@ -2992,7 +3022,7 @@ Render subscript (sub element)
 public string Subscript(string content, string customSymbol)
 ```
 
-##### Superscript()
+###### Superscript()
 
 Render superscript (sup element)
 
@@ -3002,7 +3032,7 @@ Render superscript (sup element)
 public string Superscript(string content, string customSymbol)
 ```
 
-##### SpanWithAttributes()
+###### SpanWithAttributes()
 
 Render span with attributes (for Djot: [text]{.class})
 
@@ -3012,7 +3042,7 @@ Render span with attributes (for Djot: [text]{.class})
 public string SpanWithAttributes(string content, List<string> classes, string id)
 ```
 
-##### DivWithAttributes()
+###### DivWithAttributes()
 
 Render div with attributes (for Djot: .: class)
 
@@ -3022,7 +3052,7 @@ Render div with attributes (for Djot: .: class)
 public string DivWithAttributes(string content, List<string> classes)
 ```
 
-##### IsDjot()
+###### IsDjot()
 
 Check if this is Djot format
 
@@ -3035,7 +3065,7 @@ public bool IsDjot()
 
 ---
 
-### GridCell
+#### GridCell
 
 A single cell in a table grid.
 
@@ -3051,7 +3081,7 @@ A single cell in a table grid.
 
 ---
 
-### HeaderMetadata
+#### HeaderMetadata
 
 Header element metadata with hierarchy tracking.
 
@@ -3066,9 +3096,9 @@ and position in the document structure.
 | `Depth` | `nuint` | — | Document tree depth at the header element |
 | `HtmlOffset` | `nuint` | — | Byte offset in original HTML document |
 
-#### Methods
+##### Methods
 
-##### IsValid()
+###### IsValid()
 
 Validate that the header level is within valid range (1-6).
 
@@ -3085,7 +3115,7 @@ public bool IsValid()
 
 ---
 
-### HtmlMetadata
+#### HtmlMetadata
 
 Comprehensive metadata extraction result from HTML document.
 
@@ -3103,7 +3133,7 @@ suitable for serialization and transmission across language boundaries.
 
 ---
 
-### HtmlVisitor
+#### HtmlVisitor
 
 Visitor trait for HTML→Markdown conversion.
 
@@ -3111,30 +3141,31 @@ Implement this trait to customize the conversion behavior for any HTML element t
 All methods have default implementations that return `VisitResult.Continue`, allowing
 selective override of only the elements you care about.
 
-# Method Naming Convention
+## Method Naming Convention
 
 - `visit_*_start`: Called before entering an element (pre-order traversal)
 - `visit_*_end`: Called after exiting an element (post-order traversal)
 - `visit_*`: Called for specific element types (e.g., `visit_link`, `visit_image`)
 
-# Execution Order
+## Execution Order
 
 For a typical element like `<div><p>text</p></div>`:
+
 1. `visit_element_start` for `<div>`
 2. `visit_element_start` for `<p>`
 3. `visit_text` for "text"
 4. `visit_element_end` for `<p>`
 5. `visit_element_end` for `</div>`
 
-# Performance Notes
+## Performance Notes
 
 - `visit_text` is the most frequently called method (~100+ times per document)
 - Return `VisitResult.Continue` quickly for elements you don't need to customize
 - Avoid heavy computation in visitor methods; consider caching if needed
 
-#### Methods
+### Methods
 
-##### VisitElementStart()
+#### VisitElementStart()
 
 Called before entering any element.
 
@@ -3160,7 +3191,7 @@ Visitors can inspect or replace this output.
 public VisitResult VisitElementEnd(NodeContext ctx, string output)
 ```
 
-##### VisitText()
+###### VisitText()
 
 Visit text nodes (most frequent callback - ~100+ per document).
 
@@ -3170,7 +3201,7 @@ Visit text nodes (most frequent callback - ~100+ per document).
 public VisitResult VisitText(NodeContext ctx, string text)
 ```
 
-##### VisitLink()
+###### VisitLink()
 
 Visit anchor links `<a href="...">`.
 
@@ -3180,7 +3211,7 @@ Visit anchor links `<a href="...">`.
 public VisitResult VisitLink(NodeContext ctx, string href, string text, string title)
 ```
 
-##### VisitImage()
+###### VisitImage()
 
 Visit images `<img src="...">`.
 
@@ -3190,7 +3221,7 @@ Visit images `<img src="...">`.
 public VisitResult VisitImage(NodeContext ctx, string src, string alt, string title)
 ```
 
-##### VisitHeading()
+###### VisitHeading()
 
 Visit heading elements `<h1>` through `<h6>`.
 
@@ -3200,7 +3231,7 @@ Visit heading elements `<h1>` through `<h6>`.
 public VisitResult VisitHeading(NodeContext ctx, uint level, string text, string id)
 ```
 
-##### VisitCodeBlock()
+###### VisitCodeBlock()
 
 Visit code blocks `<pre><code>`.
 
@@ -3210,7 +3241,7 @@ Visit code blocks `<pre><code>`.
 public VisitResult VisitCodeBlock(NodeContext ctx, string lang, string code)
 ```
 
-##### VisitCodeInline()
+###### VisitCodeInline()
 
 Visit inline code `<code>`.
 
@@ -3220,7 +3251,7 @@ Visit inline code `<code>`.
 public VisitResult VisitCodeInline(NodeContext ctx, string code)
 ```
 
-##### VisitListItem()
+###### VisitListItem()
 
 Visit list items `<li>`.
 
@@ -3230,7 +3261,7 @@ Visit list items `<li>`.
 public VisitResult VisitListItem(NodeContext ctx, bool ordered, string marker, string text)
 ```
 
-##### VisitListStart()
+###### VisitListStart()
 
 Called before processing a list `<ul>` or `<ol>`.
 
@@ -3240,7 +3271,7 @@ Called before processing a list `<ul>` or `<ol>`.
 public VisitResult VisitListStart(NodeContext ctx, bool ordered)
 ```
 
-##### VisitListEnd()
+###### VisitListEnd()
 
 Called after processing a list `</ul>` or `</ol>`.
 
@@ -3250,7 +3281,7 @@ Called after processing a list `</ul>` or `</ol>`.
 public VisitResult VisitListEnd(NodeContext ctx, bool ordered, string output)
 ```
 
-##### VisitTableStart()
+###### VisitTableStart()
 
 Called before processing a table `<table>`.
 
@@ -3260,7 +3291,7 @@ Called before processing a table `<table>`.
 public VisitResult VisitTableStart(NodeContext ctx)
 ```
 
-##### VisitTableRow()
+###### VisitTableRow()
 
 Visit table rows `<tr>`.
 
@@ -3270,7 +3301,7 @@ Visit table rows `<tr>`.
 public VisitResult VisitTableRow(NodeContext ctx, List<string> cells, bool isHeader)
 ```
 
-##### VisitTableEnd()
+###### VisitTableEnd()
 
 Called after processing a table `</table>`.
 
@@ -3280,7 +3311,7 @@ Called after processing a table `</table>`.
 public VisitResult VisitTableEnd(NodeContext ctx, string output)
 ```
 
-##### VisitBlockquote()
+###### VisitBlockquote()
 
 Visit blockquote elements `<blockquote>`.
 
@@ -3290,7 +3321,7 @@ Visit blockquote elements `<blockquote>`.
 public VisitResult VisitBlockquote(NodeContext ctx, string content, nuint depth)
 ```
 
-##### VisitStrong()
+###### VisitStrong()
 
 Visit strong/bold elements `<strong>`, `<b>`.
 
@@ -3300,7 +3331,7 @@ Visit strong/bold elements `<strong>`, `<b>`.
 public VisitResult VisitStrong(NodeContext ctx, string text)
 ```
 
-##### VisitEmphasis()
+###### VisitEmphasis()
 
 Visit emphasis/italic elements `<em>`, `<i>`.
 
@@ -3310,7 +3341,7 @@ Visit emphasis/italic elements `<em>`, `<i>`.
 public VisitResult VisitEmphasis(NodeContext ctx, string text)
 ```
 
-##### VisitStrikethrough()
+###### VisitStrikethrough()
 
 Visit strikethrough elements `<s>`, `<del>`, `<strike>`.
 
@@ -3320,7 +3351,7 @@ Visit strikethrough elements `<s>`, `<del>`, `<strike>`.
 public VisitResult VisitStrikethrough(NodeContext ctx, string text)
 ```
 
-##### VisitUnderline()
+###### VisitUnderline()
 
 Visit underline elements `<u>`, `<ins>`.
 
@@ -3330,7 +3361,7 @@ Visit underline elements `<u>`, `<ins>`.
 public VisitResult VisitUnderline(NodeContext ctx, string text)
 ```
 
-##### VisitSubscript()
+###### VisitSubscript()
 
 Visit subscript elements `<sub>`.
 
@@ -3340,7 +3371,7 @@ Visit subscript elements `<sub>`.
 public VisitResult VisitSubscript(NodeContext ctx, string text)
 ```
 
-##### VisitSuperscript()
+###### VisitSuperscript()
 
 Visit superscript elements `<sup>`.
 
@@ -3350,7 +3381,7 @@ Visit superscript elements `<sup>`.
 public VisitResult VisitSuperscript(NodeContext ctx, string text)
 ```
 
-##### VisitMark()
+###### VisitMark()
 
 Visit mark/highlight elements `<mark>`.
 
@@ -3360,7 +3391,7 @@ Visit mark/highlight elements `<mark>`.
 public VisitResult VisitMark(NodeContext ctx, string text)
 ```
 
-##### VisitLineBreak()
+###### VisitLineBreak()
 
 Visit line break elements `<br>`.
 
@@ -3370,7 +3401,7 @@ Visit line break elements `<br>`.
 public VisitResult VisitLineBreak(NodeContext ctx)
 ```
 
-##### VisitHorizontalRule()
+###### VisitHorizontalRule()
 
 Visit horizontal rule elements `<hr>`.
 
@@ -3380,7 +3411,7 @@ Visit horizontal rule elements `<hr>`.
 public VisitResult VisitHorizontalRule(NodeContext ctx)
 ```
 
-##### VisitCustomElement()
+###### VisitCustomElement()
 
 Visit custom elements (web components) or unknown tags.
 
@@ -3390,7 +3421,7 @@ Visit custom elements (web components) or unknown tags.
 public VisitResult VisitCustomElement(NodeContext ctx, string tagName, string html)
 ```
 
-##### VisitDefinitionListStart()
+###### VisitDefinitionListStart()
 
 Visit definition list `<dl>`.
 
@@ -3400,7 +3431,7 @@ Visit definition list `<dl>`.
 public VisitResult VisitDefinitionListStart(NodeContext ctx)
 ```
 
-##### VisitDefinitionTerm()
+###### VisitDefinitionTerm()
 
 Visit definition term `<dt>`.
 
@@ -3410,7 +3441,7 @@ Visit definition term `<dt>`.
 public VisitResult VisitDefinitionTerm(NodeContext ctx, string text)
 ```
 
-##### VisitDefinitionDescription()
+###### VisitDefinitionDescription()
 
 Visit definition description `<dd>`.
 
@@ -3420,7 +3451,7 @@ Visit definition description `<dd>`.
 public VisitResult VisitDefinitionDescription(NodeContext ctx, string text)
 ```
 
-##### VisitDefinitionListEnd()
+###### VisitDefinitionListEnd()
 
 Called after processing a definition list `</dl>`.
 
@@ -3430,7 +3461,7 @@ Called after processing a definition list `</dl>`.
 public VisitResult VisitDefinitionListEnd(NodeContext ctx, string output)
 ```
 
-##### VisitForm()
+###### VisitForm()
 
 Visit form elements `<form>`.
 
@@ -3440,7 +3471,7 @@ Visit form elements `<form>`.
 public VisitResult VisitForm(NodeContext ctx, string action, string method)
 ```
 
-##### VisitInput()
+###### VisitInput()
 
 Visit input elements `<input>`.
 
@@ -3450,7 +3481,7 @@ Visit input elements `<input>`.
 public VisitResult VisitInput(NodeContext ctx, string inputType, string name, string value)
 ```
 
-##### VisitButton()
+###### VisitButton()
 
 Visit button elements `<button>`.
 
@@ -3460,7 +3491,7 @@ Visit button elements `<button>`.
 public VisitResult VisitButton(NodeContext ctx, string text)
 ```
 
-##### VisitAudio()
+###### VisitAudio()
 
 Visit audio elements `<audio>`.
 
@@ -3470,7 +3501,7 @@ Visit audio elements `<audio>`.
 public VisitResult VisitAudio(NodeContext ctx, string src)
 ```
 
-##### VisitVideo()
+###### VisitVideo()
 
 Visit video elements `<video>`.
 
@@ -3480,7 +3511,7 @@ Visit video elements `<video>`.
 public VisitResult VisitVideo(NodeContext ctx, string src)
 ```
 
-##### VisitIframe()
+###### VisitIframe()
 
 Visit iframe elements `<iframe>`.
 
@@ -3490,7 +3521,7 @@ Visit iframe elements `<iframe>`.
 public VisitResult VisitIframe(NodeContext ctx, string src)
 ```
 
-##### VisitDetails()
+###### VisitDetails()
 
 Visit details elements `<details>`.
 
@@ -3500,7 +3531,7 @@ Visit details elements `<details>`.
 public VisitResult VisitDetails(NodeContext ctx, bool open)
 ```
 
-##### VisitSummary()
+###### VisitSummary()
 
 Visit summary elements `<summary>`.
 
@@ -3510,7 +3541,7 @@ Visit summary elements `<summary>`.
 public VisitResult VisitSummary(NodeContext ctx, string text)
 ```
 
-##### VisitFigureStart()
+###### VisitFigureStart()
 
 Visit figure elements `<figure>`.
 
@@ -3520,7 +3551,7 @@ Visit figure elements `<figure>`.
 public VisitResult VisitFigureStart(NodeContext ctx)
 ```
 
-##### VisitFigcaption()
+###### VisitFigcaption()
 
 Visit figcaption elements `<figcaption>`.
 
@@ -3530,7 +3561,7 @@ Visit figcaption elements `<figcaption>`.
 public VisitResult VisitFigcaption(NodeContext ctx, string text)
 ```
 
-##### VisitFigureEnd()
+###### VisitFigureEnd()
 
 Called after processing a figure `</figure>`.
 
@@ -3543,7 +3574,7 @@ public VisitResult VisitFigureEnd(NodeContext ctx, string output)
 
 ---
 
-### ImageMetadata
+#### ImageMetadata
 
 Image metadata with source and dimensions.
 
@@ -3562,21 +3593,21 @@ for image analysis and optimization.
 
 ---
 
-### ImageMetadataPayload
+#### ImageMetadataPayload
 
 Payload type for image metadata extraction.
 
 
 ---
 
-### InlineCollectorHandle
+#### InlineCollectorHandle
 
 Handle type for inline image collector when feature is enabled.
 
 
 ---
 
-### InlineImageConfig
+#### InlineImageConfig
 
 Inline image configuration that specifies contexts where images remain as markdown links.
 
@@ -3587,9 +3618,9 @@ names where inline images should be preserved.
 |-------|------|---------|-------------|
 | `KeepInlineImagesIn` | `List<string>` | `new List<string>()` | HTML elements where images should remain as markdown links (not converted to alt text) |
 
-#### Methods
+##### Methods
 
-##### FromElements()
+###### FromElements()
 
 Create a new inline image configuration from a list of element names.
 
@@ -3599,7 +3630,7 @@ Create a new inline image configuration from a list of element names.
 public InlineImageConfig FromElements(List<string> elements)
 ```
 
-##### AddElement()
+###### AddElement()
 
 Add an element name to the list of elements where images are kept inline.
 
@@ -3609,7 +3640,7 @@ Add an element name to the list of elements where images are kept inline.
 public void AddElement(string element)
 ```
 
-##### ShouldKeepImages()
+###### ShouldKeepImages()
 
 Check if a given element should keep images inline.
 
@@ -3623,7 +3654,7 @@ Check if a given element should keep images inline.
 public bool ShouldKeepImages(string element)
 ```
 
-##### CreateDefault()
+###### CreateDefault()
 
 **Signature:**
 
@@ -3634,7 +3665,7 @@ public InlineImageConfig CreateDefault()
 
 ---
 
-### LinkMetadata
+#### LinkMetadata
 
 Hyperlink metadata with categorization and attributes.
 
@@ -3649,9 +3680,9 @@ Represents `<a>` elements with parsed href values, text content, and link type c
 | `Rel` | `List<string>` | — | Rel attribute values (e.g., "nofollow", "stylesheet", "canonical") |
 | `Attributes` | `Dictionary<string, string>` | — | Additional HTML attributes |
 
-#### Methods
+##### Methods
 
-##### ClassifyLink()
+###### ClassifyLink()
 
 Classify a link based on href value.
 
@@ -3668,13 +3699,13 @@ public LinkType ClassifyLink(string href)
 
 ---
 
-### MarkdownRenderer
+#### MarkdownRenderer
 
 Renderer for standard Markdown output.
 
-#### Methods
+##### Methods
 
-##### Emphasis()
+###### Emphasis()
 
 **Signature:**
 
@@ -3682,7 +3713,7 @@ Renderer for standard Markdown output.
 public string Emphasis(string content)
 ```
 
-##### Strong()
+###### Strong()
 
 **Signature:**
 
@@ -3690,7 +3721,7 @@ public string Emphasis(string content)
 public string Strong(string content, string symbol)
 ```
 
-##### Strikethrough()
+###### Strikethrough()
 
 **Signature:**
 
@@ -3698,7 +3729,7 @@ public string Strong(string content, string symbol)
 public string Strikethrough(string content)
 ```
 
-##### Highlight()
+###### Highlight()
 
 **Signature:**
 
@@ -3706,7 +3737,7 @@ public string Strikethrough(string content)
 public string Highlight(string content)
 ```
 
-##### Inserted()
+###### Inserted()
 
 **Signature:**
 
@@ -3714,7 +3745,7 @@ public string Highlight(string content)
 public string Inserted(string content)
 ```
 
-##### Subscript()
+###### Subscript()
 
 **Signature:**
 
@@ -3722,7 +3753,7 @@ public string Inserted(string content)
 public string Subscript(string content, string customSymbol)
 ```
 
-##### Superscript()
+###### Superscript()
 
 **Signature:**
 
@@ -3730,7 +3761,7 @@ public string Subscript(string content, string customSymbol)
 public string Superscript(string content, string customSymbol)
 ```
 
-##### SpanWithAttributes()
+###### SpanWithAttributes()
 
 **Signature:**
 
@@ -3738,7 +3769,7 @@ public string Superscript(string content, string customSymbol)
 public string SpanWithAttributes(string content, List<string> classes, string id)
 ```
 
-##### DivWithAttributes()
+###### DivWithAttributes()
 
 **Signature:**
 
@@ -3746,7 +3777,7 @@ public string SpanWithAttributes(string content, List<string> classes, string id
 public string DivWithAttributes(string content, List<string> classes)
 ```
 
-##### IsDjot()
+###### IsDjot()
 
 **Signature:**
 
@@ -3757,21 +3788,23 @@ public bool IsDjot()
 
 ---
 
-### MetadataCollector
+#### MetadataCollector
 
 Internal metadata collector for single-pass extraction.
 
 Follows a pattern for efficient metadata extraction during tree traversal.
 Maintains state for:
+
 - Document metadata from head elements
 - Header hierarchy tracking
 - Link accumulation
 - Structured data collection
 - Language and directionality attributes
 
-# Architecture
+## Architecture
 
 The collector is designed to be:
+
 - **Performant**: Pre-allocated collections, minimal cloning
 - **Single-pass**: Collects during main tree walk without separate passes
 - **Optional**: Zero overhead when disabled via feature flags
@@ -3812,7 +3845,7 @@ Defaults to extracting all metadata types with 1MB limit on structured data.
 public MetadataConfig CreateDefault()
 ```
 
-##### AnyEnabled()
+###### AnyEnabled()
 
 Check if any metadata extraction is enabled.
 
@@ -3829,7 +3862,7 @@ This is useful for early exit optimization when the application doesn't need met
 public bool AnyEnabled()
 ```
 
-##### ApplyUpdate()
+###### ApplyUpdate()
 
 Apply a partial update to this metadata configuration.
 
@@ -3843,7 +3876,7 @@ of configuration without affecting unrelated settings.
 public void ApplyUpdate(MetadataConfigUpdate update)
 ```
 
-##### FromUpdate()
+###### FromUpdate()
 
 Create new metadata configuration from a partial update.
 
@@ -3862,7 +3895,7 @@ New `MetadataConfig` with specified updates applied to defaults
 public MetadataConfig FromUpdate(MetadataConfigUpdate update)
 ```
 
-##### From()
+###### From()
 
 **Signature:**
 
@@ -3873,7 +3906,7 @@ public MetadataConfig From(MetadataConfigUpdate update)
 
 ---
 
-### NodeContext
+#### NodeContext
 
 Context information passed to all visitor methods.
 
@@ -3893,7 +3926,7 @@ including its type, attributes, position in the DOM tree, and parent context.
 
 ---
 
-### PreprocessingOptions
+#### PreprocessingOptions
 
 HTML preprocessing options for document cleanup before conversion.
 
@@ -3904,9 +3937,9 @@ HTML preprocessing options for document cleanup before conversion.
 | `RemoveNavigation` | `bool` | `true` | Remove navigation elements (nav, breadcrumbs, menus, sidebars) |
 | `RemoveForms` | `bool` | `true` | Remove form elements (forms, inputs, buttons, etc.) |
 
-#### Methods
+##### Methods
 
-##### CreateDefault()
+###### CreateDefault()
 
 **Signature:**
 
@@ -3914,7 +3947,7 @@ HTML preprocessing options for document cleanup before conversion.
 public PreprocessingOptions CreateDefault()
 ```
 
-##### ApplyUpdate()
+###### ApplyUpdate()
 
 Apply a partial update to these preprocessing options.
 
@@ -3927,7 +3960,7 @@ Unspecified fields (None) are left unchanged.
 public void ApplyUpdate(PreprocessingOptionsUpdate update)
 ```
 
-##### FromUpdate()
+###### FromUpdate()
 
 Create new preprocessing options from a partial update.
 
@@ -3944,7 +3977,7 @@ New `PreprocessingOptions` with specified updates applied to defaults
 public PreprocessingOptions FromUpdate(PreprocessingOptionsUpdate update)
 ```
 
-##### From()
+###### From()
 
 **Signature:**
 
@@ -3955,7 +3988,7 @@ public PreprocessingOptions From(PreprocessingOptionsUpdate update)
 
 ---
 
-### ProcessingWarning
+#### ProcessingWarning
 
 A non-fatal warning generated during HTML processing.
 
@@ -3967,14 +4000,14 @@ A non-fatal warning generated during HTML processing.
 
 ---
 
-### ReferenceCollector
+#### ReferenceCollector
 
 Collects link/image references during conversion and produces a reference
 definitions section at the end of the document.
 
-#### Methods
+##### Methods
 
-##### GetOrInsert()
+###### GetOrInsert()
 
 Register a URL (and optional title) and return its 1-based reference number.
 
@@ -3986,7 +4019,7 @@ If the same URL+title pair was already registered, the existing number is return
 public nuint GetOrInsert(string url, string title)
 ```
 
-##### Finish()
+###### Finish()
 
 Produce the reference definitions section.
 
@@ -4001,20 +4034,20 @@ public string Finish()
 
 ---
 
-### ReferenceCollectorHandle
+#### ReferenceCollectorHandle
 
 Shared handle for passing the collector through the conversion context.
 
 
 ---
 
-### StructureCollector
+#### StructureCollector
 
 Incremental builder for `DocumentStructure` during a single DOM walk.
 
-#### Methods
+##### Methods
 
-##### PushHeading()
+###### PushHeading()
 
 Record a heading element.
 
@@ -4029,7 +4062,7 @@ Returns the index of the **heading** node (the group node is one before it).
 public uint PushHeading(byte level, string text, string id)
 ```
 
-##### PushParagraph()
+###### PushParagraph()
 
 Record a paragraph element.
 
@@ -4041,7 +4074,7 @@ Returns the node index.
 public uint PushParagraph(string text)
 ```
 
-##### PushListStart()
+###### PushListStart()
 
 Open a list container.
 
@@ -4053,7 +4086,7 @@ Returns the node index; call `push_list_end` to close it.
 public uint PushListStart(bool ordered)
 ```
 
-##### PushListEnd()
+###### PushListEnd()
 
 Close the innermost open list container.
 
@@ -4063,7 +4096,7 @@ Close the innermost open list container.
 public void PushListEnd()
 ```
 
-##### PushListItem()
+###### PushListItem()
 
 Record a list item under the current open list.
 
@@ -4076,7 +4109,7 @@ Returns the node index.
 public uint PushListItem(string text)
 ```
 
-##### PushTable()
+###### PushTable()
 
 Record a table.
 
@@ -4088,7 +4121,7 @@ Returns the node index.
 public uint PushTable(TableGrid grid)
 ```
 
-##### PushImage()
+###### PushImage()
 
 Record an image element.
 
@@ -4100,7 +4133,7 @@ Returns the node index.
 public uint PushImage(string src, string alt)
 ```
 
-##### PushCode()
+###### PushCode()
 
 Record a code block.
 
@@ -4112,7 +4145,7 @@ Returns the node index.
 public uint PushCode(string text, string language)
 ```
 
-##### PushQuoteStart()
+###### PushQuoteStart()
 
 Open a blockquote container.
 
@@ -4124,7 +4157,7 @@ Returns the node index; call `push_quote_end` to close it.
 public uint PushQuoteStart()
 ```
 
-##### PushQuoteEnd()
+###### PushQuoteEnd()
 
 Close the innermost open blockquote container.
 
@@ -4134,7 +4167,7 @@ Close the innermost open blockquote container.
 public void PushQuoteEnd()
 ```
 
-##### PushRawBlock()
+###### PushRawBlock()
 
 Record a raw block (e.g. preserved `<script>` or `<style>` content).
 
@@ -4146,7 +4179,7 @@ Returns the node index.
 public uint PushRawBlock(string format, string content)
 ```
 
-##### Finish()
+###### Finish()
 
 Consume the collector and return the completed `DocumentStructure`.
 
@@ -4156,7 +4189,7 @@ Consume the collector and return the completed `DocumentStructure`.
 public DocumentStructure Finish()
 ```
 
-##### CreateDefault()
+###### CreateDefault()
 
 **Signature:**
 
@@ -4167,14 +4200,14 @@ public StructureCollector CreateDefault()
 
 ---
 
-### StructureCollectorHandle
+#### StructureCollectorHandle
 
 Shared mutable handle used in `crate.converter.Context`.
 
 
 ---
 
-### StructuredData
+#### StructuredData
 
 Structured data block (JSON-LD, Microdata, or RDFa).
 
@@ -4190,7 +4223,7 @@ JSON-LD blocks are collected as raw JSON strings for flexibility.
 
 ---
 
-### TableData
+#### TableData
 
 A top-level extracted table with both structured data and markdown representation.
 
@@ -4202,7 +4235,7 @@ A top-level extracted table with both structured data and markdown representatio
 
 ---
 
-### TableGrid
+#### TableGrid
 
 A structured table grid with cell-level data including spans.
 
@@ -4215,11 +4248,12 @@ A structured table grid with cell-level data including spans.
 
 ---
 
-### TableScan
+#### TableScan
 
 Scan results for a table element.
 
 Contains metadata about table structure to determine optimal rendering:
+
 - Row counts for consistency checking
 - Presence of headers, captions, and nested tables
 - Presence of colspan/rowspan (spanning cells)
@@ -4238,7 +4272,7 @@ Contains metadata about table structure to determine optimal rendering:
 
 ---
 
-### TextAnnotation
+#### TextAnnotation
 
 An inline text annotation with byte-range offsets.
 
@@ -4253,7 +4287,7 @@ Annotations describe formatting (bold, italic, etc.) and links within a node's t
 
 ---
 
-### VisitorHandle
+#### VisitorHandle
 
 Type alias for a visitor handle (Rc-wrapped `RefCell` for interior mutability).
 
@@ -4262,9 +4296,9 @@ This allows visitors to be passed around and shared while still being mutable.
 
 ---
 
-## Enums
+### Enums
 
-### VisitAction
+#### VisitAction
 
 Result of visitor element start callback indicating what should happen next.
 
@@ -4278,7 +4312,7 @@ Result of visitor element start callback indicating what should happen next.
 
 ---
 
-### TextDirection
+#### TextDirection
 
 Text directionality of document content.
 
@@ -4293,7 +4327,7 @@ Corresponds to the HTML `dir` attribute and `bdi` element directionality.
 
 ---
 
-### LinkType
+#### LinkType
 
 Link classification based on href value and document context.
 
@@ -4311,7 +4345,7 @@ Used to categorize links during extraction for filtering and analysis.
 
 ---
 
-### ImageType
+#### ImageType
 
 Image source classification for proper handling and processing.
 
@@ -4327,7 +4361,7 @@ Determines whether an image is embedded (data URI), inline SVG, external, or rel
 
 ---
 
-### StructuredDataType
+#### StructuredDataType
 
 Structured data format type.
 
@@ -4342,7 +4376,7 @@ Identifies the schema/format used for structured data markup.
 
 ---
 
-### PreprocessingPreset
+#### PreprocessingPreset
 
 HTML preprocessing aggressiveness level.
 
@@ -4357,7 +4391,7 @@ Controls the extent of cleanup performed before conversion. Higher levels remove
 
 ---
 
-### HeadingStyle
+#### HeadingStyle
 
 Heading style options for Markdown output.
 
@@ -4372,7 +4406,7 @@ Controls how headings (h1-h6) are rendered in the output Markdown.
 
 ---
 
-### ListIndentType
+#### ListIndentType
 
 List indentation character type.
 
@@ -4386,7 +4420,7 @@ Controls whether list items are indented with spaces or tabs.
 
 ---
 
-### WhitespaceMode
+#### WhitespaceMode
 
 Whitespace handling strategy during conversion.
 
@@ -4400,7 +4434,7 @@ Determines how sequences of whitespace characters (spaces, tabs, newlines) are p
 
 ---
 
-### NewlineStyle
+#### NewlineStyle
 
 Line break syntax in Markdown output.
 
@@ -4414,7 +4448,7 @@ Controls how soft line breaks (from `<br>` or line breaks in source) are rendere
 
 ---
 
-### CodeBlockStyle
+#### CodeBlockStyle
 
 Code block fence style in Markdown output.
 
@@ -4429,7 +4463,7 @@ Determines how code blocks (`<pre><code>`) are rendered in Markdown.
 
 ---
 
-### HighlightStyle
+#### HighlightStyle
 
 Highlight rendering style for `<mark>` elements.
 
@@ -4445,7 +4479,7 @@ Controls how highlighted text is rendered in Markdown output.
 
 ---
 
-### LinkStyle
+#### LinkStyle
 
 Link rendering style in Markdown output.
 
@@ -4460,7 +4494,7 @@ reference-style `[text][1]` syntax with definitions collected at the end.
 
 ---
 
-### OutputFormat
+#### OutputFormat
 
 Output format for conversion.
 
@@ -4475,7 +4509,7 @@ Specifies the target markup language format for the conversion output.
 
 ---
 
-### NodeContent
+#### NodeContent
 
 The semantic content type of a document node.
 
@@ -4500,7 +4534,7 @@ Uses internally tagged representation (`"node_type": "heading"`) for JSON serial
 
 ---
 
-### AnnotationKind
+#### AnnotationKind
 
 The type of an inline text annotation.
 
@@ -4521,7 +4555,7 @@ Uses internally tagged representation (`"annotation_type": "bold"`) for JSON ser
 
 ---
 
-### WarningKind
+#### WarningKind
 
 Categories of processing warnings.
 
@@ -4536,7 +4570,7 @@ Categories of processing warnings.
 
 ---
 
-### NodeType
+#### NodeType
 
 Node type enumeration covering all HTML element types.
 
@@ -4637,7 +4671,7 @@ providing a coarse-grained classification for visitor dispatch.
 
 ---
 
-### VisitResult
+#### VisitResult
 
 Result of a visitor callback.
 
@@ -4656,7 +4690,7 @@ preserving HTML, or signaling errors.
 
 ---
 
-### VisitorDispatch
+#### VisitorDispatch
 
 Result of dispatching a visitor callback.
 
@@ -4674,9 +4708,9 @@ raw `VisitResult` type.
 
 ---
 
-## Errors
+### Errors
 
-### ConversionError
+#### ConversionError
 
 Errors that can occur during HTML to Markdown conversion.
 
@@ -4692,4 +4726,3 @@ Errors that can occur during HTML to Markdown conversion.
 
 
 ---
-

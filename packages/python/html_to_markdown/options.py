@@ -341,5 +341,3 @@ class TableGrid:
 
     cells: list[Any] = field(default_factory=list)
     """All cells in the table (may be fewer than rows*cols due to spans)."""
-
-

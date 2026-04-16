@@ -86,4 +86,3 @@ fn test_structure_sibling_h1_groups() {
     assert!(!result.document.as_ref().unwrap().nodes.is_empty(), "expected non-empty value");
     assert!(result.document.as_ref().unwrap().nodes.len() >= 4, "expected at least 4 elements, got {}", result.document.as_ref().unwrap().nodes.len());
 }
-

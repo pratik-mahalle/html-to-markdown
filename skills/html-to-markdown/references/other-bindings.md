@@ -416,6 +416,7 @@ const char *ver = htm_version(); // static — do NOT free
 ```
 
 **Key FFI contracts:**
+
 - All exported functions use the `htm_` prefix.
 - Strings returned by `htm_conversion_result_content()` and similar field accessors must be freed with `htm_free_string()`. Never use the system `free()`.
 - `htm_last_error_context()` and `htm_version()` return borrowed/static pointers — do NOT free them.

@@ -2,13 +2,13 @@
 title: "Types Reference"
 ---
 
-# Types Reference
+## Types Reference
 
 All types defined by the library, grouped by category. Types are shown using Rust as the canonical representation.
 
-## Result Types
+### Result Types
 
-### ConversionResult
+#### ConversionResult
 
 The primary result of HTML conversion and extraction.
 
@@ -26,15 +26,16 @@ metadata, extracted tables, images, and processing warnings.
 
 ---
 
-## Configuration Types
+### Configuration Types
 
 See [Configuration Reference](configuration.md) for detailed defaults and language-specific representations.
 
-### TableScan
+#### TableScan
 
 Scan results for a table element.
 
 Contains metadata about table structure to determine optimal rendering:
+
 - Row counts for consistency checking
 - Presence of headers, captions, and nested tables
 - Presence of colspan/rowspan (spanning cells)
@@ -52,7 +53,7 @@ Contains metadata about table structure to determine optimal rendering:
 
 ---
 
-### DjotRenderer
+#### DjotRenderer
 
 Renderer for Djot lightweight markup output.
 
@@ -60,7 +61,7 @@ Renderer for Djot lightweight markup output.
 
 ---
 
-### MarkdownRenderer
+#### MarkdownRenderer
 
 Renderer for standard Markdown output.
 
@@ -68,7 +69,7 @@ Renderer for standard Markdown output.
 
 ---
 
-### ReferenceCollector
+#### ReferenceCollector
 
 Collects link/image references during conversion and produces a reference
 definitions section at the end of the document.
@@ -77,7 +78,7 @@ definitions section at the end of the document.
 
 ---
 
-### ConversionOptions
+#### ConversionOptions
 
 Main conversion options for HTML to Markdown conversion.
 
@@ -126,7 +127,7 @@ Use `ConversionOptions.builder()` to construct, or `the default constructor` for
 
 ---
 
-### InlineImageConfig
+#### InlineImageConfig
 
 Inline image configuration that specifies contexts where images remain as markdown links.
 
@@ -139,7 +140,7 @@ names where inline images should be preserved.
 
 ---
 
-### PreprocessingOptions
+#### PreprocessingOptions
 
 HTML preprocessing options for document cleanup before conversion.
 
@@ -152,7 +153,7 @@ HTML preprocessing options for document cleanup before conversion.
 
 ---
 
-### StructureCollector
+#### StructureCollector
 
 Incremental builder for `DocumentStructure` during a single DOM walk.
 
@@ -160,7 +161,7 @@ Incremental builder for `DocumentStructure` during a single DOM walk.
 
 ---
 
-### TableGrid
+#### TableGrid
 
 A structured table grid with cell-level data including spans.
 
@@ -172,9 +173,9 @@ A structured table grid with cell-level data including spans.
 
 ---
 
-## Metadata Types
+### Metadata Types
 
-### ImageMetadataPayload
+#### ImageMetadataPayload
 
 Payload type for image metadata extraction.
 
@@ -182,21 +183,23 @@ Payload type for image metadata extraction.
 
 ---
 
-### MetadataCollector
+#### MetadataCollector
 
 Internal metadata collector for single-pass extraction.
 
 Follows a pattern for efficient metadata extraction during tree traversal.
 Maintains state for:
+
 - Document metadata from head elements
 - Header hierarchy tracking
 - Link accumulation
 - Structured data collection
 - Language and directionality attributes
 
-# Architecture
+## Architecture
 
 The collector is designed to be:
+
 - **Performant**: Pre-allocated collections, minimal cloning
 - **Single-pass**: Collects during main tree walk without separate passes
 - **Optional**: Zero overhead when disabled via feature flags
@@ -226,7 +229,7 @@ the HTML-to-Markdown conversion process.
 
 ---
 
-### DocumentMetadata
+#### DocumentMetadata
 
 Document-level metadata extracted from `<head>` and top-level elements.
 
@@ -249,7 +252,7 @@ and browsers for document indexing and presentation.
 
 ---
 
-### HeaderMetadata
+#### HeaderMetadata
 
 Header element metadata with hierarchy tracking.
 
@@ -266,7 +269,7 @@ and position in the document structure.
 
 ---
 
-### LinkMetadata
+#### LinkMetadata
 
 Hyperlink metadata with categorization and attributes.
 
@@ -283,7 +286,7 @@ Represents `<a>` elements with parsed href values, text content, and link type c
 
 ---
 
-### ImageMetadata
+#### ImageMetadata
 
 Image metadata with source and dimensions.
 
@@ -301,7 +304,7 @@ for image analysis and optimization.
 
 ---
 
-### HtmlMetadata
+#### HtmlMetadata
 
 Comprehensive metadata extraction result from HTML document.
 
@@ -318,9 +321,9 @@ suitable for serialization and transmission across language boundaries.
 
 ---
 
-## Document Structure
+### Document Structure
 
-### DocumentStructure
+#### DocumentStructure
 
 A structured document tree representing the semantic content of an HTML document.
 
@@ -333,7 +336,7 @@ Uses a flat node array with index-based parent/child references for efficient tr
 
 ---
 
-### DocumentNode
+#### DocumentNode
 
 A single node in the document tree.
 
@@ -348,7 +351,7 @@ A single node in the document tree.
 
 ---
 
-### GridCell
+#### GridCell
 
 A single cell in a table grid.
 
@@ -363,7 +366,7 @@ A single cell in a table grid.
 
 ---
 
-### TableData
+#### TableData
 
 A top-level extracted table with both structured data and markdown representation.
 
@@ -374,7 +377,7 @@ A top-level extracted table with both structured data and markdown representatio
 
 ---
 
-### NodeContext
+#### NodeContext
 
 Context information passed to all visitor methods.
 
@@ -393,9 +396,9 @@ including its type, attributes, position in the DOM tree, and parent context.
 
 ---
 
-## Other Types
+### Other Types
 
-### InlineCollectorHandle
+#### InlineCollectorHandle
 
 Handle type for inline image collector when feature is enabled.
 
@@ -403,7 +406,7 @@ Handle type for inline image collector when feature is enabled.
 
 ---
 
-### Context
+#### Context
 
 Conversion context that tracks state during HTML to Markdown conversion.
 
@@ -414,7 +417,7 @@ about the current position in the document tree, nesting levels, and enabled fea
 
 ---
 
-### DomContext
+#### DomContext
 
 DOM context that provides efficient access to parent/child relationships and text content.
 
@@ -425,7 +428,7 @@ via precomputed maps. It also includes an LRU cache for text content extraction.
 
 ---
 
-### FormatRenderer
+#### FormatRenderer
 
 Trait for format-specific rendering of inline elements.
 
@@ -436,7 +439,7 @@ in their respective output formats.
 
 ---
 
-### ReferenceCollectorHandle
+#### ReferenceCollectorHandle
 
 Shared handle for passing the collector through the conversion context.
 
@@ -444,7 +447,7 @@ Shared handle for passing the collector through the conversion context.
 
 ---
 
-### StructuredData
+#### StructuredData
 
 Structured data block (JSON-LD, Microdata, or RDFa).
 
@@ -459,7 +462,7 @@ JSON-LD blocks are collected as raw JSON strings for flexibility.
 
 ---
 
-### ConversionOptionsBuilder
+#### ConversionOptionsBuilder
 
 Builder for `ConversionOptions`.
 
@@ -469,7 +472,7 @@ All fields start with default values. Call `.build()` to produce the final optio
 
 ---
 
-### TextAnnotation
+#### TextAnnotation
 
 An inline text annotation with byte-range offsets.
 
@@ -483,7 +486,7 @@ Annotations describe formatting (bold, italic, etc.) and links within a node's t
 
 ---
 
-### StructureCollectorHandle
+#### StructureCollectorHandle
 
 Shared mutable handle used in `crate.converter.Context`.
 
@@ -491,7 +494,7 @@ Shared mutable handle used in `crate.converter.Context`.
 
 ---
 
-### ProcessingWarning
+#### ProcessingWarning
 
 A non-fatal warning generated during HTML processing.
 
@@ -502,7 +505,7 @@ A non-fatal warning generated during HTML processing.
 
 ---
 
-### VisitorHandle
+#### VisitorHandle
 
 Type alias for a visitor handle (Rc-wrapped `RefCell` for interior mutability).
 
@@ -512,7 +515,7 @@ This allows visitors to be passed around and shared while still being mutable.
 
 ---
 
-### HtmlVisitor
+#### HtmlVisitor
 
 Visitor trait for HTML→Markdown conversion.
 
@@ -520,22 +523,23 @@ Implement this trait to customize the conversion behavior for any HTML element t
 All methods have default implementations that return `VisitResult.Continue`, allowing
 selective override of only the elements you care about.
 
-# Method Naming Convention
+## Method Naming Convention
 
 - `visit_*_start`: Called before entering an element (pre-order traversal)
 - `visit_*_end`: Called after exiting an element (post-order traversal)
 - `visit_*`: Called for specific element types (e.g., `visit_link`, `visit_image`)
 
-# Execution Order
+## Execution Order
 
 For a typical element like `<div><p>text</p></div>`:
+
 1. `visit_element_start` for `<div>`
 2. `visit_element_start` for `<p>`
 3. `visit_text` for "text"
 4. `visit_element_end` for `<p>`
 5. `visit_element_end` for `</div>`
 
-# Performance Notes
+## Performance Notes
 
 - `visit_text` is the most frequently called method (~100+ times per document)
 - Return `VisitResult.Continue` quickly for elements you don't need to customize
@@ -544,4 +548,3 @@ For a typical element like `<div><p>text</p></div>`:
 *Opaque type — fields are not directly accessible.*
 
 ---
-

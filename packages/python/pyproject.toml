@@ -1,12 +1,14 @@
 [build-system]
-requires = ["maturin>=1.0,<2.0"]
 build-backend = "maturin"
+requires = [ "maturin>=1,<2" ]
 
 [project]
 name = "html-to-markdown"
 version = "3.2.0"
 description = "High-performance HTML to Markdown converter"
+keywords = [ "converter", "html", "markdown" ]
 license = "MIT"
+authors = [ { name = "Kreuzberg Team" } ]
 requires-python = ">=3.10"
 classifiers = [
   "Programming Language :: Python :: 3 :: Only",
@@ -16,15 +18,10 @@ classifiers = [
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
 ]
-authors = [
-    { name = "Kreuzberg Team" }
-]
-keywords = ["html", "markdown", "converter"]
-[project.urls]
-repository = "https://github.com/kreuzberg-dev/html-to-markdown"
+urls.repository = "https://github.com/kreuzberg-dev/html-to-markdown"
 
 [tool.maturin]
 module-name = "html_to_markdown._html_to_markdown"
 manifest-path = "../../crates/html-to-markdown-py/Cargo.toml"
-features = ["pyo3/extension-module"]
-python-packages = ["html_to_markdown"]
+features = [ "pyo3/extension-module" ]
+python-packages = [ "html_to_markdown" ]

@@ -34,5 +34,3 @@ class InvalidInputError(ConversionError):
 
 class OtherError(ConversionError):
     """Generic conversion error."""
-
-
