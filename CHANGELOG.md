@@ -22,9 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Python `pyproject.toml`** — corrected `module-name` and `python-packages` to match `html-to-markdown` pip package name.
 - **`docs/llms.txt`** metadata defaults corrected from `false` to `true` for `extract_metadata`, `extract_document`, `extract_headers`, `extract_links`, `extract_images`, `extract_structured_data` (#276).
 
+- **WASM type prefix restored** (#303) — `WasmConversionOptions` (not `JsConversionOptions`) via configurable `type_prefix` in alef. No breaking change for WASM users.
+
 ### Known Issues
 
-- **WASM type rename** (#303) — `WasmConversionOptions` renamed to `JsConversionOptions` as part of alef codegen unification. This is a breaking change for WASM users upgrading from v3.1.x.
 - **Python silent output cap** (#277) — `convert()` silently truncates output at ~439 KB on certain large HTML inputs. Under investigation.
 
 ## [3.2.0] - 2026-04-14
