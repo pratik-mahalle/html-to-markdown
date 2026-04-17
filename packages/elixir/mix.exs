@@ -22,9 +22,6 @@ defmodule Html_to_markdown.MixProject do
       links: %{"GitHub" => @source_url},
       files: ~w(
         lib
-        native/html_to_markdown_elixir/src
-        native/html_to_markdown_elixir/Cargo.toml
-        native/html_to_markdown_elixir/Cargo.lock
         mix.exs
         README.md
         .formatter.exs
