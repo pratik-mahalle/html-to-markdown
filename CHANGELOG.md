@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.4] - 2026-04-17
+
+### Fixed
+
+- **Elixir Hex package** — fixed precompiled NIF pipeline: correct build output paths, removed Rust source from Hex files list, removed Windows target (no build job), simplified build script for `rustler_precompiled`.
+- **C# NuGet package** — republished with `htm_conversion_options_from_json` and related FFI functions.
+
 ## [3.2.3] - 2026-04-17
 
 ### Fixed
