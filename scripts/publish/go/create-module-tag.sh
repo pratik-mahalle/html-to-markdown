@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Creates the Go submodule tag required for Go proxy to recognize the module.
 # For modules in subdirectories, Go requires tags in the format: {subdir}/{version}
-# e.g., packages/go/v2.23.0 for module github.com/kreuzberg-dev/html-to-markdown/packages/go/v2@v2.23.0
+# e.g., packages/go/v3.23.0 for module github.com/kreuzberg-dev/html-to-markdown/packages/go/v3@v2.23.0
 #
 # Usage: create-module-tag.sh <version> [--dry-run]
 # Example: create-module-tag.sh v2.23.0
@@ -16,12 +16,12 @@ if [[ ! "$VERSION" =~ ^v ]]; then
 fi
 
 # The Go submodule tag format for modules in subdirectories
-# Module path: github.com/kreuzberg-dev/html-to-markdown/packages/go/v2
+# Module path: github.com/kreuzberg-dev/html-to-markdown/packages/go/v3
 # Tag format: packages/go/{version} (the /v2 is part of the module path, not the tag prefix)
 GO_TAG="packages/go/${VERSION}"
 
 echo "Creating Go module tag: ${GO_TAG}"
-echo "  For module: github.com/kreuzberg-dev/html-to-markdown/packages/go/v2@${VERSION}"
+echo "  For module: github.com/kreuzberg-dev/html-to-markdown/packages/go/v3@${VERSION}"
 
 # Check if Go tag already exists locally
 if git rev-parse "$GO_TAG" >/dev/null 2>&1; then
@@ -47,7 +47,7 @@ echo "Go module tag created and pushed: ${GO_TAG}"
 
 # Trigger Go proxy to fetch the module (optional but speeds up availability)
 echo "Triggering Go proxy fetch..."
-GOPROXY_URL="https://proxy.golang.org/github.com/kreuzberg-dev/html-to-markdown/packages/go/v2/@v/${VERSION}.info"
+GOPROXY_URL="https://proxy.golang.org/github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/@v/${VERSION}.info"
 if curl -sf "${GOPROXY_URL}" >/dev/null 2>&1; then
   echo "Go proxy successfully fetched module version"
 else
@@ -56,5 +56,5 @@ fi
 
 echo ""
 echo "Go module published successfully!"
-echo "  Module: github.com/kreuzberg-dev/html-to-markdown/packages/go/v2@${VERSION}"
-echo "  Install: go get github.com/kreuzberg-dev/html-to-markdown/packages/go/v2@${VERSION}"
+echo "  Module: github.com/kreuzberg-dev/html-to-markdown/packages/go/v3@${VERSION}"
+echo "  Install: go get github.com/kreuzberg-dev/html-to-markdown/packages/go/v3@${VERSION}"

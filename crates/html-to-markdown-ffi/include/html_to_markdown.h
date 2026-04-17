@@ -515,6 +515,22 @@ void htm_free_string(char *ptr);
 const char *htm_version(void);
 
 /**
+ * Create a `MetadataConfig` from a JSON string. Returns null on failure.
+ * # Safety
+ * JSON string must be valid UTF-8 and null-terminated.
+ * Returned handle must be freed with `htm_metadata_config_free`.
+ */
+HTMMetadataConfig *htm_metadata_config_from_json(const char *json);
+
+/**
+ * Serialize a `MetadataConfig` to a JSON string. Returns null on failure.
+ * # Safety
+ * `ptr` must be a valid, non-null pointer returned by a `htm` function.
+ * The returned string must be freed with `htm_free_string`.
+ */
+char *htm_metadata_config_to_json(const HTMMetadataConfig *ptr);
+
+/**
  * Free a `MetadataConfig` handle.
  * # Safety
  * Pointer must have been returned by this library, or be null.
@@ -669,6 +685,22 @@ int32_t htm_metadata_config_update_extract_structured_data(const HTMMetadataConf
 uintptr_t htm_metadata_config_update_max_structured_data_size(const HTMMetadataConfigUpdate *ptr);
 
 /**
+ * Create a `DocumentMetadata` from a JSON string. Returns null on failure.
+ * # Safety
+ * JSON string must be valid UTF-8 and null-terminated.
+ * Returned handle must be freed with `htm_document_metadata_free`.
+ */
+HTMDocumentMetadata *htm_document_metadata_from_json(const char *json);
+
+/**
+ * Serialize a `DocumentMetadata` to a JSON string. Returns null on failure.
+ * # Safety
+ * `ptr` must be a valid, non-null pointer returned by a `htm` function.
+ * The returned string must be freed with `htm_free_string`.
+ */
+char *htm_document_metadata_to_json(const HTMDocumentMetadata *ptr);
+
+/**
  * Free a `DocumentMetadata` handle.
  * # Safety
  * Pointer must have been returned by this library, or be null.
@@ -753,6 +785,22 @@ char *htm_document_metadata_twitter_card(const HTMDocumentMetadata *ptr);
 char *htm_document_metadata_meta_tags(const HTMDocumentMetadata *ptr);
 
 /**
+ * Create a `HeaderMetadata` from a JSON string. Returns null on failure.
+ * # Safety
+ * JSON string must be valid UTF-8 and null-terminated.
+ * Returned handle must be freed with `htm_header_metadata_free`.
+ */
+HTMHeaderMetadata *htm_header_metadata_from_json(const char *json);
+
+/**
+ * Serialize a `HeaderMetadata` to a JSON string. Returns null on failure.
+ * # Safety
+ * `ptr` must be a valid, non-null pointer returned by a `htm` function.
+ * The returned string must be freed with `htm_free_string`.
+ */
+char *htm_header_metadata_to_json(const HTMHeaderMetadata *ptr);
+
+/**
  * Free a `HeaderMetadata` handle.
  * # Safety
  * Pointer must have been returned by this library, or be null.
@@ -830,6 +878,22 @@ uintptr_t htm_header_metadata_html_offset(const HTMHeaderMetadata *ptr);
 int32_t htm_header_metadata_is_valid(const HTMHeaderMetadata *this_);
 
 /**
+ * Create a `LinkMetadata` from a JSON string. Returns null on failure.
+ * # Safety
+ * JSON string must be valid UTF-8 and null-terminated.
+ * Returned handle must be freed with `htm_link_metadata_free`.
+ */
+HTMLinkMetadata *htm_link_metadata_from_json(const char *json);
+
+/**
+ * Serialize a `LinkMetadata` to a JSON string. Returns null on failure.
+ * # Safety
+ * `ptr` must be a valid, non-null pointer returned by a `htm` function.
+ * The returned string must be freed with `htm_free_string`.
+ */
+char *htm_link_metadata_to_json(const HTMLinkMetadata *ptr);
+
+/**
  * Free a `LinkMetadata` handle.
  * # Safety
  * Pointer must have been returned by this library, or be null.
@@ -905,6 +969,22 @@ char *htm_link_metadata_attributes(const HTMLinkMetadata *ptr);
 HTMLinkType *htm_link_metadata_classify_link(const char *href);
 
 /**
+ * Create a `ImageMetadata` from a JSON string. Returns null on failure.
+ * # Safety
+ * JSON string must be valid UTF-8 and null-terminated.
+ * Returned handle must be freed with `htm_image_metadata_free`.
+ */
+HTMImageMetadata *htm_image_metadata_from_json(const char *json);
+
+/**
+ * Serialize a `ImageMetadata` to a JSON string. Returns null on failure.
+ * # Safety
+ * `ptr` must be a valid, non-null pointer returned by a `htm` function.
+ * The returned string must be freed with `htm_free_string`.
+ */
+char *htm_image_metadata_to_json(const HTMImageMetadata *ptr);
+
+/**
  * Free a `ImageMetadata` handle.
  * # Safety
  * Pointer must have been returned by this library, or be null.
@@ -947,6 +1027,22 @@ HTMImageType *htm_image_metadata_image_type(const HTMImageMetadata *ptr);
 char *htm_image_metadata_attributes(const HTMImageMetadata *ptr);
 
 /**
+ * Create a `StructuredData` from a JSON string. Returns null on failure.
+ * # Safety
+ * JSON string must be valid UTF-8 and null-terminated.
+ * Returned handle must be freed with `htm_structured_data_free`.
+ */
+HTMStructuredData *htm_structured_data_from_json(const char *json);
+
+/**
+ * Serialize a `StructuredData` to a JSON string. Returns null on failure.
+ * # Safety
+ * `ptr` must be a valid, non-null pointer returned by a `htm` function.
+ * The returned string must be freed with `htm_free_string`.
+ */
+char *htm_structured_data_to_json(const HTMStructuredData *ptr);
+
+/**
  * Free a `StructuredData` handle.
  * # Safety
  * Pointer must have been returned by this library, or be null.
@@ -973,6 +1069,22 @@ char *htm_structured_data_raw_json(const HTMStructuredData *ptr);
  * Pointer must be a valid handle returned by this library.
  */
 char *htm_structured_data_schema_type(const HTMStructuredData *ptr);
+
+/**
+ * Create a `HtmlMetadata` from a JSON string. Returns null on failure.
+ * # Safety
+ * JSON string must be valid UTF-8 and null-terminated.
+ * Returned handle must be freed with `htm_html_metadata_free`.
+ */
+HTMHtmlMetadata *htm_html_metadata_from_json(const char *json);
+
+/**
+ * Serialize a `HtmlMetadata` to a JSON string. Returns null on failure.
+ * # Safety
+ * `ptr` must be a valid, non-null pointer returned by a `htm` function.
+ * The returned string must be freed with `htm_free_string`.
+ */
+char *htm_html_metadata_to_json(const HTMHtmlMetadata *ptr);
 
 /**
  * Free a `HtmlMetadata` handle.
@@ -1015,6 +1127,22 @@ char *htm_html_metadata_images(const HTMHtmlMetadata *ptr);
  * Pointer must be a valid handle returned by this library.
  */
 char *htm_html_metadata_structured_data(const HTMHtmlMetadata *ptr);
+
+/**
+ * Create a `ConversionOptions` from a JSON string. Returns null on failure.
+ * # Safety
+ * JSON string must be valid UTF-8 and null-terminated.
+ * Returned handle must be freed with `htm_conversion_options_free`.
+ */
+HTMConversionOptions *htm_conversion_options_from_json(const char *json);
+
+/**
+ * Serialize a `ConversionOptions` to a JSON string. Returns null on failure.
+ * # Safety
+ * `ptr` must be a valid, non-null pointer returned by a `htm` function.
+ * The returned string must be freed with `htm_free_string`.
+ */
+char *htm_conversion_options_to_json(const HTMConversionOptions *ptr);
 
 /**
  * Free a `ConversionOptions` handle.
@@ -1356,6 +1484,14 @@ HTMConversionOptionsBuilder *htm_conversion_options_builder_preprocessing(HTMCon
 HTMConversionOptions *htm_conversion_options_builder_build(HTMConversionOptionsBuilder *this_);
 
 /**
+ * Create a `ConversionOptionsUpdate` from a JSON string. Returns null on failure.
+ * # Safety
+ * JSON string must be valid UTF-8 and null-terminated.
+ * Returned handle must be freed with `htm_conversion_options_update_free`.
+ */
+HTMConversionOptionsUpdate *htm_conversion_options_update_from_json(const char *json);
+
+/**
  * Free a `ConversionOptionsUpdate` handle.
  * # Safety
  * Pointer must have been returned by this library, or be null.
@@ -1629,6 +1765,22 @@ int32_t htm_conversion_options_update_capture_svg(const HTMConversionOptionsUpda
 int32_t htm_conversion_options_update_infer_dimensions(const HTMConversionOptionsUpdate *ptr);
 
 /**
+ * Create a `PreprocessingOptions` from a JSON string. Returns null on failure.
+ * # Safety
+ * JSON string must be valid UTF-8 and null-terminated.
+ * Returned handle must be freed with `htm_preprocessing_options_free`.
+ */
+HTMPreprocessingOptions *htm_preprocessing_options_from_json(const char *json);
+
+/**
+ * Serialize a `PreprocessingOptions` to a JSON string. Returns null on failure.
+ * # Safety
+ * `ptr` must be a valid, non-null pointer returned by a `htm` function.
+ * The returned string must be freed with `htm_free_string`.
+ */
+char *htm_preprocessing_options_to_json(const HTMPreprocessingOptions *ptr);
+
+/**
  * Free a `PreprocessingOptions` handle.
  * # Safety
  * Pointer must have been returned by this library, or be null.
@@ -1669,6 +1821,14 @@ int32_t htm_preprocessing_options_remove_forms(const HTMPreprocessingOptions *pt
  * Returned pointers must be freed with the appropriate free function.
  */
 HTMPreprocessingOptions *htm_preprocessing_options_default(void);
+
+/**
+ * Create a `PreprocessingOptionsUpdate` from a JSON string. Returns null on failure.
+ * # Safety
+ * JSON string must be valid UTF-8 and null-terminated.
+ * Returned handle must be freed with `htm_preprocessing_options_update_free`.
+ */
+HTMPreprocessingOptionsUpdate *htm_preprocessing_options_update_from_json(const char *json);
 
 /**
  * Free a `PreprocessingOptionsUpdate` handle.

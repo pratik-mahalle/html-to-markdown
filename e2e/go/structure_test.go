@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	htmd "github.com/kreuzberg-dev/html-to-markdown-go"
+	htmd "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3"
 )
 
 func Test_StructureCodeBlock(t *testing.T) {

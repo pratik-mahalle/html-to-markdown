@@ -1,3 +1,3 @@
-# `html-to-markdown-node-linux-arm-gnueabihf`
+# `@kreuzberg/html-to-markdown-node-linux-arm-gnueabihf`
 
-This is the **armv7-unknown-linux-gnueabihf** binary for `html-to-markdown-node`
+This is the **armv7-unknown-linux-gnueabihf** binary for `@kreuzberg/html-to-markdown-node`

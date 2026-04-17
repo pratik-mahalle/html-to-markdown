@@ -4,7 +4,7 @@ defmodule Html_to_markdown.MixProject do
   def project do
     [
       app: :html_to_markdown,
-      version: "3.2.0",
+      version: "3.2.2",
       elixir: "~> 1.14",
       description: "High-performance HTML to Markdown converter",
       package: package(),

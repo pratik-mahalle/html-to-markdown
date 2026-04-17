@@ -14,11 +14,10 @@
 		"markdown",
 		"converter",
 		"rust",
-		"napi",
-		"native"
+		"napi"
 	],
-	"author": "Na'aman Hirschfeld <nhirschfeld@gmail.com>",
-	"homepage": "https://github.com/kreuzberg-dev/html-to-markdown",
+	"author": "Na'aman Hirschfeld <naaman@kreuzberg.dev>",
+	"homepage": "https://kreuzberg.dev",
 	"license": "MIT",
 	"engines": {
 		"node": ">= 10"

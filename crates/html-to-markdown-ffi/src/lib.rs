@@ -59,6 +59,64 @@ pub unsafe extern "C" fn htm_version() -> *const c_char {
     VERSION.as_ptr() as *const c_char
 }
 
+/// Create a `MetadataConfig` from a JSON string. Returns null on failure.
+/// # Safety
+/// JSON string must be valid UTF-8 and null-terminated.
+/// Returned handle must be freed with `htm_metadata_config_free`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_metadata_config_from_json(
+    json: *const c_char,
+) -> *mut html_to_markdown_rs::metadata::MetadataConfig {
+    clear_last_error();
+    if json.is_null() {
+        set_last_error(1, "Null pointer passed for JSON string");
+        return std::ptr::null_mut();
+    }
+    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in JSON string");
+            return std::ptr::null_mut();
+        }
+    };
+    match serde_json::from_str::<html_to_markdown_rs::metadata::MetadataConfig>(c_str) {
+        Ok(val) => Box::into_raw(Box::new(val)),
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// Serialize a `MetadataConfig` to a JSON string. Returns null on failure.
+/// # Safety
+/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
+/// The returned string must be freed with `htm_free_string`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_metadata_config_to_json(
+    ptr: *const html_to_markdown_rs::metadata::MetadataConfig,
+) -> *mut c_char {
+    clear_last_error();
+    if ptr.is_null() {
+        set_last_error(1, "Null pointer passed to to_json");
+        return std::ptr::null_mut();
+    }
+    let val = unsafe { &*ptr };
+    match serde_json::to_string(val) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(e) => {
+                set_last_error(2, &e.to_string());
+                std::ptr::null_mut()
+            }
+        },
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
 /// Free a `MetadataConfig` handle.
 /// # Safety
 /// Pointer must have been returned by this library, or be null.
@@ -345,6 +403,64 @@ pub unsafe extern "C" fn htm_metadata_config_update_max_structured_data_size(
     }
 }
 
+/// Create a `DocumentMetadata` from a JSON string. Returns null on failure.
+/// # Safety
+/// JSON string must be valid UTF-8 and null-terminated.
+/// Returned handle must be freed with `htm_document_metadata_free`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_document_metadata_from_json(
+    json: *const c_char,
+) -> *mut html_to_markdown_rs::metadata::DocumentMetadata {
+    clear_last_error();
+    if json.is_null() {
+        set_last_error(1, "Null pointer passed for JSON string");
+        return std::ptr::null_mut();
+    }
+    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in JSON string");
+            return std::ptr::null_mut();
+        }
+    };
+    match serde_json::from_str::<html_to_markdown_rs::metadata::DocumentMetadata>(c_str) {
+        Ok(val) => Box::into_raw(Box::new(val)),
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// Serialize a `DocumentMetadata` to a JSON string. Returns null on failure.
+/// # Safety
+/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
+/// The returned string must be freed with `htm_free_string`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_document_metadata_to_json(
+    ptr: *const html_to_markdown_rs::metadata::DocumentMetadata,
+) -> *mut c_char {
+    clear_last_error();
+    if ptr.is_null() {
+        set_last_error(1, "Null pointer passed to to_json");
+        return std::ptr::null_mut();
+    }
+    let val = unsafe { &*ptr };
+    match serde_json::to_string(val) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(e) => {
+                set_last_error(2, &e.to_string());
+                std::ptr::null_mut()
+            }
+        },
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
 /// Free a `DocumentMetadata` handle.
 /// # Safety
 /// Pointer must have been returned by this library, or be null.
@@ -574,6 +690,64 @@ pub unsafe extern "C" fn htm_document_metadata_meta_tags(
     }
 }
 
+/// Create a `HeaderMetadata` from a JSON string. Returns null on failure.
+/// # Safety
+/// JSON string must be valid UTF-8 and null-terminated.
+/// Returned handle must be freed with `htm_header_metadata_free`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_header_metadata_from_json(
+    json: *const c_char,
+) -> *mut html_to_markdown_rs::metadata::HeaderMetadata {
+    clear_last_error();
+    if json.is_null() {
+        set_last_error(1, "Null pointer passed for JSON string");
+        return std::ptr::null_mut();
+    }
+    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in JSON string");
+            return std::ptr::null_mut();
+        }
+    };
+    match serde_json::from_str::<html_to_markdown_rs::metadata::HeaderMetadata>(c_str) {
+        Ok(val) => Box::into_raw(Box::new(val)),
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// Serialize a `HeaderMetadata` to a JSON string. Returns null on failure.
+/// # Safety
+/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
+/// The returned string must be freed with `htm_free_string`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_header_metadata_to_json(
+    ptr: *const html_to_markdown_rs::metadata::HeaderMetadata,
+) -> *mut c_char {
+    clear_last_error();
+    if ptr.is_null() {
+        set_last_error(1, "Null pointer passed to to_json");
+        return std::ptr::null_mut();
+    }
+    let val = unsafe { &*ptr };
+    match serde_json::to_string(val) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(e) => {
+                set_last_error(2, &e.to_string());
+                std::ptr::null_mut()
+            }
+        },
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
 /// Free a `HeaderMetadata` handle.
 /// # Safety
 /// Pointer must have been returned by this library, or be null.
@@ -708,6 +882,64 @@ pub unsafe extern "C" fn htm_header_metadata_is_valid(
         1
     } else {
         0
+    }
+}
+
+/// Create a `LinkMetadata` from a JSON string. Returns null on failure.
+/// # Safety
+/// JSON string must be valid UTF-8 and null-terminated.
+/// Returned handle must be freed with `htm_link_metadata_free`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_link_metadata_from_json(
+    json: *const c_char,
+) -> *mut html_to_markdown_rs::metadata::LinkMetadata {
+    clear_last_error();
+    if json.is_null() {
+        set_last_error(1, "Null pointer passed for JSON string");
+        return std::ptr::null_mut();
+    }
+    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in JSON string");
+            return std::ptr::null_mut();
+        }
+    };
+    match serde_json::from_str::<html_to_markdown_rs::metadata::LinkMetadata>(c_str) {
+        Ok(val) => Box::into_raw(Box::new(val)),
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// Serialize a `LinkMetadata` to a JSON string. Returns null on failure.
+/// # Safety
+/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
+/// The returned string must be freed with `htm_free_string`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_link_metadata_to_json(
+    ptr: *const html_to_markdown_rs::metadata::LinkMetadata,
+) -> *mut c_char {
+    clear_last_error();
+    if ptr.is_null() {
+        set_last_error(1, "Null pointer passed to to_json");
+        return std::ptr::null_mut();
+    }
+    let val = unsafe { &*ptr };
+    match serde_json::to_string(val) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(e) => {
+                set_last_error(2, &e.to_string());
+                std::ptr::null_mut()
+            }
+        },
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
     }
 }
 
@@ -873,6 +1105,64 @@ pub unsafe extern "C" fn htm_link_metadata_classify_link(
     Box::into_raw(Box::new(result))
 }
 
+/// Create a `ImageMetadata` from a JSON string. Returns null on failure.
+/// # Safety
+/// JSON string must be valid UTF-8 and null-terminated.
+/// Returned handle must be freed with `htm_image_metadata_free`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_image_metadata_from_json(
+    json: *const c_char,
+) -> *mut html_to_markdown_rs::metadata::ImageMetadata {
+    clear_last_error();
+    if json.is_null() {
+        set_last_error(1, "Null pointer passed for JSON string");
+        return std::ptr::null_mut();
+    }
+    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in JSON string");
+            return std::ptr::null_mut();
+        }
+    };
+    match serde_json::from_str::<html_to_markdown_rs::metadata::ImageMetadata>(c_str) {
+        Ok(val) => Box::into_raw(Box::new(val)),
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// Serialize a `ImageMetadata` to a JSON string. Returns null on failure.
+/// # Safety
+/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
+/// The returned string must be freed with `htm_free_string`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_image_metadata_to_json(
+    ptr: *const html_to_markdown_rs::metadata::ImageMetadata,
+) -> *mut c_char {
+    clear_last_error();
+    if ptr.is_null() {
+        set_last_error(1, "Null pointer passed to to_json");
+        return std::ptr::null_mut();
+    }
+    let val = unsafe { &*ptr };
+    match serde_json::to_string(val) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(e) => {
+                set_last_error(2, &e.to_string());
+                std::ptr::null_mut()
+            }
+        },
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
 /// Free a `ImageMetadata` handle.
 /// # Safety
 /// Pointer must have been returned by this library, or be null.
@@ -976,6 +1266,64 @@ pub unsafe extern "C" fn htm_image_metadata_attributes(
     }
 }
 
+/// Create a `StructuredData` from a JSON string. Returns null on failure.
+/// # Safety
+/// JSON string must be valid UTF-8 and null-terminated.
+/// Returned handle must be freed with `htm_structured_data_free`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_structured_data_from_json(
+    json: *const c_char,
+) -> *mut html_to_markdown_rs::metadata::StructuredData {
+    clear_last_error();
+    if json.is_null() {
+        set_last_error(1, "Null pointer passed for JSON string");
+        return std::ptr::null_mut();
+    }
+    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in JSON string");
+            return std::ptr::null_mut();
+        }
+    };
+    match serde_json::from_str::<html_to_markdown_rs::metadata::StructuredData>(c_str) {
+        Ok(val) => Box::into_raw(Box::new(val)),
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// Serialize a `StructuredData` to a JSON string. Returns null on failure.
+/// # Safety
+/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
+/// The returned string must be freed with `htm_free_string`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_structured_data_to_json(
+    ptr: *const html_to_markdown_rs::metadata::StructuredData,
+) -> *mut c_char {
+    clear_last_error();
+    if ptr.is_null() {
+        set_last_error(1, "Null pointer passed to to_json");
+        return std::ptr::null_mut();
+    }
+    let val = unsafe { &*ptr };
+    match serde_json::to_string(val) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(e) => {
+                set_last_error(2, &e.to_string());
+                std::ptr::null_mut()
+            }
+        },
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
 /// Free a `StructuredData` handle.
 /// # Safety
 /// Pointer must have been returned by this library, or be null.
@@ -1036,6 +1384,64 @@ pub unsafe extern "C" fn htm_structured_data_schema_type(
             Err(_) => std::ptr::null_mut(),
         },
         None => std::ptr::null_mut(),
+    }
+}
+
+/// Create a `HtmlMetadata` from a JSON string. Returns null on failure.
+/// # Safety
+/// JSON string must be valid UTF-8 and null-terminated.
+/// Returned handle must be freed with `htm_html_metadata_free`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_html_metadata_from_json(
+    json: *const c_char,
+) -> *mut html_to_markdown_rs::metadata::HtmlMetadata {
+    clear_last_error();
+    if json.is_null() {
+        set_last_error(1, "Null pointer passed for JSON string");
+        return std::ptr::null_mut();
+    }
+    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in JSON string");
+            return std::ptr::null_mut();
+        }
+    };
+    match serde_json::from_str::<html_to_markdown_rs::metadata::HtmlMetadata>(c_str) {
+        Ok(val) => Box::into_raw(Box::new(val)),
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// Serialize a `HtmlMetadata` to a JSON string. Returns null on failure.
+/// # Safety
+/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
+/// The returned string must be freed with `htm_free_string`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_html_metadata_to_json(
+    ptr: *const html_to_markdown_rs::metadata::HtmlMetadata,
+) -> *mut c_char {
+    clear_last_error();
+    if ptr.is_null() {
+        set_last_error(1, "Null pointer passed to to_json");
+        return std::ptr::null_mut();
+    }
+    let val = unsafe { &*ptr };
+    match serde_json::to_string(val) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(e) => {
+                set_last_error(2, &e.to_string());
+                std::ptr::null_mut()
+            }
+        },
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
     }
 }
 
@@ -1142,6 +1548,64 @@ pub unsafe extern "C" fn htm_html_metadata_structured_data(
             Err(_) => std::ptr::null_mut(),
         },
         Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Create a `ConversionOptions` from a JSON string. Returns null on failure.
+/// # Safety
+/// JSON string must be valid UTF-8 and null-terminated.
+/// Returned handle must be freed with `htm_conversion_options_free`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_from_json(
+    json: *const c_char,
+) -> *mut html_to_markdown_rs::options::ConversionOptions {
+    clear_last_error();
+    if json.is_null() {
+        set_last_error(1, "Null pointer passed for JSON string");
+        return std::ptr::null_mut();
+    }
+    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in JSON string");
+            return std::ptr::null_mut();
+        }
+    };
+    match serde_json::from_str::<html_to_markdown_rs::options::ConversionOptions>(c_str) {
+        Ok(val) => Box::into_raw(Box::new(val)),
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// Serialize a `ConversionOptions` to a JSON string. Returns null on failure.
+/// # Safety
+/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
+/// The returned string must be freed with `htm_free_string`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_to_json(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> *mut c_char {
+    clear_last_error();
+    if ptr.is_null() {
+        set_last_error(1, "Null pointer passed to to_json");
+        return std::ptr::null_mut();
+    }
+    let val = unsafe { &*ptr };
+    match serde_json::to_string(val) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(e) => {
+                set_last_error(2, &e.to_string());
+                std::ptr::null_mut()
+            }
+        },
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
     }
 }
 
@@ -1919,6 +2383,35 @@ pub unsafe extern "C" fn htm_conversion_options_builder_build(
     Box::into_raw(Box::new(result))
 }
 
+/// Create a `ConversionOptionsUpdate` from a JSON string. Returns null on failure.
+/// # Safety
+/// JSON string must be valid UTF-8 and null-terminated.
+/// Returned handle must be freed with `htm_conversion_options_update_free`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_from_json(
+    json: *const c_char,
+) -> *mut html_to_markdown_rs::options::ConversionOptionsUpdate {
+    clear_last_error();
+    if json.is_null() {
+        set_last_error(1, "Null pointer passed for JSON string");
+        return std::ptr::null_mut();
+    }
+    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in JSON string");
+            return std::ptr::null_mut();
+        }
+    };
+    match serde_json::from_str::<html_to_markdown_rs::options::ConversionOptionsUpdate>(c_str) {
+        Ok(val) => Box::into_raw(Box::new(val)),
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
 /// Free a `ConversionOptionsUpdate` handle.
 /// # Safety
 /// Pointer must have been returned by this library, or be null.
@@ -2615,6 +3108,64 @@ pub unsafe extern "C" fn htm_conversion_options_update_infer_dimensions(
     }
 }
 
+/// Create a `PreprocessingOptions` from a JSON string. Returns null on failure.
+/// # Safety
+/// JSON string must be valid UTF-8 and null-terminated.
+/// Returned handle must be freed with `htm_preprocessing_options_free`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_preprocessing_options_from_json(
+    json: *const c_char,
+) -> *mut html_to_markdown_rs::options::PreprocessingOptions {
+    clear_last_error();
+    if json.is_null() {
+        set_last_error(1, "Null pointer passed for JSON string");
+        return std::ptr::null_mut();
+    }
+    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in JSON string");
+            return std::ptr::null_mut();
+        }
+    };
+    match serde_json::from_str::<html_to_markdown_rs::options::PreprocessingOptions>(c_str) {
+        Ok(val) => Box::into_raw(Box::new(val)),
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// Serialize a `PreprocessingOptions` to a JSON string. Returns null on failure.
+/// # Safety
+/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
+/// The returned string must be freed with `htm_free_string`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_preprocessing_options_to_json(
+    ptr: *const html_to_markdown_rs::options::PreprocessingOptions,
+) -> *mut c_char {
+    clear_last_error();
+    if ptr.is_null() {
+        set_last_error(1, "Null pointer passed to to_json");
+        return std::ptr::null_mut();
+    }
+    let val = unsafe { &*ptr };
+    match serde_json::to_string(val) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(e) => {
+                set_last_error(2, &e.to_string());
+                std::ptr::null_mut()
+            }
+        },
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
 /// Free a `PreprocessingOptions` handle.
 /// # Safety
 /// Pointer must have been returned by this library, or be null.
@@ -2692,6 +3243,35 @@ pub unsafe extern "C" fn htm_preprocessing_options_default() -> *mut html_to_mar
     clear_last_error();
     let result = html_to_markdown_rs::options::PreprocessingOptions::default();
     Box::into_raw(Box::new(result))
+}
+
+/// Create a `PreprocessingOptionsUpdate` from a JSON string. Returns null on failure.
+/// # Safety
+/// JSON string must be valid UTF-8 and null-terminated.
+/// Returned handle must be freed with `htm_preprocessing_options_update_free`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_preprocessing_options_update_from_json(
+    json: *const c_char,
+) -> *mut html_to_markdown_rs::options::PreprocessingOptionsUpdate {
+    clear_last_error();
+    if json.is_null() {
+        set_last_error(1, "Null pointer passed for JSON string");
+        return std::ptr::null_mut();
+    }
+    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in JSON string");
+            return std::ptr::null_mut();
+        }
+    };
+    match serde_json::from_str::<html_to_markdown_rs::options::PreprocessingOptionsUpdate>(c_str) {
+        Ok(val) => Box::into_raw(Box::new(val)),
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
 }
 
 /// Free a `PreprocessingOptionsUpdate` handle.

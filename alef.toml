@@ -97,7 +97,7 @@ lib_name = "html_to_markdown_ffi"
 visitor_callbacks = true
 
 [go]
-module = "github.com/kreuzberg-dev/html-to-markdown-go"
+module = "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3"
 package_name = "htmltomarkdown"
 
 [java]
@@ -705,7 +705,7 @@ options_type = "ConversionOptions"
 enum_module = "html_to_markdown._html_to_markdown"
 
 [e2e.call.overrides.go]
-module = "github.com/kreuzberg-dev/html-to-markdown-go"
+module = "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3"
 function = "Convert"
 alias = "htmd"
 options_type = "ConversionOptions"
@@ -810,7 +810,7 @@ name = "html-to-markdown-rs"
 version = "3.2.0"
 
 [e2e.registry.packages.go]
-module = "github.com/kreuzberg-dev/html-to-markdown-go/v3"
+module = "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3"
 version = "v3.2.0"
 
 [e2e.registry.packages.java]
@@ -857,7 +857,7 @@ name = "html-to-markdown"
 path = "../../crates/html-to-markdown-node"
 
 [e2e.packages.go]
-module = "github.com/kreuzberg-dev/html-to-markdown-go"
+module = "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3"
 path = "../../packages/go"
 version = "v0.0.0"
 

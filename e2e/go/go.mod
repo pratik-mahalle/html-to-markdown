@@ -2,6 +2,6 @@ module e2e_go
 
 go 1.23
 
-require github.com/kreuzberg-dev/html-to-markdown-go v0.0.0
+require github.com/kreuzberg-dev/html-to-markdown/packages/go/v3 v0.0.0
 
-replace github.com/kreuzberg-dev/html-to-markdown-go => ../../packages/go
+replace github.com/kreuzberg-dev/html-to-markdown/packages/go/v3 => ../../packages/go

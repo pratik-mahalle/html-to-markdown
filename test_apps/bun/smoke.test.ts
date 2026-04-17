@@ -1,5 +1,5 @@
 import { test, expect, describe } from "bun:test";
-import { convert } from "@kreuzberg/html-to-markdown";
+import { convert } from "@kreuzberg/html-to-markdown-node";
 
 describe("html-to-markdown Bun smoke tests", () => {
   describe("Basic conversion", () => {
@@ -42,7 +42,7 @@ describe("html-to-markdown Bun smoke tests", () => {
       const result = convert(html);
       expect(result).toBeDefined();
       if (result.metadata) {
-        expect(typeof result.metadata).toBe("string");
+        expect(typeof result.metadata).toBe("object");
       }
     });
 

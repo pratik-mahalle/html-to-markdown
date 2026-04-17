@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	htmltomarkdown "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown"
+	htmltomarkdown "github.com/kreuzberg-dev/html-to-markdown/packages/go/v3"
 	"os"
 	"path/filepath"
 	"strings"

@@ -5,6 +5,11 @@ import topLevelAwait from 'vite-plugin-top-level-await';
 
 export default defineConfig({
   plugins: [wasm(), topLevelAwait()],
+  resolve: {
+    alias: {
+      '@kreuzberg/html-to-markdown-wasm': '@kreuzberg/html-to-markdown-wasm/dist-node',
+    },
+  },
   test: {
     include: ['tests/**/*.test.ts'],
   },

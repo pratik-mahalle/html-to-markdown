@@ -8,7 +8,7 @@
     "test:smoke": "bun test smoke.test.ts"
   },
   "dependencies": {
-    "@kreuzberg/html-to-markdown": "3.2.2"
+    "@kreuzberg/html-to-markdown-node": "file:../../crates/html-to-markdown-node"
   },
   "devDependencies": {
     "@types/bun": "latest"
