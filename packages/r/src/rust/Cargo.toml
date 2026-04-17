@@ -18,7 +18,7 @@ html-to-markdown-rs = { path = "vendor/html-to-markdown-rs", features = [
   "metadata",
   "visitor",
 ] }
-extendr-api = "0.8"
+extendr-api = "0.9"
 serde_json = "1.0"
 
 [features]
