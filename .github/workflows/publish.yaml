@@ -905,10 +905,9 @@ jobs:
           target: ${{ matrix.settings.target }}
 
       - name: Build Elixir NIF
-        working-directory: packages/elixir/native/html_to_markdown_nif
         env:
           CARGO_BUILD_TARGET: ${{ matrix.settings.target }}
-        run: cargo build --release --target ${{ matrix.settings.target }}
+        run: cargo build --release --target ${{ matrix.settings.target }} --manifest-path packages/elixir/native/html_to_markdown_nif/Cargo.toml
 
       - name: Package NIF (NIF 2.16)
         shell: bash
@@ -916,6 +915,7 @@ jobs:
           VERSION="${{ needs.prepare.outputs.version }}"
           TARGET="${{ matrix.settings.target }}"
           NIF_VERSION="2.16"
+          NIF_DIR="packages/elixir/native/html_to_markdown_nif"
           if [[ "${{ runner.os }}" == "macOS" ]]; then
             LIB_NAME="libhtml_to_markdown_nif.dylib"; EXT="so"
           else
@@ -923,8 +923,8 @@ jobs:
           fi
           mkdir -p dist/elixir
           ARTIFACT="libhtml_to_markdown_nif-v${VERSION}-nif-${NIF_VERSION}-${TARGET}.${EXT}"
-          LIB_PATH="target/${TARGET}/release/${LIB_NAME}"
-          [[ ! -f "$LIB_PATH" ]] && LIB_PATH="target/release/${LIB_NAME}"
+          LIB_PATH="${NIF_DIR}/target/${TARGET}/release/${LIB_NAME}"
+          [[ ! -f "$LIB_PATH" ]] && LIB_PATH="${NIF_DIR}/target/release/${LIB_NAME}"
           cp "$LIB_PATH" "${ARTIFACT}"
           tar -czf "dist/elixir/${ARTIFACT}.tar.gz" "${ARTIFACT}"
 
@@ -934,14 +934,15 @@ jobs:
           VERSION="${{ needs.prepare.outputs.version }}"
           TARGET="${{ matrix.settings.target }}"
           NIF_VERSION="2.17"
+          NIF_DIR="packages/elixir/native/html_to_markdown_nif"
           if [[ "${{ runner.os }}" == "macOS" ]]; then
             LIB_NAME="libhtml_to_markdown_nif.dylib"; EXT="so"
           else
             LIB_NAME="libhtml_to_markdown_nif.so"; EXT="so"
           fi
           ARTIFACT="libhtml_to_markdown_nif-v${VERSION}-nif-${NIF_VERSION}-${TARGET}.${EXT}"
-          LIB_PATH="target/${TARGET}/release/${LIB_NAME}"
-          [[ ! -f "$LIB_PATH" ]] && LIB_PATH="target/release/${LIB_NAME}"
+          LIB_PATH="${NIF_DIR}/target/${TARGET}/release/${LIB_NAME}"
+          [[ ! -f "$LIB_PATH" ]] && LIB_PATH="${NIF_DIR}/target/release/${LIB_NAME}"
           cp "$LIB_PATH" "${ARTIFACT}"
           tar -czf "dist/elixir/${ARTIFACT}.tar.gz" "${ARTIFACT}"
 
