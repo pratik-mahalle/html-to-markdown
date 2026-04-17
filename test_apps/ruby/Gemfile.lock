@@ -3,8 +3,8 @@ GEM
   specs:
     ast (2.4.3)
     diff-lcs (1.6.2)
-    html-to-markdown (3.2.2-arm64-darwin)
-    html-to-markdown (3.2.2-x86_64-linux)
+    html-to-markdown (3.2.4-arm64-darwin)
+    html-to-markdown (3.2.4-x86_64-linux)
     json (2.19.3)
     language_server-protocol (3.17.0.5)
     lint_roller (1.1.0)
@@ -64,8 +64,8 @@ DEPENDENCIES
 CHECKSUMS
   ast (2.4.3) sha256=954615157c1d6a382bc27d690d973195e79db7f55e9765ac7c481c60bdb4d383
   diff-lcs (1.6.2) sha256=9ae0d2cba7d4df3075fe8cd8602a8604993efc0dfa934cff568969efb1909962
-  html-to-markdown (3.2.2-arm64-darwin) sha256=fd9cf909204a62fef86336dcdbffe95ed7ce6ab29da0f274ef2d079863b64685
-  html-to-markdown (3.2.2-x86_64-linux) sha256=5a89a6aaebf02a951832c66fd50fb589c42a5ca4c6e09c012c7af6e3bcd3ac92
+  html-to-markdown (3.2.4-arm64-darwin) sha256=5cc5d2b0098f2ca34efb17f2c4f9332112e10145582cb52fb516f30fa6d0b9c1
+  html-to-markdown (3.2.4-x86_64-linux) sha256=7ff18ee801d92ae2e72d51d2149026828904334e0388013fcab0f54c0f9b0ba1
   json (2.19.3) sha256=289b0bb53052a1fa8c34ab33cc750b659ba14a5c45f3fcf4b18762dc67c78646
   language_server-protocol (3.17.0.5) sha256=fd1e39a51a28bf3eec959379985a72e296e9f9acfce46f6a79d31ca8760803cc
   lint_roller (1.1.0) sha256=2c0c845b632a7d172cb849cc90c1bce937a28c5c8ccccb50dfd46a485003cc87
