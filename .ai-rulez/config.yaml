@@ -14,6 +14,11 @@ includes:
     path: modules/core
     merge_strategy: local-override
     local_override: ../ai-rulez
+  - name: kreuzberg-languages
+    source: https://github.com/kreuzberg-dev/ai-rulez.git
+    path: modules/languages
+    merge_strategy: local-override
+    local_override: ../ai-rulez
   - name: kreuzberg-cicd
     source: https://github.com/kreuzberg-dev/ai-rulez.git
     path: modules/cicd
@@ -33,20 +38,14 @@ includes:
 builtins:
   - rust
   - python
-  - pyo3
   - typescript
-  - napi-rs
   - go
   - java
   - ruby
-  - magnus
   - php
-  - ext-php-rs
   - csharp
   - elixir
-  - rustler
   - r
-  - wasm
   - security
   - git-workflow
   - code-quality
