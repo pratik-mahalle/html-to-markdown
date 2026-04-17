@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.3] - 2026-04-17
+
+### Fixed
+
+- **Java/C#/Go FFI functions** — `htm_conversion_options_from_json`, `htm_preprocessing_options_from_json`, and related `to_json` functions now generated. Fixed alef IR extraction to detect serde derives inside `#[cfg_attr(...)]` attributes.
+- **Node.js native binding loader** — regenerated `index.js` with correct NAPI platform-aware loader (was referencing old `html-to-markdown-rs.node` binary name).
+- **Go module path** — fixed from non-existent `github.com/kreuzberg-dev/html-to-markdown-go` to monorepo path `github.com/kreuzberg-dev/html-to-markdown/packages/go/v3`.
+- **Elixir precompiled NIFs** — switched from `Rustler` (compile-from-source) to `RustlerPrecompiled` with CI jobs for building and uploading platform-specific NIF binaries to GitHub releases.
+
+### Removed
+
+- Stale hand-written test files superseded by alef-generated e2e tests (comprehensive_test, feature_test, smoke_test duplicates across Go, Python, Ruby, PHP, Node, WASM, Elixir, R).
+- Empty placeholder crate directories (`html-to-markdown-rs-ffi`, `html-to-markdown-rs-wasm`).
+- Duplicate Ruby extension directory (`html-to-markdown_rb` with wrong naming).
+
 ## [3.2.2] - 2026-04-16
 
 ### Fixed
