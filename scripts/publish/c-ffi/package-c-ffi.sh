@@ -84,6 +84,11 @@ fi
 # Copy shared library
 cp -f "${shared_path}" "${root}/lib/${shared_lib}"
 
+# Fix macOS dylib install_name (replace CI runner absolute path with @rpath)
+if [[ "${shared_lib}" == *.dylib ]]; then
+  install_name_tool -id "@rpath/${shared_lib}" "${root}/lib/${shared_lib}" 2>/dev/null || true
+fi
+
 # Copy static library (if it exists)
 if [[ -n "${static_path}" && -f "${static_path}" ]]; then
   cp -f "${static_path}" "${root}/lib/${static_lib}"
