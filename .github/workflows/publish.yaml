@@ -874,6 +874,115 @@ jobs:
           path: packages/ruby/pkg/*.gem
           retention-days: 14
 
+  elixir-natives:
+    name: Build Elixir native libs (${{ matrix.settings.label }})
+    needs: [prepare]
+    if: ${{ needs.prepare.outputs.is_tag == 'true' }}
+    runs-on: ${{ matrix.settings.os }}
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        settings:
+          - os: ubuntu-24.04-arm
+            label: linux-aarch64
+            target: aarch64-unknown-linux-gnu
+          - os: ubuntu-latest
+            label: linux-x86_64
+            target: x86_64-unknown-linux-gnu
+          - os: macos-latest
+            label: macos-arm64
+            target: aarch64-apple-darwin
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.prepare.outputs.ref }}
+
+      - name: Setup Rust
+        uses: kreuzberg-dev/actions/setup-rust@v1
+        with:
+          target: ${{ matrix.settings.target }}
+
+      - name: Build Elixir NIF
+        working-directory: packages/elixir/native/html_to_markdown_nif
+        env:
+          CARGO_BUILD_TARGET: ${{ matrix.settings.target }}
+        run: cargo build --release --target ${{ matrix.settings.target }}
+
+      - name: Package NIF (NIF 2.16)
+        shell: bash
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          TARGET="${{ matrix.settings.target }}"
+          NIF_VERSION="2.16"
+          if [[ "${{ runner.os }}" == "macOS" ]]; then
+            LIB_NAME="libhtml_to_markdown_nif.dylib"; EXT="so"
+          else
+            LIB_NAME="libhtml_to_markdown_nif.so"; EXT="so"
+          fi
+          mkdir -p dist/elixir
+          ARTIFACT="libhtml_to_markdown_nif-v${VERSION}-nif-${NIF_VERSION}-${TARGET}.${EXT}"
+          LIB_PATH="target/${TARGET}/release/${LIB_NAME}"
+          [[ ! -f "$LIB_PATH" ]] && LIB_PATH="target/release/${LIB_NAME}"
+          cp "$LIB_PATH" "${ARTIFACT}"
+          tar -czf "dist/elixir/${ARTIFACT}.tar.gz" "${ARTIFACT}"
+
+      - name: Package NIF (NIF 2.17)
+        shell: bash
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          TARGET="${{ matrix.settings.target }}"
+          NIF_VERSION="2.17"
+          if [[ "${{ runner.os }}" == "macOS" ]]; then
+            LIB_NAME="libhtml_to_markdown_nif.dylib"; EXT="so"
+          else
+            LIB_NAME="libhtml_to_markdown_nif.so"; EXT="so"
+          fi
+          ARTIFACT="libhtml_to_markdown_nif-v${VERSION}-nif-${NIF_VERSION}-${TARGET}.${EXT}"
+          LIB_PATH="target/${TARGET}/release/${LIB_NAME}"
+          [[ ! -f "$LIB_PATH" ]] && LIB_PATH="target/release/${LIB_NAME}"
+          cp "$LIB_PATH" "${ARTIFACT}"
+          tar -czf "dist/elixir/${ARTIFACT}.tar.gz" "${ARTIFACT}"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: elixir-${{ matrix.settings.label }}
+          path: dist/elixir/*.tar.gz
+          if-no-files-found: error
+          retention-days: 1
+
+  upload-elixir-release:
+    name: Upload Elixir NIF binaries to GitHub Release
+    needs: [prepare, elixir-natives]
+    if: ${{ always() && needs.prepare.outputs.is_tag == 'true' && needs.elixir-natives.result == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.prepare.outputs.ref }}
+
+      - name: Download Elixir NIF artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: elixir-*
+          path: dist/elixir
+          merge-multiple: true
+
+      - name: Upload to GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ needs.prepare.outputs.tag }}"
+          for file in dist/elixir/*.tar.gz; do
+            echo "Uploading $(basename "$file")..."
+            gh release upload "$TAG" "$file" --clobber
+          done
+
   elixir-package:
     name: Build Elixir Hex package (${{ matrix.label }})
     needs: prepare
@@ -1415,7 +1524,7 @@ jobs:
 
   publish-hex:
     name: Publish Hex package
-    needs: [prepare, elixir-package, check-hex]
+    needs: [prepare, elixir-package, check-hex, upload-elixir-release]
     if: ${{ always() && needs.elixir-package.result == 'success' && needs.prepare.outputs.dry_run != 'true' && needs.prepare.outputs.is_tag == 'true' && needs.check-hex.outputs.exists != 'true' }}
     runs-on: ubuntu-latest
     permissions:
@@ -1451,6 +1560,9 @@ jobs:
       - name: Install Hex/Rebar
         run: scripts/publish/elixir/install-hex-rebar.sh
         shell: bash
+
+      - name: Generate NIF checksums from GitHub release
+        run: scripts/publish/generate_elixir_checksums.sh "${{ needs.prepare.outputs.version }}"
 
       - name: Install dependencies
         run: scripts/publish/elixir/install-deps.sh
