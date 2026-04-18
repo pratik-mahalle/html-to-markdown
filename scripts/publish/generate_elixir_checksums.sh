@@ -33,7 +33,8 @@ for TARGET in "${TARGETS[@]}"; do
       fi
       CHECKSUMS+=("  \"${FILENAME}\" => \"sha256:${CHECKSUM}\",")
     else
-      echo "  ERROR: Failed to download $FILENAME"; exit 1
+      echo "  ERROR: Failed to download $FILENAME"
+      exit 1
     fi
   done
 done

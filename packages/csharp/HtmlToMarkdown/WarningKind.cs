@@ -34,4 +34,9 @@ public enum WarningKind
     /// </summary>
     [JsonPropertyName("sanitization_applied")]
     SanitizationApplied,
+    /// <summary>
+    /// DOM traversal was truncated because max_depth was exceeded.
+    /// </summary>
+    [JsonPropertyName("depth_limit_exceeded")]
+    DepthLimitExceeded,
 }

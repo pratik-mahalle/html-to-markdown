@@ -128,6 +128,7 @@ def _to_rust_conversion_options(value: ConversionOptions | None) -> _rust.Conver
         max_image_size=value.max_image_size,
         capture_svg=value.capture_svg,
         infer_dimensions=value.infer_dimensions,
+        max_depth=value.max_depth,
     )
 
 

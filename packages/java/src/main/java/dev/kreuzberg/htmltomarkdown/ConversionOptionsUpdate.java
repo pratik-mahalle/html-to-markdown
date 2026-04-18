@@ -43,7 +43,8 @@ public record ConversionOptionsUpdate(
     @JsonProperty("extract_images") Optional<Boolean> extractImages,
     @JsonProperty("max_image_size") Optional<Long> maxImageSize,
     @JsonProperty("capture_svg") Optional<Boolean> captureSvg,
-    @JsonProperty("infer_dimensions") Optional<Boolean> inferDimensions
+    @JsonProperty("infer_dimensions") Optional<Boolean> inferDimensions,
+    @JsonProperty("max_depth") Optional<Long> maxDepth
 ) {
     public static ConversionOptionsUpdateBuilder builder() {
         return new ConversionOptionsUpdateBuilder();

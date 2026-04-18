@@ -2189,6 +2189,23 @@ pub unsafe extern "C" fn htm_conversion_options_infer_dimensions(
     obj.infer_dimensions as i32
 }
 
+/// Get the `max_depth` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_max_depth(
+    ptr: *const html_to_markdown_rs::options::ConversionOptions,
+) -> usize {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.max_depth {
+        Some(val) => *val,
+        None => 0,
+    }
+}
+
 /// # Safety
 /// Caller must ensure all pointer arguments are valid or null.
 /// Returned pointers must be freed with the appropriate free function.
@@ -3104,6 +3121,24 @@ pub unsafe extern "C" fn htm_conversion_options_update_infer_dimensions(
     let obj = unsafe { &*ptr };
     match &obj.infer_dimensions {
         Some(val) => *val as i32,
+        None => 0,
+    }
+}
+
+/// Get the `max_depth` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_max_depth(
+    ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> usize {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.max_depth {
+        Some(Some(inner_val)) => *inner_val,
+        Some(None) => 0,
         None => 0,
     }
 }
@@ -5057,6 +5092,7 @@ pub unsafe extern "C" fn htm_warning_kind_from_i32(value: i32) -> i32 {
         2 => 2, // TruncatedInput
         3 => 3, // MalformedHtml
         4 => 4, // SanitizationApplied
+        5 => 5, // DepthLimitExceeded
         _ => {
             set_last_error(1, "Invalid WarningKind variant");
             -1
@@ -5086,6 +5122,7 @@ pub unsafe extern "C" fn htm_warning_kind_from_str(name: *const c_char) -> i32 {
         "TruncatedInput" => 2,
         "MalformedHtml" => 3,
         "SanitizationApplied" => 4,
+        "DepthLimitExceeded" => 5,
         _ => {
             set_last_error(1, "Unknown WarningKind variant");
             -1

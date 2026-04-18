@@ -184,6 +184,7 @@ class ConversionOptions:
     max_image_size: int
     capture_svg: bool
     infer_dimensions: bool
+    max_depth: int | None
     def __init__(
         self,
         heading_style: HeadingStyle | str,
@@ -224,6 +225,7 @@ class ConversionOptions:
         max_image_size: int,
         capture_svg: bool,
         infer_dimensions: bool,
+        max_depth: int | None = None,
     ) -> None: ...
     @staticmethod
     def default() -> ConversionOptions: ...
@@ -276,6 +278,7 @@ class ConversionOptionsUpdate:
     max_image_size: int | None
     capture_svg: bool | None
     infer_dimensions: bool | None
+    max_depth: int | None
     def __init__(
         self,
         heading_style: HeadingStyle | str | None = None,
@@ -316,6 +319,7 @@ class ConversionOptionsUpdate:
         max_image_size: int | None = None,
         capture_svg: bool | None = None,
         infer_dimensions: bool | None = None,
+        max_depth: int | None = None,
     ) -> None: ...
 
 class PreprocessingOptions:
@@ -515,6 +519,7 @@ class WarningKind:
     TruncatedInput: WarningKind = ...
     MalformedHtml: WarningKind = ...
     SanitizationApplied: WarningKind = ...
+    DepthLimitExceeded: WarningKind = ...
     def __init__(self, value: int | str) -> None: ...
 
 def convert(html: str, options: ConversionOptions | None = None) -> ConversionResult: ...

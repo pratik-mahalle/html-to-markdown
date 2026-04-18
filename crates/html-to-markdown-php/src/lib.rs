@@ -232,7 +232,7 @@ impl DocumentMetadata {
     }
 }
 
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, serde::Serialize, serde::Deserialize, Default)]
 #[php_class]
 #[php(name = "Html\\To\\Markdown\\Rs\\HeaderMetadata")]
 pub struct HeaderMetadata {
@@ -277,7 +277,7 @@ impl HeaderMetadata {
     }
 }
 
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, serde::Serialize, serde::Deserialize, Default)]
 #[php_class]
 #[php(name = "Html\\To\\Markdown\\Rs\\LinkMetadata")]
 pub struct LinkMetadata {
@@ -319,7 +319,7 @@ impl LinkMetadata {
     }
 }
 
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, serde::Serialize, serde::Deserialize, Default)]
 #[php_class]
 #[php(name = "Html\\To\\Markdown\\Rs\\ImageMetadata")]
 pub struct ImageMetadata {
@@ -354,7 +354,7 @@ impl ImageMetadata {
     }
 }
 
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, serde::Serialize, serde::Deserialize, Default)]
 #[php_class]
 #[php(name = "Html\\To\\Markdown\\Rs\\StructuredData")]
 pub struct StructuredData {
@@ -542,6 +542,10 @@ pub struct ConversionOptions {
     /// Infer image dimensions from data.
     #[php(prop, name = "infer_dimensions")]
     pub infer_dimensions: bool,
+    /// Maximum DOM traversal depth. `None` means unlimited.
+    /// When set, subtrees beyond this depth are silently truncated.
+    #[php(prop, name = "max_depth")]
+    pub max_depth: Option<i64>,
 }
 
 #[php_impl]
@@ -723,6 +727,9 @@ pub struct ConversionOptionsUpdate {
     /// Optional override for [`ConversionOptions::infer_dimensions`].
     #[php(prop, name = "infer_dimensions")]
     pub infer_dimensions: Option<bool>,
+    /// Optional override for [`ConversionOptions::max_depth`].
+    #[php(prop, name = "max_depth")]
+    pub max_depth: Option<Option<i64>>,
 }
 
 #[php_impl]
@@ -792,7 +799,7 @@ impl PreprocessingOptionsUpdate {
     }
 }
 
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, serde::Serialize, serde::Deserialize, Default)]
 #[php_class]
 #[php(name = "Html\\To\\Markdown\\Rs\\DocumentStructure")]
 pub struct DocumentStructure {
@@ -815,7 +822,7 @@ impl DocumentStructure {
     }
 }
 
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, serde::Serialize, serde::Deserialize, Default)]
 #[php_class]
 #[php(name = "Html\\To\\Markdown\\Rs\\DocumentNode")]
 pub struct DocumentNode {
@@ -854,7 +861,7 @@ impl DocumentNode {
     }
 }
 
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, serde::Serialize, serde::Deserialize, Default)]
 #[php_class]
 #[php(name = "Html\\To\\Markdown\\Rs\\TextAnnotation")]
 pub struct TextAnnotation {
@@ -957,7 +964,7 @@ impl TableGrid {
     }
 }
 
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, serde::Serialize, serde::Deserialize, Default)]
 #[php_class]
 #[php(name = "Html\\To\\Markdown\\Rs\\GridCell")]
 #[allow(clippy::similar_names)]
@@ -996,7 +1003,7 @@ impl GridCell {
     }
 }
 
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, serde::Serialize, serde::Deserialize, Default)]
 #[php_class]
 #[php(name = "Html\\To\\Markdown\\Rs\\TableData")]
 pub struct TableData {
@@ -1019,7 +1026,7 @@ impl TableData {
     }
 }
 
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, serde::Serialize, serde::Deserialize, Default)]
 #[php_class]
 #[php(name = "Html\\To\\Markdown\\Rs\\ProcessingWarning")]
 pub struct ProcessingWarning {
@@ -1136,6 +1143,7 @@ pub const WARNINGKIND_ENCODINGFALLBACK: &str = "EncodingFallback";
 pub const WARNINGKIND_TRUNCATEDINPUT: &str = "TruncatedInput";
 pub const WARNINGKIND_MALFORMEDHTML: &str = "MalformedHtml";
 pub const WARNINGKIND_SANITIZATIONAPPLIED: &str = "SanitizationApplied";
+pub const WARNINGKIND_DEPTHLIMITEXCEEDED: &str = "DepthLimitExceeded";
 
 #[php_class]
 #[php(name = "Html\\To\\Markdown\\Rs\\HtmlToMarkdownRsApi")]
@@ -1401,6 +1409,7 @@ impl From<html_to_markdown_rs::options::ConversionOptions> for ConversionOptions
             max_image_size: val.max_image_size as i64,
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
+            max_depth: val.max_depth.map(|v| v as i64),
         }
     }
 }
@@ -1486,6 +1495,7 @@ impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for ConversionO
             max_image_size: val.max_image_size.map(|v| v as i64),
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
+            max_depth: val.max_depth.map(|v| v as i64),
         }
     }
 }

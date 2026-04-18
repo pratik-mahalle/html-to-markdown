@@ -242,4 +242,10 @@ public sealed class ConversionOptionsUpdate
     [JsonPropertyName("infer_dimensions")]
     public bool? InferDimensions { get; set; } = null;
 
+    /// <summary>
+    /// Optional override for [`ConversionOptions::max_depth`].
+    /// </summary>
+    [JsonPropertyName("max_depth")]
+    public ulong? MaxDepth { get; set; } = null;
+
 }

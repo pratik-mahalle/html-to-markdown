@@ -288,6 +288,9 @@ class ConversionOptions:
     infer_dimensions: bool = True
     """Infer image dimensions from data."""
 
+    max_depth: int | None = None
+    """Maximum DOM traversal depth. `None` means unlimited."""
+
 
 @dataclass
 class PreprocessingOptions:

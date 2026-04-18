@@ -44,6 +44,7 @@ public class ConversionOptionsUpdateBuilder {
     private Optional<Long> maxImageSize = Optional.empty();
     private Optional<Boolean> captureSvg = Optional.empty();
     private Optional<Boolean> inferDimensions = Optional.empty();
+    private Optional<Long> maxDepth = Optional.empty();
 
     public ConversionOptionsUpdateBuilder withHeadingStyle(Optional<HeadingStyle> value) {
         this.headingStyle = value;
@@ -235,6 +236,11 @@ public class ConversionOptionsUpdateBuilder {
         return this;
     }
 
+    public ConversionOptionsUpdateBuilder withMaxDepth(Optional<Long> value) {
+        this.maxDepth = value;
+        return this;
+    }
+
     public ConversionOptionsUpdate build() {
         return new ConversionOptionsUpdate(
             headingStyle,
@@ -274,7 +280,8 @@ public class ConversionOptionsUpdateBuilder {
             extractImages,
             maxImageSize,
             captureSvg,
-            inferDimensions
+            inferDimensions,
+            maxDepth
         );
     }
 }

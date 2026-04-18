@@ -40,8 +40,9 @@ fn json_to_ruby(handle: &Ruby, val: serde_json::Value) -> magnus::Value {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::MetadataConfig")]
+#[serde(default)]
 pub struct MetadataConfig {
     pub extract_document: bool,
     pub extract_headers: bool,
@@ -130,8 +131,9 @@ impl MetadataConfig {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::MetadataConfigUpdate")]
+#[serde(default)]
 pub struct MetadataConfigUpdate {
     pub extract_document: Option<bool>,
     pub extract_headers: Option<bool>,
@@ -208,8 +210,9 @@ impl MetadataConfigUpdate {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::DocumentMetadata")]
+#[serde(default)]
 pub struct DocumentMetadata {
     pub title: Option<String>,
     pub description: Option<String>,
@@ -308,7 +311,7 @@ impl DocumentMetadata {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::HeaderMetadata")]
 pub struct HeaderMetadata {
     pub level: u8,
@@ -371,7 +374,7 @@ impl HeaderMetadata {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::LinkMetadata")]
 pub struct LinkMetadata {
     pub href: String,
@@ -436,7 +439,7 @@ impl LinkMetadata {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::ImageMetadata")]
 pub struct ImageMetadata {
     pub src: String,
@@ -501,7 +504,7 @@ impl ImageMetadata {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::StructuredData")]
 pub struct StructuredData {
     pub data_type: StructuredDataType,
@@ -541,8 +544,9 @@ impl StructuredData {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::HtmlMetadata")]
+#[serde(default)]
 pub struct HtmlMetadata {
     pub document: DocumentMetadata,
     pub headers: Vec<HeaderMetadata>,
@@ -599,8 +603,9 @@ impl HtmlMetadata {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::ConversionOptions")]
+#[serde(default)]
 pub struct ConversionOptions {
     pub heading_style: HeadingStyle,
     pub list_indent_type: ListIndentType,
@@ -640,6 +645,7 @@ pub struct ConversionOptions {
     pub max_image_size: u64,
     pub capture_svg: bool,
     pub infer_dimensions: bool,
+    pub max_depth: Option<usize>,
 }
 
 unsafe impl IntoValueFromNative for ConversionOptions {}
@@ -808,6 +814,9 @@ impl ConversionOptions {
                 .get(ruby.to_symbol("infer_dimensions"))
                 .and_then(|v| bool::try_convert(v).ok())
                 .unwrap_or(true),
+            max_depth: kwargs
+                .get(ruby.to_symbol("max_depth"))
+                .and_then(|v| usize::try_convert(v).ok()),
         })
     }
 
@@ -962,6 +971,10 @@ impl ConversionOptions {
     fn infer_dimensions(&self) -> bool {
         self.infer_dimensions
     }
+
+    fn max_depth(&self) -> Option<usize> {
+        self.max_depth
+    }
 }
 
 #[derive(Clone)]
@@ -1010,8 +1023,9 @@ impl ConversionOptionsBuilder {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::ConversionOptionsUpdate")]
+#[serde(default)]
 pub struct ConversionOptionsUpdate {
     pub heading_style: Option<HeadingStyle>,
     pub list_indent_type: Option<ListIndentType>,
@@ -1051,6 +1065,7 @@ pub struct ConversionOptionsUpdate {
     pub max_image_size: Option<u64>,
     pub capture_svg: Option<bool>,
     pub infer_dimensions: Option<bool>,
+    pub max_depth: Option<Option<usize>>,
 }
 
 unsafe impl IntoValueFromNative for ConversionOptionsUpdate {}
@@ -1181,6 +1196,9 @@ impl ConversionOptionsUpdate {
             infer_dimensions: kwargs
                 .get(ruby.to_symbol("infer_dimensions"))
                 .and_then(|v| bool::try_convert(v).ok()),
+            max_depth: kwargs
+                .get(ruby.to_symbol("max_depth"))
+                .and_then(|v| <Option<usize>>::try_convert(v).ok()),
         })
     }
 
@@ -1335,10 +1353,15 @@ impl ConversionOptionsUpdate {
     fn infer_dimensions(&self) -> Option<bool> {
         self.infer_dimensions
     }
+
+    fn max_depth(&self) -> Option<Option<usize>> {
+        self.max_depth.clone()
+    }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::PreprocessingOptions")]
+#[serde(default)]
 pub struct PreprocessingOptions {
     pub enabled: bool,
     pub preset: PreprocessingPreset,
@@ -1388,8 +1411,9 @@ impl PreprocessingOptions {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::PreprocessingOptionsUpdate")]
+#[serde(default)]
 pub struct PreprocessingOptionsUpdate {
     pub enabled: Option<bool>,
     pub preset: Option<PreprocessingPreset>,
@@ -1439,7 +1463,7 @@ impl PreprocessingOptionsUpdate {
     }
 }
 
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::DocumentStructure")]
 pub struct DocumentStructure {
     pub nodes: Vec<DocumentNode>,
@@ -1470,7 +1494,7 @@ impl DocumentStructure {
     }
 }
 
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::DocumentNode")]
 pub struct DocumentNode {
     pub id: String,
@@ -1535,7 +1559,7 @@ impl DocumentNode {
     }
 }
 
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::TextAnnotation")]
 pub struct TextAnnotation {
     pub start: u32,
@@ -1571,8 +1595,9 @@ impl TextAnnotation {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::ConversionResult")]
+#[serde(default)]
 pub struct ConversionResult {
     pub content: Option<String>,
     pub document: Option<DocumentStructure>,
@@ -1636,7 +1661,7 @@ impl ConversionResult {
     }
 }
 
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize, Default)]
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::TableGrid")]
 #[serde(default)]
 pub struct TableGrid {
@@ -1677,7 +1702,7 @@ impl TableGrid {
     }
 }
 
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::GridCell")]
 pub struct GridCell {
     pub content: String,
@@ -1735,7 +1760,7 @@ impl GridCell {
     }
 }
 
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::TableData")]
 pub struct TableData {
     pub grid: TableGrid,
@@ -1766,7 +1791,7 @@ impl TableData {
     }
 }
 
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::ProcessingWarning")]
 pub struct ProcessingWarning {
     pub message: String,
@@ -2475,6 +2500,7 @@ pub enum WarningKind {
     TruncatedInput,
     MalformedHtml,
     SanitizationApplied,
+    DepthLimitExceeded,
 }
 
 impl Default for WarningKind {
@@ -2491,6 +2517,7 @@ impl magnus::IntoValue for WarningKind {
             WarningKind::TruncatedInput => "truncated_input",
             WarningKind::MalformedHtml => "malformed_html",
             WarningKind::SanitizationApplied => "sanitization_applied",
+            WarningKind::DepthLimitExceeded => "depth_limit_exceeded",
         };
         handle.to_symbol(sym).into_value_with(handle)
     }
@@ -2505,6 +2532,7 @@ impl magnus::TryConvert for WarningKind {
             "truncated_input" => Ok(WarningKind::TruncatedInput),
             "malformed_html" => Ok(WarningKind::MalformedHtml),
             "sanitization_applied" => Ok(WarningKind::SanitizationApplied),
+            "depth_limit_exceeded" => Ok(WarningKind::DepthLimitExceeded),
             other => Err(magnus::Error::new(
                 unsafe { Ruby::get_unchecked() }.exception_arg_error(),
                 format!("invalid WarningKind value: {other}"),
@@ -2772,6 +2800,7 @@ impl From<ConversionOptions> for html_to_markdown_rs::options::ConversionOptions
             max_image_size: val.max_image_size,
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
+            max_depth: val.max_depth,
         }
     }
 }
@@ -2817,6 +2846,7 @@ impl From<html_to_markdown_rs::options::ConversionOptions> for ConversionOptions
             max_image_size: val.max_image_size,
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
+            max_depth: val.max_depth,
         }
     }
 }
@@ -2862,6 +2892,7 @@ impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for ConversionO
             max_image_size: val.max_image_size,
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
+            max_depth: val.max_depth,
         }
     }
 }
@@ -3338,36 +3369,46 @@ impl From<html_to_markdown_rs::options::OutputFormat> for OutputFormat {
 impl From<NodeContent> for html_to_markdown_rs::NodeContent {
     fn from(val: NodeContent) -> Self {
         match val {
-            NodeContent::Heading { level, text } => Self::Heading { level, text },
-            NodeContent::Paragraph { text } => Self::Paragraph { text },
-            NodeContent::List { ordered } => Self::List { ordered },
-            NodeContent::ListItem { text } => Self::ListItem { text },
-            NodeContent::Table { grid } => Self::Table { grid: grid.into() },
+            NodeContent::Heading { level, text } => Self::Heading {
+                level: val.level,
+                text: val.text,
+            },
+            NodeContent::Paragraph { text } => Self::Paragraph { text: val.text },
+            NodeContent::List { ordered } => Self::List { ordered: val.ordered },
+            NodeContent::ListItem { text } => Self::ListItem { text: val.text },
+            NodeContent::Table { grid } => Self::Table { grid: val.grid.into() },
             NodeContent::Image {
                 description,
                 src,
                 image_index,
             } => Self::Image {
-                description,
-                src,
-                image_index,
+                description: val.description,
+                src: val.src,
+                image_index: val.image_index,
             },
-            NodeContent::Code { text, language } => Self::Code { text, language },
+            NodeContent::Code { text, language } => Self::Code {
+                text: val.text,
+                language: val.language,
+            },
             NodeContent::Quote => Self::Quote,
             NodeContent::DefinitionList => Self::DefinitionList,
-            NodeContent::DefinitionItem { term, definition } => Self::DefinitionItem { term, definition },
-            NodeContent::RawBlock { format, content } => Self::RawBlock { format, content },
-            NodeContent::MetadataBlock { entries } => Self::MetadataBlock {
-                entries: serde_json::from_str(&entries).unwrap_or_default(),
+            NodeContent::DefinitionItem { term, definition } => Self::DefinitionItem {
+                term: val.term,
+                definition: val.definition,
             },
+            NodeContent::RawBlock { format, content } => Self::RawBlock {
+                format: val.format,
+                content: val.content,
+            },
+            NodeContent::MetadataBlock { entries } => Self::MetadataBlock { entries: val.entries },
             NodeContent::Group {
                 label,
                 heading_level,
                 heading_text,
             } => Self::Group {
-                label,
-                heading_level,
-                heading_text,
+                label: val.label,
+                heading_level: val.heading_level,
+                heading_text: val.heading_text,
             },
         }
     }
@@ -3376,38 +3417,48 @@ impl From<NodeContent> for html_to_markdown_rs::NodeContent {
 impl From<html_to_markdown_rs::NodeContent> for NodeContent {
     fn from(val: html_to_markdown_rs::NodeContent) -> Self {
         match val {
-            html_to_markdown_rs::NodeContent::Heading { level, text } => Self::Heading { level, text },
-            html_to_markdown_rs::NodeContent::Paragraph { text } => Self::Paragraph { text },
-            html_to_markdown_rs::NodeContent::List { ordered } => Self::List { ordered },
-            html_to_markdown_rs::NodeContent::ListItem { text } => Self::ListItem { text },
-            html_to_markdown_rs::NodeContent::Table { grid } => Self::Table { grid: grid.into() },
+            html_to_markdown_rs::NodeContent::Heading { level, text } => Self::Heading {
+                level: val.level,
+                text: val.text,
+            },
+            html_to_markdown_rs::NodeContent::Paragraph { text } => Self::Paragraph { text: val.text },
+            html_to_markdown_rs::NodeContent::List { ordered } => Self::List { ordered: val.ordered },
+            html_to_markdown_rs::NodeContent::ListItem { text } => Self::ListItem { text: val.text },
+            html_to_markdown_rs::NodeContent::Table { grid } => Self::Table { grid: val.grid.into() },
             html_to_markdown_rs::NodeContent::Image {
                 description,
                 src,
                 image_index,
             } => Self::Image {
-                description,
-                src,
-                image_index,
+                description: val.description,
+                src: val.src,
+                image_index: val.image_index,
             },
-            html_to_markdown_rs::NodeContent::Code { text, language } => Self::Code { text, language },
+            html_to_markdown_rs::NodeContent::Code { text, language } => Self::Code {
+                text: val.text,
+                language: val.language,
+            },
             html_to_markdown_rs::NodeContent::Quote => Self::Quote,
             html_to_markdown_rs::NodeContent::DefinitionList => Self::DefinitionList,
-            html_to_markdown_rs::NodeContent::DefinitionItem { term, definition } => {
-                Self::DefinitionItem { term, definition }
-            }
-            html_to_markdown_rs::NodeContent::RawBlock { format, content } => Self::RawBlock { format, content },
+            html_to_markdown_rs::NodeContent::DefinitionItem { term, definition } => Self::DefinitionItem {
+                term: val.term,
+                definition: val.definition,
+            },
+            html_to_markdown_rs::NodeContent::RawBlock { format, content } => Self::RawBlock {
+                format: val.format,
+                content: val.content,
+            },
             html_to_markdown_rs::NodeContent::MetadataBlock { entries } => Self::MetadataBlock {
-                entries: serde_json::to_string(&entries).unwrap_or_default(),
+                entries: val.entries.iter().map(|i| format!("{:?}", i)).collect(),
             },
             html_to_markdown_rs::NodeContent::Group {
                 label,
                 heading_level,
                 heading_text,
             } => Self::Group {
-                label,
-                heading_level,
-                heading_text,
+                label: val.label,
+                heading_level: val.heading_level,
+                heading_text: val.heading_text,
             },
         }
     }
@@ -3424,7 +3475,10 @@ impl From<AnnotationKind> for html_to_markdown_rs::AnnotationKind {
             AnnotationKind::Subscript => Self::Subscript,
             AnnotationKind::Superscript => Self::Superscript,
             AnnotationKind::Highlight => Self::Highlight,
-            AnnotationKind::Link { url, title } => Self::Link { url, title },
+            AnnotationKind::Link { url, title } => Self::Link {
+                url: val.url,
+                title: val.title,
+            },
         }
     }
 }
@@ -3440,7 +3494,10 @@ impl From<html_to_markdown_rs::AnnotationKind> for AnnotationKind {
             html_to_markdown_rs::AnnotationKind::Subscript => Self::Subscript,
             html_to_markdown_rs::AnnotationKind::Superscript => Self::Superscript,
             html_to_markdown_rs::AnnotationKind::Highlight => Self::Highlight,
-            html_to_markdown_rs::AnnotationKind::Link { url, title } => Self::Link { url, title },
+            html_to_markdown_rs::AnnotationKind::Link { url, title } => Self::Link {
+                url: val.url,
+                title: val.title,
+            },
         }
     }
 }
@@ -3453,6 +3510,7 @@ impl From<WarningKind> for html_to_markdown_rs::WarningKind {
             WarningKind::TruncatedInput => Self::TruncatedInput,
             WarningKind::MalformedHtml => Self::MalformedHtml,
             WarningKind::SanitizationApplied => Self::SanitizationApplied,
+            WarningKind::DepthLimitExceeded => Self::DepthLimitExceeded,
         }
     }
 }
@@ -3465,6 +3523,7 @@ impl From<html_to_markdown_rs::WarningKind> for WarningKind {
             html_to_markdown_rs::WarningKind::TruncatedInput => Self::TruncatedInput,
             html_to_markdown_rs::WarningKind::MalformedHtml => Self::MalformedHtml,
             html_to_markdown_rs::WarningKind::SanitizationApplied => Self::SanitizationApplied,
+            html_to_markdown_rs::WarningKind::DepthLimitExceeded => Self::DepthLimitExceeded,
         }
     }
 }
@@ -3612,6 +3671,7 @@ fn init(ruby: &Ruby) -> Result<(), Error> {
     class.define_method("max_image_size", method!(ConversionOptions::max_image_size, 0))?;
     class.define_method("capture_svg", method!(ConversionOptions::capture_svg, 0))?;
     class.define_method("infer_dimensions", method!(ConversionOptions::infer_dimensions, 0))?;
+    class.define_method("max_depth", method!(ConversionOptions::max_depth, 0))?;
 
     let class = module.define_class("ConversionOptionsBuilder", ruby.class_object())?;
     class.define_method("strip_tags", method!(ConversionOptionsBuilder::strip_tags, 1))?;
@@ -3696,6 +3756,7 @@ fn init(ruby: &Ruby) -> Result<(), Error> {
         "infer_dimensions",
         method!(ConversionOptionsUpdate::infer_dimensions, 0),
     )?;
+    class.define_method("max_depth", method!(ConversionOptionsUpdate::max_depth, 0))?;
 
     let class = module.define_class("PreprocessingOptions", ruby.class_object())?;
     class.define_singleton_method("new", function!(PreprocessingOptions::new, 4))?;

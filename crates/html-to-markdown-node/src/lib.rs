@@ -7,7 +7,7 @@ use napi_derive::napi;
 use std::collections::HashMap;
 use std::sync::Arc;
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[napi(object)]
 pub struct JsMetadataConfig {
     #[napi(js_name = "extractDocument")]
@@ -24,7 +24,7 @@ pub struct JsMetadataConfig {
     pub max_structured_data_size: Option<i64>,
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[napi(object)]
 pub struct JsMetadataConfigUpdate {
     #[napi(js_name = "extractDocument")]
@@ -41,7 +41,7 @@ pub struct JsMetadataConfigUpdate {
     pub max_structured_data_size: Option<i64>,
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[napi(object)]
 pub struct JsDocumentMetadata {
     pub title: Option<String>,
@@ -63,7 +63,7 @@ pub struct JsDocumentMetadata {
     pub meta_tags: Option<HashMap<String, String>>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[napi(object)]
 pub struct JsHeaderMetadata {
     pub level: u8,
@@ -74,7 +74,7 @@ pub struct JsHeaderMetadata {
     pub html_offset: i64,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[napi(object)]
 pub struct JsLinkMetadata {
     pub href: String,
@@ -86,7 +86,7 @@ pub struct JsLinkMetadata {
     pub attributes: HashMap<String, String>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[napi(object)]
 pub struct JsImageMetadata {
     pub src: String,
@@ -98,7 +98,7 @@ pub struct JsImageMetadata {
     pub attributes: HashMap<String, String>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[napi(object)]
 pub struct JsStructuredData {
     #[napi(js_name = "dataType")]
@@ -109,7 +109,7 @@ pub struct JsStructuredData {
     pub schema_type: Option<String>,
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[napi(object)]
 pub struct JsHtmlMetadata {
     pub document: Option<JsDocumentMetadata>,
@@ -120,7 +120,7 @@ pub struct JsHtmlMetadata {
     pub structured_data: Option<Vec<JsStructuredData>>,
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[napi(object)]
 pub struct JsConversionOptions {
     #[napi(js_name = "headingStyle")]
@@ -193,6 +193,8 @@ pub struct JsConversionOptions {
     pub capture_svg: Option<bool>,
     #[napi(js_name = "inferDimensions")]
     pub infer_dimensions: Option<bool>,
+    #[napi(js_name = "maxDepth")]
+    pub max_depth: Option<i64>,
 }
 
 #[derive(Clone)]
@@ -237,7 +239,7 @@ impl JsConversionOptionsBuilder {
     }
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[napi(object)]
 pub struct JsConversionOptionsUpdate {
     #[napi(js_name = "headingStyle")]
@@ -310,9 +312,11 @@ pub struct JsConversionOptionsUpdate {
     pub capture_svg: Option<bool>,
     #[napi(js_name = "inferDimensions")]
     pub infer_dimensions: Option<bool>,
+    #[napi(js_name = "maxDepth")]
+    pub max_depth: Option<Option<i64>>,
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[napi(object)]
 pub struct JsPreprocessingOptions {
     pub enabled: Option<bool>,
@@ -323,7 +327,7 @@ pub struct JsPreprocessingOptions {
     pub remove_forms: Option<bool>,
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[napi(object)]
 pub struct JsPreprocessingOptionsUpdate {
     pub enabled: Option<bool>,
@@ -334,7 +338,7 @@ pub struct JsPreprocessingOptionsUpdate {
     pub remove_forms: Option<bool>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[napi(object)]
 pub struct JsDocumentStructure {
     pub nodes: Vec<JsDocumentNode>,
@@ -342,7 +346,7 @@ pub struct JsDocumentStructure {
     pub source_format: Option<String>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[napi(object)]
 pub struct JsDocumentNode {
     pub id: String,
@@ -353,7 +357,7 @@ pub struct JsDocumentNode {
     pub attributes: Option<HashMap<String, String>>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[napi(object)]
 pub struct JsTextAnnotation {
     pub start: u32,
@@ -361,7 +365,7 @@ pub struct JsTextAnnotation {
     pub kind: JsAnnotationKind,
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[napi(object)]
 pub struct JsConversionResult {
     pub content: Option<String>,
@@ -372,7 +376,7 @@ pub struct JsConversionResult {
     pub warnings: Option<Vec<JsProcessingWarning>>,
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[napi(object)]
 pub struct JsTableGrid {
     pub rows: Option<u32>,
@@ -380,7 +384,7 @@ pub struct JsTableGrid {
     pub cells: Option<Vec<JsGridCell>>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[napi(object)]
 pub struct JsGridCell {
     pub content: String,
@@ -394,14 +398,14 @@ pub struct JsGridCell {
     pub is_header: bool,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[napi(object)]
 pub struct JsTableData {
     pub grid: JsTableGrid,
     pub markdown: String,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[napi(object)]
 pub struct JsProcessingWarning {
     pub message: String,
@@ -409,7 +413,7 @@ pub struct JsProcessingWarning {
 }
 
 #[napi(string_enum)]
-#[derive(Clone)]
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub enum JsTextDirection {
     LeftToRight,
     RightToLeft,
@@ -424,7 +428,7 @@ impl Default for JsTextDirection {
 }
 
 #[napi(string_enum = "snake_case")]
-#[derive(Clone)]
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub enum JsLinkType {
     Anchor,
     Internal,
@@ -442,7 +446,7 @@ impl Default for JsLinkType {
 }
 
 #[napi(string_enum = "snake_case")]
-#[derive(Clone)]
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub enum JsImageType {
     DataUri,
     InlineSvg,
@@ -458,7 +462,7 @@ impl Default for JsImageType {
 }
 
 #[napi(string_enum = "snake_case")]
-#[derive(Clone)]
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub enum JsStructuredDataType {
     JsonLd,
     Microdata,
@@ -473,7 +477,7 @@ impl Default for JsStructuredDataType {
 }
 
 #[napi(string_enum)]
-#[derive(Clone)]
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub enum JsPreprocessingPreset {
     Minimal,
     Standard,
@@ -488,7 +492,7 @@ impl Default for JsPreprocessingPreset {
 }
 
 #[napi(string_enum)]
-#[derive(Clone)]
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub enum JsHeadingStyle {
     Underlined,
     Atx,
@@ -503,7 +507,7 @@ impl Default for JsHeadingStyle {
 }
 
 #[napi(string_enum)]
-#[derive(Clone)]
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub enum JsListIndentType {
     Spaces,
     Tabs,
@@ -517,7 +521,7 @@ impl Default for JsListIndentType {
 }
 
 #[napi(string_enum)]
-#[derive(Clone)]
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub enum JsWhitespaceMode {
     Normalized,
     Strict,
@@ -531,7 +535,7 @@ impl Default for JsWhitespaceMode {
 }
 
 #[napi(string_enum)]
-#[derive(Clone)]
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub enum JsNewlineStyle {
     Spaces,
     Backslash,
@@ -545,7 +549,7 @@ impl Default for JsNewlineStyle {
 }
 
 #[napi(string_enum)]
-#[derive(Clone)]
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub enum JsCodeBlockStyle {
     Indented,
     Backticks,
@@ -560,7 +564,7 @@ impl Default for JsCodeBlockStyle {
 }
 
 #[napi(string_enum)]
-#[derive(Clone)]
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub enum JsHighlightStyle {
     DoubleEqual,
     Html,
@@ -576,7 +580,7 @@ impl Default for JsHighlightStyle {
 }
 
 #[napi(string_enum)]
-#[derive(Clone)]
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub enum JsLinkStyle {
     Inline,
     Reference,
@@ -590,7 +594,7 @@ impl Default for JsLinkStyle {
 }
 
 #[napi(string_enum)]
-#[derive(Clone)]
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub enum JsOutputFormat {
     Markdown,
     Djot,
@@ -604,7 +608,7 @@ impl Default for JsOutputFormat {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
 #[napi(object)]
 pub struct JsNodeContent {
     #[napi(js_name = "node_type")]
@@ -655,7 +659,7 @@ impl Default for JsNodeContent {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
 #[napi(object)]
 pub struct JsAnnotationKind {
     #[napi(js_name = "annotation_type")]
@@ -676,13 +680,14 @@ impl Default for JsAnnotationKind {
 }
 
 #[napi(string_enum = "snake_case")]
-#[derive(Clone)]
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub enum JsWarningKind {
     ImageExtractionFailed,
     EncodingFallback,
     TruncatedInput,
     MalformedHtml,
     SanitizationApplied,
+    DepthLimitExceeded,
 }
 
 #[allow(clippy::derivable_impls)]
@@ -695,7 +700,7 @@ impl Default for JsWarningKind {
 #[allow(clippy::missing_errors_doc)]
 #[napi]
 pub fn convert(html: String, options: Option<JsConversionOptions>) -> Result<JsConversionResult> {
-    let options_core = options.map(Into::into);
+    let options_core: Option<html_to_markdown_rs::ConversionOptions> = options.map(Into::into);
     html_to_markdown_rs::convert(&html, options_core)
         .map(|val| val.into())
         .map_err(|e| napi::Error::new(napi::Status::GenericFailure, e.to_string()))
@@ -949,6 +954,7 @@ impl From<JsConversionOptions> for html_to_markdown_rs::options::ConversionOptio
             max_image_size: val.max_image_size.map(|v| v as u64).unwrap_or_default(),
             capture_svg: val.capture_svg.unwrap_or_default(),
             infer_dimensions: val.infer_dimensions.unwrap_or_default(),
+            max_depth: val.max_depth.map(|v| v as usize),
         }
     }
 }
@@ -994,6 +1000,7 @@ impl From<html_to_markdown_rs::options::ConversionOptions> for JsConversionOptio
             max_image_size: Some(val.max_image_size as i64),
             capture_svg: Some(val.capture_svg),
             infer_dimensions: Some(val.infer_dimensions),
+            max_depth: val.max_depth.map(|v| v as i64),
         }
     }
 }
@@ -1039,6 +1046,7 @@ impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for JsConversio
             max_image_size: val.max_image_size.map(|v| v as i64),
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
+            max_depth: val.max_depth.map(|v| v as i64),
         }
     }
 }
@@ -1538,12 +1546,12 @@ impl From<JsNodeContent> for html_to_markdown_rs::NodeContent {
                 text: val.text.unwrap_or_default(),
             },
             "table" => Self::Table {
-                grid: val.grid.unwrap_or_default().into(),
+                grid: val.grid.map(|v| v.into()).unwrap_or_default(),
             },
             "image" => Self::Image {
                 description: val.description,
                 src: val.src,
-                image_index: val.image_index,
+                image_index: val.image_index.map(|v| v as u32),
             },
             "code" => Self::Code {
                 text: val.text.unwrap_or_default(),
@@ -1917,6 +1925,7 @@ impl From<JsWarningKind> for html_to_markdown_rs::WarningKind {
             JsWarningKind::TruncatedInput => Self::TruncatedInput,
             JsWarningKind::MalformedHtml => Self::MalformedHtml,
             JsWarningKind::SanitizationApplied => Self::SanitizationApplied,
+            JsWarningKind::DepthLimitExceeded => Self::DepthLimitExceeded,
         }
     }
 }
@@ -1929,6 +1938,7 @@ impl From<html_to_markdown_rs::WarningKind> for JsWarningKind {
             html_to_markdown_rs::WarningKind::TruncatedInput => Self::TruncatedInput,
             html_to_markdown_rs::WarningKind::MalformedHtml => Self::MalformedHtml,
             html_to_markdown_rs::WarningKind::SanitizationApplied => Self::SanitizationApplied,
+            html_to_markdown_rs::WarningKind::DepthLimitExceeded => Self::DepthLimitExceeded,
         }
     }
 }

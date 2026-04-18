@@ -1418,6 +1418,13 @@ int32_t htm_conversion_options_capture_svg(const HTMConversionOptions *ptr);
 int32_t htm_conversion_options_infer_dimensions(const HTMConversionOptions *ptr);
 
 /**
+ * Get the `max_depth` field from a `ConversionOptions`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+uintptr_t htm_conversion_options_max_depth(const HTMConversionOptions *ptr);
+
+/**
  * # Safety
  * Caller must ensure all pointer arguments are valid or null.
  * Returned pointers must be freed with the appropriate free function.
@@ -1763,6 +1770,13 @@ int32_t htm_conversion_options_update_capture_svg(const HTMConversionOptionsUpda
  * Pointer must be a valid handle returned by this library.
  */
 int32_t htm_conversion_options_update_infer_dimensions(const HTMConversionOptionsUpdate *ptr);
+
+/**
+ * Get the `max_depth` field from a `ConversionOptionsUpdate`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+uintptr_t htm_conversion_options_update_max_depth(const HTMConversionOptionsUpdate *ptr);
 
 /**
  * Create a `PreprocessingOptions` from a JSON string. Returns null on failure.

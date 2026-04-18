@@ -5,6 +5,9 @@ edition = "2024"
 license = "MIT"
 description = "High-performance HTML to Markdown converter"
 repository = "https://github.com/kreuzberg-dev/html-to-markdown"
+readme = "README.md"
+keywords = ["html", "markdown", "converter"]
+categories = ["text-processing", "web-programming"]
 
 [package.metadata.wasm-pack.profile.release]
 wasm-opt = false

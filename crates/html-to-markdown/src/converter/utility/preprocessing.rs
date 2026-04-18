@@ -289,7 +289,7 @@ pub(crate) fn preprocess_html(input: &str) -> Cow<'_, str> {
                             if tag == b"script" && is_json_ld_script_open_tag(&input[idx..open_end]) {
                                 continue;
                             }
-                            let remove_end = find_closing_tag(bytes, open_end, tag).unwrap_or(len);
+                            let remove_end = find_closing_tag(bytes, open_end, tag).unwrap_or(open_end);
                             let out = output.get_or_insert_with(|| String::with_capacity(input.len()));
                             out.push_str(&input[last..idx]);
                             out.push_str(&input[idx..open_end]);

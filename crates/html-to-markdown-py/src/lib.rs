@@ -13,7 +13,7 @@ use pyo3::prelude::*;
 use std::collections::HashMap;
 use std::sync::Arc;
 
-#[derive(Clone, Default, serde::Serialize)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(frozen, from_py_object)]
 pub struct MetadataConfig {
     /// Extract document-level metadata (title, description, author, etc.).
@@ -122,7 +122,7 @@ impl MetadataConfig {
     }
 }
 
-#[derive(Clone, Default, serde::Serialize)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(frozen, from_py_object)]
 pub struct MetadataConfigUpdate {
     /// Optional override for extracting document-level metadata.
@@ -187,7 +187,7 @@ impl MetadataConfigUpdate {
     }
 }
 
-#[derive(Clone, Default, serde::Serialize)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(frozen, from_py_object)]
 pub struct DocumentMetadata {
     /// Document title from `<title>` tag
@@ -263,7 +263,7 @@ impl DocumentMetadata {
     }
 }
 
-#[derive(Clone, serde::Serialize)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(frozen, from_py_object)]
 pub struct HeaderMetadata {
     /// Header level: 1 (h1) through 6 (h6)
@@ -311,7 +311,7 @@ impl HeaderMetadata {
     }
 }
 
-#[derive(Clone, serde::Serialize)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(frozen, from_py_object)]
 pub struct LinkMetadata {
     /// The href URL value
@@ -364,7 +364,7 @@ impl LinkMetadata {
     }
 }
 
-#[derive(Clone, serde::Serialize)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(frozen, from_py_object)]
 pub struct ImageMetadata {
     /// Image source (URL, data URI, or SVG content identifier)
@@ -411,7 +411,7 @@ impl ImageMetadata {
     }
 }
 
-#[derive(Clone, serde::Serialize)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(frozen, from_py_object)]
 pub struct StructuredData {
     /// Type of structured data (JSON-LD, Microdata, RDFa)
@@ -439,7 +439,7 @@ impl StructuredData {
     }
 }
 
-#[derive(Clone, Default, serde::Serialize)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(frozen, from_py_object)]
 pub struct HtmlMetadata {
     /// Document-level metadata (title, description, canonical, etc.)
@@ -481,7 +481,7 @@ impl HtmlMetadata {
     }
 }
 
-#[derive(Clone, Default, serde::Serialize)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(frozen, from_py_object)]
 #[allow(clippy::similar_names)]
 pub struct ConversionOptions {
@@ -599,13 +599,17 @@ pub struct ConversionOptions {
     /// Infer image dimensions from data.
     #[pyo3(get)]
     pub infer_dimensions: bool,
+    /// Maximum DOM traversal depth. `None` means unlimited.
+    /// When set, subtrees beyond this depth are silently truncated.
+    #[pyo3(get)]
+    pub max_depth: Option<usize>,
 }
 
 #[pymethods]
 impl ConversionOptions {
     #[allow(clippy::too_many_arguments)]
     #[must_use]
-    #[pyo3(signature = (heading_style=None, list_indent_type=None, list_indent_width=None, bullets=None, strong_em_symbol=None, escape_asterisks=None, escape_underscores=None, escape_misc=None, escape_ascii=None, code_language=None, autolinks=None, default_title=None, br_in_tables=None, highlight_style=None, extract_metadata=None, whitespace_mode=None, strip_newlines=None, wrap=None, wrap_width=None, convert_as_inline=None, sub_symbol=None, sup_symbol=None, newline_style=None, code_block_style=None, keep_inline_images_in=None, preprocessing=None, encoding=None, debug=None, strip_tags=None, preserve_tags=None, skip_images=None, link_style=None, output_format=None, include_document_structure=None, extract_images=None, max_image_size=None, capture_svg=None, infer_dimensions=None))]
+    #[pyo3(signature = (heading_style=None, list_indent_type=None, list_indent_width=None, bullets=None, strong_em_symbol=None, escape_asterisks=None, escape_underscores=None, escape_misc=None, escape_ascii=None, code_language=None, autolinks=None, default_title=None, br_in_tables=None, highlight_style=None, extract_metadata=None, whitespace_mode=None, strip_newlines=None, wrap=None, wrap_width=None, convert_as_inline=None, sub_symbol=None, sup_symbol=None, newline_style=None, code_block_style=None, keep_inline_images_in=None, preprocessing=None, encoding=None, debug=None, strip_tags=None, preserve_tags=None, skip_images=None, link_style=None, output_format=None, include_document_structure=None, extract_images=None, max_image_size=None, capture_svg=None, infer_dimensions=None, max_depth=None))]
     #[new]
     pub fn new(
         heading_style: Option<HeadingStyle>,
@@ -646,6 +650,7 @@ impl ConversionOptions {
         max_image_size: Option<u64>,
         capture_svg: Option<bool>,
         infer_dimensions: Option<bool>,
+        max_depth: Option<usize>,
     ) -> Self {
         Self {
             heading_style: heading_style.unwrap_or_default(),
@@ -686,6 +691,7 @@ impl ConversionOptions {
             max_image_size: max_image_size.unwrap_or(5242880),
             capture_svg: capture_svg.unwrap_or(false),
             infer_dimensions: infer_dimensions.unwrap_or(true),
+            max_depth,
         }
     }
 
@@ -747,7 +753,7 @@ impl ConversionOptionsBuilder {
     }
 }
 
-#[derive(Clone, Default, serde::Serialize)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(frozen, from_py_object)]
 #[allow(clippy::similar_names)]
 pub struct ConversionOptionsUpdate {
@@ -865,13 +871,16 @@ pub struct ConversionOptionsUpdate {
     /// Optional override for [`ConversionOptions::infer_dimensions`].
     #[pyo3(get)]
     pub infer_dimensions: Option<bool>,
+    /// Optional override for [`ConversionOptions::max_depth`].
+    #[pyo3(get)]
+    pub max_depth: Option<Option<usize>>,
 }
 
 #[pymethods]
 impl ConversionOptionsUpdate {
     #[allow(clippy::too_many_arguments)]
     #[must_use]
-    #[pyo3(signature = (heading_style=None, list_indent_type=None, list_indent_width=None, bullets=None, strong_em_symbol=None, escape_asterisks=None, escape_underscores=None, escape_misc=None, escape_ascii=None, code_language=None, autolinks=None, default_title=None, br_in_tables=None, highlight_style=None, extract_metadata=None, whitespace_mode=None, strip_newlines=None, wrap=None, wrap_width=None, convert_as_inline=None, sub_symbol=None, sup_symbol=None, newline_style=None, code_block_style=None, keep_inline_images_in=None, preprocessing=None, encoding=None, debug=None, strip_tags=None, preserve_tags=None, skip_images=None, link_style=None, output_format=None, include_document_structure=None, extract_images=None, max_image_size=None, capture_svg=None, infer_dimensions=None))]
+    #[pyo3(signature = (heading_style=None, list_indent_type=None, list_indent_width=None, bullets=None, strong_em_symbol=None, escape_asterisks=None, escape_underscores=None, escape_misc=None, escape_ascii=None, code_language=None, autolinks=None, default_title=None, br_in_tables=None, highlight_style=None, extract_metadata=None, whitespace_mode=None, strip_newlines=None, wrap=None, wrap_width=None, convert_as_inline=None, sub_symbol=None, sup_symbol=None, newline_style=None, code_block_style=None, keep_inline_images_in=None, preprocessing=None, encoding=None, debug=None, strip_tags=None, preserve_tags=None, skip_images=None, link_style=None, output_format=None, include_document_structure=None, extract_images=None, max_image_size=None, capture_svg=None, infer_dimensions=None, max_depth=None))]
     #[new]
     pub fn new(
         heading_style: Option<HeadingStyle>,
@@ -912,6 +921,7 @@ impl ConversionOptionsUpdate {
         max_image_size: Option<u64>,
         capture_svg: Option<bool>,
         infer_dimensions: Option<bool>,
+        max_depth: Option<Option<usize>>,
     ) -> Self {
         Self {
             heading_style,
@@ -952,11 +962,12 @@ impl ConversionOptionsUpdate {
             max_image_size,
             capture_svg,
             infer_dimensions,
+            max_depth,
         }
     }
 }
 
-#[derive(Clone, Default, serde::Serialize)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(frozen, from_py_object)]
 pub struct PreprocessingOptions {
     /// Enable HTML preprocessing globally
@@ -1000,7 +1011,7 @@ impl PreprocessingOptions {
     }
 }
 
-#[derive(Clone, Default, serde::Serialize)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(frozen, from_py_object)]
 pub struct PreprocessingOptionsUpdate {
     /// Optional global preprocessing enablement override
@@ -1037,7 +1048,7 @@ impl PreprocessingOptionsUpdate {
     }
 }
 
-#[derive(Clone, serde::Serialize)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(frozen, from_py_object)]
 pub struct DocumentStructure {
     /// All nodes in document reading order.
@@ -1058,7 +1069,7 @@ impl DocumentStructure {
     }
 }
 
-#[derive(Clone, serde::Serialize)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(frozen, from_py_object)]
 pub struct DocumentNode {
     /// Deterministic node identifier.
@@ -1105,7 +1116,7 @@ impl DocumentNode {
     }
 }
 
-#[derive(Clone, serde::Serialize)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(frozen, from_py_object)]
 pub struct TextAnnotation {
     /// Start byte offset (inclusive) into the parent node's text.
@@ -1129,7 +1140,7 @@ impl TextAnnotation {
     }
 }
 
-#[derive(Clone, Default, serde::Serialize)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(frozen, from_py_object)]
 pub struct ConversionResult {
     /// Converted text output (markdown, djot, or plain text).
@@ -1183,7 +1194,7 @@ impl ConversionResult {
     }
 }
 
-#[derive(Clone, Default, serde::Serialize)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(frozen, from_py_object)]
 #[allow(clippy::similar_names)]
 pub struct TableGrid {
@@ -1212,7 +1223,7 @@ impl TableGrid {
     }
 }
 
-#[derive(Clone, serde::Serialize)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(frozen, from_py_object)]
 #[allow(clippy::similar_names)]
 pub struct GridCell {
@@ -1253,7 +1264,7 @@ impl GridCell {
     }
 }
 
-#[derive(Clone, serde::Serialize)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(frozen, from_py_object)]
 pub struct TableData {
     /// The structured table grid.
@@ -1274,7 +1285,7 @@ impl TableData {
     }
 }
 
-#[derive(Clone, serde::Serialize)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(frozen, from_py_object)]
 pub struct ProcessingWarning {
     /// Human-readable warning message.
@@ -1295,24 +1306,19 @@ impl ProcessingWarning {
     }
 }
 
-#[derive(Clone, PartialEq, serde::Serialize)]
+#[derive(Clone, PartialEq, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(eq, eq_int, from_py_object)]
 pub enum TextDirection {
+    #[default]
     LeftToRight = 0,
     RightToLeft = 1,
     Auto = 2,
 }
 
-#[allow(clippy::derivable_impls)]
-impl Default for TextDirection {
-    fn default() -> Self {
-        Self::LeftToRight
-    }
-}
-
-#[derive(Clone, PartialEq, serde::Serialize)]
+#[derive(Clone, PartialEq, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(eq, eq_int, from_py_object)]
 pub enum LinkType {
+    #[default]
     Anchor = 0,
     Internal = 1,
     External = 2,
@@ -1321,134 +1327,80 @@ pub enum LinkType {
     Other = 5,
 }
 
-#[allow(clippy::derivable_impls)]
-impl Default for LinkType {
-    fn default() -> Self {
-        Self::Anchor
-    }
-}
-
-#[derive(Clone, PartialEq, serde::Serialize)]
+#[derive(Clone, PartialEq, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(eq, eq_int, from_py_object)]
 pub enum ImageType {
+    #[default]
     DataUri = 0,
     InlineSvg = 1,
     External = 2,
     Relative = 3,
 }
 
-#[allow(clippy::derivable_impls)]
-impl Default for ImageType {
-    fn default() -> Self {
-        Self::DataUri
-    }
-}
-
-#[derive(Clone, PartialEq, serde::Serialize)]
+#[derive(Clone, PartialEq, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(eq, eq_int, from_py_object)]
 pub enum StructuredDataType {
+    #[default]
     JsonLd = 0,
     Microdata = 1,
     RDFa = 2,
 }
 
-#[allow(clippy::derivable_impls)]
-impl Default for StructuredDataType {
-    fn default() -> Self {
-        Self::JsonLd
-    }
-}
-
-#[derive(Clone, PartialEq, serde::Serialize)]
+#[derive(Clone, PartialEq, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(eq, eq_int, from_py_object)]
 pub enum PreprocessingPreset {
+    #[default]
     Minimal = 0,
     Standard = 1,
     Aggressive = 2,
 }
 
-#[allow(clippy::derivable_impls)]
-impl Default for PreprocessingPreset {
-    fn default() -> Self {
-        Self::Minimal
-    }
-}
-
-#[derive(Clone, PartialEq, serde::Serialize)]
+#[derive(Clone, PartialEq, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(eq, eq_int, from_py_object)]
 pub enum HeadingStyle {
+    #[default]
     Underlined = 0,
     Atx = 1,
     AtxClosed = 2,
 }
 
-#[allow(clippy::derivable_impls)]
-impl Default for HeadingStyle {
-    fn default() -> Self {
-        Self::Underlined
-    }
-}
-
-#[derive(Clone, PartialEq, serde::Serialize)]
+#[derive(Clone, PartialEq, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(eq, eq_int, from_py_object)]
 pub enum ListIndentType {
+    #[default]
     Spaces = 0,
     Tabs = 1,
 }
 
-#[allow(clippy::derivable_impls)]
-impl Default for ListIndentType {
-    fn default() -> Self {
-        Self::Spaces
-    }
-}
-
-#[derive(Clone, PartialEq, serde::Serialize)]
+#[derive(Clone, PartialEq, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(eq, eq_int, from_py_object)]
 pub enum WhitespaceMode {
+    #[default]
     Normalized = 0,
     Strict = 1,
 }
 
-#[allow(clippy::derivable_impls)]
-impl Default for WhitespaceMode {
-    fn default() -> Self {
-        Self::Normalized
-    }
-}
-
-#[derive(Clone, PartialEq, serde::Serialize)]
+#[derive(Clone, PartialEq, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(eq, eq_int, from_py_object)]
 pub enum NewlineStyle {
+    #[default]
     Spaces = 0,
     Backslash = 1,
 }
 
-#[allow(clippy::derivable_impls)]
-impl Default for NewlineStyle {
-    fn default() -> Self {
-        Self::Spaces
-    }
-}
-
-#[derive(Clone, PartialEq, serde::Serialize)]
+#[derive(Clone, PartialEq, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(eq, eq_int, from_py_object)]
 pub enum CodeBlockStyle {
+    #[default]
     Indented = 0,
     Backticks = 1,
     Tildes = 2,
 }
 
-#[allow(clippy::derivable_impls)]
-impl Default for CodeBlockStyle {
-    fn default() -> Self {
-        Self::Indented
-    }
-}
-
-#[derive(Clone, PartialEq, serde::Serialize)]
+#[derive(Clone, PartialEq, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(eq, eq_int, from_py_object)]
 pub enum HighlightStyle {
+    #[default]
     DoubleEqual = 0,
     Html = 1,
     Bold = 2,
@@ -1456,40 +1408,21 @@ pub enum HighlightStyle {
     None = 3,
 }
 
-#[allow(clippy::derivable_impls)]
-impl Default for HighlightStyle {
-    fn default() -> Self {
-        Self::DoubleEqual
-    }
-}
-
-#[derive(Clone, PartialEq, serde::Serialize)]
+#[derive(Clone, PartialEq, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(eq, eq_int, from_py_object)]
 pub enum LinkStyle {
+    #[default]
     Inline = 0,
     Reference = 1,
 }
 
-#[allow(clippy::derivable_impls)]
-impl Default for LinkStyle {
-    fn default() -> Self {
-        Self::Inline
-    }
-}
-
-#[derive(Clone, PartialEq, serde::Serialize)]
+#[derive(Clone, PartialEq, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(eq, eq_int, from_py_object)]
 pub enum OutputFormat {
+    #[default]
     Markdown = 0,
     Djot = 1,
     Plain = 2,
-}
-
-#[allow(clippy::derivable_impls)]
-impl Default for OutputFormat {
-    fn default() -> Self {
-        Self::Markdown
-    }
 }
 
 #[derive(Clone)]
@@ -1533,6 +1466,13 @@ impl Default for NodeContent {
         Self {
             inner: Default::default(),
         }
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for NodeContent {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let inner = html_to_markdown_rs::NodeContent::deserialize(deserializer)?;
+        Ok(Self { inner })
     }
 }
 
@@ -1580,28 +1520,30 @@ impl Default for AnnotationKind {
     }
 }
 
-#[derive(Clone, PartialEq, serde::Serialize)]
+impl<'de> serde::Deserialize<'de> for AnnotationKind {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let inner = html_to_markdown_rs::AnnotationKind::deserialize(deserializer)?;
+        Ok(Self { inner })
+    }
+}
+
+#[derive(Clone, PartialEq, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(eq, eq_int, from_py_object)]
 pub enum WarningKind {
+    #[default]
     ImageExtractionFailed = 0,
     EncodingFallback = 1,
     TruncatedInput = 2,
     MalformedHtml = 3,
     SanitizationApplied = 4,
-}
-
-#[allow(clippy::derivable_impls)]
-impl Default for WarningKind {
-    fn default() -> Self {
-        Self::ImageExtractionFailed
-    }
+    DepthLimitExceeded = 5,
 }
 
 #[allow(clippy::missing_errors_doc)]
 #[pyfunction]
 #[pyo3(signature = (html, options=None))]
 pub fn convert(html: String, options: Option<ConversionOptions>) -> PyResult<ConversionResult> {
-    let options_core = options.map(Into::into);
+    let options_core: Option<html_to_markdown_rs::ConversionOptions> = options.map(Into::into);
     html_to_markdown_rs::convert(&html, options_core)
         .map(|val| val.into())
         .map_err(|e| pyo3::exceptions::PyRuntimeError::new_err(e.to_string()))
@@ -1869,6 +1811,7 @@ impl From<ConversionOptions> for html_to_markdown_rs::options::ConversionOptions
             max_image_size: val.max_image_size,
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
+            max_depth: val.max_depth,
         }
     }
 }
@@ -1914,6 +1857,7 @@ impl From<html_to_markdown_rs::options::ConversionOptions> for ConversionOptions
             max_image_size: val.max_image_size,
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
+            max_depth: val.max_depth,
         }
     }
 }
@@ -1959,6 +1903,7 @@ impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for ConversionO
             max_image_size: val.max_image_size,
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
+            max_depth: val.max_depth,
         }
     }
 }
@@ -2440,6 +2385,7 @@ impl From<WarningKind> for html_to_markdown_rs::WarningKind {
             WarningKind::TruncatedInput => Self::TruncatedInput,
             WarningKind::MalformedHtml => Self::MalformedHtml,
             WarningKind::SanitizationApplied => Self::SanitizationApplied,
+            WarningKind::DepthLimitExceeded => Self::DepthLimitExceeded,
         }
     }
 }
@@ -2452,6 +2398,7 @@ impl From<html_to_markdown_rs::WarningKind> for WarningKind {
             html_to_markdown_rs::WarningKind::TruncatedInput => Self::TruncatedInput,
             html_to_markdown_rs::WarningKind::MalformedHtml => Self::MalformedHtml,
             html_to_markdown_rs::WarningKind::SanitizationApplied => Self::SanitizationApplied,
+            html_to_markdown_rs::WarningKind::DepthLimitExceeded => Self::DepthLimitExceeded,
         }
     }
 }

@@ -82,7 +82,9 @@ pub(crate) fn convert_html_impl(
 
     if has_custom_element_tags(&preprocessed) {
         if let Some(repaired_html) = repair_with_html5ever(&preprocessed) {
-            let repaired = preprocess_html(&repaired_html).into_owned();
+            let stripped = strip_script_and_style_tags(&repaired_html);
+            let stripped = strip_hidden_elements(&stripped);
+            let repaired = preprocess_html(&stripped).into_owned();
             preprocessed = repaired;
             preprocessed_len = preprocessed.len();
         }
@@ -93,7 +95,9 @@ pub(crate) fn convert_html_impl(
             break dom;
         }
         if let Some(repaired_html) = repair_with_html5ever(&preprocessed) {
-            preprocessed = preprocess_html(&repaired_html).into_owned();
+            let stripped = strip_script_and_style_tags(&repaired_html);
+            let stripped = strip_hidden_elements(&stripped);
+            preprocessed = preprocess_html(&stripped).into_owned();
             preprocessed_len = preprocessed.len();
             continue;
         }
@@ -111,7 +115,9 @@ pub(crate) fn convert_html_impl(
         if let Some(repaired_html) = repair_with_html5ever(&preprocessed) {
             // Drop dom to release borrow on preprocessed
             drop(dom);
-            preprocessed = preprocess_html(&repaired_html).into_owned();
+            let stripped = strip_script_and_style_tags(&repaired_html);
+            let stripped = strip_hidden_elements(&stripped);
+            preprocessed = preprocess_html(&stripped).into_owned();
             preprocessed_len = preprocessed.len();
             // Re-parse with repaired HTML
             dom = tl::parse(&preprocessed, parser_options)
@@ -307,6 +313,12 @@ pub(crate) fn walk_node(
     dom_ctx: &DomContext,
 ) {
     let Some(node) = node_handle.get(parser) else { return };
+
+    if let Some(max) = options.max_depth {
+        if depth >= max {
+            return;
+        }
+    }
 
     match node {
         tl::Node::Raw(bytes) => {

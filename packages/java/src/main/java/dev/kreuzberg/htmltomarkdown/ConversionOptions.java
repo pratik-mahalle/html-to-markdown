@@ -2,6 +2,7 @@
 package dev.kreuzberg.htmltomarkdown;
 
 import java.util.List;
+import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record ConversionOptions(
@@ -42,7 +43,8 @@ public record ConversionOptions(
     @JsonProperty("extract_images") boolean extractImages,
     @JsonProperty("max_image_size") long maxImageSize,
     @JsonProperty("capture_svg") boolean captureSvg,
-    @JsonProperty("infer_dimensions") boolean inferDimensions
+    @JsonProperty("infer_dimensions") boolean inferDimensions,
+    @JsonProperty("max_depth") Optional<Long> maxDepth
 ) {
     public static ConversionOptionsBuilder builder() {
         return new ConversionOptionsBuilder();

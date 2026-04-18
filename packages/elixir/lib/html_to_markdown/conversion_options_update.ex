@@ -39,5 +39,6 @@ defmodule HtmlToMarkdown.ConversionOptionsUpdate do
             extract_images: false,
             max_image_size: 0,
             capture_svg: false,
-            infer_dimensions: false
+            infer_dimensions: false,
+            max_depth: nil
 end

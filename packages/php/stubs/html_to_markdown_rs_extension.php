@@ -525,6 +525,7 @@ class ConversionOptions
     public int $max_image_size;
     public bool $capture_svg;
     public bool $infer_dimensions;
+    public ?int $max_depth;
 
     /**
      * @param array<string> $keep_inline_images_in
@@ -569,7 +570,8 @@ class ConversionOptions
         bool $extract_images,
         int $max_image_size,
         bool $capture_svg,
-        bool $infer_dimensions
+        bool $infer_dimensions,
+        ?int $max_depth = null
     ) { }
 
     public function getHeadingStyle(): HeadingStyle { }
@@ -613,6 +615,7 @@ class ConversionOptions
     public function getMaxImageSize(): int { }
     public function getCaptureSvg(): bool { }
     public function getInferDimensions(): bool { }
+    public function getMaxDepth(): ?int { }
 }
 
 /**
@@ -664,6 +667,7 @@ class ConversionOptionsUpdate
     public ?int $max_image_size;
     public ?bool $capture_svg;
     public ?bool $infer_dimensions;
+    public ?int $max_depth;
 
     /**
      * @param ?array<string> $keep_inline_images_in
@@ -708,7 +712,8 @@ class ConversionOptionsUpdate
         ?bool $extract_images = null,
         ?int $max_image_size = null,
         ?bool $capture_svg = null,
-        ?bool $infer_dimensions = null
+        ?bool $infer_dimensions = null,
+        ?int $max_depth = null
     ) { }
 
     public function getHeadingStyle(): ?HeadingStyle { }
@@ -752,6 +757,7 @@ class ConversionOptionsUpdate
     public function getMaxImageSize(): ?int { }
     public function getCaptureSvg(): ?bool { }
     public function getInferDimensions(): ?bool { }
+    public function getMaxDepth(): ?int { }
 }
 
 /**
@@ -1160,6 +1166,7 @@ enum WarningKind: string
     case TruncatedInput = 'TruncatedInput';
     case MalformedHtml = 'MalformedHtml';
     case SanitizationApplied = 'SanitizationApplied';
+    case DepthLimitExceeded = 'DepthLimitExceeded';
 }
 
 class HtmlToMarkdownRsApi

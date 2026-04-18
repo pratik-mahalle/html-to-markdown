@@ -11,4 +11,3 @@ crate-type = ["cdylib"]
 html-to-markdown-rs = { path = "../../../../crates/html-to-markdown", features = ["full", "metadata", "visitor", "serde", "inline-images"] }
 rustler = "0.37"
 serde_json = "1"
-tokio = { version = "1", features = ["full"] }

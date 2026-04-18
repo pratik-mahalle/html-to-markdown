@@ -10,12 +10,8 @@ defmodule HtmlToMarkdown.Native do
     version: Mix.Project.config()[:version],
     force_build:
       System.get_env("HTML_TO_MARKDOWN_BUILD") in ["1", "true"] or Mix.env() in [:test, :dev],
-    # Targets that are built in CI (see publish.yaml elixir-package matrix)
-    targets: ~w(
-      aarch64-apple-darwin
-      aarch64-unknown-linux-gnu
-      x86_64-unknown-linux-gnu
-    ),
+    targets:
+      ~w(aarch64-apple-darwin aarch64-unknown-linux-gnu x86_64-unknown-linux-gnu x86_64-pc-windows-gnu),
     nif_versions: ["2.16", "2.17"]
 
   def convert(_html, _options), do: :erlang.nif_error(:nif_not_loaded)

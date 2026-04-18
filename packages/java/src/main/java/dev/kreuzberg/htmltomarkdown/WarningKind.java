@@ -9,7 +9,8 @@ public enum WarningKind {
     EncodingFallback("encoding_fallback"),
     TruncatedInput("truncated_input"),
     MalformedHtml("malformed_html"),
-    SanitizationApplied("sanitization_applied");
+    SanitizationApplied("sanitization_applied"),
+    DepthLimitExceeded("depth_limit_exceeded");
 
     private final String value;
 

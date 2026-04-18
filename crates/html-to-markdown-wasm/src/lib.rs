@@ -361,7 +361,7 @@ impl WasmDocumentMetadata {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmHeaderMetadata {
     level: u8,
@@ -440,7 +440,7 @@ impl WasmHeaderMetadata {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmLinkMetadata {
     href: String,
@@ -538,7 +538,7 @@ impl WasmLinkMetadata {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmImageMetadata {
     src: String,
@@ -631,7 +631,7 @@ impl WasmImageMetadata {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmStructuredData {
     data_type: WasmStructuredDataType,
@@ -802,6 +802,7 @@ pub struct WasmConversionOptions {
     max_image_size: u64,
     capture_svg: bool,
     infer_dimensions: bool,
+    max_depth: Option<usize>,
 }
 
 #[wasm_bindgen]
@@ -847,6 +848,7 @@ impl WasmConversionOptions {
         max_image_size: Option<u64>,
         capture_svg: Option<bool>,
         infer_dimensions: Option<bool>,
+        max_depth: Option<usize>,
     ) -> WasmConversionOptions {
         WasmConversionOptions {
             heading_style: heading_style.unwrap_or_default(),
@@ -887,6 +889,7 @@ impl WasmConversionOptions {
             max_image_size: max_image_size.unwrap_or(5242880),
             capture_svg: capture_svg.unwrap_or(false),
             infer_dimensions: infer_dimensions.unwrap_or(true),
+            max_depth,
         }
     }
 
@@ -1270,6 +1273,16 @@ impl WasmConversionOptions {
         self.infer_dimensions = value;
     }
 
+    #[wasm_bindgen(getter, js_name = "maxDepth")]
+    pub fn max_depth(&self) -> Option<usize> {
+        self.max_depth
+    }
+
+    #[wasm_bindgen(setter, js_name = "maxDepth")]
+    pub fn set_max_depth(&mut self, value: Option<usize>) {
+        self.max_depth = value;
+    }
+
     #[allow(clippy::should_implement_trait)]
     #[wasm_bindgen]
     pub fn default() -> WasmConversionOptions {
@@ -1367,6 +1380,7 @@ pub struct WasmConversionOptionsUpdate {
     max_image_size: Option<u64>,
     capture_svg: Option<bool>,
     infer_dimensions: Option<bool>,
+    max_depth: Option<Option<usize>>,
 }
 
 #[wasm_bindgen]
@@ -1412,6 +1426,7 @@ impl WasmConversionOptionsUpdate {
         max_image_size: Option<u64>,
         capture_svg: Option<bool>,
         infer_dimensions: Option<bool>,
+        max_depth: Option<Option<usize>>,
     ) -> WasmConversionOptionsUpdate {
         WasmConversionOptionsUpdate {
             heading_style,
@@ -1452,6 +1467,7 @@ impl WasmConversionOptionsUpdate {
             max_image_size,
             capture_svg,
             infer_dimensions,
+            max_depth,
         }
     }
 
@@ -1834,6 +1850,16 @@ impl WasmConversionOptionsUpdate {
     pub fn set_infer_dimensions(&mut self, value: Option<bool>) {
         self.infer_dimensions = value;
     }
+
+    #[wasm_bindgen(getter, js_name = "maxDepth")]
+    pub fn max_depth(&self) -> Option<Option<usize>> {
+        self.max_depth
+    }
+
+    #[wasm_bindgen(setter, js_name = "maxDepth")]
+    pub fn set_max_depth(&mut self, value: Option<Option<usize>>) {
+        self.max_depth = value;
+    }
 }
 
 #[derive(Clone, Default)]
@@ -1976,7 +2002,7 @@ impl WasmPreprocessingOptionsUpdate {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmDocumentStructure {
     nodes: Vec<WasmDocumentNode>,
@@ -2011,7 +2037,7 @@ impl WasmDocumentStructure {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmDocumentNode {
     id: String,
@@ -2104,7 +2130,7 @@ impl WasmDocumentNode {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmTextAnnotation {
     start: u32,
@@ -2293,7 +2319,7 @@ impl WasmTableGrid {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmGridCell {
     content: String,
@@ -2379,7 +2405,7 @@ impl WasmGridCell {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmTableData {
     grid: WasmTableGrid,
@@ -2414,7 +2440,7 @@ impl WasmTableData {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmProcessingWarning {
     message: String,
@@ -2699,6 +2725,7 @@ pub enum WasmWarningKind {
     TruncatedInput = 2,
     MalformedHtml = 3,
     SanitizationApplied = 4,
+    DepthLimitExceeded = 5,
 }
 
 #[allow(clippy::derivable_impls)]
@@ -2711,8 +2738,8 @@ impl Default for WasmWarningKind {
 #[allow(clippy::missing_errors_doc)]
 #[wasm_bindgen]
 pub fn convert(html: String, options: Option<WasmConversionOptions>) -> Result<WasmConversionResult, JsValue> {
-    let result =
-        html_to_markdown_rs::convert(&html, options.map(Into::into)).map_err(|e| JsValue::from_str(&e.to_string()))?;
+    let options_core: Option<html_to_markdown_rs::ConversionOptions> = options.map(Into::into);
+    let result = html_to_markdown_rs::convert(&html, options_core).map_err(|e| JsValue::from_str(&e.to_string()))?;
     Ok(result.into())
 }
 
@@ -2952,6 +2979,7 @@ impl From<WasmConversionOptions> for html_to_markdown_rs::options::ConversionOpt
             max_image_size: val.max_image_size,
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
+            max_depth: val.max_depth,
         }
     }
 }
@@ -2997,6 +3025,7 @@ impl From<html_to_markdown_rs::options::ConversionOptions> for WasmConversionOpt
             max_image_size: val.max_image_size,
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
+            max_depth: val.max_depth,
         }
     }
 }
@@ -3042,6 +3071,7 @@ impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for WasmConvers
             max_image_size: val.max_image_size,
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
+            max_depth: val.max_depth,
         }
     }
 }
@@ -3634,6 +3664,7 @@ impl From<WasmWarningKind> for html_to_markdown_rs::WarningKind {
             WasmWarningKind::TruncatedInput => Self::TruncatedInput,
             WasmWarningKind::MalformedHtml => Self::MalformedHtml,
             WasmWarningKind::SanitizationApplied => Self::SanitizationApplied,
+            WasmWarningKind::DepthLimitExceeded => Self::DepthLimitExceeded,
         }
     }
 }
@@ -3646,6 +3677,7 @@ impl From<html_to_markdown_rs::WarningKind> for WasmWarningKind {
             html_to_markdown_rs::WarningKind::TruncatedInput => Self::TruncatedInput,
             html_to_markdown_rs::WarningKind::MalformedHtml => Self::MalformedHtml,
             html_to_markdown_rs::WarningKind::SanitizationApplied => Self::SanitizationApplied,
+            html_to_markdown_rs::WarningKind::DepthLimitExceeded => Self::DepthLimitExceeded,
         }
     }
 }

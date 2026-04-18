@@ -311,6 +311,8 @@ const (
     WarningKindMalformedHtml WarningKind = "malformed_html"
     // Sanitization was applied to remove potentially unsafe content.
     WarningKindSanitizationApplied WarningKind = "sanitization_applied"
+    // DOM traversal was truncated because max_depth was exceeded.
+    WarningKindDepthLimitExceeded WarningKind = "depth_limit_exceeded"
 )
 
 
@@ -949,6 +951,9 @@ type ConversionOptions struct {
     CaptureSvg bool `json:"capture_svg"`
     // Infer image dimensions from data.
     InferDimensions *bool `json:"infer_dimensions,omitempty"`
+    // Maximum DOM traversal depth. `None` means unlimited.
+    // When set, subtrees beyond this depth are silently truncated.
+    MaxDepth *uint `json:"max_depth,omitempty"`
 }
 
 
@@ -1145,6 +1150,11 @@ func WithConversionOptionsInferDimensions(v bool) ConversionOptionsOption {
     return func(c *ConversionOptions) { c.InferDimensions = &v }
 }
 
+// WithConversionOptionsMaxDepth sets the max_depth field.
+func WithConversionOptionsMaxDepth(v uint) ConversionOptionsOption {
+    return func(c *ConversionOptions) { c.MaxDepth = &v }
+}
+
 // NewConversionOptions creates a ConversionOptions with optional parameters.
 func NewConversionOptions(opts ...ConversionOptionsOption) *ConversionOptions {
     c := &ConversionOptions {
@@ -1186,6 +1196,7 @@ func NewConversionOptions(opts ...ConversionOptionsOption) *ConversionOptions {
         MaxImageSize: nil,
         CaptureSvg: false,
         InferDimensions: nil,
+        MaxDepth: nil,
     }
     for _, opt := range opts {
         opt(c)
@@ -1291,6 +1302,8 @@ type ConversionOptionsUpdate struct {
     CaptureSvg *bool `json:"capture_svg,omitempty"`
     // Optional override for [`ConversionOptions::infer_dimensions`].
     InferDimensions *bool `json:"infer_dimensions,omitempty"`
+    // Optional override for [`ConversionOptions::max_depth`].
+    MaxDepth *uint `json:"max_depth,omitempty"`
 }
 
 

@@ -253,4 +253,11 @@ public sealed class ConversionOptions
     [JsonPropertyName("infer_dimensions")]
     public bool InferDimensions { get; set; } = true;
 
+    /// <summary>
+    /// Maximum DOM traversal depth. `None` means unlimited.
+    /// When set, subtrees beyond this depth are silently truncated.
+    /// </summary>
+    [JsonPropertyName("max_depth")]
+    public ulong? MaxDepth { get; set; } = null;
+
 }

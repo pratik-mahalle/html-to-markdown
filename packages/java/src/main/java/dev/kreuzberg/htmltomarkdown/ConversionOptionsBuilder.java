@@ -2,6 +2,7 @@
 package dev.kreuzberg.htmltomarkdown;
 
 import java.util.List;
+import java.util.Optional;
 
 public class ConversionOptionsBuilder {
 
@@ -43,6 +44,7 @@ public class ConversionOptionsBuilder {
     private long maxImageSize = 0;
     private boolean captureSvg = false;
     private boolean inferDimensions = false;
+    private Optional<Long> maxDepth = Optional.empty();
 
     public ConversionOptionsBuilder withHeadingStyle(HeadingStyle value) {
         this.headingStyle = value;
@@ -234,6 +236,11 @@ public class ConversionOptionsBuilder {
         return this;
     }
 
+    public ConversionOptionsBuilder withMaxDepth(Optional<Long> value) {
+        this.maxDepth = value;
+        return this;
+    }
+
     public ConversionOptions build() {
         return new ConversionOptions(
             headingStyle,
@@ -273,7 +280,8 @@ public class ConversionOptionsBuilder {
             extractImages,
             maxImageSize,
             captureSvg,
-            inferDimensions
+            inferDimensions,
+            maxDepth
         );
     }
 }

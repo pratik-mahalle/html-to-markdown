@@ -6,7 +6,7 @@ use rustler::ResourceArc;
 use std::collections::HashMap;
 use std::sync::Arc;
 
-#[derive(Debug, Clone, Default, rustler::NifMap)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize, rustler::NifMap)]
 pub struct MetadataConfig {
     pub extract_document: bool,
     pub extract_headers: bool,
@@ -41,7 +41,7 @@ impl MetadataConfig {
     }
 }
 
-#[derive(Debug, Clone, Default, rustler::NifMap)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize, rustler::NifMap)]
 pub struct MetadataConfigUpdate {
     pub extract_document: Option<bool>,
     pub extract_headers: Option<bool>,
@@ -64,7 +64,7 @@ impl MetadataConfigUpdate {
     }
 }
 
-#[derive(Debug, Clone, Default, rustler::NifMap)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize, rustler::NifMap)]
 pub struct DocumentMetadata {
     pub title: Option<String>,
     pub description: Option<String>,
@@ -100,7 +100,7 @@ impl DocumentMetadata {
     }
 }
 
-#[derive(Debug, Clone, rustler::NifStruct)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize, rustler::NifStruct)]
 #[module = "HtmlToMarkdown.HeaderMetadata"]
 pub struct HeaderMetadata {
     pub level: u8,
@@ -110,7 +110,7 @@ pub struct HeaderMetadata {
     pub html_offset: usize,
 }
 
-#[derive(Debug, Clone, rustler::NifStruct)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize, rustler::NifStruct)]
 #[module = "HtmlToMarkdown.LinkMetadata"]
 pub struct LinkMetadata {
     pub href: String,
@@ -121,7 +121,7 @@ pub struct LinkMetadata {
     pub attributes: HashMap<String, String>,
 }
 
-#[derive(Debug, Clone, rustler::NifStruct)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize, rustler::NifStruct)]
 #[module = "HtmlToMarkdown.ImageMetadata"]
 pub struct ImageMetadata {
     pub src: String,
@@ -132,7 +132,7 @@ pub struct ImageMetadata {
     pub attributes: HashMap<String, String>,
 }
 
-#[derive(Debug, Clone, rustler::NifStruct)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize, rustler::NifStruct)]
 #[module = "HtmlToMarkdown.StructuredData"]
 pub struct StructuredData {
     pub data_type: StructuredDataType,
@@ -140,7 +140,7 @@ pub struct StructuredData {
     pub schema_type: Option<String>,
 }
 
-#[derive(Debug, Clone, Default, rustler::NifMap)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize, rustler::NifMap)]
 pub struct HtmlMetadata {
     pub document: DocumentMetadata,
     pub headers: Vec<HeaderMetadata>,
@@ -164,7 +164,7 @@ impl HtmlMetadata {
     }
 }
 
-#[derive(Debug, Clone, Default, rustler::NifMap)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize, rustler::NifMap)]
 pub struct ConversionOptions {
     pub heading_style: HeadingStyle,
     pub list_indent_type: ListIndentType,
@@ -204,6 +204,7 @@ pub struct ConversionOptions {
     pub max_image_size: u64,
     pub capture_svg: bool,
     pub infer_dimensions: bool,
+    pub max_depth: Option<usize>,
 }
 
 impl ConversionOptions {
@@ -322,6 +323,7 @@ impl ConversionOptions {
                 .get("infer_dimensions")
                 .and_then(|t| t.decode().ok())
                 .unwrap_or(true),
+            max_depth: opts.get("max_depth").and_then(|t| t.decode().ok()),
         }
     }
 }
@@ -336,7 +338,7 @@ impl std::panic::RefUnwindSafe for ConversionOptionsBuilder {}
 
 impl rustler::Resource for ConversionOptionsBuilder {}
 
-#[derive(Debug, Clone, Default, rustler::NifMap)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize, rustler::NifMap)]
 pub struct ConversionOptionsUpdate {
     pub heading_style: Option<HeadingStyle>,
     pub list_indent_type: Option<ListIndentType>,
@@ -376,6 +378,7 @@ pub struct ConversionOptionsUpdate {
     pub max_image_size: Option<u64>,
     pub capture_svg: Option<bool>,
     pub infer_dimensions: Option<bool>,
+    pub max_depth: Option<Option<usize>>,
 }
 
 impl ConversionOptionsUpdate {
@@ -419,11 +422,12 @@ impl ConversionOptionsUpdate {
             max_image_size: opts.get("max_image_size").and_then(|t| t.decode().ok()),
             capture_svg: opts.get("capture_svg").and_then(|t| t.decode().ok()),
             infer_dimensions: opts.get("infer_dimensions").and_then(|t| t.decode().ok()),
+            max_depth: opts.get("max_depth").and_then(|t| t.decode().ok()),
         }
     }
 }
 
-#[derive(Debug, Clone, Default, rustler::NifMap)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize, rustler::NifMap)]
 pub struct PreprocessingOptions {
     pub enabled: bool,
     pub preset: PreprocessingPreset,
@@ -445,7 +449,7 @@ impl PreprocessingOptions {
     }
 }
 
-#[derive(Debug, Clone, Default, rustler::NifMap)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize, rustler::NifMap)]
 pub struct PreprocessingOptionsUpdate {
     pub enabled: Option<bool>,
     pub preset: Option<PreprocessingPreset>,
@@ -464,14 +468,14 @@ impl PreprocessingOptionsUpdate {
     }
 }
 
-#[derive(Debug, Clone, rustler::NifStruct)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize, rustler::NifStruct)]
 #[module = "HtmlToMarkdown.DocumentStructure"]
 pub struct DocumentStructure {
     pub nodes: Vec<DocumentNode>,
     pub source_format: Option<String>,
 }
 
-#[derive(Debug, Clone, rustler::NifStruct)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize, rustler::NifStruct)]
 #[module = "HtmlToMarkdown.DocumentNode"]
 pub struct DocumentNode {
     pub id: String,
@@ -482,7 +486,7 @@ pub struct DocumentNode {
     pub attributes: Option<HashMap<String, String>>,
 }
 
-#[derive(Debug, Clone, rustler::NifStruct)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize, rustler::NifStruct)]
 #[module = "HtmlToMarkdown.TextAnnotation"]
 pub struct TextAnnotation {
     pub start: u32,
@@ -490,7 +494,7 @@ pub struct TextAnnotation {
     pub kind: AnnotationKind,
 }
 
-#[derive(Debug, Clone, Default, rustler::NifMap)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize, rustler::NifMap)]
 pub struct ConversionResult {
     pub content: Option<String>,
     pub document: Option<DocumentStructure>,
@@ -513,7 +517,7 @@ impl ConversionResult {
     }
 }
 
-#[derive(Debug, Clone, Default, rustler::NifMap)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize, rustler::NifMap)]
 pub struct TableGrid {
     pub rows: u32,
     pub cols: u32,
@@ -530,7 +534,7 @@ impl TableGrid {
     }
 }
 
-#[derive(Debug, Clone, rustler::NifStruct)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize, rustler::NifStruct)]
 #[module = "HtmlToMarkdown.GridCell"]
 pub struct GridCell {
     pub content: String,
@@ -541,14 +545,14 @@ pub struct GridCell {
     pub is_header: bool,
 }
 
-#[derive(Debug, Clone, rustler::NifStruct)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize, rustler::NifStruct)]
 #[module = "HtmlToMarkdown.TableData"]
 pub struct TableData {
     pub grid: TableGrid,
     pub markdown: String,
 }
 
-#[derive(Debug, Clone, rustler::NifStruct)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize, rustler::NifStruct)]
 #[module = "HtmlToMarkdown.ProcessingWarning"]
 pub struct ProcessingWarning {
     pub message: String,
@@ -789,6 +793,7 @@ pub enum WarningKind {
     TruncatedInput,
     MalformedHtml,
     SanitizationApplied,
+    DepthLimitExceeded,
 }
 
 #[allow(clippy::derivable_impls)]
@@ -1127,6 +1132,7 @@ impl From<ConversionOptions> for html_to_markdown_rs::options::ConversionOptions
             max_image_size: val.max_image_size,
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
+            max_depth: val.max_depth,
         }
     }
 }
@@ -1172,6 +1178,7 @@ impl From<html_to_markdown_rs::options::ConversionOptions> for ConversionOptions
             max_image_size: val.max_image_size,
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
+            max_depth: val.max_depth,
         }
     }
 }
@@ -1217,6 +1224,7 @@ impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for ConversionO
             max_image_size: val.max_image_size,
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
+            max_depth: val.max_depth,
         }
     }
 }
@@ -1803,6 +1811,7 @@ impl From<WarningKind> for html_to_markdown_rs::WarningKind {
             WarningKind::TruncatedInput => Self::TruncatedInput,
             WarningKind::MalformedHtml => Self::MalformedHtml,
             WarningKind::SanitizationApplied => Self::SanitizationApplied,
+            WarningKind::DepthLimitExceeded => Self::DepthLimitExceeded,
         }
     }
 }
@@ -1815,6 +1824,7 @@ impl From<html_to_markdown_rs::WarningKind> for WarningKind {
             html_to_markdown_rs::WarningKind::TruncatedInput => Self::TruncatedInput,
             html_to_markdown_rs::WarningKind::MalformedHtml => Self::MalformedHtml,
             html_to_markdown_rs::WarningKind::SanitizationApplied => Self::SanitizationApplied,
+            html_to_markdown_rs::WarningKind::DepthLimitExceeded => Self::DepthLimitExceeded,
         }
     }
 }
