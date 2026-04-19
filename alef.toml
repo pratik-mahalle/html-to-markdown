@@ -58,17 +58,7 @@ functions = ["convert"]
 [exclude]
 functions = []
 types = []
-methods = [
-  "MetadataConfig.apply_update",
-  "ConversionOptions.apply_update",
-  "PreprocessingOptions.apply_update",
-  "MetadataConfig.from_update",
-  "MetadataConfig.from",
-  "ConversionOptions.from_update",
-  "ConversionOptions.from",
-  "PreprocessingOptions.from_update",
-  "PreprocessingOptions.from",
-]
+methods = []
 
 [output]
 python = "crates/html-to-markdown-py/src/"

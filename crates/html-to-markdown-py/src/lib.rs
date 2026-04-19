@@ -114,11 +114,40 @@ impl MetadataConfig {
         core_self.any_enabled()
     }
 
+    #[pyo3(signature = (update))]
+    pub fn apply_update(&self, update: MetadataConfigUpdate) -> Self {
+        let mut core_self = html_to_markdown_rs::metadata::MetadataConfig {
+            extract_document: self.extract_document,
+            extract_headers: self.extract_headers,
+            extract_links: self.extract_links,
+            extract_images: self.extract_images,
+            extract_structured_data: self.extract_structured_data,
+            max_structured_data_size: self.max_structured_data_size,
+        };
+        core_self.apply_update(update.into());
+        core_self.into()
+    }
+
     #[allow(clippy::should_implement_trait)]
     #[staticmethod]
     #[pyo3(signature = ())]
     pub fn default() -> MetadataConfig {
         html_to_markdown_rs::metadata::MetadataConfig::default().into()
+    }
+
+    #[staticmethod]
+    #[pyo3(signature = (update))]
+    pub fn from_update(update: MetadataConfigUpdate) -> MetadataConfig {
+        let update_core: html_to_markdown_rs::MetadataConfigUpdate = update.into();
+        html_to_markdown_rs::metadata::MetadataConfig::from_update(update_core).into()
+    }
+
+    #[allow(clippy::should_implement_trait)]
+    #[staticmethod]
+    #[pyo3(signature = (update))]
+    pub fn from(update: MetadataConfigUpdate) -> MetadataConfig {
+        let update_core: html_to_markdown_rs::MetadataConfigUpdate = update.into();
+        html_to_markdown_rs::metadata::MetadataConfig::from(update_core).into()
     }
 }
 
@@ -695,6 +724,53 @@ impl ConversionOptions {
         }
     }
 
+    #[pyo3(signature = (update))]
+    pub fn apply_update(&self, update: ConversionOptionsUpdate) -> Self {
+        let mut core_self = html_to_markdown_rs::options::ConversionOptions {
+            heading_style: self.heading_style.clone().into(),
+            list_indent_type: self.list_indent_type.clone().into(),
+            list_indent_width: self.list_indent_width,
+            bullets: self.bullets.clone(),
+            strong_em_symbol: self.strong_em_symbol.chars().next().unwrap_or('*'),
+            escape_asterisks: self.escape_asterisks,
+            escape_underscores: self.escape_underscores,
+            escape_misc: self.escape_misc,
+            escape_ascii: self.escape_ascii,
+            code_language: self.code_language.clone(),
+            autolinks: self.autolinks,
+            default_title: self.default_title,
+            br_in_tables: self.br_in_tables,
+            highlight_style: self.highlight_style.clone().into(),
+            extract_metadata: self.extract_metadata,
+            whitespace_mode: self.whitespace_mode.clone().into(),
+            strip_newlines: self.strip_newlines,
+            wrap: self.wrap,
+            wrap_width: self.wrap_width,
+            convert_as_inline: self.convert_as_inline,
+            sub_symbol: self.sub_symbol.clone(),
+            sup_symbol: self.sup_symbol.clone(),
+            newline_style: self.newline_style.clone().into(),
+            code_block_style: self.code_block_style.clone().into(),
+            keep_inline_images_in: self.keep_inline_images_in.clone(),
+            preprocessing: self.preprocessing.clone().into(),
+            encoding: self.encoding.clone(),
+            debug: self.debug,
+            strip_tags: self.strip_tags.clone(),
+            preserve_tags: self.preserve_tags.clone(),
+            skip_images: self.skip_images,
+            link_style: self.link_style.clone().into(),
+            output_format: self.output_format.clone().into(),
+            include_document_structure: self.include_document_structure,
+            extract_images: self.extract_images,
+            max_image_size: self.max_image_size,
+            capture_svg: self.capture_svg,
+            infer_dimensions: self.infer_dimensions,
+            max_depth: self.max_depth,
+        };
+        core_self.apply_update(update.into());
+        core_self.into()
+    }
+
     #[allow(clippy::should_implement_trait)]
     #[staticmethod]
     #[pyo3(signature = ())]
@@ -708,6 +784,21 @@ impl ConversionOptions {
         ConversionOptionsBuilder {
             inner: Arc::new(html_to_markdown_rs::options::ConversionOptions::builder()),
         }
+    }
+
+    #[staticmethod]
+    #[pyo3(signature = (update))]
+    pub fn from_update(update: ConversionOptionsUpdate) -> ConversionOptions {
+        let update_core: html_to_markdown_rs::ConversionOptionsUpdate = update.into();
+        html_to_markdown_rs::options::ConversionOptions::from_update(update_core).into()
+    }
+
+    #[allow(clippy::should_implement_trait)]
+    #[staticmethod]
+    #[pyo3(signature = (update))]
+    pub fn from(update: ConversionOptionsUpdate) -> ConversionOptions {
+        let update_core: html_to_markdown_rs::ConversionOptionsUpdate = update.into();
+        html_to_markdown_rs::options::ConversionOptions::from(update_core).into()
     }
 }
 
@@ -873,7 +964,7 @@ pub struct ConversionOptionsUpdate {
     pub infer_dimensions: Option<bool>,
     /// Optional override for [`ConversionOptions::max_depth`].
     #[pyo3(get)]
-    pub max_depth: Option<Option<usize>>,
+    pub max_depth: Option<usize>,
 }
 
 #[pymethods]
@@ -921,7 +1012,7 @@ impl ConversionOptionsUpdate {
         max_image_size: Option<u64>,
         capture_svg: Option<bool>,
         infer_dimensions: Option<bool>,
-        max_depth: Option<Option<usize>>,
+        max_depth: Option<usize>,
     ) -> Self {
         Self {
             heading_style,
@@ -1003,11 +1094,38 @@ impl PreprocessingOptions {
         }
     }
 
+    #[pyo3(signature = (update))]
+    pub fn apply_update(&self, update: PreprocessingOptionsUpdate) -> Self {
+        let mut core_self = html_to_markdown_rs::options::PreprocessingOptions {
+            enabled: self.enabled,
+            preset: self.preset.clone().into(),
+            remove_navigation: self.remove_navigation,
+            remove_forms: self.remove_forms,
+        };
+        core_self.apply_update(update.into());
+        core_self.into()
+    }
+
     #[allow(clippy::should_implement_trait)]
     #[staticmethod]
     #[pyo3(signature = ())]
     pub fn default() -> PreprocessingOptions {
         html_to_markdown_rs::options::PreprocessingOptions::default().into()
+    }
+
+    #[staticmethod]
+    #[pyo3(signature = (update))]
+    pub fn from_update(update: PreprocessingOptionsUpdate) -> PreprocessingOptions {
+        let update_core: html_to_markdown_rs::PreprocessingOptionsUpdate = update.into();
+        html_to_markdown_rs::options::PreprocessingOptions::from_update(update_core).into()
+    }
+
+    #[allow(clippy::should_implement_trait)]
+    #[staticmethod]
+    #[pyo3(signature = (update))]
+    pub fn from(update: PreprocessingOptionsUpdate) -> PreprocessingOptions {
+        let update_core: html_to_markdown_rs::PreprocessingOptionsUpdate = update.into();
+        html_to_markdown_rs::options::PreprocessingOptions::from(update_core).into()
     }
 }
 
@@ -1601,6 +1719,19 @@ impl From<html_to_markdown_rs::metadata::MetadataConfig> for MetadataConfig {
     }
 }
 
+impl From<MetadataConfigUpdate> for html_to_markdown_rs::metadata::MetadataConfigUpdate {
+    fn from(val: MetadataConfigUpdate) -> Self {
+        Self {
+            extract_document: val.extract_document,
+            extract_headers: val.extract_headers,
+            extract_links: val.extract_links,
+            extract_images: val.extract_images,
+            extract_structured_data: val.extract_structured_data,
+            max_structured_data_size: val.max_structured_data_size,
+        }
+    }
+}
+
 impl From<html_to_markdown_rs::metadata::MetadataConfigUpdate> for MetadataConfigUpdate {
     fn from(val: html_to_markdown_rs::metadata::MetadataConfigUpdate) -> Self {
         Self {
@@ -1862,6 +1993,52 @@ impl From<html_to_markdown_rs::options::ConversionOptions> for ConversionOptions
     }
 }
 
+impl From<ConversionOptionsUpdate> for html_to_markdown_rs::options::ConversionOptionsUpdate {
+    fn from(val: ConversionOptionsUpdate) -> Self {
+        Self {
+            heading_style: val.heading_style.map(Into::into),
+            list_indent_type: val.list_indent_type.map(Into::into),
+            list_indent_width: val.list_indent_width,
+            bullets: val.bullets,
+            strong_em_symbol: val.strong_em_symbol.and_then(|s| s.chars().next()),
+            escape_asterisks: val.escape_asterisks,
+            escape_underscores: val.escape_underscores,
+            escape_misc: val.escape_misc,
+            escape_ascii: val.escape_ascii,
+            code_language: val.code_language,
+            autolinks: val.autolinks,
+            default_title: val.default_title,
+            br_in_tables: val.br_in_tables,
+            highlight_style: val.highlight_style.map(Into::into),
+            extract_metadata: val.extract_metadata,
+            whitespace_mode: val.whitespace_mode.map(Into::into),
+            strip_newlines: val.strip_newlines,
+            wrap: val.wrap,
+            wrap_width: val.wrap_width,
+            convert_as_inline: val.convert_as_inline,
+            sub_symbol: val.sub_symbol,
+            sup_symbol: val.sup_symbol,
+            newline_style: val.newline_style.map(Into::into),
+            code_block_style: val.code_block_style.map(Into::into),
+            keep_inline_images_in: val.keep_inline_images_in,
+            preprocessing: val.preprocessing.map(Into::into),
+            encoding: val.encoding,
+            debug: val.debug,
+            strip_tags: val.strip_tags,
+            preserve_tags: val.preserve_tags,
+            skip_images: val.skip_images,
+            link_style: val.link_style.map(Into::into),
+            output_format: val.output_format.map(Into::into),
+            include_document_structure: val.include_document_structure,
+            extract_images: val.extract_images,
+            max_image_size: val.max_image_size,
+            capture_svg: val.capture_svg,
+            infer_dimensions: val.infer_dimensions,
+            max_depth: (val.max_depth).map(Some),
+        }
+    }
+}
+
 impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for ConversionOptionsUpdate {
     fn from(val: html_to_markdown_rs::options::ConversionOptionsUpdate) -> Self {
         Self {
@@ -1903,7 +2080,7 @@ impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for ConversionO
             max_image_size: val.max_image_size,
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
-            max_depth: val.max_depth,
+            max_depth: val.max_depth.flatten(),
         }
     }
 }
@@ -1924,6 +2101,17 @@ impl From<html_to_markdown_rs::options::PreprocessingOptions> for PreprocessingO
         Self {
             enabled: val.enabled,
             preset: val.preset.into(),
+            remove_navigation: val.remove_navigation,
+            remove_forms: val.remove_forms,
+        }
+    }
+}
+
+impl From<PreprocessingOptionsUpdate> for html_to_markdown_rs::options::PreprocessingOptionsUpdate {
+    fn from(val: PreprocessingOptionsUpdate) -> Self {
+        Self {
+            enabled: val.enabled,
+            preset: val.preset.map(Into::into),
             remove_navigation: val.remove_navigation,
             remove_forms: val.remove_forms,
         }

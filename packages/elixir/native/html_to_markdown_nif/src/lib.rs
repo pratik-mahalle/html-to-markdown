@@ -559,7 +559,7 @@ pub struct ProcessingWarning {
     pub kind: WarningKind,
 }
 
-#[derive(Debug, Clone, Copy, rustler::NifUnitEnum)]
+#[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize, rustler::NifUnitEnum)]
 pub enum TextDirection {
     LeftToRight,
     RightToLeft,
@@ -573,7 +573,7 @@ impl Default for TextDirection {
     }
 }
 
-#[derive(Debug, Clone, Copy, rustler::NifUnitEnum)]
+#[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize, rustler::NifUnitEnum)]
 pub enum LinkType {
     Anchor,
     Internal,
@@ -590,7 +590,7 @@ impl Default for LinkType {
     }
 }
 
-#[derive(Debug, Clone, Copy, rustler::NifUnitEnum)]
+#[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize, rustler::NifUnitEnum)]
 pub enum ImageType {
     DataUri,
     InlineSvg,
@@ -605,7 +605,7 @@ impl Default for ImageType {
     }
 }
 
-#[derive(Debug, Clone, Copy, rustler::NifUnitEnum)]
+#[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize, rustler::NifUnitEnum)]
 pub enum StructuredDataType {
     JsonLd,
     Microdata,
@@ -619,7 +619,7 @@ impl Default for StructuredDataType {
     }
 }
 
-#[derive(Debug, Clone, Copy, rustler::NifUnitEnum)]
+#[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize, rustler::NifUnitEnum)]
 pub enum PreprocessingPreset {
     Minimal,
     Standard,
@@ -633,7 +633,7 @@ impl Default for PreprocessingPreset {
     }
 }
 
-#[derive(Debug, Clone, Copy, rustler::NifUnitEnum)]
+#[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize, rustler::NifUnitEnum)]
 pub enum HeadingStyle {
     Underlined,
     Atx,
@@ -647,7 +647,7 @@ impl Default for HeadingStyle {
     }
 }
 
-#[derive(Debug, Clone, Copy, rustler::NifUnitEnum)]
+#[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize, rustler::NifUnitEnum)]
 pub enum ListIndentType {
     Spaces,
     Tabs,
@@ -660,7 +660,7 @@ impl Default for ListIndentType {
     }
 }
 
-#[derive(Debug, Clone, Copy, rustler::NifUnitEnum)]
+#[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize, rustler::NifUnitEnum)]
 pub enum WhitespaceMode {
     Normalized,
     Strict,
@@ -673,7 +673,7 @@ impl Default for WhitespaceMode {
     }
 }
 
-#[derive(Debug, Clone, Copy, rustler::NifUnitEnum)]
+#[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize, rustler::NifUnitEnum)]
 pub enum NewlineStyle {
     Spaces,
     Backslash,
@@ -686,7 +686,7 @@ impl Default for NewlineStyle {
     }
 }
 
-#[derive(Debug, Clone, Copy, rustler::NifUnitEnum)]
+#[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize, rustler::NifUnitEnum)]
 pub enum CodeBlockStyle {
     Indented,
     Backticks,
@@ -700,7 +700,7 @@ impl Default for CodeBlockStyle {
     }
 }
 
-#[derive(Debug, Clone, Copy, rustler::NifUnitEnum)]
+#[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize, rustler::NifUnitEnum)]
 pub enum HighlightStyle {
     DoubleEqual,
     Html,
@@ -715,7 +715,7 @@ impl Default for HighlightStyle {
     }
 }
 
-#[derive(Debug, Clone, Copy, rustler::NifUnitEnum)]
+#[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize, rustler::NifUnitEnum)]
 pub enum LinkStyle {
     Inline,
     Reference,
@@ -728,7 +728,7 @@ impl Default for LinkStyle {
     }
 }
 
-#[derive(Debug, Clone, Copy, rustler::NifUnitEnum)]
+#[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize, rustler::NifUnitEnum)]
 pub enum OutputFormat {
     Markdown,
     Djot,
@@ -742,7 +742,7 @@ impl Default for OutputFormat {
     }
 }
 
-#[derive(Debug, Clone, Copy, rustler::NifUnitEnum)]
+#[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize, rustler::NifUnitEnum)]
 pub enum NodeContent {
     Heading,
     Paragraph,
@@ -766,7 +766,7 @@ impl Default for NodeContent {
     }
 }
 
-#[derive(Debug, Clone, Copy, rustler::NifUnitEnum)]
+#[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize, rustler::NifUnitEnum)]
 pub enum AnnotationKind {
     Bold,
     Italic,
@@ -786,7 +786,7 @@ impl Default for AnnotationKind {
     }
 }
 
-#[derive(Debug, Clone, Copy, rustler::NifUnitEnum)]
+#[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize, rustler::NifUnitEnum)]
 pub enum WarningKind {
     ImageExtractionFailed,
     EncodingFallback,
@@ -825,6 +825,21 @@ pub fn metadataconfig_any_enabled(obj: MetadataConfig) -> bool {
 }
 
 #[rustler::nif]
+pub fn metadataconfig_apply_update(obj: MetadataConfig, update: MetadataConfigUpdate) -> () {
+    ()
+}
+
+#[rustler::nif]
+pub fn metadataconfig_from_update(update: MetadataConfigUpdate) -> MetadataConfig {
+    html_to_markdown_rs::MetadataConfig::from_update(update.into()).into()
+}
+
+#[rustler::nif]
+pub fn metadataconfig_from(update: MetadataConfigUpdate) -> MetadataConfig {
+    html_to_markdown_rs::MetadataConfig::from(update.into()).into()
+}
+
+#[rustler::nif]
 pub fn headermetadata_is_valid(obj: HeaderMetadata) -> bool {
     html_to_markdown_rs::HeaderMetadata::from(obj).is_valid()
 }
@@ -844,6 +859,21 @@ pub fn conversionoptions_builder() -> ResourceArc<ConversionOptionsBuilder> {
     ResourceArc::new(ConversionOptionsBuilder {
         inner: Arc::new(html_to_markdown_rs::ConversionOptions::builder()),
     })
+}
+
+#[rustler::nif]
+pub fn conversionoptions_apply_update(obj: ConversionOptions, update: ConversionOptionsUpdate) -> () {
+    ()
+}
+
+#[rustler::nif]
+pub fn conversionoptions_from_update(update: ConversionOptionsUpdate) -> ConversionOptions {
+    html_to_markdown_rs::ConversionOptions::from_update(update.into()).into()
+}
+
+#[rustler::nif]
+pub fn conversionoptions_from(update: ConversionOptionsUpdate) -> ConversionOptions {
+    html_to_markdown_rs::ConversionOptions::from(update.into()).into()
 }
 
 #[rustler::nif]
@@ -896,6 +926,21 @@ pub fn preprocessingoptions_default() -> PreprocessingOptions {
     html_to_markdown_rs::PreprocessingOptions::default().into()
 }
 
+#[rustler::nif]
+pub fn preprocessingoptions_apply_update(obj: PreprocessingOptions, update: PreprocessingOptionsUpdate) -> () {
+    ()
+}
+
+#[rustler::nif]
+pub fn preprocessingoptions_from_update(update: PreprocessingOptionsUpdate) -> PreprocessingOptions {
+    html_to_markdown_rs::PreprocessingOptions::from_update(update.into()).into()
+}
+
+#[rustler::nif]
+pub fn preprocessingoptions_from(update: PreprocessingOptionsUpdate) -> PreprocessingOptions {
+    html_to_markdown_rs::PreprocessingOptions::from(update.into()).into()
+}
+
 impl From<MetadataConfig> for html_to_markdown_rs::metadata::MetadataConfig {
     fn from(val: MetadataConfig) -> Self {
         Self {
@@ -911,6 +956,19 @@ impl From<MetadataConfig> for html_to_markdown_rs::metadata::MetadataConfig {
 
 impl From<html_to_markdown_rs::metadata::MetadataConfig> for MetadataConfig {
     fn from(val: html_to_markdown_rs::metadata::MetadataConfig) -> Self {
+        Self {
+            extract_document: val.extract_document,
+            extract_headers: val.extract_headers,
+            extract_links: val.extract_links,
+            extract_images: val.extract_images,
+            extract_structured_data: val.extract_structured_data,
+            max_structured_data_size: val.max_structured_data_size,
+        }
+    }
+}
+
+impl From<MetadataConfigUpdate> for html_to_markdown_rs::metadata::MetadataConfigUpdate {
+    fn from(val: MetadataConfigUpdate) -> Self {
         Self {
             extract_document: val.extract_document,
             extract_headers: val.extract_headers,
@@ -1183,6 +1241,52 @@ impl From<html_to_markdown_rs::options::ConversionOptions> for ConversionOptions
     }
 }
 
+impl From<ConversionOptionsUpdate> for html_to_markdown_rs::options::ConversionOptionsUpdate {
+    fn from(val: ConversionOptionsUpdate) -> Self {
+        Self {
+            heading_style: val.heading_style.map(Into::into),
+            list_indent_type: val.list_indent_type.map(Into::into),
+            list_indent_width: val.list_indent_width,
+            bullets: val.bullets,
+            strong_em_symbol: val.strong_em_symbol.and_then(|s| s.chars().next()),
+            escape_asterisks: val.escape_asterisks,
+            escape_underscores: val.escape_underscores,
+            escape_misc: val.escape_misc,
+            escape_ascii: val.escape_ascii,
+            code_language: val.code_language,
+            autolinks: val.autolinks,
+            default_title: val.default_title,
+            br_in_tables: val.br_in_tables,
+            highlight_style: val.highlight_style.map(Into::into),
+            extract_metadata: val.extract_metadata,
+            whitespace_mode: val.whitespace_mode.map(Into::into),
+            strip_newlines: val.strip_newlines,
+            wrap: val.wrap,
+            wrap_width: val.wrap_width,
+            convert_as_inline: val.convert_as_inline,
+            sub_symbol: val.sub_symbol,
+            sup_symbol: val.sup_symbol,
+            newline_style: val.newline_style.map(Into::into),
+            code_block_style: val.code_block_style.map(Into::into),
+            keep_inline_images_in: val.keep_inline_images_in,
+            preprocessing: val.preprocessing.map(Into::into),
+            encoding: val.encoding,
+            debug: val.debug,
+            strip_tags: val.strip_tags,
+            preserve_tags: val.preserve_tags,
+            skip_images: val.skip_images,
+            link_style: val.link_style.map(Into::into),
+            output_format: val.output_format.map(Into::into),
+            include_document_structure: val.include_document_structure,
+            extract_images: val.extract_images,
+            max_image_size: val.max_image_size,
+            capture_svg: val.capture_svg,
+            infer_dimensions: val.infer_dimensions,
+            max_depth: (val.max_depth).map(Some),
+        }
+    }
+}
+
 impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for ConversionOptionsUpdate {
     fn from(val: html_to_markdown_rs::options::ConversionOptionsUpdate) -> Self {
         Self {
@@ -1224,7 +1328,7 @@ impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for ConversionO
             max_image_size: val.max_image_size,
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
-            max_depth: val.max_depth,
+            max_depth: val.max_depth.flatten(),
         }
     }
 }
@@ -1245,6 +1349,17 @@ impl From<html_to_markdown_rs::options::PreprocessingOptions> for PreprocessingO
         Self {
             enabled: val.enabled,
             preset: val.preset.into(),
+            remove_navigation: val.remove_navigation,
+            remove_forms: val.remove_forms,
+        }
+    }
+}
+
+impl From<PreprocessingOptionsUpdate> for html_to_markdown_rs::options::PreprocessingOptionsUpdate {
+    fn from(val: PreprocessingOptionsUpdate) -> Self {
+        Self {
+            enabled: val.enabled,
+            preset: val.preset.map(Into::into),
             remove_navigation: val.remove_navigation,
             remove_forms: val.remove_forms,
         }

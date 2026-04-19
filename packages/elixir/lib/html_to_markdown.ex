@@ -9,8 +9,7 @@ defmodule HtmlToMarkdown do
   end
 
   @doc "Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images,"
-  @spec convert(String.t(), String.t() | nil | nil) ::
-          {:ok, String.t() | nil} | {:error, String.t()}
+  @spec convert(String.t(), String.t() | nil | nil) :: {:ok, String.t() | nil} | {:error, String.t()}
   def convert(html, options) do
     HtmlToMarkdown.Native.convert(html, options)
   end
@@ -25,6 +24,24 @@ defmodule HtmlToMarkdown do
   @spec metadataconfig_any_enabled(map()) :: boolean()
   def metadataconfig_any_enabled(obj) do
     HtmlToMarkdown.Native.metadataconfig_any_enabled(obj)
+  end
+
+  @doc "Apply a partial update to this metadata configuration."
+  @spec metadataconfig_apply_update(map(), String.t() | nil) :: nil
+  def metadataconfig_apply_update(obj, update) do
+    HtmlToMarkdown.Native.metadataconfig_apply_update(obj, update)
+  end
+
+  @doc "Create new metadata configuration from a partial update."
+  @spec metadataconfig_from_update(String.t() | nil) :: String.t() | nil
+  def metadataconfig_from_update(update) do
+    HtmlToMarkdown.Native.metadataconfig_from_update(update)
+  end
+
+  @doc "Method"
+  @spec metadataconfig_from(String.t() | nil) :: String.t() | nil
+  def metadataconfig_from(update) do
+    HtmlToMarkdown.Native.metadataconfig_from(update)
   end
 
   @doc "Validate that the header level is within valid range (1-6)."
@@ -49,6 +66,24 @@ defmodule HtmlToMarkdown do
   @spec conversionoptions_builder() :: reference()
   def conversionoptions_builder do
     HtmlToMarkdown.Native.conversionoptions_builder()
+  end
+
+  @doc "Apply a partial update to these conversion options."
+  @spec conversionoptions_apply_update(map(), String.t() | nil) :: nil
+  def conversionoptions_apply_update(obj, update) do
+    HtmlToMarkdown.Native.conversionoptions_apply_update(obj, update)
+  end
+
+  @doc "Create from a partial update, applying to defaults."
+  @spec conversionoptions_from_update(String.t() | nil) :: String.t() | nil
+  def conversionoptions_from_update(update) do
+    HtmlToMarkdown.Native.conversionoptions_from_update(update)
+  end
+
+  @doc "Method"
+  @spec conversionoptions_from(String.t() | nil) :: String.t() | nil
+  def conversionoptions_from(update) do
+    HtmlToMarkdown.Native.conversionoptions_from(update)
   end
 
   @doc "Set the list of HTML tag names whose content is stripped from output."
@@ -85,5 +120,23 @@ defmodule HtmlToMarkdown do
   @spec preprocessingoptions_default() :: String.t() | nil
   def preprocessingoptions_default do
     HtmlToMarkdown.Native.preprocessingoptions_default()
+  end
+
+  @doc "Apply a partial update to these preprocessing options."
+  @spec preprocessingoptions_apply_update(map(), String.t() | nil) :: nil
+  def preprocessingoptions_apply_update(obj, update) do
+    HtmlToMarkdown.Native.preprocessingoptions_apply_update(obj, update)
+  end
+
+  @doc "Create new preprocessing options from a partial update."
+  @spec preprocessingoptions_from_update(String.t() | nil) :: String.t() | nil
+  def preprocessingoptions_from_update(update) do
+    HtmlToMarkdown.Native.preprocessingoptions_from_update(update)
+  end
+
+  @doc "Method"
+  @spec preprocessingoptions_from(String.t() | nil) :: String.t() | nil
+  def preprocessingoptions_from(update) do
+    HtmlToMarkdown.Native.preprocessingoptions_from(update)
   end
 end

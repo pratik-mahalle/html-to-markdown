@@ -636,6 +636,95 @@ HTMMetadataConfig *htm_metadata_config_default(void);
 int32_t htm_metadata_config_any_enabled(const HTMMetadataConfig *this_);
 
 /**
+ * Apply a partial update to this metadata configuration.
+ *
+ * Any specified fields in the update (Some values) will override the current values.
+ * Unspecified fields (None) are left unchanged. This allows selective modification
+ * of configuration without affecting unrelated settings.
+ *
+ * # Arguments
+ *
+ * * `update` - Partial metadata config update with fields to override
+ *
+ * # Examples
+ *
+ * ```
+ * # use html_to_markdown_rs::metadata::{MetadataConfig, MetadataConfigUpdate};
+ * let mut config = MetadataConfig::default();
+ * // config starts with all extraction enabled
+ *
+ * let update = MetadataConfigUpdate {
+ *     extract_document: Some(false),
+ *     extract_images: Some(false),
+ *     // All other fields are None, so they won't change
+ *     ..Default::default()
+ * };
+ *
+ * config.apply_update(update);
+ *
+ * assert!(!config.extract_document);
+ * assert!(!config.extract_images);
+ * assert!(config.extract_headers);  // Unchanged
+ * assert!(config.extract_links);    // Unchanged
+ * ```
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+void htm_metadata_config_apply_update(HTMMetadataConfig *this_,
+                                      const HTMMetadataConfigUpdate *update);
+
+/**
+ * Create new metadata configuration from a partial update.
+ *
+ * Creates a new `MetadataConfig` struct with defaults, then applies the update.
+ * Fields not specified in the update (None) keep their default values.
+ * This is a convenience method for constructing a configuration from a partial specification
+ * without needing to explicitly call `.default()` first.
+ *
+ * # Arguments
+ *
+ * * `update` - Partial metadata config update with fields to set
+ *
+ * # Returns
+ *
+ * New `MetadataConfig` with specified updates applied to defaults
+ *
+ * # Examples
+ *
+ * ```
+ * # use html_to_markdown_rs::metadata::{MetadataConfig, MetadataConfigUpdate};
+ * let update = MetadataConfigUpdate {
+ *     extract_document: Some(false),
+ *     extract_headers: Some(true),
+ *     extract_links: Some(true),
+ *     extract_images: None,  // Will use default (true)
+ *     extract_structured_data: None,  // Will use default (true)
+ *     max_structured_data_size: None,  // Will use default (1MB)
+ * };
+ *
+ * let config = MetadataConfig::from_update(update);
+ *
+ * assert!(!config.extract_document);
+ * assert!(config.extract_headers);
+ * assert!(config.extract_links);
+ * assert!(config.extract_images);  // Default
+ * assert!(config.extract_structured_data);  // Default
+ * ```
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+HTMMetadataConfig *htm_metadata_config_from_update(const HTMMetadataConfigUpdate *update);
+
+/**
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+HTMMetadataConfig *htm_metadata_config_from(const HTMMetadataConfigUpdate *update);
+
+/**
  * Free a `MetadataConfigUpdate` handle.
  * # Safety
  * Pointer must have been returned by this library, or be null.
@@ -1440,6 +1529,30 @@ HTMConversionOptions *htm_conversion_options_default(void);
 HTMConversionOptionsBuilder *htm_conversion_options_builder(void);
 
 /**
+ * Apply a partial update to these conversion options.
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+void htm_conversion_options_apply_update(HTMConversionOptions *this_,
+                                         const HTMConversionOptionsUpdate *update);
+
+/**
+ * Create from a partial update, applying to defaults.
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+HTMConversionOptions *htm_conversion_options_from_update(const HTMConversionOptionsUpdate *update);
+
+/**
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+HTMConversionOptions *htm_conversion_options_from(const HTMConversionOptionsUpdate *update);
+
+/**
  * Free a `ConversionOptionsBuilder` handle.
  * # Safety
  * Pointer must have been returned by this library, or be null.
@@ -1835,6 +1948,48 @@ int32_t htm_preprocessing_options_remove_forms(const HTMPreprocessingOptions *pt
  * Returned pointers must be freed with the appropriate free function.
  */
 HTMPreprocessingOptions *htm_preprocessing_options_default(void);
+
+/**
+ * Apply a partial update to these preprocessing options.
+ *
+ * Any specified fields in the update will override the current values.
+ * Unspecified fields (None) are left unchanged.
+ *
+ * # Arguments
+ *
+ * * `update` - Partial preprocessing options update
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+void htm_preprocessing_options_apply_update(HTMPreprocessingOptions *this_,
+                                            const HTMPreprocessingOptionsUpdate *update);
+
+/**
+ * Create new preprocessing options from a partial update.
+ *
+ * Creates a new `PreprocessingOptions` struct with defaults, then applies the update.
+ * Fields not specified in the update keep their default values.
+ *
+ * # Arguments
+ *
+ * * `update` - Partial preprocessing options update
+ *
+ * # Returns
+ *
+ * New `PreprocessingOptions` with specified updates applied to defaults
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+HTMPreprocessingOptions *htm_preprocessing_options_from_update(const HTMPreprocessingOptionsUpdate *update);
+
+/**
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+HTMPreprocessingOptions *htm_preprocessing_options_from(const HTMPreprocessingOptionsUpdate *update);
 
 /**
  * Create a `PreprocessingOptionsUpdate` from a JSON string. Returns null on failure.

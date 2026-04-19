@@ -40,7 +40,7 @@ fn json_to_ruby(handle: &Ruby, val: serde_json::Value) -> magnus::Value {
     }
 }
 
-#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::MetadataConfig")]
 #[serde(default)]
 pub struct MetadataConfig {
@@ -129,9 +129,13 @@ impl MetadataConfig {
         };
         core_self.any_enabled()
     }
+
+    fn apply_update(&self, update: MetadataConfigUpdate) -> () {
+        ()
+    }
 }
 
-#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[magnus::wrap(class = "HtmlToMarkdownRs::MetadataConfigUpdate")]
 #[serde(default)]
 pub struct MetadataConfigUpdate {
@@ -975,6 +979,10 @@ impl ConversionOptions {
     fn max_depth(&self) -> Option<usize> {
         self.max_depth
     }
+
+    fn apply_update(&self, update: ConversionOptionsUpdate) -> () {
+        ()
+    }
 }
 
 #[derive(Clone)]
@@ -1408,6 +1416,10 @@ impl PreprocessingOptions {
 
     fn remove_forms(&self) -> bool {
         self.remove_forms
+    }
+
+    fn apply_update(&self, update: PreprocessingOptionsUpdate) -> () {
+        ()
     }
 }
 
@@ -2590,6 +2602,19 @@ impl From<html_to_markdown_rs::metadata::MetadataConfig> for MetadataConfig {
     }
 }
 
+impl From<MetadataConfigUpdate> for html_to_markdown_rs::metadata::MetadataConfigUpdate {
+    fn from(val: MetadataConfigUpdate) -> Self {
+        Self {
+            extract_document: val.extract_document,
+            extract_headers: val.extract_headers,
+            extract_links: val.extract_links,
+            extract_images: val.extract_images,
+            extract_structured_data: val.extract_structured_data,
+            max_structured_data_size: val.max_structured_data_size,
+        }
+    }
+}
+
 impl From<html_to_markdown_rs::metadata::MetadataConfigUpdate> for MetadataConfigUpdate {
     fn from(val: html_to_markdown_rs::metadata::MetadataConfigUpdate) -> Self {
         Self {
@@ -2851,6 +2876,52 @@ impl From<html_to_markdown_rs::options::ConversionOptions> for ConversionOptions
     }
 }
 
+impl From<ConversionOptionsUpdate> for html_to_markdown_rs::options::ConversionOptionsUpdate {
+    fn from(val: ConversionOptionsUpdate) -> Self {
+        Self {
+            heading_style: val.heading_style.map(Into::into),
+            list_indent_type: val.list_indent_type.map(Into::into),
+            list_indent_width: val.list_indent_width,
+            bullets: val.bullets,
+            strong_em_symbol: val.strong_em_symbol.and_then(|s| s.chars().next()),
+            escape_asterisks: val.escape_asterisks,
+            escape_underscores: val.escape_underscores,
+            escape_misc: val.escape_misc,
+            escape_ascii: val.escape_ascii,
+            code_language: val.code_language,
+            autolinks: val.autolinks,
+            default_title: val.default_title,
+            br_in_tables: val.br_in_tables,
+            highlight_style: val.highlight_style.map(Into::into),
+            extract_metadata: val.extract_metadata,
+            whitespace_mode: val.whitespace_mode.map(Into::into),
+            strip_newlines: val.strip_newlines,
+            wrap: val.wrap,
+            wrap_width: val.wrap_width,
+            convert_as_inline: val.convert_as_inline,
+            sub_symbol: val.sub_symbol,
+            sup_symbol: val.sup_symbol,
+            newline_style: val.newline_style.map(Into::into),
+            code_block_style: val.code_block_style.map(Into::into),
+            keep_inline_images_in: val.keep_inline_images_in,
+            preprocessing: val.preprocessing.map(Into::into),
+            encoding: val.encoding,
+            debug: val.debug,
+            strip_tags: val.strip_tags,
+            preserve_tags: val.preserve_tags,
+            skip_images: val.skip_images,
+            link_style: val.link_style.map(Into::into),
+            output_format: val.output_format.map(Into::into),
+            include_document_structure: val.include_document_structure,
+            extract_images: val.extract_images,
+            max_image_size: val.max_image_size,
+            capture_svg: val.capture_svg,
+            infer_dimensions: val.infer_dimensions,
+            max_depth: (val.max_depth).map(Some),
+        }
+    }
+}
+
 impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for ConversionOptionsUpdate {
     fn from(val: html_to_markdown_rs::options::ConversionOptionsUpdate) -> Self {
         Self {
@@ -2892,7 +2963,7 @@ impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for ConversionO
             max_image_size: val.max_image_size,
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
-            max_depth: val.max_depth,
+            max_depth: val.max_depth.flatten(),
         }
     }
 }
@@ -2913,6 +2984,17 @@ impl From<html_to_markdown_rs::options::PreprocessingOptions> for PreprocessingO
         Self {
             enabled: val.enabled,
             preset: val.preset.into(),
+            remove_navigation: val.remove_navigation,
+            remove_forms: val.remove_forms,
+        }
+    }
+}
+
+impl From<PreprocessingOptionsUpdate> for html_to_markdown_rs::options::PreprocessingOptionsUpdate {
+    fn from(val: PreprocessingOptionsUpdate) -> Self {
+        Self {
+            enabled: val.enabled,
+            preset: val.preset.map(Into::into),
             remove_navigation: val.remove_navigation,
             remove_forms: val.remove_forms,
         }
@@ -3369,46 +3451,34 @@ impl From<html_to_markdown_rs::options::OutputFormat> for OutputFormat {
 impl From<NodeContent> for html_to_markdown_rs::NodeContent {
     fn from(val: NodeContent) -> Self {
         match val {
-            NodeContent::Heading { level, text } => Self::Heading {
-                level: val.level,
-                text: val.text,
-            },
-            NodeContent::Paragraph { text } => Self::Paragraph { text: val.text },
-            NodeContent::List { ordered } => Self::List { ordered: val.ordered },
-            NodeContent::ListItem { text } => Self::ListItem { text: val.text },
-            NodeContent::Table { grid } => Self::Table { grid: val.grid.into() },
+            NodeContent::Heading { level, text } => Self::Heading { level, text },
+            NodeContent::Paragraph { text } => Self::Paragraph { text },
+            NodeContent::List { ordered } => Self::List { ordered },
+            NodeContent::ListItem { text } => Self::ListItem { text },
+            NodeContent::Table { grid } => Self::Table { grid: grid.into() },
             NodeContent::Image {
                 description,
                 src,
                 image_index,
             } => Self::Image {
-                description: val.description,
-                src: val.src,
-                image_index: val.image_index,
+                description,
+                src,
+                image_index,
             },
-            NodeContent::Code { text, language } => Self::Code {
-                text: val.text,
-                language: val.language,
-            },
+            NodeContent::Code { text, language } => Self::Code { text, language },
             NodeContent::Quote => Self::Quote,
             NodeContent::DefinitionList => Self::DefinitionList,
-            NodeContent::DefinitionItem { term, definition } => Self::DefinitionItem {
-                term: val.term,
-                definition: val.definition,
-            },
-            NodeContent::RawBlock { format, content } => Self::RawBlock {
-                format: val.format,
-                content: val.content,
-            },
-            NodeContent::MetadataBlock { entries } => Self::MetadataBlock { entries: val.entries },
+            NodeContent::DefinitionItem { term, definition } => Self::DefinitionItem { term, definition },
+            NodeContent::RawBlock { format, content } => Self::RawBlock { format, content },
+            NodeContent::MetadataBlock { entries } => Self::MetadataBlock { entries },
             NodeContent::Group {
                 label,
                 heading_level,
                 heading_text,
             } => Self::Group {
-                label: val.label,
-                heading_level: val.heading_level,
-                heading_text: val.heading_text,
+                label,
+                heading_level,
+                heading_text,
             },
         }
     }
@@ -3417,48 +3487,38 @@ impl From<NodeContent> for html_to_markdown_rs::NodeContent {
 impl From<html_to_markdown_rs::NodeContent> for NodeContent {
     fn from(val: html_to_markdown_rs::NodeContent) -> Self {
         match val {
-            html_to_markdown_rs::NodeContent::Heading { level, text } => Self::Heading {
-                level: val.level,
-                text: val.text,
-            },
-            html_to_markdown_rs::NodeContent::Paragraph { text } => Self::Paragraph { text: val.text },
-            html_to_markdown_rs::NodeContent::List { ordered } => Self::List { ordered: val.ordered },
-            html_to_markdown_rs::NodeContent::ListItem { text } => Self::ListItem { text: val.text },
-            html_to_markdown_rs::NodeContent::Table { grid } => Self::Table { grid: val.grid.into() },
+            html_to_markdown_rs::NodeContent::Heading { level, text } => Self::Heading { level, text },
+            html_to_markdown_rs::NodeContent::Paragraph { text } => Self::Paragraph { text },
+            html_to_markdown_rs::NodeContent::List { ordered } => Self::List { ordered },
+            html_to_markdown_rs::NodeContent::ListItem { text } => Self::ListItem { text },
+            html_to_markdown_rs::NodeContent::Table { grid } => Self::Table { grid: grid.into() },
             html_to_markdown_rs::NodeContent::Image {
                 description,
                 src,
                 image_index,
             } => Self::Image {
-                description: val.description,
-                src: val.src,
-                image_index: val.image_index,
+                description,
+                src,
+                image_index,
             },
-            html_to_markdown_rs::NodeContent::Code { text, language } => Self::Code {
-                text: val.text,
-                language: val.language,
-            },
+            html_to_markdown_rs::NodeContent::Code { text, language } => Self::Code { text, language },
             html_to_markdown_rs::NodeContent::Quote => Self::Quote,
             html_to_markdown_rs::NodeContent::DefinitionList => Self::DefinitionList,
-            html_to_markdown_rs::NodeContent::DefinitionItem { term, definition } => Self::DefinitionItem {
-                term: val.term,
-                definition: val.definition,
-            },
-            html_to_markdown_rs::NodeContent::RawBlock { format, content } => Self::RawBlock {
-                format: val.format,
-                content: val.content,
-            },
+            html_to_markdown_rs::NodeContent::DefinitionItem { term, definition } => {
+                Self::DefinitionItem { term, definition }
+            }
+            html_to_markdown_rs::NodeContent::RawBlock { format, content } => Self::RawBlock { format, content },
             html_to_markdown_rs::NodeContent::MetadataBlock { entries } => Self::MetadataBlock {
-                entries: val.entries.iter().map(|i| format!("{:?}", i)).collect(),
+                entries: entries.iter().map(|i| format!("{:?}", i)).collect(),
             },
             html_to_markdown_rs::NodeContent::Group {
                 label,
                 heading_level,
                 heading_text,
             } => Self::Group {
-                label: val.label,
-                heading_level: val.heading_level,
-                heading_text: val.heading_text,
+                label,
+                heading_level,
+                heading_text,
             },
         }
     }
@@ -3475,10 +3535,7 @@ impl From<AnnotationKind> for html_to_markdown_rs::AnnotationKind {
             AnnotationKind::Subscript => Self::Subscript,
             AnnotationKind::Superscript => Self::Superscript,
             AnnotationKind::Highlight => Self::Highlight,
-            AnnotationKind::Link { url, title } => Self::Link {
-                url: val.url,
-                title: val.title,
-            },
+            AnnotationKind::Link { url, title } => Self::Link { url, title },
         }
     }
 }
@@ -3494,10 +3551,7 @@ impl From<html_to_markdown_rs::AnnotationKind> for AnnotationKind {
             html_to_markdown_rs::AnnotationKind::Subscript => Self::Subscript,
             html_to_markdown_rs::AnnotationKind::Superscript => Self::Superscript,
             html_to_markdown_rs::AnnotationKind::Highlight => Self::Highlight,
-            html_to_markdown_rs::AnnotationKind::Link { url, title } => Self::Link {
-                url: val.url,
-                title: val.title,
-            },
+            html_to_markdown_rs::AnnotationKind::Link { url, title } => Self::Link { url, title },
         }
     }
 }
@@ -3554,6 +3608,7 @@ fn init(ruby: &Ruby) -> Result<(), Error> {
         method!(MetadataConfig::max_structured_data_size, 0),
     )?;
     class.define_method("any_enabled", method!(MetadataConfig::any_enabled, 0))?;
+    class.define_method("apply_update", method!(MetadataConfig::apply_update, 1))?;
 
     let class = module.define_class("MetadataConfigUpdate", ruby.class_object())?;
     class.define_singleton_method("new", function!(MetadataConfigUpdate::new, 6))?;
@@ -3672,6 +3727,7 @@ fn init(ruby: &Ruby) -> Result<(), Error> {
     class.define_method("capture_svg", method!(ConversionOptions::capture_svg, 0))?;
     class.define_method("infer_dimensions", method!(ConversionOptions::infer_dimensions, 0))?;
     class.define_method("max_depth", method!(ConversionOptions::max_depth, 0))?;
+    class.define_method("apply_update", method!(ConversionOptions::apply_update, 1))?;
 
     let class = module.define_class("ConversionOptionsBuilder", ruby.class_object())?;
     class.define_method("strip_tags", method!(ConversionOptionsBuilder::strip_tags, 1))?;
@@ -3764,6 +3820,7 @@ fn init(ruby: &Ruby) -> Result<(), Error> {
     class.define_method("preset", method!(PreprocessingOptions::preset, 0))?;
     class.define_method("remove_navigation", method!(PreprocessingOptions::remove_navigation, 0))?;
     class.define_method("remove_forms", method!(PreprocessingOptions::remove_forms, 0))?;
+    class.define_method("apply_update", method!(PreprocessingOptions::apply_update, 1))?;
 
     let class = module.define_class("PreprocessingOptionsUpdate", ruby.class_object())?;
     class.define_singleton_method("new", function!(PreprocessingOptionsUpdate::new, 4))?;

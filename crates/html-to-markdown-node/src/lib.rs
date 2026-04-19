@@ -7,7 +7,7 @@ use napi_derive::napi;
 use std::collections::HashMap;
 use std::sync::Arc;
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Default)]
 #[napi(object)]
 pub struct JsMetadataConfig {
     #[napi(js_name = "extractDocument")]
@@ -24,7 +24,7 @@ pub struct JsMetadataConfig {
     pub max_structured_data_size: Option<i64>,
 }
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Default)]
 #[napi(object)]
 pub struct JsMetadataConfigUpdate {
     #[napi(js_name = "extractDocument")]
@@ -41,7 +41,7 @@ pub struct JsMetadataConfigUpdate {
     pub max_structured_data_size: Option<i64>,
 }
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Default)]
 #[napi(object)]
 pub struct JsDocumentMetadata {
     pub title: Option<String>,
@@ -63,7 +63,7 @@ pub struct JsDocumentMetadata {
     pub meta_tags: Option<HashMap<String, String>>,
 }
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Default)]
 #[napi(object)]
 pub struct JsHeaderMetadata {
     pub level: u8,
@@ -74,7 +74,7 @@ pub struct JsHeaderMetadata {
     pub html_offset: i64,
 }
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Default)]
 #[napi(object)]
 pub struct JsLinkMetadata {
     pub href: String,
@@ -86,7 +86,7 @@ pub struct JsLinkMetadata {
     pub attributes: HashMap<String, String>,
 }
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Default)]
 #[napi(object)]
 pub struct JsImageMetadata {
     pub src: String,
@@ -98,7 +98,7 @@ pub struct JsImageMetadata {
     pub attributes: HashMap<String, String>,
 }
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Default)]
 #[napi(object)]
 pub struct JsStructuredData {
     #[napi(js_name = "dataType")]
@@ -109,7 +109,7 @@ pub struct JsStructuredData {
     pub schema_type: Option<String>,
 }
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Default)]
 #[napi(object)]
 pub struct JsHtmlMetadata {
     pub document: Option<JsDocumentMetadata>,
@@ -120,7 +120,7 @@ pub struct JsHtmlMetadata {
     pub structured_data: Option<Vec<JsStructuredData>>,
 }
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Default)]
 #[napi(object)]
 pub struct JsConversionOptions {
     #[napi(js_name = "headingStyle")]
@@ -239,7 +239,7 @@ impl JsConversionOptionsBuilder {
     }
 }
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Default)]
 #[napi(object)]
 pub struct JsConversionOptionsUpdate {
     #[napi(js_name = "headingStyle")]
@@ -313,10 +313,10 @@ pub struct JsConversionOptionsUpdate {
     #[napi(js_name = "inferDimensions")]
     pub infer_dimensions: Option<bool>,
     #[napi(js_name = "maxDepth")]
-    pub max_depth: Option<Option<i64>>,
+    pub max_depth: Option<i64>,
 }
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Default)]
 #[napi(object)]
 pub struct JsPreprocessingOptions {
     pub enabled: Option<bool>,
@@ -327,7 +327,7 @@ pub struct JsPreprocessingOptions {
     pub remove_forms: Option<bool>,
 }
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Default)]
 #[napi(object)]
 pub struct JsPreprocessingOptionsUpdate {
     pub enabled: Option<bool>,
@@ -338,7 +338,7 @@ pub struct JsPreprocessingOptionsUpdate {
     pub remove_forms: Option<bool>,
 }
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Default)]
 #[napi(object)]
 pub struct JsDocumentStructure {
     pub nodes: Vec<JsDocumentNode>,
@@ -346,7 +346,7 @@ pub struct JsDocumentStructure {
     pub source_format: Option<String>,
 }
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Default)]
 #[napi(object)]
 pub struct JsDocumentNode {
     pub id: String,
@@ -357,7 +357,7 @@ pub struct JsDocumentNode {
     pub attributes: Option<HashMap<String, String>>,
 }
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Default)]
 #[napi(object)]
 pub struct JsTextAnnotation {
     pub start: u32,
@@ -365,7 +365,7 @@ pub struct JsTextAnnotation {
     pub kind: JsAnnotationKind,
 }
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Default)]
 #[napi(object)]
 pub struct JsConversionResult {
     pub content: Option<String>,
@@ -376,7 +376,7 @@ pub struct JsConversionResult {
     pub warnings: Option<Vec<JsProcessingWarning>>,
 }
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Default)]
 #[napi(object)]
 pub struct JsTableGrid {
     pub rows: Option<u32>,
@@ -384,7 +384,7 @@ pub struct JsTableGrid {
     pub cells: Option<Vec<JsGridCell>>,
 }
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Default)]
 #[napi(object)]
 pub struct JsGridCell {
     pub content: String,
@@ -398,14 +398,14 @@ pub struct JsGridCell {
     pub is_header: bool,
 }
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Default)]
 #[napi(object)]
 pub struct JsTableData {
     pub grid: JsTableGrid,
     pub markdown: String,
 }
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Default)]
 #[napi(object)]
 pub struct JsProcessingWarning {
     pub message: String,
@@ -413,7 +413,7 @@ pub struct JsProcessingWarning {
 }
 
 #[napi(string_enum)]
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone)]
 pub enum JsTextDirection {
     LeftToRight,
     RightToLeft,
@@ -428,7 +428,7 @@ impl Default for JsTextDirection {
 }
 
 #[napi(string_enum = "snake_case")]
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone)]
 pub enum JsLinkType {
     Anchor,
     Internal,
@@ -446,7 +446,7 @@ impl Default for JsLinkType {
 }
 
 #[napi(string_enum = "snake_case")]
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone)]
 pub enum JsImageType {
     DataUri,
     InlineSvg,
@@ -462,7 +462,7 @@ impl Default for JsImageType {
 }
 
 #[napi(string_enum = "snake_case")]
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone)]
 pub enum JsStructuredDataType {
     JsonLd,
     Microdata,
@@ -477,7 +477,7 @@ impl Default for JsStructuredDataType {
 }
 
 #[napi(string_enum)]
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone)]
 pub enum JsPreprocessingPreset {
     Minimal,
     Standard,
@@ -492,7 +492,7 @@ impl Default for JsPreprocessingPreset {
 }
 
 #[napi(string_enum)]
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone)]
 pub enum JsHeadingStyle {
     Underlined,
     Atx,
@@ -507,7 +507,7 @@ impl Default for JsHeadingStyle {
 }
 
 #[napi(string_enum)]
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone)]
 pub enum JsListIndentType {
     Spaces,
     Tabs,
@@ -521,7 +521,7 @@ impl Default for JsListIndentType {
 }
 
 #[napi(string_enum)]
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone)]
 pub enum JsWhitespaceMode {
     Normalized,
     Strict,
@@ -535,7 +535,7 @@ impl Default for JsWhitespaceMode {
 }
 
 #[napi(string_enum)]
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone)]
 pub enum JsNewlineStyle {
     Spaces,
     Backslash,
@@ -549,7 +549,7 @@ impl Default for JsNewlineStyle {
 }
 
 #[napi(string_enum)]
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone)]
 pub enum JsCodeBlockStyle {
     Indented,
     Backticks,
@@ -564,7 +564,7 @@ impl Default for JsCodeBlockStyle {
 }
 
 #[napi(string_enum)]
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone)]
 pub enum JsHighlightStyle {
     DoubleEqual,
     Html,
@@ -580,7 +580,7 @@ impl Default for JsHighlightStyle {
 }
 
 #[napi(string_enum)]
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone)]
 pub enum JsLinkStyle {
     Inline,
     Reference,
@@ -594,7 +594,7 @@ impl Default for JsLinkStyle {
 }
 
 #[napi(string_enum)]
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone)]
 pub enum JsOutputFormat {
     Markdown,
     Djot,
@@ -608,7 +608,7 @@ impl Default for JsOutputFormat {
     }
 }
 
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone)]
 #[napi(object)]
 pub struct JsNodeContent {
     #[napi(js_name = "node_type")]
@@ -659,7 +659,7 @@ impl Default for JsNodeContent {
     }
 }
 
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone)]
 #[napi(object)]
 pub struct JsAnnotationKind {
     #[napi(js_name = "annotation_type")]
@@ -680,7 +680,7 @@ impl Default for JsAnnotationKind {
 }
 
 #[napi(string_enum = "snake_case")]
-#[derive(Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Clone)]
 pub enum JsWarningKind {
     ImageExtractionFailed,
     EncodingFallback,
@@ -728,6 +728,19 @@ impl From<html_to_markdown_rs::metadata::MetadataConfig> for JsMetadataConfig {
             extract_images: Some(val.extract_images),
             extract_structured_data: Some(val.extract_structured_data),
             max_structured_data_size: Some(val.max_structured_data_size as i64),
+        }
+    }
+}
+
+impl From<JsMetadataConfigUpdate> for html_to_markdown_rs::metadata::MetadataConfigUpdate {
+    fn from(val: JsMetadataConfigUpdate) -> Self {
+        Self {
+            extract_document: val.extract_document,
+            extract_headers: val.extract_headers,
+            extract_links: val.extract_links,
+            extract_images: val.extract_images,
+            extract_structured_data: val.extract_structured_data,
+            max_structured_data_size: val.max_structured_data_size.map(|v| v as usize),
         }
     }
 }
@@ -1005,6 +1018,52 @@ impl From<html_to_markdown_rs::options::ConversionOptions> for JsConversionOptio
     }
 }
 
+impl From<JsConversionOptionsUpdate> for html_to_markdown_rs::options::ConversionOptionsUpdate {
+    fn from(val: JsConversionOptionsUpdate) -> Self {
+        Self {
+            heading_style: val.heading_style.map(Into::into),
+            list_indent_type: val.list_indent_type.map(Into::into),
+            list_indent_width: val.list_indent_width.map(|v| v as usize),
+            bullets: val.bullets,
+            strong_em_symbol: val.strong_em_symbol.and_then(|s| s.chars().next()),
+            escape_asterisks: val.escape_asterisks,
+            escape_underscores: val.escape_underscores,
+            escape_misc: val.escape_misc,
+            escape_ascii: val.escape_ascii,
+            code_language: val.code_language,
+            autolinks: val.autolinks,
+            default_title: val.default_title,
+            br_in_tables: val.br_in_tables,
+            highlight_style: val.highlight_style.map(Into::into),
+            extract_metadata: val.extract_metadata,
+            whitespace_mode: val.whitespace_mode.map(Into::into),
+            strip_newlines: val.strip_newlines,
+            wrap: val.wrap,
+            wrap_width: val.wrap_width.map(|v| v as usize),
+            convert_as_inline: val.convert_as_inline,
+            sub_symbol: val.sub_symbol,
+            sup_symbol: val.sup_symbol,
+            newline_style: val.newline_style.map(Into::into),
+            code_block_style: val.code_block_style.map(Into::into),
+            keep_inline_images_in: val.keep_inline_images_in,
+            preprocessing: val.preprocessing.map(Into::into),
+            encoding: val.encoding,
+            debug: val.debug,
+            strip_tags: val.strip_tags,
+            preserve_tags: val.preserve_tags,
+            skip_images: val.skip_images,
+            link_style: val.link_style.map(Into::into),
+            output_format: val.output_format.map(Into::into),
+            include_document_structure: val.include_document_structure,
+            extract_images: val.extract_images,
+            max_image_size: val.max_image_size.map(|v| v as u64),
+            capture_svg: val.capture_svg,
+            infer_dimensions: val.infer_dimensions,
+            max_depth: (val.max_depth.map(|v| v as usize)).map(Some),
+        }
+    }
+}
+
 impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for JsConversionOptionsUpdate {
     fn from(val: html_to_markdown_rs::options::ConversionOptionsUpdate) -> Self {
         Self {
@@ -1046,7 +1105,7 @@ impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for JsConversio
             max_image_size: val.max_image_size.map(|v| v as i64),
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
-            max_depth: val.max_depth.map(|v| v as i64),
+            max_depth: val.max_depth.flatten().map(|v| v as i64),
         }
     }
 }
@@ -1069,6 +1128,17 @@ impl From<html_to_markdown_rs::options::PreprocessingOptions> for JsPreprocessin
             preset: Some(val.preset.into()),
             remove_navigation: Some(val.remove_navigation),
             remove_forms: Some(val.remove_forms),
+        }
+    }
+}
+
+impl From<JsPreprocessingOptionsUpdate> for html_to_markdown_rs::options::PreprocessingOptionsUpdate {
+    fn from(val: JsPreprocessingOptionsUpdate) -> Self {
+        Self {
+            enabled: val.enabled,
+            preset: val.preset.map(Into::into),
+            remove_navigation: val.remove_navigation,
+            remove_forms: val.remove_forms,
         }
     }
 }

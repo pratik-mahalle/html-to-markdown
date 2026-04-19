@@ -107,6 +107,24 @@ impl WasmMetadataConfig {
     pub fn any_enabled(&self) -> bool {
         html_to_markdown_rs::MetadataConfig::from(self.clone()).any_enabled()
     }
+
+    #[wasm_bindgen(js_name = "applyUpdate")]
+    pub fn apply_update(&self, update: WasmMetadataConfigUpdate) -> () {
+        ()
+    }
+
+    #[wasm_bindgen(js_name = "fromUpdate")]
+    pub fn from_update(update: WasmMetadataConfigUpdate) -> WasmMetadataConfig {
+        let update_core: html_to_markdown_rs::MetadataConfigUpdate = update.into();
+        html_to_markdown_rs::MetadataConfig::from_update(update_core).into()
+    }
+
+    #[allow(clippy::should_implement_trait)]
+    #[wasm_bindgen]
+    pub fn from(update: WasmMetadataConfigUpdate) -> WasmMetadataConfig {
+        let update_core: html_to_markdown_rs::MetadataConfigUpdate = update.into();
+        html_to_markdown_rs::MetadataConfig::from(update_core).into()
+    }
 }
 
 #[derive(Clone, Default)]
@@ -1295,6 +1313,24 @@ impl WasmConversionOptions {
             inner: Arc::new(html_to_markdown_rs::ConversionOptions::builder()),
         }
     }
+
+    #[wasm_bindgen(js_name = "applyUpdate")]
+    pub fn apply_update(&self, update: WasmConversionOptionsUpdate) -> () {
+        ()
+    }
+
+    #[wasm_bindgen(js_name = "fromUpdate")]
+    pub fn from_update(update: WasmConversionOptionsUpdate) -> WasmConversionOptions {
+        let update_core: html_to_markdown_rs::ConversionOptionsUpdate = update.into();
+        html_to_markdown_rs::ConversionOptions::from_update(update_core).into()
+    }
+
+    #[allow(clippy::should_implement_trait)]
+    #[wasm_bindgen]
+    pub fn from(update: WasmConversionOptionsUpdate) -> WasmConversionOptions {
+        let update_core: html_to_markdown_rs::ConversionOptionsUpdate = update.into();
+        html_to_markdown_rs::ConversionOptions::from(update_core).into()
+    }
 }
 
 #[derive(Clone)]
@@ -1380,7 +1416,7 @@ pub struct WasmConversionOptionsUpdate {
     max_image_size: Option<u64>,
     capture_svg: Option<bool>,
     infer_dimensions: Option<bool>,
-    max_depth: Option<Option<usize>>,
+    max_depth: Option<usize>,
 }
 
 #[wasm_bindgen]
@@ -1426,7 +1462,7 @@ impl WasmConversionOptionsUpdate {
         max_image_size: Option<u64>,
         capture_svg: Option<bool>,
         infer_dimensions: Option<bool>,
-        max_depth: Option<Option<usize>>,
+        max_depth: Option<usize>,
     ) -> WasmConversionOptionsUpdate {
         WasmConversionOptionsUpdate {
             heading_style,
@@ -1852,12 +1888,12 @@ impl WasmConversionOptionsUpdate {
     }
 
     #[wasm_bindgen(getter, js_name = "maxDepth")]
-    pub fn max_depth(&self) -> Option<Option<usize>> {
+    pub fn max_depth(&self) -> Option<usize> {
         self.max_depth
     }
 
     #[wasm_bindgen(setter, js_name = "maxDepth")]
-    pub fn set_max_depth(&mut self, value: Option<Option<usize>>) {
+    pub fn set_max_depth(&mut self, value: Option<usize>) {
         self.max_depth = value;
     }
 }
@@ -1932,6 +1968,24 @@ impl WasmPreprocessingOptions {
     #[wasm_bindgen]
     pub fn default() -> WasmPreprocessingOptions {
         html_to_markdown_rs::PreprocessingOptions::default().into()
+    }
+
+    #[wasm_bindgen(js_name = "applyUpdate")]
+    pub fn apply_update(&self, update: WasmPreprocessingOptionsUpdate) -> () {
+        ()
+    }
+
+    #[wasm_bindgen(js_name = "fromUpdate")]
+    pub fn from_update(update: WasmPreprocessingOptionsUpdate) -> WasmPreprocessingOptions {
+        let update_core: html_to_markdown_rs::PreprocessingOptionsUpdate = update.into();
+        html_to_markdown_rs::PreprocessingOptions::from_update(update_core).into()
+    }
+
+    #[allow(clippy::should_implement_trait)]
+    #[wasm_bindgen]
+    pub fn from(update: WasmPreprocessingOptionsUpdate) -> WasmPreprocessingOptions {
+        let update_core: html_to_markdown_rs::PreprocessingOptionsUpdate = update.into();
+        html_to_markdown_rs::PreprocessingOptions::from(update_core).into()
     }
 }
 
@@ -2769,6 +2823,19 @@ impl From<html_to_markdown_rs::metadata::MetadataConfig> for WasmMetadataConfig 
     }
 }
 
+impl From<WasmMetadataConfigUpdate> for html_to_markdown_rs::metadata::MetadataConfigUpdate {
+    fn from(val: WasmMetadataConfigUpdate) -> Self {
+        Self {
+            extract_document: val.extract_document,
+            extract_headers: val.extract_headers,
+            extract_links: val.extract_links,
+            extract_images: val.extract_images,
+            extract_structured_data: val.extract_structured_data,
+            max_structured_data_size: val.max_structured_data_size,
+        }
+    }
+}
+
 impl From<html_to_markdown_rs::metadata::MetadataConfigUpdate> for WasmMetadataConfigUpdate {
     fn from(val: html_to_markdown_rs::metadata::MetadataConfigUpdate) -> Self {
         Self {
@@ -3030,6 +3097,52 @@ impl From<html_to_markdown_rs::options::ConversionOptions> for WasmConversionOpt
     }
 }
 
+impl From<WasmConversionOptionsUpdate> for html_to_markdown_rs::options::ConversionOptionsUpdate {
+    fn from(val: WasmConversionOptionsUpdate) -> Self {
+        Self {
+            heading_style: val.heading_style.map(Into::into),
+            list_indent_type: val.list_indent_type.map(Into::into),
+            list_indent_width: val.list_indent_width,
+            bullets: val.bullets,
+            strong_em_symbol: val.strong_em_symbol.and_then(|s| s.chars().next()),
+            escape_asterisks: val.escape_asterisks,
+            escape_underscores: val.escape_underscores,
+            escape_misc: val.escape_misc,
+            escape_ascii: val.escape_ascii,
+            code_language: val.code_language,
+            autolinks: val.autolinks,
+            default_title: val.default_title,
+            br_in_tables: val.br_in_tables,
+            highlight_style: val.highlight_style.map(Into::into),
+            extract_metadata: val.extract_metadata,
+            whitespace_mode: val.whitespace_mode.map(Into::into),
+            strip_newlines: val.strip_newlines,
+            wrap: val.wrap,
+            wrap_width: val.wrap_width,
+            convert_as_inline: val.convert_as_inline,
+            sub_symbol: val.sub_symbol,
+            sup_symbol: val.sup_symbol,
+            newline_style: val.newline_style.map(Into::into),
+            code_block_style: val.code_block_style.map(Into::into),
+            keep_inline_images_in: val.keep_inline_images_in,
+            preprocessing: val.preprocessing.map(Into::into),
+            encoding: val.encoding,
+            debug: val.debug,
+            strip_tags: val.strip_tags,
+            preserve_tags: val.preserve_tags,
+            skip_images: val.skip_images,
+            link_style: val.link_style.map(Into::into),
+            output_format: val.output_format.map(Into::into),
+            include_document_structure: val.include_document_structure,
+            extract_images: val.extract_images,
+            max_image_size: val.max_image_size,
+            capture_svg: val.capture_svg,
+            infer_dimensions: val.infer_dimensions,
+            max_depth: (val.max_depth).map(Some),
+        }
+    }
+}
+
 impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for WasmConversionOptionsUpdate {
     fn from(val: html_to_markdown_rs::options::ConversionOptionsUpdate) -> Self {
         Self {
@@ -3071,7 +3184,7 @@ impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for WasmConvers
             max_image_size: val.max_image_size,
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
-            max_depth: val.max_depth,
+            max_depth: val.max_depth.flatten(),
         }
     }
 }
@@ -3092,6 +3205,17 @@ impl From<html_to_markdown_rs::options::PreprocessingOptions> for WasmPreprocess
         Self {
             enabled: val.enabled,
             preset: val.preset.into(),
+            remove_navigation: val.remove_navigation,
+            remove_forms: val.remove_forms,
+        }
+    }
+}
+
+impl From<WasmPreprocessingOptionsUpdate> for html_to_markdown_rs::options::PreprocessingOptionsUpdate {
+    fn from(val: WasmPreprocessingOptionsUpdate) -> Self {
+        Self {
+            enabled: val.enabled,
+            preset: val.preset.map(Into::into),
             remove_navigation: val.remove_navigation,
             remove_forms: val.remove_forms,
         }

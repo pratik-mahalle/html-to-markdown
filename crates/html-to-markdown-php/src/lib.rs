@@ -102,9 +102,22 @@ impl MetadataConfig {
         core_self.any_enabled()
     }
 
+    pub fn apply_update(&self, update: &MetadataConfigUpdate) -> () {
+        ()
+    }
+
     #[allow(clippy::should_implement_trait)]
     pub fn default() -> MetadataConfig {
         html_to_markdown_rs::metadata::MetadataConfig::default().into()
+    }
+
+    pub fn from_update(update: &MetadataConfigUpdate) -> MetadataConfig {
+        panic!("alef: from_update not auto-delegatable")
+    }
+
+    #[allow(clippy::should_implement_trait)]
+    pub fn from(update: &MetadataConfigUpdate) -> MetadataConfig {
+        panic!("alef: from not auto-delegatable")
     }
 }
 
@@ -559,6 +572,10 @@ impl ConversionOptions {
         self.preprocessing.clone()
     }
 
+    pub fn apply_update(&self, update: &ConversionOptionsUpdate) -> () {
+        ()
+    }
+
     #[allow(clippy::should_implement_trait)]
     pub fn default() -> ConversionOptions {
         html_to_markdown_rs::options::ConversionOptions::default().into()
@@ -568,6 +585,15 @@ impl ConversionOptions {
         ConversionOptionsBuilder {
             inner: Arc::new(html_to_markdown_rs::options::ConversionOptions::builder()),
         }
+    }
+
+    pub fn from_update(update: &ConversionOptionsUpdate) -> ConversionOptions {
+        panic!("alef: from_update not auto-delegatable")
+    }
+
+    #[allow(clippy::should_implement_trait)]
+    pub fn from(update: &ConversionOptionsUpdate) -> ConversionOptions {
+        panic!("alef: from not auto-delegatable")
     }
 }
 
@@ -729,7 +755,7 @@ pub struct ConversionOptionsUpdate {
     pub infer_dimensions: Option<bool>,
     /// Optional override for [`ConversionOptions::max_depth`].
     #[php(prop, name = "max_depth")]
-    pub max_depth: Option<Option<i64>>,
+    pub max_depth: Option<i64>,
 }
 
 #[php_impl]
@@ -768,9 +794,22 @@ impl PreprocessingOptions {
         serde_json::from_str(&json).map_err(|e| PhpException::default(e.to_string()))
     }
 
+    pub fn apply_update(&self, update: &PreprocessingOptionsUpdate) -> () {
+        ()
+    }
+
     #[allow(clippy::should_implement_trait)]
     pub fn default() -> PreprocessingOptions {
         html_to_markdown_rs::options::PreprocessingOptions::default().into()
+    }
+
+    pub fn from_update(update: &PreprocessingOptionsUpdate) -> PreprocessingOptions {
+        panic!("alef: from_update not auto-delegatable")
+    }
+
+    #[allow(clippy::should_implement_trait)]
+    pub fn from(update: &PreprocessingOptionsUpdate) -> PreprocessingOptions {
+        panic!("alef: from not auto-delegatable")
     }
 }
 
@@ -1185,6 +1224,19 @@ impl From<html_to_markdown_rs::metadata::MetadataConfig> for MetadataConfig {
     }
 }
 
+impl From<MetadataConfigUpdate> for html_to_markdown_rs::metadata::MetadataConfigUpdate {
+    fn from(val: MetadataConfigUpdate) -> Self {
+        Self {
+            extract_document: val.extract_document,
+            extract_headers: val.extract_headers,
+            extract_links: val.extract_links,
+            extract_images: val.extract_images,
+            extract_structured_data: val.extract_structured_data,
+            max_structured_data_size: val.max_structured_data_size.map(|v| v as usize),
+        }
+    }
+}
+
 impl From<html_to_markdown_rs::metadata::MetadataConfigUpdate> for MetadataConfigUpdate {
     fn from(val: html_to_markdown_rs::metadata::MetadataConfigUpdate) -> Self {
         Self {
@@ -1414,6 +1466,13 @@ impl From<html_to_markdown_rs::options::ConversionOptions> for ConversionOptions
     }
 }
 
+impl From<ConversionOptionsUpdate> for html_to_markdown_rs::options::ConversionOptionsUpdate {
+    fn from(val: ConversionOptionsUpdate) -> Self {
+        let json = serde_json::to_string(&val).expect("alef: serialize binding type");
+        serde_json::from_str(&json).expect("alef: deserialize to core type")
+    }
+}
+
 impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for ConversionOptionsUpdate {
     fn from(val: html_to_markdown_rs::options::ConversionOptionsUpdate) -> Self {
         Self {
@@ -1495,7 +1554,7 @@ impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for ConversionO
             max_image_size: val.max_image_size.map(|v| v as i64),
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
-            max_depth: val.max_depth.map(|v| v as i64),
+            max_depth: val.max_depth.flatten().map(|v| v as i64),
         }
     }
 }
@@ -1518,6 +1577,13 @@ impl From<html_to_markdown_rs::options::PreprocessingOptions> for PreprocessingO
             remove_navigation: val.remove_navigation,
             remove_forms: val.remove_forms,
         }
+    }
+}
+
+impl From<PreprocessingOptionsUpdate> for html_to_markdown_rs::options::PreprocessingOptionsUpdate {
+    fn from(val: PreprocessingOptionsUpdate) -> Self {
+        let json = serde_json::to_string(&val).expect("alef: serialize binding type");
+        serde_json::from_str(&json).expect("alef: deserialize to core type")
     }
 }
 

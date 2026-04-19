@@ -5,22 +5,25 @@ defmodule HtmlToMarkdown.Native do
   use RustlerPrecompiled,
     otp_app: :html_to_markdown,
     crate: "html_to_markdown_nif",
-    base_url:
-      "https://github.com/kreuzberg-dev/html-to-markdown/releases/download/v#{Mix.Project.config()[:version]}",
+    base_url: "https://github.com/kreuzberg-dev/html-to-markdown/releases/download/v#{Mix.Project.config()[:version]}",
     version: Mix.Project.config()[:version],
-    force_build:
-      System.get_env("HTML_TO_MARKDOWN_BUILD") in ["1", "true"] or Mix.env() in [:test, :dev],
-    targets:
-      ~w(aarch64-apple-darwin aarch64-unknown-linux-gnu x86_64-unknown-linux-gnu x86_64-pc-windows-gnu),
+    force_build: System.get_env("HTML_TO_MARKDOWN_BUILD") in ["1", "true"] or Mix.env() in [:test, :dev],
+    targets: ~w(aarch64-apple-darwin aarch64-unknown-linux-gnu x86_64-unknown-linux-gnu x86_64-pc-windows-gnu),
     nif_versions: ["2.16", "2.17"]
 
   def convert(_html, _options), do: :erlang.nif_error(:nif_not_loaded)
   def metadataconfig_default, do: :erlang.nif_error(:nif_not_loaded)
   def metadataconfig_any_enabled(_obj), do: :erlang.nif_error(:nif_not_loaded)
+  def metadataconfig_apply_update(_obj, _update), do: :erlang.nif_error(:nif_not_loaded)
+  def metadataconfig_from_update(_update), do: :erlang.nif_error(:nif_not_loaded)
+  def metadataconfig_from(_update), do: :erlang.nif_error(:nif_not_loaded)
   def headermetadata_is_valid(_obj), do: :erlang.nif_error(:nif_not_loaded)
   def linkmetadata_classify_link(_href), do: :erlang.nif_error(:nif_not_loaded)
   def conversionoptions_default, do: :erlang.nif_error(:nif_not_loaded)
   def conversionoptions_builder, do: :erlang.nif_error(:nif_not_loaded)
+  def conversionoptions_apply_update(_obj, _update), do: :erlang.nif_error(:nif_not_loaded)
+  def conversionoptions_from_update(_update), do: :erlang.nif_error(:nif_not_loaded)
+  def conversionoptions_from(_update), do: :erlang.nif_error(:nif_not_loaded)
   def conversionoptionsbuilder_strip_tags(_obj, _tags), do: :erlang.nif_error(:nif_not_loaded)
   def conversionoptionsbuilder_preserve_tags(_obj, _tags), do: :erlang.nif_error(:nif_not_loaded)
 
@@ -32,4 +35,7 @@ defmodule HtmlToMarkdown.Native do
 
   def conversionoptionsbuilder_build(_obj), do: :erlang.nif_error(:nif_not_loaded)
   def preprocessingoptions_default, do: :erlang.nif_error(:nif_not_loaded)
+  def preprocessingoptions_apply_update(_obj, _update), do: :erlang.nif_error(:nif_not_loaded)
+  def preprocessingoptions_from_update(_update), do: :erlang.nif_error(:nif_not_loaded)
+  def preprocessingoptions_from(_update), do: :erlang.nif_error(:nif_not_loaded)
 end

@@ -1683,6 +1683,51 @@ func (r *MetadataConfig) AnyEnabled() *bool {
 }
 
 
+// Apply a partial update to this metadata configuration.
+//
+// Any specified fields in the update (Some values) will override the current values.
+// Unspecified fields (None) are left unchanged. This allows selective modification
+// of configuration without affecting unrelated settings.
+//
+// # Arguments
+//
+// * `update` - Partial metadata config update with fields to override
+//
+// # Examples
+//
+// ```
+// # use html_to_markdown_rs::metadata::{MetadataConfig, MetadataConfigUpdate};
+// let mut config = MetadataConfig::default();
+// // config starts with all extraction enabled
+//
+// let update = MetadataConfigUpdate {
+// extract_document: Some(false),
+// extract_images: Some(false),
+// // All other fields are None, so they won't change
+// ..Default::default()
+// };
+//
+// config.apply_update(update);
+//
+// assert!(!config.extract_document);
+// assert!(!config.extract_images);
+// assert!(config.extract_headers);  // Unchanged
+// assert!(config.extract_links);    // Unchanged
+// ```
+func (r *MetadataConfig) ApplyUpdate(update MetadataConfigUpdate) {
+    jsonBytescUpdate, err := json.Marshal(update)
+    if err != nil {
+        panic(fmt.Sprintf("failed to marshal: %v", err))
+    }
+    tmpStrcUpdate := C.CString(string(jsonBytescUpdate))
+    cUpdate := C.htm_metadata_config_update_from_json(tmpStrcUpdate)
+    C.free(unsafe.Pointer(tmpStrcUpdate))
+    defer C.htm_metadata_config_update_free(cUpdate)
+
+    C.htm_metadata_config_apply_update ((*C.HTMMetadataConfig)(unsafe.Pointer(r)), cUpdate)
+}
+
+
 // Validate that the header level is within valid range (1-6).
 //
 // # Returns
@@ -1714,6 +1759,21 @@ func (r *MetadataConfig) AnyEnabled() *bool {
 func (r *HeaderMetadata) IsValid() *bool {
     ptr := C.htm_header_metadata_is_valid ((*C.HTMHeaderMetadata)(unsafe.Pointer(r)))
     return func() *bool { v := ptr != 0; return &v }()
+}
+
+
+// Apply a partial update to these conversion options.
+func (r *ConversionOptions) ApplyUpdate(update ConversionOptionsUpdate) {
+    jsonBytescUpdate, err := json.Marshal(update)
+    if err != nil {
+        panic(fmt.Sprintf("failed to marshal: %v", err))
+    }
+    tmpStrcUpdate := C.CString(string(jsonBytescUpdate))
+    cUpdate := C.htm_conversion_options_update_from_json(tmpStrcUpdate)
+    C.free(unsafe.Pointer(tmpStrcUpdate))
+    defer C.htm_conversion_options_update_free(cUpdate)
+
+    C.htm_conversion_options_apply_update ((*C.HTMConversionOptions)(unsafe.Pointer(r)), cUpdate)
 }
 
 
@@ -1779,4 +1839,26 @@ func (r *ConversionOptionsBuilder) Preprocessing(preprocessing PreprocessingOpti
 func (r *ConversionOptionsBuilder) Build() *ConversionOptions {
     ptr := C.htm_conversion_options_builder_build ((*C.HTMConversionOptionsBuilder)(unsafe.Pointer(r)))
     return (*ConversionOptions)(unsafe.Pointer(ptr))
+}
+
+
+// Apply a partial update to these preprocessing options.
+//
+// Any specified fields in the update will override the current values.
+// Unspecified fields (None) are left unchanged.
+//
+// # Arguments
+//
+// * `update` - Partial preprocessing options update
+func (r *PreprocessingOptions) ApplyUpdate(update PreprocessingOptionsUpdate) {
+    jsonBytescUpdate, err := json.Marshal(update)
+    if err != nil {
+        panic(fmt.Sprintf("failed to marshal: %v", err))
+    }
+    tmpStrcUpdate := C.CString(string(jsonBytescUpdate))
+    cUpdate := C.htm_preprocessing_options_update_from_json(tmpStrcUpdate)
+    C.free(unsafe.Pointer(tmpStrcUpdate))
+    defer C.htm_preprocessing_options_update_free(cUpdate)
+
+    C.htm_preprocessing_options_apply_update ((*C.HTMPreprocessingOptions)(unsafe.Pointer(r)), cUpdate)
 }

@@ -50,14 +50,7 @@ public static class HtmlToMarkdownRs
             html,
             optionsHandle
         );
-        if (result == IntPtr.Zero)
-        {
-            var err = GetLastError();
-            if (err.Code != 0)
-            {
-                throw err;
-            }
-        }
+        if (result == IntPtr.Zero) { var err = GetLastError(); if (err.Code != 0) throw err; }
         var jsonPtr = NativeMethods.ConversionResultToJson(result);
         var json = Marshal.PtrToStringUTF8(jsonPtr);
         NativeMethods.FreeString(jsonPtr);
@@ -128,6 +121,124 @@ public static class HtmlToMarkdownRs
     {
         var result = NativeMethods.MetadataConfigAnyEnabled();
         var returnValue = result != 0;
+        return returnValue;
+    }
+
+    /// <summary>
+    /// Apply a partial update to this metadata configuration.
+    ///
+    /// Any specified fields in the update (Some values) will override the current values.
+    /// Unspecified fields (None) are left unchanged. This allows selective modification
+    /// of configuration without affecting unrelated settings.
+    ///
+    /// # Arguments
+    ///
+    /// * `update` - Partial metadata config update with fields to override
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use html_to_markdown_rs::metadata::{MetadataConfig, MetadataConfigUpdate};
+    /// let mut config = MetadataConfig::default();
+    /// // config starts with all extraction enabled
+    ///
+    /// let update = MetadataConfigUpdate {
+    ///     extract_document: Some(false),
+    ///     extract_images: Some(false),
+    ///     // All other fields are None, so they won't change
+    ///     ..Default::default()
+    /// };
+    ///
+    /// config.apply_update(update);
+    ///
+    /// assert!(!config.extract_document);
+    /// assert!(!config.extract_images);
+    /// assert!(config.extract_headers);  // Unchanged
+    /// assert!(config.extract_links);    // Unchanged
+    /// ```
+    /// </summary>
+    /// <param name="update"></param>
+    public static void MetadataConfigApplyUpdate(MetadataConfigUpdate update)
+    {
+        ArgumentNullException.ThrowIfNull(update);
+        var updateJson = JsonSerializer.Serialize(update, JsonOptions);
+        var updateHandle = NativeMethods.MetadataConfigUpdateFromJson(updateJson);
+        NativeMethods.MetadataConfigApplyUpdate(
+            updateHandle
+        );
+        NativeMethods.MetadataConfigUpdateFree(updateHandle);
+    }
+
+    /// <summary>
+    /// Create new metadata configuration from a partial update.
+    ///
+    /// Creates a new `MetadataConfig` struct with defaults, then applies the update.
+    /// Fields not specified in the update (None) keep their default values.
+    /// This is a convenience method for constructing a configuration from a partial specification
+    /// without needing to explicitly call `.default()` first.
+    ///
+    /// # Arguments
+    ///
+    /// * `update` - Partial metadata config update with fields to set
+    ///
+    /// # Returns
+    ///
+    /// New `MetadataConfig` with specified updates applied to defaults
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use html_to_markdown_rs::metadata::{MetadataConfig, MetadataConfigUpdate};
+    /// let update = MetadataConfigUpdate {
+    ///     extract_document: Some(false),
+    ///     extract_headers: Some(true),
+    ///     extract_links: Some(true),
+    ///     extract_images: None,  // Will use default (true)
+    ///     extract_structured_data: None,  // Will use default (true)
+    ///     max_structured_data_size: None,  // Will use default (1MB)
+    /// };
+    ///
+    /// let config = MetadataConfig::from_update(update);
+    ///
+    /// assert!(!config.extract_document);
+    /// assert!(config.extract_headers);
+    /// assert!(config.extract_links);
+    /// assert!(config.extract_images);  // Default
+    /// assert!(config.extract_structured_data);  // Default
+    /// ```
+    /// </summary>
+    /// <param name="update"></param>
+    public static MetadataConfig MetadataConfigFromUpdate(MetadataConfigUpdate update)
+    {
+        ArgumentNullException.ThrowIfNull(update);
+        var updateJson = JsonSerializer.Serialize(update, JsonOptions);
+        var updateHandle = NativeMethods.MetadataConfigUpdateFromJson(updateJson);
+        var result = NativeMethods.MetadataConfigFromUpdate(
+            updateHandle
+        );
+        var jsonPtr = NativeMethods.MetadataConfigToJson(result);
+        var json = Marshal.PtrToStringUTF8(jsonPtr);
+        NativeMethods.FreeString(jsonPtr);
+        NativeMethods.MetadataConfigFree(result);
+        var returnValue = JsonSerializer.Deserialize<MetadataConfig>(json ?? "null", JsonOptions)!;
+        NativeMethods.MetadataConfigUpdateFree(updateHandle);
+        return returnValue;
+    }
+
+    public static MetadataConfig MetadataConfigFrom(MetadataConfigUpdate update)
+    {
+        ArgumentNullException.ThrowIfNull(update);
+        var updateJson = JsonSerializer.Serialize(update, JsonOptions);
+        var updateHandle = NativeMethods.MetadataConfigUpdateFromJson(updateJson);
+        var result = NativeMethods.MetadataConfigFrom(
+            updateHandle
+        );
+        var jsonPtr = NativeMethods.MetadataConfigToJson(result);
+        var json = Marshal.PtrToStringUTF8(jsonPtr);
+        NativeMethods.FreeString(jsonPtr);
+        NativeMethods.MetadataConfigFree(result);
+        var returnValue = JsonSerializer.Deserialize<MetadataConfig>(json ?? "null", JsonOptions)!;
+        NativeMethods.MetadataConfigUpdateFree(updateHandle);
         return returnValue;
     }
 
@@ -223,6 +334,59 @@ public static class HtmlToMarkdownRs
         return returnValue;
     }
 
+    /// <summary>
+    /// Apply a partial update to these conversion options.
+    /// </summary>
+    /// <param name="update"></param>
+    public static void ConversionOptionsApplyUpdate(ConversionOptionsUpdate update)
+    {
+        ArgumentNullException.ThrowIfNull(update);
+        var updateJson = JsonSerializer.Serialize(update, JsonOptions);
+        var updateHandle = NativeMethods.ConversionOptionsUpdateFromJson(updateJson);
+        NativeMethods.ConversionOptionsApplyUpdate(
+            updateHandle
+        );
+        NativeMethods.ConversionOptionsUpdateFree(updateHandle);
+    }
+
+    /// <summary>
+    /// Create from a partial update, applying to defaults.
+    /// </summary>
+    /// <param name="update"></param>
+    public static ConversionOptions ConversionOptionsFromUpdate(ConversionOptionsUpdate update)
+    {
+        ArgumentNullException.ThrowIfNull(update);
+        var updateJson = JsonSerializer.Serialize(update, JsonOptions);
+        var updateHandle = NativeMethods.ConversionOptionsUpdateFromJson(updateJson);
+        var result = NativeMethods.ConversionOptionsFromUpdate(
+            updateHandle
+        );
+        var jsonPtr = NativeMethods.ConversionOptionsToJson(result);
+        var json = Marshal.PtrToStringUTF8(jsonPtr);
+        NativeMethods.FreeString(jsonPtr);
+        NativeMethods.ConversionOptionsFree(result);
+        var returnValue = JsonSerializer.Deserialize<ConversionOptions>(json ?? "null", JsonOptions)!;
+        NativeMethods.ConversionOptionsUpdateFree(updateHandle);
+        return returnValue;
+    }
+
+    public static ConversionOptions ConversionOptionsFrom(ConversionOptionsUpdate update)
+    {
+        ArgumentNullException.ThrowIfNull(update);
+        var updateJson = JsonSerializer.Serialize(update, JsonOptions);
+        var updateHandle = NativeMethods.ConversionOptionsUpdateFromJson(updateJson);
+        var result = NativeMethods.ConversionOptionsFrom(
+            updateHandle
+        );
+        var jsonPtr = NativeMethods.ConversionOptionsToJson(result);
+        var json = Marshal.PtrToStringUTF8(jsonPtr);
+        NativeMethods.FreeString(jsonPtr);
+        NativeMethods.ConversionOptionsFree(result);
+        var returnValue = JsonSerializer.Deserialize<ConversionOptions>(json ?? "null", JsonOptions)!;
+        NativeMethods.ConversionOptionsUpdateFree(updateHandle);
+        return returnValue;
+    }
+
     public static PreprocessingOptions PreprocessingOptionsDefault()
     {
         var result = NativeMethods.PreprocessingOptionsDefault();
@@ -231,6 +395,77 @@ public static class HtmlToMarkdownRs
         NativeMethods.FreeString(jsonPtr);
         NativeMethods.PreprocessingOptionsFree(result);
         var returnValue = JsonSerializer.Deserialize<PreprocessingOptions>(json ?? "null", JsonOptions)!;
+        return returnValue;
+    }
+
+    /// <summary>
+    /// Apply a partial update to these preprocessing options.
+    ///
+    /// Any specified fields in the update will override the current values.
+    /// Unspecified fields (None) are left unchanged.
+    ///
+    /// # Arguments
+    ///
+    /// * `update` - Partial preprocessing options update
+    /// </summary>
+    /// <param name="update"></param>
+    public static void PreprocessingOptionsApplyUpdate(PreprocessingOptionsUpdate update)
+    {
+        ArgumentNullException.ThrowIfNull(update);
+        var updateJson = JsonSerializer.Serialize(update, JsonOptions);
+        var updateHandle = NativeMethods.PreprocessingOptionsUpdateFromJson(updateJson);
+        NativeMethods.PreprocessingOptionsApplyUpdate(
+            updateHandle
+        );
+        NativeMethods.PreprocessingOptionsUpdateFree(updateHandle);
+    }
+
+    /// <summary>
+    /// Create new preprocessing options from a partial update.
+    ///
+    /// Creates a new `PreprocessingOptions` struct with defaults, then applies the update.
+    /// Fields not specified in the update keep their default values.
+    ///
+    /// # Arguments
+    ///
+    /// * `update` - Partial preprocessing options update
+    ///
+    /// # Returns
+    ///
+    /// New `PreprocessingOptions` with specified updates applied to defaults
+    /// </summary>
+    /// <param name="update"></param>
+    public static PreprocessingOptions PreprocessingOptionsFromUpdate(PreprocessingOptionsUpdate update)
+    {
+        ArgumentNullException.ThrowIfNull(update);
+        var updateJson = JsonSerializer.Serialize(update, JsonOptions);
+        var updateHandle = NativeMethods.PreprocessingOptionsUpdateFromJson(updateJson);
+        var result = NativeMethods.PreprocessingOptionsFromUpdate(
+            updateHandle
+        );
+        var jsonPtr = NativeMethods.PreprocessingOptionsToJson(result);
+        var json = Marshal.PtrToStringUTF8(jsonPtr);
+        NativeMethods.FreeString(jsonPtr);
+        NativeMethods.PreprocessingOptionsFree(result);
+        var returnValue = JsonSerializer.Deserialize<PreprocessingOptions>(json ?? "null", JsonOptions)!;
+        NativeMethods.PreprocessingOptionsUpdateFree(updateHandle);
+        return returnValue;
+    }
+
+    public static PreprocessingOptions PreprocessingOptionsFrom(PreprocessingOptionsUpdate update)
+    {
+        ArgumentNullException.ThrowIfNull(update);
+        var updateJson = JsonSerializer.Serialize(update, JsonOptions);
+        var updateHandle = NativeMethods.PreprocessingOptionsUpdateFromJson(updateJson);
+        var result = NativeMethods.PreprocessingOptionsFrom(
+            updateHandle
+        );
+        var jsonPtr = NativeMethods.PreprocessingOptionsToJson(result);
+        var json = Marshal.PtrToStringUTF8(jsonPtr);
+        NativeMethods.FreeString(jsonPtr);
+        NativeMethods.PreprocessingOptionsFree(result);
+        var returnValue = JsonSerializer.Deserialize<PreprocessingOptions>(json ?? "null", JsonOptions)!;
+        NativeMethods.PreprocessingOptionsUpdateFree(updateHandle);
         return returnValue;
     }
 

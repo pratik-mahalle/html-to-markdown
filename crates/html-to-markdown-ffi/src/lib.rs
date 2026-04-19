@@ -5,8 +5,8 @@ use std::cell::RefCell;
 use std::ffi::{c_char, CStr, CString};
 
 thread_local! {
-    static LAST_ERROR_CODE: RefCell<i32> = const { RefCell::new(0) };
-    static LAST_ERROR_CONTEXT: RefCell<Option<CString>> = const { RefCell::new(None) };
+    static LAST_ERROR_CODE: RefCell<i32> = RefCell::new(0);
+    static LAST_ERROR_CONTEXT: RefCell<Option<CString>> = RefCell::new(None);
 }
 
 fn set_last_error(code: i32, message: &str) {
@@ -285,6 +285,130 @@ pub unsafe extern "C" fn htm_metadata_config_any_enabled(
     } else {
         0
     }
+}
+
+/// Apply a partial update to this metadata configuration.
+///
+/// Any specified fields in the update (Some values) will override the current values.
+/// Unspecified fields (None) are left unchanged. This allows selective modification
+/// of configuration without affecting unrelated settings.
+///
+/// # Arguments
+///
+/// * `update` - Partial metadata config update with fields to override
+///
+/// # Examples
+///
+/// ```
+/// # use html_to_markdown_rs::metadata::{MetadataConfig, MetadataConfigUpdate};
+/// let mut config = MetadataConfig::default();
+/// // config starts with all extraction enabled
+///
+/// let update = MetadataConfigUpdate {
+///     extract_document: Some(false),
+///     extract_images: Some(false),
+///     // All other fields are None, so they won't change
+///     ..Default::default()
+/// };
+///
+/// config.apply_update(update);
+///
+/// assert!(!config.extract_document);
+/// assert!(!config.extract_images);
+/// assert!(config.extract_headers);  // Unchanged
+/// assert!(config.extract_links);    // Unchanged
+/// ```
+/// # Safety
+/// Caller must ensure all pointer arguments are valid or null.
+/// Returned pointers must be freed with the appropriate free function.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_metadata_config_apply_update(
+    this: *mut html_to_markdown_rs::metadata::MetadataConfig,
+    update: *const html_to_markdown_rs::metadata::MetadataConfigUpdate,
+) {
+    clear_last_error();
+    if this.is_null() {
+        set_last_error(1, "Null pointer passed for self");
+        return;
+    }
+    // SAFETY: null check above guarantees this is a valid pointer; caller ensures exclusive access.
+    let obj = unsafe { &mut *this };
+    if update.is_null() {
+        set_last_error(1, "Null pointer passed for parameter 'update'");
+        return;
+    }
+    let update_rs = unsafe { &*update }.clone();
+    let result = obj.apply_update(update_rs);
+}
+
+/// Create new metadata configuration from a partial update.
+///
+/// Creates a new `MetadataConfig` struct with defaults, then applies the update.
+/// Fields not specified in the update (None) keep their default values.
+/// This is a convenience method for constructing a configuration from a partial specification
+/// without needing to explicitly call `.default()` first.
+///
+/// # Arguments
+///
+/// * `update` - Partial metadata config update with fields to set
+///
+/// # Returns
+///
+/// New `MetadataConfig` with specified updates applied to defaults
+///
+/// # Examples
+///
+/// ```
+/// # use html_to_markdown_rs::metadata::{MetadataConfig, MetadataConfigUpdate};
+/// let update = MetadataConfigUpdate {
+///     extract_document: Some(false),
+///     extract_headers: Some(true),
+///     extract_links: Some(true),
+///     extract_images: None,  // Will use default (true)
+///     extract_structured_data: None,  // Will use default (true)
+///     max_structured_data_size: None,  // Will use default (1MB)
+/// };
+///
+/// let config = MetadataConfig::from_update(update);
+///
+/// assert!(!config.extract_document);
+/// assert!(config.extract_headers);
+/// assert!(config.extract_links);
+/// assert!(config.extract_images);  // Default
+/// assert!(config.extract_structured_data);  // Default
+/// ```
+/// # Safety
+/// Caller must ensure all pointer arguments are valid or null.
+/// Returned pointers must be freed with the appropriate free function.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_metadata_config_from_update(
+    update: *const html_to_markdown_rs::metadata::MetadataConfigUpdate,
+) -> *mut html_to_markdown_rs::metadata::MetadataConfig {
+    clear_last_error();
+    if update.is_null() {
+        set_last_error(1, "Null pointer passed for parameter 'update'");
+        return std::ptr::null_mut();
+    }
+    let update_rs = unsafe { &*update }.clone();
+    let result = html_to_markdown_rs::metadata::MetadataConfig::from_update(update_rs);
+    Box::into_raw(Box::new(result))
+}
+
+/// # Safety
+/// Caller must ensure all pointer arguments are valid or null.
+/// Returned pointers must be freed with the appropriate free function.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_metadata_config_from(
+    update: *const html_to_markdown_rs::metadata::MetadataConfigUpdate,
+) -> *mut html_to_markdown_rs::metadata::MetadataConfig {
+    clear_last_error();
+    if update.is_null() {
+        set_last_error(1, "Null pointer passed for parameter 'update'");
+        return std::ptr::null_mut();
+    }
+    let update_rs = unsafe { &*update }.clone();
+    let result = html_to_markdown_rs::metadata::MetadataConfig::from(update_rs);
+    Box::into_raw(Box::new(result))
 }
 
 /// Free a `MetadataConfigUpdate` handle.
@@ -625,7 +749,7 @@ pub unsafe extern "C" fn htm_document_metadata_text_direction(
     }
     let obj = unsafe { &*ptr };
     match &obj.text_direction {
-        Some(val) => Box::into_raw(Box::new(*val)),
+        Some(val) => Box::into_raw(Box::new(val.clone())),
         None => std::ptr::null_mut(),
     }
 }
@@ -1020,7 +1144,7 @@ pub unsafe extern "C" fn htm_link_metadata_link_type(
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.link_type))
+    Box::into_raw(Box::new(obj.link_type.clone()))
 }
 
 /// Get the `rel` field from a `LinkMetadata`.
@@ -1243,7 +1367,7 @@ pub unsafe extern "C" fn htm_image_metadata_image_type(
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.image_type))
+    Box::into_raw(Box::new(obj.image_type.clone()))
 }
 
 /// Get the `attributes` field from a `ImageMetadata`.
@@ -1347,7 +1471,7 @@ pub unsafe extern "C" fn htm_structured_data_data_type(
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.data_type))
+    Box::into_raw(Box::new(obj.data_type.clone()))
 }
 
 /// Get the `raw_json` field from a `StructuredData`.
@@ -1632,7 +1756,7 @@ pub unsafe extern "C" fn htm_conversion_options_heading_style(
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.heading_style))
+    Box::into_raw(Box::new(obj.heading_style.clone()))
 }
 
 /// Get the `list_indent_type` field from a `ConversionOptions`.
@@ -1646,7 +1770,7 @@ pub unsafe extern "C" fn htm_conversion_options_list_indent_type(
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.list_indent_type))
+    Box::into_raw(Box::new(obj.list_indent_type.clone()))
 }
 
 /// Get the `list_indent_width` field from a `ConversionOptions`.
@@ -1823,7 +1947,7 @@ pub unsafe extern "C" fn htm_conversion_options_highlight_style(
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.highlight_style))
+    Box::into_raw(Box::new(obj.highlight_style.clone()))
 }
 
 /// Get the `extract_metadata` field from a `ConversionOptions`.
@@ -1851,7 +1975,7 @@ pub unsafe extern "C" fn htm_conversion_options_whitespace_mode(
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.whitespace_mode))
+    Box::into_raw(Box::new(obj.whitespace_mode.clone()))
 }
 
 /// Get the `strip_newlines` field from a `ConversionOptions`.
@@ -1955,7 +2079,7 @@ pub unsafe extern "C" fn htm_conversion_options_newline_style(
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.newline_style))
+    Box::into_raw(Box::new(obj.newline_style.clone()))
 }
 
 /// Get the `code_block_style` field from a `ConversionOptions`.
@@ -1969,7 +2093,7 @@ pub unsafe extern "C" fn htm_conversion_options_code_block_style(
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.code_block_style))
+    Box::into_raw(Box::new(obj.code_block_style.clone()))
 }
 
 /// Get the `keep_inline_images_in` field from a `ConversionOptions`.
@@ -2102,7 +2226,7 @@ pub unsafe extern "C" fn htm_conversion_options_link_style(
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.link_style))
+    Box::into_raw(Box::new(obj.link_style.clone()))
 }
 
 /// Get the `output_format` field from a `ConversionOptions`.
@@ -2116,7 +2240,7 @@ pub unsafe extern "C" fn htm_conversion_options_output_format(
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.output_format))
+    Box::into_raw(Box::new(obj.output_format.clone()))
 }
 
 /// Get the `include_document_structure` field from a `ConversionOptions`.
@@ -2225,6 +2349,65 @@ pub unsafe extern "C" fn htm_conversion_options_builder() -> *mut html_to_markdo
 {
     clear_last_error();
     let result = html_to_markdown_rs::options::ConversionOptions::builder();
+    Box::into_raw(Box::new(result))
+}
+
+/// Apply a partial update to these conversion options.
+/// # Safety
+/// Caller must ensure all pointer arguments are valid or null.
+/// Returned pointers must be freed with the appropriate free function.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_apply_update(
+    this: *mut html_to_markdown_rs::options::ConversionOptions,
+    update: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) {
+    clear_last_error();
+    if this.is_null() {
+        set_last_error(1, "Null pointer passed for self");
+        return;
+    }
+    // SAFETY: null check above guarantees this is a valid pointer; caller ensures exclusive access.
+    let obj = unsafe { &mut *this };
+    if update.is_null() {
+        set_last_error(1, "Null pointer passed for parameter 'update'");
+        return;
+    }
+    let update_rs = unsafe { &*update }.clone();
+    let result = obj.apply_update(update_rs);
+}
+
+/// Create from a partial update, applying to defaults.
+/// # Safety
+/// Caller must ensure all pointer arguments are valid or null.
+/// Returned pointers must be freed with the appropriate free function.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_from_update(
+    update: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> *mut html_to_markdown_rs::options::ConversionOptions {
+    clear_last_error();
+    if update.is_null() {
+        set_last_error(1, "Null pointer passed for parameter 'update'");
+        return std::ptr::null_mut();
+    }
+    let update_rs = unsafe { &*update }.clone();
+    let result = html_to_markdown_rs::options::ConversionOptions::from_update(update_rs);
+    Box::into_raw(Box::new(result))
+}
+
+/// # Safety
+/// Caller must ensure all pointer arguments are valid or null.
+/// Returned pointers must be freed with the appropriate free function.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_from(
+    update: *const html_to_markdown_rs::options::ConversionOptionsUpdate,
+) -> *mut html_to_markdown_rs::options::ConversionOptions {
+    clear_last_error();
+    if update.is_null() {
+        set_last_error(1, "Null pointer passed for parameter 'update'");
+        return std::ptr::null_mut();
+    }
+    let update_rs = unsafe { &*update }.clone();
+    let result = html_to_markdown_rs::options::ConversionOptions::from(update_rs);
     Box::into_raw(Box::new(result))
 }
 
@@ -2455,7 +2638,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_heading_style(
     }
     let obj = unsafe { &*ptr };
     match &obj.heading_style {
-        Some(val) => Box::into_raw(Box::new(*val)),
+        Some(val) => Box::into_raw(Box::new(val.clone())),
         None => std::ptr::null_mut(),
     }
 }
@@ -2472,7 +2655,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_list_indent_type(
     }
     let obj = unsafe { &*ptr };
     match &obj.list_indent_type {
-        Some(val) => Box::into_raw(Box::new(*val)),
+        Some(val) => Box::into_raw(Box::new(val.clone())),
         None => std::ptr::null_mut(),
     }
 }
@@ -2685,7 +2868,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_highlight_style(
     }
     let obj = unsafe { &*ptr };
     match &obj.highlight_style {
-        Some(val) => Box::into_raw(Box::new(*val)),
+        Some(val) => Box::into_raw(Box::new(val.clone())),
         None => std::ptr::null_mut(),
     }
 }
@@ -2719,7 +2902,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_whitespace_mode(
     }
     let obj = unsafe { &*ptr };
     match &obj.whitespace_mode {
-        Some(val) => Box::into_raw(Box::new(*val)),
+        Some(val) => Box::into_raw(Box::new(val.clone())),
         None => std::ptr::null_mut(),
     }
 }
@@ -2844,7 +3027,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_newline_style(
     }
     let obj = unsafe { &*ptr };
     match &obj.newline_style {
-        Some(val) => Box::into_raw(Box::new(*val)),
+        Some(val) => Box::into_raw(Box::new(val.clone())),
         None => std::ptr::null_mut(),
     }
 }
@@ -2861,7 +3044,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_code_block_style(
     }
     let obj = unsafe { &*ptr };
     match &obj.code_block_style {
-        Some(val) => Box::into_raw(Box::new(*val)),
+        Some(val) => Box::into_raw(Box::new(val.clone())),
         None => std::ptr::null_mut(),
     }
 }
@@ -3018,7 +3201,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_link_style(
     }
     let obj = unsafe { &*ptr };
     match &obj.link_style {
-        Some(val) => Box::into_raw(Box::new(*val)),
+        Some(val) => Box::into_raw(Box::new(val.clone())),
         None => std::ptr::null_mut(),
     }
 }
@@ -3035,7 +3218,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_output_format(
     }
     let obj = unsafe { &*ptr };
     match &obj.output_format {
-        Some(val) => Box::into_raw(Box::new(*val)),
+        Some(val) => Box::into_raw(Box::new(val.clone())),
         None => std::ptr::null_mut(),
     }
 }
@@ -3238,7 +3421,7 @@ pub unsafe extern "C" fn htm_preprocessing_options_preset(
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.preset))
+    Box::into_raw(Box::new(obj.preset.clone()))
 }
 
 /// Get the `remove_navigation` field from a `PreprocessingOptions`.
@@ -3277,6 +3460,83 @@ pub unsafe extern "C" fn htm_preprocessing_options_default() -> *mut html_to_mar
 {
     clear_last_error();
     let result = html_to_markdown_rs::options::PreprocessingOptions::default();
+    Box::into_raw(Box::new(result))
+}
+
+/// Apply a partial update to these preprocessing options.
+///
+/// Any specified fields in the update will override the current values.
+/// Unspecified fields (None) are left unchanged.
+///
+/// # Arguments
+///
+/// * `update` - Partial preprocessing options update
+/// # Safety
+/// Caller must ensure all pointer arguments are valid or null.
+/// Returned pointers must be freed with the appropriate free function.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_preprocessing_options_apply_update(
+    this: *mut html_to_markdown_rs::options::PreprocessingOptions,
+    update: *const html_to_markdown_rs::options::PreprocessingOptionsUpdate,
+) {
+    clear_last_error();
+    if this.is_null() {
+        set_last_error(1, "Null pointer passed for self");
+        return;
+    }
+    // SAFETY: null check above guarantees this is a valid pointer; caller ensures exclusive access.
+    let obj = unsafe { &mut *this };
+    if update.is_null() {
+        set_last_error(1, "Null pointer passed for parameter 'update'");
+        return;
+    }
+    let update_rs = unsafe { &*update }.clone();
+    let result = obj.apply_update(update_rs);
+}
+
+/// Create new preprocessing options from a partial update.
+///
+/// Creates a new `PreprocessingOptions` struct with defaults, then applies the update.
+/// Fields not specified in the update keep their default values.
+///
+/// # Arguments
+///
+/// * `update` - Partial preprocessing options update
+///
+/// # Returns
+///
+/// New `PreprocessingOptions` with specified updates applied to defaults
+/// # Safety
+/// Caller must ensure all pointer arguments are valid or null.
+/// Returned pointers must be freed with the appropriate free function.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_preprocessing_options_from_update(
+    update: *const html_to_markdown_rs::options::PreprocessingOptionsUpdate,
+) -> *mut html_to_markdown_rs::options::PreprocessingOptions {
+    clear_last_error();
+    if update.is_null() {
+        set_last_error(1, "Null pointer passed for parameter 'update'");
+        return std::ptr::null_mut();
+    }
+    let update_rs = unsafe { &*update }.clone();
+    let result = html_to_markdown_rs::options::PreprocessingOptions::from_update(update_rs);
+    Box::into_raw(Box::new(result))
+}
+
+/// # Safety
+/// Caller must ensure all pointer arguments are valid or null.
+/// Returned pointers must be freed with the appropriate free function.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_preprocessing_options_from(
+    update: *const html_to_markdown_rs::options::PreprocessingOptionsUpdate,
+) -> *mut html_to_markdown_rs::options::PreprocessingOptions {
+    clear_last_error();
+    if update.is_null() {
+        set_last_error(1, "Null pointer passed for parameter 'update'");
+        return std::ptr::null_mut();
+    }
+    let update_rs = unsafe { &*update }.clone();
+    let result = html_to_markdown_rs::options::PreprocessingOptions::from(update_rs);
     Box::into_raw(Box::new(result))
 }
 
@@ -3352,7 +3612,7 @@ pub unsafe extern "C" fn htm_preprocessing_options_update_preset(
     }
     let obj = unsafe { &*ptr };
     match &obj.preset {
-        Some(val) => Box::into_raw(Box::new(*val)),
+        Some(val) => Box::into_raw(Box::new(val.clone())),
         None => std::ptr::null_mut(),
     }
 }
@@ -4383,7 +4643,7 @@ pub unsafe extern "C" fn htm_processing_warning_kind(
         return std::ptr::null_mut();
     }
     let obj = unsafe { &*ptr };
-    Box::into_raw(Box::new(obj.kind))
+    Box::into_raw(Box::new(obj.kind.clone()))
 }
 
 /// Convert an integer to a `TextDirection` variant. Returns -1 on invalid input.
