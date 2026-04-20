@@ -4,7 +4,7 @@ defmodule HtmlToMarkdown.Native do
 
   use RustlerPrecompiled,
     otp_app: :html_to_markdown,
-    crate: "html_to_markdown_nif",
+    crate: "html_to_markdown_rustler",
     base_url:
       "https://github.com/kreuzberg-dev/html-to-markdown/releases/download/v#{Mix.Project.config()[:version]}",
     version: Mix.Project.config()[:version],
