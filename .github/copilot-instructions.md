@@ -310,6 +310,7 @@ High-performance HTML to Markdown converter with Rust core and polyglot bindings
 **Priority:** high
 
 Audit dependencies before adding them. Prefer well-maintained, widely-used packages with active maintenance. Pin versions and commit lock files. Use language-specific audit tools in CI:
+
 - Rust: `cargo audit`, `cargo deny` (license + advisory policies)
 - Python: `pip-audit`, `bandit` (SAST)
 - JavaScript/TypeScript: `npm audit`, `pnpm audit`
@@ -605,7 +606,7 @@ Shared hooks run via `prek run --all-files`. Each repo's `.pre-commit-config.yam
 - Manages language toolchains automatically (Python via uv, Node, Go, Rust, Ruby)
 - Supports workspace mode for monorepo/polyrepo setups
 - Config file: `.pre-commit-config.yaml` (same format as pre-commit)
-- Docs: https://prek.j178.dev/
+- Docs: <https://prek.j178.dev/>
 
 Always run `prek run --all-files` after making changes to verify compliance.
 
@@ -630,4 +631,3 @@ All repos use [Taskfile.yaml](https://taskfile.dev) with the `task` CLI. Always 
 8. **Data Integrity Failures** — verify software updates, use signed artifacts and checksums.
 9. **Logging Failures** — log all security events with context, protect log data from tampering.
 10. **SSRF** — validate and allowlist URLs, restrict outbound network requests.
-

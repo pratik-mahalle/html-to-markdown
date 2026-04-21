@@ -3,48 +3,6 @@
 
 from typing import Any
 
-class MetadataConfig:
-    extract_document: bool
-    extract_headers: bool
-    extract_links: bool
-    extract_images: bool
-    extract_structured_data: bool
-    max_structured_data_size: int
-    def __init__(
-        self,
-        extract_document: bool,
-        extract_headers: bool,
-        extract_links: bool,
-        extract_images: bool,
-        extract_structured_data: bool,
-        max_structured_data_size: int,
-    ) -> None: ...
-    def any_enabled(self) -> bool: ...
-    def apply_update(self, update: MetadataConfigUpdate) -> None: ...
-    @staticmethod
-    def default() -> MetadataConfig: ...
-    @staticmethod
-    def from_update(update: MetadataConfigUpdate) -> MetadataConfig: ...
-    @staticmethod
-    def from_(update: MetadataConfigUpdate) -> MetadataConfig: ...
-
-class MetadataConfigUpdate:
-    extract_document: bool | None
-    extract_headers: bool | None
-    extract_links: bool | None
-    extract_images: bool | None
-    extract_structured_data: bool | None
-    max_structured_data_size: int | None
-    def __init__(
-        self,
-        extract_document: bool | None = None,
-        extract_headers: bool | None = None,
-        extract_links: bool | None = None,
-        extract_images: bool | None = None,
-        extract_structured_data: bool | None = None,
-        max_structured_data_size: int | None = None,
-    ) -> None: ...
-
 class DocumentMetadata:
     title: str | None
     description: str | None

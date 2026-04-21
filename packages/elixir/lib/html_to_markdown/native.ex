@@ -14,11 +14,6 @@ defmodule HtmlToMarkdown.Native do
     nif_versions: ["2.16", "2.17"]
 
   def convert(_html, _options, _visitor), do: :erlang.nif_error(:nif_not_loaded)
-  def metadataconfig_default, do: :erlang.nif_error(:nif_not_loaded)
-  def metadataconfig_any_enabled(_obj), do: :erlang.nif_error(:nif_not_loaded)
-  def metadataconfig_apply_update(_obj, _update), do: :erlang.nif_error(:nif_not_loaded)
-  def metadataconfig_from_update(_update), do: :erlang.nif_error(:nif_not_loaded)
-  def metadataconfig_from(_update), do: :erlang.nif_error(:nif_not_loaded)
   def headermetadata_is_valid(_obj), do: :erlang.nif_error(:nif_not_loaded)
   def linkmetadata_classify_link(_href), do: :erlang.nif_error(:nif_not_loaded)
   def conversionoptions_default, do: :erlang.nif_error(:nif_not_loaded)

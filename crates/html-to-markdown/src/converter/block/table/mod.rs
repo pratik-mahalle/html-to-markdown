@@ -22,7 +22,6 @@ pub(super) mod utils;
 // Re-export types from parent module for submodule access
 
 // Re-export for use in converter.rs
-pub use builder::handle_table;
 pub use caption::handle_caption;
 
 /// Dispatches table element handling to the main convert_table function.

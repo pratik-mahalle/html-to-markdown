@@ -23,8 +23,6 @@ export type {
 	JsLinkStyle,
 	JsLinkType,
 	JsListIndentType,
-	JsMetadataConfig,
-	JsMetadataConfigUpdate,
 	JsNewlineStyle,
 	JsNodeContent,
 	JsNodeContext,

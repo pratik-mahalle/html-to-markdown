@@ -381,12 +381,22 @@ fn test_code_block_style_tildes() {
 
 #[test]
 fn test_autolinks() {
+    // Autolinks are enabled by default — no flag needed
     cli()
-        .arg("--autolinks")
         .write_stdin("<p><a href=\"https://example.com\">https://example.com</a></p>")
         .assert()
         .success()
         .stdout("<https://example.com>\n");
+}
+
+#[test]
+fn test_no_autolinks() {
+    cli()
+        .arg("--no-autolinks")
+        .write_stdin("<p><a href=\"https://example.com\">https://example.com</a></p>")
+        .assert()
+        .success()
+        .stdout("[https://example.com](https://example.com)\n");
 }
 
 #[test]
@@ -797,11 +807,9 @@ fn test_multiple_options_combined() {
 }
 
 #[test]
-fn test_metadata_flags_work_without_with_metadata() {
-    // --extract-headers without --with-metadata or --json is silently ignored
-    // (the flag has no effect but does not cause an error)
+fn test_metadata_flags_work_without_extract_metadata() {
+    // Without --extract-metadata, conversion proceeds normally
     cli()
-        .arg("--extract-headers")
         .write_stdin("<html><body><h1>Title</h1></body></html>")
         .assert()
         .success()
@@ -810,10 +818,9 @@ fn test_metadata_flags_work_without_with_metadata() {
 
 #[test]
 fn test_metadata_flags_work_with_json() {
-    // --extract-headers with --json produces JSON output
+    // --json produces JSON output with a "content" field
     cli()
         .arg("--json")
-        .arg("--extract-headers")
         .write_stdin("<html><body><h1>Title</h1></body></html>")
         .assert()
         .success()

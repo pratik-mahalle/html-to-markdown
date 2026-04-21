@@ -44,7 +44,7 @@ html-to-markdown --url https://example.com > output.md
 | Flag | Description |
 |------|-------------|
 | `-o`, `--output FILE` | Write output to file (default: stdout). |
-| `-f`, `--output-format FORMAT` | Output format: `markdown` (default) or `djot`. |
+| `-f`, `--output-format FORMAT` | Output format: `markdown` (default), `djot`, or `plain`. |
 
 ## Heading Options
 
@@ -85,7 +85,7 @@ html-to-markdown --url https://example.com > output.md
 
 | Flag | Description |
 |------|-------------|
-| `-a`, `--autolinks` | When link text equals the href, use `<url>` instead of `[url](url)`. |
+| `--no-autolinks` | Disable autolink conversion. By default, when link text equals the href, `<url>` syntax is used instead of `[url](url)`. |
 | `--default-title` | Use href as link title when no `title` attribute exists. |
 
 ## Images
@@ -120,6 +120,9 @@ html-to-markdown --url https://example.com > output.md
 |------|-------------|
 | `--convert-as-inline` | Treat block elements as inline (no paragraph breaks). |
 | `--strip-tags TAGS` | Comma-separated tags to strip (text content preserved, no Markdown conversion). |
+| `--preserve-tags TAGS` | Comma-separated tags to keep as raw HTML in output (e.g. `details,summary`). |
+| `--skip-images` | Omit all `<img>` elements from output. |
+| `--max-depth N` | Truncate DOM subtrees beyond N levels of nesting (default: unlimited). |
 
 ## Metadata
 
@@ -127,11 +130,6 @@ html-to-markdown --url https://example.com > output.md
 |------|-------------|
 | `--extract-metadata` | Prepend a metadata comment block to the Markdown output. |
 | `--json` | Output a full `ConversionResult` as JSON (content, metadata, tables, images, warnings). |
-| `--extract-document` | Extract document-level metadata (requires `--json`). |
-| `--extract-headers` | Extract heading elements (requires `--json`). |
-| `--extract-links` | Extract anchor tags (requires `--json`). |
-| `--extract-images` | Extract image elements (requires `--json`). |
-| `--extract-structured-data` | Extract JSON-LD, Microdata, and RDFa (requires `--json`). |
 
 ## Preprocessing
 
@@ -167,9 +165,7 @@ html-to-markdown --generate-man > html-to-markdown.1
 html-to-markdown page.html --preprocess --preset aggressive
 
 # Extract full structured result as JSON
-html-to-markdown input.html --json \
-    --extract-document --extract-headers --extract-links --extract-images \
-    -o output.json
+html-to-markdown input.html --json -o output.json
 
 # Discord/Slack-friendly output (2-space list indents)
 html-to-markdown input.html --list-indent-width 2

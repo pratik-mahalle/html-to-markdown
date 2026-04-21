@@ -15,64 +15,6 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize, rustler::NifMap)]
-pub struct MetadataConfig {
-    pub extract_document: bool,
-    pub extract_headers: bool,
-    pub extract_links: bool,
-    pub extract_images: bool,
-    pub extract_structured_data: bool,
-    pub max_structured_data_size: usize,
-}
-
-impl MetadataConfig {
-    pub fn new(opts: std::collections::HashMap<String, rustler::Term>) -> Self {
-        Self {
-            extract_document: opts
-                .get("extract_document")
-                .and_then(|t| t.decode().ok())
-                .unwrap_or(true),
-            extract_headers: opts
-                .get("extract_headers")
-                .and_then(|t| t.decode().ok())
-                .unwrap_or(true),
-            extract_links: opts.get("extract_links").and_then(|t| t.decode().ok()).unwrap_or(true),
-            extract_images: opts.get("extract_images").and_then(|t| t.decode().ok()).unwrap_or(true),
-            extract_structured_data: opts
-                .get("extract_structured_data")
-                .and_then(|t| t.decode().ok())
-                .unwrap_or(true),
-            max_structured_data_size: opts
-                .get("max_structured_data_size")
-                .and_then(|t| t.decode().ok())
-                .unwrap_or_default(),
-        }
-    }
-}
-
-#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize, rustler::NifMap)]
-pub struct MetadataConfigUpdate {
-    pub extract_document: Option<bool>,
-    pub extract_headers: Option<bool>,
-    pub extract_links: Option<bool>,
-    pub extract_images: Option<bool>,
-    pub extract_structured_data: Option<bool>,
-    pub max_structured_data_size: Option<usize>,
-}
-
-impl MetadataConfigUpdate {
-    pub fn new(opts: std::collections::HashMap<String, rustler::Term>) -> Self {
-        Self {
-            extract_document: opts.get("extract_document").and_then(|t| t.decode().ok()),
-            extract_headers: opts.get("extract_headers").and_then(|t| t.decode().ok()),
-            extract_links: opts.get("extract_links").and_then(|t| t.decode().ok()),
-            extract_images: opts.get("extract_images").and_then(|t| t.decode().ok()),
-            extract_structured_data: opts.get("extract_structured_data").and_then(|t| t.decode().ok()),
-            max_structured_data_size: opts.get("max_structured_data_size").and_then(|t| t.decode().ok()),
-        }
-    }
-}
-
-#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize, rustler::NifMap)]
 pub struct DocumentMetadata {
     pub title: Option<String>,
     pub description: Option<String>,
@@ -2230,31 +2172,6 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
 }
 
 #[rustler::nif]
-pub fn metadataconfig_default() -> MetadataConfig {
-    html_to_markdown_rs::MetadataConfig::default().into()
-}
-
-#[rustler::nif]
-pub fn metadataconfig_any_enabled(obj: MetadataConfig) -> bool {
-    html_to_markdown_rs::MetadataConfig::from(obj).any_enabled()
-}
-
-#[rustler::nif]
-pub fn metadataconfig_apply_update(obj: MetadataConfig, update: MetadataConfigUpdate) -> () {
-    ()
-}
-
-#[rustler::nif]
-pub fn metadataconfig_from_update(update: MetadataConfigUpdate) -> MetadataConfig {
-    html_to_markdown_rs::MetadataConfig::from_update(update.into()).into()
-}
-
-#[rustler::nif]
-pub fn metadataconfig_from(update: MetadataConfigUpdate) -> MetadataConfig {
-    html_to_markdown_rs::MetadataConfig::from(update.into()).into()
-}
-
-#[rustler::nif]
 pub fn headermetadata_is_valid(obj: HeaderMetadata) -> bool {
     html_to_markdown_rs::HeaderMetadata::from(obj).is_valid()
 }
@@ -2354,58 +2271,6 @@ pub fn preprocessingoptions_from_update(update: PreprocessingOptionsUpdate) -> P
 #[rustler::nif]
 pub fn preprocessingoptions_from(update: PreprocessingOptionsUpdate) -> PreprocessingOptions {
     html_to_markdown_rs::PreprocessingOptions::from(update.into()).into()
-}
-
-impl From<MetadataConfig> for html_to_markdown_rs::metadata::MetadataConfig {
-    fn from(val: MetadataConfig) -> Self {
-        Self {
-            extract_document: val.extract_document,
-            extract_headers: val.extract_headers,
-            extract_links: val.extract_links,
-            extract_images: val.extract_images,
-            extract_structured_data: val.extract_structured_data,
-            max_structured_data_size: val.max_structured_data_size,
-        }
-    }
-}
-
-impl From<html_to_markdown_rs::metadata::MetadataConfig> for MetadataConfig {
-    fn from(val: html_to_markdown_rs::metadata::MetadataConfig) -> Self {
-        Self {
-            extract_document: val.extract_document,
-            extract_headers: val.extract_headers,
-            extract_links: val.extract_links,
-            extract_images: val.extract_images,
-            extract_structured_data: val.extract_structured_data,
-            max_structured_data_size: val.max_structured_data_size,
-        }
-    }
-}
-
-impl From<MetadataConfigUpdate> for html_to_markdown_rs::metadata::MetadataConfigUpdate {
-    fn from(val: MetadataConfigUpdate) -> Self {
-        Self {
-            extract_document: val.extract_document,
-            extract_headers: val.extract_headers,
-            extract_links: val.extract_links,
-            extract_images: val.extract_images,
-            extract_structured_data: val.extract_structured_data,
-            max_structured_data_size: val.max_structured_data_size,
-        }
-    }
-}
-
-impl From<html_to_markdown_rs::metadata::MetadataConfigUpdate> for MetadataConfigUpdate {
-    fn from(val: html_to_markdown_rs::metadata::MetadataConfigUpdate) -> Self {
-        Self {
-            extract_document: val.extract_document,
-            extract_headers: val.extract_headers,
-            extract_links: val.extract_links,
-            extract_images: val.extract_images,
-            extract_structured_data: val.extract_structured_data,
-            max_structured_data_size: val.max_structured_data_size,
-        }
-    }
 }
 
 impl From<DocumentMetadata> for html_to_markdown_rs::metadata::DocumentMetadata {

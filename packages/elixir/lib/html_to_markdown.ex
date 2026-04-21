@@ -27,36 +27,6 @@ defmodule HtmlToMarkdown do
     HtmlToMarkdown.Native.convert(html, options, visitor)
   end
 
-  @doc "Create default metadata configuration."
-  @spec metadataconfig_default() :: String.t() | nil
-  def metadataconfig_default do
-    HtmlToMarkdown.Native.metadataconfig_default()
-  end
-
-  @doc "Check if any metadata extraction is enabled."
-  @spec metadataconfig_any_enabled(map()) :: boolean()
-  def metadataconfig_any_enabled(obj) do
-    HtmlToMarkdown.Native.metadataconfig_any_enabled(obj)
-  end
-
-  @doc "Apply a partial update to this metadata configuration."
-  @spec metadataconfig_apply_update(map(), String.t() | nil) :: nil
-  def metadataconfig_apply_update(obj, update) do
-    HtmlToMarkdown.Native.metadataconfig_apply_update(obj, update)
-  end
-
-  @doc "Create new metadata configuration from a partial update."
-  @spec metadataconfig_from_update(String.t() | nil) :: String.t() | nil
-  def metadataconfig_from_update(update) do
-    HtmlToMarkdown.Native.metadataconfig_from_update(update)
-  end
-
-  @doc "Method"
-  @spec metadataconfig_from(String.t() | nil) :: String.t() | nil
-  def metadataconfig_from(update) do
-    HtmlToMarkdown.Native.metadataconfig_from(update)
-  end
-
   @doc "Validate that the header level is within valid range (1-6)."
   @spec headermetadata_is_valid(map()) :: boolean()
   def headermetadata_is_valid(obj) do

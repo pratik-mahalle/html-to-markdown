@@ -22,8 +22,6 @@ export {
 	WasmLinkStyle,
 	WasmLinkType,
 	WasmListIndentType,
-	WasmMetadataConfig,
-	WasmMetadataConfigUpdate,
 	WasmNewlineStyle,
 	WasmNodeContent,
 	WasmNodeContext,

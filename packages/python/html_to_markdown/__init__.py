@@ -4,7 +4,7 @@
 Version: 3.2.6
 """
 
-from ._html_to_markdown import ConversionOptions, ConversionResult, MetadataConfig
+from ._html_to_markdown import ConversionOptions, ConversionResult
 from .api import convert
 from .exceptions import (
     ConfigError,
@@ -47,7 +47,6 @@ __all__ = [
     "IoError",
     "LinkStyle",
     "ListIndentType",
-    "MetadataConfig",
     "NewlineStyle",
     "OtherError",
     "OutputFormat",

@@ -16,40 +16,6 @@ use std::sync::Arc;
 
 #[derive(Clone, Default)]
 #[napi(object)]
-pub struct JsMetadataConfig {
-    #[napi(js_name = "extractDocument")]
-    pub extract_document: Option<bool>,
-    #[napi(js_name = "extractHeaders")]
-    pub extract_headers: Option<bool>,
-    #[napi(js_name = "extractLinks")]
-    pub extract_links: Option<bool>,
-    #[napi(js_name = "extractImages")]
-    pub extract_images: Option<bool>,
-    #[napi(js_name = "extractStructuredData")]
-    pub extract_structured_data: Option<bool>,
-    #[napi(js_name = "maxStructuredDataSize")]
-    pub max_structured_data_size: Option<i64>,
-}
-
-#[derive(Clone, Default)]
-#[napi(object)]
-pub struct JsMetadataConfigUpdate {
-    #[napi(js_name = "extractDocument")]
-    pub extract_document: Option<bool>,
-    #[napi(js_name = "extractHeaders")]
-    pub extract_headers: Option<bool>,
-    #[napi(js_name = "extractLinks")]
-    pub extract_links: Option<bool>,
-    #[napi(js_name = "extractImages")]
-    pub extract_images: Option<bool>,
-    #[napi(js_name = "extractStructuredData")]
-    pub extract_structured_data: Option<bool>,
-    #[napi(js_name = "maxStructuredDataSize")]
-    pub max_structured_data_size: Option<i64>,
-}
-
-#[derive(Clone, Default)]
-#[napi(object)]
 pub struct JsDocumentMetadata {
     pub title: Option<String>,
     pub description: Option<String>,
@@ -3264,58 +3230,6 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
                     html_to_markdown_rs::VisitResult::Continue
                 }
             }
-        }
-    }
-}
-
-impl From<JsMetadataConfig> for html_to_markdown_rs::metadata::MetadataConfig {
-    fn from(val: JsMetadataConfig) -> Self {
-        Self {
-            extract_document: val.extract_document.unwrap_or_default(),
-            extract_headers: val.extract_headers.unwrap_or_default(),
-            extract_links: val.extract_links.unwrap_or_default(),
-            extract_images: val.extract_images.unwrap_or_default(),
-            extract_structured_data: val.extract_structured_data.unwrap_or_default(),
-            max_structured_data_size: val.max_structured_data_size.map(|v| v as usize).unwrap_or_default(),
-        }
-    }
-}
-
-impl From<html_to_markdown_rs::metadata::MetadataConfig> for JsMetadataConfig {
-    fn from(val: html_to_markdown_rs::metadata::MetadataConfig) -> Self {
-        Self {
-            extract_document: Some(val.extract_document),
-            extract_headers: Some(val.extract_headers),
-            extract_links: Some(val.extract_links),
-            extract_images: Some(val.extract_images),
-            extract_structured_data: Some(val.extract_structured_data),
-            max_structured_data_size: Some(val.max_structured_data_size as i64),
-        }
-    }
-}
-
-impl From<JsMetadataConfigUpdate> for html_to_markdown_rs::metadata::MetadataConfigUpdate {
-    fn from(val: JsMetadataConfigUpdate) -> Self {
-        Self {
-            extract_document: val.extract_document,
-            extract_headers: val.extract_headers,
-            extract_links: val.extract_links,
-            extract_images: val.extract_images,
-            extract_structured_data: val.extract_structured_data,
-            max_structured_data_size: val.max_structured_data_size.map(|v| v as usize),
-        }
-    }
-}
-
-impl From<html_to_markdown_rs::metadata::MetadataConfigUpdate> for JsMetadataConfigUpdate {
-    fn from(val: html_to_markdown_rs::metadata::MetadataConfigUpdate) -> Self {
-        Self {
-            extract_document: val.extract_document,
-            extract_headers: val.extract_headers,
-            extract_links: val.extract_links,
-            extract_images: val.extract_images,
-            extract_structured_data: val.extract_structured_data,
-            max_structured_data_size: val.max_structured_data_size.map(|v| v as i64),
         }
     }
 }

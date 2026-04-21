@@ -27,8 +27,6 @@ typedef struct HTMLinkMetadata HTMLinkMetadata;
 typedef struct HTMLinkStyle HTMLinkStyle;
 typedef struct HTMLinkType HTMLinkType;
 typedef struct HTMListIndentType HTMListIndentType;
-typedef struct HTMMetadataConfig HTMMetadataConfig;
-typedef struct HTMMetadataConfigUpdate HTMMetadataConfigUpdate;
 typedef struct HTMNewlineStyle HTMNewlineStyle;
 typedef struct HTMNodeContent HTMNodeContent;
 typedef struct HTMNodeContext HTMNodeContext;

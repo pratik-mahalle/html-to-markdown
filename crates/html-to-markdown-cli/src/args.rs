@@ -178,12 +178,13 @@ pub struct Cli {
     #[arg(help_heading = "Code Blocks")]
     pub code_language: Option<String>,
 
-    /// Convert URLs to autolinks
+    /// Disable autolink conversion
     ///
-    /// When link text equals href, use <url> instead of [url](url)
-    #[arg(short = 'a', long)]
+    /// By default, when link text equals the href, the link is converted to
+    /// `<url>` autolink syntax. Pass this flag to output `[url](url)` instead.
+    #[arg(long = "no-autolinks")]
     #[arg(help_heading = "Links")]
-    pub autolinks: bool,
+    pub no_autolinks: bool,
 
     /// Link rendering style
     ///
@@ -277,41 +278,6 @@ pub struct Cli {
     #[arg(requires = "json")]
     pub no_content: bool,
 
-    /// Extract document-level metadata
-    ///
-    /// Requires --with-metadata or --json. Extracts title, description, charset, language, etc.
-    #[arg(long)]
-    #[arg(help_heading = "Metadata")]
-    pub extract_document: bool,
-
-    /// Extract header elements
-    ///
-    /// Requires --with-metadata or --json. Extracts h1-h6 headers with hierarchy.
-    #[arg(long)]
-    #[arg(help_heading = "Metadata")]
-    pub extract_headers: bool,
-
-    /// Extract link elements
-    ///
-    /// Requires --with-metadata or --json. Extracts anchor tags with types (internal, external, etc.).
-    #[arg(long)]
-    #[arg(help_heading = "Metadata")]
-    pub extract_links: bool,
-
-    /// Extract image elements (metadata)
-    ///
-    /// Requires --with-metadata or --json. Extracts img tags with sources and metadata.
-    #[arg(long)]
-    #[arg(help_heading = "Metadata")]
-    pub extract_images: bool,
-
-    /// Extract structured data
-    ///
-    /// Requires --with-metadata or --json. Extracts JSON-LD, Microdata, and `RDFa` blocks.
-    #[arg(long)]
-    #[arg(help_heading = "Metadata")]
-    pub extract_structured_data: bool,
-
     /// Whitespace handling mode
     ///
     /// How to handle whitespace in HTML:
@@ -357,6 +323,29 @@ pub struct Cli {
     #[arg(long, value_name = "TAGS", value_delimiter = ',')]
     #[arg(help_heading = "Element Handling")]
     pub strip_tags: Option<Vec<String>>,
+
+    /// HTML tags to preserve verbatim
+    ///
+    /// Comma-separated list of HTML tags to keep as raw HTML in the output.
+    /// Example: "details,summary"
+    #[arg(long, value_name = "TAGS", value_delimiter = ',')]
+    #[arg(help_heading = "Element Handling")]
+    pub preserve_tags: Option<Vec<String>>,
+
+    /// Skip image elements
+    ///
+    /// Omit all <img> elements from the output entirely
+    #[arg(long)]
+    #[arg(help_heading = "Element Handling")]
+    pub skip_images: bool,
+
+    /// Maximum DOM traversal depth
+    ///
+    /// Silently truncate subtrees beyond this nesting depth. Useful for
+    /// pathologically deep documents. Omit for unlimited depth (default).
+    #[arg(long, value_name = "N")]
+    #[arg(help_heading = "Element Handling")]
+    pub max_depth: Option<usize>,
 
     /// Enable HTML preprocessing
     ///

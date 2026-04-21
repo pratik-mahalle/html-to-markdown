@@ -31,7 +31,7 @@ pub fn build_conversion_options(cli: &Cli) -> ConversionOptions {
         escape_misc: cli.escape_misc,
         escape_ascii: cli.escape_ascii,
         code_language: cli.code_language.clone().unwrap_or(defaults.code_language),
-        autolinks: cli.autolinks,
+        autolinks: !cli.no_autolinks,
         default_title: cli.default_title,
         br_in_tables: cli.br_in_tables,
         highlight_style: cli.highlight_style.map_or(defaults.highlight_style, Into::into),
@@ -50,19 +50,19 @@ pub fn build_conversion_options(cli: &Cli) -> ConversionOptions {
             .clone()
             .unwrap_or(defaults.keep_inline_images_in),
         link_style: cli.link_style.map_or(defaults.link_style, Into::into),
-        skip_images: false,
+        skip_images: cli.skip_images,
         preprocessing,
         encoding: cli.encoding.clone(),
         debug: cli.debug,
         strip_tags: cli.strip_tags.clone().unwrap_or(defaults.strip_tags),
-        preserve_tags: Vec::new(),
+        preserve_tags: cli.preserve_tags.clone().unwrap_or(defaults.preserve_tags),
         output_format: cli.output_format.map_or(OutputFormat::default(), Into::into),
         include_document_structure: cli.include_structure,
         extract_images: cli.extract_inline_images,
         max_image_size: 5_242_880,
         capture_svg: false,
         infer_dimensions: true,
-        max_depth: None,
+        max_depth: cli.max_depth,
     }
 }
 
