@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace Kreuzberg\E2e;
 
 use PHPUnit\Framework\TestCase;
+use HtmlToMarkdown\HtmlToMarkdown;
 
 /** E2e tests for category: options. */
 final class OptionsTest extends TestCase
@@ -94,6 +95,28 @@ final class OptionsTest extends TestCase
         $this->assertNotEmpty($result);
         $this->assertStringContainsString("Parent", $result);
         $this->assertStringContainsString("Child", $result);
+    }
+
+    /** Default max_depth (null) converts deeply nested content fully */
+    public function test_options_max_depth_default_unlimited(): void
+    {
+        $result = HtmlToMarkdown::convert("<div><div><div><div><p>Deep content</p></div></div></div></div>");
+        $this->assertStringContainsString("Deep content", $result);
+    }
+
+    /** max_depth truncates content beyond the specified depth */
+    public function test_options_max_depth_truncates(): void
+    {
+        $result = HtmlToMarkdown::convert("<div><p>Shallow</p><div><div><div><p>Too deep</p></div></div></div></div>", ["max_depth" => 3]);
+        $this->assertStringContainsString("Shallow", $result);
+        $this->assertStringNotContainsString("Too deep", $result);
+    }
+
+    /** max_depth of 0 produces empty output */
+    public function test_options_max_depth_zero_empty(): void
+    {
+        $result = HtmlToMarkdown::convert("<p>Hello</p>", ["max_depth" => 0]);
+        $this->assertEquals("", trim($result));
     }
 
     /** Djot output format produces djot-compatible markup */

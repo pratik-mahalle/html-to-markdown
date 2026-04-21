@@ -10,31 +10,31 @@
 
 void test_smoke_empty_string(void) {
     /* Empty string produces empty output */
-    HTMConversionResult* result = htm_convert("", NULL);
+    HTMHtmConvert* result = htm_convert("", NULL);
     assert(result != NULL && "expected call to succeed");
-    char* content = htm_conversion_result_content(result);
+    char* content = htm_htm_convert_content(result);
     assert(str_trim_eq(content, "") == 0 && "equals assertion failed");
     htm_free_string(content);
-    htm_conversion_result_free(result);
+    htm_htm_convert_free(result);
 }
 
 void test_smoke_simple_heading(void) {
     /* H1 heading converts to ATX markdown */
-    HTMConversionResult* result = htm_convert("<h1>Title</h1>", NULL);
+    HTMHtmConvert* result = htm_convert("<h1>Title</h1>", NULL);
     assert(result != NULL && "expected call to succeed");
-    char* content = htm_conversion_result_content(result);
+    char* content = htm_htm_convert_content(result);
     assert(strstr(content, "# Title") != NULL && "expected to contain substring");
     htm_free_string(content);
-    htm_conversion_result_free(result);
+    htm_htm_convert_free(result);
 }
 
 void test_smoke_simple_paragraph(void) {
     /* Simple paragraph converts correctly */
-    HTMConversionResult* result = htm_convert("<p>Hello World</p>", NULL);
+    HTMHtmConvert* result = htm_convert("<p>Hello World</p>", NULL);
     assert(result != NULL && "expected call to succeed");
-    char* content = htm_conversion_result_content(result);
+    char* content = htm_htm_convert_content(result);
     assert(str_trim_eq(content, "Hello World") == 0 && "equals assertion failed");
     assert(strlen(content) > 0 && "expected non-empty value");
     htm_free_string(content);
-    htm_conversion_result_free(result);
+    htm_htm_convert_free(result);
 }

@@ -71,6 +71,22 @@ RSpec.describe 'options' do
     expect(result.to_s).to include('Child')
   end
 
+  it 'options_max_depth_default_unlimited: Default max_depth (null) converts deeply nested content fully' do
+    result = HtmlToMarkdown.convert('<div><div><div><div><p>Deep content</p></div></div></div></div>')
+    expect(result.to_s).to include('Deep content')
+  end
+
+  it 'options_max_depth_truncates: max_depth truncates content beyond the specified depth' do
+    result = HtmlToMarkdown.convert('<div><p>Shallow</p><div><div><div><p>Too deep</p></div></div></div></div>', {max_depth: 3})
+    expect(result.to_s).to include('Shallow')
+    expect(result.to_s).not_to include('Too deep')
+  end
+
+  it 'options_max_depth_zero_empty: max_depth of 0 produces empty output' do
+    result = HtmlToMarkdown.convert('<p>Hello</p>', {max_depth: 0})
+    expect(result.strip).to eq('')
+  end
+
   it 'options_output_format_djot: Djot output format produces djot-compatible markup' do
     result = HtmlToMarkdown.convert('<p>Simple paragraph.</p>', {output_format: 'djot'})
     expect(result).not_to be_empty

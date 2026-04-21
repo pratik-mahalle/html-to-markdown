@@ -122,6 +122,32 @@ def test_options_list_indent_tabs() -> None:
     assert "Child" in result.content
 
 
+def test_options_max_depth_default_unlimited() -> None:
+    """Default max_depth (null) converts deeply nested content fully."""
+    html = "<div><div><div><div><p>Deep content</p></div></div></div></div>"
+    result = convert(html=html)
+    assert result.content is not None
+    assert "Deep content" in result.content
+
+
+def test_options_max_depth_truncates() -> None:
+    """max_depth truncates content beyond the specified depth."""
+    html = "<div><p>Shallow</p><div><div><div><p>Too deep</p></div></div></div></div>"
+    options = ConversionOptions(max_depth=3)
+    result = convert(html=html, options=options)
+    assert result.content is not None
+    assert "Shallow" in result.content
+    assert result.content is None or "Too deep" not in result.content
+
+
+def test_options_max_depth_zero_empty() -> None:
+    """max_depth of 0 produces empty output."""
+    html = "<p>Hello</p>"
+    options = ConversionOptions(max_depth=0)
+    result = convert(html=html, options=options)
+    assert result.content.strip() == ""
+
+
 def test_options_output_format_djot() -> None:
     """Djot output format produces djot-compatible markup."""
     html = "<p>Simple paragraph.</p>"

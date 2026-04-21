@@ -4,7 +4,7 @@ import { convert, JsConversionOptions, JsCodeBlockStyle, JsHeadingStyle, JsListI
 
 describe('options', () => {
   it('options_code_block_backticks: Backticks code block style uses triple backtick fences', () => {
-    const options = JsConversionOptions.default();
+    const options = new JsConversionOptions();
     options.codeBlockStyle = JsCodeBlockStyle.Backticks;
     const result = convert("<pre><code class=\"language-js\">console.log('hi');</code></pre>", options);
     expect(result.content).toContain("\`\`\`");
@@ -12,7 +12,7 @@ describe('options', () => {
   });
 
   it('options_code_block_tildes: Tildes code block style uses triple tilde fences', () => {
-    const options = JsConversionOptions.default();
+    const options = new JsConversionOptions();
     options.codeBlockStyle = JsCodeBlockStyle.Tildes;
     const result = convert("<pre><code>some code</code></pre>", options);
     expect(result.content).toContain("~~~");
@@ -20,7 +20,7 @@ describe('options', () => {
   });
 
   it('options_escape_asterisks: escape_asterisks option escapes asterisks in plain text', () => {
-    const options = JsConversionOptions.default();
+    const options = new JsConversionOptions();
     options.escapeAsterisks = true;
     const result = convert("<p>Use 2*3 = 6 in math.</p>", options);
     expect(result.content.length).toBeGreaterThan(0);
@@ -30,7 +30,7 @@ describe('options', () => {
   });
 
   it('options_escape_misc: escape_misc option escapes miscellaneous markdown characters', () => {
-    const options = JsConversionOptions.default();
+    const options = new JsConversionOptions();
     options.escapeMisc = true;
     const result = convert("<p>Use # and | and ~ in text.</p>", options);
     expect(result.content.length).toBeGreaterThan(0);
@@ -40,7 +40,7 @@ describe('options', () => {
   });
 
   it('options_escape_underscores: escape_underscores option escapes underscores in plain text', () => {
-    const options = JsConversionOptions.default();
+    const options = new JsConversionOptions();
     options.escapeUnderscores = true;
     const result = convert("<p>The variable_name is defined.</p>", options);
     expect(result.content.length).toBeGreaterThan(0);
@@ -50,7 +50,7 @@ describe('options', () => {
   });
 
   it('options_heading_style_atx: ATX heading style produces hash-prefixed headings', () => {
-    const options = JsConversionOptions.default();
+    const options = new JsConversionOptions();
     options.headingStyle = JsHeadingStyle.Atx;
     const result = convert("<h1>Title</h1><h2>Subtitle</h2>", options);
     expect(result.content).toContain("# Title");
@@ -58,14 +58,14 @@ describe('options', () => {
   });
 
   it('options_heading_style_atx_closed: ATX closed heading style adds closing hashes', () => {
-    const options = JsConversionOptions.default();
+    const options = new JsConversionOptions();
     options.headingStyle = JsHeadingStyle.AtxClosed;
     const result = convert("<h1>Closed Heading</h1>", options);
     expect(result.content).toContain("# Closed Heading #");
   });
 
   it('options_heading_style_underlined: Underlined heading style produces setext-style headings for h1 and h2', () => {
-    const options = JsConversionOptions.default();
+    const options = new JsConversionOptions();
     options.headingStyle = JsHeadingStyle.Underlined;
     const result = convert("<h1>Main Title</h1>", options);
     expect(result.content.length).toBeGreaterThan(0);
@@ -73,7 +73,7 @@ describe('options', () => {
   });
 
   it('options_list_custom_bullets: Custom bullet character for unordered lists', () => {
-    const options = JsConversionOptions.default();
+    const options = new JsConversionOptions();
     options.bullets = "*";
     const result = convert("<ul><li>Item A</li><li>Item B</li></ul>", options);
     expect(result.content).toContain("* Item A");
@@ -81,7 +81,7 @@ describe('options', () => {
   });
 
   it('options_list_indent_tabs: Tab indentation type for nested list items', () => {
-    const options = JsConversionOptions.default();
+    const options = new JsConversionOptions();
     options.listIndentType = JsListIndentType.Tabs;
     const result = convert("<ul><li>Parent<ul><li>Child</li></ul></li></ul>", options);
     expect(result.content.length).toBeGreaterThan(0);
@@ -89,8 +89,28 @@ describe('options', () => {
     expect(result.content).toContain("Child");
   });
 
+  it('options_max_depth_default_unlimited: Default max_depth (null) converts deeply nested content fully', () => {
+    const result = convert("<div><div><div><div><p>Deep content</p></div></div></div></div>");
+    expect(result.content).toContain("Deep content");
+  });
+
+  it('options_max_depth_truncates: max_depth truncates content beyond the specified depth', () => {
+    const options = new JsConversionOptions();
+    options.maxDepth = 3;
+    const result = convert("<div><p>Shallow</p><div><div><div><p>Too deep</p></div></div></div></div>", options);
+    expect(result.content).toContain("Shallow");
+    expect(result.content).not.toContain("Too deep");
+  });
+
+  it('options_max_depth_zero_empty: max_depth of 0 produces empty output', () => {
+    const options = new JsConversionOptions();
+    options.maxDepth = 0;
+    const result = convert("<p>Hello</p>", options);
+    expect(result.content.trim()).toBe("");
+  });
+
   it('options_output_format_djot: Djot output format produces djot-compatible markup', () => {
-    const options = JsConversionOptions.default();
+    const options = new JsConversionOptions();
     options.outputFormat = JsOutputFormat.Djot;
     const result = convert("<p>Simple paragraph.</p>", options);
     expect(result.content.length).toBeGreaterThan(0);
@@ -98,7 +118,7 @@ describe('options', () => {
   });
 
   it('options_output_format_markdown: Default markdown output format produces standard markdown', () => {
-    const options = JsConversionOptions.default();
+    const options = new JsConversionOptions();
     options.headingStyle = JsHeadingStyle.Atx;
     options.outputFormat = JsOutputFormat.Markdown;
     const result = convert("<h1>Title</h1><p>Some text.</p>", options);
@@ -107,7 +127,7 @@ describe('options', () => {
   });
 
   it('options_output_format_plain: Plain text output format strips markdown syntax', () => {
-    const options = JsConversionOptions.default();
+    const options = new JsConversionOptions();
     options.outputFormat = JsOutputFormat.Plain;
     const result = convert("<h1>Title</h1><p>Some <strong>bold</strong> text.</p>", options);
     expect(result.content).toContain("Title");
@@ -116,7 +136,7 @@ describe('options', () => {
   });
 
   it('options_whitespace_normalized: Normalized whitespace mode collapses multiple spaces', () => {
-    const options = JsConversionOptions.default();
+    const options = new JsConversionOptions();
     options.whitespaceMode = JsWhitespaceMode.Normalized;
     const result = convert("<p>Text   with    extra   spaces.</p>", options);
     expect(result.content.length).toBeGreaterThan(0);
@@ -127,7 +147,7 @@ describe('options', () => {
   });
 
   it('options_whitespace_strict: Strict whitespace mode preserves whitespace as-is', () => {
-    const options = JsConversionOptions.default();
+    const options = new JsConversionOptions();
     options.whitespaceMode = JsWhitespaceMode.Strict;
     const result = convert("<p>Preserved   spacing.</p>", options);
     expect(result.content.length).toBeGreaterThan(0);
@@ -136,14 +156,14 @@ describe('options', () => {
   });
 
   it('options_wrap_disabled: Wrap option disabled preserves long lines without breaking', () => {
-    const options = JsConversionOptions.default();
+    const options = new JsConversionOptions();
     options.wrap = false;
     const result = convert("<p>This is a long paragraph that should not be wrapped at all because wrapping is disabled.</p>", options);
     expect(result.content).toContain("This is a long paragraph that should not be wrapped at all because wrapping is disabled.");
   });
 
   it('options_wrap_enabled: Wrap option enabled with custom width wraps long lines', () => {
-    const options = JsConversionOptions.default();
+    const options = new JsConversionOptions();
     options.wrap = true;
     options.wrapWidth = 40;
     const result = convert("<p>This is a long paragraph that should be wrapped at the specified column width when the wrap option is enabled.</p>", options);

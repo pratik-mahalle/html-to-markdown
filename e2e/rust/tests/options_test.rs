@@ -9,10 +9,18 @@ fn test_options_code_block_backticks() {
     let html = r#"<pre><code class="language-js">console.log('hi');</code></pre>"#;
     let options_json = serde_json::json!({"code_block_style": "Backticks"});
     let options = Some(serde_json::from_value(options_json).unwrap());
-    let result = convert(&html, options).expect("should succeed");
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
-    assert!(format!("{:?}", content).contains(r#"```"#), "expected to contain: {}", r#"```"#);
-    assert!(format!("{:?}", content).contains(r#"console.log('hi');"#), "expected to contain: {}", r#"console.log('hi');"#);
+    assert!(
+        format!("{:?}", content).contains(r#"```"#),
+        "expected to contain: {}",
+        r#"```"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"console.log('hi');"#),
+        "expected to contain: {}",
+        r#"console.log('hi');"#
+    );
 }
 
 #[test]
@@ -21,10 +29,18 @@ fn test_options_code_block_tildes() {
     let html = r#"<pre><code>some code</code></pre>"#;
     let options_json = serde_json::json!({"code_block_style": "Tildes"});
     let options = Some(serde_json::from_value(options_json).unwrap());
-    let result = convert(&html, options).expect("should succeed");
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
-    assert!(format!("{:?}", content).contains(r#"~~~"#), "expected to contain: {}", r#"~~~"#);
-    assert!(format!("{:?}", content).contains(r#"some code"#), "expected to contain: {}", r#"some code"#);
+    assert!(
+        format!("{:?}", content).contains(r#"~~~"#),
+        "expected to contain: {}",
+        r#"~~~"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"some code"#),
+        "expected to contain: {}",
+        r#"some code"#
+    );
 }
 
 #[test]
@@ -33,12 +49,24 @@ fn test_options_escape_asterisks() {
     let html = r#"<p>Use 2*3 = 6 in math.</p>"#;
     let options_json = serde_json::json!({"escape_asterisks": true});
     let options = Some(serde_json::from_value(options_json).unwrap());
-    let result = convert(&html, options).expect("should succeed");
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert!(!content.is_empty(), "expected non-empty value");
-    assert!(format!("{:?}", content).contains(r#"2"#), "expected to contain: {}", r#"2"#);
-    assert!(format!("{:?}", content).contains(r#"3"#), "expected to contain: {}", r#"3"#);
-    assert!(format!("{:?}", content).contains(r#"6"#), "expected to contain: {}", r#"6"#);
+    assert!(
+        format!("{:?}", content).contains(r#"2"#),
+        "expected to contain: {}",
+        r#"2"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"3"#),
+        "expected to contain: {}",
+        r#"3"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"6"#),
+        "expected to contain: {}",
+        r#"6"#
+    );
 }
 
 #[test]
@@ -47,12 +75,24 @@ fn test_options_escape_misc() {
     let html = r#"<p>Use # and | and ~ in text.</p>"#;
     let options_json = serde_json::json!({"escape_misc": true});
     let options = Some(serde_json::from_value(options_json).unwrap());
-    let result = convert(&html, options).expect("should succeed");
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert!(!content.is_empty(), "expected non-empty value");
-    assert!(format!("{:?}", content).contains(r#"Use"#), "expected to contain: {}", r#"Use"#);
-    assert!(format!("{:?}", content).contains(r#"and"#), "expected to contain: {}", r#"and"#);
-    assert!(format!("{:?}", content).contains(r#"in text."#), "expected to contain: {}", r#"in text."#);
+    assert!(
+        format!("{:?}", content).contains(r#"Use"#),
+        "expected to contain: {}",
+        r#"Use"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"and"#),
+        "expected to contain: {}",
+        r#"and"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"in text."#),
+        "expected to contain: {}",
+        r#"in text."#
+    );
 }
 
 #[test]
@@ -61,12 +101,24 @@ fn test_options_escape_underscores() {
     let html = r#"<p>The variable_name is defined.</p>"#;
     let options_json = serde_json::json!({"escape_underscores": true});
     let options = Some(serde_json::from_value(options_json).unwrap());
-    let result = convert(&html, options).expect("should succeed");
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert!(!content.is_empty(), "expected non-empty value");
-    assert!(format!("{:?}", content).contains(r#"variable"#), "expected to contain: {}", r#"variable"#);
-    assert!(format!("{:?}", content).contains(r#"name"#), "expected to contain: {}", r#"name"#);
-    assert!(format!("{:?}", content).contains(r#"defined."#), "expected to contain: {}", r#"defined."#);
+    assert!(
+        format!("{:?}", content).contains(r#"variable"#),
+        "expected to contain: {}",
+        r#"variable"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"name"#),
+        "expected to contain: {}",
+        r#"name"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"defined."#),
+        "expected to contain: {}",
+        r#"defined."#
+    );
 }
 
 #[test]
@@ -75,10 +127,18 @@ fn test_options_heading_style_atx() {
     let html = r#"<h1>Title</h1><h2>Subtitle</h2>"#;
     let options_json = serde_json::json!({"heading_style": "Atx"});
     let options = Some(serde_json::from_value(options_json).unwrap());
-    let result = convert(&html, options).expect("should succeed");
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
-    assert!(format!("{:?}", content).contains(r#"# Title"#), "expected to contain: {}", r#"# Title"#);
-    assert!(format!("{:?}", content).contains(r#"## Subtitle"#), "expected to contain: {}", r#"## Subtitle"#);
+    assert!(
+        format!("{:?}", content).contains(r#"# Title"#),
+        "expected to contain: {}",
+        r#"# Title"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"## Subtitle"#),
+        "expected to contain: {}",
+        r#"## Subtitle"#
+    );
 }
 
 #[test]
@@ -87,9 +147,13 @@ fn test_options_heading_style_atx_closed() {
     let html = r#"<h1>Closed Heading</h1>"#;
     let options_json = serde_json::json!({"heading_style": "AtxClosed"});
     let options = Some(serde_json::from_value(options_json).unwrap());
-    let result = convert(&html, options).expect("should succeed");
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
-    assert!(format!("{:?}", content).contains(r#"# Closed Heading #"#), "expected to contain: {}", r#"# Closed Heading #"#);
+    assert!(
+        format!("{:?}", content).contains(r#"# Closed Heading #"#),
+        "expected to contain: {}",
+        r#"# Closed Heading #"#
+    );
 }
 
 #[test]
@@ -98,10 +162,14 @@ fn test_options_heading_style_underlined() {
     let html = r#"<h1>Main Title</h1>"#;
     let options_json = serde_json::json!({"heading_style": "Underlined"});
     let options = Some(serde_json::from_value(options_json).unwrap());
-    let result = convert(&html, options).expect("should succeed");
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert!(!content.is_empty(), "expected non-empty value");
-    assert!(format!("{:?}", content).contains(r#"Main Title"#), "expected to contain: {}", r#"Main Title"#);
+    assert!(
+        format!("{:?}", content).contains(r#"Main Title"#),
+        "expected to contain: {}",
+        r#"Main Title"#
+    );
 }
 
 #[test]
@@ -110,10 +178,18 @@ fn test_options_list_custom_bullets() {
     let html = r#"<ul><li>Item A</li><li>Item B</li></ul>"#;
     let options_json = serde_json::json!({"bullets": "*"});
     let options = Some(serde_json::from_value(options_json).unwrap());
-    let result = convert(&html, options).expect("should succeed");
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
-    assert!(format!("{:?}", content).contains(r#"* Item A"#), "expected to contain: {}", r#"* Item A"#);
-    assert!(format!("{:?}", content).contains(r#"* Item B"#), "expected to contain: {}", r#"* Item B"#);
+    assert!(
+        format!("{:?}", content).contains(r#"* Item A"#),
+        "expected to contain: {}",
+        r#"* Item A"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"* Item B"#),
+        "expected to contain: {}",
+        r#"* Item B"#
+    );
 }
 
 #[test]
@@ -122,11 +198,64 @@ fn test_options_list_indent_tabs() {
     let html = r#"<ul><li>Parent<ul><li>Child</li></ul></li></ul>"#;
     let options_json = serde_json::json!({"list_indent_type": "Tabs"});
     let options = Some(serde_json::from_value(options_json).unwrap());
-    let result = convert(&html, options).expect("should succeed");
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert!(!content.is_empty(), "expected non-empty value");
-    assert!(format!("{:?}", content).contains(r#"Parent"#), "expected to contain: {}", r#"Parent"#);
-    assert!(format!("{:?}", content).contains(r#"Child"#), "expected to contain: {}", r#"Child"#);
+    assert!(
+        format!("{:?}", content).contains(r#"Parent"#),
+        "expected to contain: {}",
+        r#"Parent"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"Child"#),
+        "expected to contain: {}",
+        r#"Child"#
+    );
+}
+
+#[test]
+fn test_options_max_depth_default_unlimited() {
+    // Default max_depth (null) converts deeply nested content fully
+    let html = r#"<div><div><div><div><p>Deep content</p></div></div></div></div>"#;
+    let options = Default::default();
+    let result = convert(&html, &options).expect("should succeed");
+    let content = result.content.as_deref().unwrap_or("");
+    assert!(
+        format!("{:?}", content).contains(r#"Deep content"#),
+        "expected to contain: {}",
+        r#"Deep content"#
+    );
+}
+
+#[test]
+fn test_options_max_depth_truncates() {
+    // max_depth truncates content beyond the specified depth
+    let html = r#"<div><p>Shallow</p><div><div><div><p>Too deep</p></div></div></div></div>"#;
+    let options_json = serde_json::json!({"max_depth": 3});
+    let options = Some(serde_json::from_value(options_json).unwrap());
+    let result = convert(&html, &options).expect("should succeed");
+    let content = result.content.as_deref().unwrap_or("");
+    assert!(
+        format!("{:?}", content).contains(r#"Shallow"#),
+        "expected to contain: {}",
+        r#"Shallow"#
+    );
+    assert!(
+        !format!("{:?}", content).contains(r#"Too deep"#),
+        "expected NOT to contain: {}",
+        r#"Too deep"#
+    );
+}
+
+#[test]
+fn test_options_max_depth_zero_empty() {
+    // max_depth of 0 produces empty output
+    let html = r#"<p>Hello</p>"#;
+    let options_json = serde_json::json!({"max_depth": 0});
+    let options = Some(serde_json::from_value(options_json).unwrap());
+    let result = convert(&html, &options).expect("should succeed");
+    let content = result.content.as_deref().unwrap_or("");
+    assert_eq!(content.trim(), r#""#, "equals assertion failed");
 }
 
 #[test]
@@ -135,10 +264,14 @@ fn test_options_output_format_djot() {
     let html = r#"<p>Simple paragraph.</p>"#;
     let options_json = serde_json::json!({"output_format": "Djot"});
     let options = Some(serde_json::from_value(options_json).unwrap());
-    let result = convert(&html, options).expect("should succeed");
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert!(!content.is_empty(), "expected non-empty value");
-    assert!(format!("{:?}", content).contains(r#"Simple paragraph."#), "expected to contain: {}", r#"Simple paragraph."#);
+    assert!(
+        format!("{:?}", content).contains(r#"Simple paragraph."#),
+        "expected to contain: {}",
+        r#"Simple paragraph."#
+    );
 }
 
 #[test]
@@ -147,10 +280,18 @@ fn test_options_output_format_markdown() {
     let html = r#"<h1>Title</h1><p>Some text.</p>"#;
     let options_json = serde_json::json!({"heading_style": "Atx", "output_format": "Markdown"});
     let options = Some(serde_json::from_value(options_json).unwrap());
-    let result = convert(&html, options).expect("should succeed");
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
-    assert!(format!("{:?}", content).contains(r#"# Title"#), "expected to contain: {}", r#"# Title"#);
-    assert!(format!("{:?}", content).contains(r#"Some text."#), "expected to contain: {}", r#"Some text."#);
+    assert!(
+        format!("{:?}", content).contains(r#"# Title"#),
+        "expected to contain: {}",
+        r#"# Title"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"Some text."#),
+        "expected to contain: {}",
+        r#"Some text."#
+    );
 }
 
 #[test]
@@ -159,11 +300,23 @@ fn test_options_output_format_plain() {
     let html = r#"<h1>Title</h1><p>Some <strong>bold</strong> text.</p>"#;
     let options_json = serde_json::json!({"output_format": "Plain"});
     let options = Some(serde_json::from_value(options_json).unwrap());
-    let result = convert(&html, options).expect("should succeed");
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
-    assert!(format!("{:?}", content).contains(r#"Title"#), "expected to contain: {}", r#"Title"#);
-    assert!(format!("{:?}", content).contains(r#"bold"#), "expected to contain: {}", r#"bold"#);
-    assert!(format!("{:?}", content).contains(r#"text."#), "expected to contain: {}", r#"text."#);
+    assert!(
+        format!("{:?}", content).contains(r#"Title"#),
+        "expected to contain: {}",
+        r#"Title"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"bold"#),
+        "expected to contain: {}",
+        r#"bold"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"text."#),
+        "expected to contain: {}",
+        r#"text."#
+    );
 }
 
 #[test]
@@ -172,13 +325,29 @@ fn test_options_whitespace_normalized() {
     let html = r#"<p>Text   with    extra   spaces.</p>"#;
     let options_json = serde_json::json!({"whitespace_mode": "Normalized"});
     let options = Some(serde_json::from_value(options_json).unwrap());
-    let result = convert(&html, options).expect("should succeed");
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert!(!content.is_empty(), "expected non-empty value");
-    assert!(format!("{:?}", content).contains(r#"Text"#), "expected to contain: {}", r#"Text"#);
-    assert!(format!("{:?}", content).contains(r#"with"#), "expected to contain: {}", r#"with"#);
-    assert!(format!("{:?}", content).contains(r#"extra"#), "expected to contain: {}", r#"extra"#);
-    assert!(format!("{:?}", content).contains(r#"spaces."#), "expected to contain: {}", r#"spaces."#);
+    assert!(
+        format!("{:?}", content).contains(r#"Text"#),
+        "expected to contain: {}",
+        r#"Text"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"with"#),
+        "expected to contain: {}",
+        r#"with"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"extra"#),
+        "expected to contain: {}",
+        r#"extra"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"spaces."#),
+        "expected to contain: {}",
+        r#"spaces."#
+    );
 }
 
 #[test]
@@ -187,11 +356,19 @@ fn test_options_whitespace_strict() {
     let html = r#"<p>Preserved   spacing.</p>"#;
     let options_json = serde_json::json!({"whitespace_mode": "Strict"});
     let options = Some(serde_json::from_value(options_json).unwrap());
-    let result = convert(&html, options).expect("should succeed");
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert!(!content.is_empty(), "expected non-empty value");
-    assert!(format!("{:?}", content).contains(r#"Preserved"#), "expected to contain: {}", r#"Preserved"#);
-    assert!(format!("{:?}", content).contains(r#"spacing."#), "expected to contain: {}", r#"spacing."#);
+    assert!(
+        format!("{:?}", content).contains(r#"Preserved"#),
+        "expected to contain: {}",
+        r#"Preserved"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"spacing."#),
+        "expected to contain: {}",
+        r#"spacing."#
+    );
 }
 
 #[test]
@@ -200,9 +377,14 @@ fn test_options_wrap_disabled() {
     let html = r#"<p>This is a long paragraph that should not be wrapped at all because wrapping is disabled.</p>"#;
     let options_json = serde_json::json!({"wrap": false});
     let options = Some(serde_json::from_value(options_json).unwrap());
-    let result = convert(&html, options).expect("should succeed");
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
-    assert!(format!("{:?}", content).contains(r#"This is a long paragraph that should not be wrapped at all because wrapping is disabled."#), "expected to contain: {}", r#"This is a long paragraph that should not be wrapped at all because wrapping is disabled."#);
+    assert!(
+        format!("{:?}", content)
+            .contains(r#"This is a long paragraph that should not be wrapped at all because wrapping is disabled."#),
+        "expected to contain: {}",
+        r#"This is a long paragraph that should not be wrapped at all because wrapping is disabled."#
+    );
 }
 
 #[test]
@@ -211,8 +393,12 @@ fn test_options_wrap_enabled() {
     let html = r#"<p>This is a long paragraph that should be wrapped at the specified column width when the wrap option is enabled.</p>"#;
     let options_json = serde_json::json!({"wrap": true, "wrap_width": 40});
     let options = Some(serde_json::from_value(options_json).unwrap());
-    let result = convert(&html, options).expect("should succeed");
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert!(!content.is_empty(), "expected non-empty value");
-    assert!(format!("{:?}", content).contains(r#"This is a long paragraph"#), "expected to contain: {}", r#"This is a long paragraph"#);
+    assert!(
+        format!("{:?}", content).contains(r#"This is a long paragraph"#),
+        "expected to contain: {}",
+        r#"This is a long paragraph"#
+    );
 }

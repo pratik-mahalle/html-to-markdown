@@ -109,6 +109,31 @@ public class OptionsTests
     }
 
     [Fact]
+    public void Test_OptionsMaxDepthDefaultUnlimited()
+    {
+        // Default max_depth (null) converts deeply nested content fully
+        var result = HtmlToMarkdownRs.Convert("<div><div><div><div><p>Deep content</p></div></div></div></div>", null);
+        Assert.Contains("deep content", result.Content.ToString().ToLower());
+    }
+
+    [Fact]
+    public void Test_OptionsMaxDepthTruncates()
+    {
+        // max_depth truncates content beyond the specified depth
+        var result = HtmlToMarkdownRs.Convert("<div><p>Shallow</p><div><div><div><p>Too deep</p></div></div></div></div>", new ConversionOptions { MaxDepth = 3 });
+        Assert.Contains("shallow", result.Content.ToString().ToLower());
+        Assert.DoesNotContain("Too deep", result.Content.ToString());
+    }
+
+    [Fact]
+    public void Test_OptionsMaxDepthZeroEmpty()
+    {
+        // max_depth of 0 produces empty output
+        var result = HtmlToMarkdownRs.Convert("<p>Hello</p>", new ConversionOptions { MaxDepth = 0 });
+        Assert.Equal("", result.Content.Trim());
+    }
+
+    [Fact]
     public void Test_OptionsOutputFormatDjot()
     {
         // Djot output format produces djot-compatible markup

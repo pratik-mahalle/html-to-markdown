@@ -9,10 +9,17 @@ fn test_structure_code_block() {
     let html = r#"<p>Example code:</p><pre><code class="language-rust">fn main() { println!("Hello"); }</code></pre>"#;
     let options_json = serde_json::json!({"include_document_structure": true});
     let options = Some(serde_json::from_value(options_json).unwrap());
-    let result = convert(&html, options).expect("should succeed");
+    let result = convert(&html, &options).expect("should succeed");
     assert!(result.content.is_some(), "expected content to be present");
-    assert!(!result.document.as_ref().unwrap().nodes.is_empty(), "expected non-empty value");
-    assert!(result.document.as_ref().unwrap().nodes.len() >= 2, "expected at least 2 elements, got {}", result.document.as_ref().unwrap().nodes.len());
+    assert!(
+        !result.document.as_ref().unwrap().nodes.is_empty(),
+        "expected non-empty value"
+    );
+    assert!(
+        result.document.as_ref().unwrap().nodes.len() >= 2,
+        "expected at least 2 elements, got {}",
+        result.document.as_ref().unwrap().nodes.len()
+    );
 }
 
 #[test]
@@ -21,10 +28,17 @@ fn test_structure_deep_nesting_h1_h2_h3() {
     let html = r#"<h1>Top Level</h1><p>Top intro.</p><h2>Mid Level</h2><p>Mid content.</p><h3>Deep Level</h3><p>Deep content.</p>"#;
     let options_json = serde_json::json!({"include_document_structure": true});
     let options = Some(serde_json::from_value(options_json).unwrap());
-    let result = convert(&html, options).expect("should succeed");
+    let result = convert(&html, &options).expect("should succeed");
     assert!(result.content.is_some(), "expected content to be present");
-    assert!(!result.document.as_ref().unwrap().nodes.is_empty(), "expected non-empty value");
-    assert!(result.document.as_ref().unwrap().nodes.len() >= 5, "expected at least 5 elements, got {}", result.document.as_ref().unwrap().nodes.len());
+    assert!(
+        !result.document.as_ref().unwrap().nodes.is_empty(),
+        "expected non-empty value"
+    );
+    assert!(
+        result.document.as_ref().unwrap().nodes.len() >= 5,
+        "expected at least 5 elements, got {}",
+        result.document.as_ref().unwrap().nodes.len()
+    );
 }
 
 #[test]
@@ -33,10 +47,17 @@ fn test_structure_h1_h2_nested_group() {
     let html = r#"<h1>Chapter One</h1><p>Chapter intro.</p><h2>Section One</h2><p>Section content.</p>"#;
     let options_json = serde_json::json!({"include_document_structure": true});
     let options = Some(serde_json::from_value(options_json).unwrap());
-    let result = convert(&html, options).expect("should succeed");
+    let result = convert(&html, &options).expect("should succeed");
     assert!(result.content.is_some(), "expected content to be present");
-    assert!(!result.document.as_ref().unwrap().nodes.is_empty(), "expected non-empty value");
-    assert!(result.document.as_ref().unwrap().nodes.len() >= 3, "expected at least 3 elements, got {}", result.document.as_ref().unwrap().nodes.len());
+    assert!(
+        !result.document.as_ref().unwrap().nodes.is_empty(),
+        "expected non-empty value"
+    );
+    assert!(
+        result.document.as_ref().unwrap().nodes.len() >= 3,
+        "expected at least 3 elements, got {}",
+        result.document.as_ref().unwrap().nodes.len()
+    );
 }
 
 #[test]
@@ -45,10 +66,17 @@ fn test_structure_heading_paragraph() {
     let html = r#"<h1>Title</h1><p>A paragraph of text.</p>"#;
     let options_json = serde_json::json!({"include_document_structure": true});
     let options = Some(serde_json::from_value(options_json).unwrap());
-    let result = convert(&html, options).expect("should succeed");
+    let result = convert(&html, &options).expect("should succeed");
     assert!(result.content.is_some(), "expected content to be present");
-    assert!(!result.document.as_ref().unwrap().nodes.is_empty(), "expected non-empty value");
-    assert!(result.document.as_ref().unwrap().nodes.len() >= 2, "expected at least 2 elements, got {}", result.document.as_ref().unwrap().nodes.len());
+    assert!(
+        !result.document.as_ref().unwrap().nodes.is_empty(),
+        "expected non-empty value"
+    );
+    assert!(
+        result.document.as_ref().unwrap().nodes.len() >= 2,
+        "expected at least 2 elements, got {}",
+        result.document.as_ref().unwrap().nodes.len()
+    );
 }
 
 #[test]
@@ -57,10 +85,17 @@ fn test_structure_list() {
     let html = r#"<p>Items:</p><ul><li>Alpha</li><li>Beta</li><li>Gamma</li></ul>"#;
     let options_json = serde_json::json!({"include_document_structure": true});
     let options = Some(serde_json::from_value(options_json).unwrap());
-    let result = convert(&html, options).expect("should succeed");
+    let result = convert(&html, &options).expect("should succeed");
     assert!(result.content.is_some(), "expected content to be present");
-    assert!(!result.document.as_ref().unwrap().nodes.is_empty(), "expected non-empty value");
-    assert!(result.document.as_ref().unwrap().nodes.len() >= 2, "expected at least 2 elements, got {}", result.document.as_ref().unwrap().nodes.len());
+    assert!(
+        !result.document.as_ref().unwrap().nodes.is_empty(),
+        "expected non-empty value"
+    );
+    assert!(
+        result.document.as_ref().unwrap().nodes.len() >= 2,
+        "expected at least 2 elements, got {}",
+        result.document.as_ref().unwrap().nodes.len()
+    );
 }
 
 #[test]
@@ -69,10 +104,17 @@ fn test_structure_multiple_headings() {
     let html = r#"<h1>Main Title</h1><h2>Section One</h2><p>Section one content.</p><h2>Section Two</h2><p>Section two content.</p>"#;
     let options_json = serde_json::json!({"include_document_structure": true});
     let options = Some(serde_json::from_value(options_json).unwrap());
-    let result = convert(&html, options).expect("should succeed");
+    let result = convert(&html, &options).expect("should succeed");
     assert!(result.content.is_some(), "expected content to be present");
-    assert!(!result.document.as_ref().unwrap().nodes.is_empty(), "expected non-empty value");
-    assert!(result.document.as_ref().unwrap().nodes.len() >= 4, "expected at least 4 elements, got {}", result.document.as_ref().unwrap().nodes.len());
+    assert!(
+        !result.document.as_ref().unwrap().nodes.is_empty(),
+        "expected non-empty value"
+    );
+    assert!(
+        result.document.as_ref().unwrap().nodes.len() >= 4,
+        "expected at least 4 elements, got {}",
+        result.document.as_ref().unwrap().nodes.len()
+    );
 }
 
 #[test]
@@ -81,8 +123,15 @@ fn test_structure_sibling_h1_groups() {
     let html = r#"<h1>Chapter One</h1><h2>Section A</h2><p>Section A content.</p><h1>Chapter Two</h1><h2>Section B</h2><p>Section B content.</p>"#;
     let options_json = serde_json::json!({"include_document_structure": true});
     let options = Some(serde_json::from_value(options_json).unwrap());
-    let result = convert(&html, options).expect("should succeed");
+    let result = convert(&html, &options).expect("should succeed");
     assert!(result.content.is_some(), "expected content to be present");
-    assert!(!result.document.as_ref().unwrap().nodes.is_empty(), "expected non-empty value");
-    assert!(result.document.as_ref().unwrap().nodes.len() >= 4, "expected at least 4 elements, got {}", result.document.as_ref().unwrap().nodes.len());
+    assert!(
+        !result.document.as_ref().unwrap().nodes.is_empty(),
+        "expected non-empty value"
+    );
+    assert!(
+        result.document.as_ref().unwrap().nodes.len() >= 4,
+        "expected at least 4 elements, got {}",
+        result.document.as_ref().unwrap().nodes.len()
+    );
 }

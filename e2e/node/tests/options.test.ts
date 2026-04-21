@@ -69,6 +69,22 @@ describe('options', () => {
     expect(result.content).toContain("Child");
   });
 
+  it('options_max_depth_default_unlimited: Default max_depth (null) converts deeply nested content fully', () => {
+    const result = convert("<div><div><div><div><p>Deep content</p></div></div></div></div>");
+    expect(result.content ?? "").toContain("Deep content");
+  });
+
+  it('options_max_depth_truncates: max_depth truncates content beyond the specified depth', () => {
+    const result = convert("<div><p>Shallow</p><div><div><div><p>Too deep</p></div></div></div></div>", { maxDepth: 3 } as ConversionOptions);
+    expect(result.content ?? "").toContain("Shallow");
+    expect(result.content).not.toContain("Too deep");
+  });
+
+  it('options_max_depth_zero_empty: max_depth of 0 produces empty output', () => {
+    const result = convert("<p>Hello</p>", { maxDepth: 0 } as ConversionOptions);
+    expect((result.content ?? "").trim()).toBe("");
+  });
+
   it('options_output_format_djot: Djot output format produces djot-compatible markup', () => {
     const result = convert("<p>Simple paragraph.</p>", { outputFormat: "Djot" } as ConversionOptions);
     expect((result.content ?? "").length).toBeGreaterThan(0);

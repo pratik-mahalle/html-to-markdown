@@ -11,185 +11,220 @@
 void test_options_code_block_backticks(void) {
     /* Backticks code block style uses triple backtick fences */
     HTMConversionOptions* options_handle = htm_conversion_options_from_json("{\"code_block_style\":\"Backticks\"}");
-    HTMConversionResult* result = htm_convert("<pre><code class=\"language-js\">console.log('hi');</code></pre>", options_handle);
+    HTMHtmConvert* result = htm_convert("<pre><code class=\"language-js\">console.log('hi');</code></pre>", options_handle);
     assert(result != NULL && "expected call to succeed");
-    char* content = htm_conversion_result_content(result);
+    char* content = htm_htm_convert_content(result);
     assert(strstr(content, "```") != NULL && "expected to contain substring");
     assert(strstr(content, "console.log('hi');") != NULL && "expected to contain substring");
     htm_free_string(content);
     htm_conversion_options_free(options_handle);
-    htm_conversion_result_free(result);
+    htm_htm_convert_free(result);
 }
 
 void test_options_code_block_tildes(void) {
     /* Tildes code block style uses triple tilde fences */
     HTMConversionOptions* options_handle = htm_conversion_options_from_json("{\"code_block_style\":\"Tildes\"}");
-    HTMConversionResult* result = htm_convert("<pre><code>some code</code></pre>", options_handle);
+    HTMHtmConvert* result = htm_convert("<pre><code>some code</code></pre>", options_handle);
     assert(result != NULL && "expected call to succeed");
-    char* content = htm_conversion_result_content(result);
+    char* content = htm_htm_convert_content(result);
     assert(strstr(content, "~~~") != NULL && "expected to contain substring");
     assert(strstr(content, "some code") != NULL && "expected to contain substring");
     htm_free_string(content);
     htm_conversion_options_free(options_handle);
-    htm_conversion_result_free(result);
+    htm_htm_convert_free(result);
 }
 
 void test_options_escape_asterisks(void) {
     /* escape_asterisks option escapes asterisks in plain text */
     HTMConversionOptions* options_handle = htm_conversion_options_from_json("{\"escape_asterisks\":true}");
-    HTMConversionResult* result = htm_convert("<p>Use 2*3 = 6 in math.</p>", options_handle);
+    HTMHtmConvert* result = htm_convert("<p>Use 2*3 = 6 in math.</p>", options_handle);
     assert(result != NULL && "expected call to succeed");
-    char* content = htm_conversion_result_content(result);
+    char* content = htm_htm_convert_content(result);
     assert(strlen(content) > 0 && "expected non-empty value");
     assert(strstr(content, "2") != NULL && "expected to contain substring");
     assert(strstr(content, "3") != NULL && "expected to contain substring");
     assert(strstr(content, "6") != NULL && "expected to contain substring");
     htm_free_string(content);
     htm_conversion_options_free(options_handle);
-    htm_conversion_result_free(result);
+    htm_htm_convert_free(result);
 }
 
 void test_options_escape_misc(void) {
     /* escape_misc option escapes miscellaneous markdown characters */
     HTMConversionOptions* options_handle = htm_conversion_options_from_json("{\"escape_misc\":true}");
-    HTMConversionResult* result = htm_convert("<p>Use # and | and ~ in text.</p>", options_handle);
+    HTMHtmConvert* result = htm_convert("<p>Use # and | and ~ in text.</p>", options_handle);
     assert(result != NULL && "expected call to succeed");
-    char* content = htm_conversion_result_content(result);
+    char* content = htm_htm_convert_content(result);
     assert(strlen(content) > 0 && "expected non-empty value");
     assert(strstr(content, "Use") != NULL && "expected to contain substring");
     assert(strstr(content, "and") != NULL && "expected to contain substring");
     assert(strstr(content, "in text.") != NULL && "expected to contain substring");
     htm_free_string(content);
     htm_conversion_options_free(options_handle);
-    htm_conversion_result_free(result);
+    htm_htm_convert_free(result);
 }
 
 void test_options_escape_underscores(void) {
     /* escape_underscores option escapes underscores in plain text */
     HTMConversionOptions* options_handle = htm_conversion_options_from_json("{\"escape_underscores\":true}");
-    HTMConversionResult* result = htm_convert("<p>The variable_name is defined.</p>", options_handle);
+    HTMHtmConvert* result = htm_convert("<p>The variable_name is defined.</p>", options_handle);
     assert(result != NULL && "expected call to succeed");
-    char* content = htm_conversion_result_content(result);
+    char* content = htm_htm_convert_content(result);
     assert(strlen(content) > 0 && "expected non-empty value");
     assert(strstr(content, "variable") != NULL && "expected to contain substring");
     assert(strstr(content, "name") != NULL && "expected to contain substring");
     assert(strstr(content, "defined.") != NULL && "expected to contain substring");
     htm_free_string(content);
     htm_conversion_options_free(options_handle);
-    htm_conversion_result_free(result);
+    htm_htm_convert_free(result);
 }
 
 void test_options_heading_style_atx(void) {
     /* ATX heading style produces hash-prefixed headings */
     HTMConversionOptions* options_handle = htm_conversion_options_from_json("{\"heading_style\":\"Atx\"}");
-    HTMConversionResult* result = htm_convert("<h1>Title</h1><h2>Subtitle</h2>", options_handle);
+    HTMHtmConvert* result = htm_convert("<h1>Title</h1><h2>Subtitle</h2>", options_handle);
     assert(result != NULL && "expected call to succeed");
-    char* content = htm_conversion_result_content(result);
+    char* content = htm_htm_convert_content(result);
     assert(strstr(content, "# Title") != NULL && "expected to contain substring");
     assert(strstr(content, "## Subtitle") != NULL && "expected to contain substring");
     htm_free_string(content);
     htm_conversion_options_free(options_handle);
-    htm_conversion_result_free(result);
+    htm_htm_convert_free(result);
 }
 
 void test_options_heading_style_atx_closed(void) {
     /* ATX closed heading style adds closing hashes */
     HTMConversionOptions* options_handle = htm_conversion_options_from_json("{\"heading_style\":\"AtxClosed\"}");
-    HTMConversionResult* result = htm_convert("<h1>Closed Heading</h1>", options_handle);
+    HTMHtmConvert* result = htm_convert("<h1>Closed Heading</h1>", options_handle);
     assert(result != NULL && "expected call to succeed");
-    char* content = htm_conversion_result_content(result);
+    char* content = htm_htm_convert_content(result);
     assert(strstr(content, "# Closed Heading #") != NULL && "expected to contain substring");
     htm_free_string(content);
     htm_conversion_options_free(options_handle);
-    htm_conversion_result_free(result);
+    htm_htm_convert_free(result);
 }
 
 void test_options_heading_style_underlined(void) {
     /* Underlined heading style produces setext-style headings for h1 and h2 */
     HTMConversionOptions* options_handle = htm_conversion_options_from_json("{\"heading_style\":\"Underlined\"}");
-    HTMConversionResult* result = htm_convert("<h1>Main Title</h1>", options_handle);
+    HTMHtmConvert* result = htm_convert("<h1>Main Title</h1>", options_handle);
     assert(result != NULL && "expected call to succeed");
-    char* content = htm_conversion_result_content(result);
+    char* content = htm_htm_convert_content(result);
     assert(strlen(content) > 0 && "expected non-empty value");
     assert(strstr(content, "Main Title") != NULL && "expected to contain substring");
     htm_free_string(content);
     htm_conversion_options_free(options_handle);
-    htm_conversion_result_free(result);
+    htm_htm_convert_free(result);
 }
 
 void test_options_list_custom_bullets(void) {
     /* Custom bullet character for unordered lists */
     HTMConversionOptions* options_handle = htm_conversion_options_from_json("{\"bullets\":\"*\"}");
-    HTMConversionResult* result = htm_convert("<ul><li>Item A</li><li>Item B</li></ul>", options_handle);
+    HTMHtmConvert* result = htm_convert("<ul><li>Item A</li><li>Item B</li></ul>", options_handle);
     assert(result != NULL && "expected call to succeed");
-    char* content = htm_conversion_result_content(result);
+    char* content = htm_htm_convert_content(result);
     assert(strstr(content, "* Item A") != NULL && "expected to contain substring");
     assert(strstr(content, "* Item B") != NULL && "expected to contain substring");
     htm_free_string(content);
     htm_conversion_options_free(options_handle);
-    htm_conversion_result_free(result);
+    htm_htm_convert_free(result);
 }
 
 void test_options_list_indent_tabs(void) {
     /* Tab indentation type for nested list items */
     HTMConversionOptions* options_handle = htm_conversion_options_from_json("{\"list_indent_type\":\"Tabs\"}");
-    HTMConversionResult* result = htm_convert("<ul><li>Parent<ul><li>Child</li></ul></li></ul>", options_handle);
+    HTMHtmConvert* result = htm_convert("<ul><li>Parent<ul><li>Child</li></ul></li></ul>", options_handle);
     assert(result != NULL && "expected call to succeed");
-    char* content = htm_conversion_result_content(result);
+    char* content = htm_htm_convert_content(result);
     assert(strlen(content) > 0 && "expected non-empty value");
     assert(strstr(content, "Parent") != NULL && "expected to contain substring");
     assert(strstr(content, "Child") != NULL && "expected to contain substring");
     htm_free_string(content);
     htm_conversion_options_free(options_handle);
-    htm_conversion_result_free(result);
+    htm_htm_convert_free(result);
+}
+
+void test_options_max_depth_default_unlimited(void) {
+    /* Default max_depth (null) converts deeply nested content fully */
+    HTMHtmConvert* result = htm_convert("<div><div><div><div><p>Deep content</p></div></div></div></div>", NULL);
+    assert(result != NULL && "expected call to succeed");
+    char* content = htm_htm_convert_content(result);
+    assert(strstr(content, "Deep content") != NULL && "expected to contain substring");
+    htm_free_string(content);
+    htm_htm_convert_free(result);
+}
+
+void test_options_max_depth_truncates(void) {
+    /* max_depth truncates content beyond the specified depth */
+    HTMConversionOptions* options_handle = htm_conversion_options_from_json("{\"max_depth\":3}");
+    HTMHtmConvert* result = htm_convert("<div><p>Shallow</p><div><div><div><p>Too deep</p></div></div></div></div>", options_handle);
+    assert(result != NULL && "expected call to succeed");
+    char* content = htm_htm_convert_content(result);
+    assert(strstr(content, "Shallow") != NULL && "expected to contain substring");
+    assert(strstr(content, "Too deep") == NULL && "expected NOT to contain substring");
+    htm_free_string(content);
+    htm_conversion_options_free(options_handle);
+    htm_htm_convert_free(result);
+}
+
+void test_options_max_depth_zero_empty(void) {
+    /* max_depth of 0 produces empty output */
+    HTMConversionOptions* options_handle = htm_conversion_options_from_json("{\"max_depth\":0}");
+    HTMHtmConvert* result = htm_convert("<p>Hello</p>", options_handle);
+    assert(result != NULL && "expected call to succeed");
+    char* content = htm_htm_convert_content(result);
+    assert(str_trim_eq(content, "") == 0 && "equals assertion failed");
+    htm_free_string(content);
+    htm_conversion_options_free(options_handle);
+    htm_htm_convert_free(result);
 }
 
 void test_options_output_format_djot(void) {
     /* Djot output format produces djot-compatible markup */
     HTMConversionOptions* options_handle = htm_conversion_options_from_json("{\"output_format\":\"Djot\"}");
-    HTMConversionResult* result = htm_convert("<p>Simple paragraph.</p>", options_handle);
+    HTMHtmConvert* result = htm_convert("<p>Simple paragraph.</p>", options_handle);
     assert(result != NULL && "expected call to succeed");
-    char* content = htm_conversion_result_content(result);
+    char* content = htm_htm_convert_content(result);
     assert(strlen(content) > 0 && "expected non-empty value");
     assert(strstr(content, "Simple paragraph.") != NULL && "expected to contain substring");
     htm_free_string(content);
     htm_conversion_options_free(options_handle);
-    htm_conversion_result_free(result);
+    htm_htm_convert_free(result);
 }
 
 void test_options_output_format_markdown(void) {
     /* Default markdown output format produces standard markdown */
     HTMConversionOptions* options_handle = htm_conversion_options_from_json("{\"heading_style\":\"Atx\",\"output_format\":\"Markdown\"}");
-    HTMConversionResult* result = htm_convert("<h1>Title</h1><p>Some text.</p>", options_handle);
+    HTMHtmConvert* result = htm_convert("<h1>Title</h1><p>Some text.</p>", options_handle);
     assert(result != NULL && "expected call to succeed");
-    char* content = htm_conversion_result_content(result);
+    char* content = htm_htm_convert_content(result);
     assert(strstr(content, "# Title") != NULL && "expected to contain substring");
     assert(strstr(content, "Some text.") != NULL && "expected to contain substring");
     htm_free_string(content);
     htm_conversion_options_free(options_handle);
-    htm_conversion_result_free(result);
+    htm_htm_convert_free(result);
 }
 
 void test_options_output_format_plain(void) {
     /* Plain text output format strips markdown syntax */
     HTMConversionOptions* options_handle = htm_conversion_options_from_json("{\"output_format\":\"Plain\"}");
-    HTMConversionResult* result = htm_convert("<h1>Title</h1><p>Some <strong>bold</strong> text.</p>", options_handle);
+    HTMHtmConvert* result = htm_convert("<h1>Title</h1><p>Some <strong>bold</strong> text.</p>", options_handle);
     assert(result != NULL && "expected call to succeed");
-    char* content = htm_conversion_result_content(result);
+    char* content = htm_htm_convert_content(result);
     assert(strstr(content, "Title") != NULL && "expected to contain substring");
     assert(strstr(content, "bold") != NULL && "expected to contain substring");
     assert(strstr(content, "text.") != NULL && "expected to contain substring");
     htm_free_string(content);
     htm_conversion_options_free(options_handle);
-    htm_conversion_result_free(result);
+    htm_htm_convert_free(result);
 }
 
 void test_options_whitespace_normalized(void) {
     /* Normalized whitespace mode collapses multiple spaces */
     HTMConversionOptions* options_handle = htm_conversion_options_from_json("{\"whitespace_mode\":\"Normalized\"}");
-    HTMConversionResult* result = htm_convert("<p>Text   with    extra   spaces.</p>", options_handle);
+    HTMHtmConvert* result = htm_convert("<p>Text   with    extra   spaces.</p>", options_handle);
     assert(result != NULL && "expected call to succeed");
-    char* content = htm_conversion_result_content(result);
+    char* content = htm_htm_convert_content(result);
     assert(strlen(content) > 0 && "expected non-empty value");
     assert(strstr(content, "Text") != NULL && "expected to contain substring");
     assert(strstr(content, "with") != NULL && "expected to contain substring");
@@ -197,44 +232,44 @@ void test_options_whitespace_normalized(void) {
     assert(strstr(content, "spaces.") != NULL && "expected to contain substring");
     htm_free_string(content);
     htm_conversion_options_free(options_handle);
-    htm_conversion_result_free(result);
+    htm_htm_convert_free(result);
 }
 
 void test_options_whitespace_strict(void) {
     /* Strict whitespace mode preserves whitespace as-is */
     HTMConversionOptions* options_handle = htm_conversion_options_from_json("{\"whitespace_mode\":\"Strict\"}");
-    HTMConversionResult* result = htm_convert("<p>Preserved   spacing.</p>", options_handle);
+    HTMHtmConvert* result = htm_convert("<p>Preserved   spacing.</p>", options_handle);
     assert(result != NULL && "expected call to succeed");
-    char* content = htm_conversion_result_content(result);
+    char* content = htm_htm_convert_content(result);
     assert(strlen(content) > 0 && "expected non-empty value");
     assert(strstr(content, "Preserved") != NULL && "expected to contain substring");
     assert(strstr(content, "spacing.") != NULL && "expected to contain substring");
     htm_free_string(content);
     htm_conversion_options_free(options_handle);
-    htm_conversion_result_free(result);
+    htm_htm_convert_free(result);
 }
 
 void test_options_wrap_disabled(void) {
     /* Wrap option disabled preserves long lines without breaking */
     HTMConversionOptions* options_handle = htm_conversion_options_from_json("{\"wrap\":false}");
-    HTMConversionResult* result = htm_convert("<p>This is a long paragraph that should not be wrapped at all because wrapping is disabled.</p>", options_handle);
+    HTMHtmConvert* result = htm_convert("<p>This is a long paragraph that should not be wrapped at all because wrapping is disabled.</p>", options_handle);
     assert(result != NULL && "expected call to succeed");
-    char* content = htm_conversion_result_content(result);
+    char* content = htm_htm_convert_content(result);
     assert(strstr(content, "This is a long paragraph that should not be wrapped at all because wrapping is disabled.") != NULL && "expected to contain substring");
     htm_free_string(content);
     htm_conversion_options_free(options_handle);
-    htm_conversion_result_free(result);
+    htm_htm_convert_free(result);
 }
 
 void test_options_wrap_enabled(void) {
     /* Wrap option enabled with custom width wraps long lines */
     HTMConversionOptions* options_handle = htm_conversion_options_from_json("{\"wrap\":true,\"wrap_width\":40}");
-    HTMConversionResult* result = htm_convert("<p>This is a long paragraph that should be wrapped at the specified column width when the wrap option is enabled.</p>", options_handle);
+    HTMHtmConvert* result = htm_convert("<p>This is a long paragraph that should be wrapped at the specified column width when the wrap option is enabled.</p>", options_handle);
     assert(result != NULL && "expected call to succeed");
-    char* content = htm_conversion_result_content(result);
+    char* content = htm_htm_convert_content(result);
     assert(strlen(content) > 0 && "expected non-empty value");
     assert(strstr(content, "This is a long paragraph") != NULL && "expected to contain substring");
     htm_free_string(content);
     htm_conversion_options_free(options_handle);
-    htm_conversion_result_free(result);
+    htm_htm_convert_free(result);
 }

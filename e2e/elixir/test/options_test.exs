@@ -109,6 +109,32 @@ defmodule E2e.OptionsTest do
     end
   end
 
+  describe "options_max_depth_default_unlimited" do
+    test "Default max_depth (null) converts deeply nested content fully" do
+      {:ok, result} = HtmlToMarkdown.convert("<div><div><div><div><p>Deep content</p></div></div></div></div>")
+      assert String.contains?(to_string(result.content), "Deep content")
+    end
+  end
+
+  describe "options_max_depth_truncates" do
+    test "max_depth truncates content beyond the specified depth" do
+      options = HtmlToMarkdown.conversionoptions_default()
+      options = %{options | max_depth: 3}
+      {:ok, result} = HtmlToMarkdown.convert("<div><p>Shallow</p><div><div><div><p>Too deep</p></div></div></div></div>", options)
+      assert String.contains?(to_string(result.content), "Shallow")
+      refute String.contains?(to_string(result.content), "Too deep")
+    end
+  end
+
+  describe "options_max_depth_zero_empty" do
+    test "max_depth of 0 produces empty output" do
+      options = HtmlToMarkdown.conversionoptions_default()
+      options = %{options | max_depth: 0}
+      {:ok, result} = HtmlToMarkdown.convert("<p>Hello</p>", options)
+      assert String.trim(result.content) == ""
+    end
+  end
+
   describe "options_output_format_djot" do
     test "Djot output format produces djot-compatible markup" do
       options = HtmlToMarkdown.conversionoptions_default()

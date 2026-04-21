@@ -168,6 +168,54 @@ func Test_OptionsListIndentTabs(t *testing.T) {
 	}
 }
 
+func Test_OptionsMaxDepthDefaultUnlimited(t *testing.T) {
+	// Default max_depth (null) converts deeply nested content fully
+	result, err := htmd.Convert(`<div><div><div><div><p>Deep content</p></div></div></div></div>`)
+	if err != nil {
+		t.Fatalf("call failed: %v", err)
+	}
+	var content string
+	if result.Content != nil {
+		content = *result.Content
+	}
+	if !strings.Contains(string(content), `Deep content`) {
+		t.Errorf("expected to contain %s, got %v", `Deep content`, content)
+	}
+}
+
+func Test_OptionsMaxDepthTruncates(t *testing.T) {
+	// max_depth truncates content beyond the specified depth
+	result, err := htmd.Convert(`<div><p>Shallow</p><div><div><div><p>Too deep</p></div></div></div></div>`, htmd.NewConversionOptions(htmd.WithConversionOptionsMaxDepth(3)))
+	if err != nil {
+		t.Fatalf("call failed: %v", err)
+	}
+	var content string
+	if result.Content != nil {
+		content = *result.Content
+	}
+	if !strings.Contains(string(content), `Shallow`) {
+		t.Errorf("expected to contain %s, got %v", `Shallow`, content)
+	}
+	if strings.Contains(string(content), `Too deep`) {
+		t.Errorf("expected NOT to contain %s, got %v", `Too deep`, content)
+	}
+}
+
+func Test_OptionsMaxDepthZeroEmpty(t *testing.T) {
+	// max_depth of 0 produces empty output
+	result, err := htmd.Convert(`<p>Hello</p>`, htmd.NewConversionOptions(htmd.WithConversionOptionsMaxDepth(0)))
+	if err != nil {
+		t.Fatalf("call failed: %v", err)
+	}
+	var content string
+	if result.Content != nil {
+		content = *result.Content
+	}
+	if strings.TrimSpace(content) != `` {
+		t.Errorf("equals mismatch: got %v", content)
+	}
+}
+
 func Test_OptionsOutputFormatDjot(t *testing.T) {
 	// Djot output format produces djot-compatible markup
 	result, err := htmd.Convert(`<p>Simple paragraph.</p>`, htmd.NewConversionOptions(htmd.WithConversionOptionsOutputFormat(`Djot`)))

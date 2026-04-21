@@ -23,7 +23,7 @@ static inline int str_trim_eq(const char *actual, const char *expected) {
  * Returns a heap-allocated copy of the value, or NULL if not found.
  * Caller must free() the returned string.
  */
-static inline char *htm_json_get_string(const char *json, const char *key) {
+static inline char *alef_json_get_string(const char *json, const char *key) {
     if (json == NULL || key == NULL) return NULL;
     /* Build search pattern: "key":  */
     size_t key_len = strlen(key);
@@ -58,7 +58,7 @@ static inline char *htm_json_get_string(const char *json, const char *key) {
  * Count top-level elements in a JSON array string.
  * Returns 0 for empty arrays ("[]") or NULL input.
  */
-static inline int htm_json_array_count(const char *json) {
+static inline int alef_json_array_count(const char *json) {
     if (json == NULL) return 0;
     /* Skip leading whitespace */
     while (*json == ' ' || *json == '\t' || *json == '\n') json++;
@@ -198,6 +198,9 @@ void test_options_heading_style_atx_closed(void);
 void test_options_heading_style_underlined(void);
 void test_options_list_custom_bullets(void);
 void test_options_list_indent_tabs(void);
+void test_options_max_depth_default_unlimited(void);
+void test_options_max_depth_truncates(void);
+void test_options_max_depth_zero_empty(void);
 void test_options_output_format_djot(void);
 void test_options_output_format_markdown(void);
 void test_options_output_format_plain(void);
@@ -224,5 +227,22 @@ void test_structure_heading_paragraph(void);
 void test_structure_list(void);
 void test_structure_multiple_headings(void);
 void test_structure_sibling_h1_groups(void);
+
+/* Tests for category: visitor */
+void test_visitor_continue_default(void);
+void test_visitor_custom_blockquote(void);
+void test_visitor_custom_emphasis(void);
+void test_visitor_custom_heading(void);
+void test_visitor_custom_image(void);
+void test_visitor_custom_link_format(void);
+void test_visitor_custom_link_static(void);
+void test_visitor_custom_output(void);
+void test_visitor_preserve_html(void);
+void test_visitor_skip_all_headings(void);
+void test_visitor_skip_code_blocks(void);
+void test_visitor_skip_heading(void);
+void test_visitor_skip_images(void);
+void test_visitor_skip_links(void);
+void test_visitor_skip_strong(void);
 
 #endif /* TEST_RUNNER_H */

@@ -67,6 +67,22 @@ test_that("options_list_indent_tabs: Tab indentation type for nested list items"
   expect_true(grepl("Child", result$content, fixed = TRUE))
 })
 
+test_that("options_max_depth_default_unlimited: Default max_depth (null) converts deeply nested content fully", {
+  result <- convert(html = "<div><div><div><div><p>Deep content</p></div></div></div></div>")
+  expect_true(grepl("Deep content", result$content, fixed = TRUE))
+})
+
+test_that("options_max_depth_truncates: max_depth truncates content beyond the specified depth", {
+  result <- convert(html = "<div><p>Shallow</p><div><div><div><p>Too deep</p></div></div></div></div>", options = list("maxDepth" = 3))
+  expect_true(grepl("Shallow", result$content, fixed = TRUE))
+  expect_false(grepl("Too deep", result$content, fixed = TRUE))
+})
+
+test_that("options_max_depth_zero_empty: max_depth of 0 produces empty output", {
+  result <- convert(html = "<p>Hello</p>", options = list("maxDepth" = 0))
+  expect_equal(trimws(result$content), "")
+})
+
 test_that("options_output_format_djot: Djot output format produces djot-compatible markup", {
   result <- convert(html = "<p>Simple paragraph.</p>", options = list("outputFormat" = "djot"))
   expect_true(if (is.character(result$content)) nchar(result$content) > 0 else length(result$content) > 0)

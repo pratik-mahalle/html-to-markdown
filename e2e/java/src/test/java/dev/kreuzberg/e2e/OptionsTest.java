@@ -109,6 +109,30 @@ class OptionsTest {
     }
 
     @Test
+    void testOptionsMaxDepthDefaultUnlimited() throws Exception {
+        // Default max_depth (null) converts deeply nested content fully
+        var result = HtmlToMarkdown.convert("<div><div><div><div><p>Deep content</p></div></div></div></div>");
+        assertTrue(result.content().orElse("").contains("Deep content"), "expected to contain: " + "Deep content");
+    }
+
+    @Test
+    void testOptionsMaxDepthTruncates() throws Exception {
+        // max_depth truncates content beyond the specified depth
+        var options = MAPPER.readValue("{\"max_depth\":3}", ConversionOptions.class);
+        var result = HtmlToMarkdown.convert("<div><p>Shallow</p><div><div><div><p>Too deep</p></div></div></div></div>", options);
+        assertTrue(result.content().orElse("").contains("Shallow"), "expected to contain: " + "Shallow");
+        assertFalse(result.content().orElse("").contains("Too deep"), "expected NOT to contain: " + "Too deep");
+    }
+
+    @Test
+    void testOptionsMaxDepthZeroEmpty() throws Exception {
+        // max_depth of 0 produces empty output
+        var options = MAPPER.readValue("{\"max_depth\":0}", ConversionOptions.class);
+        var result = HtmlToMarkdown.convert("<p>Hello</p>", options);
+        assertEquals("", result.content().orElse("").trim());
+    }
+
+    @Test
     void testOptionsOutputFormatDjot() throws Exception {
         // Djot output format produces djot-compatible markup
         var options = MAPPER.readValue("{\"output_format\":\"Djot\"}", ConversionOptions.class);

@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace Kreuzberg\E2e;
 
 use PHPUnit\Framework\TestCase;
+use HtmlToMarkdown\HtmlToMarkdown;
 
 /** E2e tests for category: edge-cases. */
 final class EdgeCasesTest extends TestCase

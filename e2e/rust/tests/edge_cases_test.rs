@@ -7,8 +7,8 @@ use html_to_markdown_rs::convert;
 fn test_empty_html() {
     // Empty HTML document
     let html = r#"<html><head></head><body></body></html>"#;
-    let options = None;
-    let result = convert(&html, options).expect("should succeed");
+    let options = Default::default();
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert_eq!(content.trim(), r#""#, "equals assertion failed");
 }
@@ -17,72 +17,128 @@ fn test_empty_html() {
 fn test_encoding_cjk_characters() {
     // CJK (Chinese, Japanese, Korean) characters are preserved
     let html = r#"<p>中文内容</p><p>日本語テキスト</p><p>한국어 텍스트</p>"#;
-    let options = None;
-    let result = convert(&html, options).expect("should succeed");
+    let options = Default::default();
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert!(!content.is_empty(), "expected non-empty value");
-    assert!(format!("{:?}", content).contains(r#"中文内容"#), "expected to contain: {}", r#"中文内容"#);
-    assert!(format!("{:?}", content).contains(r#"日本語テキスト"#), "expected to contain: {}", r#"日本語テキスト"#);
-    assert!(format!("{:?}", content).contains(r#"한국어 텍스트"#), "expected to contain: {}", r#"한국어 텍스트"#);
+    assert!(
+        format!("{:?}", content).contains(r#"中文内容"#),
+        "expected to contain: {}",
+        r#"中文内容"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"日本語テキスト"#),
+        "expected to contain: {}",
+        r#"日本語テキスト"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"한국어 텍스트"#),
+        "expected to contain: {}",
+        r#"한국어 텍스트"#
+    );
 }
 
 #[test]
 fn test_encoding_html_entities() {
     // Common HTML entities are decoded in output
     let html = r#"<p>&amp; &lt; &gt; &nbsp; &quot; &apos;</p>"#;
-    let options = None;
-    let result = convert(&html, options).expect("should succeed");
+    let options = Default::default();
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert!(!content.is_empty(), "expected non-empty value");
-    assert!(format!("{:?}", content).contains(r#"&"#), "expected to contain: {}", r#"&"#);
-    assert!(format!("{:?}", content).contains(r#"<"#), "expected to contain: {}", r#"<"#);
-    assert!(format!("{:?}", content).contains(r#">"#), "expected to contain: {}", r#">"#);
+    assert!(
+        format!("{:?}", content).contains(r#"&"#),
+        "expected to contain: {}",
+        r#"&"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"<"#),
+        "expected to contain: {}",
+        r#"<"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#">"#),
+        "expected to contain: {}",
+        r#">"#
+    );
 }
 
 #[test]
 fn test_encoding_named_entities() {
     // Named HTML entities like &mdash; and &hellip; are decoded
     let html = r#"<p>Em dash&mdash;used for parenthetical remarks&mdash;is common. Ellipsis&hellip; indicates omission. Non-breaking&nbsp;space.</p>"#;
-    let options = None;
-    let result = convert(&html, options).expect("should succeed");
+    let options = Default::default();
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert!(!content.is_empty(), "expected non-empty value");
-    assert!(format!("{:?}", content).contains(r#"—"#), "expected to contain: {}", r#"—"#);
-    assert!(format!("{:?}", content).contains(r#"…"#), "expected to contain: {}", r#"…"#);
+    assert!(
+        format!("{:?}", content).contains(r#"—"#),
+        "expected to contain: {}",
+        r#"—"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"…"#),
+        "expected to contain: {}",
+        r#"…"#
+    );
 }
 
 #[test]
 fn test_encoding_numeric_entities() {
     // Numeric HTML entities (decimal and hex) are decoded
     let html = r#"<p>Copyright: &#169; Trade: &#174; Euro: &#8364; Hex: &#x00A9;</p>"#;
-    let options = None;
-    let result = convert(&html, options).expect("should succeed");
+    let options = Default::default();
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert!(!content.is_empty(), "expected non-empty value");
-    assert!(format!("{:?}", content).contains(r#"©"#), "expected to contain: {}", r#"©"#);
-    assert!(format!("{:?}", content).contains(r#"®"#), "expected to contain: {}", r#"®"#);
-    assert!(format!("{:?}", content).contains(r#"€"#), "expected to contain: {}", r#"€"#);
+    assert!(
+        format!("{:?}", content).contains(r#"©"#),
+        "expected to contain: {}",
+        r#"©"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"®"#),
+        "expected to contain: {}",
+        r#"®"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"€"#),
+        "expected to contain: {}",
+        r#"€"#
+    );
 }
 
 #[test]
 fn test_encoding_unicode_emoji() {
     // Emoji and Unicode characters are preserved
     let html = r#"<p>Hello 🌍 World 🚀</p><p>Stars: ⭐ ✨</p>"#;
-    let options = None;
-    let result = convert(&html, options).expect("should succeed");
+    let options = Default::default();
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert!(!content.is_empty(), "expected non-empty value");
-    assert!(format!("{:?}", content).contains(r#"🌍"#), "expected to contain: {}", r#"🌍"#);
-    assert!(format!("{:?}", content).contains(r#"🚀"#), "expected to contain: {}", r#"🚀"#);
-    assert!(format!("{:?}", content).contains(r#"⭐"#), "expected to contain: {}", r#"⭐"#);
+    assert!(
+        format!("{:?}", content).contains(r#"🌍"#),
+        "expected to contain: {}",
+        r#"🌍"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"🚀"#),
+        "expected to contain: {}",
+        r#"🚀"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"⭐"#),
+        "expected to contain: {}",
+        r#"⭐"#
+    );
 }
 
 #[test]
 fn test_html_comments_only() {
     // Document containing only HTML comments produces empty output
     let html = r#"<!-- This is a comment --><!-- Another comment -->"#;
-    let options = None;
-    let result = convert(&html, options).expect("should succeed");
+    let options = Default::default();
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert_eq!(content.trim(), r#""#, "equals assertion failed");
 }
@@ -91,8 +147,8 @@ fn test_html_comments_only() {
 fn test_just_whitespace_input() {
     // Input that is only whitespace characters (spaces, tabs, newlines) produces empty output
     let html = r#"   "#;
-    let options = None;
-    let result = convert(&html, options).expect("should succeed");
+    let options = Default::default();
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert_eq!(content.trim(), r#""#, "equals assertion failed");
 }
@@ -101,54 +157,78 @@ fn test_just_whitespace_input() {
 fn test_malformed_deeply_nested_elements() {
     // Deeply nested elements (100 levels) are handled without stack overflow
     let html = r#"<div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><p>Deeply nested content</p></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div>"#;
-    let options = None;
-    let result = convert(&html, options).expect("should succeed");
+    let options = Default::default();
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert!(!content.is_empty(), "expected non-empty value");
-    assert!(format!("{:?}", content).contains(r#"Deeply nested content"#), "expected to contain: {}", r#"Deeply nested content"#);
+    assert!(
+        format!("{:?}", content).contains(r#"Deeply nested content"#),
+        "expected to contain: {}",
+        r#"Deeply nested content"#
+    );
 }
 
 #[test]
 fn test_malformed_missing_block_closing_tags() {
     // Missing closing tags on block elements are auto-closed by parser
     let html = r#"<div><h1>Title<p>First paragraph<p>Second paragraph</div>"#;
-    let options = None;
-    let result = convert(&html, options).expect("should succeed");
+    let options = Default::default();
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert!(!content.is_empty(), "expected non-empty value");
-    assert!(format!("{:?}", content).contains(r#"Title"#), "expected to contain: {}", r#"Title"#);
-    assert!(format!("{:?}", content).contains(r#"First paragraph"#), "expected to contain: {}", r#"First paragraph"#);
-    assert!(format!("{:?}", content).contains(r#"Second paragraph"#), "expected to contain: {}", r#"Second paragraph"#);
+    assert!(
+        format!("{:?}", content).contains(r#"Title"#),
+        "expected to contain: {}",
+        r#"Title"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"First paragraph"#),
+        "expected to contain: {}",
+        r#"First paragraph"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"Second paragraph"#),
+        "expected to contain: {}",
+        r#"Second paragraph"#
+    );
 }
 
 #[test]
 fn test_malformed_overlapping_tags() {
     // Overlapping bold/italic tags are recovered by the HTML parser without panic
     let html = r#"<p><b><i>bold and italic</b></i></p>"#;
-    let options = None;
-    let result = convert(&html, options).expect("should succeed");
+    let options = Default::default();
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert!(!content.is_empty(), "expected non-empty value");
-    assert!(format!("{:?}", content).contains(r#"bold and italic"#), "expected to contain: {}", r#"bold and italic"#);
+    assert!(
+        format!("{:?}", content).contains(r#"bold and italic"#),
+        "expected to contain: {}",
+        r#"bold and italic"#
+    );
 }
 
 #[test]
 fn test_malformed_unclosed_paragraph() {
     // Unclosed <p> tag is recovered gracefully and content is preserved
     let html = r#"<p>This paragraph is never closed"#;
-    let options = None;
-    let result = convert(&html, options).expect("should succeed");
+    let options = Default::default();
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert!(!content.is_empty(), "expected non-empty value");
-    assert!(format!("{:?}", content).contains(r#"This paragraph is never closed"#), "expected to contain: {}", r#"This paragraph is never closed"#);
+    assert!(
+        format!("{:?}", content).contains(r#"This paragraph is never closed"#),
+        "expected to contain: {}",
+        r#"This paragraph is never closed"#
+    );
 }
 
 #[test]
 fn test_script_tags_only() {
     // Document with only script tags produces empty output (scripts are stripped)
     let html = r#"<html><head><script>alert('xss')</script></head><body><script>document.write('hello')</script></body></html>"#;
-    let options = None;
-    let result = convert(&html, options).expect("should succeed");
+    let options = Default::default();
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert_eq!(content.trim(), r#""#, "equals assertion failed");
 }
@@ -157,8 +237,8 @@ fn test_script_tags_only() {
 fn test_style_tags_only() {
     // Document with only style tags produces empty output (styles are stripped)
     let html = r#"<html><head><style>body { color: red; }</style></head><body><style>.foo { margin: 0; }</style></body></html>"#;
-    let options = None;
-    let result = convert(&html, options).expect("should succeed");
+    let options = Default::default();
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert_eq!(content.trim(), r#""#, "equals assertion failed");
 }
@@ -167,8 +247,8 @@ fn test_style_tags_only() {
 fn test_whitespace_only() {
     // Whitespace-only content
     let html = r#"<p>   </p>"#;
-    let options = None;
-    let result = convert(&html, options).expect("should succeed");
+    let options = Default::default();
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert_eq!(content.trim(), r#""#, "equals assertion failed");
 }
@@ -177,33 +257,53 @@ fn test_whitespace_only() {
 fn test_xss_onclick_handler_removed() {
     // onclick and other on* event handlers are removed from elements
     let html = r#"<p><a href="https://example.com" onclick="alert('xss')">Click me</a></p><button onmouseover="steal_data()">Hover me</button>"#;
-    let options = None;
-    let result = convert(&html, options).expect("should succeed");
+    let options = Default::default();
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert!(!content.is_empty(), "expected non-empty value");
-    assert!(format!("{:?}", content).contains(r#"Click me"#), "expected to contain: {}", r#"Click me"#);
+    assert!(
+        format!("{:?}", content).contains(r#"Click me"#),
+        "expected to contain: {}",
+        r#"Click me"#
+    );
 }
 
 #[test]
 fn test_xss_script_tag_stripped() {
     // Script tag content is stripped and does not appear in output
     let html = r#"<p>Safe content.</p><script>alert('xss')</script><p>More safe content.</p>"#;
-    let options = None;
-    let result = convert(&html, options).expect("should succeed");
+    let options = Default::default();
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert!(!content.is_empty(), "expected non-empty value");
-    assert!(format!("{:?}", content).contains(r#"Safe content"#), "expected to contain: {}", r#"Safe content"#);
-    assert!(format!("{:?}", content).contains(r#"More safe content"#), "expected to contain: {}", r#"More safe content"#);
+    assert!(
+        format!("{:?}", content).contains(r#"Safe content"#),
+        "expected to contain: {}",
+        r#"Safe content"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"More safe content"#),
+        "expected to contain: {}",
+        r#"More safe content"#
+    );
 }
 
 #[test]
 fn test_xss_svg_nested_script_stripped() {
     // Script tags nested inside SVG are stripped
     let html = r#"<p>Before SVG.</p><svg xmlns="http://www.w3.org/2000/svg"><script>alert('svg-xss')</script><text>SVG text</text></svg><p>After SVG.</p>"#;
-    let options = None;
-    let result = convert(&html, options).expect("should succeed");
+    let options = Default::default();
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert!(!content.is_empty(), "expected non-empty value");
-    assert!(format!("{:?}", content).contains(r#"Before SVG"#), "expected to contain: {}", r#"Before SVG"#);
-    assert!(format!("{:?}", content).contains(r#"After SVG"#), "expected to contain: {}", r#"After SVG"#);
+    assert!(
+        format!("{:?}", content).contains(r#"Before SVG"#),
+        "expected to contain: {}",
+        r#"Before SVG"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"After SVG"#),
+        "expected to contain: {}",
+        r#"After SVG"#
+    );
 }

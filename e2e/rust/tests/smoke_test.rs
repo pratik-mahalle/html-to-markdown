@@ -7,8 +7,8 @@ use html_to_markdown_rs::convert;
 fn test_smoke_empty_string() {
     // Empty string produces empty output
     let html = r#""#;
-    let options = None;
-    let result = convert(&html, options).expect("should succeed");
+    let options = Default::default();
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert_eq!(content.trim(), r#""#, "equals assertion failed");
 }
@@ -17,18 +17,22 @@ fn test_smoke_empty_string() {
 fn test_smoke_simple_heading() {
     // H1 heading converts to ATX markdown
     let html = r#"<h1>Title</h1>"#;
-    let options = None;
-    let result = convert(&html, options).expect("should succeed");
+    let options = Default::default();
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
-    assert!(format!("{:?}", content).contains(r#"# Title"#), "expected to contain: {}", r#"# Title"#);
+    assert!(
+        format!("{:?}", content).contains(r#"# Title"#),
+        "expected to contain: {}",
+        r#"# Title"#
+    );
 }
 
 #[test]
 fn test_smoke_simple_paragraph() {
     // Simple paragraph converts correctly
     let html = r#"<p>Hello World</p>"#;
-    let options = None;
-    let result = convert(&html, options).expect("should succeed");
+    let options = Default::default();
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert_eq!(content.trim(), r#"Hello World"#, "equals assertion failed");
     assert!(!content.is_empty(), "expected non-empty value");

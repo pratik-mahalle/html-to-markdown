@@ -1,6 +1,6 @@
 module e2e_go
 
-go 1.23
+go 1.26
 
 require github.com/kreuzberg-dev/html-to-markdown/packages/go/v3 v0.0.0
 

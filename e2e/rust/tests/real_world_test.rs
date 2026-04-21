@@ -9,17 +9,45 @@ fn test_real_world_blog_post() {
     let html = r#"<article><h1>Getting Started with Rust</h1><p>Rust is a systems programming language focused on <strong>safety</strong>, <em>performance</em>, and concurrency. It was created by <a href="https://www.mozilla.org">Mozilla</a> and has grown significantly in popularity.</p><h2>Installation</h2><p>Install Rust using the official installer:</p><pre><code class="language-bash">curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh</code></pre><h2>Hello World</h2><p>Create your first Rust program:</p><pre><code class="language-rust">fn main() {
     println!("Hello, world!");
 }</code></pre><p>Run it with <code>cargo run</code> from your project directory.</p><h2>Key Concepts</h2><ul><li>Ownership and borrowing</li><li>Lifetimes</li><li>Traits and generics</li><li>Pattern matching</li></ul><p>For more information, visit the <a href="https://doc.rust-lang.org/book/">Rust Book</a>.</p></article>"#;
-    let options = None;
-    let result = convert(&html, options).expect("should succeed");
+    let options = Default::default();
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert!(!content.is_empty(), "expected non-empty value");
-    assert!(format!("{:?}", content).contains(r#"# Getting Started with Rust"#), "expected to contain: {}", r#"# Getting Started with Rust"#);
-    assert!(format!("{:?}", content).contains(r#"## Installation"#), "expected to contain: {}", r#"## Installation"#);
-    assert!(format!("{:?}", content).contains(r#"## Hello World"#), "expected to contain: {}", r#"## Hello World"#);
-    assert!(format!("{:?}", content).contains(r#"## Key Concepts"#), "expected to contain: {}", r#"## Key Concepts"#);
-    assert!(format!("{:?}", content).contains(r#"cargo run"#), "expected to contain: {}", r#"cargo run"#);
-    assert!(format!("{:?}", content).contains(r#"[Mozilla](https://www.mozilla.org)"#), "expected to contain: {}", r#"[Mozilla](https://www.mozilla.org)"#);
-    assert!(format!("{:?}", content).contains(r#"- Ownership and borrowing"#), "expected to contain: {}", r#"- Ownership and borrowing"#);
+    assert!(
+        format!("{:?}", content).contains(r#"# Getting Started with Rust"#),
+        "expected to contain: {}",
+        r#"# Getting Started with Rust"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"## Installation"#),
+        "expected to contain: {}",
+        r#"## Installation"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"## Hello World"#),
+        "expected to contain: {}",
+        r#"## Hello World"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"## Key Concepts"#),
+        "expected to contain: {}",
+        r#"## Key Concepts"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"cargo run"#),
+        "expected to contain: {}",
+        r#"cargo run"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"[Mozilla](https://www.mozilla.org)"#),
+        "expected to contain: {}",
+        r#"[Mozilla](https://www.mozilla.org)"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"- Ownership and borrowing"#),
+        "expected to contain: {}",
+        r#"- Ownership and borrowing"#
+    );
     assert!(content.len() >= 200, "expected length >= 200, got {}", content.len());
 }
 
@@ -31,20 +59,60 @@ assert_eq!(markdown, "# Hello");</code></pre><h2>ConversionOptions</h2><p>Config
     .heading_style(HeadingStyle::ATX)
     .code_block_style(CodeBlockStyle::Fenced)
     .build();</code></pre><blockquote><p>See the <a href="/docs/options">options reference</a> for a full list of configuration values.</p></blockquote></div>"##;
-    let options = None;
-    let result = convert(&html, options).expect("should succeed");
+    let options = Default::default();
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert!(!content.is_empty(), "expected non-empty value");
-    assert!(format!("{:?}", content).contains(r#"# API Reference"#), "expected to contain: {}", r#"# API Reference"#);
-    assert!(format!("{:?}", content).contains(r#"## convert_html"#), "expected to contain: {}", r#"## convert_html"#);
-    assert!(format!("{:?}", content).contains(r#"### Parameters"#), "expected to contain: {}", r#"### Parameters"#);
-    assert!(format!("{:?}", content).contains(r#"### Returns"#), "expected to contain: {}", r#"### Returns"#);
-    assert!(format!("{:?}", content).contains(r#"### Example"#), "expected to contain: {}", r#"### Example"#);
-    assert!(format!("{:?}", content).contains(r#"## ConversionOptions"#), "expected to contain: {}", r#"## ConversionOptions"#);
-    assert!(format!("{:?}", content).contains(r#"> "#), "expected to contain: {}", r#"> "#);
-    assert!(format!("{:?}", content).contains(r#"thread-safe"#), "expected to contain: {}", r#"thread-safe"#);
-    assert!(format!("{:?}", content).contains(r#"convert_html"#), "expected to contain: {}", r#"convert_html"#);
-    assert!(format!("{:?}", content).contains(r#"ConversionOptions"#), "expected to contain: {}", r#"ConversionOptions"#);
+    assert!(
+        format!("{:?}", content).contains(r#"# API Reference"#),
+        "expected to contain: {}",
+        r#"# API Reference"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"## convert_html"#),
+        "expected to contain: {}",
+        r#"## convert_html"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"### Parameters"#),
+        "expected to contain: {}",
+        r#"### Parameters"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"### Returns"#),
+        "expected to contain: {}",
+        r#"### Returns"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"### Example"#),
+        "expected to contain: {}",
+        r#"### Example"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"## ConversionOptions"#),
+        "expected to contain: {}",
+        r#"## ConversionOptions"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"> "#),
+        "expected to contain: {}",
+        r#"> "#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"thread-safe"#),
+        "expected to contain: {}",
+        r#"thread-safe"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"convert_html"#),
+        "expected to contain: {}",
+        r#"convert_html"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"ConversionOptions"#),
+        "expected to contain: {}",
+        r#"ConversionOptions"#
+    );
     assert!(content.len() >= 400, "expected length >= 400, got {}", content.len());
 }
 
@@ -52,19 +120,59 @@ assert_eq!(markdown, "# Hello");</code></pre><h2>ConversionOptions</h2><p>Config
 fn test_real_world_product_page() {
     // Product page with table, images, and lists converts correctly
     let html = r#"<div class="product"><h1>Wireless Keyboard Pro</h1><img src="https://example.com/keyboard.jpg" alt="Wireless Keyboard Pro"><p>The ultimate wireless keyboard for professionals. Features a comfortable layout with <strong>backlit keys</strong> and <em>ultra-long battery life</em>.</p><h2>Specifications</h2><table><thead><tr><th>Feature</th><th>Details</th></tr></thead><tbody><tr><td>Battery Life</td><td>Up to 12 months</td></tr><tr><td>Connectivity</td><td>Bluetooth 5.0</td></tr><tr><td>Key Travel</td><td>2mm</td></tr><tr><td>Weight</td><td>750g</td></tr></tbody></table><h2>What's in the Box</h2><ul><li>Wireless Keyboard Pro</li><li>USB-C charging cable</li><li>USB receiver dongle</li><li>Quick start guide</li></ul><h2>Compatibility</h2><p>Compatible with <strong>Windows</strong>, <strong>macOS</strong>, <strong>Linux</strong>, <strong>iOS</strong>, and <strong>Android</strong>.</p></div>"#;
-    let options = None;
-    let result = convert(&html, options).expect("should succeed");
+    let options = Default::default();
+    let result = convert(&html, &options).expect("should succeed");
     let content = result.content.as_deref().unwrap_or("");
     assert!(!content.is_empty(), "expected non-empty value");
-    assert!(format!("{:?}", content).contains(r#"# Wireless Keyboard Pro"#), "expected to contain: {}", r#"# Wireless Keyboard Pro"#);
-    assert!(format!("{:?}", content).contains(r#"![Wireless Keyboard Pro](https://example.com/keyboard.jpg)"#), "expected to contain: {}", r#"![Wireless Keyboard Pro](https://example.com/keyboard.jpg)"#);
-    assert!(format!("{:?}", content).contains(r#"## Specifications"#), "expected to contain: {}", r#"## Specifications"#);
-    assert!(format!("{:?}", content).contains(r#"Battery Life"#), "expected to contain: {}", r#"Battery Life"#);
-    assert!(format!("{:?}", content).contains(r#"12 months"#), "expected to contain: {}", r#"12 months"#);
-    assert!(format!("{:?}", content).contains(r#"Bluetooth 5.0"#), "expected to contain: {}", r#"Bluetooth 5.0"#);
-    assert!(format!("{:?}", content).contains(r#"## What's in the Box"#), "expected to contain: {}", r#"## What's in the Box"#);
-    assert!(format!("{:?}", content).contains(r#"USB-C charging cable"#), "expected to contain: {}", r#"USB-C charging cable"#);
-    assert!(format!("{:?}", content).contains(r#"|"#), "expected to contain: {}", r#"|"#);
-    assert!(format!("{:?}", content).contains(r#"---"#), "expected to contain: {}", r#"---"#);
+    assert!(
+        format!("{:?}", content).contains(r#"# Wireless Keyboard Pro"#),
+        "expected to contain: {}",
+        r#"# Wireless Keyboard Pro"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"![Wireless Keyboard Pro](https://example.com/keyboard.jpg)"#),
+        "expected to contain: {}",
+        r#"![Wireless Keyboard Pro](https://example.com/keyboard.jpg)"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"## Specifications"#),
+        "expected to contain: {}",
+        r#"## Specifications"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"Battery Life"#),
+        "expected to contain: {}",
+        r#"Battery Life"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"12 months"#),
+        "expected to contain: {}",
+        r#"12 months"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"Bluetooth 5.0"#),
+        "expected to contain: {}",
+        r#"Bluetooth 5.0"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"## What's in the Box"#),
+        "expected to contain: {}",
+        r#"## What's in the Box"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"USB-C charging cable"#),
+        "expected to contain: {}",
+        r#"USB-C charging cable"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"|"#),
+        "expected to contain: {}",
+        r#"|"#
+    );
+    assert!(
+        format!("{:?}", content).contains(r#"---"#),
+        "expected to contain: {}",
+        r#"---"#
+    );
     assert!(content.len() >= 300, "expected length >= 300, got {}", content.len());
 }
