@@ -6,6 +6,11 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.util.Optional;
 
+/**
+ * The semantic content type of a document node.
+ *
+ * Uses internally tagged representation ({@code "node_type": "heading"}) for JSON serialization.
+ */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "node_type", visible = false)
 @JsonSubTypes({
     @JsonSubTypes.Type(value = NodeContent.Heading.class, name = "heading"),
@@ -24,20 +29,26 @@ import java.util.Optional;
 })
 public sealed interface NodeContent {
 
+    /** A heading element (h1-h6). */
     record Heading(
         @JsonProperty("level") byte level,
         @JsonProperty("text") String text
     ) implements NodeContent {
     }
 
+    /** A paragraph of text. */
     record Paragraph(@JsonProperty("text") String text) implements NodeContent { }
 
+    /** A list container (ordered or unordered). Children are {@code ListItem} nodes. */
     record List(@JsonProperty("ordered") boolean ordered) implements NodeContent { }
 
+    /** A single list item. */
     record ListItem(@JsonProperty("text") String text) implements NodeContent { }
 
+    /** A table with structured cell data. */
     record Table(@JsonProperty("grid") TableGrid grid) implements NodeContent { }
 
+    /** An image element. */
     record Image(
         @JsonProperty("description") Optional<String> description,
         @JsonProperty("src") Optional<String> src,
@@ -45,32 +56,39 @@ public sealed interface NodeContent {
     ) implements NodeContent {
     }
 
+    /** A code block or inline code. */
     record Code(
         @JsonProperty("text") String text,
         @JsonProperty("language") Optional<String> language
     ) implements NodeContent {
     }
 
+    /** A block quote container. */
     record Quote() implements NodeContent {
     }
 
+    /** A definition list container. */
     record DefinitionList() implements NodeContent {
     }
 
+    /** A definition list entry with term and description. */
     record DefinitionItem(
         @JsonProperty("term") String term,
         @JsonProperty("definition") String definition
     ) implements NodeContent {
     }
 
+    /** A raw block preserved as-is (e.g. {@code <script>}, {@code <style>} content). */
     record RawBlock(
         @JsonProperty("format") String format,
         @JsonProperty("content") String content
     ) implements NodeContent {
     }
 
+    /** A block of key-value metadata pairs (from {@code <head>} meta tags). */
     record MetadataBlock(@JsonProperty("entries") java.util.List<String> entries) implements NodeContent { }
 
+    /** A section grouping container (auto-generated from heading hierarchy). */
     record Group(
         @JsonProperty("label") Optional<String> label,
         @JsonProperty("heading_level") Optional<Byte> headingLevel,

@@ -4,10 +4,19 @@ package dev.kreuzberg.htmltomarkdown;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+/**
+ * Highlight rendering style for {@code <mark>} elements.
+ *
+ * Controls how highlighted text is rendered in Markdown output.
+ */
 public enum HighlightStyle {
+    /** Double equals syntax (==text==). Default. Pandoc-compatible. */
     DoubleEqual("doubleequal"),
+    /** Preserve as HTML (==text==). Original HTML tag. */
     Html("html"),
+    /** Render as bold (**text**). Uses strong emphasis. */
     Bold("bold"),
+    /** Strip formatting, render as plain text. No markup. */
     None("none");
 
     private final String value;

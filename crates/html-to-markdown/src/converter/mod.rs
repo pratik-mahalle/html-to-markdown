@@ -117,9 +117,6 @@ pub use self::context::Context;
 pub use self::dom_context::DomContext;
 pub use self::main::convert_html;
 
-#[cfg(feature = "visitor")]
-pub use self::main::convert_html_with_visitor;
-
 // Import the tree walker and utility functions from main and main_helpers
 pub(crate) use self::main::{convert_html_impl, walk_node};
 pub(crate) use self::main_helpers::trim_trailing_whitespace;

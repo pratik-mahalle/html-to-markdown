@@ -6,12 +6,44 @@
     clippy::let_unit_value,
     clippy::needless_borrow,
     clippy::map_identity,
-    clippy::just_underscores_and_digits
+    clippy::just_underscores_and_digits,
+    clippy::unused_unit
 )]
 
 use std::sync::Arc;
 use wasm_bindgen::prelude::*;
 
+/// Configuration for metadata extraction granularity.
+///
+/// Controls which metadata types are extracted and size limits for safety.
+/// Enables selective extraction of different metadata categories from HTML documents,
+/// allowing fine-grained control over which types of information to collect during
+/// the HTML-to-Markdown conversion process.
+///
+/// # Fields
+///
+/// - `extract_document`: Enable document-level metadata extraction (title, description, author, Open Graph, Twitter Card, etc.)
+/// - `extract_headers`: Enable heading element extraction (h1-h6) with hierarchy tracking
+/// - `extract_links`: Enable anchor element extraction with link type classification
+/// - `extract_images`: Enable image element extraction with source and dimension metadata
+/// - `extract_structured_data`: Enable structured data extraction (JSON-LD, Microdata, RDFa)
+/// - `max_structured_data_size`: Safety limit on total structured data size in bytes
+///
+/// # Examples
+///
+/// ```
+/// # use html_to_markdown_rs::metadata::MetadataConfig;
+/// let config = MetadataConfig {
+///     extract_document: true,
+///     extract_headers: true,
+///     extract_links: true,
+///     extract_images: true,
+///     extract_structured_data: true,
+///     max_structured_data_size: 1_000_000,
+/// };
+///
+/// assert!(config.extract_headers);
+/// ```
 #[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmMetadataConfig {
@@ -104,22 +136,131 @@ impl WasmMetadataConfig {
         self.max_structured_data_size = value;
     }
 
+    /// Create default metadata configuration.
+    ///
+    /// Defaults to extracting all metadata types with 1MB limit on structured data.
     #[allow(clippy::should_implement_trait)]
     #[wasm_bindgen]
     pub fn default() -> WasmMetadataConfig {
         html_to_markdown_rs::MetadataConfig::default().into()
     }
 
+    /// Check if any metadata extraction is enabled.
+    ///
+    /// Returns `true` if at least one extraction category is enabled, `false` if all are disabled.
+    /// This is useful for early exit optimization when the application doesn't need metadata.
+    ///
+    /// # Returns
+    ///
+    /// `true` if any of the extraction flags are enabled, `false` if all are disabled.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use html_to_markdown_rs::metadata::MetadataConfig;
+    /// // All enabled
+    /// let config = MetadataConfig::default();
+    /// assert!(config.any_enabled());
+    ///
+    /// // Selectively enabled
+    /// let config = MetadataConfig {
+    ///     extract_headers: true,
+    ///     extract_document: false,
+    ///     extract_links: false,
+    ///     extract_images: false,
+    ///     extract_structured_data: false,
+    ///     max_structured_data_size: 1_000_000,
+    /// };
+    /// assert!(config.any_enabled());
+    ///
+    /// // All disabled
+    /// let config = MetadataConfig {
+    ///     extract_document: false,
+    ///     extract_headers: false,
+    ///     extract_links: false,
+    ///     extract_images: false,
+    ///     extract_structured_data: false,
+    ///     max_structured_data_size: 1_000_000,
+    /// };
+    /// assert!(!config.any_enabled());
+    /// ```
     #[wasm_bindgen(js_name = "anyEnabled")]
     pub fn any_enabled(&self) -> bool {
         html_to_markdown_rs::MetadataConfig::from(self.clone()).any_enabled()
     }
 
+    /// Apply a partial update to this metadata configuration.
+    ///
+    /// Any specified fields in the update (Some values) will override the current values.
+    /// Unspecified fields (None) are left unchanged. This allows selective modification
+    /// of configuration without affecting unrelated settings.
+    ///
+    /// # Arguments
+    ///
+    /// * `update` - Partial metadata config update with fields to override
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use html_to_markdown_rs::metadata::{MetadataConfig, MetadataConfigUpdate};
+    /// let mut config = MetadataConfig::default();
+    /// // config starts with all extraction enabled
+    ///
+    /// let update = MetadataConfigUpdate {
+    ///     extract_document: Some(false),
+    ///     extract_images: Some(false),
+    ///     // All other fields are None, so they won't change
+    ///     ..Default::default()
+    /// };
+    ///
+    /// config.apply_update(update);
+    ///
+    /// assert!(!config.extract_document);
+    /// assert!(!config.extract_images);
+    /// assert!(config.extract_headers);  // Unchanged
+    /// assert!(config.extract_links);    // Unchanged
+    /// ```
     #[wasm_bindgen(js_name = "applyUpdate")]
     pub fn apply_update(&self, _update: WasmMetadataConfigUpdate) -> () {
         ()
     }
 
+    /// Create new metadata configuration from a partial update.
+    ///
+    /// Creates a new `MetadataConfig` struct with defaults, then applies the update.
+    /// Fields not specified in the update (None) keep their default values.
+    /// This is a convenience method for constructing a configuration from a partial specification
+    /// without needing to explicitly call `.default()` first.
+    ///
+    /// # Arguments
+    ///
+    /// * `update` - Partial metadata config update with fields to set
+    ///
+    /// # Returns
+    ///
+    /// New `MetadataConfig` with specified updates applied to defaults
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use html_to_markdown_rs::metadata::{MetadataConfig, MetadataConfigUpdate};
+    /// let update = MetadataConfigUpdate {
+    ///     extract_document: Some(false),
+    ///     extract_headers: Some(true),
+    ///     extract_links: Some(true),
+    ///     extract_images: None,  // Will use default (true)
+    ///     extract_structured_data: None,  // Will use default (true)
+    ///     max_structured_data_size: None,  // Will use default (1MB)
+    /// };
+    ///
+    /// let config = MetadataConfig::from_update(update);
+    ///
+    /// assert!(!config.extract_document);
+    /// assert!(config.extract_headers);
+    /// assert!(config.extract_links);
+    /// assert!(config.extract_images);  // Default
+    /// assert!(config.extract_structured_data);  // Default
+    /// ```
     #[wasm_bindgen(js_name = "fromUpdate")]
     pub fn from_update(update: WasmMetadataConfigUpdate) -> WasmMetadataConfig {
         let update_core: html_to_markdown_rs::MetadataConfigUpdate = update.into();
@@ -134,6 +275,39 @@ impl WasmMetadataConfig {
     }
 }
 
+/// Partial update for `MetadataConfig`.
+///
+/// This struct uses `Option<T>` to represent optional fields that can be selectively updated.
+/// Only specified fields (Some values) will override existing config; None values leave the
+/// corresponding fields unchanged when applied via [`MetadataConfig::apply_update`].
+///
+/// # Fields
+///
+/// - `extract_document`: Optional override for document-level metadata extraction
+/// - `extract_headers`: Optional override for heading element extraction
+/// - `extract_links`: Optional override for link element extraction
+/// - `extract_images`: Optional override for image element extraction
+/// - `extract_structured_data`: Optional override for structured data extraction
+/// - `max_structured_data_size`: Optional override for structured data size limit
+///
+/// # Examples
+///
+/// ```
+/// # use html_to_markdown_rs::metadata::{MetadataConfig, MetadataConfigUpdate};
+/// let update = MetadataConfigUpdate {
+///     extract_document: Some(false),
+///     extract_headers: Some(true),
+///     extract_links: None,  // No change
+///     extract_images: None,  // No change
+///     extract_structured_data: None,  // No change
+///     max_structured_data_size: None,  // No change
+/// };
+///
+/// let mut config = MetadataConfig::default();
+/// config.apply_update(update);
+/// assert!(!config.extract_document);
+/// assert!(config.extract_headers);
+/// ```
 #[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmMetadataConfigUpdate {
@@ -227,6 +401,24 @@ impl WasmMetadataConfigUpdate {
     }
 }
 
+/// Document-level metadata extracted from `<head>` and top-level elements.
+///
+/// Contains all metadata typically used by search engines, social media platforms,
+/// and browsers for document indexing and presentation.
+///
+/// # Examples
+///
+/// ```
+/// # use html_to_markdown_rs::metadata::DocumentMetadata;
+/// let doc = DocumentMetadata {
+///     title: Some("My Article".to_string()),
+///     description: Some("A great article about Rust".to_string()),
+///     keywords: vec!["rust".to_string(), "programming".to_string()],
+///     ..Default::default()
+/// };
+///
+/// assert_eq!(doc.title, Some("My Article".to_string()));
+/// ```
 #[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmDocumentMetadata {
@@ -386,6 +578,26 @@ impl WasmDocumentMetadata {
     }
 }
 
+/// Header element metadata with hierarchy tracking.
+///
+/// Captures heading elements (h1-h6) with their text content, identifiers,
+/// and position in the document structure.
+///
+/// # Examples
+///
+/// ```
+/// # use html_to_markdown_rs::metadata::HeaderMetadata;
+/// let header = HeaderMetadata {
+///     level: 1,
+///     text: "Main Title".to_string(),
+///     id: Some("main-title".to_string()),
+///     depth: 0,
+///     html_offset: 145,
+/// };
+///
+/// assert_eq!(header.level, 1);
+/// assert!(header.is_valid());
+/// ```
 #[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmHeaderMetadata {
@@ -459,12 +671,60 @@ impl WasmHeaderMetadata {
         self.html_offset = value;
     }
 
+    /// Validate that the header level is within valid range (1-6).
+    ///
+    /// # Returns
+    ///
+    /// `true` if level is 1-6, `false` otherwise.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use html_to_markdown_rs::metadata::HeaderMetadata;
+    /// let valid = HeaderMetadata {
+    ///     level: 3,
+    ///     text: "Title".to_string(),
+    ///     id: None,
+    ///     depth: 2,
+    ///     html_offset: 100,
+    /// };
+    /// assert!(valid.is_valid());
+    ///
+    /// let invalid = HeaderMetadata {
+    ///     level: 7,  // Invalid
+    ///     text: "Title".to_string(),
+    ///     id: None,
+    ///     depth: 2,
+    ///     html_offset: 100,
+    /// };
+    /// assert!(!invalid.is_valid());
+    /// ```
     #[wasm_bindgen(js_name = "isValid")]
     pub fn is_valid(&self) -> bool {
         html_to_markdown_rs::HeaderMetadata::from(self.clone()).is_valid()
     }
 }
 
+/// Hyperlink metadata with categorization and attributes.
+///
+/// Represents `<a>` elements with parsed href values, text content, and link type classification.
+///
+/// # Examples
+///
+/// ```
+/// # use html_to_markdown_rs::metadata::{LinkMetadata, LinkType};
+/// let link = LinkMetadata {
+///     href: "https://example.com".to_string(),
+///     text: "Example".to_string(),
+///     title: Some("Visit Example".to_string()),
+///     link_type: LinkType::External,
+///     rel: vec!["nofollow".to_string()],
+///     attributes: Default::default(),
+/// };
+///
+/// assert_eq!(link.link_type, LinkType::External);
+/// assert_eq!(link.text, "Example");
+/// ```
 #[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmLinkMetadata {
@@ -557,12 +817,51 @@ impl WasmLinkMetadata {
         self.attributes = value;
     }
 
+    /// Classify a link based on href value.
+    ///
+    /// # Arguments
+    ///
+    /// * `href` - The href attribute value
+    ///
+    /// # Returns
+    ///
+    /// Appropriate [`LinkType`] based on protocol and content.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use html_to_markdown_rs::metadata::{LinkMetadata, LinkType};
+    /// assert_eq!(LinkMetadata::classify_link("#section"), LinkType::Anchor);
+    /// assert_eq!(LinkMetadata::classify_link("mailto:test@example.com"), LinkType::Email);
+    /// assert_eq!(LinkMetadata::classify_link("tel:+1234567890"), LinkType::Phone);
+    /// assert_eq!(LinkMetadata::classify_link("https://example.com"), LinkType::External);
+    /// ```
     #[wasm_bindgen(js_name = "classifyLink")]
     pub fn classify_link(href: String) -> WasmLinkType {
         html_to_markdown_rs::LinkMetadata::classify_link(&href).into()
     }
 }
 
+/// Image metadata with source and dimensions.
+///
+/// Captures `<img>` elements and inline `<svg>` elements with metadata
+/// for image analysis and optimization.
+///
+/// # Examples
+///
+/// ```
+/// # use html_to_markdown_rs::metadata::{ImageMetadata, ImageType};
+/// let img = ImageMetadata {
+///     src: "https://example.com/image.jpg".to_string(),
+///     alt: Some("An example image".to_string()),
+///     title: Some("Example".to_string()),
+///     dimensions: Some((800, 600)),
+///     image_type: ImageType::External,
+///     attributes: Default::default(),
+/// };
+///
+/// assert_eq!(img.image_type, ImageType::External);
+/// ```
 #[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmImageMetadata {
@@ -656,6 +955,23 @@ impl WasmImageMetadata {
     }
 }
 
+/// Structured data block (JSON-LD, Microdata, or RDFa).
+///
+/// Represents machine-readable structured data found in the document.
+/// JSON-LD blocks are collected as raw JSON strings for flexibility.
+///
+/// # Examples
+///
+/// ```
+/// # use html_to_markdown_rs::metadata::{StructuredData, StructuredDataType};
+/// let schema = StructuredData {
+///     data_type: StructuredDataType::JsonLd,
+///     raw_json: r#"{"@context":"https://schema.org","@type":"Article"}"#.to_string(),
+///     schema_type: Some("Article".to_string()),
+/// };
+///
+/// assert_eq!(schema.data_type, StructuredDataType::JsonLd);
+/// ```
 #[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmStructuredData {
@@ -706,6 +1022,25 @@ impl WasmStructuredData {
     }
 }
 
+/// Comprehensive metadata extraction result from HTML document.
+///
+/// Contains all extracted metadata types in a single structure,
+/// suitable for serialization and transmission across language boundaries.
+///
+/// # Examples
+///
+/// ```
+/// # use html_to_markdown_rs::metadata::HtmlMetadata;
+/// let metadata = HtmlMetadata {
+///     document: Default::default(),
+///     headers: Vec::new(),
+///     links: Vec::new(),
+///     images: Vec::new(),
+///     structured_data: Vec::new(),
+/// };
+///
+/// assert!(metadata.headers.is_empty());
+/// ```
 #[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmHtmlMetadata {
@@ -786,6 +1121,21 @@ impl WasmHtmlMetadata {
     }
 }
 
+/// Main conversion options for HTML to Markdown conversion.
+///
+/// Use [`ConversionOptions::builder()`] to construct, or [`Default::default()`] for defaults.
+///
+/// # Example
+///
+/// ```text
+/// use html_to_markdown_rs::ConversionOptions;
+///
+/// let options = ConversionOptions::builder()
+///     .heading_style(HeadingStyle::Atx)
+///     .wrap(true)
+///     .wrap_width(100)
+///     .build();
+/// ```
 #[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmConversionOptions {
@@ -1314,6 +1664,7 @@ impl WasmConversionOptions {
         html_to_markdown_rs::ConversionOptions::default().into()
     }
 
+    /// Create a new builder with default values.
     #[wasm_bindgen]
     pub fn builder() -> WasmConversionOptionsBuilder {
         WasmConversionOptionsBuilder {
@@ -1321,11 +1672,13 @@ impl WasmConversionOptions {
         }
     }
 
+    /// Apply a partial update to these conversion options.
     #[wasm_bindgen(js_name = "applyUpdate")]
     pub fn apply_update(&self, _update: WasmConversionOptionsUpdate) -> () {
         ()
     }
 
+    /// Create from a partial update, applying to defaults.
     #[wasm_bindgen(js_name = "fromUpdate")]
     pub fn from_update(update: WasmConversionOptionsUpdate) -> WasmConversionOptions {
         let update_core: html_to_markdown_rs::ConversionOptionsUpdate = update.into();
@@ -1340,6 +1693,9 @@ impl WasmConversionOptions {
     }
 }
 
+/// Builder for [`ConversionOptions`].
+///
+/// All fields start with default values. Call `.build()` to produce the final options.
 #[derive(Clone)]
 #[wasm_bindgen]
 pub struct WasmConversionOptionsBuilder {
@@ -1348,6 +1704,7 @@ pub struct WasmConversionOptionsBuilder {
 
 #[wasm_bindgen]
 impl WasmConversionOptionsBuilder {
+    /// Set the list of HTML tag names whose content is stripped from output.
     #[wasm_bindgen(js_name = "stripTags")]
     pub fn strip_tags(&self, tags: Vec<String>) -> WasmConversionOptionsBuilder {
         Self {
@@ -1355,6 +1712,7 @@ impl WasmConversionOptionsBuilder {
         }
     }
 
+    /// Set the list of HTML tag names that are preserved verbatim in output.
     #[wasm_bindgen(js_name = "preserveTags")]
     pub fn preserve_tags(&self, tags: Vec<String>) -> WasmConversionOptionsBuilder {
         Self {
@@ -1362,6 +1720,7 @@ impl WasmConversionOptionsBuilder {
         }
     }
 
+    /// Set the list of HTML tag names whose `<img>` children are kept inline.
     #[wasm_bindgen(js_name = "keepInlineImagesIn")]
     pub fn keep_inline_images_in(&self, tags: Vec<String>) -> WasmConversionOptionsBuilder {
         Self {
@@ -1369,6 +1728,7 @@ impl WasmConversionOptionsBuilder {
         }
     }
 
+    /// Set the pre-processing options applied to the HTML before conversion.
     #[wasm_bindgen]
     pub fn preprocessing(&self, preprocessing: WasmPreprocessingOptions) -> WasmConversionOptionsBuilder {
         Self {
@@ -1376,12 +1736,17 @@ impl WasmConversionOptionsBuilder {
         }
     }
 
+    /// Build the final [`ConversionOptions`].
     #[wasm_bindgen]
     pub fn build(&self) -> WasmConversionOptions {
         (*self.inner).clone().build().into()
     }
 }
 
+/// Partial update for `ConversionOptions`.
+///
+/// Uses `Option<T>` fields for selective updates. Bindings use this to construct
+/// options from language-native types. Prefer [`ConversionOptionsBuilder`] for Rust code.
 #[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmConversionOptionsUpdate {
@@ -1905,6 +2270,7 @@ impl WasmConversionOptionsUpdate {
     }
 }
 
+/// HTML preprocessing options for document cleanup before conversion.
 #[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmPreprocessingOptions {
@@ -1977,11 +2343,31 @@ impl WasmPreprocessingOptions {
         html_to_markdown_rs::PreprocessingOptions::default().into()
     }
 
+    /// Apply a partial update to these preprocessing options.
+    ///
+    /// Any specified fields in the update will override the current values.
+    /// Unspecified fields (None) are left unchanged.
+    ///
+    /// # Arguments
+    ///
+    /// * `update` - Partial preprocessing options update
     #[wasm_bindgen(js_name = "applyUpdate")]
     pub fn apply_update(&self, _update: WasmPreprocessingOptionsUpdate) -> () {
         ()
     }
 
+    /// Create new preprocessing options from a partial update.
+    ///
+    /// Creates a new `PreprocessingOptions` struct with defaults, then applies the update.
+    /// Fields not specified in the update keep their default values.
+    ///
+    /// # Arguments
+    ///
+    /// * `update` - Partial preprocessing options update
+    ///
+    /// # Returns
+    ///
+    /// New `PreprocessingOptions` with specified updates applied to defaults
     #[wasm_bindgen(js_name = "fromUpdate")]
     pub fn from_update(update: WasmPreprocessingOptionsUpdate) -> WasmPreprocessingOptions {
         let update_core: html_to_markdown_rs::PreprocessingOptionsUpdate = update.into();
@@ -1996,6 +2382,11 @@ impl WasmPreprocessingOptions {
     }
 }
 
+/// Partial update for `PreprocessingOptions`.
+///
+/// This struct uses `Option<T>` to represent optional fields that can be selectively updated.
+/// Only specified fields (Some values) will override existing options; None values leave the
+/// corresponding fields unchanged when applied via [`PreprocessingOptions::apply_update`].
 #[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmPreprocessingOptionsUpdate {
@@ -2063,6 +2454,9 @@ impl WasmPreprocessingOptionsUpdate {
     }
 }
 
+/// A structured document tree representing the semantic content of an HTML document.
+///
+/// Uses a flat node array with index-based parent/child references for efficient traversal.
 #[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmDocumentStructure {
@@ -2098,6 +2492,7 @@ impl WasmDocumentStructure {
     }
 }
 
+/// A single node in the document tree.
 #[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmDocumentNode {
@@ -2191,6 +2586,9 @@ impl WasmDocumentNode {
     }
 }
 
+/// An inline text annotation with byte-range offsets.
+///
+/// Annotations describe formatting (bold, italic, etc.) and links within a node's text content.
 #[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmTextAnnotation {
@@ -2237,6 +2635,20 @@ impl WasmTextAnnotation {
     }
 }
 
+/// The primary result of HTML conversion and extraction.
+///
+/// Contains the converted text output, optional structured document tree,
+/// metadata, extracted tables, images, and processing warnings.
+///
+/// # Example
+///
+/// ```text
+/// use html_to_markdown_rs::{convert, ConversionOptions};
+///
+/// let result = convert("<h1>Hello</h1><p>World</p>", None)?;
+/// assert!(result.content.is_some());
+/// assert!(result.warnings.is_empty());
+/// ```
 #[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmConversionResult {
@@ -2330,6 +2742,7 @@ impl WasmConversionResult {
     }
 }
 
+/// A structured table grid with cell-level data including spans.
 #[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmTableGrid {
@@ -2380,6 +2793,7 @@ impl WasmTableGrid {
     }
 }
 
+/// A single cell in a table grid.
 #[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmGridCell {
@@ -2466,6 +2880,7 @@ impl WasmGridCell {
     }
 }
 
+/// A top-level extracted table with both structured data and markdown representation.
 #[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmTableData {
@@ -2501,6 +2916,7 @@ impl WasmTableData {
     }
 }
 
+/// A non-fatal warning generated during HTML processing.
 #[derive(Clone, Default)]
 #[wasm_bindgen]
 pub struct WasmProcessingWarning {
@@ -2536,6 +2952,119 @@ impl WasmProcessingWarning {
     }
 }
 
+/// Context information passed to all visitor methods.
+///
+/// Provides comprehensive metadata about the current node being visited,
+/// including its type, attributes, position in the DOM tree, and parent context.
+#[derive(Clone, Default)]
+#[wasm_bindgen]
+pub struct WasmNodeContext {
+    node_type: WasmNodeType,
+    tag_name: String,
+    attributes: JsValue,
+    depth: usize,
+    index_in_parent: usize,
+    parent_tag: Option<String>,
+    is_inline: bool,
+}
+
+#[wasm_bindgen]
+impl WasmNodeContext {
+    #[wasm_bindgen(constructor)]
+    pub fn new(
+        node_type: WasmNodeType,
+        tag_name: String,
+        attributes: JsValue,
+        depth: usize,
+        index_in_parent: usize,
+        is_inline: bool,
+        parent_tag: Option<String>,
+    ) -> WasmNodeContext {
+        WasmNodeContext {
+            node_type,
+            tag_name,
+            attributes,
+            depth,
+            index_in_parent,
+            parent_tag,
+            is_inline,
+        }
+    }
+
+    #[wasm_bindgen(getter, js_name = "nodeType")]
+    pub fn node_type(&self) -> WasmNodeType {
+        self.node_type
+    }
+
+    #[wasm_bindgen(setter, js_name = "nodeType")]
+    pub fn set_node_type(&mut self, value: WasmNodeType) {
+        self.node_type = value;
+    }
+
+    #[wasm_bindgen(getter, js_name = "tagName")]
+    pub fn tag_name(&self) -> String {
+        self.tag_name.clone()
+    }
+
+    #[wasm_bindgen(setter, js_name = "tagName")]
+    pub fn set_tag_name(&mut self, value: String) {
+        self.tag_name = value;
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn attributes(&self) -> JsValue {
+        self.attributes.clone()
+    }
+
+    #[wasm_bindgen(setter)]
+    pub fn set_attributes(&mut self, value: JsValue) {
+        self.attributes = value;
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn depth(&self) -> usize {
+        self.depth
+    }
+
+    #[wasm_bindgen(setter)]
+    pub fn set_depth(&mut self, value: usize) {
+        self.depth = value;
+    }
+
+    #[wasm_bindgen(getter, js_name = "indexInParent")]
+    pub fn index_in_parent(&self) -> usize {
+        self.index_in_parent
+    }
+
+    #[wasm_bindgen(setter, js_name = "indexInParent")]
+    pub fn set_index_in_parent(&mut self, value: usize) {
+        self.index_in_parent = value;
+    }
+
+    #[wasm_bindgen(getter, js_name = "parentTag")]
+    pub fn parent_tag(&self) -> Option<String> {
+        self.parent_tag.clone()
+    }
+
+    #[wasm_bindgen(setter, js_name = "parentTag")]
+    pub fn set_parent_tag(&mut self, value: Option<String>) {
+        self.parent_tag = value;
+    }
+
+    #[wasm_bindgen(getter, js_name = "isInline")]
+    pub fn is_inline(&self) -> bool {
+        self.is_inline
+    }
+
+    #[wasm_bindgen(setter, js_name = "isInline")]
+    pub fn set_is_inline(&mut self, value: bool) {
+        self.is_inline = value;
+    }
+}
+
+/// Text directionality of document content.
+///
+/// Corresponds to the HTML `dir` attribute and `bdi` element directionality.
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum WasmTextDirection {
@@ -2551,6 +3080,9 @@ impl Default for WasmTextDirection {
     }
 }
 
+/// Link classification based on href value and document context.
+///
+/// Used to categorize links during extraction for filtering and analysis.
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum WasmLinkType {
@@ -2569,6 +3101,9 @@ impl Default for WasmLinkType {
     }
 }
 
+/// Image source classification for proper handling and processing.
+///
+/// Determines whether an image is embedded (data URI), inline SVG, external, or relative.
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum WasmImageType {
@@ -2585,6 +3120,9 @@ impl Default for WasmImageType {
     }
 }
 
+/// Structured data format type.
+///
+/// Identifies the schema/format used for structured data markup.
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum WasmStructuredDataType {
@@ -2600,6 +3138,9 @@ impl Default for WasmStructuredDataType {
     }
 }
 
+/// HTML preprocessing aggressiveness level.
+///
+/// Controls the extent of cleanup performed before conversion. Higher levels remove more elements.
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum WasmPreprocessingPreset {
@@ -2615,6 +3156,9 @@ impl Default for WasmPreprocessingPreset {
     }
 }
 
+/// Heading style options for Markdown output.
+///
+/// Controls how headings (h1-h6) are rendered in the output Markdown.
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum WasmHeadingStyle {
@@ -2630,6 +3174,9 @@ impl Default for WasmHeadingStyle {
     }
 }
 
+/// List indentation character type.
+///
+/// Controls whether list items are indented with spaces or tabs.
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum WasmListIndentType {
@@ -2644,6 +3191,9 @@ impl Default for WasmListIndentType {
     }
 }
 
+/// Whitespace handling strategy during conversion.
+///
+/// Determines how sequences of whitespace characters (spaces, tabs, newlines) are processed.
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum WasmWhitespaceMode {
@@ -2658,6 +3208,9 @@ impl Default for WasmWhitespaceMode {
     }
 }
 
+/// Line break syntax in Markdown output.
+///
+/// Controls how soft line breaks (from `<br>` or line breaks in source) are rendered.
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum WasmNewlineStyle {
@@ -2672,6 +3225,9 @@ impl Default for WasmNewlineStyle {
     }
 }
 
+/// Code block fence style in Markdown output.
+///
+/// Determines how code blocks (`<pre><code>`) are rendered in Markdown.
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum WasmCodeBlockStyle {
@@ -2687,6 +3243,9 @@ impl Default for WasmCodeBlockStyle {
     }
 }
 
+/// Highlight rendering style for `<mark>` elements.
+///
+/// Controls how highlighted text is rendered in Markdown output.
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum WasmHighlightStyle {
@@ -2703,6 +3262,10 @@ impl Default for WasmHighlightStyle {
     }
 }
 
+/// Link rendering style in Markdown output.
+///
+/// Controls whether links and images use inline `[text](url)` syntax or
+/// reference-style `[text][1]` syntax with definitions collected at the end.
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum WasmLinkStyle {
@@ -2717,6 +3280,9 @@ impl Default for WasmLinkStyle {
     }
 }
 
+/// Output format for conversion.
+///
+/// Specifies the target markup language format for the conversion output.
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum WasmOutputFormat {
@@ -2732,6 +3298,9 @@ impl Default for WasmOutputFormat {
     }
 }
 
+/// The semantic content type of a document node.
+///
+/// Uses internally tagged representation (`"node_type": "heading"`) for JSON serialization.
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum WasmNodeContent {
@@ -2757,6 +3326,9 @@ impl Default for WasmNodeContent {
     }
 }
 
+/// The type of an inline text annotation.
+///
+/// Uses internally tagged representation (`"annotation_type": "bold"`) for JSON serialization.
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum WasmAnnotationKind {
@@ -2778,6 +3350,7 @@ impl Default for WasmAnnotationKind {
     }
 }
 
+/// Categories of processing warnings.
 #[wasm_bindgen]
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum WasmWarningKind {
@@ -2796,12 +3369,1806 @@ impl Default for WasmWarningKind {
     }
 }
 
+/// Node type enumeration covering all HTML element types.
+///
+/// This enum categorizes all HTML elements that the converter recognizes,
+/// providing a coarse-grained classification for visitor dispatch.
+#[wasm_bindgen]
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum WasmNodeType {
+    Text = 0,
+    Element = 1,
+    Heading = 2,
+    Paragraph = 3,
+    Div = 4,
+    Blockquote = 5,
+    Pre = 6,
+    Hr = 7,
+    List = 8,
+    ListItem = 9,
+    DefinitionList = 10,
+    DefinitionTerm = 11,
+    DefinitionDescription = 12,
+    Table = 13,
+    TableRow = 14,
+    TableCell = 15,
+    TableHeader = 16,
+    TableBody = 17,
+    TableHead = 18,
+    TableFoot = 19,
+    Link = 20,
+    Image = 21,
+    Strong = 22,
+    Em = 23,
+    Code = 24,
+    Strikethrough = 25,
+    Underline = 26,
+    Subscript = 27,
+    Superscript = 28,
+    Mark = 29,
+    Small = 30,
+    Br = 31,
+    Span = 32,
+    Article = 33,
+    Section = 34,
+    Nav = 35,
+    Aside = 36,
+    Header = 37,
+    Footer = 38,
+    Main = 39,
+    Figure = 40,
+    Figcaption = 41,
+    Time = 42,
+    Details = 43,
+    Summary = 44,
+    Form = 45,
+    Input = 46,
+    Select = 47,
+    Option = 48,
+    Button = 49,
+    Textarea = 50,
+    Label = 51,
+    Fieldset = 52,
+    Legend = 53,
+    Audio = 54,
+    Video = 55,
+    Picture = 56,
+    Source = 57,
+    Iframe = 58,
+    Svg = 59,
+    Canvas = 60,
+    Ruby = 61,
+    Rt = 62,
+    Rp = 63,
+    Abbr = 64,
+    Kbd = 65,
+    Samp = 66,
+    Var = 67,
+    Cite = 68,
+    Q = 69,
+    Del = 70,
+    Ins = 71,
+    Data = 72,
+    Meter = 73,
+    Progress = 74,
+    Output = 75,
+    Template = 76,
+    Slot = 77,
+    Html = 78,
+    Head = 79,
+    Body = 80,
+    Title = 81,
+    Meta = 82,
+    LinkTag = 83,
+    Style = 84,
+    Script = 85,
+    Base = 86,
+    Custom = 87,
+}
+
+#[allow(clippy::derivable_impls)]
+impl Default for WasmNodeType {
+    fn default() -> Self {
+        Self::Text
+    }
+}
+
+/// Result of a visitor callback.
+///
+/// Allows visitors to control the conversion flow by either proceeding
+/// with default behavior, providing custom output, skipping elements,
+/// preserving HTML, or signaling errors.
+#[wasm_bindgen]
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum WasmVisitResult {
+    Continue = 0,
+    Custom = 1,
+    Skip = 2,
+    PreserveHtml = 3,
+    Error = 4,
+}
+
+#[allow(clippy::derivable_impls)]
+impl Default for WasmVisitResult {
+    fn default() -> Self {
+        Self::Continue
+    }
+}
+
 #[allow(clippy::missing_errors_doc)]
 #[wasm_bindgen]
-pub fn convert(html: String, options: Option<WasmConversionOptions>) -> Result<WasmConversionResult, JsValue> {
-    let options_core: Option<html_to_markdown_rs::ConversionOptions> = options.map(Into::into);
-    let result = html_to_markdown_rs::convert(&html, options_core).map_err(|e| JsValue::from_str(&e.to_string()))?;
-    Ok(result.into())
+pub fn convert(
+    html: String,
+    options: Option<WasmConversionOptions>,
+    visitor: Option<wasm_bindgen::JsValue>,
+) -> Result<WasmConversionResult, JsValue> {
+    let visitor = visitor.map(|v| {
+        let bridge = WasmHtmlVisitorBridge::new(v);
+        std::rc::Rc::new(std::cell::RefCell::new(bridge)) as html_to_markdown_rs::visitor::VisitorHandle
+    });
+    let options_core: Option<html_to_markdown_rs::ConversionOptions> =
+        options.map(html_to_markdown_rs::ConversionOptions::from);
+    html_to_markdown_rs::convert(&html, options_core, visitor)
+        .map(|val| val.into())
+        .map_err(|e| wasm_bindgen::JsValue::from_str(&e.to_string()))
+}
+
+fn nodecontext_to_js_value(ctx: &html_to_markdown_rs::visitor::NodeContext) -> wasm_bindgen::JsValue {
+    let obj = js_sys::Object::new();
+    js_sys::Reflect::set(
+        &obj,
+        &wasm_bindgen::JsValue::from_str("nodeType"),
+        &wasm_bindgen::JsValue::from_str(&format!("{:?}", ctx.node_type)),
+    )
+    .ok();
+    js_sys::Reflect::set(
+        &obj,
+        &wasm_bindgen::JsValue::from_str("tagName"),
+        &wasm_bindgen::JsValue::from_str(&ctx.tag_name),
+    )
+    .ok();
+    js_sys::Reflect::set(
+        &obj,
+        &wasm_bindgen::JsValue::from_str("depth"),
+        &wasm_bindgen::JsValue::from_f64(ctx.depth as f64),
+    )
+    .ok();
+    js_sys::Reflect::set(
+        &obj,
+        &wasm_bindgen::JsValue::from_str("indexInParent"),
+        &wasm_bindgen::JsValue::from_f64(ctx.index_in_parent as f64),
+    )
+    .ok();
+    js_sys::Reflect::set(
+        &obj,
+        &wasm_bindgen::JsValue::from_str("isInline"),
+        &wasm_bindgen::JsValue::from_bool(ctx.is_inline),
+    )
+    .ok();
+    let parent_tag_val = match &ctx.parent_tag {
+        Some(s) => wasm_bindgen::JsValue::from_str(s),
+        None => wasm_bindgen::JsValue::null(),
+    };
+    js_sys::Reflect::set(&obj, &wasm_bindgen::JsValue::from_str("parentTag"), &parent_tag_val).ok();
+    let attrs = js_sys::Object::new();
+    for (k, v) in &ctx.attributes {
+        js_sys::Reflect::set(
+            &attrs,
+            &wasm_bindgen::JsValue::from_str(k),
+            &wasm_bindgen::JsValue::from_str(v),
+        )
+        .ok();
+    }
+    js_sys::Reflect::set(&obj, &wasm_bindgen::JsValue::from_str("attributes"), &attrs).ok();
+    obj.into()
+}
+
+pub struct WasmHtmlVisitorBridge {
+    js_obj: wasm_bindgen::JsValue,
+}
+
+impl std::fmt::Debug for WasmHtmlVisitorBridge {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "WasmHtmlVisitorBridge")
+    }
+}
+
+impl WasmHtmlVisitorBridge {
+    pub fn new(js_obj: wasm_bindgen::JsValue) -> Self {
+        Self { js_obj }
+    }
+}
+
+impl html_to_markdown_rs::visitor::HtmlVisitor for WasmHtmlVisitorBridge {
+    fn visit_element_start(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitElementStart");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_element_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitElementEnd");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_str(_output));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_text(&mut self, _ctx: &html_to_markdown_rs::NodeContext, _text: &str) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitText");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_str(_text));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_link(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _href: &str,
+        _text: &str,
+        _title: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitLink");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_str(_href));
+        args.push(&wasm_bindgen::JsValue::from_str(_text));
+        args.push(&match _title {
+            Some(s) => wasm_bindgen::JsValue::from_str(s),
+            None => wasm_bindgen::JsValue::null(),
+        });
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_image(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _src: &str,
+        _alt: &str,
+        _title: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitImage");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_str(_src));
+        args.push(&wasm_bindgen::JsValue::from_str(_alt));
+        args.push(&match _title {
+            Some(s) => wasm_bindgen::JsValue::from_str(s),
+            None => wasm_bindgen::JsValue::null(),
+        });
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_heading(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _level: u32,
+        _text: &str,
+        _id: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitHeading");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_str(&format!("{:?}", _level)));
+        args.push(&wasm_bindgen::JsValue::from_str(_text));
+        args.push(&match _id {
+            Some(s) => wasm_bindgen::JsValue::from_str(s),
+            None => wasm_bindgen::JsValue::null(),
+        });
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_code_block(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _lang: Option<&str>,
+        _code: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitCodeBlock");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&match _lang {
+            Some(s) => wasm_bindgen::JsValue::from_str(s),
+            None => wasm_bindgen::JsValue::null(),
+        });
+        args.push(&wasm_bindgen::JsValue::from_str(_code));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_code_inline(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _code: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitCodeInline");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_str(_code));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_list_item(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _ordered: bool,
+        _marker: &str,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitListItem");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_bool(_ordered));
+        args.push(&wasm_bindgen::JsValue::from_str(_marker));
+        args.push(&wasm_bindgen::JsValue::from_str(_text));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_list_start(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _ordered: bool,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitListStart");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_bool(_ordered));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_list_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _ordered: bool,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitListEnd");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_bool(_ordered));
+        args.push(&wasm_bindgen::JsValue::from_str(_output));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_table_start(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitTableStart");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_table_row(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _cells: &[String],
+        _is_header: bool,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitTableRow");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_str(&format!("{:?}", _cells)));
+        args.push(&wasm_bindgen::JsValue::from_bool(_is_header));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_table_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitTableEnd");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_str(_output));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_blockquote(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _content: &str,
+        _depth: usize,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitBlockquote");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_str(_content));
+        args.push(&wasm_bindgen::JsValue::from_str(&format!("{:?}", _depth)));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_strong(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitStrong");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_str(_text));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_emphasis(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitEmphasis");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_str(_text));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_strikethrough(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitStrikethrough");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_str(_text));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_underline(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitUnderline");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_str(_text));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_subscript(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitSubscript");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_str(_text));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_superscript(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitSuperscript");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_str(_text));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_mark(&mut self, _ctx: &html_to_markdown_rs::NodeContext, _text: &str) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitMark");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_str(_text));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_line_break(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitLineBreak");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_horizontal_rule(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitHorizontalRule");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_custom_element(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _tag_name: &str,
+        _html: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitCustomElement");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_str(_tag_name));
+        args.push(&wasm_bindgen::JsValue::from_str(_html));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_definition_list_start(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitDefinitionListStart");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_definition_term(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitDefinitionTerm");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_str(_text));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_definition_description(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitDefinitionDescription");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_str(_text));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_definition_list_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitDefinitionListEnd");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_str(_output));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_form(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _action: Option<&str>,
+        _method: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitForm");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&match _action {
+            Some(s) => wasm_bindgen::JsValue::from_str(s),
+            None => wasm_bindgen::JsValue::null(),
+        });
+        args.push(&match _method {
+            Some(s) => wasm_bindgen::JsValue::from_str(s),
+            None => wasm_bindgen::JsValue::null(),
+        });
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_input(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _input_type: &str,
+        _name: Option<&str>,
+        _value: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitInput");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_str(_input_type));
+        args.push(&match _name {
+            Some(s) => wasm_bindgen::JsValue::from_str(s),
+            None => wasm_bindgen::JsValue::null(),
+        });
+        args.push(&match _value {
+            Some(s) => wasm_bindgen::JsValue::from_str(s),
+            None => wasm_bindgen::JsValue::null(),
+        });
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_button(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitButton");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_str(_text));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_audio(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _src: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitAudio");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&match _src {
+            Some(s) => wasm_bindgen::JsValue::from_str(s),
+            None => wasm_bindgen::JsValue::null(),
+        });
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_video(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _src: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitVideo");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&match _src {
+            Some(s) => wasm_bindgen::JsValue::from_str(s),
+            None => wasm_bindgen::JsValue::null(),
+        });
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_iframe(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _src: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitIframe");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&match _src {
+            Some(s) => wasm_bindgen::JsValue::from_str(s),
+            None => wasm_bindgen::JsValue::null(),
+        });
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_details(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _open: bool,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitDetails");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_bool(_open));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_summary(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitSummary");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_str(_text));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_figure_start(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitFigureStart");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_figcaption(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitFigcaption");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_str(_text));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_figure_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let key = wasm_bindgen::JsValue::from_str("visitFigureEnd");
+        let has_method = js_sys::Reflect::has(&self.js_obj, &key).unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func_val = match js_sys::Reflect::get(&self.js_obj, &key) {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let func: js_sys::Function = match func_val.dyn_into() {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let args = js_sys::Array::new();
+        args.push(&nodecontext_to_js_value(_ctx));
+        args.push(&wasm_bindgen::JsValue::from_str(_output));
+        let result = func.apply(&self.js_obj, &args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Some(s) = val.as_string() {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
 }
 
 impl From<WasmMetadataConfig> for html_to_markdown_rs::metadata::MetadataConfig {
@@ -2961,7 +5328,7 @@ impl From<html_to_markdown_rs::metadata::ImageMetadata> for WasmImageMetadata {
             src: val.src,
             alt: val.alt,
             title: val.title,
-            dimensions: val.dimensions.as_ref().map(|v| format!("{:?}", v)),
+            dimensions: val.dimensions.as_ref().map(|v| format!("{v:?}")),
             image_type: val.image_type.into(),
             attributes: serde_wasm_bindgen::to_value(&val.attributes).unwrap_or(JsValue::NULL),
         }
@@ -3420,6 +5787,20 @@ impl From<html_to_markdown_rs::ProcessingWarning> for WasmProcessingWarning {
     }
 }
 
+impl From<html_to_markdown_rs::NodeContext> for WasmNodeContext {
+    fn from(val: html_to_markdown_rs::NodeContext) -> Self {
+        Self {
+            node_type: val.node_type.into(),
+            tag_name: val.tag_name,
+            attributes: serde_wasm_bindgen::to_value(&val.attributes).unwrap_or(JsValue::NULL),
+            depth: val.depth,
+            index_in_parent: val.index_in_parent,
+            parent_tag: val.parent_tag,
+            is_inline: val.is_inline,
+        }
+    }
+}
+
 impl From<WasmTextDirection> for html_to_markdown_rs::metadata::TextDirection {
     fn from(val: WasmTextDirection) -> Self {
         match val {
@@ -3813,8 +6194,136 @@ impl From<html_to_markdown_rs::WarningKind> for WasmWarningKind {
     }
 }
 
-/// Convert a `html_to_markdown_rs::error::ConversionError` error to a `JsValue` string.
+impl From<html_to_markdown_rs::NodeType> for WasmNodeType {
+    fn from(val: html_to_markdown_rs::NodeType) -> Self {
+        match val {
+            html_to_markdown_rs::NodeType::Text => Self::Text,
+            html_to_markdown_rs::NodeType::Element => Self::Element,
+            html_to_markdown_rs::NodeType::Heading => Self::Heading,
+            html_to_markdown_rs::NodeType::Paragraph => Self::Paragraph,
+            html_to_markdown_rs::NodeType::Div => Self::Div,
+            html_to_markdown_rs::NodeType::Blockquote => Self::Blockquote,
+            html_to_markdown_rs::NodeType::Pre => Self::Pre,
+            html_to_markdown_rs::NodeType::Hr => Self::Hr,
+            html_to_markdown_rs::NodeType::List => Self::List,
+            html_to_markdown_rs::NodeType::ListItem => Self::ListItem,
+            html_to_markdown_rs::NodeType::DefinitionList => Self::DefinitionList,
+            html_to_markdown_rs::NodeType::DefinitionTerm => Self::DefinitionTerm,
+            html_to_markdown_rs::NodeType::DefinitionDescription => Self::DefinitionDescription,
+            html_to_markdown_rs::NodeType::Table => Self::Table,
+            html_to_markdown_rs::NodeType::TableRow => Self::TableRow,
+            html_to_markdown_rs::NodeType::TableCell => Self::TableCell,
+            html_to_markdown_rs::NodeType::TableHeader => Self::TableHeader,
+            html_to_markdown_rs::NodeType::TableBody => Self::TableBody,
+            html_to_markdown_rs::NodeType::TableHead => Self::TableHead,
+            html_to_markdown_rs::NodeType::TableFoot => Self::TableFoot,
+            html_to_markdown_rs::NodeType::Link => Self::Link,
+            html_to_markdown_rs::NodeType::Image => Self::Image,
+            html_to_markdown_rs::NodeType::Strong => Self::Strong,
+            html_to_markdown_rs::NodeType::Em => Self::Em,
+            html_to_markdown_rs::NodeType::Code => Self::Code,
+            html_to_markdown_rs::NodeType::Strikethrough => Self::Strikethrough,
+            html_to_markdown_rs::NodeType::Underline => Self::Underline,
+            html_to_markdown_rs::NodeType::Subscript => Self::Subscript,
+            html_to_markdown_rs::NodeType::Superscript => Self::Superscript,
+            html_to_markdown_rs::NodeType::Mark => Self::Mark,
+            html_to_markdown_rs::NodeType::Small => Self::Small,
+            html_to_markdown_rs::NodeType::Br => Self::Br,
+            html_to_markdown_rs::NodeType::Span => Self::Span,
+            html_to_markdown_rs::NodeType::Article => Self::Article,
+            html_to_markdown_rs::NodeType::Section => Self::Section,
+            html_to_markdown_rs::NodeType::Nav => Self::Nav,
+            html_to_markdown_rs::NodeType::Aside => Self::Aside,
+            html_to_markdown_rs::NodeType::Header => Self::Header,
+            html_to_markdown_rs::NodeType::Footer => Self::Footer,
+            html_to_markdown_rs::NodeType::Main => Self::Main,
+            html_to_markdown_rs::NodeType::Figure => Self::Figure,
+            html_to_markdown_rs::NodeType::Figcaption => Self::Figcaption,
+            html_to_markdown_rs::NodeType::Time => Self::Time,
+            html_to_markdown_rs::NodeType::Details => Self::Details,
+            html_to_markdown_rs::NodeType::Summary => Self::Summary,
+            html_to_markdown_rs::NodeType::Form => Self::Form,
+            html_to_markdown_rs::NodeType::Input => Self::Input,
+            html_to_markdown_rs::NodeType::Select => Self::Select,
+            html_to_markdown_rs::NodeType::Option => Self::Option,
+            html_to_markdown_rs::NodeType::Button => Self::Button,
+            html_to_markdown_rs::NodeType::Textarea => Self::Textarea,
+            html_to_markdown_rs::NodeType::Label => Self::Label,
+            html_to_markdown_rs::NodeType::Fieldset => Self::Fieldset,
+            html_to_markdown_rs::NodeType::Legend => Self::Legend,
+            html_to_markdown_rs::NodeType::Audio => Self::Audio,
+            html_to_markdown_rs::NodeType::Video => Self::Video,
+            html_to_markdown_rs::NodeType::Picture => Self::Picture,
+            html_to_markdown_rs::NodeType::Source => Self::Source,
+            html_to_markdown_rs::NodeType::Iframe => Self::Iframe,
+            html_to_markdown_rs::NodeType::Svg => Self::Svg,
+            html_to_markdown_rs::NodeType::Canvas => Self::Canvas,
+            html_to_markdown_rs::NodeType::Ruby => Self::Ruby,
+            html_to_markdown_rs::NodeType::Rt => Self::Rt,
+            html_to_markdown_rs::NodeType::Rp => Self::Rp,
+            html_to_markdown_rs::NodeType::Abbr => Self::Abbr,
+            html_to_markdown_rs::NodeType::Kbd => Self::Kbd,
+            html_to_markdown_rs::NodeType::Samp => Self::Samp,
+            html_to_markdown_rs::NodeType::Var => Self::Var,
+            html_to_markdown_rs::NodeType::Cite => Self::Cite,
+            html_to_markdown_rs::NodeType::Q => Self::Q,
+            html_to_markdown_rs::NodeType::Del => Self::Del,
+            html_to_markdown_rs::NodeType::Ins => Self::Ins,
+            html_to_markdown_rs::NodeType::Data => Self::Data,
+            html_to_markdown_rs::NodeType::Meter => Self::Meter,
+            html_to_markdown_rs::NodeType::Progress => Self::Progress,
+            html_to_markdown_rs::NodeType::Output => Self::Output,
+            html_to_markdown_rs::NodeType::Template => Self::Template,
+            html_to_markdown_rs::NodeType::Slot => Self::Slot,
+            html_to_markdown_rs::NodeType::Html => Self::Html,
+            html_to_markdown_rs::NodeType::Head => Self::Head,
+            html_to_markdown_rs::NodeType::Body => Self::Body,
+            html_to_markdown_rs::NodeType::Title => Self::Title,
+            html_to_markdown_rs::NodeType::Meta => Self::Meta,
+            html_to_markdown_rs::NodeType::LinkTag => Self::LinkTag,
+            html_to_markdown_rs::NodeType::Style => Self::Style,
+            html_to_markdown_rs::NodeType::Script => Self::Script,
+            html_to_markdown_rs::NodeType::Base => Self::Base,
+            html_to_markdown_rs::NodeType::Custom => Self::Custom,
+        }
+    }
+}
+
+impl From<html_to_markdown_rs::VisitResult> for WasmVisitResult {
+    fn from(val: html_to_markdown_rs::VisitResult) -> Self {
+        match val {
+            html_to_markdown_rs::VisitResult::Continue => Self::Continue,
+            html_to_markdown_rs::VisitResult::Custom(..) => Self::Custom,
+            html_to_markdown_rs::VisitResult::Skip => Self::Skip,
+            html_to_markdown_rs::VisitResult::PreserveHtml => Self::PreserveHtml,
+            html_to_markdown_rs::VisitResult::Error(..) => Self::Error,
+        }
+    }
+}
+
+/// Return the error code string for a `html_to_markdown_rs::error::ConversionError` variant.
+#[allow(dead_code)]
+fn conversion_error_error_code(e: &html_to_markdown_rs::error::ConversionError) -> &'static str {
+    #[allow(unreachable_patterns)]
+    match e {
+        html_to_markdown_rs::error::ConversionError::ParseError(..) => "parse_error",
+        html_to_markdown_rs::error::ConversionError::SanitizationError(..) => "sanitization_error",
+        html_to_markdown_rs::error::ConversionError::ConfigError(..) => "config_error",
+        html_to_markdown_rs::error::ConversionError::IoError(..) => "io_error",
+        html_to_markdown_rs::error::ConversionError::Panic(..) => "panic",
+        html_to_markdown_rs::error::ConversionError::InvalidInput(..) => "invalid_input",
+        html_to_markdown_rs::error::ConversionError::Other(..) => "other",
+        _ => "conversion_error",
+    }
+}
+
+/// Convert a `html_to_markdown_rs::error::ConversionError` error to a `JsValue` object with `code` and `message` fields.
 #[allow(dead_code)]
 fn conversion_error_to_js_value(e: html_to_markdown_rs::error::ConversionError) -> wasm_bindgen::JsValue {
-    wasm_bindgen::JsValue::from_str(&e.to_string())
+    let code = conversion_error_error_code(&e);
+    let message = e.to_string();
+    let obj = js_sys::Object::new();
+    js_sys::Reflect::set(&obj, &"code".into(), &code.into()).ok();
+    js_sys::Reflect::set(&obj, &"message".into(), &message.into()).ok();
+    obj.into()
 }

@@ -15,7 +15,7 @@ public final class HtmlToMarkdownRs {
             var coptions = coptionsJson != null
                 ? (MemorySegment) NativeLib.HTM_CONVERSION_OPTIONS_FROM_JSON.invoke(coptionsJsonSeg)
                 : MemorySegment.NULL;
-            var resultPtr = (MemorySegment) NativeLib.HTM_CONVERT.invoke(chtml, coptions);
+            var resultPtr = (MemorySegment) NativeLib.HTM_CONVERT.invoke(chtml, coptions, MemorySegment.NULL);
             if (!coptions.equals(MemorySegment.NULL)) {
                 NativeLib.HTM_CONVERSION_OPTIONS_FREE.invoke(coptions);
             }
@@ -32,6 +32,46 @@ public final class HtmlToMarkdownRs {
             String json = jsonPtr.reinterpret(Long.MAX_VALUE).getString(0);
             NativeLib.HTM_FREE_STRING.invoke(jsonPtr);
             return createObjectMapper().readValue(json, ConversionResult.class);
+        } catch (Throwable e) {
+            throw new HtmlToMarkdownRsException("FFI call failed", e);
+        }
+    }
+
+    public static ConversionResult convertWithVisitor(String html, ConversionOptions options, Visitor visitor) throws HtmlToMarkdownRsException {
+        try (var arena = Arena.ofConfined();
+             var bridge = new VisitorBridge(visitor)) {
+            var cHtml = arena.allocateFrom(html);
+
+            MemorySegment optionsPtr = MemorySegment.NULL;
+            if (options != null) {
+                var optJson = arena.allocateFrom(createObjectMapper().writeValueAsString(options));
+                optionsPtr = (MemorySegment) NativeLib.HTM_CONVERSION_OPTIONS_FROM_JSON.invoke(optJson);
+            }
+
+            var visitorHandle = (MemorySegment) NativeLib.HTM_VISITOR_CREATE.invoke(bridge.callbacksStruct());
+            if (visitorHandle.equals(MemorySegment.NULL)) {
+                throw new HtmlToMarkdownRsException("Failed to create visitor handle", null);
+            }
+
+            try {
+                var resultPtr = (MemorySegment) NativeLib.HTM_CONVERT_WITH_VISITOR.invoke(cHtml, optionsPtr, visitorHandle);
+                if (!optionsPtr.equals(MemorySegment.NULL)) {
+                    NativeLib.HTM_CONVERSION_OPTIONS_FREE.invoke(optionsPtr);
+                }
+                if (resultPtr.equals(MemorySegment.NULL)) {
+                    checkLastError();
+                    return null;
+                }
+                var json = resultPtr.reinterpret(Long.MAX_VALUE).getString(0);
+                NativeLib.HTM_FREE_STRING.invoke(resultPtr);
+                return createObjectMapper().readValue(json, ConversionResult.class);
+            } catch (Throwable e) {
+                throw new HtmlToMarkdownRsException("FFI call failed", e);
+            } finally {
+                NativeLib.HTM_VISITOR_FREE.invoke(visitorHandle);
+            }
+        } catch (HtmlToMarkdownRsException e) {
+            throw e;
         } catch (Throwable e) {
             throw new HtmlToMarkdownRsException("FFI call failed", e);
         }

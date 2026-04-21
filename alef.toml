@@ -26,6 +26,8 @@ sources = [
   "crates/html-to-markdown/src/error.rs",
   "crates/html-to-markdown/src/convert_api.rs",
   "crates/html-to-markdown/src/metadata/types.rs",
+  "crates/html-to-markdown/src/visitor/traits.rs",
+  "crates/html-to-markdown/src/visitor/types.rs",
 ]
 version_from = "Cargo.toml"
 workspace_root = "."
@@ -52,6 +54,9 @@ types = [
   "HeadingInfo",
   "LinkInfo",
   "ImageInfo",
+  "HtmlVisitor",
+  "NodeContext",
+  "VisitResult",
 ]
 functions = ["convert"]
 
@@ -309,7 +314,7 @@ Supports automatic downloading of prebuilt FFI libraries for Linux, macOS, and W
 migration_version = ""
 
 [readme.languages.go.features]
-visitor_pattern = false
+visitor_pattern = true
 metadata_extraction = false
 cli_proxy = false
 
@@ -361,7 +366,7 @@ Uses Foreign Function & Memory API for zero-dependency, thread-safe conversion w
 migration_version = "3.1.0"
 
 [readme.languages.java.features]
-visitor_pattern = false
+visitor_pattern = true
 metadata_extraction = false
 cli_proxy = false
 
@@ -407,7 +412,7 @@ Provides type-safe record-based APIs for metadata extraction, visitor patterns, 
 migration_version = "3.1.0"
 
 [readme.languages.csharp.features]
-visitor_pattern = false
+visitor_pattern = true
 metadata_extraction = false
 cli_proxy = false
 
@@ -585,6 +590,11 @@ replace = 'Include="KreuzbergDev.HtmlToMarkdown" Version="{version}"'
 path = "test_apps/php/composer.json"
 search = '"kreuzberg-dev/html-to-markdown": "[^"]*"'
 replace = '"kreuzberg-dev/html-to-markdown": ">={version}"'
+
+[[trait_bridges]]
+trait_name = "HtmlVisitor"
+type_alias = "VisitorHandle"
+param_name = "visitor"
 
 [scaffold]
 description = "High-performance HTML to Markdown converter"

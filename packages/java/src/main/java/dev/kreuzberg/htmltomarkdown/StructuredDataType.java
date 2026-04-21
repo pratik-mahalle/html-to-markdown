@@ -4,9 +4,17 @@ package dev.kreuzberg.htmltomarkdown;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+/**
+ * Structured data format type.
+ *
+ * Identifies the schema/format used for structured data markup.
+ */
 public enum StructuredDataType {
+    /** JSON-LD (JSON for Linking Data) script blocks */
     JsonLd("json_ld"),
+    /** HTML5 Microdata attributes (itemscope, itemtype, itemprop) */
     Microdata("microdata"),
+    /** RDF in Attributes (RDFa) markup */
     RDFa("rdfa");
 
     private final String value;

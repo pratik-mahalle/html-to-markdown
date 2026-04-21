@@ -7,7 +7,7 @@
 
 #![cfg(feature = "visitor")]
 
-use html_to_markdown_rs::convert_with_visitor;
+use html_to_markdown_rs::convert;
 use html_to_markdown_rs::visitor::{HtmlVisitor, NodeContext, VisitResult};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -147,7 +147,10 @@ fn test_issue_187_content_filter() {
     "#;
 
     let visitor = Rc::new(RefCell::new(ContentFilter::default()));
-    let result = convert_with_visitor(html, None, Some(visitor.clone())).unwrap();
+    let result = convert(html, None, Some(visitor.clone()))
+        .unwrap()
+        .content
+        .unwrap_or_default();
 
     println!("Converted Markdown:\n{result}");
     println!("\nSkipped Elements:");

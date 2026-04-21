@@ -4654,6 +4654,179 @@ pub unsafe extern "C" fn htm_processing_warning_kind(
     Box::into_raw(Box::new(obj.kind))
 }
 
+/// Create a `NodeContext` from a JSON string. Returns null on failure.
+/// # Safety
+/// JSON string must be valid UTF-8 and null-terminated.
+/// Returned handle must be freed with `htm_node_context_free`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_node_context_from_json(json: *const c_char) -> *mut html_to_markdown_rs::NodeContext {
+    clear_last_error();
+    if json.is_null() {
+        set_last_error(1, "Null pointer passed for JSON string");
+        return std::ptr::null_mut();
+    }
+    let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in JSON string");
+            return std::ptr::null_mut();
+        }
+    };
+    match serde_json::from_str::<html_to_markdown_rs::NodeContext>(c_str) {
+        Ok(val) => Box::into_raw(Box::new(val)),
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// Serialize a `NodeContext` to a JSON string. Returns null on failure.
+/// # Safety
+/// `ptr` must be a valid, non-null pointer returned by a `htm` function.
+/// The returned string must be freed with `htm_free_string`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_node_context_to_json(ptr: *const html_to_markdown_rs::NodeContext) -> *mut c_char {
+    clear_last_error();
+    if ptr.is_null() {
+        set_last_error(1, "Null pointer passed to to_json");
+        return std::ptr::null_mut();
+    }
+    let val = unsafe { &*ptr };
+    match serde_json::to_string(val) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(e) => {
+                set_last_error(2, &e.to_string());
+                std::ptr::null_mut()
+            }
+        },
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
+}
+
+/// Free a `NodeContext` handle.
+/// # Safety
+/// Pointer must have been returned by this library, or be null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_node_context_free(ptr: *mut html_to_markdown_rs::NodeContext) {
+    if !ptr.is_null() {
+        unsafe {
+            drop(Box::from_raw(ptr));
+        }
+    }
+}
+
+/// Get the `node_type` field from a `NodeContext`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_node_context_node_type(
+    ptr: *const html_to_markdown_rs::NodeContext,
+) -> *mut html_to_markdown_rs::NodeType {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    Box::into_raw(Box::new(obj.node_type))
+}
+
+/// Get the `tag_name` field from a `NodeContext`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_node_context_tag_name(
+    ptr: *const html_to_markdown_rs::NodeContext,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match CString::new(obj.tag_name.to_string()) {
+        Ok(cs) => cs.into_raw(),
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `attributes` field from a `NodeContext`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_node_context_attributes(
+    ptr: *const html_to_markdown_rs::NodeContext,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match serde_json::to_string(&obj.attributes) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(_) => std::ptr::null_mut(),
+        },
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `depth` field from a `NodeContext`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_node_context_depth(ptr: *const html_to_markdown_rs::NodeContext) -> usize {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.depth
+}
+
+/// Get the `index_in_parent` field from a `NodeContext`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_node_context_index_in_parent(ptr: *const html_to_markdown_rs::NodeContext) -> usize {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.index_in_parent
+}
+
+/// Get the `parent_tag` field from a `NodeContext`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_node_context_parent_tag(
+    ptr: *const html_to_markdown_rs::NodeContext,
+) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    let obj = unsafe { &*ptr };
+    match &obj.parent_tag {
+        Some(val) => match CString::new(val.to_string()) {
+            Ok(cs) => cs.into_raw(),
+            Err(_) => std::ptr::null_mut(),
+        },
+        None => std::ptr::null_mut(),
+    }
+}
+
+/// Get the `is_inline` field from a `NodeContext`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_node_context_is_inline(ptr: *const html_to_markdown_rs::NodeContext) -> i32 {
+    if ptr.is_null() {
+        return 0;
+    }
+    let obj = unsafe { &*ptr };
+    obj.is_inline as i32
+}
+
 /// Convert an integer to a `TextDirection` variant. Returns -1 on invalid input.
 /// # Safety
 /// Caller must ensure all pointer arguments are valid or null.
@@ -5398,6 +5571,268 @@ pub unsafe extern "C" fn htm_warning_kind_from_str(name: *const c_char) -> i32 {
     }
 }
 
+/// Convert an integer to a `NodeType` variant. Returns -1 on invalid input.
+/// # Safety
+/// Caller must ensure all pointer arguments are valid or null.
+/// Returned pointers must be freed with the appropriate free function.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_node_type_from_i32(value: i32) -> i32 {
+    match value {
+        0 => 0,   // Text
+        1 => 1,   // Element
+        2 => 2,   // Heading
+        3 => 3,   // Paragraph
+        4 => 4,   // Div
+        5 => 5,   // Blockquote
+        6 => 6,   // Pre
+        7 => 7,   // Hr
+        8 => 8,   // List
+        9 => 9,   // ListItem
+        10 => 10, // DefinitionList
+        11 => 11, // DefinitionTerm
+        12 => 12, // DefinitionDescription
+        13 => 13, // Table
+        14 => 14, // TableRow
+        15 => 15, // TableCell
+        16 => 16, // TableHeader
+        17 => 17, // TableBody
+        18 => 18, // TableHead
+        19 => 19, // TableFoot
+        20 => 20, // Link
+        21 => 21, // Image
+        22 => 22, // Strong
+        23 => 23, // Em
+        24 => 24, // Code
+        25 => 25, // Strikethrough
+        26 => 26, // Underline
+        27 => 27, // Subscript
+        28 => 28, // Superscript
+        29 => 29, // Mark
+        30 => 30, // Small
+        31 => 31, // Br
+        32 => 32, // Span
+        33 => 33, // Article
+        34 => 34, // Section
+        35 => 35, // Nav
+        36 => 36, // Aside
+        37 => 37, // Header
+        38 => 38, // Footer
+        39 => 39, // Main
+        40 => 40, // Figure
+        41 => 41, // Figcaption
+        42 => 42, // Time
+        43 => 43, // Details
+        44 => 44, // Summary
+        45 => 45, // Form
+        46 => 46, // Input
+        47 => 47, // Select
+        48 => 48, // Option
+        49 => 49, // Button
+        50 => 50, // Textarea
+        51 => 51, // Label
+        52 => 52, // Fieldset
+        53 => 53, // Legend
+        54 => 54, // Audio
+        55 => 55, // Video
+        56 => 56, // Picture
+        57 => 57, // Source
+        58 => 58, // Iframe
+        59 => 59, // Svg
+        60 => 60, // Canvas
+        61 => 61, // Ruby
+        62 => 62, // Rt
+        63 => 63, // Rp
+        64 => 64, // Abbr
+        65 => 65, // Kbd
+        66 => 66, // Samp
+        67 => 67, // Var
+        68 => 68, // Cite
+        69 => 69, // Q
+        70 => 70, // Del
+        71 => 71, // Ins
+        72 => 72, // Data
+        73 => 73, // Meter
+        74 => 74, // Progress
+        75 => 75, // Output
+        76 => 76, // Template
+        77 => 77, // Slot
+        78 => 78, // Html
+        79 => 79, // Head
+        80 => 80, // Body
+        81 => 81, // Title
+        82 => 82, // Meta
+        83 => 83, // LinkTag
+        84 => 84, // Style
+        85 => 85, // Script
+        86 => 86, // Base
+        87 => 87, // Custom
+        _ => {
+            set_last_error(1, "Invalid NodeType variant");
+            -1
+        }
+    }
+}
+
+/// Convert a `NodeType` variant name (C string) to its integer value. Returns -1 on invalid input.
+/// # Safety
+/// Caller must ensure `ptr` is a valid pointer to a `c_char` or null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_node_type_from_str(name: *const c_char) -> i32 {
+    if name.is_null() {
+        set_last_error(1, "Null pointer passed for enum name");
+        return -1;
+    }
+    let s = match unsafe { CStr::from_ptr(name) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in enum name");
+            return -1;
+        }
+    };
+    match s {
+        "Text" => 0,
+        "Element" => 1,
+        "Heading" => 2,
+        "Paragraph" => 3,
+        "Div" => 4,
+        "Blockquote" => 5,
+        "Pre" => 6,
+        "Hr" => 7,
+        "List" => 8,
+        "ListItem" => 9,
+        "DefinitionList" => 10,
+        "DefinitionTerm" => 11,
+        "DefinitionDescription" => 12,
+        "Table" => 13,
+        "TableRow" => 14,
+        "TableCell" => 15,
+        "TableHeader" => 16,
+        "TableBody" => 17,
+        "TableHead" => 18,
+        "TableFoot" => 19,
+        "Link" => 20,
+        "Image" => 21,
+        "Strong" => 22,
+        "Em" => 23,
+        "Code" => 24,
+        "Strikethrough" => 25,
+        "Underline" => 26,
+        "Subscript" => 27,
+        "Superscript" => 28,
+        "Mark" => 29,
+        "Small" => 30,
+        "Br" => 31,
+        "Span" => 32,
+        "Article" => 33,
+        "Section" => 34,
+        "Nav" => 35,
+        "Aside" => 36,
+        "Header" => 37,
+        "Footer" => 38,
+        "Main" => 39,
+        "Figure" => 40,
+        "Figcaption" => 41,
+        "Time" => 42,
+        "Details" => 43,
+        "Summary" => 44,
+        "Form" => 45,
+        "Input" => 46,
+        "Select" => 47,
+        "Option" => 48,
+        "Button" => 49,
+        "Textarea" => 50,
+        "Label" => 51,
+        "Fieldset" => 52,
+        "Legend" => 53,
+        "Audio" => 54,
+        "Video" => 55,
+        "Picture" => 56,
+        "Source" => 57,
+        "Iframe" => 58,
+        "Svg" => 59,
+        "Canvas" => 60,
+        "Ruby" => 61,
+        "Rt" => 62,
+        "Rp" => 63,
+        "Abbr" => 64,
+        "Kbd" => 65,
+        "Samp" => 66,
+        "Var" => 67,
+        "Cite" => 68,
+        "Q" => 69,
+        "Del" => 70,
+        "Ins" => 71,
+        "Data" => 72,
+        "Meter" => 73,
+        "Progress" => 74,
+        "Output" => 75,
+        "Template" => 76,
+        "Slot" => 77,
+        "Html" => 78,
+        "Head" => 79,
+        "Body" => 80,
+        "Title" => 81,
+        "Meta" => 82,
+        "LinkTag" => 83,
+        "Style" => 84,
+        "Script" => 85,
+        "Base" => 86,
+        "Custom" => 87,
+        _ => {
+            set_last_error(1, "Unknown NodeType variant");
+            -1
+        }
+    }
+}
+
+/// Convert an integer to a `VisitResult` variant. Returns -1 on invalid input.
+/// # Safety
+/// Caller must ensure all pointer arguments are valid or null.
+/// Returned pointers must be freed with the appropriate free function.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_visit_result_from_i32(value: i32) -> i32 {
+    match value {
+        0 => 0, // Continue
+        1 => 1, // Custom
+        2 => 2, // Skip
+        3 => 3, // PreserveHtml
+        4 => 4, // Error
+        _ => {
+            set_last_error(1, "Invalid VisitResult variant");
+            -1
+        }
+    }
+}
+
+/// Convert a `VisitResult` variant name (C string) to its integer value. Returns -1 on invalid input.
+/// # Safety
+/// Caller must ensure `ptr` is a valid pointer to a `c_char` or null.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_visit_result_from_str(name: *const c_char) -> i32 {
+    if name.is_null() {
+        set_last_error(1, "Null pointer passed for enum name");
+        return -1;
+    }
+    let s = match unsafe { CStr::from_ptr(name) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in enum name");
+            return -1;
+        }
+    };
+    match s {
+        "Continue" => 0,
+        "Custom" => 1,
+        "Skip" => 2,
+        "PreserveHtml" => 3,
+        "Error" => 4,
+        _ => {
+            set_last_error(1, "Unknown VisitResult variant");
+            -1
+        }
+    }
+}
+
 /// Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images,
 /// and warnings.
 ///
@@ -5412,7 +5847,7 @@ pub unsafe extern "C" fn htm_warning_kind_from_str(name: *const c_char) -> i32 {
 /// use html_to_markdown_rs::{convert, ConversionOptions};
 ///
 /// let html = "<h1>Hello World</h1>";
-/// let result = convert(html, None).unwrap();
+/// let result = convert(html, None, None).unwrap();
 /// assert!(result.content.as_deref().unwrap_or("").contains("Hello World"));
 /// ```
 ///
@@ -5424,34 +5859,13 @@ pub unsafe extern "C" fn htm_warning_kind_from_str(name: *const c_char) -> i32 {
 /// Returned pointers must be freed with the appropriate free function.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_convert(
-    html: *const std::ffi::c_char,
-    options: *const html_to_markdown_rs::options::ConversionOptions,
+    _html: *const std::ffi::c_char,
+    _options: *const html_to_markdown_rs::options::ConversionOptions,
+    _visitor: *const std::ffi::c_char,
 ) -> *mut html_to_markdown_rs::ConversionResult {
     clear_last_error();
-    if html.is_null() {
-        set_last_error(1, "Null pointer passed for parameter 'html'");
-        return std::ptr::null_mut();
-    }
-    let html_rs = match unsafe { CStr::from_ptr(html) }.to_str() {
-        Ok(s) => s.to_string(),
-        Err(_) => {
-            set_last_error(1, "Invalid UTF-8 in parameter 'html'");
-            return std::ptr::null_mut();
-        }
-    };
-    let options_rs = if options.is_null() {
-        None
-    } else {
-        Some(unsafe { &*options }.clone())
-    };
-    let result = html_to_markdown_rs::convert(&html_rs, options_rs);
-    match result {
-        Ok(val) => Box::into_raw(Box::new(val.clone())),
-        Err(e) => {
-            set_last_error(2, &e.to_string());
-            std::ptr::null_mut()
-        }
-    }
+    set_last_error(99, "Not implemented: convert");
+    std::ptr::null_mut()
 }
 
 // ---------------------------------------------------------------------------
@@ -7068,7 +7482,7 @@ pub unsafe extern "C" fn htm_convert_with_visitor(
     } else {
         // SAFETY: visitor is a valid pointer for the duration of this call.
         let ffi_visitor = unsafe { &mut *visitor };
-        // Wrap in Rc<RefCell<dyn HtmlVisitor>> as required by convert_with_visitor.
+        // Wrap in Rc<RefCell<dyn HtmlVisitor>> as required by convert.
         // We use a raw-pointer wrapper to avoid cloning — the HtmVisitor is
         // pinned in place by the caller-owned Box.
         struct VisitorRef(*mut HtmVisitor);
@@ -7373,14 +7787,17 @@ pub unsafe extern "C" fn htm_convert_with_visitor(
         Some(std::rc::Rc::new(std::cell::RefCell::new(VisitorRef(visitor))))
     };
 
-    match html_to_markdown_rs::convert_with_visitor(&html_str, options_rs, visitor_handle) {
-        Ok(markdown) => match std::ffi::CString::new(markdown) {
-            Ok(s) => s.into_raw(),
-            Err(_) => {
-                set_last_error(3, "Conversion output contained null bytes");
-                std::ptr::null_mut()
+    match html_to_markdown_rs::convert(&html_str, options_rs, visitor_handle) {
+        Ok(result) => {
+            let markdown = result.content.unwrap_or_default();
+            match std::ffi::CString::new(markdown) {
+                Ok(s) => s.into_raw(),
+                Err(_) => {
+                    set_last_error(3, "Conversion output contained null bytes");
+                    std::ptr::null_mut()
+                }
             }
-        },
+        }
         Err(e) => {
             set_last_error(2, &e.to_string());
             std::ptr::null_mut()

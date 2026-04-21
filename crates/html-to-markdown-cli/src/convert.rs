@@ -73,7 +73,7 @@ pub fn perform_conversion(
 ) -> Result<String, Box<dyn std::error::Error>> {
     let output_content = if cli.json {
         // --json path: serialize full ConversionResult fields
-        let result = convert(html, Some(options)).map_err(|e| format!("Error converting HTML: {e}"))?;
+        let result = convert(html, Some(options), None).map_err(|e| format!("Error converting HTML: {e}"))?;
 
         // Emit warnings to stderr if requested
         if cli.show_warnings {
@@ -146,7 +146,7 @@ pub fn perform_conversion(
             .map_err(|e| format!("Error serializing JSON output: {e}"))?
     } else {
         // Plain markdown path
-        let result = convert(html, Some(options)).map_err(|e| format!("Error converting HTML: {e}"))?;
+        let result = convert(html, Some(options), None).map_err(|e| format!("Error converting HTML: {e}"))?;
 
         // Emit warnings to stderr if requested
         if cli.show_warnings {

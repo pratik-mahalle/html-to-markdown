@@ -4,8 +4,15 @@ package dev.kreuzberg.htmltomarkdown;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+/**
+ * Line break syntax in Markdown output.
+ *
+ * Controls how soft line breaks (from {@code <br>} or line breaks in source) are rendered.
+ */
 public enum NewlineStyle {
+    /** Two trailing spaces at end of line. Default. Standard Markdown syntax. */
     Spaces("spaces"),
+    /** Backslash at end of line. Alternative Markdown syntax. */
     Backslash("backslash");
 
     private final String value;

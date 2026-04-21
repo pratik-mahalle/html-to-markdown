@@ -4,9 +4,17 @@ package dev.kreuzberg.htmltomarkdown;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+/**
+ * HTML preprocessing aggressiveness level.
+ *
+ * Controls the extent of cleanup performed before conversion. Higher levels remove more elements.
+ */
 public enum PreprocessingPreset {
+    /** Minimal cleanup. Remove only essential noise (scripts, styles). */
     Minimal("minimal"),
+    /** Standard cleanup. Default. Removes navigation, forms, and other auxiliary content. */
     Standard("standard"),
+    /** Aggressive cleanup. Remove extensive non-content elements and structure. */
     Aggressive("aggressive");
 
     private final String value;

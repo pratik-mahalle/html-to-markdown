@@ -4,9 +4,17 @@ package dev.kreuzberg.htmltomarkdown;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+/**
+ * Heading style options for Markdown output.
+ *
+ * Controls how headings (h1-h6) are rendered in the output Markdown.
+ */
 public enum HeadingStyle {
+    /** Underlined style (=== for h1, --- for h2). */
     Underlined("underlined"),
+    /** ATX style (# for h1, ## for h2, etc.). Default. */
     Atx("atx"),
+    /** ATX closed style (# title #, with closing hashes). */
     AtxClosed("atxclosed");
 
     private final String value;

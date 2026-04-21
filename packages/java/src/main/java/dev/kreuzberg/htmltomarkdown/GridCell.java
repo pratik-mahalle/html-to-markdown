@@ -3,12 +3,21 @@ package dev.kreuzberg.htmltomarkdown;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * A single cell in a table grid.
+ */
 public record GridCell(
+    /** The text content of the cell. */
     String content,
+    /** 0-indexed row position. */
     int row,
+    /** 0-indexed column position. */
     int col,
+    /** Number of rows this cell spans (default 1). */
     @JsonProperty("row_span") int rowSpan,
+    /** Number of columns this cell spans (default 1). */
     @JsonProperty("col_span") int colSpan,
+    /** Whether this is a header cell ({@code <th>}). */
     @JsonProperty("is_header") boolean isHeader
 ) {
 }

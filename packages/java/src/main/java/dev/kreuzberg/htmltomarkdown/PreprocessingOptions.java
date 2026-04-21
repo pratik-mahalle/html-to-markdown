@@ -3,10 +3,17 @@ package dev.kreuzberg.htmltomarkdown;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * HTML preprocessing options for document cleanup before conversion.
+ */
 public record PreprocessingOptions(
+    /** Enable HTML preprocessing globally */
     boolean enabled,
+    /** Preprocessing preset level (Minimal, Standard, Aggressive) */
     PreprocessingPreset preset,
+    /** Remove navigation elements (nav, breadcrumbs, menus, sidebars) */
     @JsonProperty("remove_navigation") boolean removeNavigation,
+    /** Remove form elements (forms, inputs, buttons, etc.) */
     @JsonProperty("remove_forms") boolean removeForms
 ) {
     public static PreprocessingOptionsBuilder builder() {

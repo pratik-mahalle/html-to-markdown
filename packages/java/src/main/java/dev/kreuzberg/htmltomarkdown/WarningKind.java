@@ -4,12 +4,21 @@ package dev.kreuzberg.htmltomarkdown;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+/**
+ * Categories of processing warnings.
+ */
 public enum WarningKind {
+    /** An image could not be extracted (e.g. invalid data URI, unsupported format). */
     ImageExtractionFailed("image_extraction_failed"),
+    /** The input encoding was not recognized; fell back to UTF-8. */
     EncodingFallback("encoding_fallback"),
+    /** The input was truncated due to size limits. */
     TruncatedInput("truncated_input"),
+    /** The HTML was malformed but processing continued with best effort. */
     MalformedHtml("malformed_html"),
+    /** Sanitization was applied to remove potentially unsafe content. */
     SanitizationApplied("sanitization_applied"),
+    /** DOM traversal was truncated because max_depth was exceeded. */
     DepthLimitExceeded("depth_limit_exceeded");
 
     private final String value;

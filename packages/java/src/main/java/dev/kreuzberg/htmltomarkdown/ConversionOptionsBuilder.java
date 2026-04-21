@@ -4,6 +4,23 @@ package dev.kreuzberg.htmltomarkdown;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Main conversion options for HTML to Markdown conversion.
+ *
+ * Use [{@code ConversionOptions::builder()}] to construct, or [{@code Default::default()}] for defaults.
+ *
+ * # Example
+ *
+ * {@code }{@code text}
+ * use html_to_markdown_rs::ConversionOptions;
+ *
+ * let options = ConversionOptions::builder()
+ *     .heading_style(HeadingStyle::Atx)
+ *     .wrap(true)
+ *     .wrap_width(100)
+ *     .build();
+ * {@code }{@code }
+ */
 public class ConversionOptionsBuilder {
 
     private HeadingStyle headingStyle = null;

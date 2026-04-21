@@ -4,10 +4,19 @@ package dev.kreuzberg.htmltomarkdown;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+/**
+ * Image source classification for proper handling and processing.
+ *
+ * Determines whether an image is embedded (data URI), inline SVG, external, or relative.
+ */
 public enum ImageType {
+    /** Data URI embedded image (base64 or other encoding) */
     DataUri("data_uri"),
+    /** Inline SVG element */
     InlineSvg("inline_svg"),
+    /** External image URL (http/https) */
     External("external"),
+    /** Relative image path */
     Relative("relative");
 
     private final String value;

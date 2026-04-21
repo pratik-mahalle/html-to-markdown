@@ -4,8 +4,16 @@ package dev.kreuzberg.htmltomarkdown;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+/**
+ * Link rendering style in Markdown output.
+ *
+ * Controls whether links and images use inline {@code [text](url)} syntax or
+ * reference-style {@code [text][1]} syntax with definitions collected at the end.
+ */
 public enum LinkStyle {
+    /** Inline links: {@code [text](url)}. Default. */
     Inline("inline"),
+    /** Reference-style links: {@code [text][1]} with {@code [1]: url} at end of document. */
     Reference("reference");
 
     private final String value;

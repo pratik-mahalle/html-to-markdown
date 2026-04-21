@@ -3,6 +3,13 @@ package dev.kreuzberg.htmltomarkdown;
 
 import java.util.Optional;
 
+/**
+ * Partial update for {@code PreprocessingOptions}.
+ *
+ * This struct uses {@code Option<T>} to represent optional fields that can be selectively updated.
+ * Only specified fields (Some values) will override existing options; None values leave the
+ * corresponding fields unchanged when applied via [{@code PreprocessingOptions::apply_update}].
+ */
 public class PreprocessingOptionsUpdateBuilder {
 
     private Optional<Boolean> enabled = Optional.empty();

@@ -5,12 +5,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * A single node in the document tree.
+ */
 public record DocumentNode(
+    /** Deterministic node identifier. */
     String id,
+    /** The semantic content of this node. */
     NodeContent content,
+    /** Index of the parent node (None for root nodes). */
     Optional<Integer> parent,
+    /** Indices of child nodes in reading order. */
     List<Integer> children,
+    /** Inline formatting annotations (bold, italic, links, etc.) with byte offsets into the text. */
     List<TextAnnotation> annotations,
+    /** Format-specific attributes (e.g. class, id, data-* attributes). */
     Optional<Map<String, String>> attributes
 ) {
 }

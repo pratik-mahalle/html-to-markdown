@@ -235,8 +235,9 @@ impl JsConversionOptionsBuilder {
 
     #[napi]
     pub fn preprocessing(&self, preprocessing: JsPreprocessingOptions) -> JsConversionOptionsBuilder {
+        let preprocessing_core: html_to_markdown_rs::PreprocessingOptions = preprocessing.into();
         Self {
-            inner: Arc::new((*self.inner).clone().preprocessing(preprocessing.into())),
+            inner: Arc::new((*self.inner).clone().preprocessing(preprocessing_core)),
         }
     }
 
@@ -417,6 +418,23 @@ pub struct JsTableData {
 pub struct JsProcessingWarning {
     pub message: String,
     pub kind: JsWarningKind,
+}
+
+#[derive(Clone, Default)]
+#[napi(object)]
+pub struct JsNodeContext {
+    #[napi(js_name = "nodeType")]
+    pub node_type: JsNodeType,
+    #[napi(js_name = "tagName")]
+    pub tag_name: String,
+    pub attributes: HashMap<String, String>,
+    pub depth: i64,
+    #[napi(js_name = "indexInParent")]
+    pub index_in_parent: i64,
+    #[napi(js_name = "parentTag")]
+    pub parent_tag: Option<String>,
+    #[napi(js_name = "isInline")]
+    pub is_inline: bool,
 }
 
 #[napi(string_enum)]
@@ -704,13 +722,2550 @@ impl Default for JsWarningKind {
     }
 }
 
+#[napi(string_enum)]
+#[derive(Clone)]
+pub enum JsNodeType {
+    Text,
+    Element,
+    Heading,
+    Paragraph,
+    Div,
+    Blockquote,
+    Pre,
+    Hr,
+    List,
+    ListItem,
+    DefinitionList,
+    DefinitionTerm,
+    DefinitionDescription,
+    Table,
+    TableRow,
+    TableCell,
+    TableHeader,
+    TableBody,
+    TableHead,
+    TableFoot,
+    Link,
+    Image,
+    Strong,
+    Em,
+    Code,
+    Strikethrough,
+    Underline,
+    Subscript,
+    Superscript,
+    Mark,
+    Small,
+    Br,
+    Span,
+    Article,
+    Section,
+    Nav,
+    Aside,
+    Header,
+    Footer,
+    Main,
+    Figure,
+    Figcaption,
+    Time,
+    Details,
+    Summary,
+    Form,
+    Input,
+    Select,
+    Option,
+    Button,
+    Textarea,
+    Label,
+    Fieldset,
+    Legend,
+    Audio,
+    Video,
+    Picture,
+    Source,
+    Iframe,
+    Svg,
+    Canvas,
+    Ruby,
+    Rt,
+    Rp,
+    Abbr,
+    Kbd,
+    Samp,
+    Var,
+    Cite,
+    Q,
+    Del,
+    Ins,
+    Data,
+    Meter,
+    Progress,
+    Output,
+    Template,
+    Slot,
+    Html,
+    Head,
+    Body,
+    Title,
+    Meta,
+    LinkTag,
+    Style,
+    Script,
+    Base,
+    Custom,
+}
+
+#[allow(clippy::derivable_impls)]
+impl Default for JsNodeType {
+    fn default() -> Self {
+        Self::Text
+    }
+}
+
+#[napi(string_enum)]
+#[derive(Clone)]
+pub enum JsVisitResult {
+    Continue,
+    Custom,
+    Skip,
+    PreserveHtml,
+    Error,
+}
+
+#[allow(clippy::derivable_impls)]
+impl Default for JsVisitResult {
+    fn default() -> Self {
+        Self::Continue
+    }
+}
+
 #[allow(clippy::missing_errors_doc)]
 #[napi]
-pub fn convert(html: String, options: Option<JsConversionOptions>) -> Result<JsConversionResult> {
-    let options_core: Option<html_to_markdown_rs::ConversionOptions> = options.map(Into::into);
-    html_to_markdown_rs::convert(&html, options_core)
+pub fn convert(
+    html: String,
+    options: Option<JsConversionOptions>,
+    visitor: Option<napi::bindgen_prelude::Object>,
+) -> Result<JsConversionResult> {
+    let visitor = visitor.map(|v| {
+        let bridge = JsHtmlVisitorBridge::new(v);
+        std::rc::Rc::new(std::cell::RefCell::new(bridge)) as html_to_markdown_rs::visitor::VisitorHandle
+    });
+    let options_core: Option<html_to_markdown_rs::ConversionOptions> = options.map(|v| v.into());
+    html_to_markdown_rs::convert(&html, options_core, visitor)
         .map(|val| val.into())
         .map_err(|e| napi::Error::new(napi::Status::GenericFailure, e.to_string()))
+}
+
+#[allow(unused_imports)]
+use napi::JsValue;
+#[allow(unused_imports)]
+use napi::bindgen_prelude::{JsObjectValue, Object, ToNapiValue, Unknown};
+
+fn nodecontext_to_js_object<'e>(
+    env: &'e napi::Env,
+    ctx: &html_to_markdown_rs::visitor::NodeContext,
+) -> napi::Result<napi::bindgen_prelude::Object<'e>> {
+    let mut obj = napi::bindgen_prelude::Object::new(env)?;
+    obj.set_named_property("nodeType", env.create_string(&format!("{:?}", ctx.node_type))?)?;
+    obj.set_named_property("tagName", env.create_string(&ctx.tag_name)?)?;
+    obj.set_named_property("depth", env.create_uint32(ctx.depth as u32)?)?;
+    obj.set_named_property("indexInParent", env.create_uint32(ctx.index_in_parent as u32)?)?;
+    obj.set_named_property("isInline", ctx.is_inline)?;
+    let parent_tag = match &ctx.parent_tag {
+        Some(s) => env.create_string(s)?.to_unknown(),
+        None => {
+            // SAFETY: napi_get_null returns a valid napi_value for the given env.
+            let raw =
+                unsafe { napi::bindgen_prelude::ToNapiValue::to_napi_value(env.raw(), napi::bindgen_prelude::Null)? };
+            unsafe { napi::bindgen_prelude::Unknown::from_raw_unchecked(env.raw(), raw) }
+        }
+    };
+    obj.set_named_property("parentTag", parent_tag)?;
+    let mut attrs = napi::bindgen_prelude::Object::new(env)?;
+    for (k, v) in &ctx.attributes {
+        attrs.set_named_property(k, env.create_string(v)?)?;
+    }
+    obj.set_named_property("attributes", attrs)?;
+    Ok(obj)
+}
+
+pub struct JsHtmlVisitorBridge {
+    obj: napi::bindgen_prelude::Object<'static>,
+}
+
+impl std::fmt::Debug for JsHtmlVisitorBridge {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "JsHtmlVisitorBridge")
+    }
+}
+
+impl JsHtmlVisitorBridge {
+    pub fn new(js_obj: napi::bindgen_prelude::Object<'_>) -> Self {
+        // SAFETY: The JS object is owned by the Node.js runtime and lives for
+        // the duration of the enclosing #[napi] call. The bridge is only used
+        // synchronously during that same call, so 'static is safe here.
+        let obj: napi::bindgen_prelude::Object<'static> = unsafe { std::mem::transmute(js_obj) };
+        Self { obj }
+    }
+
+    fn env(&self) -> napi::Env {
+        // SAFETY: Object<'static> is 3 pointer-sized words; first word is napi_env.
+        let raw: [*mut std::ffi::c_void; 3] = unsafe { std::mem::transmute_copy(&self.obj) };
+        napi::Env::from_raw(raw[0] as napi::sys::napi_env)
+    }
+}
+
+impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
+    fn visit_element_start(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitElementStart").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<(napi::bindgen_prelude::Unknown,), napi::bindgen_prelude::Unknown> =
+            match self.obj.get_named_property("visitElementStart") {
+                Ok(f) => f,
+                Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+            };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let result = func.call((arg_0,));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_element_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitElementEnd").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (napi::bindgen_prelude::Unknown, napi::bindgen_prelude::Unknown),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitElementEnd") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown = __env
+            .create_string(_output)
+            .map(|s| s.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let result = func.call((arg_0, arg_1));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_text(&mut self, _ctx: &html_to_markdown_rs::NodeContext, _text: &str) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitText").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (napi::bindgen_prelude::Unknown, napi::bindgen_prelude::Unknown),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitText") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown =
+            __env
+                .create_string(_text)
+                .map(|s| s.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                });
+        let result = func.call((arg_0, arg_1));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_link(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _href: &str,
+        _text: &str,
+        _title: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitLink").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (
+                napi::bindgen_prelude::Unknown,
+                napi::bindgen_prelude::Unknown,
+                napi::bindgen_prelude::Unknown,
+                napi::bindgen_prelude::Unknown,
+            ),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitLink") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown =
+            __env
+                .create_string(_href)
+                .map(|s| s.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                });
+        let arg_2: napi::bindgen_prelude::Unknown =
+            __env
+                .create_string(_text)
+                .map(|s| s.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                });
+        let arg_3: napi::bindgen_prelude::Unknown = match _title {
+            Some(s) => __env
+                .create_string(s)
+                .map(|v| v.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                }),
+            None => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            },
+        };
+        let result = func.call((arg_0, arg_1, arg_2, arg_3));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_image(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _src: &str,
+        _alt: &str,
+        _title: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitImage").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (
+                napi::bindgen_prelude::Unknown,
+                napi::bindgen_prelude::Unknown,
+                napi::bindgen_prelude::Unknown,
+                napi::bindgen_prelude::Unknown,
+            ),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitImage") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown =
+            __env
+                .create_string(_src)
+                .map(|s| s.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                });
+        let arg_2: napi::bindgen_prelude::Unknown =
+            __env
+                .create_string(_alt)
+                .map(|s| s.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                });
+        let arg_3: napi::bindgen_prelude::Unknown = match _title {
+            Some(s) => __env
+                .create_string(s)
+                .map(|v| v.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                }),
+            None => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            },
+        };
+        let result = func.call((arg_0, arg_1, arg_2, arg_3));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_heading(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _level: u32,
+        _text: &str,
+        _id: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitHeading").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (
+                napi::bindgen_prelude::Unknown,
+                napi::bindgen_prelude::Unknown,
+                napi::bindgen_prelude::Unknown,
+                napi::bindgen_prelude::Unknown,
+            ),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitHeading") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown = __env
+            .create_uint32(_level as u32)
+            .map(|n| n.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_2: napi::bindgen_prelude::Unknown =
+            __env
+                .create_string(_text)
+                .map(|s| s.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                });
+        let arg_3: napi::bindgen_prelude::Unknown = match _id {
+            Some(s) => __env
+                .create_string(s)
+                .map(|v| v.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                }),
+            None => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            },
+        };
+        let result = func.call((arg_0, arg_1, arg_2, arg_3));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_code_block(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _lang: Option<&str>,
+        _code: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitCodeBlock").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (
+                napi::bindgen_prelude::Unknown,
+                napi::bindgen_prelude::Unknown,
+                napi::bindgen_prelude::Unknown,
+            ),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitCodeBlock") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown = match _lang {
+            Some(s) => __env
+                .create_string(s)
+                .map(|v| v.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                }),
+            None => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            },
+        };
+        let arg_2: napi::bindgen_prelude::Unknown =
+            __env
+                .create_string(_code)
+                .map(|s| s.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                });
+        let result = func.call((arg_0, arg_1, arg_2));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_code_inline(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _code: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitCodeInline").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (napi::bindgen_prelude::Unknown, napi::bindgen_prelude::Unknown),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitCodeInline") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown =
+            __env
+                .create_string(_code)
+                .map(|s| s.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                });
+        let result = func.call((arg_0, arg_1));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_list_item(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _ordered: bool,
+        _marker: &str,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitListItem").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (
+                napi::bindgen_prelude::Unknown,
+                napi::bindgen_prelude::Unknown,
+                napi::bindgen_prelude::Unknown,
+                napi::bindgen_prelude::Unknown,
+            ),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitListItem") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown = unsafe {
+            let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), _ordered)
+                .unwrap_or(std::ptr::null_mut());
+            napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+        };
+        let arg_2: napi::bindgen_prelude::Unknown = __env
+            .create_string(_marker)
+            .map(|s| s.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_3: napi::bindgen_prelude::Unknown =
+            __env
+                .create_string(_text)
+                .map(|s| s.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                });
+        let result = func.call((arg_0, arg_1, arg_2, arg_3));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_list_start(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _ordered: bool,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitListStart").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (napi::bindgen_prelude::Unknown, napi::bindgen_prelude::Unknown),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitListStart") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown = unsafe {
+            let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), _ordered)
+                .unwrap_or(std::ptr::null_mut());
+            napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+        };
+        let result = func.call((arg_0, arg_1));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_list_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _ordered: bool,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitListEnd").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (
+                napi::bindgen_prelude::Unknown,
+                napi::bindgen_prelude::Unknown,
+                napi::bindgen_prelude::Unknown,
+            ),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitListEnd") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown = unsafe {
+            let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), _ordered)
+                .unwrap_or(std::ptr::null_mut());
+            napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+        };
+        let arg_2: napi::bindgen_prelude::Unknown = __env
+            .create_string(_output)
+            .map(|s| s.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let result = func.call((arg_0, arg_1, arg_2));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_table_start(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitTableStart").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<(napi::bindgen_prelude::Unknown,), napi::bindgen_prelude::Unknown> =
+            match self.obj.get_named_property("visitTableStart") {
+                Ok(f) => f,
+                Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+            };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let result = func.call((arg_0,));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_table_row(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _cells: &[String],
+        _is_header: bool,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitTableRow").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (
+                napi::bindgen_prelude::Unknown,
+                napi::bindgen_prelude::Unknown,
+                napi::bindgen_prelude::Unknown,
+            ),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitTableRow") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown = __env
+            .create_string(&format!("{:?}", _cells))
+            .map(|s| s.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_2: napi::bindgen_prelude::Unknown = unsafe {
+            let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), _is_header)
+                .unwrap_or(std::ptr::null_mut());
+            napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+        };
+        let result = func.call((arg_0, arg_1, arg_2));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_table_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitTableEnd").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (napi::bindgen_prelude::Unknown, napi::bindgen_prelude::Unknown),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitTableEnd") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown = __env
+            .create_string(_output)
+            .map(|s| s.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let result = func.call((arg_0, arg_1));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_blockquote(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _content: &str,
+        _depth: usize,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitBlockquote").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (
+                napi::bindgen_prelude::Unknown,
+                napi::bindgen_prelude::Unknown,
+                napi::bindgen_prelude::Unknown,
+            ),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitBlockquote") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown = __env
+            .create_string(_content)
+            .map(|s| s.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_2: napi::bindgen_prelude::Unknown = __env
+            .create_uint32(_depth as u32)
+            .map(|n| n.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let result = func.call((arg_0, arg_1, arg_2));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_strong(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitStrong").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (napi::bindgen_prelude::Unknown, napi::bindgen_prelude::Unknown),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitStrong") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown =
+            __env
+                .create_string(_text)
+                .map(|s| s.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                });
+        let result = func.call((arg_0, arg_1));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_emphasis(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitEmphasis").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (napi::bindgen_prelude::Unknown, napi::bindgen_prelude::Unknown),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitEmphasis") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown =
+            __env
+                .create_string(_text)
+                .map(|s| s.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                });
+        let result = func.call((arg_0, arg_1));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_strikethrough(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitStrikethrough").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (napi::bindgen_prelude::Unknown, napi::bindgen_prelude::Unknown),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitStrikethrough") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown =
+            __env
+                .create_string(_text)
+                .map(|s| s.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                });
+        let result = func.call((arg_0, arg_1));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_underline(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitUnderline").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (napi::bindgen_prelude::Unknown, napi::bindgen_prelude::Unknown),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitUnderline") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown =
+            __env
+                .create_string(_text)
+                .map(|s| s.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                });
+        let result = func.call((arg_0, arg_1));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_subscript(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitSubscript").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (napi::bindgen_prelude::Unknown, napi::bindgen_prelude::Unknown),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitSubscript") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown =
+            __env
+                .create_string(_text)
+                .map(|s| s.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                });
+        let result = func.call((arg_0, arg_1));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_superscript(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitSuperscript").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (napi::bindgen_prelude::Unknown, napi::bindgen_prelude::Unknown),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitSuperscript") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown =
+            __env
+                .create_string(_text)
+                .map(|s| s.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                });
+        let result = func.call((arg_0, arg_1));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_mark(&mut self, _ctx: &html_to_markdown_rs::NodeContext, _text: &str) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitMark").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (napi::bindgen_prelude::Unknown, napi::bindgen_prelude::Unknown),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitMark") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown =
+            __env
+                .create_string(_text)
+                .map(|s| s.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                });
+        let result = func.call((arg_0, arg_1));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_line_break(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitLineBreak").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<(napi::bindgen_prelude::Unknown,), napi::bindgen_prelude::Unknown> =
+            match self.obj.get_named_property("visitLineBreak") {
+                Ok(f) => f,
+                Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+            };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let result = func.call((arg_0,));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_horizontal_rule(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitHorizontalRule").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<(napi::bindgen_prelude::Unknown,), napi::bindgen_prelude::Unknown> =
+            match self.obj.get_named_property("visitHorizontalRule") {
+                Ok(f) => f,
+                Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+            };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let result = func.call((arg_0,));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_custom_element(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _tag_name: &str,
+        _html: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitCustomElement").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (
+                napi::bindgen_prelude::Unknown,
+                napi::bindgen_prelude::Unknown,
+                napi::bindgen_prelude::Unknown,
+            ),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitCustomElement") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown = __env
+            .create_string(_tag_name)
+            .map(|s| s.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_2: napi::bindgen_prelude::Unknown =
+            __env
+                .create_string(_html)
+                .map(|s| s.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                });
+        let result = func.call((arg_0, arg_1, arg_2));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_definition_list_start(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitDefinitionListStart").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<(napi::bindgen_prelude::Unknown,), napi::bindgen_prelude::Unknown> =
+            match self.obj.get_named_property("visitDefinitionListStart") {
+                Ok(f) => f,
+                Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+            };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let result = func.call((arg_0,));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_definition_term(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitDefinitionTerm").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (napi::bindgen_prelude::Unknown, napi::bindgen_prelude::Unknown),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitDefinitionTerm") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown =
+            __env
+                .create_string(_text)
+                .map(|s| s.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                });
+        let result = func.call((arg_0, arg_1));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_definition_description(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self
+            .obj
+            .has_named_property("visitDefinitionDescription")
+            .unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (napi::bindgen_prelude::Unknown, napi::bindgen_prelude::Unknown),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitDefinitionDescription") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown =
+            __env
+                .create_string(_text)
+                .map(|s| s.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                });
+        let result = func.call((arg_0, arg_1));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_definition_list_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitDefinitionListEnd").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (napi::bindgen_prelude::Unknown, napi::bindgen_prelude::Unknown),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitDefinitionListEnd") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown = __env
+            .create_string(_output)
+            .map(|s| s.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let result = func.call((arg_0, arg_1));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_form(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _action: Option<&str>,
+        _method: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitForm").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (
+                napi::bindgen_prelude::Unknown,
+                napi::bindgen_prelude::Unknown,
+                napi::bindgen_prelude::Unknown,
+            ),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitForm") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown = match _action {
+            Some(s) => __env
+                .create_string(s)
+                .map(|v| v.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                }),
+            None => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            },
+        };
+        let arg_2: napi::bindgen_prelude::Unknown = match _method {
+            Some(s) => __env
+                .create_string(s)
+                .map(|v| v.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                }),
+            None => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            },
+        };
+        let result = func.call((arg_0, arg_1, arg_2));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_input(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _input_type: &str,
+        _name: Option<&str>,
+        _value: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitInput").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (
+                napi::bindgen_prelude::Unknown,
+                napi::bindgen_prelude::Unknown,
+                napi::bindgen_prelude::Unknown,
+                napi::bindgen_prelude::Unknown,
+            ),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitInput") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown = __env
+            .create_string(_input_type)
+            .map(|s| s.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_2: napi::bindgen_prelude::Unknown = match _name {
+            Some(s) => __env
+                .create_string(s)
+                .map(|v| v.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                }),
+            None => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            },
+        };
+        let arg_3: napi::bindgen_prelude::Unknown = match _value {
+            Some(s) => __env
+                .create_string(s)
+                .map(|v| v.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                }),
+            None => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            },
+        };
+        let result = func.call((arg_0, arg_1, arg_2, arg_3));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_button(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitButton").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (napi::bindgen_prelude::Unknown, napi::bindgen_prelude::Unknown),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitButton") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown =
+            __env
+                .create_string(_text)
+                .map(|s| s.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                });
+        let result = func.call((arg_0, arg_1));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_audio(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _src: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitAudio").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (napi::bindgen_prelude::Unknown, napi::bindgen_prelude::Unknown),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitAudio") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown = match _src {
+            Some(s) => __env
+                .create_string(s)
+                .map(|v| v.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                }),
+            None => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            },
+        };
+        let result = func.call((arg_0, arg_1));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_video(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _src: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitVideo").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (napi::bindgen_prelude::Unknown, napi::bindgen_prelude::Unknown),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitVideo") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown = match _src {
+            Some(s) => __env
+                .create_string(s)
+                .map(|v| v.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                }),
+            None => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            },
+        };
+        let result = func.call((arg_0, arg_1));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_iframe(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _src: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitIframe").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (napi::bindgen_prelude::Unknown, napi::bindgen_prelude::Unknown),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitIframe") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown = match _src {
+            Some(s) => __env
+                .create_string(s)
+                .map(|v| v.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                }),
+            None => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            },
+        };
+        let result = func.call((arg_0, arg_1));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_details(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _open: bool,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitDetails").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (napi::bindgen_prelude::Unknown, napi::bindgen_prelude::Unknown),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitDetails") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown = unsafe {
+            let r =
+                napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), _open).unwrap_or(std::ptr::null_mut());
+            napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+        };
+        let result = func.call((arg_0, arg_1));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_summary(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitSummary").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (napi::bindgen_prelude::Unknown, napi::bindgen_prelude::Unknown),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitSummary") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown =
+            __env
+                .create_string(_text)
+                .map(|s| s.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                });
+        let result = func.call((arg_0, arg_1));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_figure_start(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitFigureStart").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<(napi::bindgen_prelude::Unknown,), napi::bindgen_prelude::Unknown> =
+            match self.obj.get_named_property("visitFigureStart") {
+                Ok(f) => f,
+                Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+            };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let result = func.call((arg_0,));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_figcaption(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitFigcaption").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (napi::bindgen_prelude::Unknown, napi::bindgen_prelude::Unknown),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitFigcaption") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown =
+            __env
+                .create_string(_text)
+                .map(|s| s.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                });
+        let result = func.call((arg_0, arg_1));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
+
+    fn visit_figure_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let has_method = self.obj.has_named_property("visitFigureEnd").unwrap_or(false);
+        if !has_method {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let func: napi::bindgen_prelude::Function<
+            (napi::bindgen_prelude::Unknown, napi::bindgen_prelude::Unknown),
+            napi::bindgen_prelude::Unknown,
+        > = match self.obj.get_named_property("visitFigureEnd") {
+            Ok(f) => f,
+            Err(_) => return html_to_markdown_rs::VisitResult::Continue,
+        };
+        let __env = self.env();
+        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
+            .map(|o| o.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let arg_1: napi::bindgen_prelude::Unknown = __env
+            .create_string(_output)
+            .map(|s| s.to_unknown())
+            .unwrap_or_else(|_| unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                    .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+            });
+        let result = func.call((arg_0, arg_1));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                if let Ok(s) = val
+                    .coerce_to_string()
+                    .and_then(|s| s.into_utf8())
+                    .and_then(|s| s.into_owned())
+                {
+                    match s.to_lowercase().as_str() {
+                        "continue" => html_to_markdown_rs::VisitResult::Continue,
+                        "skip" => html_to_markdown_rs::VisitResult::Skip,
+                        "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                        other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                    }
+                } else {
+                    html_to_markdown_rs::VisitResult::Continue
+                }
+            }
+        }
+    }
 }
 
 impl From<JsMetadataConfig> for html_to_markdown_rs::metadata::MetadataConfig {
@@ -870,7 +3425,7 @@ impl From<html_to_markdown_rs::metadata::ImageMetadata> for JsImageMetadata {
             src: val.src,
             alt: val.alt,
             title: val.title,
-            dimensions: val.dimensions.as_ref().map(|v| format!("{:?}", v)),
+            dimensions: val.dimensions.as_ref().map(|v| format!("{v:?}")),
             image_type: val.image_type.into(),
             attributes: val.attributes.into_iter().collect(),
         }
@@ -1340,6 +3895,20 @@ impl From<html_to_markdown_rs::ProcessingWarning> for JsProcessingWarning {
         Self {
             message: val.message,
             kind: val.kind.into(),
+        }
+    }
+}
+
+impl From<html_to_markdown_rs::NodeContext> for JsNodeContext {
+    fn from(val: html_to_markdown_rs::NodeContext) -> Self {
+        Self {
+            node_type: val.node_type.into(),
+            tag_name: val.tag_name,
+            attributes: val.attributes.into_iter().collect(),
+            depth: val.depth as i64,
+            index_in_parent: val.index_in_parent as i64,
+            parent_tag: val.parent_tag,
+            is_inline: val.is_inline,
         }
     }
 }
@@ -2016,6 +4585,113 @@ impl From<html_to_markdown_rs::WarningKind> for JsWarningKind {
             html_to_markdown_rs::WarningKind::MalformedHtml => Self::MalformedHtml,
             html_to_markdown_rs::WarningKind::SanitizationApplied => Self::SanitizationApplied,
             html_to_markdown_rs::WarningKind::DepthLimitExceeded => Self::DepthLimitExceeded,
+        }
+    }
+}
+
+impl From<html_to_markdown_rs::NodeType> for JsNodeType {
+    fn from(val: html_to_markdown_rs::NodeType) -> Self {
+        match val {
+            html_to_markdown_rs::NodeType::Text => Self::Text,
+            html_to_markdown_rs::NodeType::Element => Self::Element,
+            html_to_markdown_rs::NodeType::Heading => Self::Heading,
+            html_to_markdown_rs::NodeType::Paragraph => Self::Paragraph,
+            html_to_markdown_rs::NodeType::Div => Self::Div,
+            html_to_markdown_rs::NodeType::Blockquote => Self::Blockquote,
+            html_to_markdown_rs::NodeType::Pre => Self::Pre,
+            html_to_markdown_rs::NodeType::Hr => Self::Hr,
+            html_to_markdown_rs::NodeType::List => Self::List,
+            html_to_markdown_rs::NodeType::ListItem => Self::ListItem,
+            html_to_markdown_rs::NodeType::DefinitionList => Self::DefinitionList,
+            html_to_markdown_rs::NodeType::DefinitionTerm => Self::DefinitionTerm,
+            html_to_markdown_rs::NodeType::DefinitionDescription => Self::DefinitionDescription,
+            html_to_markdown_rs::NodeType::Table => Self::Table,
+            html_to_markdown_rs::NodeType::TableRow => Self::TableRow,
+            html_to_markdown_rs::NodeType::TableCell => Self::TableCell,
+            html_to_markdown_rs::NodeType::TableHeader => Self::TableHeader,
+            html_to_markdown_rs::NodeType::TableBody => Self::TableBody,
+            html_to_markdown_rs::NodeType::TableHead => Self::TableHead,
+            html_to_markdown_rs::NodeType::TableFoot => Self::TableFoot,
+            html_to_markdown_rs::NodeType::Link => Self::Link,
+            html_to_markdown_rs::NodeType::Image => Self::Image,
+            html_to_markdown_rs::NodeType::Strong => Self::Strong,
+            html_to_markdown_rs::NodeType::Em => Self::Em,
+            html_to_markdown_rs::NodeType::Code => Self::Code,
+            html_to_markdown_rs::NodeType::Strikethrough => Self::Strikethrough,
+            html_to_markdown_rs::NodeType::Underline => Self::Underline,
+            html_to_markdown_rs::NodeType::Subscript => Self::Subscript,
+            html_to_markdown_rs::NodeType::Superscript => Self::Superscript,
+            html_to_markdown_rs::NodeType::Mark => Self::Mark,
+            html_to_markdown_rs::NodeType::Small => Self::Small,
+            html_to_markdown_rs::NodeType::Br => Self::Br,
+            html_to_markdown_rs::NodeType::Span => Self::Span,
+            html_to_markdown_rs::NodeType::Article => Self::Article,
+            html_to_markdown_rs::NodeType::Section => Self::Section,
+            html_to_markdown_rs::NodeType::Nav => Self::Nav,
+            html_to_markdown_rs::NodeType::Aside => Self::Aside,
+            html_to_markdown_rs::NodeType::Header => Self::Header,
+            html_to_markdown_rs::NodeType::Footer => Self::Footer,
+            html_to_markdown_rs::NodeType::Main => Self::Main,
+            html_to_markdown_rs::NodeType::Figure => Self::Figure,
+            html_to_markdown_rs::NodeType::Figcaption => Self::Figcaption,
+            html_to_markdown_rs::NodeType::Time => Self::Time,
+            html_to_markdown_rs::NodeType::Details => Self::Details,
+            html_to_markdown_rs::NodeType::Summary => Self::Summary,
+            html_to_markdown_rs::NodeType::Form => Self::Form,
+            html_to_markdown_rs::NodeType::Input => Self::Input,
+            html_to_markdown_rs::NodeType::Select => Self::Select,
+            html_to_markdown_rs::NodeType::Option => Self::Option,
+            html_to_markdown_rs::NodeType::Button => Self::Button,
+            html_to_markdown_rs::NodeType::Textarea => Self::Textarea,
+            html_to_markdown_rs::NodeType::Label => Self::Label,
+            html_to_markdown_rs::NodeType::Fieldset => Self::Fieldset,
+            html_to_markdown_rs::NodeType::Legend => Self::Legend,
+            html_to_markdown_rs::NodeType::Audio => Self::Audio,
+            html_to_markdown_rs::NodeType::Video => Self::Video,
+            html_to_markdown_rs::NodeType::Picture => Self::Picture,
+            html_to_markdown_rs::NodeType::Source => Self::Source,
+            html_to_markdown_rs::NodeType::Iframe => Self::Iframe,
+            html_to_markdown_rs::NodeType::Svg => Self::Svg,
+            html_to_markdown_rs::NodeType::Canvas => Self::Canvas,
+            html_to_markdown_rs::NodeType::Ruby => Self::Ruby,
+            html_to_markdown_rs::NodeType::Rt => Self::Rt,
+            html_to_markdown_rs::NodeType::Rp => Self::Rp,
+            html_to_markdown_rs::NodeType::Abbr => Self::Abbr,
+            html_to_markdown_rs::NodeType::Kbd => Self::Kbd,
+            html_to_markdown_rs::NodeType::Samp => Self::Samp,
+            html_to_markdown_rs::NodeType::Var => Self::Var,
+            html_to_markdown_rs::NodeType::Cite => Self::Cite,
+            html_to_markdown_rs::NodeType::Q => Self::Q,
+            html_to_markdown_rs::NodeType::Del => Self::Del,
+            html_to_markdown_rs::NodeType::Ins => Self::Ins,
+            html_to_markdown_rs::NodeType::Data => Self::Data,
+            html_to_markdown_rs::NodeType::Meter => Self::Meter,
+            html_to_markdown_rs::NodeType::Progress => Self::Progress,
+            html_to_markdown_rs::NodeType::Output => Self::Output,
+            html_to_markdown_rs::NodeType::Template => Self::Template,
+            html_to_markdown_rs::NodeType::Slot => Self::Slot,
+            html_to_markdown_rs::NodeType::Html => Self::Html,
+            html_to_markdown_rs::NodeType::Head => Self::Head,
+            html_to_markdown_rs::NodeType::Body => Self::Body,
+            html_to_markdown_rs::NodeType::Title => Self::Title,
+            html_to_markdown_rs::NodeType::Meta => Self::Meta,
+            html_to_markdown_rs::NodeType::LinkTag => Self::LinkTag,
+            html_to_markdown_rs::NodeType::Style => Self::Style,
+            html_to_markdown_rs::NodeType::Script => Self::Script,
+            html_to_markdown_rs::NodeType::Base => Self::Base,
+            html_to_markdown_rs::NodeType::Custom => Self::Custom,
+        }
+    }
+}
+
+impl From<html_to_markdown_rs::VisitResult> for JsVisitResult {
+    fn from(val: html_to_markdown_rs::VisitResult) -> Self {
+        match val {
+            html_to_markdown_rs::VisitResult::Continue => Self::Continue,
+            html_to_markdown_rs::VisitResult::Custom(..) => Self::Custom,
+            html_to_markdown_rs::VisitResult::Skip => Self::Skip,
+            html_to_markdown_rs::VisitResult::PreserveHtml => Self::PreserveHtml,
+            html_to_markdown_rs::VisitResult::Error(..) => Self::Error,
         }
     }
 }

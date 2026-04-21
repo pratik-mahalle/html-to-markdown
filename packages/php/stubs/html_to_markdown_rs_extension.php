@@ -1037,6 +1037,46 @@ class ProcessingWarning
     public function getKind(): WarningKind { }
 }
 
+/**
+ * Context information passed to all visitor methods.
+ *
+ * Provides comprehensive metadata about the current node being visited,
+ * including its type, attributes, position in the DOM tree, and parent context.
+ */
+class NodeContext
+{
+    public NodeType $node_type;
+    public string $tag_name;
+    /** @var array<string, string> */
+    public array $attributes;
+    public int $depth;
+    public int $index_in_parent;
+    public ?string $parent_tag;
+    public bool $is_inline;
+
+    /**
+     * @param array<string, string> $attributes
+     */
+    public function __construct(
+        NodeType $node_type,
+        string $tag_name,
+        array $attributes,
+        int $depth,
+        int $index_in_parent,
+        bool $is_inline,
+        ?string $parent_tag = null
+    ) { }
+
+    public function getNodeType(): NodeType { }
+    public function getTagName(): string { }
+    /** @return array<string, string> */
+    public function getAttributes(): array { }
+    public function getDepth(): int { }
+    public function getIndexInParent(): int { }
+    public function getParentTag(): ?string { }
+    public function getIsInline(): bool { }
+}
+
 enum TextDirection: string
 {
     case LeftToRight = 'LeftToRight';
@@ -1167,6 +1207,107 @@ enum WarningKind: string
     case MalformedHtml = 'MalformedHtml';
     case SanitizationApplied = 'SanitizationApplied';
     case DepthLimitExceeded = 'DepthLimitExceeded';
+}
+
+enum NodeType: string
+{
+    case Text = 'Text';
+    case Element = 'Element';
+    case Heading = 'Heading';
+    case Paragraph = 'Paragraph';
+    case Div = 'Div';
+    case Blockquote = 'Blockquote';
+    case Pre = 'Pre';
+    case Hr = 'Hr';
+    case List = 'List';
+    case ListItem = 'ListItem';
+    case DefinitionList = 'DefinitionList';
+    case DefinitionTerm = 'DefinitionTerm';
+    case DefinitionDescription = 'DefinitionDescription';
+    case Table = 'Table';
+    case TableRow = 'TableRow';
+    case TableCell = 'TableCell';
+    case TableHeader = 'TableHeader';
+    case TableBody = 'TableBody';
+    case TableHead = 'TableHead';
+    case TableFoot = 'TableFoot';
+    case Link = 'Link';
+    case Image = 'Image';
+    case Strong = 'Strong';
+    case Em = 'Em';
+    case Code = 'Code';
+    case Strikethrough = 'Strikethrough';
+    case Underline = 'Underline';
+    case Subscript = 'Subscript';
+    case Superscript = 'Superscript';
+    case Mark = 'Mark';
+    case Small = 'Small';
+    case Br = 'Br';
+    case Span = 'Span';
+    case Article = 'Article';
+    case Section = 'Section';
+    case Nav = 'Nav';
+    case Aside = 'Aside';
+    case Header = 'Header';
+    case Footer = 'Footer';
+    case Main = 'Main';
+    case Figure = 'Figure';
+    case Figcaption = 'Figcaption';
+    case Time = 'Time';
+    case Details = 'Details';
+    case Summary = 'Summary';
+    case Form = 'Form';
+    case Input = 'Input';
+    case Select = 'Select';
+    case Option = 'Option';
+    case Button = 'Button';
+    case Textarea = 'Textarea';
+    case Label = 'Label';
+    case Fieldset = 'Fieldset';
+    case Legend = 'Legend';
+    case Audio = 'Audio';
+    case Video = 'Video';
+    case Picture = 'Picture';
+    case Source = 'Source';
+    case Iframe = 'Iframe';
+    case Svg = 'Svg';
+    case Canvas = 'Canvas';
+    case Ruby = 'Ruby';
+    case Rt = 'Rt';
+    case Rp = 'Rp';
+    case Abbr = 'Abbr';
+    case Kbd = 'Kbd';
+    case Samp = 'Samp';
+    case Var = 'Var';
+    case Cite = 'Cite';
+    case Q = 'Q';
+    case Del = 'Del';
+    case Ins = 'Ins';
+    case Data = 'Data';
+    case Meter = 'Meter';
+    case Progress = 'Progress';
+    case Output = 'Output';
+    case Template = 'Template';
+    case Slot = 'Slot';
+    case Html = 'Html';
+    case Head = 'Head';
+    case Body = 'Body';
+    case Title = 'Title';
+    case Meta = 'Meta';
+    case LinkTag = 'LinkTag';
+    case Style = 'Style';
+    case Script = 'Script';
+    case Base = 'Base';
+    case Custom = 'Custom';
+}
+
+enum VisitResult: string
+{
+    case Continue = 'Continue';
+    case Custom = 'Custom';
+    case Skip = 'Skip';
+    case PreserveHtml = 'PreserveHtml';
+    case Error = 'Error';
 }
 
 class HtmlToMarkdownRsApi

@@ -2,6 +2,9 @@
 package dev.kreuzberg.htmltomarkdown;
 
 
+/**
+ * HTML preprocessing options for document cleanup before conversion.
+ */
 public class PreprocessingOptionsBuilder {
 
     private boolean enabled = false;

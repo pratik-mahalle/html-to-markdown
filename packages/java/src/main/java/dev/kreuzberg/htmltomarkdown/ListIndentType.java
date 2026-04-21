@@ -4,8 +4,15 @@ package dev.kreuzberg.htmltomarkdown;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+/**
+ * List indentation character type.
+ *
+ * Controls whether list items are indented with spaces or tabs.
+ */
 public enum ListIndentType {
+    /** Use spaces for indentation. Default. Width controlled by {@code list_indent_width}. */
     Spaces("spaces"),
+    /** Use tabs for indentation. */
     Tabs("tabs");
 
     private final String value;

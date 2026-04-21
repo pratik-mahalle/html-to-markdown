@@ -5,6 +5,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Document-level metadata extracted from {@code <head>} and top-level elements.
+ *
+ * Contains all metadata typically used by search engines, social media platforms,
+ * and browsers for document indexing and presentation.
+ *
+ * # Examples
+ *
+ * {@code }{@code }
+ * # use html_to_markdown_rs::metadata::DocumentMetadata;
+ * let doc = DocumentMetadata {
+ *     title: Some("My Article".to_string()),
+ *     description: Some("A great article about Rust".to_string()),
+ *     keywords: vec!["rust".to_string(), "programming".to_string()],
+ *     ..Default::default()
+ * };
+ *
+ * assert_eq!(doc.title, Some("My Article".to_string()));
+ * {@code }{@code }
+ */
 public class DocumentMetadataBuilder {
 
     private Optional<String> title = Optional.empty();

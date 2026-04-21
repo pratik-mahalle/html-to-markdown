@@ -30,14 +30,18 @@ use crate::{HtmlMetadata, MetadataConfig};
 /// use html_to_markdown_rs::{convert, ConversionOptions};
 ///
 /// let html = "<h1>Hello World</h1>";
-/// let result = convert(html, None).unwrap();
+/// let result = convert(html, None, None).unwrap();
 /// assert!(result.content.as_deref().unwrap_or("").contains("Hello World"));
 /// ```
 ///
 /// # Errors
 ///
 /// Returns an error if HTML parsing fails or if the input contains invalid UTF-8.
-pub fn convert(html: &str, options: Option<ConversionOptions>) -> Result<ConversionResult> {
+pub fn convert(
+    html: &str,
+    options: Option<ConversionOptions>,
+    #[cfg(feature = "visitor")] visitor: Option<crate::visitor::VisitorHandle>,
+) -> Result<ConversionResult> {
     use std::cell::RefCell;
     use std::rc::Rc;
 
@@ -96,6 +100,11 @@ pub fn convert(html: &str, options: Option<ConversionOptions>) -> Result<Convers
             None
         };
 
+    // When the visitor feature is not enabled, there is no visitor parameter.
+    // convert_html_impl expects `Option<()>` in the non-visitor slot.
+    #[cfg(not(feature = "visitor"))]
+    let visitor: Option<()> = None;
+
     // Run the conversion pipeline.
     // Pass structure_collector by value — convert_html_impl will consume it via Rc::try_unwrap
     // to return the finished DocumentStructure. We must not hold a second Rc reference.
@@ -107,7 +116,7 @@ pub fn convert(html: &str, options: Option<ConversionOptions>) -> Result<Convers
                 &options,
                 image_collector.as_ref().map(Rc::clone),
                 metadata_collector.as_ref().map(Rc::clone),
-                None,
+                visitor,
                 structure_collector,
             )?
         }
@@ -118,7 +127,7 @@ pub fn convert(html: &str, options: Option<ConversionOptions>) -> Result<Convers
                 &options,
                 None,
                 metadata_collector.as_ref().map(Rc::clone),
-                None,
+                visitor,
                 structure_collector,
             )?
         }
@@ -129,7 +138,7 @@ pub fn convert(html: &str, options: Option<ConversionOptions>) -> Result<Convers
                 &options,
                 image_collector.as_ref().map(Rc::clone),
                 None,
-                None,
+                visitor,
                 structure_collector,
             )?
         }
@@ -140,7 +149,7 @@ pub fn convert(html: &str, options: Option<ConversionOptions>) -> Result<Convers
                 &options,
                 None,
                 None,
-                None,
+                visitor,
                 structure_collector,
             )?
         }
@@ -199,25 +208,6 @@ pub fn convert(html: &str, options: Option<ConversionOptions>) -> Result<Convers
         images,
         warnings,
     })
-}
-
-/// Internal: convert with visitor support. Used by FFI crate.
-/// Will be removed when convert() accepts visitor parameter directly.
-#[cfg(feature = "visitor")]
-#[doc(hidden)]
-pub fn convert_with_visitor(
-    html: &str,
-    options: Option<ConversionOptions>,
-    visitor: Option<crate::visitor::VisitorHandle>,
-) -> Result<String> {
-    let options = options.unwrap_or_default();
-    let normalized_html = normalize_input(html)?;
-    let markdown = crate::converter::convert_html_with_visitor(normalized_html.as_ref(), &options, visitor)?;
-    if options.wrap {
-        Ok(crate::wrapper::wrap_markdown(&markdown, &options))
-    } else {
-        Ok(markdown)
-    }
 }
 
 /// Validate and normalize HTML input for conversion.

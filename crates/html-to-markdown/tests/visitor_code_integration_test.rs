@@ -1,7 +1,7 @@
 #![allow(missing_docs)]
 #![cfg(feature = "visitor")]
 
-use html_to_markdown_rs::convert_with_visitor;
+use html_to_markdown_rs::convert;
 use html_to_markdown_rs::visitor::{HtmlVisitor, NodeContext, VisitResult};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -33,7 +33,7 @@ fn test_code_block_visitor() {
         inline_codes: vec![],
     }));
 
-    let result = convert_with_visitor(html, None, Some(visitor.clone()));
+    let result = convert(html, None, Some(visitor.clone()));
     assert!(result.is_ok());
 
     let visitor_ref = visitor.borrow();
@@ -49,7 +49,7 @@ fn test_inline_code_visitor() {
         inline_codes: vec![],
     }));
 
-    let result = convert_with_visitor(html, None, Some(visitor.clone()));
+    let result = convert(html, None, Some(visitor.clone()));
     assert!(result.is_ok());
 
     let visitor_ref = visitor.borrow();
@@ -71,9 +71,9 @@ fn test_code_block_skip() {
     let html = "<pre><code>skipped code</code></pre>";
     let visitor = Rc::new(RefCell::new(SkipCodeVisitor));
 
-    let result = convert_with_visitor(html, None, Some(visitor));
+    let result = convert(html, None, Some(visitor));
     assert!(result.is_ok());
-    let markdown = result.unwrap();
+    let markdown = result.unwrap().content.unwrap_or_default();
     assert!(!markdown.contains("skipped code"));
 }
 
@@ -97,7 +97,7 @@ fn test_code_block_language_detection() {
             inline_codes: vec![],
         }));
 
-        let result = convert_with_visitor(html, None, Some(visitor.clone()));
+        let result = convert(html, None, Some(visitor.clone()));
         assert!(result.is_ok(), "Failed to convert: {html}");
 
         let visitor_ref = visitor.borrow();

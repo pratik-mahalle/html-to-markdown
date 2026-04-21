@@ -17,6 +17,7 @@
 use pyo3::prelude::*;
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::sync::Mutex;
 
 #[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(frozen, from_py_object)]
@@ -121,6 +122,7 @@ impl MetadataConfig {
 
     #[pyo3(signature = (update))]
     pub fn apply_update(&self, update: MetadataConfigUpdate) -> Self {
+        let update_core: html_to_markdown_rs::MetadataConfigUpdate = update.into();
         let mut core_self = html_to_markdown_rs::metadata::MetadataConfig {
             extract_document: self.extract_document,
             extract_headers: self.extract_headers,
@@ -129,7 +131,7 @@ impl MetadataConfig {
             extract_structured_data: self.extract_structured_data,
             max_structured_data_size: self.max_structured_data_size,
         };
-        core_self.apply_update(update.into());
+        core_self.apply_update(update_core);
         core_self.into()
     }
 
@@ -731,6 +733,7 @@ impl ConversionOptions {
 
     #[pyo3(signature = (update))]
     pub fn apply_update(&self, update: ConversionOptionsUpdate) -> Self {
+        let update_core: html_to_markdown_rs::ConversionOptionsUpdate = update.into();
         let mut core_self = html_to_markdown_rs::options::ConversionOptions {
             heading_style: self.heading_style.clone().into(),
             list_indent_type: self.list_indent_type.clone().into(),
@@ -772,7 +775,7 @@ impl ConversionOptions {
             infer_dimensions: self.infer_dimensions,
             max_depth: self.max_depth,
         };
-        core_self.apply_update(update.into());
+        core_self.apply_update(update_core);
         core_self.into()
     }
 
@@ -838,8 +841,9 @@ impl ConversionOptionsBuilder {
 
     #[pyo3(signature = (preprocessing))]
     pub fn preprocessing(&self, preprocessing: PreprocessingOptions) -> ConversionOptionsBuilder {
+        let preprocessing_core: html_to_markdown_rs::PreprocessingOptions = preprocessing.into();
         Self {
-            inner: Arc::new((*self.inner).clone().preprocessing(preprocessing.into())),
+            inner: Arc::new((*self.inner).clone().preprocessing(preprocessing_core)),
         }
     }
 
@@ -1101,13 +1105,14 @@ impl PreprocessingOptions {
 
     #[pyo3(signature = (update))]
     pub fn apply_update(&self, update: PreprocessingOptionsUpdate) -> Self {
+        let update_core: html_to_markdown_rs::PreprocessingOptionsUpdate = update.into();
         let mut core_self = html_to_markdown_rs::options::PreprocessingOptions {
             enabled: self.enabled,
             preset: self.preset.clone().into(),
             remove_navigation: self.remove_navigation,
             remove_forms: self.remove_forms,
         };
-        core_self.apply_update(update.into());
+        core_self.apply_update(update_core);
         core_self.into()
     }
 
@@ -1429,6 +1434,58 @@ impl ProcessingWarning {
     }
 }
 
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[pyclass(frozen, from_py_object)]
+pub struct NodeContext {
+    /// Coarse-grained node type classification
+    #[pyo3(get)]
+    pub node_type: NodeType,
+    /// Raw HTML tag name (e.g., "div", "h1", "custom-element")
+    #[pyo3(get)]
+    pub tag_name: String,
+    /// All HTML attributes as key-value pairs
+    #[pyo3(get)]
+    pub attributes: HashMap<String, String>,
+    /// Depth in the DOM tree (0 = root)
+    #[pyo3(get)]
+    pub depth: usize,
+    /// Index among siblings (0-based)
+    #[pyo3(get)]
+    pub index_in_parent: usize,
+    /// Parent element's tag name (None if root)
+    #[pyo3(get)]
+    pub parent_tag: Option<String>,
+    /// Whether this element is treated as inline vs block
+    #[pyo3(get)]
+    pub is_inline: bool,
+}
+
+#[pymethods]
+impl NodeContext {
+    #[must_use]
+    #[pyo3(signature = (node_type, tag_name, attributes, depth, index_in_parent, is_inline, parent_tag=None))]
+    #[new]
+    pub fn new(
+        node_type: NodeType,
+        tag_name: String,
+        attributes: HashMap<String, String>,
+        depth: usize,
+        index_in_parent: usize,
+        is_inline: bool,
+        parent_tag: Option<String>,
+    ) -> Self {
+        Self {
+            node_type,
+            tag_name,
+            attributes,
+            depth,
+            index_in_parent,
+            parent_tag,
+            is_inline,
+        }
+    }
+}
+
 #[derive(Clone, PartialEq, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(eq, eq_int, from_py_object)]
 pub enum TextDirection {
@@ -1662,14 +1719,1847 @@ pub enum WarningKind {
     DepthLimitExceeded = 5,
 }
 
+#[derive(Clone, PartialEq, Default, serde::Serialize, serde::Deserialize)]
+#[pyclass(eq, eq_int, from_py_object)]
+pub enum NodeType {
+    #[default]
+    Text = 0,
+    Element = 1,
+    Heading = 2,
+    Paragraph = 3,
+    Div = 4,
+    Blockquote = 5,
+    Pre = 6,
+    Hr = 7,
+    List = 8,
+    ListItem = 9,
+    DefinitionList = 10,
+    DefinitionTerm = 11,
+    DefinitionDescription = 12,
+    Table = 13,
+    TableRow = 14,
+    TableCell = 15,
+    TableHeader = 16,
+    TableBody = 17,
+    TableHead = 18,
+    TableFoot = 19,
+    Link = 20,
+    Image = 21,
+    Strong = 22,
+    Em = 23,
+    Code = 24,
+    Strikethrough = 25,
+    Underline = 26,
+    Subscript = 27,
+    Superscript = 28,
+    Mark = 29,
+    Small = 30,
+    Br = 31,
+    Span = 32,
+    Article = 33,
+    Section = 34,
+    Nav = 35,
+    Aside = 36,
+    Header = 37,
+    Footer = 38,
+    Main = 39,
+    Figure = 40,
+    Figcaption = 41,
+    Time = 42,
+    Details = 43,
+    Summary = 44,
+    Form = 45,
+    Input = 46,
+    Select = 47,
+    Option = 48,
+    Button = 49,
+    Textarea = 50,
+    Label = 51,
+    Fieldset = 52,
+    Legend = 53,
+    Audio = 54,
+    Video = 55,
+    Picture = 56,
+    Source = 57,
+    Iframe = 58,
+    Svg = 59,
+    Canvas = 60,
+    Ruby = 61,
+    Rt = 62,
+    Rp = 63,
+    Abbr = 64,
+    Kbd = 65,
+    Samp = 66,
+    Var = 67,
+    Cite = 68,
+    Q = 69,
+    Del = 70,
+    Ins = 71,
+    Data = 72,
+    Meter = 73,
+    Progress = 74,
+    Output = 75,
+    Template = 76,
+    Slot = 77,
+    Html = 78,
+    Head = 79,
+    Body = 80,
+    Title = 81,
+    Meta = 82,
+    LinkTag = 83,
+    Style = 84,
+    Script = 85,
+    Base = 86,
+    Custom = 87,
+}
+
+#[derive(Clone)]
+#[pyclass(frozen)]
+pub struct VisitResult {
+    pub(crate) inner: html_to_markdown_rs::VisitResult,
+}
+
+#[pymethods]
+impl VisitResult {
+    #[new]
+    fn new(py: Python<'_>, value: &Bound<'_, pyo3::types::PyDict>) -> PyResult<Self> {
+        let json_mod = py.import("json")?;
+        let json_str: String = json_mod.call_method1("dumps", (value,))?.extract()?;
+        let inner: html_to_markdown_rs::VisitResult = serde_json::from_str(&json_str)
+            .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Invalid VisitResult: {e}")))?;
+        Ok(Self { inner })
+    }
+}
+
+impl From<VisitResult> for html_to_markdown_rs::VisitResult {
+    fn from(val: VisitResult) -> Self {
+        val.inner
+    }
+}
+
+impl From<html_to_markdown_rs::VisitResult> for VisitResult {
+    fn from(val: html_to_markdown_rs::VisitResult) -> Self {
+        Self { inner: val }
+    }
+}
+
+impl serde::Serialize for VisitResult {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        self.inner.serialize(serializer)
+    }
+}
+
+impl Default for VisitResult {
+    fn default() -> Self {
+        Self {
+            inner: Default::default(),
+        }
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for VisitResult {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let inner = html_to_markdown_rs::VisitResult::deserialize(deserializer)?;
+        Ok(Self { inner })
+    }
+}
+
 #[allow(clippy::missing_errors_doc)]
 #[pyfunction]
-#[pyo3(signature = (html, options=None))]
-pub fn convert(html: String, options: Option<ConversionOptions>) -> PyResult<ConversionResult> {
-    let options_core: Option<html_to_markdown_rs::ConversionOptions> = options.map(Into::into);
-    html_to_markdown_rs::convert(&html, options_core)
+#[pyo3(signature = (html, options=None, visitor=None))]
+pub fn convert(
+    html: String,
+    options: Option<ConversionOptions>,
+    visitor: Option<Py<PyAny>>,
+) -> PyResult<ConversionResult> {
+    let visitor = visitor.map(|v| {
+        let bridge = PyHtmlVisitorBridge::new(v);
+        std::rc::Rc::new(std::cell::RefCell::new(bridge)) as html_to_markdown_rs::visitor::VisitorHandle
+    });
+    let options_core: Option<html_to_markdown_rs::ConversionOptions> = options
+        .map(|v| {
+            let json =
+                serde_json::to_string(&v).map_err(|e| pyo3::exceptions::PyRuntimeError::new_err(e.to_string()))?;
+            serde_json::from_str(&json).map_err(|e| pyo3::exceptions::PyRuntimeError::new_err(e.to_string()))
+        })
+        .transpose()?;
+    html_to_markdown_rs::convert(&html, options_core, visitor)
         .map(|val| val.into())
         .map_err(|e| pyo3::exceptions::PyRuntimeError::new_err(e.to_string()))
+}
+
+fn nodecontext_to_py_dict<'py>(
+    py: Python<'py>,
+    ctx: &html_to_markdown_rs::visitor::NodeContext,
+) -> pyo3::Bound<'py, pyo3::types::PyDict> {
+    let d = pyo3::types::PyDict::new(py);
+    d.set_item("node_type", format!("{:?}", ctx.node_type)).unwrap_or(());
+    d.set_item("tag_name", &ctx.tag_name).unwrap_or(());
+    d.set_item("depth", ctx.depth).unwrap_or(());
+    d.set_item("index_in_parent", ctx.index_in_parent).unwrap_or(());
+    d.set_item("is_inline", ctx.is_inline).unwrap_or(());
+    d.set_item("parent_tag", ctx.parent_tag.as_deref()).unwrap_or(());
+    let attrs = pyo3::types::PyDict::new(py);
+    for (k, v) in &ctx.attributes {
+        attrs.set_item(k, v).unwrap_or(());
+    }
+    d.set_item("attributes", attrs).unwrap_or(());
+    d
+}
+
+#[derive(Debug)]
+pub struct PyHtmlVisitorBridge {
+    python_obj: Py<PyAny>,
+}
+
+impl PyHtmlVisitorBridge {
+    pub fn new(python_obj: Py<PyAny>) -> Self {
+        Self { python_obj }
+    }
+}
+
+impl html_to_markdown_rs::visitor::HtmlVisitor for PyHtmlVisitorBridge {
+    fn visit_element_start(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_element_start").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_element_start", (nodecontext_to_py_dict(py, _ctx),)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_element_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_element_end").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_element_end", (nodecontext_to_py_dict(py, _ctx), _output)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_text(&mut self, _ctx: &html_to_markdown_rs::NodeContext, _text: &str) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_text").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_text", (nodecontext_to_py_dict(py, _ctx), _text)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_link(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _href: &str,
+        _text: &str,
+        _title: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_link").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_link", (nodecontext_to_py_dict(py, _ctx), _href, _text, _title)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_image(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _src: &str,
+        _alt: &str,
+        _title: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_image").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_image", (nodecontext_to_py_dict(py, _ctx), _src, _alt, _title)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_heading(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _level: u32,
+        _text: &str,
+        _id: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_heading").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_heading", (nodecontext_to_py_dict(py, _ctx), _level, _text, _id)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_code_block(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _lang: Option<&str>,
+        _code: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_code_block").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_code_block", (nodecontext_to_py_dict(py, _ctx), _lang, _code)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_code_inline(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _code: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_code_inline").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_code_inline", (nodecontext_to_py_dict(py, _ctx), _code)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_list_item(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _ordered: bool,
+        _marker: &str,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_list_item").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1(
+                "visit_list_item",
+                (nodecontext_to_py_dict(py, _ctx), _ordered, _marker, _text),
+            ) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_list_start(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _ordered: bool,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_list_start").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_list_start", (nodecontext_to_py_dict(py, _ctx), _ordered)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_list_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _ordered: bool,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_list_end").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_list_end", (nodecontext_to_py_dict(py, _ctx), _ordered, _output)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_table_start(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_table_start").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_table_start", (nodecontext_to_py_dict(py, _ctx),)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_table_row(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _cells: &[String],
+        _is_header: bool,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_table_row").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1(
+                "visit_table_row",
+                (nodecontext_to_py_dict(py, _ctx), _cells, _is_header),
+            ) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_table_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_table_end").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_table_end", (nodecontext_to_py_dict(py, _ctx), _output)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_blockquote(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _content: &str,
+        _depth: usize,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_blockquote").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_blockquote", (nodecontext_to_py_dict(py, _ctx), _content, _depth)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_strong(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_strong").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_strong", (nodecontext_to_py_dict(py, _ctx), _text)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_emphasis(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_emphasis").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_emphasis", (nodecontext_to_py_dict(py, _ctx), _text)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_strikethrough(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_strikethrough").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_strikethrough", (nodecontext_to_py_dict(py, _ctx), _text)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_underline(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_underline").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_underline", (nodecontext_to_py_dict(py, _ctx), _text)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_subscript(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_subscript").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_subscript", (nodecontext_to_py_dict(py, _ctx), _text)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_superscript(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_superscript").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_superscript", (nodecontext_to_py_dict(py, _ctx), _text)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_mark(&mut self, _ctx: &html_to_markdown_rs::NodeContext, _text: &str) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_mark").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_mark", (nodecontext_to_py_dict(py, _ctx), _text)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_line_break(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_line_break").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_line_break", (nodecontext_to_py_dict(py, _ctx),)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_horizontal_rule(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_horizontal_rule").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_horizontal_rule", (nodecontext_to_py_dict(py, _ctx),)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_custom_element(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _tag_name: &str,
+        _html: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_custom_element").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1(
+                "visit_custom_element",
+                (nodecontext_to_py_dict(py, _ctx), _tag_name, _html),
+            ) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_definition_list_start(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_definition_list_start").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_definition_list_start", (nodecontext_to_py_dict(py, _ctx),)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_definition_term(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_definition_term").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_definition_term", (nodecontext_to_py_dict(py, _ctx), _text)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_definition_description(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_definition_description").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1(
+                "visit_definition_description",
+                (nodecontext_to_py_dict(py, _ctx), _text),
+            ) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_definition_list_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_definition_list_end").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_definition_list_end", (nodecontext_to_py_dict(py, _ctx), _output)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_form(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _action: Option<&str>,
+        _method: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_form").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_form", (nodecontext_to_py_dict(py, _ctx), _action, _method)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_input(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _input_type: &str,
+        _name: Option<&str>,
+        _value: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_input").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1(
+                "visit_input",
+                (nodecontext_to_py_dict(py, _ctx), _input_type, _name, _value),
+            ) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_button(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_button").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_button", (nodecontext_to_py_dict(py, _ctx), _text)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_audio(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _src: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_audio").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_audio", (nodecontext_to_py_dict(py, _ctx), _src)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_video(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _src: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_video").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_video", (nodecontext_to_py_dict(py, _ctx), _src)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_iframe(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _src: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_iframe").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_iframe", (nodecontext_to_py_dict(py, _ctx), _src)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_details(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _open: bool,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_details").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_details", (nodecontext_to_py_dict(py, _ctx), _open)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_summary(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_summary").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_summary", (nodecontext_to_py_dict(py, _ctx), _text)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_figure_start(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_figure_start").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_figure_start", (nodecontext_to_py_dict(py, _ctx),)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_figcaption(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_figcaption").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_figcaption", (nodecontext_to_py_dict(py, _ctx), _text)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    fn visit_figure_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        Python::attach(|py| {
+            let obj = self.python_obj.bind(py);
+            if !obj.hasattr("visit_figure_end").unwrap_or(false) {
+                return html_to_markdown_rs::VisitResult::Continue;
+            }
+            match obj.call_method1("visit_figure_end", (nodecontext_to_py_dict(py, _ctx), _output)) {
+                Err(_) => html_to_markdown_rs::VisitResult::Continue,
+                Ok(result) => {
+                    if let Ok(s) = result.extract::<String>() {
+                        match s.to_lowercase().as_str() {
+                            "continue" => html_to_markdown_rs::VisitResult::Continue,
+                            "skip" => html_to_markdown_rs::VisitResult::Skip,
+                            "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                            other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                        }
+                    } else if result.is_none() {
+                        html_to_markdown_rs::VisitResult::Continue
+                    } else {
+                        let py_dict = result.downcast::<pyo3::types::PyDict>();
+                        if let Ok(d) = py_dict {
+                            if let Some(v) = d.get_item("custom").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Custom(v.extract::<String>().unwrap_or_default())
+                            } else if let Some(v) = d.get_item("error").ok().flatten() {
+                                html_to_markdown_rs::VisitResult::Error(v.extract::<String>().unwrap_or_default())
+                            } else {
+                                html_to_markdown_rs::VisitResult::Continue
+                            }
+                        } else {
+                            html_to_markdown_rs::VisitResult::Continue
+                        }
+                    }
+                }
+            }
+        })
+    }
 }
 
 // Error types
@@ -1855,7 +3745,7 @@ impl From<html_to_markdown_rs::metadata::ImageMetadata> for ImageMetadata {
             src: val.src,
             alt: val.alt,
             title: val.title,
-            dimensions: val.dimensions.as_ref().map(|v| format!("{:?}", v)),
+            dimensions: val.dimensions.as_ref().map(|v| format!("{v:?}")),
             image_type: val.image_type.into(),
             attributes: val.attributes.into_iter().collect(),
         }
@@ -2308,6 +4198,20 @@ impl From<html_to_markdown_rs::ProcessingWarning> for ProcessingWarning {
     }
 }
 
+impl From<html_to_markdown_rs::NodeContext> for NodeContext {
+    fn from(val: html_to_markdown_rs::NodeContext) -> Self {
+        Self {
+            node_type: val.node_type.into(),
+            tag_name: val.tag_name,
+            attributes: val.attributes.into_iter().collect(),
+            depth: val.depth,
+            index_in_parent: val.index_in_parent,
+            parent_tag: val.parent_tag,
+            is_inline: val.is_inline,
+        }
+    }
+}
+
 impl From<TextDirection> for html_to_markdown_rs::metadata::TextDirection {
     fn from(val: TextDirection) -> Self {
         match val {
@@ -2596,6 +4500,101 @@ impl From<html_to_markdown_rs::WarningKind> for WarningKind {
     }
 }
 
+impl From<html_to_markdown_rs::NodeType> for NodeType {
+    fn from(val: html_to_markdown_rs::NodeType) -> Self {
+        match val {
+            html_to_markdown_rs::NodeType::Text => Self::Text,
+            html_to_markdown_rs::NodeType::Element => Self::Element,
+            html_to_markdown_rs::NodeType::Heading => Self::Heading,
+            html_to_markdown_rs::NodeType::Paragraph => Self::Paragraph,
+            html_to_markdown_rs::NodeType::Div => Self::Div,
+            html_to_markdown_rs::NodeType::Blockquote => Self::Blockquote,
+            html_to_markdown_rs::NodeType::Pre => Self::Pre,
+            html_to_markdown_rs::NodeType::Hr => Self::Hr,
+            html_to_markdown_rs::NodeType::List => Self::List,
+            html_to_markdown_rs::NodeType::ListItem => Self::ListItem,
+            html_to_markdown_rs::NodeType::DefinitionList => Self::DefinitionList,
+            html_to_markdown_rs::NodeType::DefinitionTerm => Self::DefinitionTerm,
+            html_to_markdown_rs::NodeType::DefinitionDescription => Self::DefinitionDescription,
+            html_to_markdown_rs::NodeType::Table => Self::Table,
+            html_to_markdown_rs::NodeType::TableRow => Self::TableRow,
+            html_to_markdown_rs::NodeType::TableCell => Self::TableCell,
+            html_to_markdown_rs::NodeType::TableHeader => Self::TableHeader,
+            html_to_markdown_rs::NodeType::TableBody => Self::TableBody,
+            html_to_markdown_rs::NodeType::TableHead => Self::TableHead,
+            html_to_markdown_rs::NodeType::TableFoot => Self::TableFoot,
+            html_to_markdown_rs::NodeType::Link => Self::Link,
+            html_to_markdown_rs::NodeType::Image => Self::Image,
+            html_to_markdown_rs::NodeType::Strong => Self::Strong,
+            html_to_markdown_rs::NodeType::Em => Self::Em,
+            html_to_markdown_rs::NodeType::Code => Self::Code,
+            html_to_markdown_rs::NodeType::Strikethrough => Self::Strikethrough,
+            html_to_markdown_rs::NodeType::Underline => Self::Underline,
+            html_to_markdown_rs::NodeType::Subscript => Self::Subscript,
+            html_to_markdown_rs::NodeType::Superscript => Self::Superscript,
+            html_to_markdown_rs::NodeType::Mark => Self::Mark,
+            html_to_markdown_rs::NodeType::Small => Self::Small,
+            html_to_markdown_rs::NodeType::Br => Self::Br,
+            html_to_markdown_rs::NodeType::Span => Self::Span,
+            html_to_markdown_rs::NodeType::Article => Self::Article,
+            html_to_markdown_rs::NodeType::Section => Self::Section,
+            html_to_markdown_rs::NodeType::Nav => Self::Nav,
+            html_to_markdown_rs::NodeType::Aside => Self::Aside,
+            html_to_markdown_rs::NodeType::Header => Self::Header,
+            html_to_markdown_rs::NodeType::Footer => Self::Footer,
+            html_to_markdown_rs::NodeType::Main => Self::Main,
+            html_to_markdown_rs::NodeType::Figure => Self::Figure,
+            html_to_markdown_rs::NodeType::Figcaption => Self::Figcaption,
+            html_to_markdown_rs::NodeType::Time => Self::Time,
+            html_to_markdown_rs::NodeType::Details => Self::Details,
+            html_to_markdown_rs::NodeType::Summary => Self::Summary,
+            html_to_markdown_rs::NodeType::Form => Self::Form,
+            html_to_markdown_rs::NodeType::Input => Self::Input,
+            html_to_markdown_rs::NodeType::Select => Self::Select,
+            html_to_markdown_rs::NodeType::Option => Self::Option,
+            html_to_markdown_rs::NodeType::Button => Self::Button,
+            html_to_markdown_rs::NodeType::Textarea => Self::Textarea,
+            html_to_markdown_rs::NodeType::Label => Self::Label,
+            html_to_markdown_rs::NodeType::Fieldset => Self::Fieldset,
+            html_to_markdown_rs::NodeType::Legend => Self::Legend,
+            html_to_markdown_rs::NodeType::Audio => Self::Audio,
+            html_to_markdown_rs::NodeType::Video => Self::Video,
+            html_to_markdown_rs::NodeType::Picture => Self::Picture,
+            html_to_markdown_rs::NodeType::Source => Self::Source,
+            html_to_markdown_rs::NodeType::Iframe => Self::Iframe,
+            html_to_markdown_rs::NodeType::Svg => Self::Svg,
+            html_to_markdown_rs::NodeType::Canvas => Self::Canvas,
+            html_to_markdown_rs::NodeType::Ruby => Self::Ruby,
+            html_to_markdown_rs::NodeType::Rt => Self::Rt,
+            html_to_markdown_rs::NodeType::Rp => Self::Rp,
+            html_to_markdown_rs::NodeType::Abbr => Self::Abbr,
+            html_to_markdown_rs::NodeType::Kbd => Self::Kbd,
+            html_to_markdown_rs::NodeType::Samp => Self::Samp,
+            html_to_markdown_rs::NodeType::Var => Self::Var,
+            html_to_markdown_rs::NodeType::Cite => Self::Cite,
+            html_to_markdown_rs::NodeType::Q => Self::Q,
+            html_to_markdown_rs::NodeType::Del => Self::Del,
+            html_to_markdown_rs::NodeType::Ins => Self::Ins,
+            html_to_markdown_rs::NodeType::Data => Self::Data,
+            html_to_markdown_rs::NodeType::Meter => Self::Meter,
+            html_to_markdown_rs::NodeType::Progress => Self::Progress,
+            html_to_markdown_rs::NodeType::Output => Self::Output,
+            html_to_markdown_rs::NodeType::Template => Self::Template,
+            html_to_markdown_rs::NodeType::Slot => Self::Slot,
+            html_to_markdown_rs::NodeType::Html => Self::Html,
+            html_to_markdown_rs::NodeType::Head => Self::Head,
+            html_to_markdown_rs::NodeType::Body => Self::Body,
+            html_to_markdown_rs::NodeType::Title => Self::Title,
+            html_to_markdown_rs::NodeType::Meta => Self::Meta,
+            html_to_markdown_rs::NodeType::LinkTag => Self::LinkTag,
+            html_to_markdown_rs::NodeType::Style => Self::Style,
+            html_to_markdown_rs::NodeType::Script => Self::Script,
+            html_to_markdown_rs::NodeType::Base => Self::Base,
+            html_to_markdown_rs::NodeType::Custom => Self::Custom,
+        }
+    }
+}
+
 #[pymodule]
 pub fn _html_to_markdown(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<MetadataConfig>()?;
@@ -2619,6 +4618,7 @@ pub fn _html_to_markdown(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<GridCell>()?;
     m.add_class::<TableData>()?;
     m.add_class::<ProcessingWarning>()?;
+    m.add_class::<NodeContext>()?;
     m.add_class::<TextDirection>()?;
     m.add_class::<LinkType>()?;
     m.add_class::<ImageType>()?;
@@ -2635,6 +4635,8 @@ pub fn _html_to_markdown(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<NodeContent>()?;
     m.add_class::<AnnotationKind>()?;
     m.add_class::<WarningKind>()?;
+    m.add_class::<NodeType>()?;
+    m.add_class::<VisitResult>()?;
     m.add_function(wrap_pyfunction!(convert, m)?)?;
     m.add("ParseError", m.py().get_type::<ParseError>())?;
     m.add("SanitizationError", m.py().get_type::<SanitizationError>())?;

@@ -4,9 +4,17 @@ package dev.kreuzberg.htmltomarkdown;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+/**
+ * Text directionality of document content.
+ *
+ * Corresponds to the HTML {@code dir} attribute and {@code bdi} element directionality.
+ */
 public enum TextDirection {
+    /** Left-to-right text flow (default for Latin scripts) */
     LeftToRight("ltr"),
+    /** Right-to-left text flow (Hebrew, Arabic, Urdu, etc.) */
     RightToLeft("rtl"),
+    /** Automatic directionality detection */
     Auto("auto");
 
     private final String value;

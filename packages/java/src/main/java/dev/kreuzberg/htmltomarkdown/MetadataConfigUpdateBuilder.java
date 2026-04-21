@@ -3,6 +3,41 @@ package dev.kreuzberg.htmltomarkdown;
 
 import java.util.Optional;
 
+/**
+ * Partial update for {@code MetadataConfig}.
+ *
+ * This struct uses {@code Option<T>} to represent optional fields that can be selectively updated.
+ * Only specified fields (Some values) will override existing config; None values leave the
+ * corresponding fields unchanged when applied via [{@code MetadataConfig::apply_update}].
+ *
+ * # Fields
+ *
+ * - {@code extract_document}: Optional override for document-level metadata extraction
+ * - {@code extract_headers}: Optional override for heading element extraction
+ * - {@code extract_links}: Optional override for link element extraction
+ * - {@code extract_images}: Optional override for image element extraction
+ * - {@code extract_structured_data}: Optional override for structured data extraction
+ * - {@code max_structured_data_size}: Optional override for structured data size limit
+ *
+ * # Examples
+ *
+ * {@code }{@code }
+ * # use html_to_markdown_rs::metadata::{MetadataConfig, MetadataConfigUpdate};
+ * let update = MetadataConfigUpdate {
+ *     extract_document: Some(false),
+ *     extract_headers: Some(true),
+ *     extract_links: None,  // No change
+ *     extract_images: None,  // No change
+ *     extract_structured_data: None,  // No change
+ *     max_structured_data_size: None,  // No change
+ * };
+ *
+ * let mut config = MetadataConfig::default();
+ * config.apply_update(update);
+ * assert!(!config.extract_document);
+ * assert!(config.extract_headers);
+ * {@code }{@code }
+ */
 public class MetadataConfigUpdateBuilder {
 
     private Optional<Boolean> extractDocument = Optional.empty();

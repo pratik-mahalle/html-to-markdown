@@ -4,8 +4,15 @@ package dev.kreuzberg.htmltomarkdown;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+/**
+ * Whitespace handling strategy during conversion.
+ *
+ * Determines how sequences of whitespace characters (spaces, tabs, newlines) are processed.
+ */
 public enum WhitespaceMode {
+    /** Collapse multiple whitespace characters to single spaces. Default. Matches browser behavior. */
     Normalized("normalized"),
+    /** Preserve all whitespace exactly as it appears in the HTML. */
     Strict("strict");
 
     private final String value;

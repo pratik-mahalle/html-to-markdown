@@ -4,12 +4,23 @@ package dev.kreuzberg.htmltomarkdown;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+/**
+ * Link classification based on href value and document context.
+ *
+ * Used to categorize links during extraction for filtering and analysis.
+ */
 public enum LinkType {
+    /** Anchor link within same document (href starts with #) */
     Anchor("anchor"),
+    /** Internal link within same domain */
     Internal("internal"),
+    /** External link to different domain */
     External("external"),
+    /** Email link (mailto:) */
     Email("email"),
+    /** Phone link (tel:) */
     Phone("phone"),
+    /** Other protocol or unclassifiable */
     Other("other");
 
     private final String value;

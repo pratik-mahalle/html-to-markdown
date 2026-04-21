@@ -2,5 +2,8 @@
 package dev.kreuzberg.htmltomarkdown;
 
 
+/**
+ * A top-level extracted table with both structured data and markdown representation.
+ */
 public record TableData(TableGrid grid, String markdown) {
 }

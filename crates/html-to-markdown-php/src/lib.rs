@@ -1091,6 +1091,44 @@ impl ProcessingWarning {
     }
 }
 
+#[derive(Clone, serde::Serialize, serde::Deserialize, Default)]
+#[php_class]
+#[php(name = "Html\\To\\Markdown\\Rs\\NodeContext")]
+pub struct NodeContext {
+    /// Coarse-grained node type classification
+    #[php(prop, name = "node_type")]
+    pub node_type: String,
+    /// Raw HTML tag name (e.g., "div", "h1", "custom-element")
+    #[php(prop, name = "tag_name")]
+    pub tag_name: String,
+    /// All HTML attributes as key-value pairs
+    pub attributes: HashMap<String, String>,
+    /// Depth in the DOM tree (0 = root)
+    #[php(prop, name = "depth")]
+    pub depth: i64,
+    /// Index among siblings (0-based)
+    #[php(prop, name = "index_in_parent")]
+    pub index_in_parent: i64,
+    /// Parent element's tag name (None if root)
+    #[php(prop, name = "parent_tag")]
+    pub parent_tag: Option<String>,
+    /// Whether this element is treated as inline vs block
+    #[php(prop, name = "is_inline")]
+    pub is_inline: bool,
+}
+
+#[php_impl]
+impl NodeContext {
+    pub fn from_json(json: String) -> PhpResult<Self> {
+        serde_json::from_str(&json).map_err(|e| PhpException::default(e.to_string()))
+    }
+
+    #[php(getter)]
+    pub fn get_attributes(&self) -> HashMap<String, String> {
+        self.attributes.clone()
+    }
+}
+
 // TextDirection enum values
 pub const TEXTDIRECTION_LEFTTORIGHT: &str = "LeftToRight";
 pub const TEXTDIRECTION_RIGHTTOLEFT: &str = "RightToLeft";
@@ -1191,17 +1229,1455 @@ pub const WARNINGKIND_MALFORMEDHTML: &str = "MalformedHtml";
 pub const WARNINGKIND_SANITIZATIONAPPLIED: &str = "SanitizationApplied";
 pub const WARNINGKIND_DEPTHLIMITEXCEEDED: &str = "DepthLimitExceeded";
 
+// NodeType enum values
+pub const NODETYPE_TEXT: &str = "Text";
+pub const NODETYPE_ELEMENT: &str = "Element";
+pub const NODETYPE_HEADING: &str = "Heading";
+pub const NODETYPE_PARAGRAPH: &str = "Paragraph";
+pub const NODETYPE_DIV: &str = "Div";
+pub const NODETYPE_BLOCKQUOTE: &str = "Blockquote";
+pub const NODETYPE_PRE: &str = "Pre";
+pub const NODETYPE_HR: &str = "Hr";
+pub const NODETYPE_LIST: &str = "List";
+pub const NODETYPE_LISTITEM: &str = "ListItem";
+pub const NODETYPE_DEFINITIONLIST: &str = "DefinitionList";
+pub const NODETYPE_DEFINITIONTERM: &str = "DefinitionTerm";
+pub const NODETYPE_DEFINITIONDESCRIPTION: &str = "DefinitionDescription";
+pub const NODETYPE_TABLE: &str = "Table";
+pub const NODETYPE_TABLEROW: &str = "TableRow";
+pub const NODETYPE_TABLECELL: &str = "TableCell";
+pub const NODETYPE_TABLEHEADER: &str = "TableHeader";
+pub const NODETYPE_TABLEBODY: &str = "TableBody";
+pub const NODETYPE_TABLEHEAD: &str = "TableHead";
+pub const NODETYPE_TABLEFOOT: &str = "TableFoot";
+pub const NODETYPE_LINK: &str = "Link";
+pub const NODETYPE_IMAGE: &str = "Image";
+pub const NODETYPE_STRONG: &str = "Strong";
+pub const NODETYPE_EM: &str = "Em";
+pub const NODETYPE_CODE: &str = "Code";
+pub const NODETYPE_STRIKETHROUGH: &str = "Strikethrough";
+pub const NODETYPE_UNDERLINE: &str = "Underline";
+pub const NODETYPE_SUBSCRIPT: &str = "Subscript";
+pub const NODETYPE_SUPERSCRIPT: &str = "Superscript";
+pub const NODETYPE_MARK: &str = "Mark";
+pub const NODETYPE_SMALL: &str = "Small";
+pub const NODETYPE_BR: &str = "Br";
+pub const NODETYPE_SPAN: &str = "Span";
+pub const NODETYPE_ARTICLE: &str = "Article";
+pub const NODETYPE_SECTION: &str = "Section";
+pub const NODETYPE_NAV: &str = "Nav";
+pub const NODETYPE_ASIDE: &str = "Aside";
+pub const NODETYPE_HEADER: &str = "Header";
+pub const NODETYPE_FOOTER: &str = "Footer";
+pub const NODETYPE_MAIN: &str = "Main";
+pub const NODETYPE_FIGURE: &str = "Figure";
+pub const NODETYPE_FIGCAPTION: &str = "Figcaption";
+pub const NODETYPE_TIME: &str = "Time";
+pub const NODETYPE_DETAILS: &str = "Details";
+pub const NODETYPE_SUMMARY: &str = "Summary";
+pub const NODETYPE_FORM: &str = "Form";
+pub const NODETYPE_INPUT: &str = "Input";
+pub const NODETYPE_SELECT: &str = "Select";
+pub const NODETYPE_OPTION: &str = "Option";
+pub const NODETYPE_BUTTON: &str = "Button";
+pub const NODETYPE_TEXTAREA: &str = "Textarea";
+pub const NODETYPE_LABEL: &str = "Label";
+pub const NODETYPE_FIELDSET: &str = "Fieldset";
+pub const NODETYPE_LEGEND: &str = "Legend";
+pub const NODETYPE_AUDIO: &str = "Audio";
+pub const NODETYPE_VIDEO: &str = "Video";
+pub const NODETYPE_PICTURE: &str = "Picture";
+pub const NODETYPE_SOURCE: &str = "Source";
+pub const NODETYPE_IFRAME: &str = "Iframe";
+pub const NODETYPE_SVG: &str = "Svg";
+pub const NODETYPE_CANVAS: &str = "Canvas";
+pub const NODETYPE_RUBY: &str = "Ruby";
+pub const NODETYPE_RT: &str = "Rt";
+pub const NODETYPE_RP: &str = "Rp";
+pub const NODETYPE_ABBR: &str = "Abbr";
+pub const NODETYPE_KBD: &str = "Kbd";
+pub const NODETYPE_SAMP: &str = "Samp";
+pub const NODETYPE_VAR: &str = "Var";
+pub const NODETYPE_CITE: &str = "Cite";
+pub const NODETYPE_Q: &str = "Q";
+pub const NODETYPE_DEL: &str = "Del";
+pub const NODETYPE_INS: &str = "Ins";
+pub const NODETYPE_DATA: &str = "Data";
+pub const NODETYPE_METER: &str = "Meter";
+pub const NODETYPE_PROGRESS: &str = "Progress";
+pub const NODETYPE_OUTPUT: &str = "Output";
+pub const NODETYPE_TEMPLATE: &str = "Template";
+pub const NODETYPE_SLOT: &str = "Slot";
+pub const NODETYPE_HTML: &str = "Html";
+pub const NODETYPE_HEAD: &str = "Head";
+pub const NODETYPE_BODY: &str = "Body";
+pub const NODETYPE_TITLE: &str = "Title";
+pub const NODETYPE_META: &str = "Meta";
+pub const NODETYPE_LINKTAG: &str = "LinkTag";
+pub const NODETYPE_STYLE: &str = "Style";
+pub const NODETYPE_SCRIPT: &str = "Script";
+pub const NODETYPE_BASE: &str = "Base";
+pub const NODETYPE_CUSTOM: &str = "Custom";
+
+// VisitResult enum values
+pub const VISITRESULT_CONTINUE: &str = "Continue";
+pub const VISITRESULT_CUSTOM: &str = "Custom";
+pub const VISITRESULT_SKIP: &str = "Skip";
+pub const VISITRESULT_PRESERVEHTML: &str = "PreserveHtml";
+pub const VISITRESULT_ERROR: &str = "Error";
+
 #[php_class]
 #[php(name = "Html\\To\\Markdown\\Rs\\HtmlToMarkdownRsApi")]
 pub struct HtmlToMarkdownRsApi;
 
 #[php_impl]
 impl HtmlToMarkdownRsApi {
-    pub fn convert(html: String, options: Option<&ConversionOptions>) -> PhpResult<ConversionResult> {
-        let options_core: Option<html_to_markdown_rs::ConversionOptions> = options.map(|v| v.clone().into());
-        let result = html_to_markdown_rs::convert(&html, options_core)
-            .map_err(|e| ext_php_rs::exception::PhpException::default(e.to_string()))?;
-        Ok(result.into())
+    #[allow(clippy::missing_errors_doc)]
+    pub fn convert(
+        html: String,
+        options: Option<&mut ConversionOptions>,
+        visitor: Option<&mut ext_php_rs::types::ZendObject>,
+    ) -> PhpResult<ConversionResult> {
+        let visitor = visitor.map(|v| {
+            let bridge = PhpHtmlVisitorBridge::new(v);
+            std::rc::Rc::new(std::cell::RefCell::new(bridge)) as html_to_markdown_rs::visitor::VisitorHandle
+        });
+        let options_core: Option<html_to_markdown_rs::ConversionOptions> = options
+            .map(|v| {
+                let json = serde_json::to_string(&v)
+                    .map_err(|e| ext_php_rs::exception::PhpException::default(e.to_string()))?;
+                serde_json::from_str(&json).map_err(|e| ext_php_rs::exception::PhpException::default(e.to_string()))
+            })
+            .transpose()?;
+        html_to_markdown_rs::convert(&html, options_core, visitor)
+            .map(|val| val.into())
+            .map_err(|e| ext_php_rs::exception::PhpException::default(e.to_string()))
+    }
+}
+
+fn nodecontext_to_php_array(
+    ctx: &html_to_markdown_rs::visitor::NodeContext,
+) -> ext_php_rs::boxed::ZBox<ext_php_rs::types::ZendHashTable> {
+    let mut arr = ext_php_rs::types::ZendHashTable::new();
+    arr.insert(
+        "nodeType",
+        ext_php_rs::types::Zval::try_from(format!("{:?}", ctx.node_type)).unwrap_or_default(),
+    )
+    .ok();
+    arr.insert(
+        "tagName",
+        ext_php_rs::types::Zval::try_from(ctx.tag_name.clone()).unwrap_or_default(),
+    )
+    .ok();
+    arr.insert(
+        "depth",
+        ext_php_rs::types::Zval::try_from(ctx.depth as i64).unwrap_or_default(),
+    )
+    .ok();
+    arr.insert(
+        "indexInParent",
+        ext_php_rs::types::Zval::try_from(ctx.index_in_parent as i64).unwrap_or_default(),
+    )
+    .ok();
+    arr.insert(
+        "isInline",
+        ext_php_rs::types::Zval::try_from(ctx.is_inline).unwrap_or_default(),
+    )
+    .ok();
+    if let Some(ref pt) = ctx.parent_tag {
+        arr.insert(
+            "parentTag",
+            ext_php_rs::types::Zval::try_from(pt.clone()).unwrap_or_default(),
+        )
+        .ok();
+    }
+    let mut attrs = ext_php_rs::types::ZendHashTable::new();
+    for (k, v) in &ctx.attributes {
+        attrs
+            .insert(
+                k.as_str(),
+                ext_php_rs::types::Zval::try_from(v.clone()).unwrap_or_default(),
+            )
+            .ok();
+    }
+    let mut attrs_zval = ext_php_rs::types::Zval::new();
+    attrs_zval.set_hashtable(attrs);
+    arr.insert("attributes", attrs_zval).ok();
+    arr
+}
+
+pub struct PhpHtmlVisitorBridge {
+    php_obj: *mut ext_php_rs::types::ZendObject,
+}
+
+// SAFETY: PHP objects are single-threaded; the bridge is used
+// only within a single PHP request, never across threads.
+unsafe impl Send for PhpHtmlVisitorBridge {}
+unsafe impl Sync for PhpHtmlVisitorBridge {}
+
+impl std::fmt::Debug for PhpHtmlVisitorBridge {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "PhpHtmlVisitorBridge")
+    }
+}
+
+impl PhpHtmlVisitorBridge {
+    pub fn new(php_obj: &mut ext_php_rs::types::ZendObject) -> Self {
+        Self {
+            php_obj: php_obj as *mut _,
+        }
+    }
+}
+
+impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
+    fn visit_element_start(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitElementStart", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_element_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_output.to_string()).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitElementEnd", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_text(&mut self, _ctx: &html_to_markdown_rs::NodeContext, _text: &str) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_text.to_string()).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitText", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_link(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _href: &str,
+        _text: &str,
+        _title: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_href.to_string()).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_text.to_string()).unwrap_or_default());
+        args.push(match _title {
+            Some(s) => ext_php_rs::types::Zval::try_from(s.to_string()).unwrap_or_default(),
+            None => ext_php_rs::types::Zval::new(),
+        });
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitLink", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_image(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _src: &str,
+        _alt: &str,
+        _title: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_src.to_string()).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_alt.to_string()).unwrap_or_default());
+        args.push(match _title {
+            Some(s) => ext_php_rs::types::Zval::try_from(s.to_string()).unwrap_or_default(),
+            None => ext_php_rs::types::Zval::new(),
+        });
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitImage", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_heading(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _level: u32,
+        _text: &str,
+        _id: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(format!("{:?}", _level)).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_text.to_string()).unwrap_or_default());
+        args.push(match _id {
+            Some(s) => ext_php_rs::types::Zval::try_from(s.to_string()).unwrap_or_default(),
+            None => ext_php_rs::types::Zval::new(),
+        });
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitHeading", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_code_block(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _lang: Option<&str>,
+        _code: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(match _lang {
+            Some(s) => ext_php_rs::types::Zval::try_from(s.to_string()).unwrap_or_default(),
+            None => ext_php_rs::types::Zval::new(),
+        });
+        args.push(ext_php_rs::types::Zval::try_from(_code.to_string()).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitCodeBlock", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_code_inline(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _code: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_code.to_string()).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitCodeInline", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_list_item(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _ordered: bool,
+        _marker: &str,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        {
+            let mut _zv = ext_php_rs::types::Zval::new();
+            _zv.set_bool(_ordered);
+            args.push(_zv);
+        }
+        args.push(ext_php_rs::types::Zval::try_from(_marker.to_string()).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_text.to_string()).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitListItem", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_list_start(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _ordered: bool,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        {
+            let mut _zv = ext_php_rs::types::Zval::new();
+            _zv.set_bool(_ordered);
+            args.push(_zv);
+        }
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitListStart", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_list_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _ordered: bool,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        {
+            let mut _zv = ext_php_rs::types::Zval::new();
+            _zv.set_bool(_ordered);
+            args.push(_zv);
+        }
+        args.push(ext_php_rs::types::Zval::try_from(_output.to_string()).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitListEnd", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_table_start(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitTableStart", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_table_row(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _cells: &[String],
+        _is_header: bool,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(format!("{:?}", _cells)).unwrap_or_default());
+        {
+            let mut _zv = ext_php_rs::types::Zval::new();
+            _zv.set_bool(_is_header);
+            args.push(_zv);
+        }
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitTableRow", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_table_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_output.to_string()).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitTableEnd", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_blockquote(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _content: &str,
+        _depth: usize,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_content.to_string()).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(format!("{:?}", _depth)).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitBlockquote", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_strong(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_text.to_string()).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitStrong", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_emphasis(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_text.to_string()).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitEmphasis", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_strikethrough(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_text.to_string()).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitStrikethrough", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_underline(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_text.to_string()).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitUnderline", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_subscript(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_text.to_string()).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitSubscript", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_superscript(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_text.to_string()).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitSuperscript", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_mark(&mut self, _ctx: &html_to_markdown_rs::NodeContext, _text: &str) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_text.to_string()).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitMark", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_line_break(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitLineBreak", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_horizontal_rule(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitHorizontalRule", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_custom_element(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _tag_name: &str,
+        _html: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_tag_name.to_string()).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_html.to_string()).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitCustomElement", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_definition_list_start(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitDefinitionListStart", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_definition_term(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_text.to_string()).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitDefinitionTerm", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_definition_description(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_text.to_string()).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitDefinitionDescription", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_definition_list_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_output.to_string()).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitDefinitionListEnd", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_form(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _action: Option<&str>,
+        _method: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(match _action {
+            Some(s) => ext_php_rs::types::Zval::try_from(s.to_string()).unwrap_or_default(),
+            None => ext_php_rs::types::Zval::new(),
+        });
+        args.push(match _method {
+            Some(s) => ext_php_rs::types::Zval::try_from(s.to_string()).unwrap_or_default(),
+            None => ext_php_rs::types::Zval::new(),
+        });
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitForm", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_input(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _input_type: &str,
+        _name: Option<&str>,
+        _value: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_input_type.to_string()).unwrap_or_default());
+        args.push(match _name {
+            Some(s) => ext_php_rs::types::Zval::try_from(s.to_string()).unwrap_or_default(),
+            None => ext_php_rs::types::Zval::new(),
+        });
+        args.push(match _value {
+            Some(s) => ext_php_rs::types::Zval::try_from(s.to_string()).unwrap_or_default(),
+            None => ext_php_rs::types::Zval::new(),
+        });
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitInput", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_button(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_text.to_string()).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitButton", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_audio(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _src: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(match _src {
+            Some(s) => ext_php_rs::types::Zval::try_from(s.to_string()).unwrap_or_default(),
+            None => ext_php_rs::types::Zval::new(),
+        });
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitAudio", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_video(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _src: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(match _src {
+            Some(s) => ext_php_rs::types::Zval::try_from(s.to_string()).unwrap_or_default(),
+            None => ext_php_rs::types::Zval::new(),
+        });
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitVideo", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_iframe(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _src: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(match _src {
+            Some(s) => ext_php_rs::types::Zval::try_from(s.to_string()).unwrap_or_default(),
+            None => ext_php_rs::types::Zval::new(),
+        });
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitIframe", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_details(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _open: bool,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        {
+            let mut _zv = ext_php_rs::types::Zval::new();
+            _zv.set_bool(_open);
+            args.push(_zv);
+        }
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitDetails", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_summary(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_text.to_string()).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitSummary", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_figure_start(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitFigureStart", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_figcaption(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_text.to_string()).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitFigcaption", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_figure_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
+        let php_obj_ref = unsafe { &*self.php_obj };
+        let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
+        let ctx_arr = nodecontext_to_php_array(_ctx);
+        args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
+        args.push(ext_php_rs::types::Zval::try_from(_output.to_string()).unwrap_or_default());
+        let dyn_args: Vec<&dyn ext_php_rs::convert::IntoZvalDyn> = args
+            .iter()
+            .map(|z| z as &dyn ext_php_rs::convert::IntoZvalDyn)
+            .collect();
+        let result = php_obj_ref.try_call_method("visitFigureEnd", dyn_args);
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s = val.string().unwrap_or_default().to_lowercase();
+                match s.as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
     }
 }
 
@@ -1347,7 +2823,7 @@ impl From<html_to_markdown_rs::metadata::ImageMetadata> for ImageMetadata {
             src: val.src,
             alt: val.alt,
             title: val.title,
-            dimensions: val.dimensions.as_ref().map(|v| format!("{:?}", v)),
+            dimensions: val.dimensions.as_ref().map(|v| format!("{v:?}")),
             image_type: serde_json::to_value(val.image_type)
                 .ok()
                 .and_then(|s| s.as_str().map(String::from))
@@ -1772,6 +3248,23 @@ impl From<html_to_markdown_rs::ProcessingWarning> for ProcessingWarning {
     }
 }
 
+impl From<html_to_markdown_rs::NodeContext> for NodeContext {
+    fn from(val: html_to_markdown_rs::NodeContext) -> Self {
+        Self {
+            node_type: serde_json::to_value(val.node_type)
+                .ok()
+                .and_then(|s| s.as_str().map(String::from))
+                .unwrap_or_default(),
+            tag_name: val.tag_name,
+            attributes: val.attributes.into_iter().collect(),
+            depth: val.depth as i64,
+            index_in_parent: val.index_in_parent as i64,
+            parent_tag: val.parent_tag,
+            is_inline: val.is_inline,
+        }
+    }
+}
+
 /// Convert a `html_to_markdown_rs::error::ConversionError` error to a PHP exception.
 #[allow(dead_code)]
 fn conversion_error_to_php_err(e: html_to_markdown_rs::error::ConversionError) -> ext_php_rs::exception::PhpException {
@@ -1827,5 +3320,6 @@ pub fn get_module(module: ModuleBuilder) -> ModuleBuilder {
         .class::<GridCell>()
         .class::<TableData>()
         .class::<ProcessingWarning>()
+        .class::<NodeContext>()
         .class::<HtmlToMarkdownRsApi>()
 }

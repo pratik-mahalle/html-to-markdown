@@ -40,19 +40,6 @@ pub fn convert_html(html: &str, options: &ConversionOptions) -> Result<String> {
     convert_html_impl(html, options, None, None, None, None).map(|(md, _)| md)
 }
 
-/// Converts HTML to Markdown with a custom visitor for callbacks during traversal.
-///
-/// This variant allows passing a visitor that will receive callbacks for each node
-/// during the tree walk, enabling custom processing or analysis.
-#[cfg(feature = "visitor")]
-pub fn convert_html_with_visitor(
-    html: &str,
-    options: &ConversionOptions,
-    visitor: Option<crate::visitor::VisitorHandle>,
-) -> Result<String> {
-    convert_html_impl(html, options, None, None, visitor, None).map(|(md, _)| md)
-}
-
 /// Internal implementation of HTML to Markdown conversion.
 ///
 /// Returns `(markdown, Option<DocumentStructure>)`.  The structure is populated when

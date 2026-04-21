@@ -9,7 +9,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use html_to_markdown_rs::convert_with_visitor;
+use html_to_markdown_rs::convert;
 use html_to_markdown_rs::visitor::HtmlVisitor;
 
 /// Empty visitor — does nothing, just uses default implementations.
@@ -26,7 +26,7 @@ fn make_visitor() -> Rc<RefCell<dyn HtmlVisitor>> {
 fn test_cyrillic_with_tabs_between_divs_and_visitor() {
     // Exact reproduction from the issue
     let html = "<div><span>А</span></div>\t\t\t<div><span>По";
-    let result = convert_with_visitor(html, None, Some(make_visitor()));
+    let result = convert(html, None, Some(make_visitor()));
     assert!(result.is_ok(), "Should not panic: {result:?}");
 }
 
@@ -40,7 +40,7 @@ fn test_multibyte_utf8_with_tabs_and_visitor() {
     ];
 
     for html in &cases {
-        let result = convert_with_visitor(html, None, Some(make_visitor()));
+        let result = convert(html, None, Some(make_visitor()));
         assert!(result.is_ok(), "Should not panic for: {html}\nError: {result:?}");
     }
 }
@@ -50,7 +50,7 @@ fn test_cyrillic_with_varying_tab_counts_and_visitor() {
     for n in 1..=5 {
         let tabs = "\t".repeat(n);
         let html = format!("<div><span>А</span></div>{tabs}<div><span>По");
-        let result = convert_with_visitor(&html, None, Some(make_visitor()));
+        let result = convert(&html, None, Some(make_visitor()));
         assert!(result.is_ok(), "Should not panic with {n} tabs: {result:?}");
     }
 }

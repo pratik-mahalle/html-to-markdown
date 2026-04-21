@@ -24,6 +24,7 @@ typedef struct HTMHeaderMetadata HTMHeaderMetadata;
 typedef struct HTMHeadingStyle HTMHeadingStyle;
 typedef struct HTMHighlightStyle HTMHighlightStyle;
 typedef struct HTMHtmlMetadata HTMHtmlMetadata;
+typedef struct HTMHtmlVisitor HTMHtmlVisitor;
 typedef struct HTMImageMetadata HTMImageMetadata;
 typedef struct HTMImageType HTMImageType;
 typedef struct HTMLinkMetadata HTMLinkMetadata;
@@ -34,6 +35,8 @@ typedef struct HTMMetadataConfig HTMMetadataConfig;
 typedef struct HTMMetadataConfigUpdate HTMMetadataConfigUpdate;
 typedef struct HTMNewlineStyle HTMNewlineStyle;
 typedef struct HTMNodeContent HTMNodeContent;
+typedef struct HTMNodeContext HTMNodeContext;
+typedef struct HTMNodeType HTMNodeType;
 typedef struct HTMOutputFormat HTMOutputFormat;
 typedef struct HTMPreprocessingOptions HTMPreprocessingOptions;
 typedef struct HTMPreprocessingOptionsUpdate HTMPreprocessingOptionsUpdate;
@@ -45,6 +48,7 @@ typedef struct HTMTableData HTMTableData;
 typedef struct HTMTableGrid HTMTableGrid;
 typedef struct HTMTextAnnotation HTMTextAnnotation;
 typedef struct HTMTextDirection HTMTextDirection;
+typedef struct HTMVisitResult HTMVisitResult;
 typedef struct HTMWarningKind HTMWarningKind;
 typedef struct HTMWhitespaceMode HTMWhitespaceMode;
 
@@ -2422,6 +2426,78 @@ char *htm_processing_warning_message(const HTMProcessingWarning *ptr);
 HTMWarningKind *htm_processing_warning_kind(const HTMProcessingWarning *ptr);
 
 /**
+ * Create a `NodeContext` from a JSON string. Returns null on failure.
+ * # Safety
+ * JSON string must be valid UTF-8 and null-terminated.
+ * Returned handle must be freed with `htm_node_context_free`.
+ */
+HTMNodeContext *htm_node_context_from_json(const char *json);
+
+/**
+ * Serialize a `NodeContext` to a JSON string. Returns null on failure.
+ * # Safety
+ * `ptr` must be a valid, non-null pointer returned by a `htm` function.
+ * The returned string must be freed with `htm_free_string`.
+ */
+char *htm_node_context_to_json(const HTMNodeContext *ptr);
+
+/**
+ * Free a `NodeContext` handle.
+ * # Safety
+ * Pointer must have been returned by this library, or be null.
+ */
+void htm_node_context_free(HTMNodeContext *ptr);
+
+/**
+ * Get the `node_type` field from a `NodeContext`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+HTMNodeType *htm_node_context_node_type(const HTMNodeContext *ptr);
+
+/**
+ * Get the `tag_name` field from a `NodeContext`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_node_context_tag_name(const HTMNodeContext *ptr);
+
+/**
+ * Get the `attributes` field from a `NodeContext`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_node_context_attributes(const HTMNodeContext *ptr);
+
+/**
+ * Get the `depth` field from a `NodeContext`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+uintptr_t htm_node_context_depth(const HTMNodeContext *ptr);
+
+/**
+ * Get the `index_in_parent` field from a `NodeContext`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+uintptr_t htm_node_context_index_in_parent(const HTMNodeContext *ptr);
+
+/**
+ * Get the `parent_tag` field from a `NodeContext`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_node_context_parent_tag(const HTMNodeContext *ptr);
+
+/**
+ * Get the `is_inline` field from a `NodeContext`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+int32_t htm_node_context_is_inline(const HTMNodeContext *ptr);
+
+/**
  * Convert an integer to a `TextDirection` variant. Returns -1 on invalid input.
  * # Safety
  * Caller must ensure all pointer arguments are valid or null.
@@ -2662,6 +2738,36 @@ int32_t htm_warning_kind_from_i32(int32_t value);
 int32_t htm_warning_kind_from_str(const char *name);
 
 /**
+ * Convert an integer to a `NodeType` variant. Returns -1 on invalid input.
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+int32_t htm_node_type_from_i32(int32_t value);
+
+/**
+ * Convert a `NodeType` variant name (C string) to its integer value. Returns -1 on invalid input.
+ * # Safety
+ * Caller must ensure `ptr` is a valid pointer to a `c_char` or null.
+ */
+int32_t htm_node_type_from_str(const char *name);
+
+/**
+ * Convert an integer to a `VisitResult` variant. Returns -1 on invalid input.
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+int32_t htm_visit_result_from_i32(int32_t value);
+
+/**
+ * Convert a `VisitResult` variant name (C string) to its integer value. Returns -1 on invalid input.
+ * # Safety
+ * Caller must ensure `ptr` is a valid pointer to a `c_char` or null.
+ */
+int32_t htm_visit_result_from_str(const char *name);
+
+/**
  * Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images,
  * and warnings.
  *
@@ -2676,7 +2782,7 @@ int32_t htm_warning_kind_from_str(const char *name);
  * use html_to_markdown_rs::{convert, ConversionOptions};
  *
  * let html = "<h1>Hello World</h1>";
- * let result = convert(html, None).unwrap();
+ * let result = convert(html, None, None).unwrap();
  * assert!(result.content.as_deref().unwrap_or("").contains("Hello World"));
  * ```
  *
@@ -2687,8 +2793,9 @@ int32_t htm_warning_kind_from_str(const char *name);
  * Caller must ensure all pointer arguments are valid or null.
  * Returned pointers must be freed with the appropriate free function.
  */
-HTMConversionResult *htm_convert(const char *html,
-                                 const HTMConversionOptions *options);
+HTMConversionResult *htm_convert(const char *_html,
+                                 const HTMConversionOptions *_options,
+                                 const char *_visitor);
 
 /**
  * Create a new visitor handle from a callbacks struct.

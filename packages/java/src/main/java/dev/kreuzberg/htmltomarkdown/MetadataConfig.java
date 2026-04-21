@@ -3,12 +3,51 @@ package dev.kreuzberg.htmltomarkdown;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * Configuration for metadata extraction granularity.
+ *
+ * Controls which metadata types are extracted and size limits for safety.
+ * Enables selective extraction of different metadata categories from HTML documents,
+ * allowing fine-grained control over which types of information to collect during
+ * the HTML-to-Markdown conversion process.
+ *
+ * # Fields
+ *
+ * - {@code extract_document}: Enable document-level metadata extraction (title, description, author, Open Graph, Twitter Card, etc.)
+ * - {@code extract_headers}: Enable heading element extraction (h1-h6) with hierarchy tracking
+ * - {@code extract_links}: Enable anchor element extraction with link type classification
+ * - {@code extract_images}: Enable image element extraction with source and dimension metadata
+ * - {@code extract_structured_data}: Enable structured data extraction (JSON-LD, Microdata, RDFa)
+ * - {@code max_structured_data_size}: Safety limit on total structured data size in bytes
+ *
+ * # Examples
+ *
+ * {@code }{@code }
+ * # use html_to_markdown_rs::metadata::MetadataConfig;
+ * let config = MetadataConfig {
+ *     extract_document: true,
+ *     extract_headers: true,
+ *     extract_links: true,
+ *     extract_images: true,
+ *     extract_structured_data: true,
+ *     max_structured_data_size: 1_000_000,
+ * };
+ *
+ * assert!(config.extract_headers);
+ * {@code }{@code }
+ */
 public record MetadataConfig(
+    /** Extract document-level metadata (title, description, author, etc.). */
     @JsonProperty("extract_document") boolean extractDocument,
+    /** Extract h1-h6 header elements and their hierarchy. */
     @JsonProperty("extract_headers") boolean extractHeaders,
+    /** Extract anchor (a) elements as links with type classification. */
     @JsonProperty("extract_links") boolean extractLinks,
+    /** Extract image elements and data URIs. */
     @JsonProperty("extract_images") boolean extractImages,
+    /** Extract structured data (JSON-LD, Microdata, RDFa). */
     @JsonProperty("extract_structured_data") boolean extractStructuredData,
+    /** Maximum total size of structured data to collect (bytes). */
     @JsonProperty("max_structured_data_size") long maxStructuredDataSize
 ) {
     public static MetadataConfigBuilder builder() {

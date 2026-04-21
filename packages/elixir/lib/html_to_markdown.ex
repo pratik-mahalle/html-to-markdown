@@ -5,14 +5,21 @@ defmodule HtmlToMarkdown do
   @doc "Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images,"
   @spec convert(String.t()) :: {:ok, String.t() | nil} | {:error, String.t()}
   def convert(html) do
-    HtmlToMarkdown.Native.convert(html, nil)
+    HtmlToMarkdown.Native.convert(html, nil, nil)
   end
 
   @doc "Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images,"
   @spec convert(String.t(), String.t() | nil | nil) ::
           {:ok, String.t() | nil} | {:error, String.t()}
   def convert(html, options) do
-    HtmlToMarkdown.Native.convert(html, options)
+    HtmlToMarkdown.Native.convert(html, options, nil)
+  end
+
+  @doc "Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images,"
+  @spec convert(String.t(), String.t() | nil | nil, String.t() | nil) ::
+          {:ok, String.t() | nil} | {:error, String.t()}
+  def convert(html, options, visitor) do
+    HtmlToMarkdown.Native.convert(html, options, visitor)
   end
 
   @doc "Create default metadata configuration."

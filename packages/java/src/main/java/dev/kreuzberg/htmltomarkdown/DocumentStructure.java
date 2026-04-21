@@ -5,8 +5,15 @@ import java.util.List;
 import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * A structured document tree representing the semantic content of an HTML document.
+ *
+ * Uses a flat node array with index-based parent/child references for efficient traversal.
+ */
 public record DocumentStructure(
+    /** All nodes in document reading order. */
     List<DocumentNode> nodes,
+    /** The source format (always "html" for this crate). */
     @JsonProperty("source_format") Optional<String> sourceFormat
 ) {
 }

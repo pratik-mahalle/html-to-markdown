@@ -1834,6 +1834,78 @@ impl ProcessingWarning {
     }
 }
 
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
+#[magnus::wrap(class = "HtmlToMarkdownRs::NodeContext")]
+pub struct NodeContext {
+    pub node_type: NodeType,
+    pub tag_name: String,
+    pub attributes: HashMap<String, String>,
+    pub depth: usize,
+    pub index_in_parent: usize,
+    pub parent_tag: Option<String>,
+    pub is_inline: bool,
+}
+
+unsafe impl IntoValueFromNative for NodeContext {}
+
+impl magnus::TryConvert for NodeContext {
+    fn try_convert(val: magnus::Value) -> Result<Self, magnus::Error> {
+        let r: &NodeContext = magnus::TryConvert::try_convert(val)?;
+        Ok(r.clone())
+    }
+}
+unsafe impl TryConvertOwned for NodeContext {}
+
+impl NodeContext {
+    fn new(
+        node_type: NodeType,
+        tag_name: String,
+        attributes: HashMap<String, String>,
+        depth: usize,
+        index_in_parent: usize,
+        is_inline: bool,
+        parent_tag: Option<String>,
+    ) -> Self {
+        Self {
+            node_type,
+            tag_name,
+            attributes,
+            depth,
+            index_in_parent,
+            parent_tag,
+            is_inline,
+        }
+    }
+
+    fn node_type(&self) -> NodeType {
+        self.node_type.clone()
+    }
+
+    fn tag_name(&self) -> String {
+        self.tag_name.clone()
+    }
+
+    fn attributes(&self) -> HashMap<String, String> {
+        self.attributes.clone()
+    }
+
+    fn depth(&self) -> usize {
+        self.depth
+    }
+
+    fn index_in_parent(&self) -> usize {
+        self.index_in_parent
+    }
+
+    fn parent_tag(&self) -> Option<String> {
+        self.parent_tag.clone()
+    }
+
+    fn is_inline(&self) -> bool {
+        self.is_inline
+    }
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 pub enum TextDirection {
     #[serde(rename = "ltr")]
@@ -2556,24 +2628,1561 @@ impl magnus::TryConvert for WarningKind {
 unsafe impl IntoValueFromNative for WarningKind {}
 unsafe impl TryConvertOwned for WarningKind {}
 
-fn convert(html: String, options: Option<String>) -> Result<ConversionResult, Error> {
-    let options: Option<ConversionOptions> = options
+#[derive(Clone, Copy, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
+pub enum NodeType {
+    Text,
+    Element,
+    Heading,
+    Paragraph,
+    Div,
+    Blockquote,
+    Pre,
+    Hr,
+    List,
+    ListItem,
+    DefinitionList,
+    DefinitionTerm,
+    DefinitionDescription,
+    Table,
+    TableRow,
+    TableCell,
+    TableHeader,
+    TableBody,
+    TableHead,
+    TableFoot,
+    Link,
+    Image,
+    Strong,
+    Em,
+    Code,
+    Strikethrough,
+    Underline,
+    Subscript,
+    Superscript,
+    Mark,
+    Small,
+    Br,
+    Span,
+    Article,
+    Section,
+    Nav,
+    Aside,
+    Header,
+    Footer,
+    Main,
+    Figure,
+    Figcaption,
+    Time,
+    Details,
+    Summary,
+    Form,
+    Input,
+    Select,
+    Option,
+    Button,
+    Textarea,
+    Label,
+    Fieldset,
+    Legend,
+    Audio,
+    Video,
+    Picture,
+    Source,
+    Iframe,
+    Svg,
+    Canvas,
+    Ruby,
+    Rt,
+    Rp,
+    Abbr,
+    Kbd,
+    Samp,
+    Var,
+    Cite,
+    Q,
+    Del,
+    Ins,
+    Data,
+    Meter,
+    Progress,
+    Output,
+    Template,
+    Slot,
+    Html,
+    Head,
+    Body,
+    Title,
+    Meta,
+    LinkTag,
+    Style,
+    Script,
+    Base,
+    Custom,
+}
+
+impl Default for NodeType {
+    fn default() -> Self {
+        Self::Text
+    }
+}
+
+impl magnus::IntoValue for NodeType {
+    fn into_value_with(self, handle: &Ruby) -> magnus::Value {
+        let sym = match self {
+            NodeType::Text => "text",
+            NodeType::Element => "element",
+            NodeType::Heading => "heading",
+            NodeType::Paragraph => "paragraph",
+            NodeType::Div => "div",
+            NodeType::Blockquote => "blockquote",
+            NodeType::Pre => "pre",
+            NodeType::Hr => "hr",
+            NodeType::List => "list",
+            NodeType::ListItem => "list_item",
+            NodeType::DefinitionList => "definition_list",
+            NodeType::DefinitionTerm => "definition_term",
+            NodeType::DefinitionDescription => "definition_description",
+            NodeType::Table => "table",
+            NodeType::TableRow => "table_row",
+            NodeType::TableCell => "table_cell",
+            NodeType::TableHeader => "table_header",
+            NodeType::TableBody => "table_body",
+            NodeType::TableHead => "table_head",
+            NodeType::TableFoot => "table_foot",
+            NodeType::Link => "link",
+            NodeType::Image => "image",
+            NodeType::Strong => "strong",
+            NodeType::Em => "em",
+            NodeType::Code => "code",
+            NodeType::Strikethrough => "strikethrough",
+            NodeType::Underline => "underline",
+            NodeType::Subscript => "subscript",
+            NodeType::Superscript => "superscript",
+            NodeType::Mark => "mark",
+            NodeType::Small => "small",
+            NodeType::Br => "br",
+            NodeType::Span => "span",
+            NodeType::Article => "article",
+            NodeType::Section => "section",
+            NodeType::Nav => "nav",
+            NodeType::Aside => "aside",
+            NodeType::Header => "header",
+            NodeType::Footer => "footer",
+            NodeType::Main => "main",
+            NodeType::Figure => "figure",
+            NodeType::Figcaption => "figcaption",
+            NodeType::Time => "time",
+            NodeType::Details => "details",
+            NodeType::Summary => "summary",
+            NodeType::Form => "form",
+            NodeType::Input => "input",
+            NodeType::Select => "select",
+            NodeType::Option => "option",
+            NodeType::Button => "button",
+            NodeType::Textarea => "textarea",
+            NodeType::Label => "label",
+            NodeType::Fieldset => "fieldset",
+            NodeType::Legend => "legend",
+            NodeType::Audio => "audio",
+            NodeType::Video => "video",
+            NodeType::Picture => "picture",
+            NodeType::Source => "source",
+            NodeType::Iframe => "iframe",
+            NodeType::Svg => "svg",
+            NodeType::Canvas => "canvas",
+            NodeType::Ruby => "ruby",
+            NodeType::Rt => "rt",
+            NodeType::Rp => "rp",
+            NodeType::Abbr => "abbr",
+            NodeType::Kbd => "kbd",
+            NodeType::Samp => "samp",
+            NodeType::Var => "var",
+            NodeType::Cite => "cite",
+            NodeType::Q => "q",
+            NodeType::Del => "del",
+            NodeType::Ins => "ins",
+            NodeType::Data => "data",
+            NodeType::Meter => "meter",
+            NodeType::Progress => "progress",
+            NodeType::Output => "output",
+            NodeType::Template => "template",
+            NodeType::Slot => "slot",
+            NodeType::Html => "html",
+            NodeType::Head => "head",
+            NodeType::Body => "body",
+            NodeType::Title => "title",
+            NodeType::Meta => "meta",
+            NodeType::LinkTag => "link_tag",
+            NodeType::Style => "style",
+            NodeType::Script => "script",
+            NodeType::Base => "base",
+            NodeType::Custom => "custom",
+        };
+        handle.to_symbol(sym).into_value_with(handle)
+    }
+}
+
+impl magnus::TryConvert for NodeType {
+    fn try_convert(val: magnus::Value) -> Result<Self, magnus::Error> {
+        let s: String = magnus::TryConvert::try_convert(val)?;
+        match s.as_str() {
+            "text" => Ok(NodeType::Text),
+            "element" => Ok(NodeType::Element),
+            "heading" => Ok(NodeType::Heading),
+            "paragraph" => Ok(NodeType::Paragraph),
+            "div" => Ok(NodeType::Div),
+            "blockquote" => Ok(NodeType::Blockquote),
+            "pre" => Ok(NodeType::Pre),
+            "hr" => Ok(NodeType::Hr),
+            "list" => Ok(NodeType::List),
+            "list_item" => Ok(NodeType::ListItem),
+            "definition_list" => Ok(NodeType::DefinitionList),
+            "definition_term" => Ok(NodeType::DefinitionTerm),
+            "definition_description" => Ok(NodeType::DefinitionDescription),
+            "table" => Ok(NodeType::Table),
+            "table_row" => Ok(NodeType::TableRow),
+            "table_cell" => Ok(NodeType::TableCell),
+            "table_header" => Ok(NodeType::TableHeader),
+            "table_body" => Ok(NodeType::TableBody),
+            "table_head" => Ok(NodeType::TableHead),
+            "table_foot" => Ok(NodeType::TableFoot),
+            "link" => Ok(NodeType::Link),
+            "image" => Ok(NodeType::Image),
+            "strong" => Ok(NodeType::Strong),
+            "em" => Ok(NodeType::Em),
+            "code" => Ok(NodeType::Code),
+            "strikethrough" => Ok(NodeType::Strikethrough),
+            "underline" => Ok(NodeType::Underline),
+            "subscript" => Ok(NodeType::Subscript),
+            "superscript" => Ok(NodeType::Superscript),
+            "mark" => Ok(NodeType::Mark),
+            "small" => Ok(NodeType::Small),
+            "br" => Ok(NodeType::Br),
+            "span" => Ok(NodeType::Span),
+            "article" => Ok(NodeType::Article),
+            "section" => Ok(NodeType::Section),
+            "nav" => Ok(NodeType::Nav),
+            "aside" => Ok(NodeType::Aside),
+            "header" => Ok(NodeType::Header),
+            "footer" => Ok(NodeType::Footer),
+            "main" => Ok(NodeType::Main),
+            "figure" => Ok(NodeType::Figure),
+            "figcaption" => Ok(NodeType::Figcaption),
+            "time" => Ok(NodeType::Time),
+            "details" => Ok(NodeType::Details),
+            "summary" => Ok(NodeType::Summary),
+            "form" => Ok(NodeType::Form),
+            "input" => Ok(NodeType::Input),
+            "select" => Ok(NodeType::Select),
+            "option" => Ok(NodeType::Option),
+            "button" => Ok(NodeType::Button),
+            "textarea" => Ok(NodeType::Textarea),
+            "label" => Ok(NodeType::Label),
+            "fieldset" => Ok(NodeType::Fieldset),
+            "legend" => Ok(NodeType::Legend),
+            "audio" => Ok(NodeType::Audio),
+            "video" => Ok(NodeType::Video),
+            "picture" => Ok(NodeType::Picture),
+            "source" => Ok(NodeType::Source),
+            "iframe" => Ok(NodeType::Iframe),
+            "svg" => Ok(NodeType::Svg),
+            "canvas" => Ok(NodeType::Canvas),
+            "ruby" => Ok(NodeType::Ruby),
+            "rt" => Ok(NodeType::Rt),
+            "rp" => Ok(NodeType::Rp),
+            "abbr" => Ok(NodeType::Abbr),
+            "kbd" => Ok(NodeType::Kbd),
+            "samp" => Ok(NodeType::Samp),
+            "var" => Ok(NodeType::Var),
+            "cite" => Ok(NodeType::Cite),
+            "q" => Ok(NodeType::Q),
+            "del" => Ok(NodeType::Del),
+            "ins" => Ok(NodeType::Ins),
+            "data" => Ok(NodeType::Data),
+            "meter" => Ok(NodeType::Meter),
+            "progress" => Ok(NodeType::Progress),
+            "output" => Ok(NodeType::Output),
+            "template" => Ok(NodeType::Template),
+            "slot" => Ok(NodeType::Slot),
+            "html" => Ok(NodeType::Html),
+            "head" => Ok(NodeType::Head),
+            "body" => Ok(NodeType::Body),
+            "title" => Ok(NodeType::Title),
+            "meta" => Ok(NodeType::Meta),
+            "link_tag" => Ok(NodeType::LinkTag),
+            "style" => Ok(NodeType::Style),
+            "script" => Ok(NodeType::Script),
+            "base" => Ok(NodeType::Base),
+            "custom" => Ok(NodeType::Custom),
+            other => Err(magnus::Error::new(
+                unsafe { Ruby::get_unchecked() }.exception_arg_error(),
+                format!("invalid NodeType value: {other}"),
+            )),
+        }
+    }
+}
+
+unsafe impl IntoValueFromNative for NodeType {}
+unsafe impl TryConvertOwned for NodeType {}
+
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+pub enum VisitResult {
+    Continue,
+    Custom { _0: String },
+    Skip,
+    PreserveHtml,
+    Error { _0: String },
+}
+
+impl Default for VisitResult {
+    fn default() -> Self {
+        Self::Continue
+    }
+}
+
+impl magnus::IntoValue for VisitResult {
+    fn into_value_with(self, handle: &Ruby) -> magnus::Value {
+        match serde_json::to_value(&self) {
+            Ok(v) => json_to_ruby(handle, v),
+            Err(_) => handle.qnil().into_value_with(handle),
+        }
+    }
+}
+
+impl magnus::TryConvert for VisitResult {
+    fn try_convert(val: magnus::Value) -> Result<Self, magnus::Error> {
+        let s: String = magnus::TryConvert::try_convert(val)?;
+        serde_json::from_str(&s)
+            .map_err(|e| magnus::Error::new(unsafe { Ruby::get_unchecked() }.exception_type_error(), e.to_string()))
+    }
+}
+
+unsafe impl IntoValueFromNative for VisitResult {}
+unsafe impl TryConvertOwned for VisitResult {}
+
+#[allow(clippy::missing_errors_doc)]
+pub fn convert(
+    html: String,
+    options: Option<ConversionOptions>,
+    visitor: Option<magnus::Value>,
+) -> Result<ConversionResult, Error> {
+    let visitor: Option<html_to_markdown_rs::visitor::VisitorHandle> = match visitor {
+        Some(v) if !v.is_nil() => {
+            let bridge = RbHtmlVisitorBridge::new(v);
+            Some(std::rc::Rc::new(std::cell::RefCell::new(bridge)) as html_to_markdown_rs::visitor::VisitorHandle)
+        }
+        _ => None,
+    };
+    let options_core: Option<html_to_markdown_rs::ConversionOptions> = options
         .as_deref()
         .filter(|s| *s != "nil")
         .map(|s| {
-            let core: html_to_markdown_rs::ConversionOptions = serde_json::from_str(s).map_err(|e| {
-                magnus::Error::new(unsafe { Ruby::get_unchecked() }.exception_type_error(), e.to_string())
-            })?;
-            Ok::<_, magnus::Error>(core.into())
+            serde_json::from_str(s).map_err(|e| {
+                magnus::Error::new(
+                    unsafe { magnus::Ruby::get_unchecked() }.exception_runtime_error(),
+                    e.to_string(),
+                )
+            })
         })
         .transpose()?;
-    let result = html_to_markdown_rs::convert(&html, options.map(Into::into)).map_err(|e| {
-        magnus::Error::new(
-            unsafe { Ruby::get_unchecked() }.exception_runtime_error(),
-            e.to_string(),
-        )
-    })?;
-    Ok(result.into())
+    html_to_markdown_rs::convert(&html, options_core, visitor)
+        .map(|val| val.into())
+        .map_err(|e| {
+            magnus::Error::new(
+                unsafe { magnus::Ruby::get_unchecked() }.exception_runtime_error(),
+                e.to_string(),
+            )
+        })
+}
+
+fn nodecontext_to_rb_hash(ctx: &html_to_markdown_rs::visitor::NodeContext) -> magnus::RHash {
+    let ruby = unsafe { magnus::Ruby::get_unchecked() };
+    let h = ruby.hash_new();
+    h.aset(ruby.to_symbol("node_type"), format!("{:?}", ctx.node_type)).ok();
+    h.aset(ruby.to_symbol("tag_name"), ctx.tag_name.as_str()).ok();
+    h.aset(ruby.to_symbol("depth"), ctx.depth as i64).ok();
+    h.aset(ruby.to_symbol("index_in_parent"), ctx.index_in_parent as i64)
+        .ok();
+    h.aset(ruby.to_symbol("is_inline"), ctx.is_inline).ok();
+    h.aset(
+        ruby.to_symbol("parent_tag"),
+        ctx.parent_tag.as_deref().map(|s| magnus::Value::from(ruby.str_new(s))),
+    )
+    .ok();
+    let attrs = ruby.hash_new();
+    for (k, v) in &ctx.attributes {
+        attrs.aset(ruby.str_new(k), ruby.str_new(v)).ok();
+    }
+    h.aset(ruby.to_symbol("attributes"), attrs).ok();
+    h
+}
+
+pub struct RbHtmlVisitorBridge {
+    rb_obj: magnus::Value,
+}
+
+impl std::fmt::Debug for RbHtmlVisitorBridge {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "RbHtmlVisitorBridge")
+    }
+}
+
+impl RbHtmlVisitorBridge {
+    pub fn new(rb_obj: magnus::Value) -> Self {
+        Self { rb_obj }
+    }
+}
+
+impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
+    fn visit_element_start(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_element_start", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> =
+            magnus::method::Method::funcall(self.rb_obj, "visit_element_start", (nodecontext_to_rb_hash(_ctx),));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_element_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_element_end", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_element_end",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_output)),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_text(&mut self, _ctx: &html_to_markdown_rs::NodeContext, _text: &str) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_text", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_text",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_text)),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_link(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _href: &str,
+        _text: &str,
+        _title: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_link", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_link",
+            (
+                nodecontext_to_rb_hash(_ctx),
+                magnus::RString::new(_href),
+                magnus::RString::new(_text),
+                magnus::RString::new(_title),
+            ),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_image(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _src: &str,
+        _alt: &str,
+        _title: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_image", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_image",
+            (
+                nodecontext_to_rb_hash(_ctx),
+                magnus::RString::new(_src),
+                magnus::RString::new(_alt),
+                magnus::RString::new(_title),
+            ),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_heading(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _level: u32,
+        _text: &str,
+        _id: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_heading", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_heading",
+            (
+                nodecontext_to_rb_hash(_ctx),
+                magnus::Value::from(_level),
+                magnus::RString::new(_text),
+                magnus::RString::new(_id),
+            ),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_code_block(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _lang: Option<&str>,
+        _code: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_code_block", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_code_block",
+            (
+                nodecontext_to_rb_hash(_ctx),
+                magnus::RString::new(_lang),
+                magnus::RString::new(_code),
+            ),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_code_inline(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _code: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_code_inline", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_code_inline",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_code)),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_list_item(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _ordered: bool,
+        _marker: &str,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_list_item", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_list_item",
+            (
+                nodecontext_to_rb_hash(_ctx),
+                magnus::Value::from(_ordered),
+                magnus::RString::new(_marker),
+                magnus::RString::new(_text),
+            ),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_list_start(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _ordered: bool,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_list_start", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_list_start",
+            (nodecontext_to_rb_hash(_ctx), magnus::Value::from(_ordered)),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_list_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _ordered: bool,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_list_end", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_list_end",
+            (
+                nodecontext_to_rb_hash(_ctx),
+                magnus::Value::from(_ordered),
+                magnus::RString::new(_output),
+            ),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_table_start(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_table_start", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> =
+            magnus::method::Method::funcall(self.rb_obj, "visit_table_start", (nodecontext_to_rb_hash(_ctx),));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_table_row(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _cells: &[String],
+        _is_header: bool,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_table_row", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_table_row",
+            (
+                nodecontext_to_rb_hash(_ctx),
+                magnus::Value::from(_cells),
+                magnus::Value::from(_is_header),
+            ),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_table_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_table_end", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_table_end",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_output)),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_blockquote(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _content: &str,
+        _depth: usize,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_blockquote", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_blockquote",
+            (
+                nodecontext_to_rb_hash(_ctx),
+                magnus::RString::new(_content),
+                magnus::Value::from(_depth),
+            ),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_strong(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_strong", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_strong",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_text)),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_emphasis(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_emphasis", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_emphasis",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_text)),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_strikethrough(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_strikethrough", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_strikethrough",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_text)),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_underline(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_underline", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_underline",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_text)),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_subscript(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_subscript", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_subscript",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_text)),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_superscript(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_superscript", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_superscript",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_text)),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_mark(&mut self, _ctx: &html_to_markdown_rs::NodeContext, _text: &str) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_mark", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_mark",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_text)),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_line_break(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_line_break", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> =
+            magnus::method::Method::funcall(self.rb_obj, "visit_line_break", (nodecontext_to_rb_hash(_ctx),));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_horizontal_rule(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_horizontal_rule", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> =
+            magnus::method::Method::funcall(self.rb_obj, "visit_horizontal_rule", (nodecontext_to_rb_hash(_ctx),));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_custom_element(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _tag_name: &str,
+        _html: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_custom_element", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_custom_element",
+            (
+                nodecontext_to_rb_hash(_ctx),
+                magnus::RString::new(_tag_name),
+                magnus::RString::new(_html),
+            ),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_definition_list_start(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self
+            .rb_obj
+            .respond_to("visit_definition_list_start", false)
+            .unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_definition_list_start",
+            (nodecontext_to_rb_hash(_ctx),),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_definition_term(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_definition_term", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_definition_term",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_text)),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_definition_description(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self
+            .rb_obj
+            .respond_to("visit_definition_description", false)
+            .unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_definition_description",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_text)),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_definition_list_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self
+            .rb_obj
+            .respond_to("visit_definition_list_end", false)
+            .unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_definition_list_end",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_output)),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_form(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _action: Option<&str>,
+        _method: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_form", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_form",
+            (
+                nodecontext_to_rb_hash(_ctx),
+                magnus::RString::new(_action),
+                magnus::RString::new(_method),
+            ),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_input(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _input_type: &str,
+        _name: Option<&str>,
+        _value: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_input", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_input",
+            (
+                nodecontext_to_rb_hash(_ctx),
+                magnus::RString::new(_input_type),
+                magnus::RString::new(_name),
+                magnus::RString::new(_value),
+            ),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_button(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_button", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_button",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_text)),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_audio(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _src: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_audio", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_audio",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_src)),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_video(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _src: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_video", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_video",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_src)),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_iframe(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _src: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_iframe", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_iframe",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_src)),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_details(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _open: bool,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_details", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_details",
+            (nodecontext_to_rb_hash(_ctx), magnus::Value::from(_open)),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_summary(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_summary", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_summary",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_text)),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_figure_start(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_figure_start", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> =
+            magnus::method::Method::funcall(self.rb_obj, "visit_figure_start", (nodecontext_to_rb_hash(_ctx),));
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_figcaption(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_figcaption", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_figcaption",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_text)),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
+
+    fn visit_figure_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let responds = self.rb_obj.respond_to("visit_figure_end", false).unwrap_or(false);
+        if !responds {
+            return html_to_markdown_rs::VisitResult::Continue;
+        }
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_figure_end",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_output)),
+        );
+        match result {
+            Err(_) => html_to_markdown_rs::VisitResult::Continue,
+            Ok(val) => {
+                let s: String = val.to_string();
+                match s.to_lowercase().as_str() {
+                    "continue" => html_to_markdown_rs::VisitResult::Continue,
+                    "skip" => html_to_markdown_rs::VisitResult::Skip,
+                    "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                    other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+                }
+            }
+        }
+    }
 }
 
 impl From<MetadataConfig> for html_to_markdown_rs::metadata::MetadataConfig {
@@ -2733,7 +4342,7 @@ impl From<html_to_markdown_rs::metadata::ImageMetadata> for ImageMetadata {
             src: val.src,
             alt: val.alt,
             title: val.title,
-            dimensions: val.dimensions.as_ref().map(|v| format!("{:?}", v)),
+            dimensions: val.dimensions.as_ref().map(|v| format!("{v:?}")),
             image_type: val.image_type.into(),
             attributes: val.attributes.into_iter().collect(),
         }
@@ -3186,6 +4795,20 @@ impl From<html_to_markdown_rs::ProcessingWarning> for ProcessingWarning {
     }
 }
 
+impl From<html_to_markdown_rs::NodeContext> for NodeContext {
+    fn from(val: html_to_markdown_rs::NodeContext) -> Self {
+        Self {
+            node_type: val.node_type.into(),
+            tag_name: val.tag_name,
+            attributes: val.attributes.into_iter().collect(),
+            depth: val.depth,
+            index_in_parent: val.index_in_parent,
+            parent_tag: val.parent_tag,
+            is_inline: val.is_inline,
+        }
+    }
+}
+
 impl From<TextDirection> for html_to_markdown_rs::metadata::TextDirection {
     fn from(val: TextDirection) -> Self {
         match val {
@@ -3470,7 +5093,9 @@ impl From<NodeContent> for html_to_markdown_rs::NodeContent {
             NodeContent::DefinitionList => Self::DefinitionList,
             NodeContent::DefinitionItem { term, definition } => Self::DefinitionItem { term, definition },
             NodeContent::RawBlock { format, content } => Self::RawBlock { format, content },
-            NodeContent::MetadataBlock { entries } => Self::MetadataBlock { entries },
+            NodeContent::MetadataBlock { entries } => Self::MetadataBlock {
+                entries: serde_json::from_str(&entries).unwrap_or_default(),
+            },
             NodeContent::Group {
                 label,
                 heading_level,
@@ -3578,6 +5203,113 @@ impl From<html_to_markdown_rs::WarningKind> for WarningKind {
             html_to_markdown_rs::WarningKind::MalformedHtml => Self::MalformedHtml,
             html_to_markdown_rs::WarningKind::SanitizationApplied => Self::SanitizationApplied,
             html_to_markdown_rs::WarningKind::DepthLimitExceeded => Self::DepthLimitExceeded,
+        }
+    }
+}
+
+impl From<html_to_markdown_rs::NodeType> for NodeType {
+    fn from(val: html_to_markdown_rs::NodeType) -> Self {
+        match val {
+            html_to_markdown_rs::NodeType::Text => Self::Text,
+            html_to_markdown_rs::NodeType::Element => Self::Element,
+            html_to_markdown_rs::NodeType::Heading => Self::Heading,
+            html_to_markdown_rs::NodeType::Paragraph => Self::Paragraph,
+            html_to_markdown_rs::NodeType::Div => Self::Div,
+            html_to_markdown_rs::NodeType::Blockquote => Self::Blockquote,
+            html_to_markdown_rs::NodeType::Pre => Self::Pre,
+            html_to_markdown_rs::NodeType::Hr => Self::Hr,
+            html_to_markdown_rs::NodeType::List => Self::List,
+            html_to_markdown_rs::NodeType::ListItem => Self::ListItem,
+            html_to_markdown_rs::NodeType::DefinitionList => Self::DefinitionList,
+            html_to_markdown_rs::NodeType::DefinitionTerm => Self::DefinitionTerm,
+            html_to_markdown_rs::NodeType::DefinitionDescription => Self::DefinitionDescription,
+            html_to_markdown_rs::NodeType::Table => Self::Table,
+            html_to_markdown_rs::NodeType::TableRow => Self::TableRow,
+            html_to_markdown_rs::NodeType::TableCell => Self::TableCell,
+            html_to_markdown_rs::NodeType::TableHeader => Self::TableHeader,
+            html_to_markdown_rs::NodeType::TableBody => Self::TableBody,
+            html_to_markdown_rs::NodeType::TableHead => Self::TableHead,
+            html_to_markdown_rs::NodeType::TableFoot => Self::TableFoot,
+            html_to_markdown_rs::NodeType::Link => Self::Link,
+            html_to_markdown_rs::NodeType::Image => Self::Image,
+            html_to_markdown_rs::NodeType::Strong => Self::Strong,
+            html_to_markdown_rs::NodeType::Em => Self::Em,
+            html_to_markdown_rs::NodeType::Code => Self::Code,
+            html_to_markdown_rs::NodeType::Strikethrough => Self::Strikethrough,
+            html_to_markdown_rs::NodeType::Underline => Self::Underline,
+            html_to_markdown_rs::NodeType::Subscript => Self::Subscript,
+            html_to_markdown_rs::NodeType::Superscript => Self::Superscript,
+            html_to_markdown_rs::NodeType::Mark => Self::Mark,
+            html_to_markdown_rs::NodeType::Small => Self::Small,
+            html_to_markdown_rs::NodeType::Br => Self::Br,
+            html_to_markdown_rs::NodeType::Span => Self::Span,
+            html_to_markdown_rs::NodeType::Article => Self::Article,
+            html_to_markdown_rs::NodeType::Section => Self::Section,
+            html_to_markdown_rs::NodeType::Nav => Self::Nav,
+            html_to_markdown_rs::NodeType::Aside => Self::Aside,
+            html_to_markdown_rs::NodeType::Header => Self::Header,
+            html_to_markdown_rs::NodeType::Footer => Self::Footer,
+            html_to_markdown_rs::NodeType::Main => Self::Main,
+            html_to_markdown_rs::NodeType::Figure => Self::Figure,
+            html_to_markdown_rs::NodeType::Figcaption => Self::Figcaption,
+            html_to_markdown_rs::NodeType::Time => Self::Time,
+            html_to_markdown_rs::NodeType::Details => Self::Details,
+            html_to_markdown_rs::NodeType::Summary => Self::Summary,
+            html_to_markdown_rs::NodeType::Form => Self::Form,
+            html_to_markdown_rs::NodeType::Input => Self::Input,
+            html_to_markdown_rs::NodeType::Select => Self::Select,
+            html_to_markdown_rs::NodeType::Option => Self::Option,
+            html_to_markdown_rs::NodeType::Button => Self::Button,
+            html_to_markdown_rs::NodeType::Textarea => Self::Textarea,
+            html_to_markdown_rs::NodeType::Label => Self::Label,
+            html_to_markdown_rs::NodeType::Fieldset => Self::Fieldset,
+            html_to_markdown_rs::NodeType::Legend => Self::Legend,
+            html_to_markdown_rs::NodeType::Audio => Self::Audio,
+            html_to_markdown_rs::NodeType::Video => Self::Video,
+            html_to_markdown_rs::NodeType::Picture => Self::Picture,
+            html_to_markdown_rs::NodeType::Source => Self::Source,
+            html_to_markdown_rs::NodeType::Iframe => Self::Iframe,
+            html_to_markdown_rs::NodeType::Svg => Self::Svg,
+            html_to_markdown_rs::NodeType::Canvas => Self::Canvas,
+            html_to_markdown_rs::NodeType::Ruby => Self::Ruby,
+            html_to_markdown_rs::NodeType::Rt => Self::Rt,
+            html_to_markdown_rs::NodeType::Rp => Self::Rp,
+            html_to_markdown_rs::NodeType::Abbr => Self::Abbr,
+            html_to_markdown_rs::NodeType::Kbd => Self::Kbd,
+            html_to_markdown_rs::NodeType::Samp => Self::Samp,
+            html_to_markdown_rs::NodeType::Var => Self::Var,
+            html_to_markdown_rs::NodeType::Cite => Self::Cite,
+            html_to_markdown_rs::NodeType::Q => Self::Q,
+            html_to_markdown_rs::NodeType::Del => Self::Del,
+            html_to_markdown_rs::NodeType::Ins => Self::Ins,
+            html_to_markdown_rs::NodeType::Data => Self::Data,
+            html_to_markdown_rs::NodeType::Meter => Self::Meter,
+            html_to_markdown_rs::NodeType::Progress => Self::Progress,
+            html_to_markdown_rs::NodeType::Output => Self::Output,
+            html_to_markdown_rs::NodeType::Template => Self::Template,
+            html_to_markdown_rs::NodeType::Slot => Self::Slot,
+            html_to_markdown_rs::NodeType::Html => Self::Html,
+            html_to_markdown_rs::NodeType::Head => Self::Head,
+            html_to_markdown_rs::NodeType::Body => Self::Body,
+            html_to_markdown_rs::NodeType::Title => Self::Title,
+            html_to_markdown_rs::NodeType::Meta => Self::Meta,
+            html_to_markdown_rs::NodeType::LinkTag => Self::LinkTag,
+            html_to_markdown_rs::NodeType::Style => Self::Style,
+            html_to_markdown_rs::NodeType::Script => Self::Script,
+            html_to_markdown_rs::NodeType::Base => Self::Base,
+            html_to_markdown_rs::NodeType::Custom => Self::Custom,
+        }
+    }
+}
+
+impl From<html_to_markdown_rs::VisitResult> for VisitResult {
+    fn from(val: html_to_markdown_rs::VisitResult) -> Self {
+        match val {
+            html_to_markdown_rs::VisitResult::Continue => Self::Continue,
+            html_to_markdown_rs::VisitResult::Custom(_0) => Self::Custom { _0 },
+            html_to_markdown_rs::VisitResult::Skip => Self::Skip,
+            html_to_markdown_rs::VisitResult::PreserveHtml => Self::PreserveHtml,
+            html_to_markdown_rs::VisitResult::Error(_0) => Self::Error { _0 },
         }
     }
 }
@@ -3886,7 +5618,17 @@ fn init(ruby: &Ruby) -> Result<(), Error> {
     class.define_method("message", method!(ProcessingWarning::message, 0))?;
     class.define_method("kind", method!(ProcessingWarning::kind, 0))?;
 
-    module.define_module_function("convert", function!(convert, 2))?;
+    let class = module.define_class("NodeContext", ruby.class_object())?;
+    class.define_singleton_method("new", function!(NodeContext::new, 7))?;
+    class.define_method("node_type", method!(NodeContext::node_type, 0))?;
+    class.define_method("tag_name", method!(NodeContext::tag_name, 0))?;
+    class.define_method("attributes", method!(NodeContext::attributes, 0))?;
+    class.define_method("depth", method!(NodeContext::depth, 0))?;
+    class.define_method("index_in_parent", method!(NodeContext::index_in_parent, 0))?;
+    class.define_method("parent_tag", method!(NodeContext::parent_tag, 0))?;
+    class.define_method("is_inline", method!(NodeContext::is_inline, 0))?;
+
+    module.define_module_function("convert", function!(convert, 3))?;
 
     Ok(())
 }

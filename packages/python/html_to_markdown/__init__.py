@@ -4,7 +4,7 @@
 Version: 3.2.6
 """
 
-from ._html_to_markdown import ConversionResult
+from ._html_to_markdown import ConversionOptions, ConversionResult, MetadataConfig
 from .api import convert
 from .exceptions import (
     ConfigError,
@@ -18,14 +18,12 @@ from .exceptions import (
 )
 from .options import (
     CodeBlockStyle,
-    ConversionOptions,
     DocumentMetadata,
     HeadingStyle,
     HighlightStyle,
     HtmlMetadata,
     LinkStyle,
     ListIndentType,
-    MetadataConfig,
     NewlineStyle,
     OutputFormat,
     PreprocessingOptions,

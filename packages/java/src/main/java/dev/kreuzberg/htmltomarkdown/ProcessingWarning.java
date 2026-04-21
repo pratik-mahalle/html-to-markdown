@@ -2,5 +2,8 @@
 package dev.kreuzberg.htmltomarkdown;
 
 
+/**
+ * A non-fatal warning generated during HTML processing.
+ */
 public record ProcessingWarning(String message, WarningKind kind) {
 }

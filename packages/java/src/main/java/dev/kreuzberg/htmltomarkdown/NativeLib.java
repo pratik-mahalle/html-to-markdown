@@ -204,7 +204,7 @@ final class NativeLib {
 
     static final MethodHandle HTM_CONVERT = LINKER.downcallHandle(
         LIB.find("htm_convert").orElseThrow(),
-        FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS)
+        FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS)
     );
 
     static final MethodHandle HTM_FREE_STRING = LINKER.downcallHandle(
@@ -238,5 +238,21 @@ final class NativeLib {
     static final MethodHandle HTM_CONVERSION_OPTIONS_FREE = LINKER.downcallHandle(
         LIB.find("htm_conversion_options_free").orElseThrow(),
         FunctionDescriptor.ofVoid(ValueLayout.ADDRESS)
+    );
+
+    // Visitor FFI handles
+    static final MethodHandle HTM_VISITOR_CREATE = LINKER.downcallHandle(
+        LIB.find("htm_visitor_create").orElseThrow(),
+        FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS)
+    );
+
+    static final MethodHandle HTM_VISITOR_FREE = LINKER.downcallHandle(
+        LIB.find("htm_visitor_free").orElseThrow(),
+        FunctionDescriptor.ofVoid(ValueLayout.ADDRESS)
+    );
+
+    static final MethodHandle HTM_CONVERT_WITH_VISITOR = LINKER.downcallHandle(
+        LIB.find("htm_convert_with_visitor").orElseThrow(),
+        FunctionDescriptor.of(ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS)
     );
 }

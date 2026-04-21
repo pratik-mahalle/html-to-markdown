@@ -4,6 +4,12 @@ package dev.kreuzberg.htmltomarkdown;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Partial update for {@code ConversionOptions}.
+ *
+ * Uses {@code Option<T>} fields for selective updates. Bindings use this to construct
+ * options from language-native types. Prefer [{@code ConversionOptionsBuilder}] for Rust code.
+ */
 public class ConversionOptionsUpdateBuilder {
 
     private Optional<HeadingStyle> headingStyle = Optional.empty();

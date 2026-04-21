@@ -31,7 +31,7 @@ public static class HtmlToMarkdownRs
     /// use html_to_markdown_rs::{convert, ConversionOptions};
     ///
     /// let html = "<h1>Hello World</h1>";
-    /// let result = convert(html, None).unwrap();
+    /// let result = convert(html, None, None).unwrap();
     /// assert!(result.content.as_deref().unwrap_or("").contains("Hello World"));
     /// ```
     ///
@@ -476,6 +476,61 @@ public static class HtmlToMarkdownRs
         return returnValue;
     }
 
+    /// <summary>
+    /// Convert HTML to Markdown, invoking visitor callbacks during processing.
+    /// </summary>
+    public static ConversionResult? ConvertWithVisitor(string html, ConversionOptions? options, IVisitor visitor)
+    {
+        ArgumentNullException.ThrowIfNull(html);
+        ArgumentNullException.ThrowIfNull(visitor);
+
+        using var callbacks = new VisitorCallbacks(visitor);
+
+        var optionsHandle = IntPtr.Zero;
+        if (options != null)
+        {
+            var optionsJson = JsonSerializer.Serialize(options, JsonOptions);
+            optionsHandle = NativeMethods.ConversionOptionsFromJson(optionsJson);
+        }
+
+        var visitorHandle = NativeMethods.VisitorCreate(callbacks.NativePtr);
+        if (visitorHandle == IntPtr.Zero)
+        {
+            if (optionsHandle != IntPtr.Zero)
+            {
+                NativeMethods.ConversionOptionsFree(optionsHandle);
+            }
+
+            throw GetLastError();
+        }
+
+        try
+        {
+            var resultPtr = NativeMethods.ConvertWithVisitor(html, optionsHandle, visitorHandle);
+            if (optionsHandle != IntPtr.Zero)
+            {
+                NativeMethods.ConversionOptionsFree(optionsHandle);
+            }
+
+            if (resultPtr == IntPtr.Zero)
+            {
+                var err = GetLastError();
+                if (err.Code != 0)
+                {
+                    throw err;
+                }
+
+                return null;
+            }
+            var json = Marshal.PtrToStringAnsi(resultPtr);
+            NativeMethods.FreeString(resultPtr);
+            return JsonSerializer.Deserialize<ConversionResult>(json!, JsonOptions);
+        }
+        finally
+        {
+            NativeMethods.VisitorFree(visitorHandle);
+        }
+    }
     private static HtmlToMarkdownRsException GetLastError()
     {
         var code = NativeMethods.LastErrorCode();

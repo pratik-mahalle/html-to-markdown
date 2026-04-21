@@ -12,6 +12,7 @@ use std::collections::BTreeMap;
 /// This enum categorizes all HTML elements that the converter recognizes,
 /// providing a coarse-grained classification for visitor dispatch.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum NodeType {
     /// Text node (most frequent - 100+ per document)
     Text,
@@ -207,6 +208,7 @@ pub enum NodeType {
 /// Provides comprehensive metadata about the current node being visited,
 /// including its type, attributes, position in the DOM tree, and parent context.
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NodeContext {
     /// Coarse-grained node type classification
     pub node_type: NodeType,
@@ -235,8 +237,10 @@ pub struct NodeContext {
 /// Allows visitors to control the conversion flow by either proceeding
 /// with default behavior, providing custom output, skipping elements,
 /// preserving HTML, or signaling errors.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum VisitResult {
+    #[default]
     /// Continue with default conversion behavior
     Continue,
 

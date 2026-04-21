@@ -8,14 +8,19 @@ from typing import TYPE_CHECKING
 import html_to_markdown._html_to_markdown as _rust
 
 if TYPE_CHECKING:
-    from ._html_to_markdown import ConversionResult
-    from .options import ConversionOptions, PreprocessingOptions
+    from ._html_to_markdown import ConversionOptions, ConversionResult, PreprocessingOptions
 
 
-_TO_RUST_CODEBLOCKSTYLE_MAP = {
-    "indented": _rust.CodeBlockStyle.Indented,
-    "backticks": _rust.CodeBlockStyle.Backticks,
-    "tildes": _rust.CodeBlockStyle.Tildes,
+_TO_RUST_PREPROCESSINGPRESET_MAP = {
+    "minimal": _rust.PreprocessingPreset.Minimal,
+    "standard": _rust.PreprocessingPreset.Standard,
+    "aggressive": _rust.PreprocessingPreset.Aggressive,
+}
+
+
+_TO_RUST_LISTINDENTTYPE_MAP = {
+    "spaces": _rust.ListIndentType.Spaces,
+    "tabs": _rust.ListIndentType.Tabs,
 }
 
 
@@ -23,6 +28,12 @@ _TO_RUST_HEADINGSTYLE_MAP = {
     "underlined": _rust.HeadingStyle.Underlined,
     "atx": _rust.HeadingStyle.Atx,
     "atx_closed": _rust.HeadingStyle.AtxClosed,
+}
+
+
+_TO_RUST_WHITESPACEMODE_MAP = {
+    "normalized": _rust.WhitespaceMode.Normalized,
+    "strict": _rust.WhitespaceMode.Strict,
 }
 
 
@@ -34,21 +45,16 @@ _TO_RUST_HIGHLIGHTSTYLE_MAP = {
 }
 
 
+_TO_RUST_CODEBLOCKSTYLE_MAP = {
+    "indented": _rust.CodeBlockStyle.Indented,
+    "backticks": _rust.CodeBlockStyle.Backticks,
+    "tildes": _rust.CodeBlockStyle.Tildes,
+}
+
+
 _TO_RUST_LINKSTYLE_MAP = {
     "inline": _rust.LinkStyle.Inline,
     "reference": _rust.LinkStyle.Reference,
-}
-
-
-_TO_RUST_LISTINDENTTYPE_MAP = {
-    "spaces": _rust.ListIndentType.Spaces,
-    "tabs": _rust.ListIndentType.Tabs,
-}
-
-
-_TO_RUST_NEWLINESTYLE_MAP = {
-    "spaces": _rust.NewlineStyle.Spaces,
-    "backslash": _rust.NewlineStyle.Backslash,
 }
 
 
@@ -59,16 +65,9 @@ _TO_RUST_OUTPUTFORMAT_MAP = {
 }
 
 
-_TO_RUST_PREPROCESSINGPRESET_MAP = {
-    "minimal": _rust.PreprocessingPreset.Minimal,
-    "standard": _rust.PreprocessingPreset.Standard,
-    "aggressive": _rust.PreprocessingPreset.Aggressive,
-}
-
-
-_TO_RUST_WHITESPACEMODE_MAP = {
-    "normalized": _rust.WhitespaceMode.Normalized,
-    "strict": _rust.WhitespaceMode.Strict,
+_TO_RUST_NEWLINESTYLE_MAP = {
+    "spaces": _rust.NewlineStyle.Spaces,
+    "backslash": _rust.NewlineStyle.Backslash,
 }
 
 
@@ -80,7 +79,7 @@ def _to_rust_preprocessing_options(
         return None
     return _rust.PreprocessingOptions(
         enabled=value.enabled,
-        preset=_TO_RUST_PREPROCESSINGPRESET_MAP[value.preset],
+        preset=_TO_RUST_PREPROCESSINGPRESET_MAP[str(value.preset)],
         remove_navigation=value.remove_navigation,
         remove_forms=value.remove_forms,
     )
@@ -91,8 +90,8 @@ def _to_rust_conversion_options(value: ConversionOptions | None) -> _rust.Conver
     if value is None:
         return None
     return _rust.ConversionOptions(
-        heading_style=_TO_RUST_HEADINGSTYLE_MAP[value.heading_style],
-        list_indent_type=_TO_RUST_LISTINDENTTYPE_MAP[value.list_indent_type],
+        heading_style=_TO_RUST_HEADINGSTYLE_MAP[str(value.heading_style)],
+        list_indent_type=_TO_RUST_LISTINDENTTYPE_MAP[str(value.list_indent_type)],
         list_indent_width=value.list_indent_width,
         bullets=value.bullets,
         strong_em_symbol=value.strong_em_symbol,
@@ -104,17 +103,17 @@ def _to_rust_conversion_options(value: ConversionOptions | None) -> _rust.Conver
         autolinks=value.autolinks,
         default_title=value.default_title,
         br_in_tables=value.br_in_tables,
-        highlight_style=_TO_RUST_HIGHLIGHTSTYLE_MAP[value.highlight_style],
+        highlight_style=_TO_RUST_HIGHLIGHTSTYLE_MAP[str(value.highlight_style)],
         extract_metadata=value.extract_metadata,
-        whitespace_mode=_TO_RUST_WHITESPACEMODE_MAP[value.whitespace_mode],
+        whitespace_mode=_TO_RUST_WHITESPACEMODE_MAP[str(value.whitespace_mode)],
         strip_newlines=value.strip_newlines,
         wrap=value.wrap,
         wrap_width=value.wrap_width,
         convert_as_inline=value.convert_as_inline,
         sub_symbol=value.sub_symbol,
         sup_symbol=value.sup_symbol,
-        newline_style=_TO_RUST_NEWLINESTYLE_MAP[value.newline_style],
-        code_block_style=_TO_RUST_CODEBLOCKSTYLE_MAP[value.code_block_style],
+        newline_style=_TO_RUST_NEWLINESTYLE_MAP[str(value.newline_style)],
+        code_block_style=_TO_RUST_CODEBLOCKSTYLE_MAP[str(value.code_block_style)],
         keep_inline_images_in=value.keep_inline_images_in,
         preprocessing=_to_rust_preprocessing_options(value.preprocessing),  # type: ignore[arg-type]
         encoding=value.encoding,
@@ -122,8 +121,8 @@ def _to_rust_conversion_options(value: ConversionOptions | None) -> _rust.Conver
         strip_tags=value.strip_tags,
         preserve_tags=value.preserve_tags,
         skip_images=value.skip_images,
-        link_style=_TO_RUST_LINKSTYLE_MAP[value.link_style],
-        output_format=_TO_RUST_OUTPUTFORMAT_MAP[value.output_format],
+        link_style=_TO_RUST_LINKSTYLE_MAP[str(value.link_style)],
+        output_format=_TO_RUST_OUTPUTFORMAT_MAP[str(value.output_format)],
         include_document_structure=value.include_document_structure,
         extract_images=value.extract_images,
         max_image_size=value.max_image_size,
@@ -133,7 +132,7 @@ def _to_rust_conversion_options(value: ConversionOptions | None) -> _rust.Conver
     )
 
 
-def convert(html: str, options: ConversionOptions | None = None) -> ConversionResult:
+def convert(html: str, options: ConversionOptions | None = None, visitor: str | None = None) -> ConversionResult:
     """Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images."""
     _rust_options = _to_rust_conversion_options(options)
-    return _rust.convert(html, _rust_options)
+    return _rust.convert(html, _rust_options, visitor)

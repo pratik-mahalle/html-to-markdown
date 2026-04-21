@@ -2,5 +2,10 @@
 package dev.kreuzberg.htmltomarkdown;
 
 
+/**
+ * An inline text annotation with byte-range offsets.
+ *
+ * Annotations describe formatting (bold, italic, etc.) and links within a node's text content.
+ */
 public record TextAnnotation(int start, int end, AnnotationKind kind) {
 }

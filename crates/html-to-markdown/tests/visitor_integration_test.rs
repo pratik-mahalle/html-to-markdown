@@ -8,7 +8,7 @@
 #![cfg(feature = "visitor")]
 
 use html_to_markdown_rs::visitor::{HtmlVisitor, NodeContext, NodeType, VisitResult};
-use html_to_markdown_rs::{ConversionOptions, convert_with_visitor};
+use html_to_markdown_rs::{ConversionOptions, convert};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -99,7 +99,10 @@ fn test_custom_visitor_transforms_text() {
     let html = r"<p>Hello world</p>";
     let visitor = Rc::new(RefCell::new(CustomizingVisitor));
 
-    let result = convert_with_visitor(html, None, Some(visitor)).expect("conversion failed");
+    let result = convert(html, None, Some(visitor))
+        .expect("conversion failed")
+        .content
+        .unwrap_or_default();
 
     assert!(result.contains("[TEXT:"), "Should contain custom text format");
 }
@@ -109,7 +112,10 @@ fn test_custom_visitor_transforms_links() {
     let html = r#"<a href="https://example.com">Example</a>"#;
     let visitor = Rc::new(RefCell::new(CustomizingVisitor));
 
-    let result = convert_with_visitor(html, None, Some(visitor)).expect("conversion failed");
+    let result = convert(html, None, Some(visitor))
+        .expect("conversion failed")
+        .content
+        .unwrap_or_default();
 
     assert!(
         result.contains("[LINK:Example -> https://example.com]"),
@@ -122,7 +128,10 @@ fn test_custom_visitor_transforms_images() {
     let html = r#"<img src="/test.png" alt="Test">"#;
     let visitor = Rc::new(RefCell::new(CustomizingVisitor));
 
-    let result = convert_with_visitor(html, None, Some(visitor)).expect("conversion failed");
+    let result = convert(html, None, Some(visitor))
+        .expect("conversion failed")
+        .content
+        .unwrap_or_default();
 
     assert!(
         result.contains("[IMAGE:Test @ /test.png]"),
@@ -135,7 +144,10 @@ fn test_custom_visitor_transforms_headings() {
     let html = r"<h2>My Heading</h2>";
     let visitor = Rc::new(RefCell::new(CustomizingVisitor));
 
-    let result = convert_with_visitor(html, None, Some(visitor)).expect("conversion failed");
+    let result = convert(html, None, Some(visitor))
+        .expect("conversion failed")
+        .content
+        .unwrap_or_default();
 
     assert!(
         result.contains("[H2: My Heading]"),
@@ -151,7 +163,10 @@ fn test_skipping_visitor_removes_links() {
         skip_images: false,
     }));
 
-    let result = convert_with_visitor(html, None, Some(visitor)).expect("conversion failed");
+    let result = convert(html, None, Some(visitor))
+        .expect("conversion failed")
+        .content
+        .unwrap_or_default();
 
     assert!(
         !result.contains("example.com"),
@@ -167,7 +182,10 @@ fn test_skipping_visitor_removes_images() {
         skip_images: true,
     }));
 
-    let result = convert_with_visitor(html, None, Some(visitor)).expect("conversion failed");
+    let result = convert(html, None, Some(visitor))
+        .expect("conversion failed")
+        .content
+        .unwrap_or_default();
 
     assert!(
         !result.contains("test.png") && !result.contains("!["),
@@ -180,7 +198,10 @@ fn test_preserving_visitor_keeps_html() {
     let html = r#"<a href="https://example.com" class="special">Example</a>"#;
     let visitor = Rc::new(RefCell::new(PreservingVisitor { preserve_links: true }));
 
-    let result = convert_with_visitor(html, None, Some(visitor)).expect("conversion failed");
+    let result = convert(html, None, Some(visitor))
+        .expect("conversion failed")
+        .content
+        .unwrap_or_default();
 
     assert!(
         result.contains("<a") && result.contains("href"),
@@ -193,7 +214,7 @@ fn test_visitor_receives_node_context() {
     let html = r#"<h1 id="title" class="main">Title</h1>"#;
     let visitor = Rc::new(RefCell::new(ContextCheckingVisitor::default()));
 
-    let _result = convert_with_visitor(html, None, Some(visitor)).expect("conversion failed");
+    let _result = convert(html, None, Some(visitor)).expect("conversion failed");
 }
 
 #[test]
@@ -216,7 +237,10 @@ fn test_visitor_works_with_complex_document() {
 
     let visitor = Rc::new(RefCell::new(CustomizingVisitor));
 
-    let result = convert_with_visitor(html, None, Some(visitor)).expect("conversion failed");
+    let result = convert(html, None, Some(visitor))
+        .expect("conversion failed")
+        .content
+        .unwrap_or_default();
 
     assert!(result.contains("[H1:"));
     assert!(result.contains("[H2:"));
@@ -243,7 +267,10 @@ fn test_visitor_with_conversion_options() {
 
     let visitor = Rc::new(RefCell::new(ContinueVisitor));
 
-    let result = convert_with_visitor(html, Some(options), Some(visitor)).expect("conversion failed");
+    let result = convert(html, Some(options), Some(visitor))
+        .expect("conversion failed")
+        .content
+        .unwrap_or_default();
 
     assert!(
         result.contains(r"\*") || result.contains(r"\_"),
@@ -265,7 +292,10 @@ fn test_visitor_continue_result_produces_default_markdown() {
     let html = r"<h1>Title</h1>";
     let visitor = Rc::new(RefCell::new(ContinueVisitor));
 
-    let result = convert_with_visitor(html, None, Some(visitor)).expect("conversion failed");
+    let result = convert(html, None, Some(visitor))
+        .expect("conversion failed")
+        .content
+        .unwrap_or_default();
 
     assert!(
         result.contains("# Title"),
@@ -294,7 +324,10 @@ fn test_visitor_skip_vs_continue() {
     let html = r#"<p><a href="/first">First</a> and <a href="/second">Second</a></p>"#;
     let visitor = Rc::new(RefCell::new(SelectiveSkipper { skip_first_link: true }));
 
-    let result = convert_with_visitor(html, None, Some(visitor)).expect("conversion failed");
+    let result = convert(html, None, Some(visitor))
+        .expect("conversion failed")
+        .content
+        .unwrap_or_default();
 
     assert!(!result.contains("/first"));
     assert!(result.contains("/second"));
@@ -305,7 +338,10 @@ fn test_multiple_elements_of_same_type() {
     let html = r"<h1>First</h1><h2>Second</h2><h3>Third</h3>";
     let visitor = Rc::new(RefCell::new(CustomizingVisitor));
 
-    let result = convert_with_visitor(html, None, Some(visitor)).expect("conversion failed");
+    let result = convert(html, None, Some(visitor))
+        .expect("conversion failed")
+        .content
+        .unwrap_or_default();
 
     assert!(result.contains("[H1: First]"));
     assert!(result.contains("[H2: Second]"));
@@ -317,7 +353,10 @@ fn test_nested_elements_invoke_visitor() {
     let html = r#"<p>Text with <a href="/url">a <strong>bold</strong> link</a></p>"#;
     let visitor = Rc::new(RefCell::new(CustomizingVisitor));
 
-    let result = convert_with_visitor(html, None, Some(visitor)).expect("conversion failed");
+    let result = convert(html, None, Some(visitor))
+        .expect("conversion failed")
+        .content
+        .unwrap_or_default();
 
     assert!(result.contains("[TEXT:"));
     assert!(result.contains("[LINK:"));
@@ -336,7 +375,7 @@ fn test_visitor_error_stops_conversion() {
 
     let html = "<p>text</p>";
     let visitor = Rc::new(RefCell::new(ErrorVisitor));
-    let result = convert_with_visitor(html, None, Some(visitor));
+    let result = convert(html, None, Some(visitor));
 
     assert!(result.is_err(), "Should return error when visitor returns Error");
     assert!(
@@ -359,7 +398,10 @@ fn test_visitor_code_block() {
 
     let html = r#"<pre><code class="language-rust">fn main() {}</code></pre>"#;
     let visitor = Rc::new(RefCell::new(CodeBlockVisitor));
-    let result = convert_with_visitor(html, None, Some(visitor)).expect("conversion failed");
+    let result = convert(html, None, Some(visitor))
+        .expect("conversion failed")
+        .content
+        .unwrap_or_default();
 
     assert!(
         result.contains("[CODE_BLOCK:rust -> fn main() {}]"),
@@ -380,7 +422,10 @@ fn test_visitor_code_inline() {
 
     let html = r"<p>Use <code>println!</code> macro</p>";
     let visitor = Rc::new(RefCell::new(InlineCodeVisitor));
-    let result = convert_with_visitor(html, None, Some(visitor)).expect("conversion failed");
+    let result = convert(html, None, Some(visitor))
+        .expect("conversion failed")
+        .content
+        .unwrap_or_default();
 
     assert!(
         result.contains("[CODE:println!]"),
@@ -418,7 +463,10 @@ fn test_visitor_list_callbacks() {
 
     let html = r"<ul><li>First</li><li>Second</li></ul>";
     let visitor = Rc::new(RefCell::new(ListVisitor::default()));
-    let result = convert_with_visitor(html, None, Some(visitor)).expect("conversion failed");
+    let result = convert(html, None, Some(visitor))
+        .expect("conversion failed")
+        .content
+        .unwrap_or_default();
 
     assert!(
         result.contains("[LIST_START:UL:1]"),
@@ -462,7 +510,10 @@ fn test_visitor_table_callbacks() {
 
     let html = r"<table><tr><th>Name</th><th>Age</th></tr><tr><td>Alice</td><td>30</td></tr></table>";
     let visitor = Rc::new(RefCell::new(TableVisitor::default()));
-    let result = convert_with_visitor(html, None, Some(visitor)).expect("conversion failed");
+    let result = convert(html, None, Some(visitor))
+        .expect("conversion failed")
+        .content
+        .unwrap_or_default();
 
     assert!(
         result.contains("[TABLE_START]"),
@@ -492,7 +543,10 @@ fn test_visitor_blockquote() {
 
     let html = r"<blockquote>This is a quote</blockquote>";
     let visitor = Rc::new(RefCell::new(BlockquoteVisitor));
-    let result = convert_with_visitor(html, None, Some(visitor)).expect("conversion failed");
+    let result = convert(html, None, Some(visitor))
+        .expect("conversion failed")
+        .content
+        .unwrap_or_default();
 
     assert!(
         result.contains("[QUOTE:This is a quote]"),
@@ -521,7 +575,10 @@ fn test_visitor_inline_formatting() {
 
     let html = r"<p><strong>bold</strong> <em>italic</em> <del>struck</del></p>";
     let visitor = Rc::new(RefCell::new(FormattingVisitor));
-    let result = convert_with_visitor(html, None, Some(visitor)).expect("conversion failed");
+    let result = convert(html, None, Some(visitor))
+        .expect("conversion failed")
+        .content
+        .unwrap_or_default();
 
     assert!(result.contains("[STRONG:bold]"), "Should see strong, got: {result}");
     assert!(result.contains("[EM:italic]"), "Should see emphasis, got: {result}");
@@ -551,7 +608,7 @@ fn test_no_double_visit_in_links() {
 
     let html = r#"<a href="/url">link text</a>"#;
     let visitor = Rc::new(RefCell::new(CountingVisitor::default()));
-    let _result = convert_with_visitor(html, None, Some(visitor.clone())).expect("conversion failed");
+    let _result = convert(html, None, Some(visitor.clone())).expect("conversion failed");
 
     assert_eq!(
         visitor.borrow().text_visits,
@@ -581,7 +638,7 @@ fn test_no_double_visit_in_headings() {
 
     let html = r"<h1>heading text</h1>";
     let visitor = Rc::new(RefCell::new(CountingVisitor::default()));
-    let _result = convert_with_visitor(html, None, Some(visitor.clone())).expect("conversion failed");
+    let _result = convert(html, None, Some(visitor.clone())).expect("conversion failed");
 
     assert_eq!(
         visitor.borrow().text_visits,
@@ -624,8 +681,10 @@ fn test_visitor_with_skip_images() {
     };
 
     let visitor = Rc::new(RefCell::new(SkipImageVisitor::default()));
-    let result = convert_with_visitor(html, Some(options), Some(visitor))
-        .expect("conversion with skip_images and visitor should succeed");
+    let result = convert(html, Some(options), Some(visitor))
+        .expect("conversion with skip_images and visitor should succeed")
+        .content
+        .unwrap_or_default();
 
     // When skip_images is true, images should not appear in output
     assert!(
@@ -650,7 +709,7 @@ fn test_visitor_with_skip_images() {
 /// Test that the main `convert()` function accepts optional visitor parameter
 #[test]
 fn test_convert_accepts_visitor_parameter() {
-    use html_to_markdown_rs::convert_with_visitor;
+    use html_to_markdown_rs::convert;
 
     #[derive(Debug, Default)]
     struct CountingVisitor {
@@ -674,7 +733,7 @@ fn test_convert_accepts_visitor_parameter() {
     let visitor = Rc::new(RefCell::new(CountingVisitor::default()));
 
     // Test using the main convert() function with visitor parameter
-    let _result = convert_with_visitor(html, None, Some(visitor.clone())).expect("convert with visitor should work");
+    let _result = convert(html, None, Some(visitor.clone())).expect("convert with visitor should work");
 
     let borrowed = visitor.borrow();
     assert!(
@@ -719,7 +778,10 @@ fn test_convert_with_inline_images_accepts_visitor() {
 
     // Verify visitor callbacks fire via convert_with_visitor
     let visitor = Rc::new(RefCell::new(ImageTrackingVisitor::default()));
-    let markdown = convert_with_visitor(html, None, Some(visitor.clone())).expect("convert_with_visitor should work");
+    let markdown = convert(html, None, Some(visitor.clone()))
+        .expect("convert should work")
+        .content
+        .unwrap_or_default();
 
     assert_eq!(
         visitor.borrow().images_seen,
@@ -771,7 +833,10 @@ fn test_visitor_and_metadata_both_work() {
 
     // Verify visitor callbacks fire via convert_with_visitor
     let visitor = Rc::new(RefCell::new(MetadataAwareVisitor::default()));
-    let markdown = convert_with_visitor(html, None, Some(visitor.clone())).expect("convert_with_visitor should work");
+    let markdown = convert(html, None, Some(visitor.clone()))
+        .expect("convert should work")
+        .content
+        .unwrap_or_default();
 
     let borrowed = visitor.borrow();
     assert!(
@@ -788,7 +853,7 @@ fn test_visitor_and_metadata_both_work() {
     drop(borrowed);
 
     // Verify metadata extraction via convert()
-    let result = html_to_markdown_rs::convert(html, None).expect("convert should work");
+    let result = html_to_markdown_rs::convert(html, None, None).expect("convert should work");
     let metadata = result.metadata;
 
     assert_eq!(
@@ -856,7 +921,10 @@ fn test_convert_with_all_features_and_visitor() {
 
     // Verify visitor callbacks fire via convert_with_visitor
     let visitor = Rc::new(RefCell::new(ComprehensiveVisitor::default()));
-    let markdown = convert_with_visitor(html, None, Some(visitor.clone())).expect("convert_with_visitor should work");
+    let markdown = convert(html, None, Some(visitor.clone()))
+        .expect("convert should work")
+        .content
+        .unwrap_or_default();
 
     // Verify all visitor callbacks were invoked
     let borrowed = visitor.borrow();
@@ -901,7 +969,7 @@ fn test_image_visitor_with_metadata_does_not_panic() {
         ..Default::default()
     };
 
-    let result = convert_with_visitor(html, Some(options), Some(Rc::new(RefCell::new(ImageVisitor))));
+    let result = convert(html, Some(options), Some(Rc::new(RefCell::new(ImageVisitor))));
     assert!(result.is_ok(), "conversion panicked or errored: {:?}", result.err());
 }
 
@@ -927,10 +995,10 @@ fn test_element_end_replacement_with_metadata_preserves_subsequent_content() {
         ..Default::default()
     };
 
-    let result = convert_with_visitor(html, Some(options), Some(Rc::new(RefCell::new(FigureReplacingVisitor))));
+    let result = convert(html, Some(options), Some(Rc::new(RefCell::new(FigureReplacingVisitor))));
     assert!(result.is_ok(), "conversion panicked or errored: {:?}", result.err());
     assert!(
-        result.unwrap().contains("after"),
+        result.unwrap().content.unwrap_or_default().contains("after"),
         "content after replaced element should not be lost"
     );
 }

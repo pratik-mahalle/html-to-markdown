@@ -4,9 +4,17 @@ package dev.kreuzberg.htmltomarkdown;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+/**
+ * Output format for conversion.
+ *
+ * Specifies the target markup language format for the conversion output.
+ */
 public enum OutputFormat {
+    /** Standard Markdown (CommonMark compatible). Default. */
     Markdown("markdown"),
+    /** Djot lightweight markup language. */
     Djot("djot"),
+    /** Plain text output (no markup, visible text only). */
     Plain("plain");
 
     private final String value;

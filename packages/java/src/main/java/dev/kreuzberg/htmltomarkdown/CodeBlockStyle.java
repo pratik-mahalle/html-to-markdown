@@ -4,9 +4,17 @@ package dev.kreuzberg.htmltomarkdown;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+/**
+ * Code block fence style in Markdown output.
+ *
+ * Determines how code blocks ({@code <pre><code>}) are rendered in Markdown.
+ */
 public enum CodeBlockStyle {
+    /** Indented code blocks (4 spaces). {@code CommonMark} standard. */
     Indented("indented"),
+    /** Fenced code blocks with backticks ({@code }{@code ). Default (GFM). Supports language hints.} */
     Backticks("backticks"),
+    /** Fenced code blocks with tildes (~~~). Supports language hints. */
     Tildes("tildes");
 
     private final String value;

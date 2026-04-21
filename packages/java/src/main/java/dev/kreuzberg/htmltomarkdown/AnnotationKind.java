@@ -6,6 +6,11 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.util.Optional;
 
+/**
+ * The type of an inline text annotation.
+ *
+ * Uses internally tagged representation ({@code "annotation_type": "bold"}) for JSON serialization.
+ */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "annotation_type", visible = false)
 @JsonSubTypes({
     @JsonSubTypes.Type(value = AnnotationKind.Bold.class, name = "bold"),
@@ -20,30 +25,39 @@ import java.util.Optional;
 })
 public sealed interface AnnotationKind {
 
+    /** Bold / strong emphasis. */
     record Bold() implements AnnotationKind {
     }
 
+    /** Italic / emphasis. */
     record Italic() implements AnnotationKind {
     }
 
+    /** Underline. */
     record Underline() implements AnnotationKind {
     }
 
+    /** Strikethrough / deleted text. */
     record Strikethrough() implements AnnotationKind {
     }
 
+    /** Inline code. */
     record Code() implements AnnotationKind {
     }
 
+    /** Subscript text. */
     record Subscript() implements AnnotationKind {
     }
 
+    /** Superscript text. */
     record Superscript() implements AnnotationKind {
     }
 
+    /** Highlighted / marked text. */
     record Highlight() implements AnnotationKind {
     }
 
+    /** A hyperlink. */
     record Link(
         @JsonProperty("url") String url,
         @JsonProperty("title") Optional<String> title

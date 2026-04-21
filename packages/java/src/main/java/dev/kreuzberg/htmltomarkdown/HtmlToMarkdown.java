@@ -19,7 +19,7 @@ public final class HtmlToMarkdown {
      * use html_to_markdown_rs::{convert, ConversionOptions};
      *
      * let html = "<h1>Hello World</h1>";
-     * let result = convert(html, None).unwrap();
+     * let result = convert(html, None, None).unwrap();
      * assert!(result.content.as_deref().unwrap_or("").contains("Hello World"));
      * ```
      *
@@ -33,7 +33,15 @@ public final class HtmlToMarkdown {
     }
 
     public static ConversionResult convert(String html) throws HtmlToMarkdownRsException {
-        return convert(html, null);
+        return HtmlToMarkdownRs.convert(html, null);
+    }
+
+    /**
+     * Convert HTML to Markdown, invoking visitor callbacks during processing.
+     */
+    public static ConversionResult convertWithVisitor(String html, ConversionOptions options, Visitor visitor)
+            throws HtmlToMarkdownRsException {
+        return HtmlToMarkdownRs.convertWithVisitor(html, options, visitor);
     }
 
 }

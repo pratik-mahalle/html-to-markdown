@@ -27,6 +27,8 @@ export type {
 	JsMetadataConfigUpdate,
 	JsNewlineStyle,
 	JsNodeContent,
+	JsNodeContext,
+	JsNodeType,
 	JsOutputFormat,
 	JsPreprocessingOptions,
 	JsPreprocessingOptionsUpdate,
@@ -38,6 +40,7 @@ export type {
 	JsTableGrid,
 	JsTextAnnotation,
 	JsTextDirection,
+	JsVisitResult,
 	JsWarningKind,
 	JsWhitespaceMode,
 } from "@kreuzberg/html-to-markdown-node";

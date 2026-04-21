@@ -554,6 +554,18 @@ pub struct ProcessingWarning {
     pub kind: WarningKind,
 }
 
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize, rustler::NifStruct)]
+#[module = "HtmlToMarkdown.NodeContext"]
+pub struct NodeContext {
+    pub node_type: NodeType,
+    pub tag_name: String,
+    pub attributes: HashMap<String, String>,
+    pub depth: usize,
+    pub index_in_parent: usize,
+    pub parent_tag: Option<String>,
+    pub is_inline: bool,
+}
+
 #[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize, rustler::NifUnitEnum)]
 pub enum TextDirection {
     LeftToRight,
@@ -798,14 +810,1422 @@ impl Default for WarningKind {
     }
 }
 
+#[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize, rustler::NifUnitEnum)]
+pub enum NodeType {
+    Text,
+    Element,
+    Heading,
+    Paragraph,
+    Div,
+    Blockquote,
+    Pre,
+    Hr,
+    List,
+    ListItem,
+    DefinitionList,
+    DefinitionTerm,
+    DefinitionDescription,
+    Table,
+    TableRow,
+    TableCell,
+    TableHeader,
+    TableBody,
+    TableHead,
+    TableFoot,
+    Link,
+    Image,
+    Strong,
+    Em,
+    Code,
+    Strikethrough,
+    Underline,
+    Subscript,
+    Superscript,
+    Mark,
+    Small,
+    Br,
+    Span,
+    Article,
+    Section,
+    Nav,
+    Aside,
+    Header,
+    Footer,
+    Main,
+    Figure,
+    Figcaption,
+    Time,
+    Details,
+    Summary,
+    Form,
+    Input,
+    Select,
+    Option,
+    Button,
+    Textarea,
+    Label,
+    Fieldset,
+    Legend,
+    Audio,
+    Video,
+    Picture,
+    Source,
+    Iframe,
+    Svg,
+    Canvas,
+    Ruby,
+    Rt,
+    Rp,
+    Abbr,
+    Kbd,
+    Samp,
+    Var,
+    Cite,
+    Q,
+    Del,
+    Ins,
+    Data,
+    Meter,
+    Progress,
+    Output,
+    Template,
+    Slot,
+    Html,
+    Head,
+    Body,
+    Title,
+    Meta,
+    LinkTag,
+    Style,
+    Script,
+    Base,
+    Custom,
+}
+
+#[allow(clippy::derivable_impls)]
+impl Default for NodeType {
+    fn default() -> Self {
+        Self::Text
+    }
+}
+
+#[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize, rustler::NifUnitEnum)]
+pub enum VisitResult {
+    Continue,
+    Custom,
+    Skip,
+    PreserveHtml,
+    Error,
+}
+
+#[allow(clippy::derivable_impls)]
+impl Default for VisitResult {
+    fn default() -> Self {
+        Self::Continue
+    }
+}
+
 #[rustler::nif]
-pub fn convert(html: String, options: Option<String>) -> Result<ConversionResult, String> {
+pub fn convert(
+    env: rustler::Env<'_>,
+    html: String,
+    options: Option<String>,
+    visitor: Option<rustler::Term<'_>>,
+) -> Result<ConversionResult, String> {
+    let visitor: Option<html_to_markdown_rs::visitor::VisitorHandle> = match visitor {
+        Some(term) if !term.is_nil() => {
+            let bridge = ElixirHtmlVisitorBridge::new(env, term);
+            Some(std::rc::Rc::new(std::cell::RefCell::new(bridge)) as html_to_markdown_rs::visitor::VisitorHandle)
+        }
+        _ => None,
+    };
     let options_core: Option<html_to_markdown_rs::ConversionOptions> = options
-        .map(|s| serde_json::from_str::<html_to_markdown_rs::ConversionOptions>(&s))
+        .map(|s| serde_json::from_str::<html_to_markdown_rs::ConversionOptions>(&s).map_err(|e| e.to_string()))
         .transpose()
         .map_err(|e| e.to_string())?;
-    let result = html_to_markdown_rs::convert(&html, options_core).map_err(|e| e.to_string())?;
-    Ok(result.into())
+    html_to_markdown_rs::convert(&html, options_core.unwrap_or_default(), visitor)
+        .map(|val| val.into())
+        .map_err(|e| e.to_string())
+}
+
+fn nodecontext_to_elixir_map<'a>(
+    env: rustler::Env<'a>,
+    ctx: &html_to_markdown_rs::visitor::NodeContext,
+) -> rustler::Term<'a> {
+    let mut pairs: Vec<(rustler::Term<'a>, rustler::Term<'a>)> = Vec::new();
+    pairs.push((
+        rustler::types::atom::Atom::from_str(env, "node_type")
+            .unwrap()
+            .to_term(env),
+        format!("{:?}", ctx.node_type).encode(env),
+    ));
+    pairs.push((
+        rustler::types::atom::Atom::from_str(env, "tag_name")
+            .unwrap()
+            .to_term(env),
+        ctx.tag_name.encode(env),
+    ));
+    pairs.push((
+        rustler::types::atom::Atom::from_str(env, "depth").unwrap().to_term(env),
+        (ctx.depth as i64).encode(env),
+    ));
+    pairs.push((
+        rustler::types::atom::Atom::from_str(env, "index_in_parent")
+            .unwrap()
+            .to_term(env),
+        (ctx.index_in_parent as i64).encode(env),
+    ));
+    pairs.push((
+        rustler::types::atom::Atom::from_str(env, "is_inline")
+            .unwrap()
+            .to_term(env),
+        ctx.is_inline.encode(env),
+    ));
+    let parent_tag_term = match &ctx.parent_tag {
+        Some(s) => s.encode(env),
+        None => rustler::types::atom::Atom::from_str(env, "nil").unwrap().to_term(env),
+    };
+    pairs.push((
+        rustler::types::atom::Atom::from_str(env, "parent_tag")
+            .unwrap()
+            .to_term(env),
+        parent_tag_term,
+    ));
+    let attrs_pairs: Vec<(rustler::Term<'a>, rustler::Term<'a>)> = ctx
+        .attributes
+        .iter()
+        .map(|(k, v)| (k.encode(env), v.encode(env)))
+        .collect();
+    let attrs_map = rustler::Term::map_from_pairs(env, &attrs_pairs)
+        .unwrap_or_else(|_| rustler::types::atom::Atom::from_str(env, "nil").unwrap().to_term(env));
+    pairs.push((
+        rustler::types::atom::Atom::from_str(env, "attributes")
+            .unwrap()
+            .to_term(env),
+        attrs_map,
+    ));
+    rustler::Term::map_from_pairs(env, &pairs)
+        .unwrap_or_else(|_| rustler::types::atom::Atom::from_str(env, "nil").unwrap().to_term(env))
+}
+
+pub struct ElixirHtmlVisitorBridge {
+    env: rustler::OwnedEnv,
+    visitor_term: rustler::SavedTerm,
+}
+
+impl std::fmt::Debug for ElixirHtmlVisitorBridge {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "ElixirHtmlVisitorBridge")
+    }
+}
+
+impl ElixirHtmlVisitorBridge {
+    pub fn new(env: rustler::Env<'_>, visitor_term: rustler::Term<'_>) -> Self {
+        let owned = rustler::OwnedEnv::new();
+        let saved = owned.save(visitor_term);
+        Self {
+            env: owned,
+            visitor_term: saved,
+        }
+    }
+}
+
+impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
+    fn visit_element_start(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_element_start").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_element_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_element_end").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _output.encode(env)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_text(&mut self, _ctx: &html_to_markdown_rs::NodeContext, _text: &str) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_text").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_link(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _href: &str,
+        _text: &str,
+        _title: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_link").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![
+                nodecontext_to_elixir_map(env, _ctx),
+                _href.encode(env),
+                _text.encode(env),
+                _title.encode(env),
+            ];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_image(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _src: &str,
+        _alt: &str,
+        _title: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_image").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![
+                nodecontext_to_elixir_map(env, _ctx),
+                _src.encode(env),
+                _alt.encode(env),
+                _title.encode(env),
+            ];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_heading(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _level: u32,
+        _text: &str,
+        _id: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_heading").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![
+                nodecontext_to_elixir_map(env, _ctx),
+                format!("{:?}", _level).encode(env),
+                _text.encode(env),
+                _id.encode(env),
+            ];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_code_block(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _lang: Option<&str>,
+        _code: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_code_block").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![
+                nodecontext_to_elixir_map(env, _ctx),
+                _lang.encode(env),
+                _code.encode(env),
+            ];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_code_inline(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _code: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_code_inline").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _code.encode(env)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_list_item(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _ordered: bool,
+        _marker: &str,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_list_item").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![
+                nodecontext_to_elixir_map(env, _ctx),
+                _ordered.encode(env),
+                _marker.encode(env),
+                _text.encode(env),
+            ];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_list_start(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _ordered: bool,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_list_start").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _ordered.encode(env)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_list_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _ordered: bool,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_list_end").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![
+                nodecontext_to_elixir_map(env, _ctx),
+                _ordered.encode(env),
+                _output.encode(env),
+            ];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_table_start(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_table_start").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_table_row(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _cells: &[String],
+        _is_header: bool,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_table_row").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![
+                nodecontext_to_elixir_map(env, _ctx),
+                format!("{:?}", _cells).encode(env),
+                _is_header.encode(env),
+            ];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_table_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_table_end").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _output.encode(env)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_blockquote(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _content: &str,
+        _depth: usize,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_blockquote").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![
+                nodecontext_to_elixir_map(env, _ctx),
+                _content.encode(env),
+                format!("{:?}", _depth).encode(env),
+            ];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_strong(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_strong").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_emphasis(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_emphasis").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_strikethrough(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_strikethrough").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_underline(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_underline").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_subscript(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_subscript").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_superscript(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_superscript").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_mark(&mut self, _ctx: &html_to_markdown_rs::NodeContext, _text: &str) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_mark").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_line_break(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_line_break").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_horizontal_rule(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_horizontal_rule").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_custom_element(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _tag_name: &str,
+        _html: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_custom_element").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![
+                nodecontext_to_elixir_map(env, _ctx),
+                _tag_name.encode(env),
+                _html.encode(env),
+            ];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_definition_list_start(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_definition_list_start").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_definition_term(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_definition_term").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_definition_description(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_definition_description").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_definition_list_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_definition_list_end").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _output.encode(env)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_form(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _action: Option<&str>,
+        _method: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_form").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![
+                nodecontext_to_elixir_map(env, _ctx),
+                _action.encode(env),
+                _method.encode(env),
+            ];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_input(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _input_type: &str,
+        _name: Option<&str>,
+        _value: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_input").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![
+                nodecontext_to_elixir_map(env, _ctx),
+                _input_type.encode(env),
+                _name.encode(env),
+                _value.encode(env),
+            ];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_button(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_button").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_audio(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _src: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_audio").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _src.encode(env)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_video(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _src: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_video").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _src.encode(env)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_iframe(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _src: Option<&str>,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_iframe").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _src.encode(env)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_details(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _open: bool,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_details").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _open.encode(env)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_summary(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_summary").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_figure_start(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_figure_start").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_figcaption(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _text: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_figcaption").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
+
+    fn visit_figure_end(
+        &mut self,
+        _ctx: &html_to_markdown_rs::NodeContext,
+        _output: &str,
+    ) -> html_to_markdown_rs::VisitResult {
+        let result_str = self.env.run(|env| {
+            let visitor = self.visitor_term.load(env);
+            let key = rustler::types::atom::Atom::from_str(env, "visit_figure_end").ok()?;
+            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
+            if func_term.is_nil() {
+                return None;
+            }
+            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _output.encode(env)];
+            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
+                .ok()?
+                .0;
+            result.decode::<String>().ok()
+        });
+        match result_str {
+            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
+            Some(Ok(s)) => match s.to_lowercase().as_str() {
+                "continue" => html_to_markdown_rs::VisitResult::Continue,
+                "skip" => html_to_markdown_rs::VisitResult::Skip,
+                "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
+                other => html_to_markdown_rs::VisitResult::Custom(other.to_string()),
+            },
+        }
+    }
 }
 
 #[rustler::nif]
@@ -1092,7 +2512,7 @@ impl From<html_to_markdown_rs::metadata::ImageMetadata> for ImageMetadata {
             src: val.src,
             alt: val.alt,
             title: val.title,
-            dimensions: val.dimensions.as_ref().map(|v| format!("{:?}", v)),
+            dimensions: val.dimensions.as_ref().map(|v| format!("{v:?}")),
             image_type: val.image_type.into(),
             attributes: val.attributes.into_iter().collect(),
         }
@@ -1545,6 +2965,20 @@ impl From<html_to_markdown_rs::ProcessingWarning> for ProcessingWarning {
     }
 }
 
+impl From<html_to_markdown_rs::NodeContext> for NodeContext {
+    fn from(val: html_to_markdown_rs::NodeContext) -> Self {
+        Self {
+            node_type: val.node_type.into(),
+            tag_name: val.tag_name,
+            attributes: val.attributes.into_iter().collect(),
+            depth: val.depth,
+            index_in_parent: val.index_in_parent,
+            parent_tag: val.parent_tag,
+            is_inline: val.is_inline,
+        }
+    }
+}
+
 impl From<TextDirection> for html_to_markdown_rs::metadata::TextDirection {
     fn from(val: TextDirection) -> Self {
         match val {
@@ -1934,6 +3368,113 @@ impl From<html_to_markdown_rs::WarningKind> for WarningKind {
             html_to_markdown_rs::WarningKind::MalformedHtml => Self::MalformedHtml,
             html_to_markdown_rs::WarningKind::SanitizationApplied => Self::SanitizationApplied,
             html_to_markdown_rs::WarningKind::DepthLimitExceeded => Self::DepthLimitExceeded,
+        }
+    }
+}
+
+impl From<html_to_markdown_rs::NodeType> for NodeType {
+    fn from(val: html_to_markdown_rs::NodeType) -> Self {
+        match val {
+            html_to_markdown_rs::NodeType::Text => Self::Text,
+            html_to_markdown_rs::NodeType::Element => Self::Element,
+            html_to_markdown_rs::NodeType::Heading => Self::Heading,
+            html_to_markdown_rs::NodeType::Paragraph => Self::Paragraph,
+            html_to_markdown_rs::NodeType::Div => Self::Div,
+            html_to_markdown_rs::NodeType::Blockquote => Self::Blockquote,
+            html_to_markdown_rs::NodeType::Pre => Self::Pre,
+            html_to_markdown_rs::NodeType::Hr => Self::Hr,
+            html_to_markdown_rs::NodeType::List => Self::List,
+            html_to_markdown_rs::NodeType::ListItem => Self::ListItem,
+            html_to_markdown_rs::NodeType::DefinitionList => Self::DefinitionList,
+            html_to_markdown_rs::NodeType::DefinitionTerm => Self::DefinitionTerm,
+            html_to_markdown_rs::NodeType::DefinitionDescription => Self::DefinitionDescription,
+            html_to_markdown_rs::NodeType::Table => Self::Table,
+            html_to_markdown_rs::NodeType::TableRow => Self::TableRow,
+            html_to_markdown_rs::NodeType::TableCell => Self::TableCell,
+            html_to_markdown_rs::NodeType::TableHeader => Self::TableHeader,
+            html_to_markdown_rs::NodeType::TableBody => Self::TableBody,
+            html_to_markdown_rs::NodeType::TableHead => Self::TableHead,
+            html_to_markdown_rs::NodeType::TableFoot => Self::TableFoot,
+            html_to_markdown_rs::NodeType::Link => Self::Link,
+            html_to_markdown_rs::NodeType::Image => Self::Image,
+            html_to_markdown_rs::NodeType::Strong => Self::Strong,
+            html_to_markdown_rs::NodeType::Em => Self::Em,
+            html_to_markdown_rs::NodeType::Code => Self::Code,
+            html_to_markdown_rs::NodeType::Strikethrough => Self::Strikethrough,
+            html_to_markdown_rs::NodeType::Underline => Self::Underline,
+            html_to_markdown_rs::NodeType::Subscript => Self::Subscript,
+            html_to_markdown_rs::NodeType::Superscript => Self::Superscript,
+            html_to_markdown_rs::NodeType::Mark => Self::Mark,
+            html_to_markdown_rs::NodeType::Small => Self::Small,
+            html_to_markdown_rs::NodeType::Br => Self::Br,
+            html_to_markdown_rs::NodeType::Span => Self::Span,
+            html_to_markdown_rs::NodeType::Article => Self::Article,
+            html_to_markdown_rs::NodeType::Section => Self::Section,
+            html_to_markdown_rs::NodeType::Nav => Self::Nav,
+            html_to_markdown_rs::NodeType::Aside => Self::Aside,
+            html_to_markdown_rs::NodeType::Header => Self::Header,
+            html_to_markdown_rs::NodeType::Footer => Self::Footer,
+            html_to_markdown_rs::NodeType::Main => Self::Main,
+            html_to_markdown_rs::NodeType::Figure => Self::Figure,
+            html_to_markdown_rs::NodeType::Figcaption => Self::Figcaption,
+            html_to_markdown_rs::NodeType::Time => Self::Time,
+            html_to_markdown_rs::NodeType::Details => Self::Details,
+            html_to_markdown_rs::NodeType::Summary => Self::Summary,
+            html_to_markdown_rs::NodeType::Form => Self::Form,
+            html_to_markdown_rs::NodeType::Input => Self::Input,
+            html_to_markdown_rs::NodeType::Select => Self::Select,
+            html_to_markdown_rs::NodeType::Option => Self::Option,
+            html_to_markdown_rs::NodeType::Button => Self::Button,
+            html_to_markdown_rs::NodeType::Textarea => Self::Textarea,
+            html_to_markdown_rs::NodeType::Label => Self::Label,
+            html_to_markdown_rs::NodeType::Fieldset => Self::Fieldset,
+            html_to_markdown_rs::NodeType::Legend => Self::Legend,
+            html_to_markdown_rs::NodeType::Audio => Self::Audio,
+            html_to_markdown_rs::NodeType::Video => Self::Video,
+            html_to_markdown_rs::NodeType::Picture => Self::Picture,
+            html_to_markdown_rs::NodeType::Source => Self::Source,
+            html_to_markdown_rs::NodeType::Iframe => Self::Iframe,
+            html_to_markdown_rs::NodeType::Svg => Self::Svg,
+            html_to_markdown_rs::NodeType::Canvas => Self::Canvas,
+            html_to_markdown_rs::NodeType::Ruby => Self::Ruby,
+            html_to_markdown_rs::NodeType::Rt => Self::Rt,
+            html_to_markdown_rs::NodeType::Rp => Self::Rp,
+            html_to_markdown_rs::NodeType::Abbr => Self::Abbr,
+            html_to_markdown_rs::NodeType::Kbd => Self::Kbd,
+            html_to_markdown_rs::NodeType::Samp => Self::Samp,
+            html_to_markdown_rs::NodeType::Var => Self::Var,
+            html_to_markdown_rs::NodeType::Cite => Self::Cite,
+            html_to_markdown_rs::NodeType::Q => Self::Q,
+            html_to_markdown_rs::NodeType::Del => Self::Del,
+            html_to_markdown_rs::NodeType::Ins => Self::Ins,
+            html_to_markdown_rs::NodeType::Data => Self::Data,
+            html_to_markdown_rs::NodeType::Meter => Self::Meter,
+            html_to_markdown_rs::NodeType::Progress => Self::Progress,
+            html_to_markdown_rs::NodeType::Output => Self::Output,
+            html_to_markdown_rs::NodeType::Template => Self::Template,
+            html_to_markdown_rs::NodeType::Slot => Self::Slot,
+            html_to_markdown_rs::NodeType::Html => Self::Html,
+            html_to_markdown_rs::NodeType::Head => Self::Head,
+            html_to_markdown_rs::NodeType::Body => Self::Body,
+            html_to_markdown_rs::NodeType::Title => Self::Title,
+            html_to_markdown_rs::NodeType::Meta => Self::Meta,
+            html_to_markdown_rs::NodeType::LinkTag => Self::LinkTag,
+            html_to_markdown_rs::NodeType::Style => Self::Style,
+            html_to_markdown_rs::NodeType::Script => Self::Script,
+            html_to_markdown_rs::NodeType::Base => Self::Base,
+            html_to_markdown_rs::NodeType::Custom => Self::Custom,
+        }
+    }
+}
+
+impl From<html_to_markdown_rs::VisitResult> for VisitResult {
+    fn from(val: html_to_markdown_rs::VisitResult) -> Self {
+        match val {
+            html_to_markdown_rs::VisitResult::Continue => Self::Continue,
+            html_to_markdown_rs::VisitResult::Custom(..) => Self::Custom,
+            html_to_markdown_rs::VisitResult::Skip => Self::Skip,
+            html_to_markdown_rs::VisitResult::PreserveHtml => Self::PreserveHtml,
+            html_to_markdown_rs::VisitResult::Error(..) => Self::Error,
         }
     }
 }

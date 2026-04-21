@@ -3,6 +3,27 @@ package dev.kreuzberg.htmltomarkdown;
 
 import java.util.List;
 
+/**
+ * Comprehensive metadata extraction result from HTML document.
+ *
+ * Contains all extracted metadata types in a single structure,
+ * suitable for serialization and transmission across language boundaries.
+ *
+ * # Examples
+ *
+ * {@code }{@code }
+ * # use html_to_markdown_rs::metadata::HtmlMetadata;
+ * let metadata = HtmlMetadata {
+ *     document: Default::default(),
+ *     headers: Vec::new(),
+ *     links: Vec::new(),
+ *     images: Vec::new(),
+ *     structured_data: Vec::new(),
+ * };
+ *
+ * assert!(metadata.headers.is_empty());
+ * {@code }{@code }
+ */
 public class HtmlMetadataBuilder {
 
     private DocumentMetadata document = null;

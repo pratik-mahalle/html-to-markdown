@@ -3,6 +3,9 @@ package dev.kreuzberg.htmltomarkdown;
 
 import java.util.List;
 
+/**
+ * A structured table grid with cell-level data including spans.
+ */
 public record TableGrid(int rows, int cols, List<GridCell> cells) {
     public static TableGridBuilder builder() {
         return new TableGridBuilder();

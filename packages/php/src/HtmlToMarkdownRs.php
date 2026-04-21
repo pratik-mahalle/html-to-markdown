@@ -22,7 +22,7 @@ final class HtmlToMarkdownRs
      * use html_to_markdown_rs::{convert, ConversionOptions};
      *
      * let html = "<h1>Hello World</h1>";
-     * let result = convert(html, None).unwrap();
+     * let result = convert(html, None, None).unwrap();
      * assert!(result.content.as_deref().unwrap_or("").contains("Hello World"));
      * ```
      *

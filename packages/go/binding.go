@@ -52,9 +52,9 @@ type TextDirection string
 
 const (
     // Left-to-right text flow (default for Latin scripts)
-    TextDirectionLeftToRight TextDirection = "left_to_right"
+    TextDirectionLeftToRight TextDirection = "ltr"
     // Right-to-left text flow (Hebrew, Arabic, Urdu, etc.)
-    TextDirectionRightToLeft TextDirection = "right_to_left"
+    TextDirectionRightToLeft TextDirection = "rtl"
     // Automatic directionality detection
     TextDirectionAuto TextDirection = "auto"
 )
@@ -109,7 +109,7 @@ const (
     // HTML5 Microdata attributes (itemscope, itemtype, itemprop)
     StructuredDataTypeMicrodata StructuredDataType = "microdata"
     // RDF in Attributes (RDFa) markup
-    StructuredDataTypeRdFa StructuredDataType = "rd_fa"
+    StructuredDataTypeRdFa StructuredDataType = "rdfa"
 )
 
 
@@ -314,6 +314,202 @@ const (
     // DOM traversal was truncated because max_depth was exceeded.
     WarningKindDepthLimitExceeded WarningKind = "depth_limit_exceeded"
 )
+
+
+// Node type enumeration covering all HTML element types.
+//
+// This enum categorizes all HTML elements that the converter recognizes,
+// providing a coarse-grained classification for visitor dispatch.
+type NodeType string
+
+const (
+    // Text node (most frequent - 100+ per document)
+    NodeTypeText NodeType = "text"
+    // Generic element node
+    NodeTypeElement NodeType = "element"
+    // Heading elements (h1-h6)
+    NodeTypeHeading NodeType = "heading"
+    // Paragraph element
+    NodeTypeParagraph NodeType = "paragraph"
+    // Generic div container
+    NodeTypeDiv NodeType = "div"
+    // Blockquote element
+    NodeTypeBlockquote NodeType = "blockquote"
+    // Preformatted text block
+    NodeTypePre NodeType = "pre"
+    // Horizontal rule
+    NodeTypeHr NodeType = "hr"
+    // Ordered or unordered list (ul, ol)
+    NodeTypeList NodeType = "list"
+    // List item (li)
+    NodeTypeListItem NodeType = "list_item"
+    // Definition list (dl)
+    NodeTypeDefinitionList NodeType = "definition_list"
+    // Definition term (dt)
+    NodeTypeDefinitionTerm NodeType = "definition_term"
+    // Definition description (dd)
+    NodeTypeDefinitionDescription NodeType = "definition_description"
+    // Table element
+    NodeTypeTable NodeType = "table"
+    // Table row (tr)
+    NodeTypeTableRow NodeType = "table_row"
+    // Table cell (td, th)
+    NodeTypeTableCell NodeType = "table_cell"
+    // Table header cell (th)
+    NodeTypeTableHeader NodeType = "table_header"
+    // Table body (tbody)
+    NodeTypeTableBody NodeType = "table_body"
+    // Table head (thead)
+    NodeTypeTableHead NodeType = "table_head"
+    // Table foot (tfoot)
+    NodeTypeTableFoot NodeType = "table_foot"
+    // Anchor link (a)
+    NodeTypeLink NodeType = "link"
+    // Image (img)
+    NodeTypeImage NodeType = "image"
+    // Strong/bold (strong, b)
+    NodeTypeStrong NodeType = "strong"
+    // Emphasis/italic (em, i)
+    NodeTypeEm NodeType = "em"
+    // Inline code (code)
+    NodeTypeCode NodeType = "code"
+    // Strikethrough (s, del, strike)
+    NodeTypeStrikethrough NodeType = "strikethrough"
+    // Underline (u, ins)
+    NodeTypeUnderline NodeType = "underline"
+    // Subscript (sub)
+    NodeTypeSubscript NodeType = "subscript"
+    // Superscript (sup)
+    NodeTypeSuperscript NodeType = "superscript"
+    // Mark/highlight (mark)
+    NodeTypeMark NodeType = "mark"
+    // Small text (small)
+    NodeTypeSmall NodeType = "small"
+    // Line break (br)
+    NodeTypeBr NodeType = "br"
+    // Span element
+    NodeTypeSpan NodeType = "span"
+    // Article element
+    NodeTypeArticle NodeType = "article"
+    // Section element
+    NodeTypeSection NodeType = "section"
+    // Navigation element
+    NodeTypeNav NodeType = "nav"
+    // Aside element
+    NodeTypeAside NodeType = "aside"
+    // Header element
+    NodeTypeHeader NodeType = "header"
+    // Footer element
+    NodeTypeFooter NodeType = "footer"
+    // Main element
+    NodeTypeMain NodeType = "main"
+    // Figure element
+    NodeTypeFigure NodeType = "figure"
+    // Figure caption
+    NodeTypeFigcaption NodeType = "figcaption"
+    // Time element
+    NodeTypeTime NodeType = "time"
+    // Details element
+    NodeTypeDetails NodeType = "details"
+    // Summary element
+    NodeTypeSummary NodeType = "summary"
+    // Form element
+    NodeTypeForm NodeType = "form"
+    // Input element
+    NodeTypeInput NodeType = "input"
+    // Select element
+    NodeTypeSelect NodeType = "select"
+    // Option element
+    NodeTypeOption NodeType = "option"
+    // Button element
+    NodeTypeButton NodeType = "button"
+    // Textarea element
+    NodeTypeTextarea NodeType = "textarea"
+    // Label element
+    NodeTypeLabel NodeType = "label"
+    // Fieldset element
+    NodeTypeFieldset NodeType = "fieldset"
+    // Legend element
+    NodeTypeLegend NodeType = "legend"
+    // Audio element
+    NodeTypeAudio NodeType = "audio"
+    // Video element
+    NodeTypeVideo NodeType = "video"
+    // Picture element
+    NodeTypePicture NodeType = "picture"
+    // Source element
+    NodeTypeSource NodeType = "source"
+    // Iframe element
+    NodeTypeIframe NodeType = "iframe"
+    // SVG element
+    NodeTypeSvg NodeType = "svg"
+    // Canvas element
+    NodeTypeCanvas NodeType = "canvas"
+    // Ruby annotation
+    NodeTypeRuby NodeType = "ruby"
+    // Ruby text
+    NodeTypeRt NodeType = "rt"
+    // Ruby parenthesis
+    NodeTypeRp NodeType = "rp"
+    // Abbreviation
+    NodeTypeAbbr NodeType = "abbr"
+    // Keyboard input
+    NodeTypeKbd NodeType = "kbd"
+    // Sample output
+    NodeTypeSamp NodeType = "samp"
+    // Variable
+    NodeTypeVar NodeType = "var"
+    // Citation
+    NodeTypeCite NodeType = "cite"
+    // Quote
+    NodeTypeQ NodeType = "q"
+    // Deleted text
+    NodeTypeDel NodeType = "del"
+    // Inserted text
+    NodeTypeIns NodeType = "ins"
+    // Data element
+    NodeTypeData NodeType = "data"
+    // Meter element
+    NodeTypeMeter NodeType = "meter"
+    // Progress element
+    NodeTypeProgress NodeType = "progress"
+    // Output element
+    NodeTypeOutput NodeType = "output"
+    // Template element
+    NodeTypeTemplate NodeType = "template"
+    // Slot element
+    NodeTypeSlot NodeType = "slot"
+    // HTML root element
+    NodeTypeHtml NodeType = "html"
+    // Head element
+    NodeTypeHead NodeType = "head"
+    // Body element
+    NodeTypeBody NodeType = "body"
+    // Title element
+    NodeTypeTitle NodeType = "title"
+    // Meta element
+    NodeTypeMeta NodeType = "meta"
+    // Link element (not anchor)
+    NodeTypeLinkTag NodeType = "link_tag"
+    // Style element
+    NodeTypeStyle NodeType = "style"
+    // Script element
+    NodeTypeScript NodeType = "script"
+    // Base element
+    NodeTypeBase NodeType = "base"
+    // Custom element (web components) or unknown tag
+    NodeTypeCustom NodeType = "custom"
+)
+
+
+// Result of a visitor callback.
+//
+// Allows visitors to control the conversion flow by either proceeding
+// with default behavior, providing custom output, skipping elements,
+// preserving HTML, or signaling errors.
+// Variants: Continue, Custom, Skip, PreserveHtml, Error
+type VisitResult struct {
+}
 
 
 // Configuration for metadata extraction granularity.
@@ -1581,6 +1777,28 @@ type ProcessingWarning struct {
 }
 
 
+// Context information passed to all visitor methods.
+//
+// Provides comprehensive metadata about the current node being visited,
+// including its type, attributes, position in the DOM tree, and parent context.
+type NodeContext struct {
+    // Coarse-grained node type classification
+    NodeType NodeType `json:"node_type"`
+    // Raw HTML tag name (e.g., "div", "h1", "custom-element")
+    TagName string `json:"tag_name"`
+    // All HTML attributes as key-value pairs
+    Attributes map[string]string `json:"attributes,omitempty"`
+    // Depth in the DOM tree (0 = root)
+    Depth uint `json:"depth"`
+    // Index among siblings (0-based)
+    IndexInParent uint `json:"index_in_parent"`
+    // Parent element's tag name (None if root)
+    ParentTag *string `json:"parent_tag,omitempty"`
+    // Whether this element is treated as inline vs block
+    IsInline bool `json:"is_inline"`
+}
+
+
 // Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images,
 // and warnings.
 //
@@ -1595,7 +1813,7 @@ type ProcessingWarning struct {
 // use html_to_markdown_rs::{convert, ConversionOptions};
 //
 // let html = "<h1>Hello World</h1>";
-// let result = convert(html, None).unwrap();
+// let result = convert(html, None, None).unwrap();
 // assert!(result.content.as_deref().unwrap_or("").contains("Hello World"));
 // ```
 //
@@ -1615,7 +1833,7 @@ func Convert(html string, options *ConversionOptions) (*ConversionResult, error)
     C.free(unsafe.Pointer(tmpStrcOptions))
     defer C.htm_conversion_options_free(cOptions)
 
-    ptr := C.htm_convert(cHtml, cOptions)
+    ptr := C.htm_convert(cHtml, cOptions, nil)
     if err := lastError(); err != nil {
         if ptr != nil {
             C.htm_conversion_result_free(ptr)
@@ -1673,17 +1891,17 @@ func Convert(html string, options *ConversionOptions) (*ConversionResult, error)
 // };
 // assert!(!config.any_enabled());
 // ```
-func (r *MetadataConfig) AnyEnabled() *bool {
+func (r *MetadataConfig) AnyEnabled() (*bool, error) {
     jsonBytesRecv, err := json.Marshal(r)
     if err != nil {
-        panic(fmt.Sprintf("failed to marshal receiver: %v", err))
+        return nil, fmt.Errorf("failed to marshal receiver: %w", err)
     }
     tmpStrRecv := C.CString(string(jsonBytesRecv))
     cRecv := C.htm_metadata_config_from_json(tmpStrRecv)
     C.free(unsafe.Pointer(tmpStrRecv))
     defer C.htm_metadata_config_free(cRecv)
     ptr := C.htm_metadata_config_any_enabled (cRecv)
-    return func() *bool { v := ptr != 0; return &v }()
+    return func() *bool { v := ptr != 0; return &v }(), nil
 }
 
 
@@ -1718,10 +1936,10 @@ func (r *MetadataConfig) AnyEnabled() *bool {
 // assert!(config.extract_headers);  // Unchanged
 // assert!(config.extract_links);    // Unchanged
 // ```
-func (r *MetadataConfig) ApplyUpdate(update MetadataConfigUpdate) {
+func (r *MetadataConfig) ApplyUpdate(update MetadataConfigUpdate) error {
     jsonBytescUpdate, err := json.Marshal(update)
     if err != nil {
-        panic(fmt.Sprintf("failed to marshal: %v", err))
+        return fmt.Errorf("failed to marshal: %w", err)
     }
     tmpStrcUpdate := C.CString(string(jsonBytescUpdate))
     cUpdate := C.htm_metadata_config_update_from_json(tmpStrcUpdate)
@@ -1730,13 +1948,14 @@ func (r *MetadataConfig) ApplyUpdate(update MetadataConfigUpdate) {
 
     jsonBytesRecv, err := json.Marshal(r)
     if err != nil {
-        panic(fmt.Sprintf("failed to marshal receiver: %v", err))
+        return fmt.Errorf("failed to marshal receiver: %w", err)
     }
     tmpStrRecv := C.CString(string(jsonBytesRecv))
     cRecv := C.htm_metadata_config_from_json(tmpStrRecv)
     C.free(unsafe.Pointer(tmpStrRecv))
     defer C.htm_metadata_config_free(cRecv)
     C.htm_metadata_config_apply_update (cRecv, cUpdate)
+    return nil
 }
 
 
@@ -1768,25 +1987,25 @@ func (r *MetadataConfig) ApplyUpdate(update MetadataConfigUpdate) {
 // };
 // assert!(!invalid.is_valid());
 // ```
-func (r *HeaderMetadata) IsValid() *bool {
+func (r *HeaderMetadata) IsValid() (*bool, error) {
     jsonBytesRecv, err := json.Marshal(r)
     if err != nil {
-        panic(fmt.Sprintf("failed to marshal receiver: %v", err))
+        return nil, fmt.Errorf("failed to marshal receiver: %w", err)
     }
     tmpStrRecv := C.CString(string(jsonBytesRecv))
     cRecv := C.htm_header_metadata_from_json(tmpStrRecv)
     C.free(unsafe.Pointer(tmpStrRecv))
     defer C.htm_header_metadata_free(cRecv)
     ptr := C.htm_header_metadata_is_valid (cRecv)
-    return func() *bool { v := ptr != 0; return &v }()
+    return func() *bool { v := ptr != 0; return &v }(), nil
 }
 
 
 // Apply a partial update to these conversion options.
-func (r *ConversionOptions) ApplyUpdate(update ConversionOptionsUpdate) {
+func (r *ConversionOptions) ApplyUpdate(update ConversionOptionsUpdate) error {
     jsonBytescUpdate, err := json.Marshal(update)
     if err != nil {
-        panic(fmt.Sprintf("failed to marshal: %v", err))
+        return fmt.Errorf("failed to marshal: %w", err)
     }
     tmpStrcUpdate := C.CString(string(jsonBytescUpdate))
     cUpdate := C.htm_conversion_options_update_from_json(tmpStrcUpdate)
@@ -1795,63 +2014,64 @@ func (r *ConversionOptions) ApplyUpdate(update ConversionOptionsUpdate) {
 
     jsonBytesRecv, err := json.Marshal(r)
     if err != nil {
-        panic(fmt.Sprintf("failed to marshal receiver: %v", err))
+        return fmt.Errorf("failed to marshal receiver: %w", err)
     }
     tmpStrRecv := C.CString(string(jsonBytesRecv))
     cRecv := C.htm_conversion_options_from_json(tmpStrRecv)
     C.free(unsafe.Pointer(tmpStrRecv))
     defer C.htm_conversion_options_free(cRecv)
     C.htm_conversion_options_apply_update (cRecv, cUpdate)
+    return nil
 }
 
 
 // Set the list of HTML tag names whose content is stripped from output.
-func (r *ConversionOptionsBuilder) StripTags(tags []string) *ConversionOptionsBuilder {
+func (r *ConversionOptionsBuilder) StripTags(tags []string) (*ConversionOptionsBuilder, error) {
     jsonBytescTags, err := json.Marshal(tags)
     if err != nil {
-        panic(fmt.Sprintf("failed to marshal: %v", err))
+        return nil, fmt.Errorf("failed to marshal: %w", err)
     }
     cTags := C.CString(string(jsonBytescTags))
     defer C.free(unsafe.Pointer(cTags))
 
     ptr := C.htm_conversion_options_builder_strip_tags ((*C.HTMConversionOptionsBuilder)(unsafe.Pointer(r.ptr)), cTags)
-    return &ConversionOptionsBuilder{ptr: unsafe.Pointer(ptr)}
+    return &ConversionOptionsBuilder{ptr: unsafe.Pointer(ptr)}, nil
 }
 
 
 // Set the list of HTML tag names that are preserved verbatim in output.
-func (r *ConversionOptionsBuilder) PreserveTags(tags []string) *ConversionOptionsBuilder {
+func (r *ConversionOptionsBuilder) PreserveTags(tags []string) (*ConversionOptionsBuilder, error) {
     jsonBytescTags, err := json.Marshal(tags)
     if err != nil {
-        panic(fmt.Sprintf("failed to marshal: %v", err))
+        return nil, fmt.Errorf("failed to marshal: %w", err)
     }
     cTags := C.CString(string(jsonBytescTags))
     defer C.free(unsafe.Pointer(cTags))
 
     ptr := C.htm_conversion_options_builder_preserve_tags ((*C.HTMConversionOptionsBuilder)(unsafe.Pointer(r.ptr)), cTags)
-    return &ConversionOptionsBuilder{ptr: unsafe.Pointer(ptr)}
+    return &ConversionOptionsBuilder{ptr: unsafe.Pointer(ptr)}, nil
 }
 
 
 // Set the list of HTML tag names whose `<img>` children are kept inline.
-func (r *ConversionOptionsBuilder) KeepInlineImagesIn(tags []string) *ConversionOptionsBuilder {
+func (r *ConversionOptionsBuilder) KeepInlineImagesIn(tags []string) (*ConversionOptionsBuilder, error) {
     jsonBytescTags, err := json.Marshal(tags)
     if err != nil {
-        panic(fmt.Sprintf("failed to marshal: %v", err))
+        return nil, fmt.Errorf("failed to marshal: %w", err)
     }
     cTags := C.CString(string(jsonBytescTags))
     defer C.free(unsafe.Pointer(cTags))
 
     ptr := C.htm_conversion_options_builder_keep_inline_images_in ((*C.HTMConversionOptionsBuilder)(unsafe.Pointer(r.ptr)), cTags)
-    return &ConversionOptionsBuilder{ptr: unsafe.Pointer(ptr)}
+    return &ConversionOptionsBuilder{ptr: unsafe.Pointer(ptr)}, nil
 }
 
 
 // Set the pre-processing options applied to the HTML before conversion.
-func (r *ConversionOptionsBuilder) Preprocessing(preprocessing PreprocessingOptions) *ConversionOptionsBuilder {
+func (r *ConversionOptionsBuilder) Preprocessing(preprocessing PreprocessingOptions) (*ConversionOptionsBuilder, error) {
     jsonBytescPreprocessing, err := json.Marshal(preprocessing)
     if err != nil {
-        panic(fmt.Sprintf("failed to marshal: %v", err))
+        return nil, fmt.Errorf("failed to marshal: %w", err)
     }
     tmpStrcPreprocessing := C.CString(string(jsonBytescPreprocessing))
     cPreprocessing := C.htm_preprocessing_options_from_json(tmpStrcPreprocessing)
@@ -1859,7 +2079,7 @@ func (r *ConversionOptionsBuilder) Preprocessing(preprocessing PreprocessingOpti
     defer C.htm_preprocessing_options_free(cPreprocessing)
 
     ptr := C.htm_conversion_options_builder_preprocessing ((*C.HTMConversionOptionsBuilder)(unsafe.Pointer(r.ptr)), cPreprocessing)
-    return &ConversionOptionsBuilder{ptr: unsafe.Pointer(ptr)}
+    return &ConversionOptionsBuilder{ptr: unsafe.Pointer(ptr)}, nil
 }
 
 
@@ -1886,10 +2106,10 @@ func (r *ConversionOptionsBuilder) Build() *ConversionOptions {
 // # Arguments
 //
 // * `update` - Partial preprocessing options update
-func (r *PreprocessingOptions) ApplyUpdate(update PreprocessingOptionsUpdate) {
+func (r *PreprocessingOptions) ApplyUpdate(update PreprocessingOptionsUpdate) error {
     jsonBytescUpdate, err := json.Marshal(update)
     if err != nil {
-        panic(fmt.Sprintf("failed to marshal: %v", err))
+        return fmt.Errorf("failed to marshal: %w", err)
     }
     tmpStrcUpdate := C.CString(string(jsonBytescUpdate))
     cUpdate := C.htm_preprocessing_options_update_from_json(tmpStrcUpdate)
@@ -1898,11 +2118,12 @@ func (r *PreprocessingOptions) ApplyUpdate(update PreprocessingOptionsUpdate) {
 
     jsonBytesRecv, err := json.Marshal(r)
     if err != nil {
-        panic(fmt.Sprintf("failed to marshal receiver: %v", err))
+        return fmt.Errorf("failed to marshal receiver: %w", err)
     }
     tmpStrRecv := C.CString(string(jsonBytesRecv))
     cRecv := C.htm_preprocessing_options_from_json(tmpStrRecv)
     C.free(unsafe.Pointer(tmpStrRecv))
     defer C.htm_preprocessing_options_free(cRecv)
     C.htm_preprocessing_options_apply_update (cRecv, cUpdate)
+    return nil
 }

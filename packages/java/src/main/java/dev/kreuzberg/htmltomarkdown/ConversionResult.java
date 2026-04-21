@@ -4,12 +4,34 @@ package dev.kreuzberg.htmltomarkdown;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The primary result of HTML conversion and extraction.
+ *
+ * Contains the converted text output, optional structured document tree,
+ * metadata, extracted tables, images, and processing warnings.
+ *
+ * # Example
+ *
+ * {@code }{@code text}
+ * use html_to_markdown_rs::{convert, ConversionOptions};
+ *
+ * let result = convert("&lt;h1&gt;Hello&lt;/h1&gt;&lt;p&gt;World&lt;/p&gt;", None)?;
+ * assert!(result.content.is_some());
+ * assert!(result.warnings.is_empty());
+ * {@code }{@code }
+ */
 public record ConversionResult(
+    /** Converted text output (markdown, djot, or plain text). */
     Optional<String> content,
+    /** Structured document tree with semantic elements. */
     Optional<DocumentStructure> document,
+    /** Extracted HTML metadata (title, OG, links, images, structured data). */
     HtmlMetadata metadata,
+    /** Extracted tables with structured cell data and markdown representation. */
     List<TableData> tables,
+    /** Extracted inline images (data URIs and SVGs). */
     List<String> images,
+    /** Non-fatal processing warnings. */
     List<ProcessingWarning> warnings
 ) {
     public static ConversionResultBuilder builder() {
