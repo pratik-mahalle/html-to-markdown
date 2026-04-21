@@ -15,7 +15,7 @@ type DomContext = crate::converter::DomContext;
 ///
 /// Converts to Markdown horizontal rule (---) with appropriate blank line
 /// spacing based on context and previous siblings.
-pub(crate) fn handle(
+pub fn handle(
     node_handle: &NodeHandle,
     parser: &Parser,
     output: &mut String,

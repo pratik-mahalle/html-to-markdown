@@ -44,7 +44,7 @@ type DomContext = crate::converter::DomContext;
 /// # Note
 /// This function references helper functions from converter.rs
 /// which must be accessible (pub(crate)) for this module to work correctly.
-pub(crate) fn handle(
+pub fn handle(
     node_handle: &NodeHandle,
     parser: &Parser,
     output: &mut String,
@@ -360,7 +360,7 @@ pub(crate) fn handle(
 /// * `title` - Optional link title attribute
 /// * `raw_text` - Original unprocessed text (for default_title option)
 /// * `options` - Conversion options
-pub(crate) fn append_markdown_link(
+pub fn append_markdown_link(
     output: &mut String,
     label: &str,
     href: &str,

@@ -9,14 +9,14 @@ use std::borrow::Cow;
 use std::collections::BTreeMap;
 
 // Forward declare DomContext from parent module to avoid circular imports
-pub(crate) use crate::converter::DomContext;
+pub use crate::converter::DomContext;
 
 /// Collect all attributes from an HTML tag as a `BTreeMap<String, String>`.
 ///
 /// Boolean attributes (those with `None` as the value) are skipped; only
 /// attributes that carry an explicit value are included.
 #[cfg(feature = "visitor")]
-pub(crate) fn collect_tag_attributes(tag: &tl::HTMLTag) -> BTreeMap<String, String> {
+pub fn collect_tag_attributes(tag: &tl::HTMLTag) -> BTreeMap<String, String> {
     tag.attributes()
         .iter()
         .filter_map(|(k, v)| v.as_ref().map(|val| (k.to_string(), val.to_string())))
@@ -28,7 +28,7 @@ pub(crate) fn collect_tag_attributes(tag: &tl::HTMLTag) -> BTreeMap<String, Stri
 /// Similar to `text::chomp` but handles line breaks from `<br>` tags specially.
 /// Line breaks are extracted as suffix to be placed outside formatting.
 /// Returns (prefix, suffix, `trimmed_text`).
-pub(crate) fn chomp_inline(text: &str) -> (&str, &str, &str) {
+pub fn chomp_inline(text: &str) -> (&str, &str, &str) {
     if text.is_empty() {
         return ("", "", "");
     }
@@ -59,13 +59,13 @@ pub(crate) fn chomp_inline(text: &str) -> (&str, &str, &str) {
 
 /// Get the text content of a node and its children.
 #[allow(clippy::trivially_copy_pass_by_ref)]
-pub(crate) fn get_text_content(node_handle: &tl::NodeHandle, parser: &tl::Parser, dom_ctx: &DomContext) -> String {
+pub fn get_text_content(node_handle: &tl::NodeHandle, parser: &tl::Parser, dom_ctx: &DomContext) -> String {
     dom_ctx.text_content(*node_handle, parser)
 }
 
 /// Collect inline text for link labels, skipping block-level descendants.
 #[allow(clippy::match_wildcard_for_single_variants)]
-pub(crate) fn collect_link_label_text(
+pub fn collect_link_label_text(
     children: &[tl::NodeHandle],
     parser: &tl::Parser,
     dom_ctx: &DomContext,
@@ -118,7 +118,7 @@ pub(crate) fn collect_link_label_text(
 
 /// Normalize a link label by collapsing newlines and normalizing whitespace.
 #[allow(clippy::trivially_copy_pass_by_ref)]
-pub(crate) fn normalize_link_label(label: &str) -> String {
+pub fn normalize_link_label(label: &str) -> String {
     let mut needs_collapse = false;
     for ch in label.chars() {
         if ch == '\n' || ch == '\r' {
@@ -146,7 +146,7 @@ pub(crate) fn normalize_link_label(label: &str) -> String {
 }
 
 /// Normalize a tag name to lowercase, preserving borrowed input when possible.
-pub(crate) fn normalized_tag_name(raw: Cow<'_, str>) -> Cow<'_, str> {
+pub fn normalized_tag_name(raw: Cow<'_, str>) -> Cow<'_, str> {
     if raw.as_bytes().iter().any(u8::is_ascii_uppercase) {
         let mut owned = raw.into_owned();
         owned.make_ascii_lowercase();
@@ -157,7 +157,7 @@ pub(crate) fn normalized_tag_name(raw: Cow<'_, str>) -> Cow<'_, str> {
 }
 
 /// Check if an element is block-level (not inline).
-pub(crate) fn is_block_level_element(tag_name: &str) -> bool {
+pub fn is_block_level_element(tag_name: &str) -> bool {
     is_block_level_name(tag_name, crate::converter::main_helpers::is_inline_element(tag_name))
 }
 
@@ -191,7 +191,7 @@ pub fn floor_char_boundary(s: &str, index: usize) -> usize {
 /// Input:  "[outer [inner]]"
 /// Output: "[outer [inner]]"
 /// ```
-pub(crate) fn escape_link_label(text: &str) -> String {
+pub fn escape_link_label(text: &str) -> String {
     if text.is_empty() {
         return String::new();
     }
@@ -231,7 +231,7 @@ pub(crate) fn escape_link_label(text: &str) -> String {
 }
 
 /// Helper for block-level element detection.
-pub(crate) fn is_block_level_name(tag_name: &str, is_inline: bool) -> bool {
+pub fn is_block_level_name(tag_name: &str, is_inline: bool) -> bool {
     !is_inline
         && matches!(
             tag_name,

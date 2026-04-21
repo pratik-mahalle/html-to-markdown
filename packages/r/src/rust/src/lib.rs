@@ -2,6 +2,7 @@
 // Re-generate with: alef generate
 
 use extendr_api::prelude::*;
+use std::sync::Arc;
 
 #[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 pub struct MetadataConfig {
@@ -736,36 +737,31 @@ pub fn new_conversionoptions(
 }
 
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone)]
 pub struct ConversionOptionsBuilder {
+    inner: Arc<html_to_markdown_rs::options::ConversionOptionsBuilder>,
 }
 
 impl ConversionOptionsBuilder {
     pub fn strip_tags(&self, tags: Vec<String>) -> ConversionOptionsBuilder {
-        let _ = tags;
-        Default::default()
+        Self { inner: Arc::new((*self.inner).clone().strip_tags(tags)) }
     }
 
     pub fn preserve_tags(&self, tags: Vec<String>) -> ConversionOptionsBuilder {
-        let _ = tags;
-        Default::default()
+        Self { inner: Arc::new((*self.inner).clone().preserve_tags(tags)) }
     }
 
     pub fn keep_inline_images_in(&self, tags: Vec<String>) -> ConversionOptionsBuilder {
-        let _ = tags;
-        Default::default()
+        Self { inner: Arc::new((*self.inner).clone().keep_inline_images_in(tags)) }
     }
 
     pub fn preprocessing(&self, preprocessing: PreprocessingOptions) -> ConversionOptionsBuilder {
         let preprocessing_core: html_to_markdown_rs::PreprocessingOptions = preprocessing.into();
-    let _ = preprocessing;
-        Default::default()
+    Self { inner: Arc::new((*self.inner).clone().preprocessing(preprocessing_core)) }
     }
 
     pub fn build(&self) -> ConversionOptions {
-        let core_self = html_to_markdown_rs::options::ConversionOptionsBuilder {
-        };
-        core_self.build().into()
+        (*self.inner).clone().build().into()
     }
 }
 

@@ -115,44 +115,36 @@ pub mod visitor_hooks;
 // Import and re-export public types and functions from the main module
 pub use self::context::Context;
 pub use self::dom_context::DomContext;
-pub use self::main::convert_html;
 
 // Import the tree walker and utility functions from main and main_helpers
-pub(crate) use self::main::{convert_html_impl, walk_node};
-pub(crate) use self::main_helpers::trim_trailing_whitespace;
+pub use self::main::{convert_html_impl, walk_node};
+pub use self::main_helpers::trim_trailing_whitespace;
 
 // Re-export helper functions from utility modules (migrated from converter_legacy)
-pub(crate) use crate::converter::utility::content::{chomp_inline, get_text_content, normalized_tag_name};
+pub use crate::converter::utility::content::{chomp_inline, get_text_content, normalized_tag_name};
 #[allow(unused_imports)]
-pub(crate) use crate::converter::utility::serialization::{serialize_node, serialize_node_to_html};
+pub use crate::converter::utility::serialization::{serialize_node, serialize_node_to_html};
 
 // Helper functions migrated to utility modules
-pub(crate) use crate::converter::utility::siblings::append_inline_suffix;
+pub use crate::converter::utility::siblings::append_inline_suffix;
 
 // Caching functions migrated to utility/caching
 
 // Content functions migrated to utility/content
 
 // Heading functions migrated to block/heading
-pub(crate) use crate::converter::block::heading::find_single_heading_child;
+pub use crate::converter::block::heading::find_single_heading_child;
 
 // Link functions migrated to inline/link
 
 // Re-export dispatch functions for routing elements to handlers
-pub use block::dispatch_block_handler;
-pub use form::dispatch_form_handler;
-pub use inline::dispatch_inline_handler;
-pub use list::dispatch_list_handler;
-pub use semantic::dispatch_semantic_handler;
 // Media module doesn't have a dispatcher - it exports utility functions
 
 // Re-export utility submodules for public access to their types
 // NOTE: utility::preprocessing is deliberately not re-exported to avoid naming conflict
 // with preprocessing_helpers module. Users should access utility::preprocessing directly.
-pub use utility::{attributes, caching, content, serialization, siblings};
 
 // Re-export format renderer types
-pub use format::{DjotRenderer, FormatRenderer, MarkdownRenderer};
 
 // Block and inline handlers are internal - only dispatchers are exposed
 // Individual handlers are pub(crate) and not meant to be part of the public API

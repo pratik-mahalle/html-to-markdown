@@ -20,11 +20,10 @@ pub mod scanner;
 pub(super) mod utils;
 
 // Re-export types from parent module for submodule access
-pub use super::super::{Context, DomContext};
 
 // Re-export for use in converter.rs
-pub(crate) use builder::handle_table;
-pub(crate) use caption::handle_caption;
+pub use builder::handle_table;
+pub use caption::handle_caption;
 
 /// Dispatches table element handling to the main convert_table function.
 ///
@@ -84,7 +83,7 @@ pub fn dispatch_table_handler(
 /// * `ctx` - Conversion context (includes list state)
 /// * `dom_ctx` - DOM context for tree structure info
 /// * `depth` - Current nesting depth
-pub(crate) fn handle_table_with_context(
+pub fn handle_table_with_context(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
     output: &mut String,

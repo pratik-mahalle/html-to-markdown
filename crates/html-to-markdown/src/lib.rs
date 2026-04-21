@@ -47,28 +47,28 @@
 // Module Declarations
 // ============================================================================
 
-pub mod converter;
 pub mod error;
-#[cfg(feature = "inline-images")]
-mod inline_images;
 #[cfg(feature = "metadata")]
 pub mod metadata;
 pub mod options;
-pub mod safety;
-pub mod text;
 pub mod types;
 #[cfg(feature = "visitor")]
 pub mod visitor;
-#[cfg(feature = "visitor")]
-pub mod visitor_helpers;
-pub mod wrapper;
 
 // Internal modules (not part of public API)
 mod convert_api;
+pub(crate) mod converter;
 mod exports;
-pub mod prelude;
+#[cfg(feature = "inline-images")]
+mod inline_images;
+pub(crate) mod prelude;
 mod rcdom;
+pub(crate) mod safety;
+pub(crate) mod text;
 mod validation;
+#[cfg(feature = "visitor")]
+pub(crate) mod visitor_helpers;
+pub(crate) mod wrapper;
 
 // ============================================================================
 // Public Re-exports (from exports module)

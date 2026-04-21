@@ -21,7 +21,7 @@ metadata, extracted tables, images, and processing warnings.
 | `document` | `Option<DocumentStructure>` | `Default::default()` | Structured document tree with semantic elements. Populated when `include_document_structure` is `True` in options. |
 | `metadata` | `HtmlMetadata` | — | Extracted HTML metadata (title, OG, links, images, structured data). |
 | `tables` | `Vec<TableData>` | `vec![]` | Extracted tables with structured cell data and markdown representation. |
-| `images` | `Vec<InlineImage>` | `vec![]` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `True` in options. |
+| `images` | `Vec<String>` | `vec![]` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `True` in options. |
 | `warnings` | `Vec<ProcessingWarning>` | `vec![]` | Non-fatal processing warnings. |
 
 ---
@@ -29,54 +29,6 @@ metadata, extracted tables, images, and processing warnings.
 ### Configuration Types
 
 See [Configuration Reference](configuration.md) for detailed defaults and language-specific representations.
-
-#### TableScan
-
-Scan results for a table element.
-
-Contains metadata about table structure to determine optimal rendering:
-
-- Row counts for consistency checking
-- Presence of headers, captions, and nested tables
-- Presence of colspan/rowspan (spanning cells)
-- Link and text content counts
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `row_counts` | `Vec<usize>` | `vec![]` | Number of cells in each row |
-| `has_span` | `bool` | — | Whether any cells have colspan or rowspan attributes |
-| `has_header` | `bool` | — | Whether the table has header cells (th elements or role="head") |
-| `has_caption` | `bool` | — | Whether the table has a caption element |
-| `nested_table_count` | `usize` | — | Number of nested tables found inside this table |
-| `link_count` | `usize` | — | Count of anchor elements in the table |
-| `has_text` | `bool` | — | Whether the table contains text content (not empty) |
-
----
-
-#### DjotRenderer
-
-Renderer for Djot lightweight markup output.
-
-*Opaque type — fields are not directly accessible.*
-
----
-
-#### MarkdownRenderer
-
-Renderer for standard Markdown output.
-
-*Opaque type — fields are not directly accessible.*
-
----
-
-#### ReferenceCollector
-
-Collects link/image references during conversion and produces a reference
-definitions section at the end of the document.
-
-*Opaque type — fields are not directly accessible.*
-
----
 
 #### ConversionOptions
 
@@ -124,19 +76,7 @@ Use `ConversionOptions.builder()` to construct, or `the default constructor` for
 | `max_image_size` | `u64` | `5242880` | Maximum decoded image size in bytes (default 5MB). |
 | `capture_svg` | `bool` | `false` | Capture SVG elements as images. |
 | `infer_dimensions` | `bool` | `true` | Infer image dimensions from data. |
-
----
-
-#### InlineImageConfig
-
-Inline image configuration that specifies contexts where images remain as markdown links.
-
-This is a wrapper type that provides semantic clarity for the vector of element
-names where inline images should be preserved.
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `keep_inline_images_in` | `Vec<String>` | `vec![]` | HTML elements where images should remain as markdown links (not converted to alt text) |
+| `max_depth` | `Option<usize>` | `None` | Maximum DOM traversal depth. `None` means unlimited. When set, subtrees beyond this depth are silently truncated. |
 
 ---
 
@@ -150,14 +90,6 @@ HTML preprocessing options for document cleanup before conversion.
 | `preset` | `PreprocessingPreset` | `PreprocessingPreset::Standard` | Preprocessing preset level (Minimal, Standard, Aggressive) |
 | `remove_navigation` | `bool` | `true` | Remove navigation elements (nav, breadcrumbs, menus, sidebars) |
 | `remove_forms` | `bool` | `true` | Remove form elements (forms, inputs, buttons, etc.) |
-
----
-
-#### StructureCollector
-
-Incremental builder for `DocumentStructure` during a single DOM walk.
-
-*Opaque type — fields are not directly accessible.*
 
 ---
 
@@ -175,41 +107,7 @@ A structured table grid with cell-level data including spans.
 
 ### Metadata Types
 
-#### ImageMetadataPayload
-
-Payload type for image metadata extraction.
-
-*Opaque type — fields are not directly accessible.*
-
----
-
-#### MetadataCollector
-
-Internal metadata collector for single-pass extraction.
-
-Follows a pattern for efficient metadata extraction during tree traversal.
-Maintains state for:
-
-- Document metadata from head elements
-- Header hierarchy tracking
-- Link accumulation
-- Structured data collection
-- Language and directionality attributes
-
-## Architecture
-
-The collector is designed to be:
-
-- **Performant**: Pre-allocated collections, minimal cloning
-- **Single-pass**: Collects during main tree walk without separate passes
-- **Optional**: Zero overhead when disabled via feature flags
-- **Type-safe**: Strict separation of collection and result types
-
-*Opaque type — fields are not directly accessible.*
-
----
-
-### MetadataConfig
+#### MetadataConfig
 
 Configuration for metadata extraction granularity.
 
@@ -252,7 +150,7 @@ and browsers for document indexing and presentation.
 
 ---
 
-##### HeaderMetadata
+#### HeaderMetadata
 
 Header element metadata with hierarchy tracking.
 
@@ -269,7 +167,7 @@ and position in the document structure.
 
 ---
 
-##### LinkMetadata
+#### LinkMetadata
 
 Hyperlink metadata with categorization and attributes.
 
@@ -286,7 +184,7 @@ Represents `<a>` elements with parsed href values, text content, and link type c
 
 ---
 
-##### ImageMetadata
+#### ImageMetadata
 
 Image metadata with source and dimensions.
 
@@ -298,13 +196,13 @@ for image analysis and optimization.
 | `src` | `String` | — | Image source (URL, data URI, or SVG content identifier) |
 | `alt` | `Option<String>` | `None` | Alternative text from alt attribute (for accessibility) |
 | `title` | `Option<String>` | `None` | Title attribute (often shown as tooltip) |
-| `dimensions` | `Option<(u32, u32)>` | `None` | Image dimensions as (width, height) if available |
+| `dimensions` | `Option<String>` | `None` | Image dimensions as (width, height) if available |
 | `image_type` | `ImageType` | — | Image type classification |
 | `attributes` | `HashMap<String, String>` | — | Additional HTML attributes |
 
 ---
 
-##### HtmlMetadata
+#### HtmlMetadata
 
 Comprehensive metadata extraction result from HTML document.
 
@@ -321,9 +219,9 @@ suitable for serialization and transmission across language boundaries.
 
 ---
 
-#### Document Structure
+### Document Structure
 
-##### DocumentStructure
+#### DocumentStructure
 
 A structured document tree representing the semantic content of an HTML document.
 
@@ -336,7 +234,7 @@ Uses a flat node array with index-based parent/child references for efficient tr
 
 ---
 
-##### DocumentNode
+#### DocumentNode
 
 A single node in the document tree.
 
@@ -351,7 +249,7 @@ A single node in the document tree.
 
 ---
 
-##### GridCell
+#### GridCell
 
 A single cell in a table grid.
 
@@ -366,7 +264,7 @@ A single cell in a table grid.
 
 ---
 
-##### TableData
+#### TableData
 
 A top-level extracted table with both structured data and markdown representation.
 
@@ -377,7 +275,7 @@ A top-level extracted table with both structured data and markdown representatio
 
 ---
 
-##### NodeContext
+#### NodeContext
 
 Context information passed to all visitor methods.
 
@@ -396,58 +294,9 @@ including its type, attributes, position in the DOM tree, and parent context.
 
 ---
 
-#### Other Types
+### Other Types
 
-##### InlineCollectorHandle
-
-Handle type for inline image collector when feature is enabled.
-
-*Opaque type — fields are not directly accessible.*
-
----
-
-##### Context
-
-Conversion context that tracks state during HTML to Markdown conversion.
-
-This context is passed through the recursive tree walker and maintains information
-about the current position in the document tree, nesting levels, and enabled features.
-
-*Opaque type — fields are not directly accessible.*
-
----
-
-##### DomContext
-
-DOM context that provides efficient access to parent/child relationships and text content.
-
-This context is built once during conversion and provides O(1) access to node relationships
-via precomputed maps. It also includes an LRU cache for text content extraction.
-
-*Opaque type — fields are not directly accessible.*
-
----
-
-##### FormatRenderer
-
-Trait for format-specific rendering of inline elements.
-
-Implementations provide the syntax for emphasis, strong, strikethrough, etc.
-in their respective output formats.
-
-*Opaque type — fields are not directly accessible.*
-
----
-
-##### ReferenceCollectorHandle
-
-Shared handle for passing the collector through the conversion context.
-
-*Opaque type — fields are not directly accessible.*
-
----
-
-##### StructuredData
+#### StructuredData
 
 Structured data block (JSON-LD, Microdata, or RDFa).
 
@@ -462,7 +311,7 @@ JSON-LD blocks are collected as raw JSON strings for flexibility.
 
 ---
 
-##### ConversionOptionsBuilder
+#### ConversionOptionsBuilder
 
 Builder for `ConversionOptions`.
 
@@ -472,7 +321,7 @@ All fields start with default values. Call `.build()` to produce the final optio
 
 ---
 
-##### TextAnnotation
+#### TextAnnotation
 
 An inline text annotation with byte-range offsets.
 
@@ -486,15 +335,7 @@ Annotations describe formatting (bold, italic, etc.) and links within a node's t
 
 ---
 
-##### StructureCollectorHandle
-
-Shared mutable handle used in `crate.converter.Context`.
-
-*Opaque type — fields are not directly accessible.*
-
----
-
-##### ProcessingWarning
+#### ProcessingWarning
 
 A non-fatal warning generated during HTML processing.
 
@@ -502,49 +343,5 @@ A non-fatal warning generated during HTML processing.
 |-------|------|---------|-------------|
 | `message` | `String` | — | Human-readable warning message. |
 | `kind` | `WarningKind` | — | The category of warning. |
-
----
-
-##### VisitorHandle
-
-Type alias for a visitor handle (Rc-wrapped `RefCell` for interior mutability).
-
-This allows visitors to be passed around and shared while still being mutable.
-
-*Opaque type — fields are not directly accessible.*
-
----
-
-##### HtmlVisitor
-
-Visitor trait for HTML→Markdown conversion.
-
-Implement this trait to customize the conversion behavior for any HTML element type.
-All methods have default implementations that return `VisitResult.Continue`, allowing
-selective override of only the elements you care about.
-
-## Method Naming Convention
-
-- `visit_*_start`: Called before entering an element (pre-order traversal)
-- `visit_*_end`: Called after exiting an element (post-order traversal)
-- `visit_*`: Called for specific element types (e.g., `visit_link`, `visit_image`)
-
-## Execution Order
-
-For a typical element like `<div><p>text</p></div>`:
-
-1. `visit_element_start` for `<div>`
-2. `visit_element_start` for `<p>`
-3. `visit_text` for "text"
-4. `visit_element_end` for `<p>`
-5. `visit_element_end` for `</div>`
-
-## Performance Notes
-
-- `visit_text` is the most frequently called method (~100+ times per document)
-- Return `VisitResult.Continue` quickly for elements you don't need to customize
-- Avoid heavy computation in visitor methods; consider caching if needed
-
-*Opaque type — fields are not directly accessible.*
 
 ---

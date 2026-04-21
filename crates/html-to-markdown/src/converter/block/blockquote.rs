@@ -22,7 +22,7 @@ type DomContext = crate::converter::DomContext;
 ///
 /// Processes blockquote content, applies `> ` prefix to each line,
 /// handles optional `cite` attribution, and manages spacing.
-pub(crate) fn handle(
+pub fn handle(
     node_handle: &NodeHandle,
     parser: &Parser,
     output: &mut String,

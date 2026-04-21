@@ -15,7 +15,7 @@ use crate::text;
 ///
 /// This struct stores pre-computed information about tag elements to avoid
 /// repeated parsing during tree traversal.
-pub(crate) struct TagInfo {
+pub struct TagInfo {
     /// The normalized (lowercase) tag name.
     pub(crate) name: String,
     /// Whether this element behaves like an inline element (including script/style).

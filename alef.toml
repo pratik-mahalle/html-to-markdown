@@ -35,35 +35,24 @@ workspace_root = "."
 features = ["full", "metadata", "visitor", "serde", "inline-images"]
 
 [include]
-types = [
-  "ConversionOptions",
-  "PreprocessingOptions",
-  "MetadataConfig",
-  "HtmlMetadata",
-  "DocumentMetadata",
-  "HeaderMetadata",
-  "LinkMetadata",
-  "ImageMetadata",
-  "ConversionResult",
-  "DocumentStructure",
-  "DocumentNode",
-  "TextAnnotation",
-  "TableGrid",
-  "GridCell",
-  "ProcessingWarning",
-  "MetadataResult",
-  "HeadingInfo",
-  "LinkInfo",
-  "ImageInfo",
-  "HtmlVisitor",
-  "NodeContext",
-  "VisitResult",
-]
-functions = ["convert"]
+types = []
+functions = []
 
 [exclude]
-functions = []
-types = []
+types = [
+  "InlineImageConfig",
+  "MetadataCollector",
+  "StructureCollector",
+  "StructureCollectorHandle",
+  "VisitorHandle",
+]
+functions = [
+  "build_document_structure",
+  "conversion_options_from_json",
+  "conversion_options_update_from_json",
+  "inline_image_config_from_json",
+  "metadata_config_from_json",
+]
 methods = []
 
 [output]

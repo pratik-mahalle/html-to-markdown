@@ -19,7 +19,7 @@ type InlineCollectorHandle = std::rc::Rc<std::cell::RefCell<InlineImageCollector
 #[cfg(feature = "inline-images")]
 #[allow(clippy::items_after_statements)]
 #[allow(clippy::manual_let_else)]
-pub(crate) fn handle_inline_data_image(
+pub fn handle_inline_data_image(
     collector_ref: &InlineCollectorHandle,
     src: &str,
     alt: &str,

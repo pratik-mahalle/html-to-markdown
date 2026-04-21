@@ -10,7 +10,7 @@ use crate::converter::utility::content::normalized_tag_name;
 use crate::options::ConversionOptions;
 
 /// Check if an inline ancestor element is allowed to contain block-level elements.
-pub(crate) fn inline_ancestor_allows_block(tag_name: &str) -> bool {
+pub fn inline_ancestor_allows_block(tag_name: &str) -> bool {
     matches!(tag_name, "a" | "ins" | "del")
 }
 
@@ -18,7 +18,7 @@ pub(crate) fn inline_ancestor_allows_block(tag_name: &str) -> bool {
 ///
 /// Excludes elements inside `<pre>` or `<code>` blocks, as they have special
 /// whitespace preservation rules and should not be repaired.
-pub(crate) fn has_inline_block_misnest(dom_ctx: &DomContext, parser: &tl::Parser) -> bool {
+pub fn has_inline_block_misnest(dom_ctx: &DomContext, parser: &tl::Parser) -> bool {
     for handle in dom_ctx.node_map.iter().flatten() {
         if let Some(tl::Node::Tag(_tag)) = handle.get(parser) {
             let is_block = dom_ctx
@@ -68,7 +68,7 @@ pub(crate) fn has_inline_block_misnest(dom_ctx: &DomContext, parser: &tl::Parser
 }
 
 /// Determine if a node should be dropped during preprocessing.
-pub(crate) fn should_drop_for_preprocessing(
+pub fn should_drop_for_preprocessing(
     node_handle: &tl::NodeHandle,
     tag_name: &str,
     tag: &tl::HTMLTag,

@@ -25,7 +25,7 @@ type DomContext = crate::converter::DomContext;
 /// # Note
 /// This function references `walk_node` and helper functions from converter.rs
 /// which must be accessible (pub(crate)) for this module to work correctly.
-pub(crate) fn handle(
+pub fn handle(
     node_handle: &NodeHandle,
     parser: &Parser,
     output: &mut String,

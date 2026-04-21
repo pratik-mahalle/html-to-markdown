@@ -14,7 +14,6 @@ pub mod unordered;
 pub mod utils;
 
 // Re-export types from parent module for submodule access
-pub use super::{Context, DomContext};
 
 // Re-export utility function needed by table builder
 

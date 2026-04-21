@@ -1,8 +1,8 @@
 ---
-title: "Ruby API Reference"
+title: "R API Reference"
 ---
 
-## Ruby API Reference <span class="version-badge">v3.2.6</span>
+## R API Reference <span class="version-badge">v3.2.6</span>
 
 ### Functions
 
@@ -17,21 +17,21 @@ Returns an error if HTML parsing fails or if the input contains invalid UTF-8.
 
 **Signature:**
 
-```ruby
-def self.convert(html, options: nil, visitor: nil)
+```r
+convert(html, options = NULL, visitor = NULL)
 ```
 
 **Parameters:**
 
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
-| `html` | `String` | Yes | The HTML string to convert |
-| `options` | `ConversionOptions?` | No | Optional conversion options (defaults to `default options`) |
-| `visitor` | `String?` | No | The visitor |
+| `html` | `character` | Yes | The HTML string to convert |
+| `options` | `ConversionOptions or NULL` | No | Optional conversion options (defaults to `default options`) |
+| `visitor` | `character or NULL` | No | The visitor |
 
 **Returns:** `ConversionResult`
 
-**Errors:** Raises `Error`.
+**Errors:** Stops with error message.
 
 
 ---
@@ -46,45 +46,45 @@ Use `ConversionOptions.builder()` to construct, or `the default constructor` for
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `heading_style` | `HeadingStyle` | `:atx` | Heading style to use in Markdown output (ATX `#` or Setext underline). |
-| `list_indent_type` | `ListIndentType` | `:spaces` | How to indent nested list items (spaces or tab). |
-| `list_indent_width` | `Integer` | `2` | Number of spaces (or tabs) to use for each level of list indentation. |
-| `bullets` | `String` | `"-*+"` | Bullet character(s) to use for unordered list items (e.g. `"-"`, `"*"`). |
-| `strong_em_symbol` | `String` | `"*"` | Character used for bold/italic emphasis markers (`*` or `_`). |
-| `escape_asterisks` | `Boolean` | `false` | Escape `*` characters in plain text to avoid unintended bold/italic. |
-| `escape_underscores` | `Boolean` | `false` | Escape `_` characters in plain text to avoid unintended bold/italic. |
-| `escape_misc` | `Boolean` | `false` | Escape miscellaneous Markdown metacharacters (`[]()#` etc.) in plain text. |
-| `escape_ascii` | `Boolean` | `false` | Escape ASCII characters that have special meaning in certain Markdown dialects. |
-| `code_language` | `String` | `""` | Default language annotation for fenced code blocks that have no language hint. |
-| `autolinks` | `Boolean` | `true` | Automatically convert bare URLs into Markdown autolinks. |
-| `default_title` | `Boolean` | `false` | Emit a default title when no `<title>` tag is present. |
-| `br_in_tables` | `Boolean` | `false` | Render `<br>` elements inside table cells as literal line breaks. |
-| `highlight_style` | `HighlightStyle` | `:double_equal` | Style used for `<mark>` / highlighted text (e.g. `==text==`). |
-| `extract_metadata` | `Boolean` | `true` | Extract `<meta>` and `<head>` information into the result metadata. |
-| `whitespace_mode` | `WhitespaceMode` | `:normalized` | Controls how whitespace is normalised during conversion. |
-| `strip_newlines` | `Boolean` | `false` | Strip all newlines from the output, producing a single-line result. |
-| `wrap` | `Boolean` | `false` | Wrap long lines at `wrap_width` characters. |
-| `wrap_width` | `Integer` | `80` | Maximum line width when `wrap` is enabled (default `80`). |
-| `convert_as_inline` | `Boolean` | `false` | Treat the entire document as inline content (no block-level wrappers). |
-| `sub_symbol` | `String` | `""` | Markdown notation for subscript text (e.g. `"~"`). |
-| `sup_symbol` | `String` | `""` | Markdown notation for superscript text (e.g. `"^"`). |
-| `newline_style` | `NewlineStyle` | `:spaces` | How to encode hard line breaks (`<br>`) in Markdown. |
-| `code_block_style` | `CodeBlockStyle` | `:backticks` | Style used for fenced code blocks (backticks or tilde). |
-| `keep_inline_images_in` | `Array<String>` | `[]` | HTML tag names whose `<img>` children are kept inline instead of block. |
+| `heading_style` | `HeadingStyle` | `"atx"` | Heading style to use in Markdown output (ATX `#` or Setext underline). |
+| `list_indent_type` | `ListIndentType` | `"spaces"` | How to indent nested list items (spaces or tab). |
+| `list_indent_width` | `integer` | `2` | Number of spaces (or tabs) to use for each level of list indentation. |
+| `bullets` | `character` | `"-*+"` | Bullet character(s) to use for unordered list items (e.g. `"-"`, `"*"`). |
+| `strong_em_symbol` | `character` | `"*"` | Character used for bold/italic emphasis markers (`*` or `_`). |
+| `escape_asterisks` | `logical` | `false` | Escape `*` characters in plain text to avoid unintended bold/italic. |
+| `escape_underscores` | `logical` | `false` | Escape `_` characters in plain text to avoid unintended bold/italic. |
+| `escape_misc` | `logical` | `false` | Escape miscellaneous Markdown metacharacters (`[]()#` etc.) in plain text. |
+| `escape_ascii` | `logical` | `false` | Escape ASCII characters that have special meaning in certain Markdown dialects. |
+| `code_language` | `character` | `""` | Default language annotation for fenced code blocks that have no language hint. |
+| `autolinks` | `logical` | `true` | Automatically convert bare URLs into Markdown autolinks. |
+| `default_title` | `logical` | `false` | Emit a default title when no `<title>` tag is present. |
+| `br_in_tables` | `logical` | `false` | Render `<br>` elements inside table cells as literal line breaks. |
+| `highlight_style` | `HighlightStyle` | `"double_equal"` | Style used for `<mark>` / highlighted text (e.g. `==text==`). |
+| `extract_metadata` | `logical` | `true` | Extract `<meta>` and `<head>` information into the result metadata. |
+| `whitespace_mode` | `WhitespaceMode` | `"normalized"` | Controls how whitespace is normalised during conversion. |
+| `strip_newlines` | `logical` | `false` | Strip all newlines from the output, producing a single-line result. |
+| `wrap` | `logical` | `false` | Wrap long lines at `wrap_width` characters. |
+| `wrap_width` | `integer` | `80` | Maximum line width when `wrap` is enabled (default `80`). |
+| `convert_as_inline` | `logical` | `false` | Treat the entire document as inline content (no block-level wrappers). |
+| `sub_symbol` | `character` | `""` | Markdown notation for subscript text (e.g. `"~"`). |
+| `sup_symbol` | `character` | `""` | Markdown notation for superscript text (e.g. `"^"`). |
+| `newline_style` | `NewlineStyle` | `"spaces"` | How to encode hard line breaks (`<br>`) in Markdown. |
+| `code_block_style` | `CodeBlockStyle` | `"backticks"` | Style used for fenced code blocks (backticks or tilde). |
+| `keep_inline_images_in` | `list` | `list()` | HTML tag names whose `<img>` children are kept inline instead of block. |
 | `preprocessing` | `PreprocessingOptions` | — | Pre-processing options applied to the HTML before conversion. |
-| `encoding` | `String` | `"utf-8"` | Expected character encoding of the input HTML (default `"utf-8"`). |
-| `debug` | `Boolean` | `false` | Emit debug information during conversion. |
-| `strip_tags` | `Array<String>` | `[]` | HTML tag names whose content is stripped from the output entirely. |
-| `preserve_tags` | `Array<String>` | `[]` | HTML tag names that are preserved verbatim in the output. |
-| `skip_images` | `Boolean` | `false` | Skip conversion of `<img>` elements (omit images from output). |
-| `link_style` | `LinkStyle` | `:inline` | Link rendering style (inline or reference). |
-| `output_format` | `OutputFormat` | `:markdown` | Target output format (Markdown, plain text, etc.). |
-| `include_document_structure` | `Boolean` | `false` | Include structured document tree in result. |
-| `extract_images` | `Boolean` | `false` | Extract inline images from data URIs and SVGs. |
-| `max_image_size` | `Integer` | `5242880` | Maximum decoded image size in bytes (default 5MB). |
-| `capture_svg` | `Boolean` | `false` | Capture SVG elements as images. |
-| `infer_dimensions` | `Boolean` | `true` | Infer image dimensions from data. |
-| `max_depth` | `Integer?` | `nil` | Maximum DOM traversal depth. `None` means unlimited. When set, subtrees beyond this depth are silently truncated. |
+| `encoding` | `character` | `"utf-8"` | Expected character encoding of the input HTML (default `"utf-8"`). |
+| `debug` | `logical` | `false` | Emit debug information during conversion. |
+| `strip_tags` | `list` | `list()` | HTML tag names whose content is stripped from the output entirely. |
+| `preserve_tags` | `list` | `list()` | HTML tag names that are preserved verbatim in the output. |
+| `skip_images` | `logical` | `false` | Skip conversion of `<img>` elements (omit images from output). |
+| `link_style` | `LinkStyle` | `"inline"` | Link rendering style (inline or reference). |
+| `output_format` | `OutputFormat` | `"markdown"` | Target output format (Markdown, plain text, etc.). |
+| `include_document_structure` | `logical` | `false` | Include structured document tree in result. |
+| `extract_images` | `logical` | `false` | Extract inline images from data URIs and SVGs. |
+| `max_image_size` | `integer` | `5242880` | Maximum decoded image size in bytes (default 5MB). |
+| `capture_svg` | `logical` | `false` | Capture SVG elements as images. |
+| `infer_dimensions` | `logical` | `true` | Infer image dimensions from data. |
+| `max_depth` | `integer or NULL` | `NULL` | Maximum DOM traversal depth. `None` means unlimited. When set, subtrees beyond this depth are silently truncated. |
 
 ##### Methods
 
@@ -92,8 +92,8 @@ Use `ConversionOptions.builder()` to construct, or `the default constructor` for
 
 **Signature:**
 
-```ruby
-def self.default()
+```r
+default()
 ```
 
 ###### builder()
@@ -102,8 +102,8 @@ Create a new builder with default values.
 
 **Signature:**
 
-```ruby
-def self.builder()
+```r
+builder()
 ```
 
 ###### apply_update()
@@ -112,8 +112,8 @@ Apply a partial update to these conversion options.
 
 **Signature:**
 
-```ruby
-def apply_update(update)
+```r
+apply_update(update)
 ```
 
 ###### from_update()
@@ -122,16 +122,16 @@ Create from a partial update, applying to defaults.
 
 **Signature:**
 
-```ruby
-def self.from_update(update)
+```r
+from_update(update)
 ```
 
 ###### from()
 
 **Signature:**
 
-```ruby
-def self.from(update)
+```r
+from(update)
 ```
 
 
@@ -146,12 +146,12 @@ metadata, extracted tables, images, and processing warnings.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `content` | `String?` | `nil` | Converted text output (markdown, djot, or plain text). `None` when `output_format` is set to `OutputFormat.None`, indicating extraction-only mode. |
-| `document` | `DocumentStructure?` | `nil` | Structured document tree with semantic elements. Populated when `include_document_structure` is `True` in options. |
+| `content` | `character or NULL` | `NULL` | Converted text output (markdown, djot, or plain text). `None` when `output_format` is set to `OutputFormat.None`, indicating extraction-only mode. |
+| `document` | `DocumentStructure or NULL` | `NULL` | Structured document tree with semantic elements. Populated when `include_document_structure` is `True` in options. |
 | `metadata` | `HtmlMetadata` | — | Extracted HTML metadata (title, OG, links, images, structured data). |
-| `tables` | `Array<TableData>` | `[]` | Extracted tables with structured cell data and markdown representation. |
-| `images` | `Array<String>` | `[]` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `True` in options. |
-| `warnings` | `Array<ProcessingWarning>` | `[]` | Non-fatal processing warnings. |
+| `tables` | `list` | `list()` | Extracted tables with structured cell data and markdown representation. |
+| `images` | `list` | `list()` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `True` in options. |
+| `warnings` | `list` | `list()` | Non-fatal processing warnings. |
 
 
 ---
@@ -170,8 +170,8 @@ Set the list of HTML tag names whose content is stripped from output.
 
 **Signature:**
 
-```ruby
-def strip_tags(tags)
+```r
+strip_tags(tags)
 ```
 
 ###### preserve_tags()
@@ -180,8 +180,8 @@ Set the list of HTML tag names that are preserved verbatim in output.
 
 **Signature:**
 
-```ruby
-def preserve_tags(tags)
+```r
+preserve_tags(tags)
 ```
 
 ###### keep_inline_images_in()
@@ -190,8 +190,8 @@ Set the list of HTML tag names whose `<img>` children are kept inline.
 
 **Signature:**
 
-```ruby
-def keep_inline_images_in(tags)
+```r
+keep_inline_images_in(tags)
 ```
 
 ###### preprocessing()
@@ -200,8 +200,8 @@ Set the pre-processing options applied to the HTML before conversion.
 
 **Signature:**
 
-```ruby
-def preprocessing(preprocessing)
+```r
+preprocessing(preprocessing)
 ```
 
 ###### build()
@@ -210,8 +210,8 @@ Build the final `ConversionOptions`.
 
 **Signature:**
 
-```ruby
-def build()
+```r
+build()
 ```
 
 
@@ -226,17 +226,17 @@ and browsers for document indexing and presentation.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `title` | `String?` | `nil` | Document title from `<title>` tag |
-| `description` | `String?` | `nil` | Document description from `<meta name="description">` tag |
-| `keywords` | `Array<String>` | `[]` | Document keywords from `<meta name="keywords">` tag, split on commas |
-| `author` | `String?` | `nil` | Document author from `<meta name="author">` tag |
-| `canonical_url` | `String?` | `nil` | Canonical URL from `<link rel="canonical">` tag |
-| `base_href` | `String?` | `nil` | Base URL from `<base href="">` tag for resolving relative URLs |
-| `language` | `String?` | `nil` | Document language from `lang` attribute |
-| `text_direction` | `TextDirection?` | `nil` | Document text direction from `dir` attribute |
-| `open_graph` | `Hash{String=>String}` | `{}` | Open Graph metadata (og:* properties) for social media Keys like "title", "description", "image", "url", etc. |
-| `twitter_card` | `Hash{String=>String}` | `{}` | Twitter Card metadata (twitter:* properties) Keys like "card", "site", "creator", "title", "description", "image", etc. |
-| `meta_tags` | `Hash{String=>String}` | `{}` | Additional meta tags not covered by specific fields Keys are meta name/property attributes, values are content |
+| `title` | `character or NULL` | `NULL` | Document title from `<title>` tag |
+| `description` | `character or NULL` | `NULL` | Document description from `<meta name="description">` tag |
+| `keywords` | `list` | `list()` | Document keywords from `<meta name="keywords">` tag, split on commas |
+| `author` | `character or NULL` | `NULL` | Document author from `<meta name="author">` tag |
+| `canonical_url` | `character or NULL` | `NULL` | Canonical URL from `<link rel="canonical">` tag |
+| `base_href` | `character or NULL` | `NULL` | Base URL from `<base href="">` tag for resolving relative URLs |
+| `language` | `character or NULL` | `NULL` | Document language from `lang` attribute |
+| `text_direction` | `TextDirection or NULL` | `NULL` | Document text direction from `dir` attribute |
+| `open_graph` | `list` | `list()` | Open Graph metadata (og:* properties) for social media Keys like "title", "description", "image", "url", etc. |
+| `twitter_card` | `list` | `list()` | Twitter Card metadata (twitter:* properties) Keys like "card", "site", "creator", "title", "description", "image", etc. |
+| `meta_tags` | `list` | `list()` | Additional meta tags not covered by specific fields Keys are meta name/property attributes, values are content |
 
 
 ---
@@ -247,12 +247,12 @@ A single node in the document tree.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `id` | `String` | — | Deterministic node identifier. |
+| `id` | `character` | — | Deterministic node identifier. |
 | `content` | `NodeContent` | — | The semantic content of this node. |
-| `parent` | `Integer?` | `nil` | Index of the parent node (None for root nodes). |
-| `children` | `Array<Integer>` | — | Indices of child nodes in reading order. |
-| `annotations` | `Array<TextAnnotation>` | — | Inline formatting annotations (bold, italic, links, etc.) with byte offsets into the text. |
-| `attributes` | `Hash{String=>String}?` | `nil` | Format-specific attributes (e.g. class, id, data-* attributes). |
+| `parent` | `integer or NULL` | `NULL` | Index of the parent node (None for root nodes). |
+| `children` | `list` | — | Indices of child nodes in reading order. |
+| `annotations` | `list` | — | Inline formatting annotations (bold, italic, links, etc.) with byte offsets into the text. |
+| `attributes` | `list or NULL` | `NULL` | Format-specific attributes (e.g. class, id, data-* attributes). |
 
 
 ---
@@ -265,8 +265,8 @@ Uses a flat node array with index-based parent/child references for efficient tr
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `nodes` | `Array<DocumentNode>` | — | All nodes in document reading order. |
-| `source_format` | `String?` | `nil` | The source format (always "html" for this library). |
+| `nodes` | `list` | — | All nodes in document reading order. |
+| `source_format` | `character or NULL` | `NULL` | The source format (always "html" for this library). |
 
 
 ---
@@ -277,12 +277,12 @@ A single cell in a table grid.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `content` | `String` | — | The text content of the cell. |
-| `row` | `Integer` | — | 0-indexed row position. |
-| `col` | `Integer` | — | 0-indexed column position. |
-| `row_span` | `Integer` | — | Number of rows this cell spans (default 1). |
-| `col_span` | `Integer` | — | Number of columns this cell spans (default 1). |
-| `is_header` | `Boolean` | — | Whether this is a header cell (`<th>`). |
+| `content` | `character` | — | The text content of the cell. |
+| `row` | `integer` | — | 0-indexed row position. |
+| `col` | `integer` | — | 0-indexed column position. |
+| `row_span` | `integer` | — | Number of rows this cell spans (default 1). |
+| `col_span` | `integer` | — | Number of columns this cell spans (default 1). |
+| `is_header` | `logical` | — | Whether this is a header cell (`<th>`). |
 
 
 ---
@@ -296,11 +296,11 @@ and position in the document structure.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `level` | `Integer` | — | Header level: 1 (h1) through 6 (h6) |
-| `text` | `String` | — | Normalized text content of the header |
-| `id` | `String?` | `nil` | HTML id attribute if present |
-| `depth` | `Integer` | — | Document tree depth at the header element |
-| `html_offset` | `Integer` | — | Byte offset in original HTML document |
+| `level` | `integer` | — | Header level: 1 (h1) through 6 (h6) |
+| `text` | `character` | — | Normalized text content of the header |
+| `id` | `character or NULL` | `NULL` | HTML id attribute if present |
+| `depth` | `integer` | — | Document tree depth at the header element |
+| `html_offset` | `integer` | — | Byte offset in original HTML document |
 
 ##### Methods
 
@@ -314,8 +314,8 @@ Validate that the header level is within valid range (1-6).
 
 **Signature:**
 
-```ruby
-def is_valid()
+```r
+is_valid()
 ```
 
 
@@ -331,10 +331,10 @@ suitable for serialization and transmission across language boundaries.
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `document` | `DocumentMetadata` | — | Document-level metadata (title, description, canonical, etc.) |
-| `headers` | `Array<HeaderMetadata>` | `[]` | Extracted header elements with hierarchy |
-| `links` | `Array<LinkMetadata>` | `[]` | Extracted hyperlinks with type classification |
-| `images` | `Array<ImageMetadata>` | `[]` | Extracted images with source and dimensions |
-| `structured_data` | `Array<StructuredData>` | `[]` | Extracted structured data blocks |
+| `headers` | `list` | `list()` | Extracted header elements with hierarchy |
+| `links` | `list` | `list()` | Extracted hyperlinks with type classification |
+| `images` | `list` | `list()` | Extracted images with source and dimensions |
+| `structured_data` | `list` | `list()` | Extracted structured data blocks |
 
 
 ---
@@ -348,12 +348,12 @@ for image analysis and optimization.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `src` | `String` | — | Image source (URL, data URI, or SVG content identifier) |
-| `alt` | `String?` | `nil` | Alternative text from alt attribute (for accessibility) |
-| `title` | `String?` | `nil` | Title attribute (often shown as tooltip) |
-| `dimensions` | `String?` | `nil` | Image dimensions as (width, height) if available |
+| `src` | `character` | — | Image source (URL, data URI, or SVG content identifier) |
+| `alt` | `character or NULL` | `NULL` | Alternative text from alt attribute (for accessibility) |
+| `title` | `character or NULL` | `NULL` | Title attribute (often shown as tooltip) |
+| `dimensions` | `character or NULL` | `NULL` | Image dimensions as (width, height) if available |
 | `image_type` | `ImageType` | — | Image type classification |
-| `attributes` | `Hash{String=>String}` | — | Additional HTML attributes |
+| `attributes` | `list` | — | Additional HTML attributes |
 
 
 ---
@@ -366,12 +366,12 @@ Represents `<a>` elements with parsed href values, text content, and link type c
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `href` | `String` | — | The href URL value |
-| `text` | `String` | — | Link text content (normalized, concatenated if mixed with elements) |
-| `title` | `String?` | `nil` | Optional title attribute (often shown as tooltip) |
+| `href` | `character` | — | The href URL value |
+| `text` | `character` | — | Link text content (normalized, concatenated if mixed with elements) |
+| `title` | `character or NULL` | `NULL` | Optional title attribute (often shown as tooltip) |
 | `link_type` | `LinkType` | — | Link type classification |
-| `rel` | `Array<String>` | — | Rel attribute values (e.g., "nofollow", "stylesheet", "canonical") |
-| `attributes` | `Hash{String=>String}` | — | Additional HTML attributes |
+| `rel` | `list` | — | Rel attribute values (e.g., "nofollow", "stylesheet", "canonical") |
+| `attributes` | `list` | — | Additional HTML attributes |
 
 ##### Methods
 
@@ -385,8 +385,8 @@ Appropriate `LinkType` based on protocol and content.
 
 **Signature:**
 
-```ruby
-def self.classify_link(href)
+```r
+classify_link(href)
 ```
 
 
@@ -403,12 +403,12 @@ the HTML-to-Markdown conversion process.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `extract_document` | `Boolean` | `true` | Extract document-level metadata (title, description, author, etc.). When enabled, collects metadata from `<head>` section including: - `<title>` element content - `<meta name="description">` and other standard meta tags - Open Graph (og:*) properties for social media optimization - Twitter Card (twitter:*) properties - Language and text direction attributes - Canonical URL and base href references |
-| `extract_headers` | `Boolean` | `true` | Extract h1-h6 header elements and their hierarchy. When enabled, collects all heading elements with: - Header level (1-6) - Text content (normalized) - HTML id attribute if present - Document tree depth for hierarchy tracking - Byte offset in original HTML for positioning |
-| `extract_links` | `Boolean` | `true` | Extract anchor (a) elements as links with type classification. When enabled, collects all hyperlinks with: - href attribute value - Link text content - Title attribute (tooltip text) - Automatic link type classification (anchor, internal, external, email, phone, other) - Rel attribute values - Additional custom attributes |
-| `extract_images` | `Boolean` | `true` | Extract image elements and data URIs. When enabled, collects all image elements with: - Source URL or data URI - Alt text for accessibility - Title attribute - Dimensions (width, height) if available - Automatic image type classification (data URI, external, relative, inline SVG) - Additional custom attributes |
-| `extract_structured_data` | `Boolean` | `true` | Extract structured data (JSON-LD, Microdata, RDFa). When enabled, collects machine-readable structured data including: - JSON-LD script blocks with schema detection - Microdata attributes (itemscope, itemtype, itemprop) - RDFa markup - Extracted schema type if detectable |
-| `max_structured_data_size` | `Integer` | — | Maximum total size of structured data to collect (bytes). Prevents memory exhaustion attacks on malformed or adversarial documents containing excessively large structured data blocks. When the accumulated size of structured data exceeds this limit, further collection stops. Default: `1_000_000` bytes (1 MB) |
+| `extract_document` | `logical` | `true` | Extract document-level metadata (title, description, author, etc.). When enabled, collects metadata from `<head>` section including: - `<title>` element content - `<meta name="description">` and other standard meta tags - Open Graph (og:*) properties for social media optimization - Twitter Card (twitter:*) properties - Language and text direction attributes - Canonical URL and base href references |
+| `extract_headers` | `logical` | `true` | Extract h1-h6 header elements and their hierarchy. When enabled, collects all heading elements with: - Header level (1-6) - Text content (normalized) - HTML id attribute if present - Document tree depth for hierarchy tracking - Byte offset in original HTML for positioning |
+| `extract_links` | `logical` | `true` | Extract anchor (a) elements as links with type classification. When enabled, collects all hyperlinks with: - href attribute value - Link text content - Title attribute (tooltip text) - Automatic link type classification (anchor, internal, external, email, phone, other) - Rel attribute values - Additional custom attributes |
+| `extract_images` | `logical` | `true` | Extract image elements and data URIs. When enabled, collects all image elements with: - Source URL or data URI - Alt text for accessibility - Title attribute - Dimensions (width, height) if available - Automatic image type classification (data URI, external, relative, inline SVG) - Additional custom attributes |
+| `extract_structured_data` | `logical` | `true` | Extract structured data (JSON-LD, Microdata, RDFa). When enabled, collects machine-readable structured data including: - JSON-LD script blocks with schema detection - Microdata attributes (itemscope, itemtype, itemprop) - RDFa markup - Extracted schema type if detectable |
+| `max_structured_data_size` | `integer` | — | Maximum total size of structured data to collect (bytes). Prevents memory exhaustion attacks on malformed or adversarial documents containing excessively large structured data blocks. When the accumulated size of structured data exceeds this limit, further collection stops. Default: `1_000_000` bytes (1 MB) |
 
 ##### Methods
 
@@ -420,8 +420,8 @@ Defaults to extracting all metadata types with 1MB limit on structured data.
 
 **Signature:**
 
-```ruby
-def self.default()
+```r
+default()
 ```
 
 ###### any_enabled()
@@ -437,8 +437,8 @@ This is useful for early exit optimization when the application doesn't need met
 
 **Signature:**
 
-```ruby
-def any_enabled()
+```r
+any_enabled()
 ```
 
 ###### apply_update()
@@ -451,8 +451,8 @@ of configuration without affecting unrelated settings.
 
 **Signature:**
 
-```ruby
-def apply_update(update)
+```r
+apply_update(update)
 ```
 
 ###### from_update()
@@ -470,16 +470,16 @@ New `MetadataConfig` with specified updates applied to defaults
 
 **Signature:**
 
-```ruby
-def self.from_update(update)
+```r
+from_update(update)
 ```
 
 ###### from()
 
 **Signature:**
 
-```ruby
-def self.from(update)
+```r
+from(update)
 ```
 
 
@@ -495,12 +495,12 @@ including its type, attributes, position in the DOM tree, and parent context.
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `node_type` | `NodeType` | — | Coarse-grained node type classification |
-| `tag_name` | `String` | — | Raw HTML tag name (e.g., "div", "h1", "custom-element") |
-| `attributes` | `Hash{String=>String}` | — | All HTML attributes as key-value pairs |
-| `depth` | `Integer` | — | Depth in the DOM tree (0 = root) |
-| `index_in_parent` | `Integer` | — | Index among siblings (0-based) |
-| `parent_tag` | `String?` | `nil` | Parent element's tag name (None if root) |
-| `is_inline` | `Boolean` | — | Whether this element is treated as inline vs block |
+| `tag_name` | `character` | — | Raw HTML tag name (e.g., "div", "h1", "custom-element") |
+| `attributes` | `list` | — | All HTML attributes as key-value pairs |
+| `depth` | `integer` | — | Depth in the DOM tree (0 = root) |
+| `index_in_parent` | `integer` | — | Index among siblings (0-based) |
+| `parent_tag` | `character or NULL` | `NULL` | Parent element's tag name (None if root) |
+| `is_inline` | `logical` | — | Whether this element is treated as inline vs block |
 
 
 ---
@@ -511,10 +511,10 @@ HTML preprocessing options for document cleanup before conversion.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `enabled` | `Boolean` | `true` | Enable HTML preprocessing globally |
-| `preset` | `PreprocessingPreset` | `:standard` | Preprocessing preset level (Minimal, Standard, Aggressive) |
-| `remove_navigation` | `Boolean` | `true` | Remove navigation elements (nav, breadcrumbs, menus, sidebars) |
-| `remove_forms` | `Boolean` | `true` | Remove form elements (forms, inputs, buttons, etc.) |
+| `enabled` | `logical` | `true` | Enable HTML preprocessing globally |
+| `preset` | `PreprocessingPreset` | `"standard"` | Preprocessing preset level (Minimal, Standard, Aggressive) |
+| `remove_navigation` | `logical` | `true` | Remove navigation elements (nav, breadcrumbs, menus, sidebars) |
+| `remove_forms` | `logical` | `true` | Remove form elements (forms, inputs, buttons, etc.) |
 
 ##### Methods
 
@@ -522,8 +522,8 @@ HTML preprocessing options for document cleanup before conversion.
 
 **Signature:**
 
-```ruby
-def self.default()
+```r
+default()
 ```
 
 ###### apply_update()
@@ -535,8 +535,8 @@ Unspecified fields (None) are left unchanged.
 
 **Signature:**
 
-```ruby
-def apply_update(update)
+```r
+apply_update(update)
 ```
 
 ###### from_update()
@@ -552,16 +552,16 @@ New `PreprocessingOptions` with specified updates applied to defaults
 
 **Signature:**
 
-```ruby
-def self.from_update(update)
+```r
+from_update(update)
 ```
 
 ###### from()
 
 **Signature:**
 
-```ruby
-def self.from(update)
+```r
+from(update)
 ```
 
 
@@ -573,7 +573,7 @@ A non-fatal warning generated during HTML processing.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `message` | `String` | — | Human-readable warning message. |
+| `message` | `character` | — | Human-readable warning message. |
 | `kind` | `WarningKind` | — | The category of warning. |
 
 
@@ -589,8 +589,8 @@ JSON-LD blocks are collected as raw JSON strings for flexibility.
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `data_type` | `StructuredDataType` | — | Type of structured data (JSON-LD, Microdata, RDFa) |
-| `raw_json` | `String` | — | Raw JSON string (for JSON-LD) or serialized representation |
-| `schema_type` | `String?` | `nil` | Schema type if detectable (e.g., "Article", "Event", "Product") |
+| `raw_json` | `character` | — | Raw JSON string (for JSON-LD) or serialized representation |
+| `schema_type` | `character or NULL` | `NULL` | Schema type if detectable (e.g., "Article", "Event", "Product") |
 
 
 ---
@@ -602,7 +602,7 @@ A top-level extracted table with both structured data and markdown representatio
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `grid` | `TableGrid` | — | The structured table grid. |
-| `markdown` | `String` | — | The markdown rendering of this table. |
+| `markdown` | `character` | — | The markdown rendering of this table. |
 
 
 ---
@@ -613,9 +613,9 @@ A structured table grid with cell-level data including spans.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `rows` | `Integer` | — | Number of rows. |
-| `cols` | `Integer` | — | Number of columns. |
-| `cells` | `Array<GridCell>` | `[]` | All cells in the table (may be fewer than rows*cols due to spans). |
+| `rows` | `integer` | — | Number of rows. |
+| `cols` | `integer` | — | Number of columns. |
+| `cells` | `list` | `list()` | All cells in the table (may be fewer than rows*cols due to spans). |
 
 
 ---
@@ -628,8 +628,8 @@ Annotations describe formatting (bold, italic, etc.) and links within a node's t
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `start` | `Integer` | — | Start byte offset (inclusive) into the parent node's text. |
-| `end` | `Integer` | — | End byte offset (exclusive) into the parent node's text. |
+| `start` | `integer` | — | Start byte offset (inclusive) into the parent node's text. |
+| `end` | `integer` | — | End byte offset (exclusive) into the parent node's text. |
 | `kind` | `AnnotationKind` | — | The type of annotation. |
 
 
@@ -842,19 +842,19 @@ Uses internally tagged representation (`"node_type": "heading"`) for JSON serial
 
 | Value | Description |
 |-------|-------------|
-| `heading` | A heading element (h1-h6). — Fields: `level`: `Integer`, `text`: `String` |
-| `paragraph` | A paragraph of text. — Fields: `text`: `String` |
-| `list` | A list container (ordered or unordered). Children are `ListItem` nodes. — Fields: `ordered`: `Boolean` |
-| `list_item` | A single list item. — Fields: `text`: `String` |
+| `heading` | A heading element (h1-h6). — Fields: `level`: `integer`, `text`: `character` |
+| `paragraph` | A paragraph of text. — Fields: `text`: `character` |
+| `list` | A list container (ordered or unordered). Children are `ListItem` nodes. — Fields: `ordered`: `logical` |
+| `list_item` | A single list item. — Fields: `text`: `character` |
 | `table` | A table with structured cell data. — Fields: `grid`: `TableGrid` |
-| `image` | An image element. — Fields: `description`: `String`, `src`: `String`, `image_index`: `Integer` |
-| `code` | A code block or inline code. — Fields: `text`: `String`, `language`: `String` |
+| `image` | An image element. — Fields: `description`: `character`, `src`: `character`, `image_index`: `integer` |
+| `code` | A code block or inline code. — Fields: `text`: `character`, `language`: `character` |
 | `quote` | A block quote container. |
 | `definition_list` | A definition list container. |
-| `definition_item` | A definition list entry with term and description. — Fields: `term`: `String`, `definition`: `String` |
-| `raw_block` | A raw block preserved as-is (e.g. `<script>`, `<style>` content). — Fields: `format`: `String`, `content`: `String` |
-| `metadata_block` | A block of key-value metadata pairs (from `<head>` meta tags). — Fields: `entries`: `Array<String>` |
-| `group` | A section grouping container (auto-generated from heading hierarchy). — Fields: `label`: `String`, `heading_level`: `Integer`, `heading_text`: `String` |
+| `definition_item` | A definition list entry with term and description. — Fields: `term`: `character`, `definition`: `character` |
+| `raw_block` | A raw block preserved as-is (e.g. `<script>`, `<style>` content). — Fields: `format`: `character`, `content`: `character` |
+| `metadata_block` | A block of key-value metadata pairs (from `<head>` meta tags). — Fields: `entries`: `list` |
+| `group` | A section grouping container (auto-generated from heading hierarchy). — Fields: `label`: `character`, `heading_level`: `integer`, `heading_text`: `character` |
 
 
 ---
@@ -875,7 +875,7 @@ Uses internally tagged representation (`"annotation_type": "bold"`) for JSON ser
 | `subscript` | Subscript text. |
 | `superscript` | Superscript text. |
 | `highlight` | Highlighted / marked text. |
-| `link` | A hyperlink. — Fields: `url`: `String`, `title`: `String` |
+| `link` | A hyperlink. — Fields: `url`: `character`, `title`: `character` |
 
 
 ---
@@ -1008,10 +1008,10 @@ preserving HTML, or signaling errors.
 | Value | Description |
 |-------|-------------|
 | `continue` | Continue with default conversion behavior |
-| `custom` | Replace default output with custom markdown The visitor takes full responsibility for the markdown output of this node and its children. — Fields: `0`: `String` |
+| `custom` | Replace default output with custom markdown The visitor takes full responsibility for the markdown output of this node and its children. — Fields: `0`: `character` |
 | `skip` | Skip this element entirely (don't output anything) The element and all its children are ignored in the output. |
 | `preserve_html` | Preserve original HTML (don't convert to markdown) The element's raw HTML is included verbatim in the output. |
-| `error` | Stop conversion with an error The conversion process halts and returns this error message. — Fields: `0`: `String` |
+| `error` | Stop conversion with an error The conversion process halts and returns this error message. — Fields: `0`: `character` |
 
 
 ---
@@ -1034,3 +1034,4 @@ Errors that can occur during HTML to Markdown conversion.
 
 
 ---
+

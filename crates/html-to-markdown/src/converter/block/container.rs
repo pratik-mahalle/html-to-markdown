@@ -28,7 +28,7 @@ type DomContext = crate::converter::DomContext;
 /// * `ctx` - Current conversion context
 /// * `depth` - Current recursion depth
 /// * `dom_ctx` - DOM context for tracking relationships
-pub(crate) fn handle_structural_container(
+pub fn handle_structural_container(
     node_handle: &NodeHandle,
     parser: &Parser,
     output: &mut String,
@@ -64,7 +64,7 @@ pub(crate) fn handle_structural_container(
 /// * `ctx` - Current conversion context
 /// * `depth` - Current recursion depth
 /// * `dom_ctx` - DOM context for tracking relationships
-pub(crate) fn handle_passthrough(
+pub fn handle_passthrough(
     node_handle: &NodeHandle,
     parser: &Parser,
     output: &mut String,
@@ -101,7 +101,7 @@ pub(crate) fn handle_passthrough(
 /// * `_depth` - Current recursion depth (unused)
 /// * `_dom_ctx` - DOM context (unused)
 #[inline]
-pub(crate) fn handle_noop(
+pub fn handle_noop(
     _node_handle: &NodeHandle,
     _parser: &Parser,
     _output: &mut String,

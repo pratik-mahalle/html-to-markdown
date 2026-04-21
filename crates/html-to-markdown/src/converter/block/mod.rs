@@ -29,7 +29,6 @@ pub mod table;
 pub mod unknown;
 
 // Re-export types from parent module for submodule access
-pub use super::{Context, DomContext};
 
 // Re-export for internal use by dispatcher (crate-private)
 

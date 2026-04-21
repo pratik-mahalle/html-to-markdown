@@ -30,7 +30,7 @@ pub mod sectioning;
 pub mod summary;
 
 // Re-export types from parent module for submodule access
-pub(crate) use super::walk_node;
+pub use super::walk_node;
 pub use super::{Context, DomContext};
 
 // Re-export handler functions for direct use

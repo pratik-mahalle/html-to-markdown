@@ -25,7 +25,7 @@
 pub mod elements;
 
 // Re-export types from parent module for submodule access
-pub(crate) use super::walk_node;
+pub use super::walk_node;
 pub use super::{Context, DomContext};
 
 // Re-export handler function for direct use

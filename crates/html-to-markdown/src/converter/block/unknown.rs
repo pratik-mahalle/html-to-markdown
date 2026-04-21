@@ -32,7 +32,7 @@ type DomContext = crate::converter::DomContext;
 /// # Code Block Detection
 /// Code blocks (identified by markdown formatting) are always preserved,
 /// even if they appear "empty" according to trim().
-pub(crate) fn handle(
+pub fn handle(
     node_handle: &NodeHandle,
     parser: &Parser,
     output: &mut String,

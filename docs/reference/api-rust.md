@@ -1,8 +1,8 @@
 ---
-title: "PHP API Reference"
+title: "Rust API Reference"
 ---
 
-## PHP API Reference <span class="version-badge">v3.2.6</span>
+## Rust API Reference <span class="version-badge">v3.2.6</span>
 
 ### Functions
 
@@ -17,21 +17,21 @@ Returns an error if HTML parsing fails or if the input contains invalid UTF-8.
 
 **Signature:**
 
-```php
-public static function convert(string $html, ?ConversionOptions $options = null, ?string $visitor = null): ConversionResult
+```rust
+pub fn convert(html: &str, options: Option<ConversionOptions>, visitor: Option<String>) -> Result<ConversionResult, Error>
 ```
 
 **Parameters:**
 
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
-| `html` | `string` | Yes | The HTML string to convert |
-| `options` | `?ConversionOptions` | No | Optional conversion options (defaults to `default options`) |
-| `visitor` | `?string` | No | The visitor |
+| `html` | `String` | Yes | The HTML string to convert |
+| `options` | `Option<ConversionOptions>` | No | Optional conversion options (defaults to `default options`) |
+| `visitor` | `Option<String>` | No | The visitor |
 
 **Returns:** `ConversionResult`
 
-**Errors:** Throws `Error`.
+**Errors:** Returns `Err(Error)`.
 
 
 ---
@@ -42,49 +42,49 @@ public static function convert(string $html, ?ConversionOptions $options = null,
 
 Main conversion options for HTML to Markdown conversion.
 
-Use `ConversionOptions::builder()` to construct, or `the default constructor` for defaults.
+Use `ConversionOptions.builder()` to construct, or `the default constructor` for defaults.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `headingStyle` | `HeadingStyle` | `HeadingStyle::Atx` | Heading style to use in Markdown output (ATX `#` or Setext underline). |
-| `listIndentType` | `ListIndentType` | `ListIndentType::Spaces` | How to indent nested list items (spaces or tab). |
-| `listIndentWidth` | `int` | `2` | Number of spaces (or tabs) to use for each level of list indentation. |
-| `bullets` | `string` | `"-*+"` | Bullet character(s) to use for unordered list items (e.g. `"-"`, `"*"`). |
-| `strongEmSymbol` | `string` | `"*"` | Character used for bold/italic emphasis markers (`*` or `_`). |
-| `escapeAsterisks` | `bool` | `false` | Escape `*` characters in plain text to avoid unintended bold/italic. |
-| `escapeUnderscores` | `bool` | `false` | Escape `_` characters in plain text to avoid unintended bold/italic. |
-| `escapeMisc` | `bool` | `false` | Escape miscellaneous Markdown metacharacters (`[]()#` etc.) in plain text. |
-| `escapeAscii` | `bool` | `false` | Escape ASCII characters that have special meaning in certain Markdown dialects. |
-| `codeLanguage` | `string` | `""` | Default language annotation for fenced code blocks that have no language hint. |
+| `heading_style` | `HeadingStyle` | `HeadingStyle::Atx` | Heading style to use in Markdown output (ATX `#` or Setext underline). |
+| `list_indent_type` | `ListIndentType` | `ListIndentType::Spaces` | How to indent nested list items (spaces or tab). |
+| `list_indent_width` | `usize` | `2` | Number of spaces (or tabs) to use for each level of list indentation. |
+| `bullets` | `String` | `"-*+"` | Bullet character(s) to use for unordered list items (e.g. `"-"`, `"*"`). |
+| `strong_em_symbol` | `String` | `"*"` | Character used for bold/italic emphasis markers (`*` or `_`). |
+| `escape_asterisks` | `bool` | `false` | Escape `*` characters in plain text to avoid unintended bold/italic. |
+| `escape_underscores` | `bool` | `false` | Escape `_` characters in plain text to avoid unintended bold/italic. |
+| `escape_misc` | `bool` | `false` | Escape miscellaneous Markdown metacharacters (`[]()#` etc.) in plain text. |
+| `escape_ascii` | `bool` | `false` | Escape ASCII characters that have special meaning in certain Markdown dialects. |
+| `code_language` | `String` | `""` | Default language annotation for fenced code blocks that have no language hint. |
 | `autolinks` | `bool` | `true` | Automatically convert bare URLs into Markdown autolinks. |
-| `defaultTitle` | `bool` | `false` | Emit a default title when no `<title>` tag is present. |
-| `brInTables` | `bool` | `false` | Render `<br>` elements inside table cells as literal line breaks. |
-| `highlightStyle` | `HighlightStyle` | `HighlightStyle::DoubleEqual` | Style used for `<mark>` / highlighted text (e.g. `==text==`). |
-| `extractMetadata` | `bool` | `true` | Extract `<meta>` and `<head>` information into the result metadata. |
-| `whitespaceMode` | `WhitespaceMode` | `WhitespaceMode::Normalized` | Controls how whitespace is normalised during conversion. |
-| `stripNewlines` | `bool` | `false` | Strip all newlines from the output, producing a single-line result. |
+| `default_title` | `bool` | `false` | Emit a default title when no `<title>` tag is present. |
+| `br_in_tables` | `bool` | `false` | Render `<br>` elements inside table cells as literal line breaks. |
+| `highlight_style` | `HighlightStyle` | `HighlightStyle::DoubleEqual` | Style used for `<mark>` / highlighted text (e.g. `==text==`). |
+| `extract_metadata` | `bool` | `true` | Extract `<meta>` and `<head>` information into the result metadata. |
+| `whitespace_mode` | `WhitespaceMode` | `WhitespaceMode::Normalized` | Controls how whitespace is normalised during conversion. |
+| `strip_newlines` | `bool` | `false` | Strip all newlines from the output, producing a single-line result. |
 | `wrap` | `bool` | `false` | Wrap long lines at `wrap_width` characters. |
-| `wrapWidth` | `int` | `80` | Maximum line width when `wrap` is enabled (default `80`). |
-| `convertAsInline` | `bool` | `false` | Treat the entire document as inline content (no block-level wrappers). |
-| `subSymbol` | `string` | `""` | Markdown notation for subscript text (e.g. `"~"`). |
-| `supSymbol` | `string` | `""` | Markdown notation for superscript text (e.g. `"^"`). |
-| `newlineStyle` | `NewlineStyle` | `NewlineStyle::Spaces` | How to encode hard line breaks (`<br>`) in Markdown. |
-| `codeBlockStyle` | `CodeBlockStyle` | `CodeBlockStyle::Backticks` | Style used for fenced code blocks (backticks or tilde). |
-| `keepInlineImagesIn` | `array<string>` | `[]` | HTML tag names whose `<img>` children are kept inline instead of block. |
+| `wrap_width` | `usize` | `80` | Maximum line width when `wrap` is enabled (default `80`). |
+| `convert_as_inline` | `bool` | `false` | Treat the entire document as inline content (no block-level wrappers). |
+| `sub_symbol` | `String` | `""` | Markdown notation for subscript text (e.g. `"~"`). |
+| `sup_symbol` | `String` | `""` | Markdown notation for superscript text (e.g. `"^"`). |
+| `newline_style` | `NewlineStyle` | `NewlineStyle::Spaces` | How to encode hard line breaks (`<br>`) in Markdown. |
+| `code_block_style` | `CodeBlockStyle` | `CodeBlockStyle::Backticks` | Style used for fenced code blocks (backticks or tilde). |
+| `keep_inline_images_in` | `Vec<String>` | `vec![]` | HTML tag names whose `<img>` children are kept inline instead of block. |
 | `preprocessing` | `PreprocessingOptions` | — | Pre-processing options applied to the HTML before conversion. |
-| `encoding` | `string` | `"utf-8"` | Expected character encoding of the input HTML (default `"utf-8"`). |
+| `encoding` | `String` | `"utf-8"` | Expected character encoding of the input HTML (default `"utf-8"`). |
 | `debug` | `bool` | `false` | Emit debug information during conversion. |
-| `stripTags` | `array<string>` | `[]` | HTML tag names whose content is stripped from the output entirely. |
-| `preserveTags` | `array<string>` | `[]` | HTML tag names that are preserved verbatim in the output. |
-| `skipImages` | `bool` | `false` | Skip conversion of `<img>` elements (omit images from output). |
-| `linkStyle` | `LinkStyle` | `LinkStyle::Inline` | Link rendering style (inline or reference). |
-| `outputFormat` | `OutputFormat` | `OutputFormat::Markdown` | Target output format (Markdown, plain text, etc.). |
-| `includeDocumentStructure` | `bool` | `false` | Include structured document tree in result. |
-| `extractImages` | `bool` | `false` | Extract inline images from data URIs and SVGs. |
-| `maxImageSize` | `int` | `5242880` | Maximum decoded image size in bytes (default 5MB). |
-| `captureSvg` | `bool` | `false` | Capture SVG elements as images. |
-| `inferDimensions` | `bool` | `true` | Infer image dimensions from data. |
-| `maxDepth` | `?int` | `null` | Maximum DOM traversal depth. `None` means unlimited. When set, subtrees beyond this depth are silently truncated. |
+| `strip_tags` | `Vec<String>` | `vec![]` | HTML tag names whose content is stripped from the output entirely. |
+| `preserve_tags` | `Vec<String>` | `vec![]` | HTML tag names that are preserved verbatim in the output. |
+| `skip_images` | `bool` | `false` | Skip conversion of `<img>` elements (omit images from output). |
+| `link_style` | `LinkStyle` | `LinkStyle::Inline` | Link rendering style (inline or reference). |
+| `output_format` | `OutputFormat` | `OutputFormat::Markdown` | Target output format (Markdown, plain text, etc.). |
+| `include_document_structure` | `bool` | `false` | Include structured document tree in result. |
+| `extract_images` | `bool` | `false` | Extract inline images from data URIs and SVGs. |
+| `max_image_size` | `u64` | `5242880` | Maximum decoded image size in bytes (default 5MB). |
+| `capture_svg` | `bool` | `false` | Capture SVG elements as images. |
+| `infer_dimensions` | `bool` | `true` | Infer image dimensions from data. |
+| `max_depth` | `Option<usize>` | `None` | Maximum DOM traversal depth. `None` means unlimited. When set, subtrees beyond this depth are silently truncated. |
 
 ##### Methods
 
@@ -92,8 +92,8 @@ Use `ConversionOptions::builder()` to construct, or `the default constructor` fo
 
 **Signature:**
 
-```php
-public static function default(): ConversionOptions
+```rust
+pub fn default() -> ConversionOptions
 ```
 
 ###### builder()
@@ -102,36 +102,36 @@ Create a new builder with default values.
 
 **Signature:**
 
-```php
-public static function builder(): ConversionOptionsBuilder
+```rust
+pub fn builder() -> ConversionOptionsBuilder
 ```
 
-###### applyUpdate()
+###### apply_update()
 
 Apply a partial update to these conversion options.
 
 **Signature:**
 
-```php
-public function applyUpdate(ConversionOptionsUpdate $update): void
+```rust
+pub fn apply_update(&self, update: ConversionOptionsUpdate)
 ```
 
-###### fromUpdate()
+###### from_update()
 
 Create from a partial update, applying to defaults.
 
 **Signature:**
 
-```php
-public static function fromUpdate(ConversionOptionsUpdate $update): ConversionOptions
+```rust
+pub fn from_update(update: ConversionOptionsUpdate) -> ConversionOptions
 ```
 
 ###### from()
 
 **Signature:**
 
-```php
-public static function from(ConversionOptionsUpdate $update): ConversionOptions
+```rust
+pub fn from(update: ConversionOptionsUpdate) -> ConversionOptions
 ```
 
 
@@ -146,12 +146,12 @@ metadata, extracted tables, images, and processing warnings.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `content` | `?string` | `null` | Converted text output (markdown, djot, or plain text). `None` when `output_format` is set to `OutputFormat.None`, indicating extraction-only mode. |
-| `document` | `?DocumentStructure` | `null` | Structured document tree with semantic elements. Populated when `include_document_structure` is `True` in options. |
+| `content` | `Option<String>` | `Default::default()` | Converted text output (markdown, djot, or plain text). `None` when `output_format` is set to `OutputFormat.None`, indicating extraction-only mode. |
+| `document` | `Option<DocumentStructure>` | `Default::default()` | Structured document tree with semantic elements. Populated when `include_document_structure` is `True` in options. |
 | `metadata` | `HtmlMetadata` | — | Extracted HTML metadata (title, OG, links, images, structured data). |
-| `tables` | `array<TableData>` | `[]` | Extracted tables with structured cell data and markdown representation. |
-| `images` | `array<string>` | `[]` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `True` in options. |
-| `warnings` | `array<ProcessingWarning>` | `[]` | Non-fatal processing warnings. |
+| `tables` | `Vec<TableData>` | `vec![]` | Extracted tables with structured cell data and markdown representation. |
+| `images` | `Vec<String>` | `vec![]` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `True` in options. |
+| `warnings` | `Vec<ProcessingWarning>` | `vec![]` | Non-fatal processing warnings. |
 
 
 ---
@@ -164,34 +164,34 @@ All fields start with default values. Call `.build()` to produce the final optio
 
 ##### Methods
 
-###### stripTags()
+###### strip_tags()
 
 Set the list of HTML tag names whose content is stripped from output.
 
 **Signature:**
 
-```php
-public function stripTags(array<string> $tags): ConversionOptionsBuilder
+```rust
+pub fn strip_tags(&self, tags: Vec<String>) -> ConversionOptionsBuilder
 ```
 
-###### preserveTags()
+###### preserve_tags()
 
 Set the list of HTML tag names that are preserved verbatim in output.
 
 **Signature:**
 
-```php
-public function preserveTags(array<string> $tags): ConversionOptionsBuilder
+```rust
+pub fn preserve_tags(&self, tags: Vec<String>) -> ConversionOptionsBuilder
 ```
 
-###### keepInlineImagesIn()
+###### keep_inline_images_in()
 
 Set the list of HTML tag names whose `<img>` children are kept inline.
 
 **Signature:**
 
-```php
-public function keepInlineImagesIn(array<string> $tags): ConversionOptionsBuilder
+```rust
+pub fn keep_inline_images_in(&self, tags: Vec<String>) -> ConversionOptionsBuilder
 ```
 
 ###### preprocessing()
@@ -200,8 +200,8 @@ Set the pre-processing options applied to the HTML before conversion.
 
 **Signature:**
 
-```php
-public function preprocessing(PreprocessingOptions $preprocessing): ConversionOptionsBuilder
+```rust
+pub fn preprocessing(&self, preprocessing: PreprocessingOptions) -> ConversionOptionsBuilder
 ```
 
 ###### build()
@@ -210,8 +210,8 @@ Build the final `ConversionOptions`.
 
 **Signature:**
 
-```php
-public function build(): ConversionOptions
+```rust
+pub fn build(&self) -> ConversionOptions
 ```
 
 
@@ -226,17 +226,17 @@ and browsers for document indexing and presentation.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `title` | `?string` | `null` | Document title from `<title>` tag |
-| `description` | `?string` | `null` | Document description from `<meta name="description">` tag |
-| `keywords` | `array<string>` | `[]` | Document keywords from `<meta name="keywords">` tag, split on commas |
-| `author` | `?string` | `null` | Document author from `<meta name="author">` tag |
-| `canonicalUrl` | `?string` | `null` | Canonical URL from `<link rel="canonical">` tag |
-| `baseHref` | `?string` | `null` | Base URL from `<base href="">` tag for resolving relative URLs |
-| `language` | `?string` | `null` | Document language from `lang` attribute |
-| `textDirection` | `?TextDirection` | `null` | Document text direction from `dir` attribute |
-| `openGraph` | `array<string, string>` | `{}` | Open Graph metadata (og:* properties) for social media Keys like "title", "description", "image", "url", etc. |
-| `twitterCard` | `array<string, string>` | `{}` | Twitter Card metadata (twitter:* properties) Keys like "card", "site", "creator", "title", "description", "image", etc. |
-| `metaTags` | `array<string, string>` | `{}` | Additional meta tags not covered by specific fields Keys are meta name/property attributes, values are content |
+| `title` | `Option<String>` | `Default::default()` | Document title from `<title>` tag |
+| `description` | `Option<String>` | `Default::default()` | Document description from `<meta name="description">` tag |
+| `keywords` | `Vec<String>` | `vec![]` | Document keywords from `<meta name="keywords">` tag, split on commas |
+| `author` | `Option<String>` | `Default::default()` | Document author from `<meta name="author">` tag |
+| `canonical_url` | `Option<String>` | `Default::default()` | Canonical URL from `<link rel="canonical">` tag |
+| `base_href` | `Option<String>` | `Default::default()` | Base URL from `<base href="">` tag for resolving relative URLs |
+| `language` | `Option<String>` | `Default::default()` | Document language from `lang` attribute |
+| `text_direction` | `Option<TextDirection>` | `Default::default()` | Document text direction from `dir` attribute |
+| `open_graph` | `HashMap<String, String>` | `HashMap::new()` | Open Graph metadata (og:* properties) for social media Keys like "title", "description", "image", "url", etc. |
+| `twitter_card` | `HashMap<String, String>` | `HashMap::new()` | Twitter Card metadata (twitter:* properties) Keys like "card", "site", "creator", "title", "description", "image", etc. |
+| `meta_tags` | `HashMap<String, String>` | `HashMap::new()` | Additional meta tags not covered by specific fields Keys are meta name/property attributes, values are content |
 
 
 ---
@@ -247,12 +247,12 @@ A single node in the document tree.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `id` | `string` | — | Deterministic node identifier. |
+| `id` | `String` | — | Deterministic node identifier. |
 | `content` | `NodeContent` | — | The semantic content of this node. |
-| `parent` | `?int` | `null` | Index of the parent node (None for root nodes). |
-| `children` | `array<int>` | — | Indices of child nodes in reading order. |
-| `annotations` | `array<TextAnnotation>` | — | Inline formatting annotations (bold, italic, links, etc.) with byte offsets into the text. |
-| `attributes` | `?array<string, string>` | `null` | Format-specific attributes (e.g. class, id, data-* attributes). |
+| `parent` | `Option<u32>` | `None` | Index of the parent node (None for root nodes). |
+| `children` | `Vec<u32>` | — | Indices of child nodes in reading order. |
+| `annotations` | `Vec<TextAnnotation>` | — | Inline formatting annotations (bold, italic, links, etc.) with byte offsets into the text. |
+| `attributes` | `Option<HashMap<String, String>>` | `None` | Format-specific attributes (e.g. class, id, data-* attributes). |
 
 
 ---
@@ -265,8 +265,8 @@ Uses a flat node array with index-based parent/child references for efficient tr
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `nodes` | `array<DocumentNode>` | — | All nodes in document reading order. |
-| `sourceFormat` | `?string` | `null` | The source format (always "html" for this library). |
+| `nodes` | `Vec<DocumentNode>` | — | All nodes in document reading order. |
+| `source_format` | `Option<String>` | `None` | The source format (always "html" for this library). |
 
 
 ---
@@ -277,12 +277,12 @@ A single cell in a table grid.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `content` | `string` | — | The text content of the cell. |
-| `row` | `int` | — | 0-indexed row position. |
-| `col` | `int` | — | 0-indexed column position. |
-| `rowSpan` | `int` | — | Number of rows this cell spans (default 1). |
-| `colSpan` | `int` | — | Number of columns this cell spans (default 1). |
-| `isHeader` | `bool` | — | Whether this is a header cell (`<th>`). |
+| `content` | `String` | — | The text content of the cell. |
+| `row` | `u32` | — | 0-indexed row position. |
+| `col` | `u32` | — | 0-indexed column position. |
+| `row_span` | `u32` | — | Number of rows this cell spans (default 1). |
+| `col_span` | `u32` | — | Number of columns this cell spans (default 1). |
+| `is_header` | `bool` | — | Whether this is a header cell (`<th>`). |
 
 
 ---
@@ -296,15 +296,15 @@ and position in the document structure.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `level` | `int` | — | Header level: 1 (h1) through 6 (h6) |
-| `text` | `string` | — | Normalized text content of the header |
-| `id` | `?string` | `null` | HTML id attribute if present |
-| `depth` | `int` | — | Document tree depth at the header element |
-| `htmlOffset` | `int` | — | Byte offset in original HTML document |
+| `level` | `u8` | — | Header level: 1 (h1) through 6 (h6) |
+| `text` | `String` | — | Normalized text content of the header |
+| `id` | `Option<String>` | `None` | HTML id attribute if present |
+| `depth` | `usize` | — | Document tree depth at the header element |
+| `html_offset` | `usize` | — | Byte offset in original HTML document |
 
 ##### Methods
 
-###### isValid()
+###### is_valid()
 
 Validate that the header level is within valid range (1-6).
 
@@ -314,8 +314,8 @@ Validate that the header level is within valid range (1-6).
 
 **Signature:**
 
-```php
-public function isValid(): bool
+```rust
+pub fn is_valid(&self) -> bool
 ```
 
 
@@ -331,10 +331,10 @@ suitable for serialization and transmission across language boundaries.
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `document` | `DocumentMetadata` | — | Document-level metadata (title, description, canonical, etc.) |
-| `headers` | `array<HeaderMetadata>` | `[]` | Extracted header elements with hierarchy |
-| `links` | `array<LinkMetadata>` | `[]` | Extracted hyperlinks with type classification |
-| `images` | `array<ImageMetadata>` | `[]` | Extracted images with source and dimensions |
-| `structuredData` | `array<StructuredData>` | `[]` | Extracted structured data blocks |
+| `headers` | `Vec<HeaderMetadata>` | `vec![]` | Extracted header elements with hierarchy |
+| `links` | `Vec<LinkMetadata>` | `vec![]` | Extracted hyperlinks with type classification |
+| `images` | `Vec<ImageMetadata>` | `vec![]` | Extracted images with source and dimensions |
+| `structured_data` | `Vec<StructuredData>` | `vec![]` | Extracted structured data blocks |
 
 
 ---
@@ -348,12 +348,12 @@ for image analysis and optimization.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `src` | `string` | — | Image source (URL, data URI, or SVG content identifier) |
-| `alt` | `?string` | `null` | Alternative text from alt attribute (for accessibility) |
-| `title` | `?string` | `null` | Title attribute (often shown as tooltip) |
-| `dimensions` | `?string` | `null` | Image dimensions as (width, height) if available |
-| `imageType` | `ImageType` | — | Image type classification |
-| `attributes` | `array<string, string>` | — | Additional HTML attributes |
+| `src` | `String` | — | Image source (URL, data URI, or SVG content identifier) |
+| `alt` | `Option<String>` | `None` | Alternative text from alt attribute (for accessibility) |
+| `title` | `Option<String>` | `None` | Title attribute (often shown as tooltip) |
+| `dimensions` | `Option<String>` | `None` | Image dimensions as (width, height) if available |
+| `image_type` | `ImageType` | — | Image type classification |
+| `attributes` | `HashMap<String, String>` | — | Additional HTML attributes |
 
 
 ---
@@ -366,16 +366,16 @@ Represents `<a>` elements with parsed href values, text content, and link type c
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `href` | `string` | — | The href URL value |
-| `text` | `string` | — | Link text content (normalized, concatenated if mixed with elements) |
-| `title` | `?string` | `null` | Optional title attribute (often shown as tooltip) |
-| `linkType` | `LinkType` | — | Link type classification |
-| `rel` | `array<string>` | — | Rel attribute values (e.g., "nofollow", "stylesheet", "canonical") |
-| `attributes` | `array<string, string>` | — | Additional HTML attributes |
+| `href` | `String` | — | The href URL value |
+| `text` | `String` | — | Link text content (normalized, concatenated if mixed with elements) |
+| `title` | `Option<String>` | `None` | Optional title attribute (often shown as tooltip) |
+| `link_type` | `LinkType` | — | Link type classification |
+| `rel` | `Vec<String>` | — | Rel attribute values (e.g., "nofollow", "stylesheet", "canonical") |
+| `attributes` | `HashMap<String, String>` | — | Additional HTML attributes |
 
 ##### Methods
 
-###### classifyLink()
+###### classify_link()
 
 Classify a link based on href value.
 
@@ -385,8 +385,8 @@ Appropriate `LinkType` based on protocol and content.
 
 **Signature:**
 
-```php
-public static function classifyLink(string $href): LinkType
+```rust
+pub fn classify_link(href: String) -> LinkType
 ```
 
 
@@ -403,12 +403,12 @@ the HTML-to-Markdown conversion process.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `extractDocument` | `bool` | `true` | Extract document-level metadata (title, description, author, etc.). When enabled, collects metadata from `<head>` section including: - `<title>` element content - `<meta name="description">` and other standard meta tags - Open Graph (og:*) properties for social media optimization - Twitter Card (twitter:*) properties - Language and text direction attributes - Canonical URL and base href references |
-| `extractHeaders` | `bool` | `true` | Extract h1-h6 header elements and their hierarchy. When enabled, collects all heading elements with: - Header level (1-6) - Text content (normalized) - HTML id attribute if present - Document tree depth for hierarchy tracking - Byte offset in original HTML for positioning |
-| `extractLinks` | `bool` | `true` | Extract anchor (a) elements as links with type classification. When enabled, collects all hyperlinks with: - href attribute value - Link text content - Title attribute (tooltip text) - Automatic link type classification (anchor, internal, external, email, phone, other) - Rel attribute values - Additional custom attributes |
-| `extractImages` | `bool` | `true` | Extract image elements and data URIs. When enabled, collects all image elements with: - Source URL or data URI - Alt text for accessibility - Title attribute - Dimensions (width, height) if available - Automatic image type classification (data URI, external, relative, inline SVG) - Additional custom attributes |
-| `extractStructuredData` | `bool` | `true` | Extract structured data (JSON-LD, Microdata, RDFa). When enabled, collects machine-readable structured data including: - JSON-LD script blocks with schema detection - Microdata attributes (itemscope, itemtype, itemprop) - RDFa markup - Extracted schema type if detectable |
-| `maxStructuredDataSize` | `int` | — | Maximum total size of structured data to collect (bytes). Prevents memory exhaustion attacks on malformed or adversarial documents containing excessively large structured data blocks. When the accumulated size of structured data exceeds this limit, further collection stops. Default: `1_000_000` bytes (1 MB) |
+| `extract_document` | `bool` | `true` | Extract document-level metadata (title, description, author, etc.). When enabled, collects metadata from `<head>` section including: - `<title>` element content - `<meta name="description">` and other standard meta tags - Open Graph (og:*) properties for social media optimization - Twitter Card (twitter:*) properties - Language and text direction attributes - Canonical URL and base href references |
+| `extract_headers` | `bool` | `true` | Extract h1-h6 header elements and their hierarchy. When enabled, collects all heading elements with: - Header level (1-6) - Text content (normalized) - HTML id attribute if present - Document tree depth for hierarchy tracking - Byte offset in original HTML for positioning |
+| `extract_links` | `bool` | `true` | Extract anchor (a) elements as links with type classification. When enabled, collects all hyperlinks with: - href attribute value - Link text content - Title attribute (tooltip text) - Automatic link type classification (anchor, internal, external, email, phone, other) - Rel attribute values - Additional custom attributes |
+| `extract_images` | `bool` | `true` | Extract image elements and data URIs. When enabled, collects all image elements with: - Source URL or data URI - Alt text for accessibility - Title attribute - Dimensions (width, height) if available - Automatic image type classification (data URI, external, relative, inline SVG) - Additional custom attributes |
+| `extract_structured_data` | `bool` | `true` | Extract structured data (JSON-LD, Microdata, RDFa). When enabled, collects machine-readable structured data including: - JSON-LD script blocks with schema detection - Microdata attributes (itemscope, itemtype, itemprop) - RDFa markup - Extracted schema type if detectable |
+| `max_structured_data_size` | `usize` | — | Maximum total size of structured data to collect (bytes). Prevents memory exhaustion attacks on malformed or adversarial documents containing excessively large structured data blocks. When the accumulated size of structured data exceeds this limit, further collection stops. Default: `1_000_000` bytes (1 MB) |
 
 ##### Methods
 
@@ -420,11 +420,11 @@ Defaults to extracting all metadata types with 1MB limit on structured data.
 
 **Signature:**
 
-```php
-public static function default(): MetadataConfig
+```rust
+pub fn default() -> MetadataConfig
 ```
 
-###### anyEnabled()
+###### any_enabled()
 
 Check if any metadata extraction is enabled.
 
@@ -437,11 +437,11 @@ This is useful for early exit optimization when the application doesn't need met
 
 **Signature:**
 
-```php
-public function anyEnabled(): bool
+```rust
+pub fn any_enabled(&self) -> bool
 ```
 
-###### applyUpdate()
+###### apply_update()
 
 Apply a partial update to this metadata configuration.
 
@@ -451,11 +451,11 @@ of configuration without affecting unrelated settings.
 
 **Signature:**
 
-```php
-public function applyUpdate(MetadataConfigUpdate $update): void
+```rust
+pub fn apply_update(&self, update: MetadataConfigUpdate)
 ```
 
-###### fromUpdate()
+###### from_update()
 
 Create new metadata configuration from a partial update.
 
@@ -470,16 +470,16 @@ New `MetadataConfig` with specified updates applied to defaults
 
 **Signature:**
 
-```php
-public static function fromUpdate(MetadataConfigUpdate $update): MetadataConfig
+```rust
+pub fn from_update(update: MetadataConfigUpdate) -> MetadataConfig
 ```
 
 ###### from()
 
 **Signature:**
 
-```php
-public static function from(MetadataConfigUpdate $update): MetadataConfig
+```rust
+pub fn from(update: MetadataConfigUpdate) -> MetadataConfig
 ```
 
 
@@ -494,13 +494,13 @@ including its type, attributes, position in the DOM tree, and parent context.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `nodeType` | `NodeType` | — | Coarse-grained node type classification |
-| `tagName` | `string` | — | Raw HTML tag name (e.g., "div", "h1", "custom-element") |
-| `attributes` | `array<string, string>` | — | All HTML attributes as key-value pairs |
-| `depth` | `int` | — | Depth in the DOM tree (0 = root) |
-| `indexInParent` | `int` | — | Index among siblings (0-based) |
-| `parentTag` | `?string` | `null` | Parent element's tag name (None if root) |
-| `isInline` | `bool` | — | Whether this element is treated as inline vs block |
+| `node_type` | `NodeType` | — | Coarse-grained node type classification |
+| `tag_name` | `String` | — | Raw HTML tag name (e.g., "div", "h1", "custom-element") |
+| `attributes` | `HashMap<String, String>` | — | All HTML attributes as key-value pairs |
+| `depth` | `usize` | — | Depth in the DOM tree (0 = root) |
+| `index_in_parent` | `usize` | — | Index among siblings (0-based) |
+| `parent_tag` | `Option<String>` | `None` | Parent element's tag name (None if root) |
+| `is_inline` | `bool` | — | Whether this element is treated as inline vs block |
 
 
 ---
@@ -513,8 +513,8 @@ HTML preprocessing options for document cleanup before conversion.
 |-------|------|---------|-------------|
 | `enabled` | `bool` | `true` | Enable HTML preprocessing globally |
 | `preset` | `PreprocessingPreset` | `PreprocessingPreset::Standard` | Preprocessing preset level (Minimal, Standard, Aggressive) |
-| `removeNavigation` | `bool` | `true` | Remove navigation elements (nav, breadcrumbs, menus, sidebars) |
-| `removeForms` | `bool` | `true` | Remove form elements (forms, inputs, buttons, etc.) |
+| `remove_navigation` | `bool` | `true` | Remove navigation elements (nav, breadcrumbs, menus, sidebars) |
+| `remove_forms` | `bool` | `true` | Remove form elements (forms, inputs, buttons, etc.) |
 
 ##### Methods
 
@@ -522,11 +522,11 @@ HTML preprocessing options for document cleanup before conversion.
 
 **Signature:**
 
-```php
-public static function default(): PreprocessingOptions
+```rust
+pub fn default() -> PreprocessingOptions
 ```
 
-###### applyUpdate()
+###### apply_update()
 
 Apply a partial update to these preprocessing options.
 
@@ -535,11 +535,11 @@ Unspecified fields (None) are left unchanged.
 
 **Signature:**
 
-```php
-public function applyUpdate(PreprocessingOptionsUpdate $update): void
+```rust
+pub fn apply_update(&self, update: PreprocessingOptionsUpdate)
 ```
 
-###### fromUpdate()
+###### from_update()
 
 Create new preprocessing options from a partial update.
 
@@ -552,16 +552,16 @@ New `PreprocessingOptions` with specified updates applied to defaults
 
 **Signature:**
 
-```php
-public static function fromUpdate(PreprocessingOptionsUpdate $update): PreprocessingOptions
+```rust
+pub fn from_update(update: PreprocessingOptionsUpdate) -> PreprocessingOptions
 ```
 
 ###### from()
 
 **Signature:**
 
-```php
-public static function from(PreprocessingOptionsUpdate $update): PreprocessingOptions
+```rust
+pub fn from(update: PreprocessingOptionsUpdate) -> PreprocessingOptions
 ```
 
 
@@ -573,7 +573,7 @@ A non-fatal warning generated during HTML processing.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `message` | `string` | — | Human-readable warning message. |
+| `message` | `String` | — | Human-readable warning message. |
 | `kind` | `WarningKind` | — | The category of warning. |
 
 
@@ -588,9 +588,9 @@ JSON-LD blocks are collected as raw JSON strings for flexibility.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `dataType` | `StructuredDataType` | — | Type of structured data (JSON-LD, Microdata, RDFa) |
-| `rawJson` | `string` | — | Raw JSON string (for JSON-LD) or serialized representation |
-| `schemaType` | `?string` | `null` | Schema type if detectable (e.g., "Article", "Event", "Product") |
+| `data_type` | `StructuredDataType` | — | Type of structured data (JSON-LD, Microdata, RDFa) |
+| `raw_json` | `String` | — | Raw JSON string (for JSON-LD) or serialized representation |
+| `schema_type` | `Option<String>` | `None` | Schema type if detectable (e.g., "Article", "Event", "Product") |
 
 
 ---
@@ -602,7 +602,7 @@ A top-level extracted table with both structured data and markdown representatio
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `grid` | `TableGrid` | — | The structured table grid. |
-| `markdown` | `string` | — | The markdown rendering of this table. |
+| `markdown` | `String` | — | The markdown rendering of this table. |
 
 
 ---
@@ -613,9 +613,9 @@ A structured table grid with cell-level data including spans.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `rows` | `int` | — | Number of rows. |
-| `cols` | `int` | — | Number of columns. |
-| `cells` | `array<GridCell>` | `[]` | All cells in the table (may be fewer than rows*cols due to spans). |
+| `rows` | `u32` | — | Number of rows. |
+| `cols` | `u32` | — | Number of columns. |
+| `cells` | `Vec<GridCell>` | `vec![]` | All cells in the table (may be fewer than rows*cols due to spans). |
 
 
 ---
@@ -628,8 +628,8 @@ Annotations describe formatting (bold, italic, etc.) and links within a node's t
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `start` | `int` | — | Start byte offset (inclusive) into the parent node's text. |
-| `end` | `int` | — | End byte offset (exclusive) into the parent node's text. |
+| `start` | `u32` | — | Start byte offset (inclusive) into the parent node's text. |
+| `end` | `u32` | — | End byte offset (exclusive) into the parent node's text. |
 | `kind` | `AnnotationKind` | — | The type of annotation. |
 
 
@@ -842,19 +842,19 @@ Uses internally tagged representation (`"node_type": "heading"`) for JSON serial
 
 | Value | Description |
 |-------|-------------|
-| `Heading` | A heading element (h1-h6). — Fields: `level`: `int`, `text`: `string` |
-| `Paragraph` | A paragraph of text. — Fields: `text`: `string` |
+| `Heading` | A heading element (h1-h6). — Fields: `level`: `u8`, `text`: `String` |
+| `Paragraph` | A paragraph of text. — Fields: `text`: `String` |
 | `List` | A list container (ordered or unordered). Children are `ListItem` nodes. — Fields: `ordered`: `bool` |
-| `ListItem` | A single list item. — Fields: `text`: `string` |
+| `ListItem` | A single list item. — Fields: `text`: `String` |
 | `Table` | A table with structured cell data. — Fields: `grid`: `TableGrid` |
-| `Image` | An image element. — Fields: `description`: `string`, `src`: `string`, `imageIndex`: `int` |
-| `Code` | A code block or inline code. — Fields: `text`: `string`, `language`: `string` |
+| `Image` | An image element. — Fields: `description`: `String`, `src`: `String`, `image_index`: `u32` |
+| `Code` | A code block or inline code. — Fields: `text`: `String`, `language`: `String` |
 | `Quote` | A block quote container. |
 | `DefinitionList` | A definition list container. |
-| `DefinitionItem` | A definition list entry with term and description. — Fields: `term`: `string`, `definition`: `string` |
-| `RawBlock` | A raw block preserved as-is (e.g. `<script>`, `<style>` content). — Fields: `format`: `string`, `content`: `string` |
-| `MetadataBlock` | A block of key-value metadata pairs (from `<head>` meta tags). — Fields: `entries`: `array<string>` |
-| `Group` | A section grouping container (auto-generated from heading hierarchy). — Fields: `label`: `string`, `headingLevel`: `int`, `headingText`: `string` |
+| `DefinitionItem` | A definition list entry with term and description. — Fields: `term`: `String`, `definition`: `String` |
+| `RawBlock` | A raw block preserved as-is (e.g. `<script>`, `<style>` content). — Fields: `format`: `String`, `content`: `String` |
+| `MetadataBlock` | A block of key-value metadata pairs (from `<head>` meta tags). — Fields: `entries`: `Vec<String>` |
+| `Group` | A section grouping container (auto-generated from heading hierarchy). — Fields: `label`: `String`, `heading_level`: `u8`, `heading_text`: `String` |
 
 
 ---
@@ -875,7 +875,7 @@ Uses internally tagged representation (`"annotation_type": "bold"`) for JSON ser
 | `Subscript` | Subscript text. |
 | `Superscript` | Superscript text. |
 | `Highlight` | Highlighted / marked text. |
-| `Link` | A hyperlink. — Fields: `url`: `string`, `title`: `string` |
+| `Link` | A hyperlink. — Fields: `url`: `String`, `title`: `String` |
 
 
 ---
@@ -1008,10 +1008,10 @@ preserving HTML, or signaling errors.
 | Value | Description |
 |-------|-------------|
 | `Continue` | Continue with default conversion behavior |
-| `Custom` | Replace default output with custom markdown The visitor takes full responsibility for the markdown output of this node and its children. — Fields: `0`: `string` |
+| `Custom` | Replace default output with custom markdown The visitor takes full responsibility for the markdown output of this node and its children. — Fields: `0`: `String` |
 | `Skip` | Skip this element entirely (don't output anything) The element and all its children are ignored in the output. |
 | `PreserveHtml` | Preserve original HTML (don't convert to markdown) The element's raw HTML is included verbatim in the output. |
-| `Error` | Stop conversion with an error The conversion process halts and returns this error message. — Fields: `0`: `string` |
+| `Error` | Stop conversion with an error The conversion process halts and returns this error message. — Fields: `0`: `String` |
 
 
 ---
@@ -1034,3 +1034,4 @@ Errors that can occur during HTML to Markdown conversion.
 
 
 ---
+

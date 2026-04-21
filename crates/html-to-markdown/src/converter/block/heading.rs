@@ -27,7 +27,7 @@ type DomContext = crate::converter::DomContext;
 /// # Note
 /// This function references `walk_node` from converter.rs which must be
 /// accessible (pub(crate)) for this module to work correctly.
-pub(crate) fn handle(
+pub fn handle(
     tag_name: &str,
     node_handle: &NodeHandle,
     parser: &Parser,
@@ -149,7 +149,7 @@ pub(crate) fn handle(
 }
 
 /// Determine if a heading element should allow inline images.
-pub(crate) fn heading_allows_inline_images(
+pub fn heading_allows_inline_images(
     tag_name: &str,
     keep_inline_images_in: &std::rc::Rc<std::collections::HashSet<String>>,
 ) -> bool {
@@ -189,7 +189,7 @@ fn normalize_heading_text(text: &str) -> Cow<'_, str> {
 }
 
 /// Format heading output with appropriate markdown syntax.
-pub(crate) fn push_heading(output: &mut String, ctx: &Context, options: &ConversionOptions, level: usize, text: &str) {
+pub fn push_heading(output: &mut String, ctx: &Context, options: &ConversionOptions, level: usize, text: &str) {
     if text.is_empty() {
         return;
     }
@@ -374,7 +374,7 @@ fn visitor_heading_output(
 /// - Multiple headings are found
 /// - Non-whitespace non-heading content exists
 /// - Non-text comments exist
-pub(crate) fn find_single_heading_child(node_handle: NodeHandle, parser: &Parser) -> Option<(usize, NodeHandle)> {
+pub fn find_single_heading_child(node_handle: NodeHandle, parser: &Parser) -> Option<(usize, NodeHandle)> {
     let node = node_handle.get(parser)?;
 
     let tl::Node::Tag(tag) = node else {

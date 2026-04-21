@@ -24,7 +24,7 @@ type DomContext = crate::converter::DomContext;
 /// Processes list item content with support for task lists (checkboxes),
 /// proper indentation, and block-level element detection.
 #[allow(clippy::too_many_arguments)]
-pub(crate) fn handle_li(
+pub fn handle_li(
     node_handle: &tl::NodeHandle,
     tag: &tl::HTMLTag,
     parser: &tl::Parser,

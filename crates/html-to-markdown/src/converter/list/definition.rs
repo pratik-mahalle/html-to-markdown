@@ -15,7 +15,7 @@ type DomContext = crate::converter::DomContext;
 /// Handle definition list element (<dl>).
 ///
 /// Groups dt/dd pairs and formats them with proper Markdown separation.
-pub(crate) fn handle_dl(
+pub fn handle_dl(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
     output: &mut String,
@@ -61,7 +61,7 @@ pub(crate) fn handle_dl(
 /// Handle definition term element (<dt>).
 ///
 /// Outputs the term text followed by a newline.
-pub(crate) fn handle_dt(
+pub fn handle_dt(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
     output: &mut String,
@@ -96,7 +96,7 @@ pub(crate) fn handle_dt(
 /// Handle definition description element (<dd>).
 ///
 /// Outputs the description as a plain block.
-pub(crate) fn handle_dd(
+pub fn handle_dd(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
     output: &mut String,

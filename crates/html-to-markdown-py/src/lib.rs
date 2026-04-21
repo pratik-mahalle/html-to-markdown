@@ -11,7 +11,8 @@
     clippy::unused_unit,
     clippy::let_unit_value,
     clippy::needless_borrow,
-    clippy::too_many_arguments
+    clippy::too_many_arguments,
+    clippy::map_identity
 )]
 
 use pyo3::prelude::*;
@@ -1176,7 +1177,7 @@ impl PreprocessingOptionsUpdate {
     }
 }
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone)]
 #[pyclass(frozen, from_py_object)]
 pub struct DocumentStructure {
     /// All nodes in document reading order.
@@ -1197,7 +1198,7 @@ impl DocumentStructure {
     }
 }
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone)]
 #[pyclass(frozen, from_py_object)]
 pub struct DocumentNode {
     /// Deterministic node identifier.
@@ -1244,7 +1245,7 @@ impl DocumentNode {
     }
 }
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone)]
 #[pyclass(frozen, from_py_object)]
 pub struct TextAnnotation {
     /// Start byte offset (inclusive) into the parent node's text.
@@ -1268,7 +1269,7 @@ impl TextAnnotation {
     }
 }
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone)]
 #[pyclass(frozen, from_py_object)]
 pub struct ConversionResult {
     /// Converted text output (markdown, djot, or plain text).
@@ -1614,12 +1615,10 @@ pub struct NodeContent {
 #[pymethods]
 impl NodeContent {
     #[new]
-    fn new(py: Python<'_>, value: &Bound<'_, pyo3::types::PyDict>) -> PyResult<Self> {
-        let json_mod = py.import("json")?;
-        let json_str: String = json_mod.call_method1("dumps", (value,))?.extract()?;
-        let inner: html_to_markdown_rs::NodeContent = serde_json::from_str(&json_str)
-            .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Invalid NodeContent: {e}")))?;
-        Ok(Self { inner })
+    fn new(_py: Python<'_>, _value: &Bound<'_, pyo3::types::PyDict>) -> PyResult<Self> {
+        Err(pyo3::exceptions::PyNotImplementedError::new_err(
+            "NodeContent cannot be constructed from Python: the core type contains non-serializable variants",
+        ))
     }
 }
 
@@ -1632,27 +1631,6 @@ impl From<NodeContent> for html_to_markdown_rs::NodeContent {
 impl From<html_to_markdown_rs::NodeContent> for NodeContent {
     fn from(val: html_to_markdown_rs::NodeContent) -> Self {
         Self { inner: val }
-    }
-}
-
-impl serde::Serialize for NodeContent {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        self.inner.serialize(serializer)
-    }
-}
-
-impl Default for NodeContent {
-    fn default() -> Self {
-        Self {
-            inner: Default::default(),
-        }
-    }
-}
-
-impl<'de> serde::Deserialize<'de> for NodeContent {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        let inner = html_to_markdown_rs::NodeContent::deserialize(deserializer)?;
-        Ok(Self { inner })
     }
 }
 
@@ -3572,18 +3550,18 @@ pyo3::create_exception!(_html_to_markdown, InvalidInputError, pyo3::exceptions::
 pyo3::create_exception!(_html_to_markdown, OtherError, pyo3::exceptions::PyException);
 pyo3::create_exception!(_html_to_markdown, ConversionError, pyo3::exceptions::PyException);
 
-/// Convert a `html_to_markdown_rs::error::ConversionError` error to a Python exception.
-fn conversion_error_to_py_err(e: html_to_markdown_rs::error::ConversionError) -> pyo3::PyErr {
+/// Convert a `html_to_markdown_rs::ConversionError` error to a Python exception.
+fn conversion_error_to_py_err(e: html_to_markdown_rs::ConversionError) -> pyo3::PyErr {
     let msg = e.to_string();
     #[allow(unreachable_patterns)]
     match &e {
-        html_to_markdown_rs::error::ConversionError::ParseError(..) => ParseError::new_err(msg),
-        html_to_markdown_rs::error::ConversionError::SanitizationError(..) => SanitizationError::new_err(msg),
-        html_to_markdown_rs::error::ConversionError::ConfigError(..) => ConfigError::new_err(msg),
-        html_to_markdown_rs::error::ConversionError::IoError(..) => IoError::new_err(msg),
-        html_to_markdown_rs::error::ConversionError::Panic(..) => PanicError::new_err(msg),
-        html_to_markdown_rs::error::ConversionError::InvalidInput(..) => InvalidInputError::new_err(msg),
-        html_to_markdown_rs::error::ConversionError::Other(..) => OtherError::new_err(msg),
+        html_to_markdown_rs::ConversionError::ParseError(..) => ParseError::new_err(msg),
+        html_to_markdown_rs::ConversionError::SanitizationError(..) => SanitizationError::new_err(msg),
+        html_to_markdown_rs::ConversionError::ConfigError(..) => ConfigError::new_err(msg),
+        html_to_markdown_rs::ConversionError::IoError(..) => IoError::new_err(msg),
+        html_to_markdown_rs::ConversionError::Panic(..) => PanicError::new_err(msg),
+        html_to_markdown_rs::ConversionError::InvalidInput(..) => InvalidInputError::new_err(msg),
+        html_to_markdown_rs::ConversionError::Other(..) => OtherError::new_err(msg),
         _ => ConversionError::new_err(msg),
     }
 }

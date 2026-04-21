@@ -19,7 +19,7 @@ type Context = crate::converter::Context;
 type DomContext = crate::converter::DomContext;
 
 /// Handle preformatted code blocks (pre element).
-pub(crate) fn handle_pre(
+pub fn handle_pre(
     node_handle: &NodeHandle,
     parser: &Parser,
     output: &mut String,

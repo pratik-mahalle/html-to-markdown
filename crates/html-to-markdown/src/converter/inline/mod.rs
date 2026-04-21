@@ -31,7 +31,6 @@ pub mod ruby;
 pub mod semantic;
 
 // Re-export types from parent module for submodule access
-pub use super::{Context, DomContext};
 
 // Re-export handler functions for internal use by dispatcher (crate-private)
 // pub(crate) use ruby::handle as handle_ruby;

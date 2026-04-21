@@ -15,7 +15,7 @@ type DomContext = crate::converter::DomContext;
 ///
 /// Converts to appropriate Markdown line break syntax based on the configured
 /// newline style and current context (e.g., in headings).
-pub(crate) fn handle(
+pub fn handle(
     _node_handle: &NodeHandle,
     _parser: &Parser,
     output: &mut String,

@@ -6,7 +6,7 @@ use crate::converter::DomContext;
 use crate::converter::utility::content::normalized_tag_name;
 
 /// Check if a tag has main content semantics based on role or class.
-pub(crate) fn tag_has_main_semantics(tag: &tl::HTMLTag) -> bool {
+pub fn tag_has_main_semantics(tag: &tl::HTMLTag) -> bool {
     if let Some(Some(role)) = tag.attributes().get("role") {
         let lowered = role.as_utf8_str().to_ascii_lowercase();
         if matches!(lowered.as_str(), "main" | "article" | "document" | "region") {
@@ -38,7 +38,7 @@ pub(crate) fn tag_has_main_semantics(tag: &tl::HTMLTag) -> bool {
 }
 
 /// Check if an element has navigation-related hints in its attributes.
-pub(crate) fn element_has_navigation_hint(tag: &tl::HTMLTag) -> bool {
+pub fn element_has_navigation_hint(tag: &tl::HTMLTag) -> bool {
     if attribute_matches_any(tag, "role", &["navigation", "menubar", "tablist", "toolbar"]) {
         return true;
     }
@@ -88,7 +88,7 @@ pub(crate) fn element_has_navigation_hint(tag: &tl::HTMLTag) -> bool {
 }
 
 /// Check if an attribute value matches any of the given keywords (space or custom-separator aware).
-pub(crate) fn attribute_matches_any(tag: &tl::HTMLTag, attr: &str, keywords: &[&str]) -> bool {
+pub fn attribute_matches_any(tag: &tl::HTMLTag, attr: &str, keywords: &[&str]) -> bool {
     let Some(attr_value) = tag.attributes().get(attr) else {
         return false;
     };
@@ -113,7 +113,7 @@ pub(crate) fn attribute_matches_any(tag: &tl::HTMLTag, attr: &str, keywords: &[&
 
 /// Check if an attribute contains any of the given keywords (substring match).
 #[allow(clippy::trivially_copy_pass_by_ref)]
-pub(crate) fn attribute_contains_any(tag: &tl::HTMLTag, attr: &str, keywords: &[&str]) -> bool {
+pub fn attribute_contains_any(tag: &tl::HTMLTag, attr: &str, keywords: &[&str]) -> bool {
     let Some(attr_value) = tag.attributes().get(attr) else {
         return false;
     };
@@ -126,11 +126,7 @@ pub(crate) fn attribute_contains_any(tag: &tl::HTMLTag, attr: &str, keywords: &[
 
 /// Check if a node has a semantic content ancestor (main, article, section).
 #[allow(clippy::trivially_copy_pass_by_ref)]
-pub(crate) fn has_semantic_content_ancestor(
-    node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
-    dom_ctx: &DomContext,
-) -> bool {
+pub fn has_semantic_content_ancestor(node_handle: &tl::NodeHandle, parser: &tl::Parser, dom_ctx: &DomContext) -> bool {
     let mut current_id = node_handle.get_inner();
     while let Some(parent_id) = dom_ctx.parent_of(current_id) {
         if let Some(parent_info) = dom_ctx.tag_info(parent_id, parser) {

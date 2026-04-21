@@ -7,7 +7,7 @@ use crate::converter::DomContext;
 
 /// Get the tag name of the next sibling element.
 #[allow(clippy::trivially_copy_pass_by_ref)]
-pub(crate) fn get_next_sibling_tag<'a>(
+pub fn get_next_sibling_tag<'a>(
     node_handle: &tl::NodeHandle,
     parser: &'a tl::Parser,
     dom_ctx: &'a DomContext,
@@ -17,7 +17,7 @@ pub(crate) fn get_next_sibling_tag<'a>(
 
 /// Get the tag name of the previous sibling element.
 #[allow(clippy::trivially_copy_pass_by_ref)]
-pub(crate) fn get_previous_sibling_tag<'a>(
+pub fn get_previous_sibling_tag<'a>(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
     dom_ctx: &'a DomContext,
@@ -53,17 +53,13 @@ pub(crate) fn get_previous_sibling_tag<'a>(
 
 /// Check if the previous sibling is an inline tag.
 #[allow(clippy::trivially_copy_pass_by_ref)]
-pub(crate) fn previous_sibling_is_inline_tag(
-    node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
-    dom_ctx: &DomContext,
-) -> bool {
+pub fn previous_sibling_is_inline_tag(node_handle: &tl::NodeHandle, parser: &tl::Parser, dom_ctx: &DomContext) -> bool {
     dom_ctx.previous_inline_like(*node_handle, parser)
 }
 
 /// Check if the next sibling is whitespace-only text.
 #[allow(clippy::trivially_copy_pass_by_ref)]
-pub(crate) fn next_sibling_is_whitespace_text(
+pub fn next_sibling_is_whitespace_text(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
     dom_ctx: &DomContext,
@@ -73,11 +69,7 @@ pub(crate) fn next_sibling_is_whitespace_text(
 
 /// Check if the next sibling is an inline tag.
 #[allow(clippy::trivially_copy_pass_by_ref)]
-pub(crate) fn next_sibling_is_inline_tag(
-    node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
-    dom_ctx: &DomContext,
-) -> bool {
+pub fn next_sibling_is_inline_tag(node_handle: &tl::NodeHandle, parser: &tl::Parser, dom_ctx: &DomContext) -> bool {
     dom_ctx.next_inline_like(*node_handle, parser)
 }
 
@@ -85,7 +77,7 @@ pub(crate) fn next_sibling_is_inline_tag(
 ///
 /// Avoids adding spaces before siblings that are already whitespace.
 #[allow(clippy::trivially_copy_pass_by_ref)]
-pub(crate) fn append_inline_suffix(
+pub fn append_inline_suffix(
     output: &mut String,
     suffix: &str,
     has_core_content: bool,

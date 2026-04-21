@@ -49,7 +49,7 @@ pub fn convert_html(html: &str, options: &ConversionOptions) -> Result<String> {
     allow(unused_variables)
 )]
 #[allow(clippy::too_many_lines)]
-pub(crate) fn convert_html_impl(
+pub fn convert_html_impl(
     html: &str,
     options: &ConversionOptions,
     inline_collector: Option<InlineCollectorHandle>,
@@ -290,7 +290,7 @@ pub(crate) fn convert_html_impl(
 #[allow(clippy::only_used_in_recursion)]
 #[allow(clippy::trivially_copy_pass_by_ref)]
 #[allow(clippy::cast_possible_truncation)]
-pub(crate) fn walk_node(
+pub fn walk_node(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
     output: &mut String,

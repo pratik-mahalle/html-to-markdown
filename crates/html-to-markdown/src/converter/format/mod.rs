@@ -6,9 +6,6 @@
 mod djot;
 mod markdown;
 
-pub use djot::DjotRenderer;
-pub use markdown::MarkdownRenderer;
-
 /// Trait for format-specific rendering of inline elements.
 ///
 /// Implementations provide the syntax for emphasis, strong, strikethrough, etc.

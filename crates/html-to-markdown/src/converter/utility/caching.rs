@@ -10,7 +10,7 @@ use std::num::NonZeroUsize;
 ///
 /// Pre-computes parent-child relationships, sibling indices, and caches
 /// tag information for efficient DOM navigation during conversion.
-pub(crate) fn build_dom_context(dom: &tl::VDom, parser: &tl::Parser, input_len: usize) -> DomContext {
+pub fn build_dom_context(dom: &tl::VDom, parser: &tl::Parser, input_len: usize) -> DomContext {
     let cache_capacity = text_cache_capacity_for_input(input_len);
     let mut ctx = DomContext {
         parent_map: Vec::new(),
@@ -40,7 +40,7 @@ pub(crate) fn build_dom_context(dom: &tl::VDom, parser: &tl::Parser, input_len: 
 ///
 /// Returns a cache capacity between 32 and TEXT_CACHE_CAPACITY,
 /// scaled proportionally to input size (1KB = 1 slot).
-pub(crate) fn text_cache_capacity_for_input(input_len: usize) -> NonZeroUsize {
+pub fn text_cache_capacity_for_input(input_len: usize) -> NonZeroUsize {
     const TEXT_CACHE_CAPACITY: usize = 256;
     // `clamp(32, TEXT_CACHE_CAPACITY)` guarantees `target >= 32 > 0`, so `new` always returns Some.
     let target = (input_len / 1024).clamp(32, TEXT_CACHE_CAPACITY);
@@ -50,7 +50,7 @@ pub(crate) fn text_cache_capacity_for_input(input_len: usize) -> NonZeroUsize {
 /// Recursively record node hierarchy into DOM context.
 ///
 /// Builds the complete parent-child relationship map for efficient tree traversal.
-pub(crate) fn record_node_hierarchy(
+pub fn record_node_hierarchy(
     node_handle: tl::NodeHandle,
     parent: Option<u32>,
     parser: &tl::Parser,

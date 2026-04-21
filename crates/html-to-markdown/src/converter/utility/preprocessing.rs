@@ -7,7 +7,7 @@ use std::borrow::Cow;
 use std::str;
 
 /// Strip script and style tags and their content from HTML.
-pub(crate) fn strip_script_and_style_tags(input: &str) -> Cow<'_, str> {
+pub fn strip_script_and_style_tags(input: &str) -> Cow<'_, str> {
     let bytes = input.as_bytes();
     let len = bytes.len();
 
@@ -163,7 +163,7 @@ pub(crate) fn strip_script_and_style_tags(input: &str) -> Cow<'_, str> {
 /// Returns the position AFTER the closing tag (including the '>').
 /// This is highly optimized for performance and uses a fast-path scan.
 #[inline]
-pub(crate) fn find_closing_tag_bytes(bytes: &[u8], start: usize, tag: &[u8]) -> Option<usize> {
+pub fn find_closing_tag_bytes(bytes: &[u8], start: usize, tag: &[u8]) -> Option<usize> {
     let len = bytes.len();
     let tag_len = tag.len();
 
@@ -212,7 +212,7 @@ pub(crate) fn find_closing_tag_bytes(bytes: &[u8], start: usize, tag: &[u8]) -> 
 
 /// Compare bytes ignoring ASCII case.
 #[inline]
-pub(crate) fn eq_ascii_insensitive(a: &[u8], b: &[u8]) -> bool {
+pub fn eq_ascii_insensitive(a: &[u8], b: &[u8]) -> bool {
     if a.len() != b.len() {
         return false;
     }
@@ -220,7 +220,7 @@ pub(crate) fn eq_ascii_insensitive(a: &[u8], b: &[u8]) -> bool {
 }
 
 /// Preprocess HTML to normalize tags and fix common issues.
-pub(crate) fn preprocess_html(input: &str) -> Cow<'_, str> {
+pub fn preprocess_html(input: &str) -> Cow<'_, str> {
     const SELF_CLOSING: [(&[u8], &str); 3] = [(b"<br/>", "<br>"), (b"<hr/>", "<hr>"), (b"<img/>", "<img>")];
     const TAGS: [&[u8]; 2] = [b"script", b"style"];
     const SVG: &[u8] = b"svg";
@@ -379,7 +379,7 @@ pub(crate) fn preprocess_html(input: &str) -> Cow<'_, str> {
 }
 
 /// Check if a script tag is a JSON-LD script.
-pub(crate) fn is_json_ld_script_open_tag(tag: &str) -> bool {
+pub fn is_json_ld_script_open_tag(tag: &str) -> bool {
     let bytes = tag.as_bytes();
     let mut idx = 0;
     while idx + 4 <= bytes.len() {
@@ -443,7 +443,7 @@ pub(crate) fn is_json_ld_script_open_tag(tag: &str) -> bool {
 
 /// Case-insensitive byte comparison for ASCII.
 #[inline]
-pub(crate) fn eq_ascii_case_insensitive(haystack: &[u8], needle: &[u8]) -> bool {
+pub fn eq_ascii_case_insensitive(haystack: &[u8], needle: &[u8]) -> bool {
     if haystack.len() < needle.len() {
         return false;
     }
@@ -454,7 +454,7 @@ pub(crate) fn eq_ascii_case_insensitive(haystack: &[u8], needle: &[u8]) -> bool 
 }
 
 /// Check if bytes match a tag start pattern.
-pub(crate) fn matches_tag_start(bytes: &[u8], mut start: usize, tag: &[u8]) -> bool {
+pub fn matches_tag_start(bytes: &[u8], mut start: usize, tag: &[u8]) -> bool {
     if start >= bytes.len() {
         return false;
     }
@@ -477,7 +477,7 @@ pub(crate) fn matches_tag_start(bytes: &[u8], mut start: usize, tag: &[u8]) -> b
 }
 
 /// Find the end of an HTML tag (the position of '>').
-pub(crate) fn find_tag_end(bytes: &[u8], mut idx: usize) -> Option<usize> {
+pub fn find_tag_end(bytes: &[u8], mut idx: usize) -> Option<usize> {
     let len = bytes.len();
     let mut in_quote: Option<u8> = None;
 
@@ -502,7 +502,7 @@ pub(crate) fn find_tag_end(bytes: &[u8], mut idx: usize) -> Option<usize> {
 }
 
 /// Find the closing tag for a given tag name.
-pub(crate) fn find_closing_tag(bytes: &[u8], mut idx: usize, tag: &[u8]) -> Option<usize> {
+pub fn find_closing_tag(bytes: &[u8], mut idx: usize, tag: &[u8]) -> Option<usize> {
     let len = bytes.len();
     let mut depth = 1usize;
 
@@ -533,7 +533,7 @@ pub(crate) fn find_closing_tag(bytes: &[u8], mut idx: usize, tag: &[u8]) -> Opti
 }
 
 /// Check if bytes match an end tag pattern.
-pub(crate) fn matches_end_tag_start(bytes: &[u8], start: usize, tag: &[u8]) -> bool {
+pub fn matches_end_tag_start(bytes: &[u8], start: usize, tag: &[u8]) -> bool {
     if start >= bytes.len() || bytes[start] != b'/' {
         return false;
     }
@@ -553,7 +553,7 @@ pub(crate) fn matches_end_tag_start(bytes: &[u8], start: usize, tag: &[u8]) -> b
 ///
 /// # Returns
 /// * `Cow<str>` - Either the borrowed original URL or an owned sanitized version
-pub(crate) fn sanitize_markdown_url(url: &str) -> Cow<'_, str> {
+pub fn sanitize_markdown_url(url: &str) -> Cow<'_, str> {
     // Pattern: ...[text](actual_url) or similar markdown-like syntax
     // This handles malformed HTML where markdown syntax wasn't properly converted
     // and prevents downstream URL parsing errors (e.g., bracketed "IPv6" hosts).
@@ -585,7 +585,7 @@ pub(crate) fn sanitize_markdown_url(url: &str) -> Cow<'_, str> {
 /// Scans for opening tags containing the `hidden` attribute, finds their
 /// matching closing tag, and removes the entire element (tag + content).
 /// Self-closing tags with `hidden` are also removed.
-pub(crate) fn strip_hidden_elements(input: &str) -> Cow<'_, str> {
+pub fn strip_hidden_elements(input: &str) -> Cow<'_, str> {
     let bytes = input.as_bytes();
     let len = bytes.len();
 

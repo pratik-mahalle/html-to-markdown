@@ -6,29 +6,6 @@ title: "Configuration Reference"
 
 This page documents all configuration types and their defaults across all languages.
 
-### TableScan
-
-Scan results for a table element.
-
-Contains metadata about table structure to determine optimal rendering:
-
-- Row counts for consistency checking
-- Presence of headers, captions, and nested tables
-- Presence of colspan/rowspan (spanning cells)
-- Link and text content counts
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `row_counts` | `list[int]` | `[]` | Number of cells in each row |
-| `has_span` | `bool` | — | Whether any cells have colspan or rowspan attributes |
-| `has_header` | `bool` | — | Whether the table has header cells (th elements or role="head") |
-| `has_caption` | `bool` | — | Whether the table has a caption element |
-| `nested_table_count` | `int` | — | Number of nested tables found inside this table |
-| `link_count` | `int` | — | Count of anchor elements in the table |
-| `has_text` | `bool` | — | Whether the table contains text content (not empty) |
-
----
-
 ### MetadataConfig
 
 Configuration for metadata extraction granularity.
@@ -135,19 +112,7 @@ Use `ConversionOptions.builder()` to construct, or `the default constructor` for
 | `max_image_size` | `int` | `5242880` | Maximum decoded image size in bytes (default 5MB). |
 | `capture_svg` | `bool` | `False` | Capture SVG elements as images. |
 | `infer_dimensions` | `bool` | `True` | Infer image dimensions from data. |
-
----
-
-### InlineImageConfig
-
-Inline image configuration that specifies contexts where images remain as markdown links.
-
-This is a wrapper type that provides semantic clarity for the vector of element
-names where inline images should be preserved.
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `keep_inline_images_in` | `list[str]` | `[]` | HTML elements where images should remain as markdown links (not converted to alt text) |
+| `max_depth` | `int | None` | `None` | Maximum DOM traversal depth. `None` means unlimited. When set, subtrees beyond this depth are silently truncated. |
 
 ---
 
@@ -177,7 +142,7 @@ metadata, extracted tables, images, and processing warnings.
 | `document` | `DocumentStructure | None` | `None` | Structured document tree with semantic elements. Populated when `include_document_structure` is `True` in options. |
 | `metadata` | `HtmlMetadata` | — | Extracted HTML metadata (title, OG, links, images, structured data). |
 | `tables` | `list[TableData]` | `[]` | Extracted tables with structured cell data and markdown representation. |
-| `images` | `list[InlineImage]` | `[]` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `True` in options. |
+| `images` | `list[str]` | `[]` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `True` in options. |
 | `warnings` | `list[ProcessingWarning]` | `[]` | Non-fatal processing warnings. |
 
 ---

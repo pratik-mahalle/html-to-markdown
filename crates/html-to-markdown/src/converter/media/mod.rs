@@ -15,7 +15,7 @@ pub mod svg;
 pub use super::{Context, DomContext};
 
 #[cfg(feature = "inline-images")]
-pub(crate) use image::handle_inline_data_image;
+pub use image::handle_inline_data_image;
 
 /// Dispatches media element handling to the appropriate handler.
 ///

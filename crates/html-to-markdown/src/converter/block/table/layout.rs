@@ -17,7 +17,7 @@ use crate::options::ListIndentType;
 ///
 /// # Returns
 /// Indented table content
-pub(crate) fn indent_table_for_list(
+pub fn indent_table_for_list(
     table_content: &str,
     list_depth: usize,
     options: &crate::options::ConversionOptions,

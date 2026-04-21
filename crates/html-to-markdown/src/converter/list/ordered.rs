@@ -26,7 +26,7 @@ type DomContext = crate::converter::DomContext;
 /// Extracts the `start` attribute to set initial counter value,
 /// detects loose/tight list format, and processes list items.
 #[allow(clippy::too_many_arguments)]
-pub(crate) fn handle_ol(
+pub fn handle_ol(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
     output: &mut String,
@@ -198,4 +198,4 @@ pub(crate) fn handle_ol(
 }
 
 /// Public alias for `handle_ol` to match the expected module interface.
-pub(crate) use handle_ol as handle;
+pub use handle_ol as handle;

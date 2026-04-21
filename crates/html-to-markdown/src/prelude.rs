@@ -5,8 +5,3 @@
 //! ```
 //! use html_to_markdown_rs::prelude::*;
 //! ```
-
-pub use crate::convert;
-pub use crate::error::{ConversionError, Result};
-pub use crate::options::{ConversionOptions, HeadingStyle};
-pub use crate::types::ConversionResult;

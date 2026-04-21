@@ -18,7 +18,7 @@ type DomContext = crate::converter::DomContext;
 ///
 /// Processes children with proper context, manages spacing,
 /// and handles special cases for table cells and list items.
-pub(crate) fn handle(
+pub fn handle(
     node_handle: &NodeHandle,
     parser: &Parser,
     output: &mut String,

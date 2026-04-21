@@ -23,7 +23,7 @@ type InlineCollectorHandle = std::rc::Rc<std::cell::RefCell<InlineImageCollector
 #[allow(clippy::trivially_copy_pass_by_ref)]
 #[allow(clippy::needless_pass_by_value)]
 #[allow(clippy::option_if_let_else)]
-pub(crate) fn handle_inline_svg(
+pub fn handle_inline_svg(
     collector_ref: &InlineCollectorHandle,
     node_handle: &NodeHandle,
     parser: &Parser,
@@ -93,7 +93,7 @@ pub(crate) fn handle_inline_svg(
 
 /// Serialize an element to HTML string (for SVG and Math elements).
 #[allow(clippy::trivially_copy_pass_by_ref)]
-pub(crate) fn serialize_element(node_handle: &NodeHandle, parser: &Parser) -> String {
+pub fn serialize_element(node_handle: &NodeHandle, parser: &Parser) -> String {
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
         let tag_name = normalized_tag_name(tag.name().as_utf8_str());
         let mut html = String::with_capacity(256);
@@ -132,7 +132,7 @@ pub(crate) fn serialize_element(node_handle: &NodeHandle, parser: &Parser) -> St
 
 /// Serialize a node to HTML string.
 #[allow(clippy::trivially_copy_pass_by_ref)]
-pub(crate) fn serialize_node(node_handle: &NodeHandle, parser: &Parser) -> String {
+pub fn serialize_node(node_handle: &NodeHandle, parser: &Parser) -> String {
     if let Some(node) = node_handle.get(parser) {
         match node {
             tl::Node::Raw(bytes) => bytes.as_utf8_str().to_string(),
@@ -160,7 +160,7 @@ fn non_empty_trimmed(value: &str) -> Option<String> {
 /// Extracts title from child elements, handles inline image collection,
 /// and outputs either the title text (in inline mode) or a base64-encoded image.
 #[allow(clippy::too_many_arguments)]
-pub(crate) fn handle_svg(
+pub fn handle_svg(
     node_handle: &NodeHandle,
     tag: &tl::HTMLTag,
     parser: &Parser,
@@ -230,7 +230,7 @@ pub(crate) fn handle_svg(
 ///
 /// Serializes MathML to HTML comment and outputs text content with escaping.
 #[allow(clippy::too_many_arguments)]
-pub(crate) fn handle_math(
+pub fn handle_math(
     node_handle: &NodeHandle,
     tag: &tl::HTMLTag,
     parser: &Parser,

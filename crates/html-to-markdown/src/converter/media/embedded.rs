@@ -16,7 +16,7 @@ use crate::converter::main_helpers::tag_name_eq;
 use crate::options::ConversionOptions;
 
 /// Extract src attribute from media element (audio, video, iframe).
-pub(crate) fn extract_media_src<'a>(tag: &'a HTMLTag<'a>) -> Cow<'a, str> {
+pub fn extract_media_src<'a>(tag: &'a HTMLTag<'a>) -> Cow<'a, str> {
     tag.attributes()
         .get("src")
         .flatten()
@@ -28,7 +28,7 @@ pub(crate) fn extract_media_src<'a>(tag: &'a HTMLTag<'a>) -> Cow<'a, str> {
 ///
 /// Used by audio and video elements to extract src from child <source> elements
 /// when the parent doesn't have a src attribute.
-pub(crate) fn find_source_src<'a, T>(children: T, parser: &'a Parser) -> Option<Cow<'a, str>>
+pub fn find_source_src<'a, T>(children: T, parser: &'a Parser) -> Option<Cow<'a, str>>
 where
     T: IntoIterator<Item = &'a NodeHandle>,
 {
@@ -43,14 +43,14 @@ where
 }
 
 /// Check if tag is a source element.
-pub(crate) fn is_source_element(tag: &HTMLTag) -> bool {
+pub fn is_source_element(tag: &HTMLTag) -> bool {
     tag_name_eq(tag.name().as_utf8_str(), "source")
 }
 
 /// Determine if media should output source link in markdown.
 ///
 /// Returns true if src is non-empty.
-pub(crate) fn should_output_media_link(src: &str) -> bool {
+pub fn should_output_media_link(src: &str) -> bool {
     !src.is_empty()
 }
 
@@ -58,7 +58,7 @@ pub(crate) fn should_output_media_link(src: &str) -> bool {
 ///
 /// Extracts src from audio tag or nested source elements, outputs as a link,
 /// and processes fallback content (e.g., browser compatibility text).
-pub(crate) fn handle_audio(
+pub fn handle_audio(
     _node_handle: &NodeHandle,
     tag: &HTMLTag,
     parser: &Parser,
@@ -121,7 +121,7 @@ pub(crate) fn handle_audio(
 ///
 /// Extracts src from video tag or nested source elements, outputs as a link,
 /// and processes fallback content (e.g., browser compatibility text).
-pub(crate) fn handle_video(
+pub fn handle_video(
     _node_handle: &NodeHandle,
     tag: &HTMLTag,
     parser: &Parser,
@@ -183,7 +183,7 @@ pub(crate) fn handle_video(
 /// Handle picture element conversion to Markdown.
 ///
 /// Finds and processes the first child img element, skipping source elements.
-pub(crate) fn handle_picture(
+pub fn handle_picture(
     _node_handle: &NodeHandle,
     tag: &HTMLTag,
     parser: &Parser,
@@ -209,7 +209,7 @@ pub(crate) fn handle_picture(
 ///
 /// Extracts src attribute from iframe and outputs as a markdown link.
 /// iframes cannot be embedded in markdown, so we just provide a link to the source.
-pub(crate) fn handle_iframe(tag: &HTMLTag, output: &mut String, ctx: &Context) {
+pub fn handle_iframe(tag: &HTMLTag, output: &mut String, ctx: &Context) {
     let src = tag
         .attributes()
         .get("src")
