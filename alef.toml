@@ -9,6 +9,7 @@ languages = [
   "csharp",
   "elixir",
   "wasm",
+  "r",
 ]
 
 [crate]
@@ -74,6 +75,7 @@ ffi = "crates/html-to-markdown-ffi/src/"
 go = "packages/go/"
 elixir = "packages/elixir/native/html_to_markdown_nif/src/"
 wasm = "crates/html-to-markdown-wasm/src/"
+r = "packages/r/src/rust/src/"
 
 [python]
 module_name = "_html_to_markdown"
@@ -103,6 +105,9 @@ namespace = "HtmlToMarkdown"
 
 [elixir]
 app_name = "html_to_markdown"
+
+[r]
+package_name = "htmltomarkdown"
 
 [readme]
 template_dir = "readme_templates"
