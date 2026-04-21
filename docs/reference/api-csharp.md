@@ -84,7 +84,7 @@ Use `ConversionOptions.builder()` to construct, or `the default constructor` for
 | `MaxImageSize` | `ulong` | `5242880` | Maximum decoded image size in bytes (default 5MB). |
 | `CaptureSvg` | `bool` | `false` | Capture SVG elements as images. |
 | `InferDimensions` | `bool` | `true` | Infer image dimensions from data. |
-| `MaxDepth` | `nuint?` | `null` | Maximum DOM traversal depth. `None` means unlimited. When set, subtrees beyond this depth are silently truncated. |
+| `MaxDepth` | `nuint?` | `null` | Maximum DOM traversal depth. `null` means unlimited. When set, subtrees beyond this depth are silently truncated. |
 
 ##### Methods
 
@@ -146,11 +146,11 @@ metadata, extracted tables, images, and processing warnings.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `Content` | `string?` | `null` | Converted text output (markdown, djot, or plain text). `None` when `output_format` is set to `OutputFormat.None`, indicating extraction-only mode. |
-| `Document` | `DocumentStructure?` | `null` | Structured document tree with semantic elements. Populated when `include_document_structure` is `True` in options. |
+| `Content` | `string?` | `null` | Converted text output (markdown, djot, or plain text). `null` when `output_format` is set to `OutputFormat.None`, indicating extraction-only mode. |
+| `Document` | `DocumentStructure?` | `null` | Structured document tree with semantic elements. Populated when `include_document_structure` is `true` in options. |
 | `Metadata` | `HtmlMetadata` | — | Extracted HTML metadata (title, OG, links, images, structured data). |
 | `Tables` | `List<TableData>` | `new List<TableData>()` | Extracted tables with structured cell data and markdown representation. |
-| `Images` | `List<string>` | `new List<string>()` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `True` in options. |
+| `Images` | `List<string>` | `new List<string>()` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `true` in options. |
 | `Warnings` | `List<ProcessingWarning>` | `new List<ProcessingWarning>()` | Non-fatal processing warnings. |
 
 
@@ -335,6 +335,446 @@ suitable for serialization and transmission across language boundaries.
 | `Links` | `List<LinkMetadata>` | `new List<LinkMetadata>()` | Extracted hyperlinks with type classification |
 | `Images` | `List<ImageMetadata>` | `new List<ImageMetadata>()` | Extracted images with source and dimensions |
 | `StructuredData` | `List<StructuredData>` | `new List<StructuredData>()` | Extracted structured data blocks |
+
+
+---
+
+#### HtmlVisitor
+
+Visitor trait for HTML→Markdown conversion.
+
+Implement this trait to customize the conversion behavior for any HTML element type.
+All methods have default implementations that return `VisitResult.Continue`, allowing
+selective override of only the elements you care about.
+
+# Method Naming Convention
+
+- `visit_*_start`: Called before entering an element (pre-order traversal)
+- `visit_*_end`: Called after exiting an element (post-order traversal)
+- `visit_*`: Called for specific element types (e.g., `visit_link`, `visit_image`)
+
+# Execution Order
+
+For a typical element like `<div><p>text</p></div>`:
+1. `visit_element_start` for `<div>`
+2. `visit_element_start` for `<p>`
+3. `visit_text` for "text"
+4. `visit_element_end` for `<p>`
+5. `visit_element_end` for `</div>`
+
+# Performance Notes
+
+- `visit_text` is the most frequently called method (~100+ times per document)
+- Return `VisitResult.Continue` quickly for elements you don't need to customize
+- Avoid heavy computation in visitor methods; consider caching if needed
+
+##### Methods
+
+###### VisitElementStart()
+
+Called before entering any element.
+
+This is the first callback invoked for every HTML element, allowing
+visitors to implement generic element handling before tag-specific logic.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitElementStart(NodeContext ctx)
+```
+
+###### VisitElementEnd()
+
+Called after exiting any element.
+
+Receives the default markdown output that would be generated.
+Visitors can inspect or replace this output.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitElementEnd(NodeContext ctx, string output)
+```
+
+###### VisitText()
+
+Visit text nodes (most frequent callback - ~100+ per document).
+
+**Signature:**
+
+```csharp
+public VisitResult VisitText(NodeContext ctx, string text)
+```
+
+###### VisitLink()
+
+Visit anchor links `<a href="...">`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitLink(NodeContext ctx, string href, string text, string title)
+```
+
+###### VisitImage()
+
+Visit images `<img src="...">`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitImage(NodeContext ctx, string src, string alt, string title)
+```
+
+###### VisitHeading()
+
+Visit heading elements `<h1>` through `<h6>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitHeading(NodeContext ctx, uint level, string text, string id)
+```
+
+###### VisitCodeBlock()
+
+Visit code blocks `<pre><code>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitCodeBlock(NodeContext ctx, string lang, string code)
+```
+
+###### VisitCodeInline()
+
+Visit inline code `<code>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitCodeInline(NodeContext ctx, string code)
+```
+
+###### VisitListItem()
+
+Visit list items `<li>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitListItem(NodeContext ctx, bool ordered, string marker, string text)
+```
+
+###### VisitListStart()
+
+Called before processing a list `<ul>` or `<ol>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitListStart(NodeContext ctx, bool ordered)
+```
+
+###### VisitListEnd()
+
+Called after processing a list `</ul>` or `</ol>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitListEnd(NodeContext ctx, bool ordered, string output)
+```
+
+###### VisitTableStart()
+
+Called before processing a table `<table>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitTableStart(NodeContext ctx)
+```
+
+###### VisitTableRow()
+
+Visit table rows `<tr>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitTableRow(NodeContext ctx, List<string> cells, bool isHeader)
+```
+
+###### VisitTableEnd()
+
+Called after processing a table `</table>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitTableEnd(NodeContext ctx, string output)
+```
+
+###### VisitBlockquote()
+
+Visit blockquote elements `<blockquote>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitBlockquote(NodeContext ctx, string content, nuint depth)
+```
+
+###### VisitStrong()
+
+Visit strong/bold elements `<strong>`, `<b>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitStrong(NodeContext ctx, string text)
+```
+
+###### VisitEmphasis()
+
+Visit emphasis/italic elements `<em>`, `<i>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitEmphasis(NodeContext ctx, string text)
+```
+
+###### VisitStrikethrough()
+
+Visit strikethrough elements `<s>`, `<del>`, `<strike>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitStrikethrough(NodeContext ctx, string text)
+```
+
+###### VisitUnderline()
+
+Visit underline elements `<u>`, `<ins>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitUnderline(NodeContext ctx, string text)
+```
+
+###### VisitSubscript()
+
+Visit subscript elements `<sub>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitSubscript(NodeContext ctx, string text)
+```
+
+###### VisitSuperscript()
+
+Visit superscript elements `<sup>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitSuperscript(NodeContext ctx, string text)
+```
+
+###### VisitMark()
+
+Visit mark/highlight elements `<mark>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitMark(NodeContext ctx, string text)
+```
+
+###### VisitLineBreak()
+
+Visit line break elements `<br>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitLineBreak(NodeContext ctx)
+```
+
+###### VisitHorizontalRule()
+
+Visit horizontal rule elements `<hr>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitHorizontalRule(NodeContext ctx)
+```
+
+###### VisitCustomElement()
+
+Visit custom elements (web components) or unknown tags.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitCustomElement(NodeContext ctx, string tagName, string html)
+```
+
+###### VisitDefinitionListStart()
+
+Visit definition list `<dl>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitDefinitionListStart(NodeContext ctx)
+```
+
+###### VisitDefinitionTerm()
+
+Visit definition term `<dt>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitDefinitionTerm(NodeContext ctx, string text)
+```
+
+###### VisitDefinitionDescription()
+
+Visit definition description `<dd>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitDefinitionDescription(NodeContext ctx, string text)
+```
+
+###### VisitDefinitionListEnd()
+
+Called after processing a definition list `</dl>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitDefinitionListEnd(NodeContext ctx, string output)
+```
+
+###### VisitForm()
+
+Visit form elements `<form>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitForm(NodeContext ctx, string action, string method)
+```
+
+###### VisitInput()
+
+Visit input elements `<input>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitInput(NodeContext ctx, string inputType, string name, string value)
+```
+
+###### VisitButton()
+
+Visit button elements `<button>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitButton(NodeContext ctx, string text)
+```
+
+###### VisitAudio()
+
+Visit audio elements `<audio>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitAudio(NodeContext ctx, string src)
+```
+
+###### VisitVideo()
+
+Visit video elements `<video>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitVideo(NodeContext ctx, string src)
+```
+
+###### VisitIframe()
+
+Visit iframe elements `<iframe>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitIframe(NodeContext ctx, string src)
+```
+
+###### VisitDetails()
+
+Visit details elements `<details>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitDetails(NodeContext ctx, bool open)
+```
+
+###### VisitSummary()
+
+Visit summary elements `<summary>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitSummary(NodeContext ctx, string text)
+```
+
+###### VisitFigureStart()
+
+Visit figure elements `<figure>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitFigureStart(NodeContext ctx)
+```
+
+###### VisitFigcaption()
+
+Visit figcaption elements `<figcaption>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitFigcaption(NodeContext ctx, string text)
+```
+
+###### VisitFigureEnd()
+
+Called after processing a figure `</figure>`.
+
+**Signature:**
+
+```csharp
+public VisitResult VisitFigureEnd(NodeContext ctx, string output)
+```
 
 
 ---
@@ -1034,3 +1474,4 @@ Errors that can occur during HTML to Markdown conversion.
 
 
 ---
+

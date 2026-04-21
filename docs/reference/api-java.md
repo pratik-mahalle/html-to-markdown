@@ -84,7 +84,7 @@ Use `ConversionOptions.builder()` to construct, or `the default constructor` for
 | `maxImageSize` | `long` | `5242880` | Maximum decoded image size in bytes (default 5MB). |
 | `captureSvg` | `boolean` | `false` | Capture SVG elements as images. |
 | `inferDimensions` | `boolean` | `true` | Infer image dimensions from data. |
-| `maxDepth` | `Optional<long>` | `null` | Maximum DOM traversal depth. `None` means unlimited. When set, subtrees beyond this depth are silently truncated. |
+| `maxDepth` | `Optional<Long>` | `null` | Maximum DOM traversal depth. `null` means unlimited. When set, subtrees beyond this depth are silently truncated. |
 
 ##### Methods
 
@@ -146,11 +146,11 @@ metadata, extracted tables, images, and processing warnings.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `content` | `Optional<String>` | `null` | Converted text output (markdown, djot, or plain text). `None` when `output_format` is set to `OutputFormat.None`, indicating extraction-only mode. |
-| `document` | `Optional<DocumentStructure>` | `null` | Structured document tree with semantic elements. Populated when `include_document_structure` is `True` in options. |
+| `content` | `Optional<String>` | `null` | Converted text output (markdown, djot, or plain text). `null` when `output_format` is set to `OutputFormat.None`, indicating extraction-only mode. |
+| `document` | `Optional<DocumentStructure>` | `null` | Structured document tree with semantic elements. Populated when `include_document_structure` is `true` in options. |
 | `metadata` | `HtmlMetadata` | — | Extracted HTML metadata (title, OG, links, images, structured data). |
 | `tables` | `List<TableData>` | `Collections.emptyList()` | Extracted tables with structured cell data and markdown representation. |
-| `images` | `List<String>` | `Collections.emptyList()` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `True` in options. |
+| `images` | `List<String>` | `Collections.emptyList()` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `true` in options. |
 | `warnings` | `List<ProcessingWarning>` | `Collections.emptyList()` | Non-fatal processing warnings. |
 
 
@@ -249,7 +249,7 @@ A single node in the document tree.
 |-------|------|---------|-------------|
 | `id` | `String` | — | Deterministic node identifier. |
 | `content` | `NodeContent` | — | The semantic content of this node. |
-| `parent` | `Optional<int>` | `null` | Index of the parent node (None for root nodes). |
+| `parent` | `Optional<Integer>` | `null` | Index of the parent node (None for root nodes). |
 | `children` | `List<Integer>` | — | Indices of child nodes in reading order. |
 | `annotations` | `List<TextAnnotation>` | — | Inline formatting annotations (bold, italic, links, etc.) with byte offsets into the text. |
 | `attributes` | `Optional<Map<String, String>>` | `null` | Format-specific attributes (e.g. class, id, data-* attributes). |
@@ -335,6 +335,446 @@ suitable for serialization and transmission across language boundaries.
 | `links` | `List<LinkMetadata>` | `Collections.emptyList()` | Extracted hyperlinks with type classification |
 | `images` | `List<ImageMetadata>` | `Collections.emptyList()` | Extracted images with source and dimensions |
 | `structuredData` | `List<StructuredData>` | `Collections.emptyList()` | Extracted structured data blocks |
+
+
+---
+
+#### HtmlVisitor
+
+Visitor trait for HTML→Markdown conversion.
+
+Implement this trait to customize the conversion behavior for any HTML element type.
+All methods have default implementations that return `VisitResult.Continue`, allowing
+selective override of only the elements you care about.
+
+# Method Naming Convention
+
+- `visit_*_start`: Called before entering an element (pre-order traversal)
+- `visit_*_end`: Called after exiting an element (post-order traversal)
+- `visit_*`: Called for specific element types (e.g., `visit_link`, `visit_image`)
+
+# Execution Order
+
+For a typical element like `<div><p>text</p></div>`:
+1. `visit_element_start` for `<div>`
+2. `visit_element_start` for `<p>`
+3. `visit_text` for "text"
+4. `visit_element_end` for `<p>`
+5. `visit_element_end` for `</div>`
+
+# Performance Notes
+
+- `visit_text` is the most frequently called method (~100+ times per document)
+- Return `VisitResult.Continue` quickly for elements you don't need to customize
+- Avoid heavy computation in visitor methods; consider caching if needed
+
+##### Methods
+
+###### visitElementStart()
+
+Called before entering any element.
+
+This is the first callback invoked for every HTML element, allowing
+visitors to implement generic element handling before tag-specific logic.
+
+**Signature:**
+
+```java
+public VisitResult visitElementStart(NodeContext ctx)
+```
+
+###### visitElementEnd()
+
+Called after exiting any element.
+
+Receives the default markdown output that would be generated.
+Visitors can inspect or replace this output.
+
+**Signature:**
+
+```java
+public VisitResult visitElementEnd(NodeContext ctx, String output)
+```
+
+###### visitText()
+
+Visit text nodes (most frequent callback - ~100+ per document).
+
+**Signature:**
+
+```java
+public VisitResult visitText(NodeContext ctx, String text)
+```
+
+###### visitLink()
+
+Visit anchor links `<a href="...">`.
+
+**Signature:**
+
+```java
+public VisitResult visitLink(NodeContext ctx, String href, String text, String title)
+```
+
+###### visitImage()
+
+Visit images `<img src="...">`.
+
+**Signature:**
+
+```java
+public VisitResult visitImage(NodeContext ctx, String src, String alt, String title)
+```
+
+###### visitHeading()
+
+Visit heading elements `<h1>` through `<h6>`.
+
+**Signature:**
+
+```java
+public VisitResult visitHeading(NodeContext ctx, int level, String text, String id)
+```
+
+###### visitCodeBlock()
+
+Visit code blocks `<pre><code>`.
+
+**Signature:**
+
+```java
+public VisitResult visitCodeBlock(NodeContext ctx, String lang, String code)
+```
+
+###### visitCodeInline()
+
+Visit inline code `<code>`.
+
+**Signature:**
+
+```java
+public VisitResult visitCodeInline(NodeContext ctx, String code)
+```
+
+###### visitListItem()
+
+Visit list items `<li>`.
+
+**Signature:**
+
+```java
+public VisitResult visitListItem(NodeContext ctx, boolean ordered, String marker, String text)
+```
+
+###### visitListStart()
+
+Called before processing a list `<ul>` or `<ol>`.
+
+**Signature:**
+
+```java
+public VisitResult visitListStart(NodeContext ctx, boolean ordered)
+```
+
+###### visitListEnd()
+
+Called after processing a list `</ul>` or `</ol>`.
+
+**Signature:**
+
+```java
+public VisitResult visitListEnd(NodeContext ctx, boolean ordered, String output)
+```
+
+###### visitTableStart()
+
+Called before processing a table `<table>`.
+
+**Signature:**
+
+```java
+public VisitResult visitTableStart(NodeContext ctx)
+```
+
+###### visitTableRow()
+
+Visit table rows `<tr>`.
+
+**Signature:**
+
+```java
+public VisitResult visitTableRow(NodeContext ctx, List<String> cells, boolean isHeader)
+```
+
+###### visitTableEnd()
+
+Called after processing a table `</table>`.
+
+**Signature:**
+
+```java
+public VisitResult visitTableEnd(NodeContext ctx, String output)
+```
+
+###### visitBlockquote()
+
+Visit blockquote elements `<blockquote>`.
+
+**Signature:**
+
+```java
+public VisitResult visitBlockquote(NodeContext ctx, String content, long depth)
+```
+
+###### visitStrong()
+
+Visit strong/bold elements `<strong>`, `<b>`.
+
+**Signature:**
+
+```java
+public VisitResult visitStrong(NodeContext ctx, String text)
+```
+
+###### visitEmphasis()
+
+Visit emphasis/italic elements `<em>`, `<i>`.
+
+**Signature:**
+
+```java
+public VisitResult visitEmphasis(NodeContext ctx, String text)
+```
+
+###### visitStrikethrough()
+
+Visit strikethrough elements `<s>`, `<del>`, `<strike>`.
+
+**Signature:**
+
+```java
+public VisitResult visitStrikethrough(NodeContext ctx, String text)
+```
+
+###### visitUnderline()
+
+Visit underline elements `<u>`, `<ins>`.
+
+**Signature:**
+
+```java
+public VisitResult visitUnderline(NodeContext ctx, String text)
+```
+
+###### visitSubscript()
+
+Visit subscript elements `<sub>`.
+
+**Signature:**
+
+```java
+public VisitResult visitSubscript(NodeContext ctx, String text)
+```
+
+###### visitSuperscript()
+
+Visit superscript elements `<sup>`.
+
+**Signature:**
+
+```java
+public VisitResult visitSuperscript(NodeContext ctx, String text)
+```
+
+###### visitMark()
+
+Visit mark/highlight elements `<mark>`.
+
+**Signature:**
+
+```java
+public VisitResult visitMark(NodeContext ctx, String text)
+```
+
+###### visitLineBreak()
+
+Visit line break elements `<br>`.
+
+**Signature:**
+
+```java
+public VisitResult visitLineBreak(NodeContext ctx)
+```
+
+###### visitHorizontalRule()
+
+Visit horizontal rule elements `<hr>`.
+
+**Signature:**
+
+```java
+public VisitResult visitHorizontalRule(NodeContext ctx)
+```
+
+###### visitCustomElement()
+
+Visit custom elements (web components) or unknown tags.
+
+**Signature:**
+
+```java
+public VisitResult visitCustomElement(NodeContext ctx, String tagName, String html)
+```
+
+###### visitDefinitionListStart()
+
+Visit definition list `<dl>`.
+
+**Signature:**
+
+```java
+public VisitResult visitDefinitionListStart(NodeContext ctx)
+```
+
+###### visitDefinitionTerm()
+
+Visit definition term `<dt>`.
+
+**Signature:**
+
+```java
+public VisitResult visitDefinitionTerm(NodeContext ctx, String text)
+```
+
+###### visitDefinitionDescription()
+
+Visit definition description `<dd>`.
+
+**Signature:**
+
+```java
+public VisitResult visitDefinitionDescription(NodeContext ctx, String text)
+```
+
+###### visitDefinitionListEnd()
+
+Called after processing a definition list `</dl>`.
+
+**Signature:**
+
+```java
+public VisitResult visitDefinitionListEnd(NodeContext ctx, String output)
+```
+
+###### visitForm()
+
+Visit form elements `<form>`.
+
+**Signature:**
+
+```java
+public VisitResult visitForm(NodeContext ctx, String action, String method)
+```
+
+###### visitInput()
+
+Visit input elements `<input>`.
+
+**Signature:**
+
+```java
+public VisitResult visitInput(NodeContext ctx, String inputType, String name, String value)
+```
+
+###### visitButton()
+
+Visit button elements `<button>`.
+
+**Signature:**
+
+```java
+public VisitResult visitButton(NodeContext ctx, String text)
+```
+
+###### visitAudio()
+
+Visit audio elements `<audio>`.
+
+**Signature:**
+
+```java
+public VisitResult visitAudio(NodeContext ctx, String src)
+```
+
+###### visitVideo()
+
+Visit video elements `<video>`.
+
+**Signature:**
+
+```java
+public VisitResult visitVideo(NodeContext ctx, String src)
+```
+
+###### visitIframe()
+
+Visit iframe elements `<iframe>`.
+
+**Signature:**
+
+```java
+public VisitResult visitIframe(NodeContext ctx, String src)
+```
+
+###### visitDetails()
+
+Visit details elements `<details>`.
+
+**Signature:**
+
+```java
+public VisitResult visitDetails(NodeContext ctx, boolean open)
+```
+
+###### visitSummary()
+
+Visit summary elements `<summary>`.
+
+**Signature:**
+
+```java
+public VisitResult visitSummary(NodeContext ctx, String text)
+```
+
+###### visitFigureStart()
+
+Visit figure elements `<figure>`.
+
+**Signature:**
+
+```java
+public VisitResult visitFigureStart(NodeContext ctx)
+```
+
+###### visitFigcaption()
+
+Visit figcaption elements `<figcaption>`.
+
+**Signature:**
+
+```java
+public VisitResult visitFigcaption(NodeContext ctx, String text)
+```
+
+###### visitFigureEnd()
+
+Called after processing a figure `</figure>`.
+
+**Signature:**
+
+```java
+public VisitResult visitFigureEnd(NodeContext ctx, String output)
+```
 
 
 ---
@@ -1034,3 +1474,4 @@ Errors that can occur during HTML to Markdown conversion.
 
 
 ---
+

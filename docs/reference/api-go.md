@@ -84,7 +84,7 @@ Use `ConversionOptions.builder()` to construct, or `the default constructor` for
 | `MaxImageSize` | `uint64` | `5242880` | Maximum decoded image size in bytes (default 5MB). |
 | `CaptureSvg` | `bool` | `false` | Capture SVG elements as images. |
 | `InferDimensions` | `bool` | `true` | Infer image dimensions from data. |
-| `MaxDepth` | `*int` | `nil` | Maximum DOM traversal depth. `None` means unlimited. When set, subtrees beyond this depth are silently truncated. |
+| `MaxDepth` | `*int` | `nil` | Maximum DOM traversal depth. `nil` means unlimited. When set, subtrees beyond this depth are silently truncated. |
 
 ##### Methods
 
@@ -146,11 +146,11 @@ metadata, extracted tables, images, and processing warnings.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `Content` | `*string` | `nil` | Converted text output (markdown, djot, or plain text). `None` when `output_format` is set to `OutputFormat.None`, indicating extraction-only mode. |
-| `Document` | `*DocumentStructure` | `nil` | Structured document tree with semantic elements. Populated when `include_document_structure` is `True` in options. |
+| `Content` | `*string` | `nil` | Converted text output (markdown, djot, or plain text). `nil` when `output_format` is set to `OutputFormat.None`, indicating extraction-only mode. |
+| `Document` | `*DocumentStructure` | `nil` | Structured document tree with semantic elements. Populated when `include_document_structure` is `true` in options. |
 | `Metadata` | `HtmlMetadata` | — | Extracted HTML metadata (title, OG, links, images, structured data). |
 | `Tables` | `[]TableData` | `nil` | Extracted tables with structured cell data and markdown representation. |
-| `Images` | `[]string` | `nil` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `True` in options. |
+| `Images` | `[]string` | `nil` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `true` in options. |
 | `Warnings` | `[]ProcessingWarning` | `nil` | Non-fatal processing warnings. |
 
 
@@ -335,6 +335,446 @@ suitable for serialization and transmission across language boundaries.
 | `Links` | `[]LinkMetadata` | `nil` | Extracted hyperlinks with type classification |
 | `Images` | `[]ImageMetadata` | `nil` | Extracted images with source and dimensions |
 | `StructuredData` | `[]StructuredData` | `nil` | Extracted structured data blocks |
+
+
+---
+
+#### HtmlVisitor
+
+Visitor trait for HTML→Markdown conversion.
+
+Implement this trait to customize the conversion behavior for any HTML element type.
+All methods have default implementations that return `VisitResult.Continue`, allowing
+selective override of only the elements you care about.
+
+# Method Naming Convention
+
+- `visit_*_start`: Called before entering an element (pre-order traversal)
+- `visit_*_end`: Called after exiting an element (post-order traversal)
+- `visit_*`: Called for specific element types (e.g., `visit_link`, `visit_image`)
+
+# Execution Order
+
+For a typical element like `<div><p>text</p></div>`:
+1. `visit_element_start` for `<div>`
+2. `visit_element_start` for `<p>`
+3. `visit_text` for "text"
+4. `visit_element_end` for `<p>`
+5. `visit_element_end` for `</div>`
+
+# Performance Notes
+
+- `visit_text` is the most frequently called method (~100+ times per document)
+- Return `VisitResult.Continue` quickly for elements you don't need to customize
+- Avoid heavy computation in visitor methods; consider caching if needed
+
+##### Methods
+
+###### VisitElementStart()
+
+Called before entering any element.
+
+This is the first callback invoked for every HTML element, allowing
+visitors to implement generic element handling before tag-specific logic.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitElementStart(ctx NodeContext) VisitResult
+```
+
+###### VisitElementEnd()
+
+Called after exiting any element.
+
+Receives the default markdown output that would be generated.
+Visitors can inspect or replace this output.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitElementEnd(ctx NodeContext, output string) VisitResult
+```
+
+###### VisitText()
+
+Visit text nodes (most frequent callback - ~100+ per document).
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitText(ctx NodeContext, text string) VisitResult
+```
+
+###### VisitLink()
+
+Visit anchor links `<a href="...">`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitLink(ctx NodeContext, href string, text string, title string) VisitResult
+```
+
+###### VisitImage()
+
+Visit images `<img src="...">`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitImage(ctx NodeContext, src string, alt string, title string) VisitResult
+```
+
+###### VisitHeading()
+
+Visit heading elements `<h1>` through `<h6>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitHeading(ctx NodeContext, level uint32, text string, id string) VisitResult
+```
+
+###### VisitCodeBlock()
+
+Visit code blocks `<pre><code>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitCodeBlock(ctx NodeContext, lang string, code string) VisitResult
+```
+
+###### VisitCodeInline()
+
+Visit inline code `<code>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitCodeInline(ctx NodeContext, code string) VisitResult
+```
+
+###### VisitListItem()
+
+Visit list items `<li>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitListItem(ctx NodeContext, ordered bool, marker string, text string) VisitResult
+```
+
+###### VisitListStart()
+
+Called before processing a list `<ul>` or `<ol>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitListStart(ctx NodeContext, ordered bool) VisitResult
+```
+
+###### VisitListEnd()
+
+Called after processing a list `</ul>` or `</ol>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitListEnd(ctx NodeContext, ordered bool, output string) VisitResult
+```
+
+###### VisitTableStart()
+
+Called before processing a table `<table>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitTableStart(ctx NodeContext) VisitResult
+```
+
+###### VisitTableRow()
+
+Visit table rows `<tr>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitTableRow(ctx NodeContext, cells []string, isHeader bool) VisitResult
+```
+
+###### VisitTableEnd()
+
+Called after processing a table `</table>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitTableEnd(ctx NodeContext, output string) VisitResult
+```
+
+###### VisitBlockquote()
+
+Visit blockquote elements `<blockquote>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitBlockquote(ctx NodeContext, content string, depth int) VisitResult
+```
+
+###### VisitStrong()
+
+Visit strong/bold elements `<strong>`, `<b>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitStrong(ctx NodeContext, text string) VisitResult
+```
+
+###### VisitEmphasis()
+
+Visit emphasis/italic elements `<em>`, `<i>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitEmphasis(ctx NodeContext, text string) VisitResult
+```
+
+###### VisitStrikethrough()
+
+Visit strikethrough elements `<s>`, `<del>`, `<strike>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitStrikethrough(ctx NodeContext, text string) VisitResult
+```
+
+###### VisitUnderline()
+
+Visit underline elements `<u>`, `<ins>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitUnderline(ctx NodeContext, text string) VisitResult
+```
+
+###### VisitSubscript()
+
+Visit subscript elements `<sub>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitSubscript(ctx NodeContext, text string) VisitResult
+```
+
+###### VisitSuperscript()
+
+Visit superscript elements `<sup>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitSuperscript(ctx NodeContext, text string) VisitResult
+```
+
+###### VisitMark()
+
+Visit mark/highlight elements `<mark>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitMark(ctx NodeContext, text string) VisitResult
+```
+
+###### VisitLineBreak()
+
+Visit line break elements `<br>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitLineBreak(ctx NodeContext) VisitResult
+```
+
+###### VisitHorizontalRule()
+
+Visit horizontal rule elements `<hr>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitHorizontalRule(ctx NodeContext) VisitResult
+```
+
+###### VisitCustomElement()
+
+Visit custom elements (web components) or unknown tags.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitCustomElement(ctx NodeContext, tagName string, html string) VisitResult
+```
+
+###### VisitDefinitionListStart()
+
+Visit definition list `<dl>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitDefinitionListStart(ctx NodeContext) VisitResult
+```
+
+###### VisitDefinitionTerm()
+
+Visit definition term `<dt>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitDefinitionTerm(ctx NodeContext, text string) VisitResult
+```
+
+###### VisitDefinitionDescription()
+
+Visit definition description `<dd>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitDefinitionDescription(ctx NodeContext, text string) VisitResult
+```
+
+###### VisitDefinitionListEnd()
+
+Called after processing a definition list `</dl>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitDefinitionListEnd(ctx NodeContext, output string) VisitResult
+```
+
+###### VisitForm()
+
+Visit form elements `<form>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitForm(ctx NodeContext, action string, method string) VisitResult
+```
+
+###### VisitInput()
+
+Visit input elements `<input>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitInput(ctx NodeContext, inputType string, name string, value string) VisitResult
+```
+
+###### VisitButton()
+
+Visit button elements `<button>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitButton(ctx NodeContext, text string) VisitResult
+```
+
+###### VisitAudio()
+
+Visit audio elements `<audio>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitAudio(ctx NodeContext, src string) VisitResult
+```
+
+###### VisitVideo()
+
+Visit video elements `<video>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitVideo(ctx NodeContext, src string) VisitResult
+```
+
+###### VisitIframe()
+
+Visit iframe elements `<iframe>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitIframe(ctx NodeContext, src string) VisitResult
+```
+
+###### VisitDetails()
+
+Visit details elements `<details>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitDetails(ctx NodeContext, open bool) VisitResult
+```
+
+###### VisitSummary()
+
+Visit summary elements `<summary>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitSummary(ctx NodeContext, text string) VisitResult
+```
+
+###### VisitFigureStart()
+
+Visit figure elements `<figure>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitFigureStart(ctx NodeContext) VisitResult
+```
+
+###### VisitFigcaption()
+
+Visit figcaption elements `<figcaption>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitFigcaption(ctx NodeContext, text string) VisitResult
+```
+
+###### VisitFigureEnd()
+
+Called after processing a figure `</figure>`.
+
+**Signature:**
+
+```go
+func (o *HtmlVisitor) VisitFigureEnd(ctx NodeContext, output string) VisitResult
+```
 
 
 ---
@@ -1034,3 +1474,4 @@ Errors that can occur during HTML to Markdown conversion.
 
 
 ---
+

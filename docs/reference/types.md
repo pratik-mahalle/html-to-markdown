@@ -18,10 +18,10 @@ metadata, extracted tables, images, and processing warnings.
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `content` | `Option<String>` | `Default::default()` | Converted text output (markdown, djot, or plain text). `None` when `output_format` is set to `OutputFormat.None`, indicating extraction-only mode. |
-| `document` | `Option<DocumentStructure>` | `Default::default()` | Structured document tree with semantic elements. Populated when `include_document_structure` is `True` in options. |
+| `document` | `Option<DocumentStructure>` | `Default::default()` | Structured document tree with semantic elements. Populated when `include_document_structure` is `true` in options. |
 | `metadata` | `HtmlMetadata` | — | Extracted HTML metadata (title, OG, links, images, structured data). |
 | `tables` | `Vec<TableData>` | `vec![]` | Extracted tables with structured cell data and markdown representation. |
-| `images` | `Vec<String>` | `vec![]` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `True` in options. |
+| `images` | `Vec<String>` | `vec![]` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `true` in options. |
 | `warnings` | `Vec<ProcessingWarning>` | `vec![]` | Non-fatal processing warnings. |
 
 ---
@@ -345,3 +345,37 @@ A non-fatal warning generated during HTML processing.
 | `kind` | `WarningKind` | — | The category of warning. |
 
 ---
+
+#### HtmlVisitor
+
+Visitor trait for HTML→Markdown conversion.
+
+Implement this trait to customize the conversion behavior for any HTML element type.
+All methods have default implementations that return `VisitResult.Continue`, allowing
+selective override of only the elements you care about.
+
+# Method Naming Convention
+
+- `visit_*_start`: Called before entering an element (pre-order traversal)
+- `visit_*_end`: Called after exiting an element (post-order traversal)
+- `visit_*`: Called for specific element types (e.g., `visit_link`, `visit_image`)
+
+# Execution Order
+
+For a typical element like `<div><p>text</p></div>`:
+1. `visit_element_start` for `<div>`
+2. `visit_element_start` for `<p>`
+3. `visit_text` for "text"
+4. `visit_element_end` for `<p>`
+5. `visit_element_end` for `</div>`
+
+# Performance Notes
+
+- `visit_text` is the most frequently called method (~100+ times per document)
+- Return `VisitResult.Continue` quickly for elements you don't need to customize
+- Avoid heavy computation in visitor methods; consider caching if needed
+
+*Opaque type — fields are not directly accessible.*
+
+---
+

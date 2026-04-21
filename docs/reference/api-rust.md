@@ -147,10 +147,10 @@ metadata, extracted tables, images, and processing warnings.
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `content` | `Option<String>` | `Default::default()` | Converted text output (markdown, djot, or plain text). `None` when `output_format` is set to `OutputFormat.None`, indicating extraction-only mode. |
-| `document` | `Option<DocumentStructure>` | `Default::default()` | Structured document tree with semantic elements. Populated when `include_document_structure` is `True` in options. |
+| `document` | `Option<DocumentStructure>` | `Default::default()` | Structured document tree with semantic elements. Populated when `include_document_structure` is `true` in options. |
 | `metadata` | `HtmlMetadata` | — | Extracted HTML metadata (title, OG, links, images, structured data). |
 | `tables` | `Vec<TableData>` | `vec![]` | Extracted tables with structured cell data and markdown representation. |
-| `images` | `Vec<String>` | `vec![]` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `True` in options. |
+| `images` | `Vec<String>` | `vec![]` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `true` in options. |
 | `warnings` | `Vec<ProcessingWarning>` | `vec![]` | Non-fatal processing warnings. |
 
 
@@ -339,6 +339,446 @@ suitable for serialization and transmission across language boundaries.
 
 ---
 
+#### HtmlVisitor
+
+Visitor trait for HTML→Markdown conversion.
+
+Implement this trait to customize the conversion behavior for any HTML element type.
+All methods have default implementations that return `VisitResult.Continue`, allowing
+selective override of only the elements you care about.
+
+# Method Naming Convention
+
+- `visit_*_start`: Called before entering an element (pre-order traversal)
+- `visit_*_end`: Called after exiting an element (post-order traversal)
+- `visit_*`: Called for specific element types (e.g., `visit_link`, `visit_image`)
+
+# Execution Order
+
+For a typical element like `<div><p>text</p></div>`:
+1. `visit_element_start` for `<div>`
+2. `visit_element_start` for `<p>`
+3. `visit_text` for "text"
+4. `visit_element_end` for `<p>`
+5. `visit_element_end` for `</div>`
+
+# Performance Notes
+
+- `visit_text` is the most frequently called method (~100+ times per document)
+- Return `VisitResult.Continue` quickly for elements you don't need to customize
+- Avoid heavy computation in visitor methods; consider caching if needed
+
+##### Methods
+
+###### visit_element_start()
+
+Called before entering any element.
+
+This is the first callback invoked for every HTML element, allowing
+visitors to implement generic element handling before tag-specific logic.
+
+**Signature:**
+
+```rust
+pub fn visit_element_start(&self, ctx: NodeContext) -> VisitResult
+```
+
+###### visit_element_end()
+
+Called after exiting any element.
+
+Receives the default markdown output that would be generated.
+Visitors can inspect or replace this output.
+
+**Signature:**
+
+```rust
+pub fn visit_element_end(&self, ctx: NodeContext, output: &str) -> VisitResult
+```
+
+###### visit_text()
+
+Visit text nodes (most frequent callback - ~100+ per document).
+
+**Signature:**
+
+```rust
+pub fn visit_text(&self, ctx: NodeContext, text: &str) -> VisitResult
+```
+
+###### visit_link()
+
+Visit anchor links `<a href="...">`.
+
+**Signature:**
+
+```rust
+pub fn visit_link(&self, ctx: NodeContext, href: &str, text: &str, title: Option<String>) -> VisitResult
+```
+
+###### visit_image()
+
+Visit images `<img src="...">`.
+
+**Signature:**
+
+```rust
+pub fn visit_image(&self, ctx: NodeContext, src: &str, alt: &str, title: Option<String>) -> VisitResult
+```
+
+###### visit_heading()
+
+Visit heading elements `<h1>` through `<h6>`.
+
+**Signature:**
+
+```rust
+pub fn visit_heading(&self, ctx: NodeContext, level: u32, text: &str, id: Option<String>) -> VisitResult
+```
+
+###### visit_code_block()
+
+Visit code blocks `<pre><code>`.
+
+**Signature:**
+
+```rust
+pub fn visit_code_block(&self, ctx: NodeContext, lang: Option<String>, code: &str) -> VisitResult
+```
+
+###### visit_code_inline()
+
+Visit inline code `<code>`.
+
+**Signature:**
+
+```rust
+pub fn visit_code_inline(&self, ctx: NodeContext, code: &str) -> VisitResult
+```
+
+###### visit_list_item()
+
+Visit list items `<li>`.
+
+**Signature:**
+
+```rust
+pub fn visit_list_item(&self, ctx: NodeContext, ordered: bool, marker: &str, text: &str) -> VisitResult
+```
+
+###### visit_list_start()
+
+Called before processing a list `<ul>` or `<ol>`.
+
+**Signature:**
+
+```rust
+pub fn visit_list_start(&self, ctx: NodeContext, ordered: bool) -> VisitResult
+```
+
+###### visit_list_end()
+
+Called after processing a list `</ul>` or `</ol>`.
+
+**Signature:**
+
+```rust
+pub fn visit_list_end(&self, ctx: NodeContext, ordered: bool, output: &str) -> VisitResult
+```
+
+###### visit_table_start()
+
+Called before processing a table `<table>`.
+
+**Signature:**
+
+```rust
+pub fn visit_table_start(&self, ctx: NodeContext) -> VisitResult
+```
+
+###### visit_table_row()
+
+Visit table rows `<tr>`.
+
+**Signature:**
+
+```rust
+pub fn visit_table_row(&self, ctx: NodeContext, cells: Vec<String>, is_header: bool) -> VisitResult
+```
+
+###### visit_table_end()
+
+Called after processing a table `</table>`.
+
+**Signature:**
+
+```rust
+pub fn visit_table_end(&self, ctx: NodeContext, output: &str) -> VisitResult
+```
+
+###### visit_blockquote()
+
+Visit blockquote elements `<blockquote>`.
+
+**Signature:**
+
+```rust
+pub fn visit_blockquote(&self, ctx: NodeContext, content: &str, depth: usize) -> VisitResult
+```
+
+###### visit_strong()
+
+Visit strong/bold elements `<strong>`, `<b>`.
+
+**Signature:**
+
+```rust
+pub fn visit_strong(&self, ctx: NodeContext, text: &str) -> VisitResult
+```
+
+###### visit_emphasis()
+
+Visit emphasis/italic elements `<em>`, `<i>`.
+
+**Signature:**
+
+```rust
+pub fn visit_emphasis(&self, ctx: NodeContext, text: &str) -> VisitResult
+```
+
+###### visit_strikethrough()
+
+Visit strikethrough elements `<s>`, `<del>`, `<strike>`.
+
+**Signature:**
+
+```rust
+pub fn visit_strikethrough(&self, ctx: NodeContext, text: &str) -> VisitResult
+```
+
+###### visit_underline()
+
+Visit underline elements `<u>`, `<ins>`.
+
+**Signature:**
+
+```rust
+pub fn visit_underline(&self, ctx: NodeContext, text: &str) -> VisitResult
+```
+
+###### visit_subscript()
+
+Visit subscript elements `<sub>`.
+
+**Signature:**
+
+```rust
+pub fn visit_subscript(&self, ctx: NodeContext, text: &str) -> VisitResult
+```
+
+###### visit_superscript()
+
+Visit superscript elements `<sup>`.
+
+**Signature:**
+
+```rust
+pub fn visit_superscript(&self, ctx: NodeContext, text: &str) -> VisitResult
+```
+
+###### visit_mark()
+
+Visit mark/highlight elements `<mark>`.
+
+**Signature:**
+
+```rust
+pub fn visit_mark(&self, ctx: NodeContext, text: &str) -> VisitResult
+```
+
+###### visit_line_break()
+
+Visit line break elements `<br>`.
+
+**Signature:**
+
+```rust
+pub fn visit_line_break(&self, ctx: NodeContext) -> VisitResult
+```
+
+###### visit_horizontal_rule()
+
+Visit horizontal rule elements `<hr>`.
+
+**Signature:**
+
+```rust
+pub fn visit_horizontal_rule(&self, ctx: NodeContext) -> VisitResult
+```
+
+###### visit_custom_element()
+
+Visit custom elements (web components) or unknown tags.
+
+**Signature:**
+
+```rust
+pub fn visit_custom_element(&self, ctx: NodeContext, tag_name: &str, html: &str) -> VisitResult
+```
+
+###### visit_definition_list_start()
+
+Visit definition list `<dl>`.
+
+**Signature:**
+
+```rust
+pub fn visit_definition_list_start(&self, ctx: NodeContext) -> VisitResult
+```
+
+###### visit_definition_term()
+
+Visit definition term `<dt>`.
+
+**Signature:**
+
+```rust
+pub fn visit_definition_term(&self, ctx: NodeContext, text: &str) -> VisitResult
+```
+
+###### visit_definition_description()
+
+Visit definition description `<dd>`.
+
+**Signature:**
+
+```rust
+pub fn visit_definition_description(&self, ctx: NodeContext, text: &str) -> VisitResult
+```
+
+###### visit_definition_list_end()
+
+Called after processing a definition list `</dl>`.
+
+**Signature:**
+
+```rust
+pub fn visit_definition_list_end(&self, ctx: NodeContext, output: &str) -> VisitResult
+```
+
+###### visit_form()
+
+Visit form elements `<form>`.
+
+**Signature:**
+
+```rust
+pub fn visit_form(&self, ctx: NodeContext, action: Option<String>, method: Option<String>) -> VisitResult
+```
+
+###### visit_input()
+
+Visit input elements `<input>`.
+
+**Signature:**
+
+```rust
+pub fn visit_input(&self, ctx: NodeContext, input_type: &str, name: Option<String>, value: Option<String>) -> VisitResult
+```
+
+###### visit_button()
+
+Visit button elements `<button>`.
+
+**Signature:**
+
+```rust
+pub fn visit_button(&self, ctx: NodeContext, text: &str) -> VisitResult
+```
+
+###### visit_audio()
+
+Visit audio elements `<audio>`.
+
+**Signature:**
+
+```rust
+pub fn visit_audio(&self, ctx: NodeContext, src: Option<String>) -> VisitResult
+```
+
+###### visit_video()
+
+Visit video elements `<video>`.
+
+**Signature:**
+
+```rust
+pub fn visit_video(&self, ctx: NodeContext, src: Option<String>) -> VisitResult
+```
+
+###### visit_iframe()
+
+Visit iframe elements `<iframe>`.
+
+**Signature:**
+
+```rust
+pub fn visit_iframe(&self, ctx: NodeContext, src: Option<String>) -> VisitResult
+```
+
+###### visit_details()
+
+Visit details elements `<details>`.
+
+**Signature:**
+
+```rust
+pub fn visit_details(&self, ctx: NodeContext, open: bool) -> VisitResult
+```
+
+###### visit_summary()
+
+Visit summary elements `<summary>`.
+
+**Signature:**
+
+```rust
+pub fn visit_summary(&self, ctx: NodeContext, text: &str) -> VisitResult
+```
+
+###### visit_figure_start()
+
+Visit figure elements `<figure>`.
+
+**Signature:**
+
+```rust
+pub fn visit_figure_start(&self, ctx: NodeContext) -> VisitResult
+```
+
+###### visit_figcaption()
+
+Visit figcaption elements `<figcaption>`.
+
+**Signature:**
+
+```rust
+pub fn visit_figcaption(&self, ctx: NodeContext, text: &str) -> VisitResult
+```
+
+###### visit_figure_end()
+
+Called after processing a figure `</figure>`.
+
+**Signature:**
+
+```rust
+pub fn visit_figure_end(&self, ctx: NodeContext, output: &str) -> VisitResult
+```
+
+
+---
+
 #### ImageMetadata
 
 Image metadata with source and dimensions.
@@ -386,7 +826,7 @@ Appropriate `LinkType` based on protocol and content.
 **Signature:**
 
 ```rust
-pub fn classify_link(href: String) -> LinkType
+pub fn classify_link(href: &str) -> LinkType
 ```
 
 

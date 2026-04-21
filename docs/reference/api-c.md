@@ -84,7 +84,7 @@ Use `ConversionOptions.builder()` to construct, or `the default constructor` for
 | `max_image_size` | `uint64_t` | `5242880` | Maximum decoded image size in bytes (default 5MB). |
 | `capture_svg` | `bool` | `false` | Capture SVG elements as images. |
 | `infer_dimensions` | `bool` | `true` | Infer image dimensions from data. |
-| `max_depth` | `uintptr_t*` | `NULL` | Maximum DOM traversal depth. `None` means unlimited. When set, subtrees beyond this depth are silently truncated. |
+| `max_depth` | `uintptr_t*` | `NULL` | Maximum DOM traversal depth. `NULL` means unlimited. When set, subtrees beyond this depth are silently truncated. |
 
 ##### Methods
 
@@ -146,11 +146,11 @@ metadata, extracted tables, images, and processing warnings.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `content` | `const char**` | `NULL` | Converted text output (markdown, djot, or plain text). `None` when `output_format` is set to `OutputFormat.None`, indicating extraction-only mode. |
-| `document` | `HtmDocumentStructure*` | `NULL` | Structured document tree with semantic elements. Populated when `include_document_structure` is `True` in options. |
+| `content` | `const char**` | `NULL` | Converted text output (markdown, djot, or plain text). `NULL` when `output_format` is set to `OutputFormat.None`, indicating extraction-only mode. |
+| `document` | `HtmDocumentStructure*` | `NULL` | Structured document tree with semantic elements. Populated when `include_document_structure` is `true` in options. |
 | `metadata` | `HtmHtmlMetadata` | — | Extracted HTML metadata (title, OG, links, images, structured data). |
 | `tables` | `HtmTableData*` | `NULL` | Extracted tables with structured cell data and markdown representation. |
-| `images` | `const char**` | `NULL` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `True` in options. |
+| `images` | `const char**` | `NULL` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `true` in options. |
 | `warnings` | `HtmProcessingWarning*` | `NULL` | Non-fatal processing warnings. |
 
 
@@ -335,6 +335,446 @@ suitable for serialization and transmission across language boundaries.
 | `links` | `HtmLinkMetadata*` | `NULL` | Extracted hyperlinks with type classification |
 | `images` | `HtmImageMetadata*` | `NULL` | Extracted images with source and dimensions |
 | `structured_data` | `HtmStructuredData*` | `NULL` | Extracted structured data blocks |
+
+
+---
+
+#### HtmHtmlVisitor
+
+Visitor trait for HTML→Markdown conversion.
+
+Implement this trait to customize the conversion behavior for any HTML element type.
+All methods have default implementations that return `VisitResult.Continue`, allowing
+selective override of only the elements you care about.
+
+# Method Naming Convention
+
+- `visit_*_start`: Called before entering an element (pre-order traversal)
+- `visit_*_end`: Called after exiting an element (post-order traversal)
+- `visit_*`: Called for specific element types (e.g., `visit_link`, `visit_image`)
+
+# Execution Order
+
+For a typical element like `<div><p>text</p></div>`:
+1. `visit_element_start` for `<div>`
+2. `visit_element_start` for `<p>`
+3. `visit_text` for "text"
+4. `visit_element_end` for `<p>`
+5. `visit_element_end` for `</div>`
+
+# Performance Notes
+
+- `visit_text` is the most frequently called method (~100+ times per document)
+- Return `VisitResult.Continue` quickly for elements you don't need to customize
+- Avoid heavy computation in visitor methods; consider caching if needed
+
+##### Methods
+
+###### htm_visit_element_start()
+
+Called before entering any element.
+
+This is the first callback invoked for every HTML element, allowing
+visitors to implement generic element handling before tag-specific logic.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_element_start(HtmNodeContext ctx);
+```
+
+###### htm_visit_element_end()
+
+Called after exiting any element.
+
+Receives the default markdown output that would be generated.
+Visitors can inspect or replace this output.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_element_end(HtmNodeContext ctx, const char* output);
+```
+
+###### htm_visit_text()
+
+Visit text nodes (most frequent callback - ~100+ per document).
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_text(HtmNodeContext ctx, const char* text);
+```
+
+###### htm_visit_link()
+
+Visit anchor links `<a href="...">`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_link(HtmNodeContext ctx, const char* href, const char* text, const char* title);
+```
+
+###### htm_visit_image()
+
+Visit images `<img src="...">`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_image(HtmNodeContext ctx, const char* src, const char* alt, const char* title);
+```
+
+###### htm_visit_heading()
+
+Visit heading elements `<h1>` through `<h6>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_heading(HtmNodeContext ctx, uint32_t level, const char* text, const char* id);
+```
+
+###### htm_visit_code_block()
+
+Visit code blocks `<pre><code>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_code_block(HtmNodeContext ctx, const char* lang, const char* code);
+```
+
+###### htm_visit_code_inline()
+
+Visit inline code `<code>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_code_inline(HtmNodeContext ctx, const char* code);
+```
+
+###### htm_visit_list_item()
+
+Visit list items `<li>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_list_item(HtmNodeContext ctx, bool ordered, const char* marker, const char* text);
+```
+
+###### htm_visit_list_start()
+
+Called before processing a list `<ul>` or `<ol>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_list_start(HtmNodeContext ctx, bool ordered);
+```
+
+###### htm_visit_list_end()
+
+Called after processing a list `</ul>` or `</ol>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_list_end(HtmNodeContext ctx, bool ordered, const char* output);
+```
+
+###### htm_visit_table_start()
+
+Called before processing a table `<table>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_table_start(HtmNodeContext ctx);
+```
+
+###### htm_visit_table_row()
+
+Visit table rows `<tr>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_table_row(HtmNodeContext ctx, const char** cells, bool is_header);
+```
+
+###### htm_visit_table_end()
+
+Called after processing a table `</table>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_table_end(HtmNodeContext ctx, const char* output);
+```
+
+###### htm_visit_blockquote()
+
+Visit blockquote elements `<blockquote>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_blockquote(HtmNodeContext ctx, const char* content, uintptr_t depth);
+```
+
+###### htm_visit_strong()
+
+Visit strong/bold elements `<strong>`, `<b>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_strong(HtmNodeContext ctx, const char* text);
+```
+
+###### htm_visit_emphasis()
+
+Visit emphasis/italic elements `<em>`, `<i>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_emphasis(HtmNodeContext ctx, const char* text);
+```
+
+###### htm_visit_strikethrough()
+
+Visit strikethrough elements `<s>`, `<del>`, `<strike>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_strikethrough(HtmNodeContext ctx, const char* text);
+```
+
+###### htm_visit_underline()
+
+Visit underline elements `<u>`, `<ins>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_underline(HtmNodeContext ctx, const char* text);
+```
+
+###### htm_visit_subscript()
+
+Visit subscript elements `<sub>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_subscript(HtmNodeContext ctx, const char* text);
+```
+
+###### htm_visit_superscript()
+
+Visit superscript elements `<sup>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_superscript(HtmNodeContext ctx, const char* text);
+```
+
+###### htm_visit_mark()
+
+Visit mark/highlight elements `<mark>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_mark(HtmNodeContext ctx, const char* text);
+```
+
+###### htm_visit_line_break()
+
+Visit line break elements `<br>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_line_break(HtmNodeContext ctx);
+```
+
+###### htm_visit_horizontal_rule()
+
+Visit horizontal rule elements `<hr>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_horizontal_rule(HtmNodeContext ctx);
+```
+
+###### htm_visit_custom_element()
+
+Visit custom elements (web components) or unknown tags.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_custom_element(HtmNodeContext ctx, const char* tag_name, const char* html);
+```
+
+###### htm_visit_definition_list_start()
+
+Visit definition list `<dl>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_definition_list_start(HtmNodeContext ctx);
+```
+
+###### htm_visit_definition_term()
+
+Visit definition term `<dt>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_definition_term(HtmNodeContext ctx, const char* text);
+```
+
+###### htm_visit_definition_description()
+
+Visit definition description `<dd>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_definition_description(HtmNodeContext ctx, const char* text);
+```
+
+###### htm_visit_definition_list_end()
+
+Called after processing a definition list `</dl>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_definition_list_end(HtmNodeContext ctx, const char* output);
+```
+
+###### htm_visit_form()
+
+Visit form elements `<form>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_form(HtmNodeContext ctx, const char* action, const char* method);
+```
+
+###### htm_visit_input()
+
+Visit input elements `<input>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_input(HtmNodeContext ctx, const char* input_type, const char* name, const char* value);
+```
+
+###### htm_visit_button()
+
+Visit button elements `<button>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_button(HtmNodeContext ctx, const char* text);
+```
+
+###### htm_visit_audio()
+
+Visit audio elements `<audio>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_audio(HtmNodeContext ctx, const char* src);
+```
+
+###### htm_visit_video()
+
+Visit video elements `<video>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_video(HtmNodeContext ctx, const char* src);
+```
+
+###### htm_visit_iframe()
+
+Visit iframe elements `<iframe>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_iframe(HtmNodeContext ctx, const char* src);
+```
+
+###### htm_visit_details()
+
+Visit details elements `<details>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_details(HtmNodeContext ctx, bool open);
+```
+
+###### htm_visit_summary()
+
+Visit summary elements `<summary>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_summary(HtmNodeContext ctx, const char* text);
+```
+
+###### htm_visit_figure_start()
+
+Visit figure elements `<figure>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_figure_start(HtmNodeContext ctx);
+```
+
+###### htm_visit_figcaption()
+
+Visit figcaption elements `<figcaption>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_figcaption(HtmNodeContext ctx, const char* text);
+```
+
+###### htm_visit_figure_end()
+
+Called after processing a figure `</figure>`.
+
+**Signature:**
+
+```c
+HtmVisitResult htm_visit_figure_end(HtmNodeContext ctx, const char* output);
+```
 
 
 ---
@@ -1034,3 +1474,4 @@ Errors that can occur during HTML to Markdown conversion.
 
 
 ---
+

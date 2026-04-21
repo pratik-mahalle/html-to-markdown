@@ -84,7 +84,7 @@ Use `ConversionOptions.builder()` to construct, or `the default constructor` for
 | `maxImageSize` | `number` | `5242880` | Maximum decoded image size in bytes (default 5MB). |
 | `captureSvg` | `boolean` | `false` | Capture SVG elements as images. |
 | `inferDimensions` | `boolean` | `true` | Infer image dimensions from data. |
-| `maxDepth` | `number | null` | `null` | Maximum DOM traversal depth. `None` means unlimited. When set, subtrees beyond this depth are silently truncated. |
+| `maxDepth` | `number | null` | `null` | Maximum DOM traversal depth. `null` means unlimited. When set, subtrees beyond this depth are silently truncated. |
 
 ##### Methods
 
@@ -146,11 +146,11 @@ metadata, extracted tables, images, and processing warnings.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `content` | `string | null` | `null` | Converted text output (markdown, djot, or plain text). `None` when `output_format` is set to `OutputFormat.None`, indicating extraction-only mode. |
-| `document` | `DocumentStructure | null` | `null` | Structured document tree with semantic elements. Populated when `include_document_structure` is `True` in options. |
+| `content` | `string | null` | `null` | Converted text output (markdown, djot, or plain text). `null` when `output_format` is set to `OutputFormat.None`, indicating extraction-only mode. |
+| `document` | `DocumentStructure | null` | `null` | Structured document tree with semantic elements. Populated when `include_document_structure` is `true` in options. |
 | `metadata` | `HtmlMetadata` | — | Extracted HTML metadata (title, OG, links, images, structured data). |
 | `tables` | `Array<TableData>` | `[]` | Extracted tables with structured cell data and markdown representation. |
-| `images` | `Array<string>` | `[]` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `True` in options. |
+| `images` | `Array<string>` | `[]` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `true` in options. |
 | `warnings` | `Array<ProcessingWarning>` | `[]` | Non-fatal processing warnings. |
 
 
@@ -335,6 +335,446 @@ suitable for serialization and transmission across language boundaries.
 | `links` | `Array<LinkMetadata>` | `[]` | Extracted hyperlinks with type classification |
 | `images` | `Array<ImageMetadata>` | `[]` | Extracted images with source and dimensions |
 | `structuredData` | `Array<StructuredData>` | `[]` | Extracted structured data blocks |
+
+
+---
+
+#### HtmlVisitor
+
+Visitor trait for HTML→Markdown conversion.
+
+Implement this trait to customize the conversion behavior for any HTML element type.
+All methods have default implementations that return `VisitResult.Continue`, allowing
+selective override of only the elements you care about.
+
+# Method Naming Convention
+
+- `visit_*_start`: Called before entering an element (pre-order traversal)
+- `visit_*_end`: Called after exiting an element (post-order traversal)
+- `visit_*`: Called for specific element types (e.g., `visit_link`, `visit_image`)
+
+# Execution Order
+
+For a typical element like `<div><p>text</p></div>`:
+1. `visit_element_start` for `<div>`
+2. `visit_element_start` for `<p>`
+3. `visit_text` for "text"
+4. `visit_element_end` for `<p>`
+5. `visit_element_end` for `</div>`
+
+# Performance Notes
+
+- `visit_text` is the most frequently called method (~100+ times per document)
+- Return `VisitResult.Continue` quickly for elements you don't need to customize
+- Avoid heavy computation in visitor methods; consider caching if needed
+
+##### Methods
+
+###### visitElementStart()
+
+Called before entering any element.
+
+This is the first callback invoked for every HTML element, allowing
+visitors to implement generic element handling before tag-specific logic.
+
+**Signature:**
+
+```typescript
+visitElementStart(ctx: NodeContext): VisitResult
+```
+
+###### visitElementEnd()
+
+Called after exiting any element.
+
+Receives the default markdown output that would be generated.
+Visitors can inspect or replace this output.
+
+**Signature:**
+
+```typescript
+visitElementEnd(ctx: NodeContext, output: string): VisitResult
+```
+
+###### visitText()
+
+Visit text nodes (most frequent callback - ~100+ per document).
+
+**Signature:**
+
+```typescript
+visitText(ctx: NodeContext, text: string): VisitResult
+```
+
+###### visitLink()
+
+Visit anchor links `<a href="...">`.
+
+**Signature:**
+
+```typescript
+visitLink(ctx: NodeContext, href: string, text: string, title: string): VisitResult
+```
+
+###### visitImage()
+
+Visit images `<img src="...">`.
+
+**Signature:**
+
+```typescript
+visitImage(ctx: NodeContext, src: string, alt: string, title: string): VisitResult
+```
+
+###### visitHeading()
+
+Visit heading elements `<h1>` through `<h6>`.
+
+**Signature:**
+
+```typescript
+visitHeading(ctx: NodeContext, level: number, text: string, id: string): VisitResult
+```
+
+###### visitCodeBlock()
+
+Visit code blocks `<pre><code>`.
+
+**Signature:**
+
+```typescript
+visitCodeBlock(ctx: NodeContext, lang: string, code: string): VisitResult
+```
+
+###### visitCodeInline()
+
+Visit inline code `<code>`.
+
+**Signature:**
+
+```typescript
+visitCodeInline(ctx: NodeContext, code: string): VisitResult
+```
+
+###### visitListItem()
+
+Visit list items `<li>`.
+
+**Signature:**
+
+```typescript
+visitListItem(ctx: NodeContext, ordered: boolean, marker: string, text: string): VisitResult
+```
+
+###### visitListStart()
+
+Called before processing a list `<ul>` or `<ol>`.
+
+**Signature:**
+
+```typescript
+visitListStart(ctx: NodeContext, ordered: boolean): VisitResult
+```
+
+###### visitListEnd()
+
+Called after processing a list `</ul>` or `</ol>`.
+
+**Signature:**
+
+```typescript
+visitListEnd(ctx: NodeContext, ordered: boolean, output: string): VisitResult
+```
+
+###### visitTableStart()
+
+Called before processing a table `<table>`.
+
+**Signature:**
+
+```typescript
+visitTableStart(ctx: NodeContext): VisitResult
+```
+
+###### visitTableRow()
+
+Visit table rows `<tr>`.
+
+**Signature:**
+
+```typescript
+visitTableRow(ctx: NodeContext, cells: Array<string>, isHeader: boolean): VisitResult
+```
+
+###### visitTableEnd()
+
+Called after processing a table `</table>`.
+
+**Signature:**
+
+```typescript
+visitTableEnd(ctx: NodeContext, output: string): VisitResult
+```
+
+###### visitBlockquote()
+
+Visit blockquote elements `<blockquote>`.
+
+**Signature:**
+
+```typescript
+visitBlockquote(ctx: NodeContext, content: string, depth: number): VisitResult
+```
+
+###### visitStrong()
+
+Visit strong/bold elements `<strong>`, `<b>`.
+
+**Signature:**
+
+```typescript
+visitStrong(ctx: NodeContext, text: string): VisitResult
+```
+
+###### visitEmphasis()
+
+Visit emphasis/italic elements `<em>`, `<i>`.
+
+**Signature:**
+
+```typescript
+visitEmphasis(ctx: NodeContext, text: string): VisitResult
+```
+
+###### visitStrikethrough()
+
+Visit strikethrough elements `<s>`, `<del>`, `<strike>`.
+
+**Signature:**
+
+```typescript
+visitStrikethrough(ctx: NodeContext, text: string): VisitResult
+```
+
+###### visitUnderline()
+
+Visit underline elements `<u>`, `<ins>`.
+
+**Signature:**
+
+```typescript
+visitUnderline(ctx: NodeContext, text: string): VisitResult
+```
+
+###### visitSubscript()
+
+Visit subscript elements `<sub>`.
+
+**Signature:**
+
+```typescript
+visitSubscript(ctx: NodeContext, text: string): VisitResult
+```
+
+###### visitSuperscript()
+
+Visit superscript elements `<sup>`.
+
+**Signature:**
+
+```typescript
+visitSuperscript(ctx: NodeContext, text: string): VisitResult
+```
+
+###### visitMark()
+
+Visit mark/highlight elements `<mark>`.
+
+**Signature:**
+
+```typescript
+visitMark(ctx: NodeContext, text: string): VisitResult
+```
+
+###### visitLineBreak()
+
+Visit line break elements `<br>`.
+
+**Signature:**
+
+```typescript
+visitLineBreak(ctx: NodeContext): VisitResult
+```
+
+###### visitHorizontalRule()
+
+Visit horizontal rule elements `<hr>`.
+
+**Signature:**
+
+```typescript
+visitHorizontalRule(ctx: NodeContext): VisitResult
+```
+
+###### visitCustomElement()
+
+Visit custom elements (web components) or unknown tags.
+
+**Signature:**
+
+```typescript
+visitCustomElement(ctx: NodeContext, tagName: string, html: string): VisitResult
+```
+
+###### visitDefinitionListStart()
+
+Visit definition list `<dl>`.
+
+**Signature:**
+
+```typescript
+visitDefinitionListStart(ctx: NodeContext): VisitResult
+```
+
+###### visitDefinitionTerm()
+
+Visit definition term `<dt>`.
+
+**Signature:**
+
+```typescript
+visitDefinitionTerm(ctx: NodeContext, text: string): VisitResult
+```
+
+###### visitDefinitionDescription()
+
+Visit definition description `<dd>`.
+
+**Signature:**
+
+```typescript
+visitDefinitionDescription(ctx: NodeContext, text: string): VisitResult
+```
+
+###### visitDefinitionListEnd()
+
+Called after processing a definition list `</dl>`.
+
+**Signature:**
+
+```typescript
+visitDefinitionListEnd(ctx: NodeContext, output: string): VisitResult
+```
+
+###### visitForm()
+
+Visit form elements `<form>`.
+
+**Signature:**
+
+```typescript
+visitForm(ctx: NodeContext, action: string, method: string): VisitResult
+```
+
+###### visitInput()
+
+Visit input elements `<input>`.
+
+**Signature:**
+
+```typescript
+visitInput(ctx: NodeContext, inputType: string, name: string, value: string): VisitResult
+```
+
+###### visitButton()
+
+Visit button elements `<button>`.
+
+**Signature:**
+
+```typescript
+visitButton(ctx: NodeContext, text: string): VisitResult
+```
+
+###### visitAudio()
+
+Visit audio elements `<audio>`.
+
+**Signature:**
+
+```typescript
+visitAudio(ctx: NodeContext, src: string): VisitResult
+```
+
+###### visitVideo()
+
+Visit video elements `<video>`.
+
+**Signature:**
+
+```typescript
+visitVideo(ctx: NodeContext, src: string): VisitResult
+```
+
+###### visitIframe()
+
+Visit iframe elements `<iframe>`.
+
+**Signature:**
+
+```typescript
+visitIframe(ctx: NodeContext, src: string): VisitResult
+```
+
+###### visitDetails()
+
+Visit details elements `<details>`.
+
+**Signature:**
+
+```typescript
+visitDetails(ctx: NodeContext, open: boolean): VisitResult
+```
+
+###### visitSummary()
+
+Visit summary elements `<summary>`.
+
+**Signature:**
+
+```typescript
+visitSummary(ctx: NodeContext, text: string): VisitResult
+```
+
+###### visitFigureStart()
+
+Visit figure elements `<figure>`.
+
+**Signature:**
+
+```typescript
+visitFigureStart(ctx: NodeContext): VisitResult
+```
+
+###### visitFigcaption()
+
+Visit figcaption elements `<figcaption>`.
+
+**Signature:**
+
+```typescript
+visitFigcaption(ctx: NodeContext, text: string): VisitResult
+```
+
+###### visitFigureEnd()
+
+Called after processing a figure `</figure>`.
+
+**Signature:**
+
+```typescript
+visitFigureEnd(ctx: NodeContext, output: string): VisitResult
+```
 
 
 ---
@@ -1036,3 +1476,4 @@ Errors are thrown as plain `Error` objects with descriptive messages.
 
 
 ---
+

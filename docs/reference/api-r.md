@@ -84,7 +84,7 @@ Use `ConversionOptions.builder()` to construct, or `the default constructor` for
 | `max_image_size` | `integer` | `5242880` | Maximum decoded image size in bytes (default 5MB). |
 | `capture_svg` | `logical` | `false` | Capture SVG elements as images. |
 | `infer_dimensions` | `logical` | `true` | Infer image dimensions from data. |
-| `max_depth` | `integer or NULL` | `NULL` | Maximum DOM traversal depth. `None` means unlimited. When set, subtrees beyond this depth are silently truncated. |
+| `max_depth` | `integer or NULL` | `NULL` | Maximum DOM traversal depth. `NULL` means unlimited. When set, subtrees beyond this depth are silently truncated. |
 
 ##### Methods
 
@@ -146,11 +146,11 @@ metadata, extracted tables, images, and processing warnings.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `content` | `character or NULL` | `NULL` | Converted text output (markdown, djot, or plain text). `None` when `output_format` is set to `OutputFormat.None`, indicating extraction-only mode. |
-| `document` | `DocumentStructure or NULL` | `NULL` | Structured document tree with semantic elements. Populated when `include_document_structure` is `True` in options. |
+| `content` | `character or NULL` | `NULL` | Converted text output (markdown, djot, or plain text). `NULL` when `output_format` is set to `OutputFormat.None`, indicating extraction-only mode. |
+| `document` | `DocumentStructure or NULL` | `NULL` | Structured document tree with semantic elements. Populated when `include_document_structure` is `true` in options. |
 | `metadata` | `HtmlMetadata` | — | Extracted HTML metadata (title, OG, links, images, structured data). |
 | `tables` | `list` | `list()` | Extracted tables with structured cell data and markdown representation. |
-| `images` | `list` | `list()` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `True` in options. |
+| `images` | `list` | `list()` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `true` in options. |
 | `warnings` | `list` | `list()` | Non-fatal processing warnings. |
 
 
@@ -335,6 +335,446 @@ suitable for serialization and transmission across language boundaries.
 | `links` | `list` | `list()` | Extracted hyperlinks with type classification |
 | `images` | `list` | `list()` | Extracted images with source and dimensions |
 | `structured_data` | `list` | `list()` | Extracted structured data blocks |
+
+
+---
+
+#### HtmlVisitor
+
+Visitor trait for HTML→Markdown conversion.
+
+Implement this trait to customize the conversion behavior for any HTML element type.
+All methods have default implementations that return `VisitResult.Continue`, allowing
+selective override of only the elements you care about.
+
+# Method Naming Convention
+
+- `visit_*_start`: Called before entering an element (pre-order traversal)
+- `visit_*_end`: Called after exiting an element (post-order traversal)
+- `visit_*`: Called for specific element types (e.g., `visit_link`, `visit_image`)
+
+# Execution Order
+
+For a typical element like `<div><p>text</p></div>`:
+1. `visit_element_start` for `<div>`
+2. `visit_element_start` for `<p>`
+3. `visit_text` for "text"
+4. `visit_element_end` for `<p>`
+5. `visit_element_end` for `</div>`
+
+# Performance Notes
+
+- `visit_text` is the most frequently called method (~100+ times per document)
+- Return `VisitResult.Continue` quickly for elements you don't need to customize
+- Avoid heavy computation in visitor methods; consider caching if needed
+
+##### Methods
+
+###### visit_element_start()
+
+Called before entering any element.
+
+This is the first callback invoked for every HTML element, allowing
+visitors to implement generic element handling before tag-specific logic.
+
+**Signature:**
+
+```r
+visit_element_start(ctx)
+```
+
+###### visit_element_end()
+
+Called after exiting any element.
+
+Receives the default markdown output that would be generated.
+Visitors can inspect or replace this output.
+
+**Signature:**
+
+```r
+visit_element_end(ctx, output)
+```
+
+###### visit_text()
+
+Visit text nodes (most frequent callback - ~100+ per document).
+
+**Signature:**
+
+```r
+visit_text(ctx, text)
+```
+
+###### visit_link()
+
+Visit anchor links `<a href="...">`.
+
+**Signature:**
+
+```r
+visit_link(ctx, href, text, title)
+```
+
+###### visit_image()
+
+Visit images `<img src="...">`.
+
+**Signature:**
+
+```r
+visit_image(ctx, src, alt, title)
+```
+
+###### visit_heading()
+
+Visit heading elements `<h1>` through `<h6>`.
+
+**Signature:**
+
+```r
+visit_heading(ctx, level, text, id)
+```
+
+###### visit_code_block()
+
+Visit code blocks `<pre><code>`.
+
+**Signature:**
+
+```r
+visit_code_block(ctx, lang, code)
+```
+
+###### visit_code_inline()
+
+Visit inline code `<code>`.
+
+**Signature:**
+
+```r
+visit_code_inline(ctx, code)
+```
+
+###### visit_list_item()
+
+Visit list items `<li>`.
+
+**Signature:**
+
+```r
+visit_list_item(ctx, ordered, marker, text)
+```
+
+###### visit_list_start()
+
+Called before processing a list `<ul>` or `<ol>`.
+
+**Signature:**
+
+```r
+visit_list_start(ctx, ordered)
+```
+
+###### visit_list_end()
+
+Called after processing a list `</ul>` or `</ol>`.
+
+**Signature:**
+
+```r
+visit_list_end(ctx, ordered, output)
+```
+
+###### visit_table_start()
+
+Called before processing a table `<table>`.
+
+**Signature:**
+
+```r
+visit_table_start(ctx)
+```
+
+###### visit_table_row()
+
+Visit table rows `<tr>`.
+
+**Signature:**
+
+```r
+visit_table_row(ctx, cells, is_header)
+```
+
+###### visit_table_end()
+
+Called after processing a table `</table>`.
+
+**Signature:**
+
+```r
+visit_table_end(ctx, output)
+```
+
+###### visit_blockquote()
+
+Visit blockquote elements `<blockquote>`.
+
+**Signature:**
+
+```r
+visit_blockquote(ctx, content, depth)
+```
+
+###### visit_strong()
+
+Visit strong/bold elements `<strong>`, `<b>`.
+
+**Signature:**
+
+```r
+visit_strong(ctx, text)
+```
+
+###### visit_emphasis()
+
+Visit emphasis/italic elements `<em>`, `<i>`.
+
+**Signature:**
+
+```r
+visit_emphasis(ctx, text)
+```
+
+###### visit_strikethrough()
+
+Visit strikethrough elements `<s>`, `<del>`, `<strike>`.
+
+**Signature:**
+
+```r
+visit_strikethrough(ctx, text)
+```
+
+###### visit_underline()
+
+Visit underline elements `<u>`, `<ins>`.
+
+**Signature:**
+
+```r
+visit_underline(ctx, text)
+```
+
+###### visit_subscript()
+
+Visit subscript elements `<sub>`.
+
+**Signature:**
+
+```r
+visit_subscript(ctx, text)
+```
+
+###### visit_superscript()
+
+Visit superscript elements `<sup>`.
+
+**Signature:**
+
+```r
+visit_superscript(ctx, text)
+```
+
+###### visit_mark()
+
+Visit mark/highlight elements `<mark>`.
+
+**Signature:**
+
+```r
+visit_mark(ctx, text)
+```
+
+###### visit_line_break()
+
+Visit line break elements `<br>`.
+
+**Signature:**
+
+```r
+visit_line_break(ctx)
+```
+
+###### visit_horizontal_rule()
+
+Visit horizontal rule elements `<hr>`.
+
+**Signature:**
+
+```r
+visit_horizontal_rule(ctx)
+```
+
+###### visit_custom_element()
+
+Visit custom elements (web components) or unknown tags.
+
+**Signature:**
+
+```r
+visit_custom_element(ctx, tag_name, html)
+```
+
+###### visit_definition_list_start()
+
+Visit definition list `<dl>`.
+
+**Signature:**
+
+```r
+visit_definition_list_start(ctx)
+```
+
+###### visit_definition_term()
+
+Visit definition term `<dt>`.
+
+**Signature:**
+
+```r
+visit_definition_term(ctx, text)
+```
+
+###### visit_definition_description()
+
+Visit definition description `<dd>`.
+
+**Signature:**
+
+```r
+visit_definition_description(ctx, text)
+```
+
+###### visit_definition_list_end()
+
+Called after processing a definition list `</dl>`.
+
+**Signature:**
+
+```r
+visit_definition_list_end(ctx, output)
+```
+
+###### visit_form()
+
+Visit form elements `<form>`.
+
+**Signature:**
+
+```r
+visit_form(ctx, action, method)
+```
+
+###### visit_input()
+
+Visit input elements `<input>`.
+
+**Signature:**
+
+```r
+visit_input(ctx, input_type, name, value)
+```
+
+###### visit_button()
+
+Visit button elements `<button>`.
+
+**Signature:**
+
+```r
+visit_button(ctx, text)
+```
+
+###### visit_audio()
+
+Visit audio elements `<audio>`.
+
+**Signature:**
+
+```r
+visit_audio(ctx, src)
+```
+
+###### visit_video()
+
+Visit video elements `<video>`.
+
+**Signature:**
+
+```r
+visit_video(ctx, src)
+```
+
+###### visit_iframe()
+
+Visit iframe elements `<iframe>`.
+
+**Signature:**
+
+```r
+visit_iframe(ctx, src)
+```
+
+###### visit_details()
+
+Visit details elements `<details>`.
+
+**Signature:**
+
+```r
+visit_details(ctx, open)
+```
+
+###### visit_summary()
+
+Visit summary elements `<summary>`.
+
+**Signature:**
+
+```r
+visit_summary(ctx, text)
+```
+
+###### visit_figure_start()
+
+Visit figure elements `<figure>`.
+
+**Signature:**
+
+```r
+visit_figure_start(ctx)
+```
+
+###### visit_figcaption()
+
+Visit figcaption elements `<figcaption>`.
+
+**Signature:**
+
+```r
+visit_figcaption(ctx, text)
+```
+
+###### visit_figure_end()
+
+Called after processing a figure `</figure>`.
+
+**Signature:**
+
+```r
+visit_figure_end(ctx, output)
+```
 
 
 ---

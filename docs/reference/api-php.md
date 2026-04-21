@@ -84,7 +84,7 @@ Use `ConversionOptions::builder()` to construct, or `the default constructor` fo
 | `maxImageSize` | `int` | `5242880` | Maximum decoded image size in bytes (default 5MB). |
 | `captureSvg` | `bool` | `false` | Capture SVG elements as images. |
 | `inferDimensions` | `bool` | `true` | Infer image dimensions from data. |
-| `maxDepth` | `?int` | `null` | Maximum DOM traversal depth. `None` means unlimited. When set, subtrees beyond this depth are silently truncated. |
+| `maxDepth` | `?int` | `null` | Maximum DOM traversal depth. `null` means unlimited. When set, subtrees beyond this depth are silently truncated. |
 
 ##### Methods
 
@@ -146,11 +146,11 @@ metadata, extracted tables, images, and processing warnings.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `content` | `?string` | `null` | Converted text output (markdown, djot, or plain text). `None` when `output_format` is set to `OutputFormat.None`, indicating extraction-only mode. |
-| `document` | `?DocumentStructure` | `null` | Structured document tree with semantic elements. Populated when `include_document_structure` is `True` in options. |
+| `content` | `?string` | `null` | Converted text output (markdown, djot, or plain text). `null` when `output_format` is set to `OutputFormat::None`, indicating extraction-only mode. |
+| `document` | `?DocumentStructure` | `null` | Structured document tree with semantic elements. Populated when `include_document_structure` is `true` in options. |
 | `metadata` | `HtmlMetadata` | — | Extracted HTML metadata (title, OG, links, images, structured data). |
 | `tables` | `array<TableData>` | `[]` | Extracted tables with structured cell data and markdown representation. |
-| `images` | `array<string>` | `[]` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `True` in options. |
+| `images` | `array<string>` | `[]` | Extracted inline images (data URIs and SVGs). Populated when `extract_images` is `true` in options. |
 | `warnings` | `array<ProcessingWarning>` | `[]` | Non-fatal processing warnings. |
 
 
@@ -335,6 +335,446 @@ suitable for serialization and transmission across language boundaries.
 | `links` | `array<LinkMetadata>` | `[]` | Extracted hyperlinks with type classification |
 | `images` | `array<ImageMetadata>` | `[]` | Extracted images with source and dimensions |
 | `structuredData` | `array<StructuredData>` | `[]` | Extracted structured data blocks |
+
+
+---
+
+#### HtmlVisitor
+
+Visitor trait for HTML→Markdown conversion.
+
+Implement this trait to customize the conversion behavior for any HTML element type.
+All methods have default implementations that return `VisitResult::Continue`, allowing
+selective override of only the elements you care about.
+
+# Method Naming Convention
+
+- `visit_*_start`: Called before entering an element (pre-order traversal)
+- `visit_*_end`: Called after exiting an element (post-order traversal)
+- `visit_*`: Called for specific element types (e.g., `visit_link`, `visit_image`)
+
+# Execution Order
+
+For a typical element like `<div><p>text</p></div>`:
+1. `visit_element_start` for `<div>`
+2. `visit_element_start` for `<p>`
+3. `visit_text` for "text"
+4. `visit_element_end` for `<p>`
+5. `visit_element_end` for `</div>`
+
+# Performance Notes
+
+- `visit_text` is the most frequently called method (~100+ times per document)
+- Return `VisitResult::Continue` quickly for elements you don't need to customize
+- Avoid heavy computation in visitor methods; consider caching if needed
+
+##### Methods
+
+###### visitElementStart()
+
+Called before entering any element.
+
+This is the first callback invoked for every HTML element, allowing
+visitors to implement generic element handling before tag-specific logic.
+
+**Signature:**
+
+```php
+public function visitElementStart(NodeContext $ctx): VisitResult
+```
+
+###### visitElementEnd()
+
+Called after exiting any element.
+
+Receives the default markdown output that would be generated.
+Visitors can inspect or replace this output.
+
+**Signature:**
+
+```php
+public function visitElementEnd(NodeContext $ctx, string $output): VisitResult
+```
+
+###### visitText()
+
+Visit text nodes (most frequent callback - ~100+ per document).
+
+**Signature:**
+
+```php
+public function visitText(NodeContext $ctx, string $text): VisitResult
+```
+
+###### visitLink()
+
+Visit anchor links `<a href="...">`.
+
+**Signature:**
+
+```php
+public function visitLink(NodeContext $ctx, string $href, string $text, string $title): VisitResult
+```
+
+###### visitImage()
+
+Visit images `<img src="...">`.
+
+**Signature:**
+
+```php
+public function visitImage(NodeContext $ctx, string $src, string $alt, string $title): VisitResult
+```
+
+###### visitHeading()
+
+Visit heading elements `<h1>` through `<h6>`.
+
+**Signature:**
+
+```php
+public function visitHeading(NodeContext $ctx, int $level, string $text, string $id): VisitResult
+```
+
+###### visitCodeBlock()
+
+Visit code blocks `<pre><code>`.
+
+**Signature:**
+
+```php
+public function visitCodeBlock(NodeContext $ctx, string $lang, string $code): VisitResult
+```
+
+###### visitCodeInline()
+
+Visit inline code `<code>`.
+
+**Signature:**
+
+```php
+public function visitCodeInline(NodeContext $ctx, string $code): VisitResult
+```
+
+###### visitListItem()
+
+Visit list items `<li>`.
+
+**Signature:**
+
+```php
+public function visitListItem(NodeContext $ctx, bool $ordered, string $marker, string $text): VisitResult
+```
+
+###### visitListStart()
+
+Called before processing a list `<ul>` or `<ol>`.
+
+**Signature:**
+
+```php
+public function visitListStart(NodeContext $ctx, bool $ordered): VisitResult
+```
+
+###### visitListEnd()
+
+Called after processing a list `</ul>` or `</ol>`.
+
+**Signature:**
+
+```php
+public function visitListEnd(NodeContext $ctx, bool $ordered, string $output): VisitResult
+```
+
+###### visitTableStart()
+
+Called before processing a table `<table>`.
+
+**Signature:**
+
+```php
+public function visitTableStart(NodeContext $ctx): VisitResult
+```
+
+###### visitTableRow()
+
+Visit table rows `<tr>`.
+
+**Signature:**
+
+```php
+public function visitTableRow(NodeContext $ctx, array<string> $cells, bool $isHeader): VisitResult
+```
+
+###### visitTableEnd()
+
+Called after processing a table `</table>`.
+
+**Signature:**
+
+```php
+public function visitTableEnd(NodeContext $ctx, string $output): VisitResult
+```
+
+###### visitBlockquote()
+
+Visit blockquote elements `<blockquote>`.
+
+**Signature:**
+
+```php
+public function visitBlockquote(NodeContext $ctx, string $content, int $depth): VisitResult
+```
+
+###### visitStrong()
+
+Visit strong/bold elements `<strong>`, `<b>`.
+
+**Signature:**
+
+```php
+public function visitStrong(NodeContext $ctx, string $text): VisitResult
+```
+
+###### visitEmphasis()
+
+Visit emphasis/italic elements `<em>`, `<i>`.
+
+**Signature:**
+
+```php
+public function visitEmphasis(NodeContext $ctx, string $text): VisitResult
+```
+
+###### visitStrikethrough()
+
+Visit strikethrough elements `<s>`, `<del>`, `<strike>`.
+
+**Signature:**
+
+```php
+public function visitStrikethrough(NodeContext $ctx, string $text): VisitResult
+```
+
+###### visitUnderline()
+
+Visit underline elements `<u>`, `<ins>`.
+
+**Signature:**
+
+```php
+public function visitUnderline(NodeContext $ctx, string $text): VisitResult
+```
+
+###### visitSubscript()
+
+Visit subscript elements `<sub>`.
+
+**Signature:**
+
+```php
+public function visitSubscript(NodeContext $ctx, string $text): VisitResult
+```
+
+###### visitSuperscript()
+
+Visit superscript elements `<sup>`.
+
+**Signature:**
+
+```php
+public function visitSuperscript(NodeContext $ctx, string $text): VisitResult
+```
+
+###### visitMark()
+
+Visit mark/highlight elements `<mark>`.
+
+**Signature:**
+
+```php
+public function visitMark(NodeContext $ctx, string $text): VisitResult
+```
+
+###### visitLineBreak()
+
+Visit line break elements `<br>`.
+
+**Signature:**
+
+```php
+public function visitLineBreak(NodeContext $ctx): VisitResult
+```
+
+###### visitHorizontalRule()
+
+Visit horizontal rule elements `<hr>`.
+
+**Signature:**
+
+```php
+public function visitHorizontalRule(NodeContext $ctx): VisitResult
+```
+
+###### visitCustomElement()
+
+Visit custom elements (web components) or unknown tags.
+
+**Signature:**
+
+```php
+public function visitCustomElement(NodeContext $ctx, string $tagName, string $html): VisitResult
+```
+
+###### visitDefinitionListStart()
+
+Visit definition list `<dl>`.
+
+**Signature:**
+
+```php
+public function visitDefinitionListStart(NodeContext $ctx): VisitResult
+```
+
+###### visitDefinitionTerm()
+
+Visit definition term `<dt>`.
+
+**Signature:**
+
+```php
+public function visitDefinitionTerm(NodeContext $ctx, string $text): VisitResult
+```
+
+###### visitDefinitionDescription()
+
+Visit definition description `<dd>`.
+
+**Signature:**
+
+```php
+public function visitDefinitionDescription(NodeContext $ctx, string $text): VisitResult
+```
+
+###### visitDefinitionListEnd()
+
+Called after processing a definition list `</dl>`.
+
+**Signature:**
+
+```php
+public function visitDefinitionListEnd(NodeContext $ctx, string $output): VisitResult
+```
+
+###### visitForm()
+
+Visit form elements `<form>`.
+
+**Signature:**
+
+```php
+public function visitForm(NodeContext $ctx, string $action, string $method): VisitResult
+```
+
+###### visitInput()
+
+Visit input elements `<input>`.
+
+**Signature:**
+
+```php
+public function visitInput(NodeContext $ctx, string $inputType, string $name, string $value): VisitResult
+```
+
+###### visitButton()
+
+Visit button elements `<button>`.
+
+**Signature:**
+
+```php
+public function visitButton(NodeContext $ctx, string $text): VisitResult
+```
+
+###### visitAudio()
+
+Visit audio elements `<audio>`.
+
+**Signature:**
+
+```php
+public function visitAudio(NodeContext $ctx, string $src): VisitResult
+```
+
+###### visitVideo()
+
+Visit video elements `<video>`.
+
+**Signature:**
+
+```php
+public function visitVideo(NodeContext $ctx, string $src): VisitResult
+```
+
+###### visitIframe()
+
+Visit iframe elements `<iframe>`.
+
+**Signature:**
+
+```php
+public function visitIframe(NodeContext $ctx, string $src): VisitResult
+```
+
+###### visitDetails()
+
+Visit details elements `<details>`.
+
+**Signature:**
+
+```php
+public function visitDetails(NodeContext $ctx, bool $open): VisitResult
+```
+
+###### visitSummary()
+
+Visit summary elements `<summary>`.
+
+**Signature:**
+
+```php
+public function visitSummary(NodeContext $ctx, string $text): VisitResult
+```
+
+###### visitFigureStart()
+
+Visit figure elements `<figure>`.
+
+**Signature:**
+
+```php
+public function visitFigureStart(NodeContext $ctx): VisitResult
+```
+
+###### visitFigcaption()
+
+Visit figcaption elements `<figcaption>`.
+
+**Signature:**
+
+```php
+public function visitFigcaption(NodeContext $ctx, string $text): VisitResult
+```
+
+###### visitFigureEnd()
+
+Called after processing a figure `</figure>`.
+
+**Signature:**
+
+```php
+public function visitFigureEnd(NodeContext $ctx, string $output): VisitResult
+```
 
 
 ---
@@ -1034,3 +1474,4 @@ Errors that can occur during HTML to Markdown conversion.
 
 
 ---
+
