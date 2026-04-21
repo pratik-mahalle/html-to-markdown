@@ -33,13 +33,6 @@ use crate::options::ConversionOptions;
 use crate::converter::context::{Context, InlineCollectorHandle};
 use crate::types::structure_collector::StructureCollectorHandle;
 
-/// Converts HTML to Markdown using the provided conversion options.
-///
-/// This is the main entry point for HTML to Markdown conversion.
-pub fn convert_html(html: &str, options: &ConversionOptions) -> Result<String> {
-    convert_html_impl(html, options, None, None, None, None).map(|(md, _)| md)
-}
-
 /// Internal implementation of HTML to Markdown conversion.
 ///
 /// Returns `(markdown, Option<DocumentStructure>)`.  The structure is populated when

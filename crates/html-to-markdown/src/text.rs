@@ -314,36 +314,6 @@ const fn is_unicode_space(ch: char) -> bool {
     )
 }
 
-/// Underline text with a character.
-#[must_use]
-pub fn underline(text: &str, pad_char: char) -> String {
-    let text = text.trim_end();
-    if text.is_empty() {
-        return String::new();
-    }
-    format!("{}\n{}\n\n", text, pad_char.to_string().repeat(text.len()))
-}
-
-/// Indent text with a string prefix.
-#[must_use]
-pub fn indent(text: &str, level: usize, indent_str: &str) -> String {
-    if text.is_empty() {
-        return String::new();
-    }
-
-    let prefix = indent_str.repeat(level);
-    text.lines()
-        .map(|line| {
-            if line.is_empty() {
-                String::new()
-            } else {
-                format!("{prefix}{line}")
-            }
-        })
-        .collect::<Vec<_>>()
-        .join("\n")
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -384,19 +354,5 @@ mod tests {
         assert_eq!(chomp(" text"), (" ", "", "text"));
         assert_eq!(chomp("text "), ("", " ", "text"));
         assert_eq!(chomp(""), ("", "", ""));
-    }
-
-    #[test]
-    fn test_underline() {
-        assert_eq!(underline("Title", '='), "Title\n=====\n\n");
-        assert_eq!(underline("Subtitle", '-'), "Subtitle\n--------\n\n");
-        assert_eq!(underline("", '='), "");
-    }
-
-    #[test]
-    fn test_indent() {
-        assert_eq!(indent("line1\nline2", 1, "\t"), "\tline1\n\tline2");
-        assert_eq!(indent("text", 2, "  "), "    text");
-        assert_eq!(indent("", 1, "\t"), "");
     }
 }

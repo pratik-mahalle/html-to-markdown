@@ -57,16 +57,17 @@ pub mod visitor;
 
 // Internal modules (not part of public API)
 mod convert_api;
+#[allow(dead_code)]
 pub(crate) mod converter;
 mod exports;
 #[cfg(feature = "inline-images")]
 mod inline_images;
 pub(crate) mod prelude;
 mod rcdom;
-pub(crate) mod safety;
 pub(crate) mod text;
 mod validation;
 #[cfg(feature = "visitor")]
+#[allow(clippy::ref_option)]
 pub(crate) mod visitor_helpers;
 pub(crate) mod wrapper;
 
