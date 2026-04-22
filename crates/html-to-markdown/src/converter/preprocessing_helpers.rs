@@ -68,6 +68,17 @@ pub fn has_inline_block_misnest(dom_ctx: &DomContext, parser: &tl::Parser) -> bo
 }
 
 /// Determine if a node should be dropped during preprocessing.
+///
+/// Behavior depends on the [`PreprocessingPreset`]:
+///
+/// - **Minimal**: Only scripts/styles are stripped (handled elsewhere). This function
+///   drops nothing — all structural elements are preserved.
+/// - **Standard** (default): Drops `<nav>` unconditionally. Drops `<header>`, `<footer>`,
+///   and `<aside>` only when they have navigation hints (class/role/aria attributes
+///   indicating site chrome). Drops `<form>` when `remove_forms` is enabled.
+/// - **Aggressive**: Drops `<nav>`, `<footer>`, `<aside>` unconditionally. Drops
+///   `<header>` only with navigation hints (to preserve article titles). Drops `<form>`
+///   when `remove_forms` is enabled.
 pub fn should_drop_for_preprocessing(
     _node_handle: &tl::NodeHandle,
     tag_name: &str,
@@ -76,34 +87,50 @@ pub fn should_drop_for_preprocessing(
     _dom_ctx: &DomContext,
     options: &ConversionOptions,
 ) -> bool {
-    // If preprocessing is globally disabled, don't drop any nodes
+    use crate::options::PreprocessingPreset;
+
     if !options.preprocessing.enabled {
         return false;
     }
 
+    let preset = options.preprocessing.preset;
+
+    // Minimal preset: drop nothing here (scripts/styles handled in earlier pipeline stage).
+    if preset == PreprocessingPreset::Minimal {
+        return false;
+    }
+
+    // Form removal — applies to both Standard and Aggressive when enabled.
+    if options.preprocessing.remove_forms && tag_name == "form" {
+        return true;
+    }
+
+    // Navigation removal — only when the flag is enabled.
     if !options.preprocessing.remove_navigation {
         return false;
     }
 
     let has_nav_hint = element_has_navigation_hint(tag);
+    let is_aggressive = preset == PreprocessingPreset::Aggressive;
 
+    // <nav> is always navigation — drop in both Standard and Aggressive.
     if tag_name == "nav" {
         return true;
     }
 
     if tag_name == "header" {
-        // Drop a <header> element only when it has explicit navigation-style attributes
-        // (e.g. class="site-header", role="navigation") indicating it is site chrome.
-        // A plain <header> with no such hints is a legitimate content container — for
-        // example <header><h1>Title</h1></header> — and must not be dropped, otherwise
-        // child headings and text are silently discarded.
-        if has_nav_hint {
-            return true;
-        }
-    } else if tag_name == "footer" || tag_name == "aside" {
-        if has_nav_hint {
-            return true;
-        }
+        // Drop <header> only with navigation hints (e.g. class="site-header",
+        // role="navigation"). A plain <header> often wraps article titles like
+        // <header><h1>Title</h1></header> — dropping it loses content.
+        // This applies to BOTH Standard and Aggressive.
+        return has_nav_hint;
+    }
+
+    if tag_name == "footer" || tag_name == "aside" {
+        // Standard: drop only with navigation hints.
+        // Aggressive: drop unconditionally — footer/aside content is rarely
+        // the primary article content.
+        return is_aggressive || has_nav_hint;
     }
 
     false

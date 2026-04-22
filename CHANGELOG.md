@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`PreprocessingPreset` not wired into preprocessing logic** — the `preset` field on `PreprocessingOptions` was defined and serializable but never checked by `should_drop_for_preprocessing()`. All three presets (Minimal, Standard, Aggressive) behaved identically. Now:
+  - **Minimal**: Drops nothing during DOM walk (scripts/styles already handled in earlier pipeline stage).
+  - **Standard** (default, no behavior change): Drops `<nav>` unconditionally; drops `<header>`/`<footer>`/`<aside>` only with navigation hints.
+  - **Aggressive**: Drops `<nav>`/`<footer>`/`<aside>` unconditionally; drops `<header>` only with navigation hints (preserves article titles).
+- **`remove_forms` flag was dead code** — `<form>` elements are now dropped when `remove_forms: true` (the default) and preset is Standard or Aggressive.
+
 ## [3.2.7] - 2026-04-22
 
 ### Fixed
