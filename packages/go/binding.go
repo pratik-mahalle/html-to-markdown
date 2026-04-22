@@ -502,16 +502,6 @@ const (
 )
 
 
-// Result of a visitor callback.
-//
-// Allows visitors to control the conversion flow by either proceeding
-// with default behavior, providing custom output, skipping elements,
-// preserving HTML, or signaling errors.
-// Variants: Continue, Custom, Skip, PreserveHtml, Error
-type VisitResult struct {
-}
-
-
 // Document-level metadata extracted from `<head>` and top-level elements.
 //
 // Contains all metadata typically used by search engines, social media platforms,
@@ -1568,28 +1558,6 @@ type ProcessingWarning struct {
     Message string `json:"message"`
     // The category of warning.
     Kind WarningKind `json:"kind"`
-}
-
-
-// Context information passed to all visitor methods.
-//
-// Provides comprehensive metadata about the current node being visited,
-// including its type, attributes, position in the DOM tree, and parent context.
-type NodeContext struct {
-    // Coarse-grained node type classification
-    NodeType NodeType `json:"node_type"`
-    // Raw HTML tag name (e.g., "div", "h1", "custom-element")
-    TagName string `json:"tag_name"`
-    // All HTML attributes as key-value pairs
-    Attributes map[string]string `json:"attributes,omitempty"`
-    // Depth in the DOM tree (0 = root)
-    Depth uint `json:"depth"`
-    // Index among siblings (0-based)
-    IndexInParent uint `json:"index_in_parent"`
-    // Parent element's tag name (None if root)
-    ParentTag *string `json:"parent_tag,omitempty"`
-    // Whether this element is treated as inline vs block
-    IsInline bool `json:"is_inline"`
 }
 
 

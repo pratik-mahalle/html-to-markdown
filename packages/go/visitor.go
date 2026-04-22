@@ -109,7 +109,7 @@ import (
 // NodeContext carries context information passed to every visitor callback.
 type NodeContext struct {
 	// NodeType is a coarse-grained node type tag.
-	NodeType int32
+	NodeType NodeType
 	// TagName is the HTML element tag name (e.g. "div").
 	TagName string
 	// Depth is the DOM depth (0 = root).
@@ -516,7 +516,7 @@ func lookupVisitor(id uintptr) (Visitor, bool) {
 
 func decodeNodeContext(c *C.HTMHtmNodeContext) NodeContext {
 	ctx := NodeContext{
-		NodeType:      int32(c.node_type),
+		NodeType:      nodeTypeFromC(c.node_type),
 		TagName:       C.GoString(c.tag_name),
 		Depth:         uint(c.depth),
 		IndexInParent: uint(c.index_in_parent),
@@ -527,6 +527,101 @@ func decodeNodeContext(c *C.HTMHtmNodeContext) NodeContext {
 		ctx.ParentTag = &s
 	}
 	return ctx
+}
+
+// nodeTypeFromC maps the C node_type enum ordinal to the Go NodeType string constant.
+func nodeTypeFromC(i C.int32_t) NodeType {
+	switch int(i) {
+	case 0: return NodeTypeText
+	case 1: return NodeTypeElement
+	case 2: return NodeTypeHeading
+	case 3: return NodeTypeParagraph
+	case 4: return NodeTypeDiv
+	case 5: return NodeTypeBlockquote
+	case 6: return NodeTypePre
+	case 7: return NodeTypeHr
+	case 8: return NodeTypeList
+	case 9: return NodeTypeListItem
+	case 10: return NodeTypeDefinitionList
+	case 11: return NodeTypeDefinitionTerm
+	case 12: return NodeTypeDefinitionDescription
+	case 13: return NodeTypeTable
+	case 14: return NodeTypeTableRow
+	case 15: return NodeTypeTableCell
+	case 16: return NodeTypeTableHeader
+	case 17: return NodeTypeTableBody
+	case 18: return NodeTypeTableHead
+	case 19: return NodeTypeTableFoot
+	case 20: return NodeTypeLink
+	case 21: return NodeTypeImage
+	case 22: return NodeTypeStrong
+	case 23: return NodeTypeEm
+	case 24: return NodeTypeCode
+	case 25: return NodeTypeStrikethrough
+	case 26: return NodeTypeUnderline
+	case 27: return NodeTypeSubscript
+	case 28: return NodeTypeSuperscript
+	case 29: return NodeTypeMark
+	case 30: return NodeTypeSmall
+	case 31: return NodeTypeBr
+	case 32: return NodeTypeSpan
+	case 33: return NodeTypeArticle
+	case 34: return NodeTypeSection
+	case 35: return NodeTypeNav
+	case 36: return NodeTypeAside
+	case 37: return NodeTypeHeader
+	case 38: return NodeTypeFooter
+	case 39: return NodeTypeMain
+	case 40: return NodeTypeFigure
+	case 41: return NodeTypeFigcaption
+	case 42: return NodeTypeTime
+	case 43: return NodeTypeDetails
+	case 44: return NodeTypeSummary
+	case 45: return NodeTypeForm
+	case 46: return NodeTypeInput
+	case 47: return NodeTypeSelect
+	case 48: return NodeTypeOption
+	case 49: return NodeTypeButton
+	case 50: return NodeTypeTextarea
+	case 51: return NodeTypeLabel
+	case 52: return NodeTypeFieldset
+	case 53: return NodeTypeLegend
+	case 54: return NodeTypeAudio
+	case 55: return NodeTypeVideo
+	case 56: return NodeTypePicture
+	case 57: return NodeTypeSource
+	case 58: return NodeTypeIframe
+	case 59: return NodeTypeSvg
+	case 60: return NodeTypeCanvas
+	case 61: return NodeTypeRuby
+	case 62: return NodeTypeRt
+	case 63: return NodeTypeRp
+	case 64: return NodeTypeAbbr
+	case 65: return NodeTypeKbd
+	case 66: return NodeTypeSamp
+	case 67: return NodeTypeVar
+	case 68: return NodeTypeCite
+	case 69: return NodeTypeQ
+	case 70: return NodeTypeDel
+	case 71: return NodeTypeIns
+	case 72: return NodeTypeData
+	case 73: return NodeTypeMeter
+	case 74: return NodeTypeProgress
+	case 75: return NodeTypeOutput
+	case 76: return NodeTypeTemplate
+	case 77: return NodeTypeSlot
+	case 78: return NodeTypeHtml
+	case 79: return NodeTypeHead
+	case 80: return NodeTypeBody
+	case 81: return NodeTypeTitle
+	case 82: return NodeTypeMeta
+	case 83: return NodeTypeLinkTag
+	case 84: return NodeTypeStyle
+	case 85: return NodeTypeScript
+	case 86: return NodeTypeBase
+	case 87: return NodeTypeCustom
+	default: return NodeType("unknown")
+	}
 }
 
 func encodeVisitResult(r VisitResult, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
@@ -561,8 +656,8 @@ func decodeCells(cells **C.char, count C.uintptr_t) []string {
 
 //export goVisitText
 func goVisitText(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, text *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -574,8 +669,8 @@ func goVisitText(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, text *C.char
 
 //export goVisitElementStart
 func goVisitElementStart(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -586,8 +681,8 @@ func goVisitElementStart(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, outC
 
 //export goVisitElementEnd
 func goVisitElementEnd(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, output *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -599,8 +694,8 @@ func goVisitElementEnd(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, output
 
 //export goVisitLink
 func goVisitLink(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, href *C.char, text *C.char, title *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -614,8 +709,8 @@ func goVisitLink(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, href *C.char
 
 //export goVisitImage
 func goVisitImage(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, src *C.char, alt *C.char, title *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -629,8 +724,8 @@ func goVisitImage(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, src *C.char
 
 //export goVisitHeading
 func goVisitHeading(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, level C.uint32_t, text *C.char, id *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -644,8 +739,8 @@ func goVisitHeading(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, level C.u
 
 //export goVisitCodeBlock
 func goVisitCodeBlock(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, lang *C.char, code *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -658,8 +753,8 @@ func goVisitCodeBlock(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, lang *C
 
 //export goVisitCodeInline
 func goVisitCodeInline(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, code *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -671,8 +766,8 @@ func goVisitCodeInline(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, code *
 
 //export goVisitListItem
 func goVisitListItem(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, ordered C.int32_t, marker *C.char, text *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -686,8 +781,8 @@ func goVisitListItem(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, ordered 
 
 //export goVisitListStart
 func goVisitListStart(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, ordered C.int32_t, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -699,8 +794,8 @@ func goVisitListStart(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, ordered
 
 //export goVisitListEnd
 func goVisitListEnd(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, ordered C.int32_t, output *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -713,8 +808,8 @@ func goVisitListEnd(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, ordered C
 
 //export goVisitTableStart
 func goVisitTableStart(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -725,8 +820,8 @@ func goVisitTableStart(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, outCus
 
 //export goVisitTableRow
 func goVisitTableRow(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, cells **C.char, cellCount C.uintptr_t, isHeader C.int32_t, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -739,8 +834,8 @@ func goVisitTableRow(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, cells **
 
 //export goVisitTableEnd
 func goVisitTableEnd(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, output *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -752,8 +847,8 @@ func goVisitTableEnd(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, output *
 
 //export goVisitBlockquote
 func goVisitBlockquote(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, content *C.char, depth C.uintptr_t, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -766,8 +861,8 @@ func goVisitBlockquote(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, conten
 
 //export goVisitStrong
 func goVisitStrong(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, text *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -779,8 +874,8 @@ func goVisitStrong(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, text *C.ch
 
 //export goVisitEmphasis
 func goVisitEmphasis(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, text *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -792,8 +887,8 @@ func goVisitEmphasis(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, text *C.
 
 //export goVisitStrikethrough
 func goVisitStrikethrough(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, text *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -805,8 +900,8 @@ func goVisitStrikethrough(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, tex
 
 //export goVisitUnderline
 func goVisitUnderline(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, text *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -818,8 +913,8 @@ func goVisitUnderline(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, text *C
 
 //export goVisitSubscript
 func goVisitSubscript(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, text *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -831,8 +926,8 @@ func goVisitSubscript(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, text *C
 
 //export goVisitSuperscript
 func goVisitSuperscript(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, text *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -844,8 +939,8 @@ func goVisitSuperscript(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, text 
 
 //export goVisitMark
 func goVisitMark(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, text *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -857,8 +952,8 @@ func goVisitMark(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, text *C.char
 
 //export goVisitLineBreak
 func goVisitLineBreak(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -869,8 +964,8 @@ func goVisitLineBreak(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, outCust
 
 //export goVisitHorizontalRule
 func goVisitHorizontalRule(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -881,8 +976,8 @@ func goVisitHorizontalRule(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, ou
 
 //export goVisitCustomElement
 func goVisitCustomElement(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, tagName *C.char, html *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -895,8 +990,8 @@ func goVisitCustomElement(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, tag
 
 //export goVisitDefinitionListStart
 func goVisitDefinitionListStart(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -907,8 +1002,8 @@ func goVisitDefinitionListStart(ctx *C.HTMHtmNodeContext, userData unsafe.Pointe
 
 //export goVisitDefinitionTerm
 func goVisitDefinitionTerm(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, text *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -920,8 +1015,8 @@ func goVisitDefinitionTerm(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, te
 
 //export goVisitDefinitionDescription
 func goVisitDefinitionDescription(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, text *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -933,8 +1028,8 @@ func goVisitDefinitionDescription(ctx *C.HTMHtmNodeContext, userData unsafe.Poin
 
 //export goVisitDefinitionListEnd
 func goVisitDefinitionListEnd(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, output *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -946,8 +1041,8 @@ func goVisitDefinitionListEnd(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer,
 
 //export goVisitForm
 func goVisitForm(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, action *C.char, method *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -960,8 +1055,8 @@ func goVisitForm(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, action *C.ch
 
 //export goVisitInput
 func goVisitInput(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, inputType *C.char, name *C.char, value *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -975,8 +1070,8 @@ func goVisitInput(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, inputType *
 
 //export goVisitButton
 func goVisitButton(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, text *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -988,8 +1083,8 @@ func goVisitButton(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, text *C.ch
 
 //export goVisitAudio
 func goVisitAudio(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, src *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -1001,8 +1096,8 @@ func goVisitAudio(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, src *C.char
 
 //export goVisitVideo
 func goVisitVideo(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, src *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -1014,8 +1109,8 @@ func goVisitVideo(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, src *C.char
 
 //export goVisitIframe
 func goVisitIframe(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, src *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -1027,8 +1122,8 @@ func goVisitIframe(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, src *C.cha
 
 //export goVisitDetails
 func goVisitDetails(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, open C.int32_t, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -1040,8 +1135,8 @@ func goVisitDetails(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, open C.in
 
 //export goVisitSummary
 func goVisitSummary(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, text *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -1053,8 +1148,8 @@ func goVisitSummary(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, text *C.c
 
 //export goVisitFigureStart
 func goVisitFigureStart(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -1065,8 +1160,8 @@ func goVisitFigureStart(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, outCu
 
 //export goVisitFigcaption
 func goVisitFigcaption(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, text *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
@@ -1078,8 +1173,8 @@ func goVisitFigcaption(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, text *
 
 //export goVisitFigureEnd
 func goVisitFigureEnd(ctx *C.HTMHtmNodeContext, userData unsafe.Pointer, output *C.char, outCustom **C.char, outLen *C.uintptr_t) C.int32_t {
-	id := uintptr(uintptr(userData))
-	v, ok := lookupVisitor(id)
+	visitorID := uintptr(uintptr(userData))
+	v, ok := lookupVisitor(visitorID)
 	if !ok {
 		return 0
 	}
