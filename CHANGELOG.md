@@ -7,9 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.7] - 2026-04-22
+
 ### Fixed
 
-- **Java FFI broken on all platforms** (#315) — native libraries were bundled into the JAR under `natives/{platform}/` by the publish script, but `NativeLib.java` looked for them at `native/{platform}/`. Every release since the FFI was introduced shipped a non-functional JAR. Fixed `copy-native-libs.sh` to write into the correct `natives/` resource directory and added an explicit `mkdir -p` before each copy for portability.
+- **Java FFI broken on all platforms** (#315) — native libraries were bundled under wrong JAR path (`natives/` vs `native/`).
+- **Java/C# visitor type conflicts** — alef generator produced conflicting VisitResult/NodeContext types from two code paths; fixed by skipping gen_bindings types when visitor bridge is active.
+- **Ruby `convert()` TypeError** (#319) — options type mismatch and wrong return type in Ruby binding.
+- **Ruby gemspec naming** — duplicate gemspec with wrong name broke Bundler; fixed scaffold to use snake_case file paths.
+- **Go CGO const mismatch** — visitor callback extern declarations used `const` qualifiers that conflict with CGO's export prolog; removed const.
+- **R `ConversionOptionsBuilder`** — four methods panicked with `todo!()`; fixed alef extendr backend to handle opaque types correctly with `inner: Arc<CoreType>` delegation.
+- **CLI `autolinks` default** — library defaults to `true` but CLI had `false`; replaced `--autolinks` with `--no-autolinks` so defaults match.
+- **CLI dead metadata flags** — removed `--extract-document`, `--extract-headers`, `--extract-links`, `--extract-images`, `--extract-structured-data` flags that were parsed but never wired through.
+
+### Added
+
+- **CLI flags** — `--preserve-tags`, `--skip-images`, `--max-depth` for full ConversionOptions parity.
+- **Visitor pattern for all bindings** (#314, #313) — restored visitor support across Python, TypeScript, Ruby, PHP, Go, Java, C#, Elixir, R, WASM, and C FFI.
+- **R visitor support** — added visitor callbacks for the R binding.
+- **E2E test coverage** — regenerated e2e tests with visitor coverage for all 12 languages.
+
+### Changed
+
+- **Public API surface restricted** — internal Rust modules (`converter`, `safety`, `text`, `wrapper`, `visitor_helpers`) changed from `pub` to `pub(crate)`. API docs now document only the public API (down from 233 to 66 items).
+- **alef.toml simplified** — switched from 20-item include whitelist to minimal 3-type + 1-function include (`ConversionOptions`, `ConversionResult`, `HtmlVisitor`, `convert`). Transitive dependencies expand automatically.
+- **Generated code lint-clean** — alef now emits `#![allow(clippy::...)]` in generated binding files for patterns inherent to codegen output.
+- **Dead code removed** — deleted unused dispatch functions, duplicate text utilities, and unused safety module from core crate.
+- **CI consolidated** (#317) — 13 workflows merged into single `ci.yaml`.
 
 ## [3.2.6] - 2026-04-20
 
