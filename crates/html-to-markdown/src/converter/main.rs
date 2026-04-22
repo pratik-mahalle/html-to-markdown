@@ -512,6 +512,20 @@ pub fn walk_node(
                     );
                 }
 
+                // Sectioning elements routed to semantic dispatcher
+                "article" | "section" | "nav" | "aside" | "header" | "footer" | "main" => {
+                    crate::converter::semantic::dispatch_semantic_handler(
+                        &tag_name,
+                        node_handle,
+                        parser,
+                        output,
+                        options,
+                        ctx,
+                        depth,
+                        dom_ctx,
+                    );
+                }
+
                 // Quote element routed to semantic dispatcher
                 "q" => {
                     crate::converter::semantic::dispatch_semantic_handler(

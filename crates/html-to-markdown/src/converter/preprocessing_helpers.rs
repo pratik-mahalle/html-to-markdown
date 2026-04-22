@@ -69,11 +69,11 @@ pub fn has_inline_block_misnest(dom_ctx: &DomContext, parser: &tl::Parser) -> bo
 
 /// Determine if a node should be dropped during preprocessing.
 pub fn should_drop_for_preprocessing(
-    node_handle: &tl::NodeHandle,
+    _node_handle: &tl::NodeHandle,
     tag_name: &str,
     tag: &tl::HTMLTag,
-    parser: &tl::Parser,
-    dom_ctx: &DomContext,
+    _parser: &tl::Parser,
+    _dom_ctx: &DomContext,
     options: &ConversionOptions,
 ) -> bool {
     // If preprocessing is globally disabled, don't drop any nodes
@@ -92,11 +92,11 @@ pub fn should_drop_for_preprocessing(
     }
 
     if tag_name == "header" {
-        use crate::converter::utility::attributes::has_semantic_content_ancestor;
-        let inside_semantic_content = has_semantic_content_ancestor(node_handle, parser, dom_ctx);
-        if !inside_semantic_content {
-            return true;
-        }
+        // Drop a <header> element only when it has explicit navigation-style attributes
+        // (e.g. class="site-header", role="navigation") indicating it is site chrome.
+        // A plain <header> with no such hints is a legitimate content container — for
+        // example <header><h1>Title</h1></header> — and must not be dropped, otherwise
+        // child headings and text are silently discarded.
         if has_nav_hint {
             return true;
         }

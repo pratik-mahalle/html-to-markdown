@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`<h1>` inside `<header>` not exported** (#321) — top-level `<header>` elements were unconditionally dropped during preprocessing; now only `<header>` with navigation hints (e.g. `class="site-header"`, `role="navigation"`) is removed. Added explicit semantic dispatch for all sectioning elements (`article`, `section`, `nav`, `aside`, `header`, `footer`, `main`).
 - **Java FFI broken on all platforms** (#315) — native libraries were bundled under wrong JAR path (`natives/` vs `native/`).
 - **Java/C# visitor type conflicts** — alef generator produced conflicting VisitResult/NodeContext types from two code paths; fixed by skipping gen_bindings types when visitor bridge is active.
 - **Ruby `convert()` TypeError** (#319) — options type mismatch and wrong return type in Ruby binding.
