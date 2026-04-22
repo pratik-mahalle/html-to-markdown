@@ -20,16 +20,17 @@ _TO_RUST_HEADINGSTYLE_MAP = {
 }
 
 
-_TO_RUST_LINKSTYLE_MAP = {
-    "inline": _rust.LinkStyle.Inline,
-    "reference": _rust.LinkStyle.Reference,
+_TO_RUST_CODEBLOCKSTYLE_MAP = {
+    "indented": _rust.CodeBlockStyle.Indented,
+    "backticks": _rust.CodeBlockStyle.Backticks,
+    "tildes": _rust.CodeBlockStyle.Tildes,
 }
 
 
-_TO_RUST_PREPROCESSINGPRESET_MAP = {
-    "minimal": _rust.PreprocessingPreset.Minimal,
-    "standard": _rust.PreprocessingPreset.Standard,
-    "aggressive": _rust.PreprocessingPreset.Aggressive,
+_TO_RUST_OUTPUTFORMAT_MAP = {
+    "markdown": _rust.OutputFormat.Markdown,
+    "djot": _rust.OutputFormat.Djot,
+    "plain": _rust.OutputFormat.Plain,
 }
 
 
@@ -45,23 +46,22 @@ _TO_RUST_NEWLINESTYLE_MAP = {
 }
 
 
-_TO_RUST_OUTPUTFORMAT_MAP = {
-    "markdown": _rust.OutputFormat.Markdown,
-    "djot": _rust.OutputFormat.Djot,
-    "plain": _rust.OutputFormat.Plain,
-}
-
-
-_TO_RUST_CODEBLOCKSTYLE_MAP = {
-    "indented": _rust.CodeBlockStyle.Indented,
-    "backticks": _rust.CodeBlockStyle.Backticks,
-    "tildes": _rust.CodeBlockStyle.Tildes,
+_TO_RUST_LINKSTYLE_MAP = {
+    "inline": _rust.LinkStyle.Inline,
+    "reference": _rust.LinkStyle.Reference,
 }
 
 
 _TO_RUST_LISTINDENTTYPE_MAP = {
     "spaces": _rust.ListIndentType.Spaces,
     "tabs": _rust.ListIndentType.Tabs,
+}
+
+
+_TO_RUST_PREPROCESSINGPRESET_MAP = {
+    "minimal": _rust.PreprocessingPreset.Minimal,
+    "standard": _rust.PreprocessingPreset.Standard,
+    "aggressive": _rust.PreprocessingPreset.Aggressive,
 }
 
 
@@ -126,7 +126,7 @@ def _to_rust_conversion_options(value: ConversionOptions | None) -> _rust.Conver
     )
 
 
-def convert(html: str, options: ConversionOptions | None = None, visitor: str | None = None) -> ConversionResult:
+def convert(html: str, options: ConversionOptions | None = None, visitor: object | None = None) -> ConversionResult:
     """Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images."""
     _rust_options = _to_rust_conversion_options(options)
     return _rust.convert(html, _rust_options, visitor)  # type: ignore[arg-type]

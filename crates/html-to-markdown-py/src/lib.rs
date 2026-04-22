@@ -978,12 +978,11 @@ impl PreprocessingOptionsUpdate {
     }
 }
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone)]
 #[pyclass(frozen, from_py_object)]
 pub struct DocumentStructure {
     /// All nodes in document reading order.
     #[pyo3(get)]
-    #[serde(skip)]
     pub nodes: Vec<DocumentNode>,
     /// The source format (always "html" for this crate).
     #[pyo3(get)]
@@ -1000,7 +999,7 @@ impl DocumentStructure {
     }
 }
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone)]
 #[pyclass(frozen, from_py_object)]
 pub struct DocumentNode {
     /// Deterministic node identifier.
@@ -1008,7 +1007,6 @@ pub struct DocumentNode {
     pub id: String,
     /// The semantic content of this node.
     #[pyo3(get)]
-    #[serde(skip)]
     pub content: NodeContent,
     /// Index of the parent node (None for root nodes).
     #[pyo3(get)]
@@ -1018,7 +1016,6 @@ pub struct DocumentNode {
     pub children: Vec<u32>,
     /// Inline formatting annotations (bold, italic, links, etc.) with byte offsets into the text.
     #[pyo3(get)]
-    #[serde(skip)]
     pub annotations: Vec<TextAnnotation>,
     /// Format-specific attributes (e.g. class, id, data-* attributes).
     #[pyo3(get)]
@@ -1049,7 +1046,7 @@ impl DocumentNode {
     }
 }
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone)]
 #[pyclass(frozen, from_py_object)]
 pub struct TextAnnotation {
     /// Start byte offset (inclusive) into the parent node's text.
@@ -1060,7 +1057,6 @@ pub struct TextAnnotation {
     pub end: u32,
     /// The type of annotation.
     #[pyo3(get)]
-    #[serde(skip)]
     pub kind: AnnotationKind,
 }
 
@@ -1074,7 +1070,7 @@ impl TextAnnotation {
     }
 }
 
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone)]
 #[pyclass(frozen, from_py_object)]
 pub struct ConversionResult {
     /// Converted text output (markdown, djot, or plain text).
@@ -1087,7 +1083,6 @@ pub struct ConversionResult {
     ///
     /// Populated when `include_document_structure` is `true` in options.
     #[pyo3(get)]
-    #[serde(skip)]
     pub document: Option<DocumentStructure>,
     /// Extracted HTML metadata (title, OG, links, images, structured data).
     #[pyo3(get)]

@@ -17,17 +17,17 @@ class DocumentMetadata:
     meta_tags: dict[str, str]
     def __init__(
         self,
-        keywords: list[str],
-        open_graph: dict[str, str],
-        twitter_card: dict[str, str],
-        meta_tags: dict[str, str],
         title: str | None = None,
         description: str | None = None,
+        keywords: list[str] | None = None,
         author: str | None = None,
         canonical_url: str | None = None,
         base_href: str | None = None,
         language: str | None = None,
         text_direction: TextDirection | str | None = None,
+        open_graph: dict[str, str] | None = None,
+        twitter_card: dict[str, str] | None = None,
+        meta_tags: dict[str, str] | None = None,
     ) -> None: ...
 
 class HeaderMetadata:
@@ -101,11 +101,11 @@ class HtmlMetadata:
     structured_data: list[StructuredData]
     def __init__(
         self,
-        document: DocumentMetadata,
-        headers: list[HeaderMetadata],
-        links: list[LinkMetadata],
-        images: list[ImageMetadata],
-        structured_data: list[StructuredData],
+        document: DocumentMetadata | None = None,
+        headers: list[HeaderMetadata] | None = None,
+        links: list[LinkMetadata] | None = None,
+        images: list[ImageMetadata] | None = None,
+        structured_data: list[StructuredData] | None = None,
     ) -> None: ...
 
 class ConversionOptions:
@@ -150,44 +150,44 @@ class ConversionOptions:
     max_depth: int | None
     def __init__(
         self,
-        heading_style: HeadingStyle | str,
-        list_indent_type: ListIndentType | str,
-        list_indent_width: int,
-        bullets: str,
-        strong_em_symbol: str,
-        escape_asterisks: bool,
-        escape_underscores: bool,
-        escape_misc: bool,
-        escape_ascii: bool,
-        code_language: str,
-        autolinks: bool,
-        default_title: bool,
-        br_in_tables: bool,
-        highlight_style: HighlightStyle | str,
-        extract_metadata: bool,
-        whitespace_mode: WhitespaceMode | str,
-        strip_newlines: bool,
-        wrap: bool,
-        wrap_width: int,
-        convert_as_inline: bool,
-        sub_symbol: str,
-        sup_symbol: str,
-        newline_style: NewlineStyle | str,
-        code_block_style: CodeBlockStyle | str,
-        keep_inline_images_in: list[str],
-        preprocessing: PreprocessingOptions,
-        encoding: str,
-        debug: bool,
-        strip_tags: list[str],
-        preserve_tags: list[str],
-        skip_images: bool,
-        link_style: LinkStyle | str,
-        output_format: OutputFormat | str,
-        include_document_structure: bool,
-        extract_images: bool,
-        max_image_size: int,
-        capture_svg: bool,
-        infer_dimensions: bool,
+        heading_style: HeadingStyle | str | None = None,
+        list_indent_type: ListIndentType | str | None = None,
+        list_indent_width: int | None = None,
+        bullets: str | None = None,
+        strong_em_symbol: str | None = None,
+        escape_asterisks: bool | None = None,
+        escape_underscores: bool | None = None,
+        escape_misc: bool | None = None,
+        escape_ascii: bool | None = None,
+        code_language: str | None = None,
+        autolinks: bool | None = None,
+        default_title: bool | None = None,
+        br_in_tables: bool | None = None,
+        highlight_style: HighlightStyle | str | None = None,
+        extract_metadata: bool | None = None,
+        whitespace_mode: WhitespaceMode | str | None = None,
+        strip_newlines: bool | None = None,
+        wrap: bool | None = None,
+        wrap_width: int | None = None,
+        convert_as_inline: bool | None = None,
+        sub_symbol: str | None = None,
+        sup_symbol: str | None = None,
+        newline_style: NewlineStyle | str | None = None,
+        code_block_style: CodeBlockStyle | str | None = None,
+        keep_inline_images_in: list[str] | None = None,
+        preprocessing: PreprocessingOptions | None = None,
+        encoding: str | None = None,
+        debug: bool | None = None,
+        strip_tags: list[str] | None = None,
+        preserve_tags: list[str] | None = None,
+        skip_images: bool | None = None,
+        link_style: LinkStyle | str | None = None,
+        output_format: OutputFormat | str | None = None,
+        include_document_structure: bool | None = None,
+        extract_images: bool | None = None,
+        max_image_size: int | None = None,
+        capture_svg: bool | None = None,
+        infer_dimensions: bool | None = None,
         max_depth: int | None = None,
     ) -> None: ...
     def apply_update(self, update: ConversionOptionsUpdate) -> None: ...
@@ -290,10 +290,10 @@ class PreprocessingOptions:
     remove_forms: bool
     def __init__(
         self,
-        enabled: bool,
-        preset: PreprocessingPreset | str,
-        remove_navigation: bool,
-        remove_forms: bool,
+        enabled: bool | None = None,
+        preset: PreprocessingPreset | str | None = None,
+        remove_navigation: bool | None = None,
+        remove_forms: bool | None = None,
     ) -> None: ...
     def apply_update(self, update: PreprocessingOptionsUpdate) -> None: ...
     @staticmethod
@@ -353,19 +353,24 @@ class ConversionResult:
     warnings: list[ProcessingWarning]
     def __init__(
         self,
-        metadata: HtmlMetadata,
-        tables: list[TableData],
-        images: list[str],
-        warnings: list[ProcessingWarning],
         content: str | None = None,
         document: DocumentStructure | None = None,
+        metadata: HtmlMetadata | None = None,
+        tables: list[TableData] | None = None,
+        images: list[str] | None = None,
+        warnings: list[ProcessingWarning] | None = None,
     ) -> None: ...
 
 class TableGrid:
     rows: int
     cols: int
     cells: list[GridCell]
-    def __init__(self, rows: int, cols: int, cells: list[GridCell]) -> None: ...
+    def __init__(
+        self,
+        rows: int | None = None,
+        cols: int | None = None,
+        cells: list[GridCell] | None = None,
+    ) -> None: ...
 
 class GridCell:
     content: str
@@ -742,5 +747,5 @@ VisitResult: TypeAlias = (
 def convert(
     html: str,
     options: ConversionOptions | None = None,
-    visitor: str | None = None,
+    visitor: object | None = None,
 ) -> ConversionResult: ...

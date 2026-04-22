@@ -50,7 +50,12 @@ public static class HtmlToMarkdownRs
             html,
             optionsHandle
         );
-        if (result == IntPtr.Zero) { var err = GetLastError(); if (err.Code != 0) throw err; }
+        if (result == IntPtr.Zero)
+        { var err = GetLastError(); if (err.Code != 0)
+            {
+                throw err;
+            }
+        }
         var jsonPtr = NativeMethods.ConversionResultToJson(result);
         var json = Marshal.PtrToStringUTF8(jsonPtr);
         NativeMethods.FreeString(jsonPtr);
@@ -307,18 +312,30 @@ public static class HtmlToMarkdownRs
         var visitorHandle = NativeMethods.VisitorCreate(callbacks.NativePtr);
         if (visitorHandle == IntPtr.Zero)
         {
-            if (optionsHandle != IntPtr.Zero) NativeMethods.ConversionOptionsFree(optionsHandle);
+            if (optionsHandle != IntPtr.Zero)
+            {
+                NativeMethods.ConversionOptionsFree(optionsHandle);
+            }
+
             throw GetLastError();
         }
 
         try
         {
             var resultPtr = NativeMethods.ConvertWithVisitor(html, optionsHandle, visitorHandle);
-            if (optionsHandle != IntPtr.Zero) NativeMethods.ConversionOptionsFree(optionsHandle);
+            if (optionsHandle != IntPtr.Zero)
+            {
+                NativeMethods.ConversionOptionsFree(optionsHandle);
+            }
+
             if (resultPtr == IntPtr.Zero)
             {
                 var err = GetLastError();
-                if (err.Code != 0) throw err;
+                if (err.Code != 0)
+                {
+                    throw err;
+                }
+
                 return null;
             }
             var json = Marshal.PtrToStringAnsi(resultPtr);
