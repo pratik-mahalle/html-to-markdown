@@ -80,6 +80,8 @@ pub struct Context {
     pub(crate) preserve_tags: Rc<HashSet<String>>,
     /// Tag names that allow inline images inside headings.
     pub(crate) keep_inline_images_in: Rc<HashSet<String>>,
+    /// Node IDs matching `exclude_selectors` — these nodes and all descendants are dropped.
+    pub(crate) excluded_node_ids: Rc<HashSet<u32>>,
     #[cfg(feature = "inline-images")]
     /// Shared collector for inline images when enabled.
     pub(crate) inline_collector: Option<InlineCollectorHandle>,
@@ -111,6 +113,13 @@ pub struct Context {
 }
 
 impl Context {
+    /// Set the pre-computed set of node IDs that match `exclude_selectors`.
+    ///
+    /// Called in `convert_html_impl` after DOM parsing, before the walk starts.
+    pub(crate) fn set_excluded_node_ids(&mut self, ids: HashSet<u32>) {
+        self.excluded_node_ids = Rc::new(ids);
+    }
+
     /// Create a new conversion context from options and optional collectors.
     #[allow(clippy::too_many_arguments)]
     #[cfg_attr(
@@ -171,6 +180,7 @@ impl Context {
             strip_tags: Rc::new(options.strip_tags.iter().cloned().collect()),
             preserve_tags: Rc::new(options.preserve_tags.iter().cloned().collect()),
             keep_inline_images_in: Rc::new(options.keep_inline_images_in.iter().cloned().collect()),
+            excluded_node_ids: Rc::new(HashSet::new()),
             #[cfg(feature = "inline-images")]
             inline_collector,
             #[cfg(feature = "metadata")]

@@ -288,7 +288,7 @@ pub struct ImageMetadata {
     pub src: String,
     pub alt: Option<String>,
     pub title: Option<String>,
-    pub dimensions: Option<String>,
+    pub dimensions: Option<Vec<u32>>,
     pub image_type: ImageType,
     pub attributes: HashMap<String, String>,
 }
@@ -310,7 +310,7 @@ impl ImageMetadata {
         attributes: HashMap<String, String>,
         alt: Option<String>,
         title: Option<String>,
-        dimensions: Option<String>,
+        dimensions: Option<Vec<u32>>,
     ) -> Self {
         Self {
             src,
@@ -334,7 +334,7 @@ impl ImageMetadata {
         self.title.clone()
     }
 
-    fn dimensions(&self) -> Option<String> {
+    fn dimensions(&self) -> Option<Vec<u32>> {
         self.dimensions.clone()
     }
 

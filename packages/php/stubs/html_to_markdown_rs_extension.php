@@ -225,13 +225,15 @@ class ImageMetadata
     public string $src;
     public ?string $alt;
     public ?string $title;
-    public ?string $dimensions;
+    /** @var ?array<int> */
+    public ?array $dimensions;
     public ImageType $image_type;
     /** @var array<string, string> */
     public array $attributes;
 
     /**
      * @param array<string, string> $attributes
+     * @param ?array<int> $dimensions
      */
     public function __construct(
         string $src,
@@ -239,13 +241,14 @@ class ImageMetadata
         array $attributes,
         ?string $alt = null,
         ?string $title = null,
-        ?string $dimensions = null
+        ?array $dimensions = null
     ) { }
 
     public function getSrc(): string { }
     public function getAlt(): ?string { }
     public function getTitle(): ?string { }
-    public function getDimensions(): ?string { }
+    /** @return ?array<int> */
+    public function getDimensions(): ?array { }
     public function getImageType(): ImageType { }
     /** @return array<string, string> */
     public function getAttributes(): array { }

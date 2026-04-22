@@ -82,7 +82,7 @@ pub struct ImageMetadata {
     pub src: String,
     pub alt: Option<String>,
     pub title: Option<String>,
-    pub dimensions: Option<String>,
+    pub dimensions: Option<Vec<u32>>,
     pub image_type: ImageType,
     pub attributes: HashMap<String, String>,
 }

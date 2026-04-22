@@ -1314,9 +1314,6 @@ func ConvertWithVisitor(html string, options *ConversionOptions, visitor Visitor
 		return nil, fmt.Errorf("conversion returned nil")
 	}
 	defer C.htm_free_string(ptr)
-	var result ConversionResult
-	if err := json.Unmarshal([]byte(C.GoString(ptr)), &result); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal conversion result: %w", err)
-	}
-	return &result, nil
+	content := C.GoString(ptr)
+	return &ConversionResult{Content: &content}, nil
 }

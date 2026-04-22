@@ -163,7 +163,7 @@ pub struct ImageMetadata {
     /// Title attribute (often shown as tooltip)
     pub title: Option<String>,
     /// Image dimensions as (width, height) if available
-    pub dimensions: Option<String>,
+    pub dimensions: Option<Vec<i32>>,
     /// Image type classification
     pub image_type: ImageType,
     /// Additional HTML attributes
@@ -179,7 +179,7 @@ impl ImageMetadata {
         attributes: HashMap<String, String>,
         alt: Option<String>,
         title: Option<String>,
-        dimensions: Option<String>,
+        dimensions: Option<Vec<i32>>,
     ) -> Self {
         Self { src, alt, title, dimensions, image_type, attributes }
     }

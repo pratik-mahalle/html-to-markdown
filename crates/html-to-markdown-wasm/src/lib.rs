@@ -485,7 +485,7 @@ pub struct WasmImageMetadata {
     src: String,
     alt: Option<String>,
     title: Option<String>,
-    dimensions: Option<String>,
+    dimensions: Option<Vec<u32>>,
     image_type: WasmImageType,
     attributes: JsValue,
 }
@@ -499,7 +499,7 @@ impl WasmImageMetadata {
         attributes: JsValue,
         alt: Option<String>,
         title: Option<String>,
-        dimensions: Option<String>,
+        dimensions: Option<Vec<u32>>,
     ) -> WasmImageMetadata {
         WasmImageMetadata {
             src,
@@ -542,12 +542,12 @@ impl WasmImageMetadata {
     }
 
     #[wasm_bindgen(getter)]
-    pub fn dimensions(&self) -> Option<String> {
+    pub fn dimensions(&self) -> Option<Vec<u32>> {
         self.dimensions.clone()
     }
 
     #[wasm_bindgen(setter)]
-    pub fn set_dimensions(&mut self, value: Option<String>) {
+    pub fn set_dimensions(&mut self, value: Option<Vec<u32>>) {
         self.dimensions = value;
     }
 

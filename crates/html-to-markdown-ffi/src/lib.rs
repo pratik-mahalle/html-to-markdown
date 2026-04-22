@@ -47,6 +47,7 @@ pub unsafe extern "C" fn htm_last_error_context() -> *const c_char {
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_free_string(ptr: *mut c_char) {
     if !ptr.is_null() {
+        // SAFETY: ptr was allocated by CString::into_raw; caller ensures no aliases.
         unsafe { drop(CString::from_raw(ptr)); }
     }
 }
@@ -72,6 +73,7 @@ pub unsafe extern "C" fn htm_document_metadata_from_json(json: *const c_char) ->
         set_last_error(1, "Null pointer passed for JSON string");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees json is a valid pointer; string is valid UTF-8 from caller.
     let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -99,6 +101,7 @@ pub unsafe extern "C" fn htm_document_metadata_to_json(ptr: *const html_to_markd
         set_last_error(1, "Null pointer passed to to_json");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let val = unsafe { &*ptr };
     match serde_json::to_string(val) {
         Ok(s) => match CString::new(s) {
@@ -121,6 +124,7 @@ pub unsafe extern "C" fn htm_document_metadata_to_json(ptr: *const html_to_markd
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_document_metadata_free(ptr: *mut html_to_markdown_rs::metadata::DocumentMetadata) {
     if !ptr.is_null() {
+        // SAFETY: ptr was allocated by Box::into_raw; caller ensures no aliases.
         unsafe { drop(Box::from_raw(ptr)); }
     }
 }
@@ -133,6 +137,7 @@ pub unsafe extern "C" fn htm_document_metadata_title(ptr: *const html_to_markdow
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.title {
         Some(val) => {
@@ -153,6 +158,7 @@ pub unsafe extern "C" fn htm_document_metadata_description(ptr: *const html_to_m
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.description {
         Some(val) => {
@@ -173,6 +179,7 @@ pub unsafe extern "C" fn htm_document_metadata_keywords(ptr: *const html_to_mark
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match serde_json::to_string(&obj.keywords) {
         Ok(s) => match CString::new(s) {
@@ -191,6 +198,7 @@ pub unsafe extern "C" fn htm_document_metadata_author(ptr: *const html_to_markdo
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.author {
         Some(val) => {
@@ -211,6 +219,7 @@ pub unsafe extern "C" fn htm_document_metadata_canonical_url(ptr: *const html_to
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.canonical_url {
         Some(val) => {
@@ -231,6 +240,7 @@ pub unsafe extern "C" fn htm_document_metadata_base_href(ptr: *const html_to_mar
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.base_href {
         Some(val) => {
@@ -251,6 +261,7 @@ pub unsafe extern "C" fn htm_document_metadata_language(ptr: *const html_to_mark
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.language {
         Some(val) => {
@@ -271,6 +282,7 @@ pub unsafe extern "C" fn htm_document_metadata_text_direction(ptr: *const html_t
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.text_direction {
         Some(val) => {
@@ -288,6 +300,7 @@ pub unsafe extern "C" fn htm_document_metadata_open_graph(ptr: *const html_to_ma
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match serde_json::to_string(&obj.open_graph) {
         Ok(s) => match CString::new(s) {
@@ -306,6 +319,7 @@ pub unsafe extern "C" fn htm_document_metadata_twitter_card(ptr: *const html_to_
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match serde_json::to_string(&obj.twitter_card) {
         Ok(s) => match CString::new(s) {
@@ -324,6 +338,7 @@ pub unsafe extern "C" fn htm_document_metadata_meta_tags(ptr: *const html_to_mar
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match serde_json::to_string(&obj.meta_tags) {
         Ok(s) => match CString::new(s) {
@@ -345,6 +360,7 @@ pub unsafe extern "C" fn htm_header_metadata_from_json(json: *const c_char) -> *
         set_last_error(1, "Null pointer passed for JSON string");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees json is a valid pointer; string is valid UTF-8 from caller.
     let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -372,6 +388,7 @@ pub unsafe extern "C" fn htm_header_metadata_to_json(ptr: *const html_to_markdow
         set_last_error(1, "Null pointer passed to to_json");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let val = unsafe { &*ptr };
     match serde_json::to_string(val) {
         Ok(s) => match CString::new(s) {
@@ -394,6 +411,7 @@ pub unsafe extern "C" fn htm_header_metadata_to_json(ptr: *const html_to_markdow
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_header_metadata_free(ptr: *mut html_to_markdown_rs::metadata::HeaderMetadata) {
     if !ptr.is_null() {
+        // SAFETY: ptr was allocated by Box::into_raw; caller ensures no aliases.
         unsafe { drop(Box::from_raw(ptr)); }
     }
 }
@@ -406,6 +424,7 @@ pub unsafe extern "C" fn htm_header_metadata_level(ptr: *const html_to_markdown_
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.level
 }
@@ -418,6 +437,7 @@ pub unsafe extern "C" fn htm_header_metadata_text(ptr: *const html_to_markdown_r
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match CString::new(obj.text.to_string()) {
         Ok(cs) => cs.into_raw(),
@@ -433,6 +453,7 @@ pub unsafe extern "C" fn htm_header_metadata_id(ptr: *const html_to_markdown_rs:
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.id {
         Some(val) => {
@@ -453,6 +474,7 @@ pub unsafe extern "C" fn htm_header_metadata_depth(ptr: *const html_to_markdown_
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.depth
 }
@@ -465,6 +487,7 @@ pub unsafe extern "C" fn htm_header_metadata_html_offset(ptr: *const html_to_mar
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.html_offset
 }
@@ -530,6 +553,7 @@ pub unsafe extern "C" fn htm_link_metadata_from_json(json: *const c_char) -> *mu
         set_last_error(1, "Null pointer passed for JSON string");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees json is a valid pointer; string is valid UTF-8 from caller.
     let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -557,6 +581,7 @@ pub unsafe extern "C" fn htm_link_metadata_to_json(ptr: *const html_to_markdown_
         set_last_error(1, "Null pointer passed to to_json");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let val = unsafe { &*ptr };
     match serde_json::to_string(val) {
         Ok(s) => match CString::new(s) {
@@ -579,6 +604,7 @@ pub unsafe extern "C" fn htm_link_metadata_to_json(ptr: *const html_to_markdown_
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_link_metadata_free(ptr: *mut html_to_markdown_rs::metadata::LinkMetadata) {
     if !ptr.is_null() {
+        // SAFETY: ptr was allocated by Box::into_raw; caller ensures no aliases.
         unsafe { drop(Box::from_raw(ptr)); }
     }
 }
@@ -591,6 +617,7 @@ pub unsafe extern "C" fn htm_link_metadata_href(ptr: *const html_to_markdown_rs:
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match CString::new(obj.href.to_string()) {
         Ok(cs) => cs.into_raw(),
@@ -606,6 +633,7 @@ pub unsafe extern "C" fn htm_link_metadata_text(ptr: *const html_to_markdown_rs:
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match CString::new(obj.text.to_string()) {
         Ok(cs) => cs.into_raw(),
@@ -621,6 +649,7 @@ pub unsafe extern "C" fn htm_link_metadata_title(ptr: *const html_to_markdown_rs
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.title {
         Some(val) => {
@@ -641,6 +670,7 @@ pub unsafe extern "C" fn htm_link_metadata_link_type(ptr: *const html_to_markdow
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     Box::into_raw(Box::new(obj.link_type.clone()))
 }
@@ -653,6 +683,7 @@ pub unsafe extern "C" fn htm_link_metadata_rel(ptr: *const html_to_markdown_rs::
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match serde_json::to_string(&obj.rel) {
         Ok(s) => match CString::new(s) {
@@ -671,6 +702,7 @@ pub unsafe extern "C" fn htm_link_metadata_attributes(ptr: *const html_to_markdo
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match serde_json::to_string(&obj.attributes) {
         Ok(s) => match CString::new(s) {
@@ -712,6 +744,7 @@ pub unsafe extern "C" fn htm_link_metadata_classify_link(
         set_last_error(1, "Null pointer passed for parameter 'href'");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees href is a valid pointer; string is valid UTF-8 from caller.
     let href_rs = match unsafe { CStr::from_ptr(href) }.to_str() {
         Ok(s) => s.to_string(),
         Err(_) => {
@@ -734,6 +767,7 @@ pub unsafe extern "C" fn htm_image_metadata_from_json(json: *const c_char) -> *m
         set_last_error(1, "Null pointer passed for JSON string");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees json is a valid pointer; string is valid UTF-8 from caller.
     let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -761,6 +795,7 @@ pub unsafe extern "C" fn htm_image_metadata_to_json(ptr: *const html_to_markdown
         set_last_error(1, "Null pointer passed to to_json");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let val = unsafe { &*ptr };
     match serde_json::to_string(val) {
         Ok(s) => match CString::new(s) {
@@ -783,6 +818,7 @@ pub unsafe extern "C" fn htm_image_metadata_to_json(ptr: *const html_to_markdown
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_image_metadata_free(ptr: *mut html_to_markdown_rs::metadata::ImageMetadata) {
     if !ptr.is_null() {
+        // SAFETY: ptr was allocated by Box::into_raw; caller ensures no aliases.
         unsafe { drop(Box::from_raw(ptr)); }
     }
 }
@@ -795,6 +831,7 @@ pub unsafe extern "C" fn htm_image_metadata_src(ptr: *const html_to_markdown_rs:
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match CString::new(obj.src.to_string()) {
         Ok(cs) => cs.into_raw(),
@@ -810,6 +847,7 @@ pub unsafe extern "C" fn htm_image_metadata_alt(ptr: *const html_to_markdown_rs:
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.alt {
         Some(val) => {
@@ -830,6 +868,7 @@ pub unsafe extern "C" fn htm_image_metadata_title(ptr: *const html_to_markdown_r
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.title {
         Some(val) => {
@@ -850,6 +889,7 @@ pub unsafe extern "C" fn htm_image_metadata_image_type(ptr: *const html_to_markd
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     Box::into_raw(Box::new(obj.image_type.clone()))
 }
@@ -862,6 +902,7 @@ pub unsafe extern "C" fn htm_image_metadata_attributes(ptr: *const html_to_markd
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match serde_json::to_string(&obj.attributes) {
         Ok(s) => match CString::new(s) {
@@ -883,6 +924,7 @@ pub unsafe extern "C" fn htm_structured_data_from_json(json: *const c_char) -> *
         set_last_error(1, "Null pointer passed for JSON string");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees json is a valid pointer; string is valid UTF-8 from caller.
     let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -910,6 +952,7 @@ pub unsafe extern "C" fn htm_structured_data_to_json(ptr: *const html_to_markdow
         set_last_error(1, "Null pointer passed to to_json");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let val = unsafe { &*ptr };
     match serde_json::to_string(val) {
         Ok(s) => match CString::new(s) {
@@ -932,6 +975,7 @@ pub unsafe extern "C" fn htm_structured_data_to_json(ptr: *const html_to_markdow
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_structured_data_free(ptr: *mut html_to_markdown_rs::metadata::StructuredData) {
     if !ptr.is_null() {
+        // SAFETY: ptr was allocated by Box::into_raw; caller ensures no aliases.
         unsafe { drop(Box::from_raw(ptr)); }
     }
 }
@@ -944,6 +988,7 @@ pub unsafe extern "C" fn htm_structured_data_data_type(ptr: *const html_to_markd
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     Box::into_raw(Box::new(obj.data_type.clone()))
 }
@@ -956,6 +1001,7 @@ pub unsafe extern "C" fn htm_structured_data_raw_json(ptr: *const html_to_markdo
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match CString::new(obj.raw_json.to_string()) {
         Ok(cs) => cs.into_raw(),
@@ -971,6 +1017,7 @@ pub unsafe extern "C" fn htm_structured_data_schema_type(ptr: *const html_to_mar
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.schema_type {
         Some(val) => {
@@ -994,6 +1041,7 @@ pub unsafe extern "C" fn htm_html_metadata_from_json(json: *const c_char) -> *mu
         set_last_error(1, "Null pointer passed for JSON string");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees json is a valid pointer; string is valid UTF-8 from caller.
     let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -1021,6 +1069,7 @@ pub unsafe extern "C" fn htm_html_metadata_to_json(ptr: *const html_to_markdown_
         set_last_error(1, "Null pointer passed to to_json");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let val = unsafe { &*ptr };
     match serde_json::to_string(val) {
         Ok(s) => match CString::new(s) {
@@ -1043,6 +1092,7 @@ pub unsafe extern "C" fn htm_html_metadata_to_json(ptr: *const html_to_markdown_
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_html_metadata_free(ptr: *mut html_to_markdown_rs::metadata::HtmlMetadata) {
     if !ptr.is_null() {
+        // SAFETY: ptr was allocated by Box::into_raw; caller ensures no aliases.
         unsafe { drop(Box::from_raw(ptr)); }
     }
 }
@@ -1055,6 +1105,7 @@ pub unsafe extern "C" fn htm_html_metadata_document(ptr: *const html_to_markdown
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     Box::into_raw(Box::new(obj.document.clone()))
 }
@@ -1067,6 +1118,7 @@ pub unsafe extern "C" fn htm_html_metadata_headers(ptr: *const html_to_markdown_
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match serde_json::to_string(&obj.headers) {
         Ok(s) => match CString::new(s) {
@@ -1085,6 +1137,7 @@ pub unsafe extern "C" fn htm_html_metadata_links(ptr: *const html_to_markdown_rs
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match serde_json::to_string(&obj.links) {
         Ok(s) => match CString::new(s) {
@@ -1103,6 +1156,7 @@ pub unsafe extern "C" fn htm_html_metadata_images(ptr: *const html_to_markdown_r
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match serde_json::to_string(&obj.images) {
         Ok(s) => match CString::new(s) {
@@ -1121,6 +1175,7 @@ pub unsafe extern "C" fn htm_html_metadata_structured_data(ptr: *const html_to_m
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match serde_json::to_string(&obj.structured_data) {
         Ok(s) => match CString::new(s) {
@@ -1142,6 +1197,7 @@ pub unsafe extern "C" fn htm_conversion_options_from_json(json: *const c_char) -
         set_last_error(1, "Null pointer passed for JSON string");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees json is a valid pointer; string is valid UTF-8 from caller.
     let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -1169,6 +1225,7 @@ pub unsafe extern "C" fn htm_conversion_options_to_json(ptr: *const html_to_mark
         set_last_error(1, "Null pointer passed to to_json");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let val = unsafe { &*ptr };
     match serde_json::to_string(val) {
         Ok(s) => match CString::new(s) {
@@ -1191,6 +1248,7 @@ pub unsafe extern "C" fn htm_conversion_options_to_json(ptr: *const html_to_mark
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_conversion_options_free(ptr: *mut html_to_markdown_rs::options::ConversionOptions) {
     if !ptr.is_null() {
+        // SAFETY: ptr was allocated by Box::into_raw; caller ensures no aliases.
         unsafe { drop(Box::from_raw(ptr)); }
     }
 }
@@ -1203,6 +1261,7 @@ pub unsafe extern "C" fn htm_conversion_options_heading_style(ptr: *const html_t
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     Box::into_raw(Box::new(obj.heading_style.clone()))
 }
@@ -1215,6 +1274,7 @@ pub unsafe extern "C" fn htm_conversion_options_list_indent_type(ptr: *const htm
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     Box::into_raw(Box::new(obj.list_indent_type.clone()))
 }
@@ -1227,6 +1287,7 @@ pub unsafe extern "C" fn htm_conversion_options_list_indent_width(ptr: *const ht
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.list_indent_width
 }
@@ -1239,6 +1300,7 @@ pub unsafe extern "C" fn htm_conversion_options_bullets(ptr: *const html_to_mark
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match CString::new(obj.bullets.to_string()) {
         Ok(cs) => cs.into_raw(),
@@ -1254,6 +1316,7 @@ pub unsafe extern "C" fn htm_conversion_options_strong_em_symbol(ptr: *const htm
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match CString::new(obj.strong_em_symbol.to_string()) {
         Ok(cs) => cs.into_raw(),
@@ -1269,6 +1332,7 @@ pub unsafe extern "C" fn htm_conversion_options_escape_asterisks(ptr: *const htm
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.escape_asterisks as i32
 }
@@ -1281,6 +1345,7 @@ pub unsafe extern "C" fn htm_conversion_options_escape_underscores(ptr: *const h
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.escape_underscores as i32
 }
@@ -1293,6 +1358,7 @@ pub unsafe extern "C" fn htm_conversion_options_escape_misc(ptr: *const html_to_
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.escape_misc as i32
 }
@@ -1305,6 +1371,7 @@ pub unsafe extern "C" fn htm_conversion_options_escape_ascii(ptr: *const html_to
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.escape_ascii as i32
 }
@@ -1317,6 +1384,7 @@ pub unsafe extern "C" fn htm_conversion_options_code_language(ptr: *const html_t
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match CString::new(obj.code_language.to_string()) {
         Ok(cs) => cs.into_raw(),
@@ -1332,6 +1400,7 @@ pub unsafe extern "C" fn htm_conversion_options_autolinks(ptr: *const html_to_ma
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.autolinks as i32
 }
@@ -1344,6 +1413,7 @@ pub unsafe extern "C" fn htm_conversion_options_default_title(ptr: *const html_t
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.default_title as i32
 }
@@ -1356,6 +1426,7 @@ pub unsafe extern "C" fn htm_conversion_options_br_in_tables(ptr: *const html_to
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.br_in_tables as i32
 }
@@ -1368,6 +1439,7 @@ pub unsafe extern "C" fn htm_conversion_options_highlight_style(ptr: *const html
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     Box::into_raw(Box::new(obj.highlight_style.clone()))
 }
@@ -1380,6 +1452,7 @@ pub unsafe extern "C" fn htm_conversion_options_extract_metadata(ptr: *const htm
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.extract_metadata as i32
 }
@@ -1392,6 +1465,7 @@ pub unsafe extern "C" fn htm_conversion_options_whitespace_mode(ptr: *const html
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     Box::into_raw(Box::new(obj.whitespace_mode.clone()))
 }
@@ -1404,6 +1478,7 @@ pub unsafe extern "C" fn htm_conversion_options_strip_newlines(ptr: *const html_
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.strip_newlines as i32
 }
@@ -1416,6 +1491,7 @@ pub unsafe extern "C" fn htm_conversion_options_wrap(ptr: *const html_to_markdow
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.wrap as i32
 }
@@ -1428,6 +1504,7 @@ pub unsafe extern "C" fn htm_conversion_options_wrap_width(ptr: *const html_to_m
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.wrap_width
 }
@@ -1440,6 +1517,7 @@ pub unsafe extern "C" fn htm_conversion_options_convert_as_inline(ptr: *const ht
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.convert_as_inline as i32
 }
@@ -1452,6 +1530,7 @@ pub unsafe extern "C" fn htm_conversion_options_sub_symbol(ptr: *const html_to_m
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match CString::new(obj.sub_symbol.to_string()) {
         Ok(cs) => cs.into_raw(),
@@ -1467,6 +1546,7 @@ pub unsafe extern "C" fn htm_conversion_options_sup_symbol(ptr: *const html_to_m
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match CString::new(obj.sup_symbol.to_string()) {
         Ok(cs) => cs.into_raw(),
@@ -1482,6 +1562,7 @@ pub unsafe extern "C" fn htm_conversion_options_newline_style(ptr: *const html_t
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     Box::into_raw(Box::new(obj.newline_style.clone()))
 }
@@ -1494,6 +1575,7 @@ pub unsafe extern "C" fn htm_conversion_options_code_block_style(ptr: *const htm
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     Box::into_raw(Box::new(obj.code_block_style.clone()))
 }
@@ -1506,6 +1588,7 @@ pub unsafe extern "C" fn htm_conversion_options_keep_inline_images_in(ptr: *cons
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match serde_json::to_string(&obj.keep_inline_images_in) {
         Ok(s) => match CString::new(s) {
@@ -1524,6 +1607,7 @@ pub unsafe extern "C" fn htm_conversion_options_preprocessing(ptr: *const html_t
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     Box::into_raw(Box::new(obj.preprocessing.clone()))
 }
@@ -1536,6 +1620,7 @@ pub unsafe extern "C" fn htm_conversion_options_encoding(ptr: *const html_to_mar
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match CString::new(obj.encoding.to_string()) {
         Ok(cs) => cs.into_raw(),
@@ -1551,6 +1636,7 @@ pub unsafe extern "C" fn htm_conversion_options_debug(ptr: *const html_to_markdo
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.debug as i32
 }
@@ -1563,6 +1649,7 @@ pub unsafe extern "C" fn htm_conversion_options_strip_tags(ptr: *const html_to_m
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match serde_json::to_string(&obj.strip_tags) {
         Ok(s) => match CString::new(s) {
@@ -1581,6 +1668,7 @@ pub unsafe extern "C" fn htm_conversion_options_preserve_tags(ptr: *const html_t
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match serde_json::to_string(&obj.preserve_tags) {
         Ok(s) => match CString::new(s) {
@@ -1599,6 +1687,7 @@ pub unsafe extern "C" fn htm_conversion_options_skip_images(ptr: *const html_to_
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.skip_images as i32
 }
@@ -1611,6 +1700,7 @@ pub unsafe extern "C" fn htm_conversion_options_link_style(ptr: *const html_to_m
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     Box::into_raw(Box::new(obj.link_style.clone()))
 }
@@ -1623,6 +1713,7 @@ pub unsafe extern "C" fn htm_conversion_options_output_format(ptr: *const html_t
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     Box::into_raw(Box::new(obj.output_format.clone()))
 }
@@ -1635,6 +1726,7 @@ pub unsafe extern "C" fn htm_conversion_options_include_document_structure(ptr: 
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.include_document_structure as i32
 }
@@ -1647,6 +1739,7 @@ pub unsafe extern "C" fn htm_conversion_options_extract_images(ptr: *const html_
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.extract_images as i32
 }
@@ -1659,6 +1752,7 @@ pub unsafe extern "C" fn htm_conversion_options_max_image_size(ptr: *const html_
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.max_image_size
 }
@@ -1671,6 +1765,7 @@ pub unsafe extern "C" fn htm_conversion_options_capture_svg(ptr: *const html_to_
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.capture_svg as i32
 }
@@ -1683,6 +1778,7 @@ pub unsafe extern "C" fn htm_conversion_options_infer_dimensions(ptr: *const htm
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.infer_dimensions as i32
 }
@@ -1695,6 +1791,7 @@ pub unsafe extern "C" fn htm_conversion_options_max_depth(ptr: *const html_to_ma
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.max_depth {
         Some(val) => {
@@ -1749,6 +1846,7 @@ pub unsafe extern "C" fn htm_conversion_options_apply_update(
         set_last_error(1, "Null pointer passed for parameter 'update'");
         return;
     }
+    // SAFETY: null check above guarantees update is a valid pointer.
     let update_rs = unsafe { &*update }.clone();
     let result = obj.apply_update(update_rs);
 }
@@ -1766,6 +1864,7 @@ pub unsafe extern "C" fn htm_conversion_options_from_update(
         set_last_error(1, "Null pointer passed for parameter 'update'");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees update is a valid pointer.
     let update_rs = unsafe { &*update }.clone();
     let result = html_to_markdown_rs::options::ConversionOptions::from_update(update_rs);
     Box::into_raw(Box::new(result))
@@ -1783,6 +1882,7 @@ pub unsafe extern "C" fn htm_conversion_options_from(
         set_last_error(1, "Null pointer passed for parameter 'update'");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees update is a valid pointer.
     let update_rs = unsafe { &*update }.clone();
     let result = html_to_markdown_rs::options::ConversionOptions::from(update_rs);
     Box::into_raw(Box::new(result))
@@ -1794,6 +1894,7 @@ pub unsafe extern "C" fn htm_conversion_options_from(
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_conversion_options_builder_free(ptr: *mut html_to_markdown_rs::options::ConversionOptionsBuilder) {
     if !ptr.is_null() {
+        // SAFETY: ptr was allocated by Box::into_raw; caller ensures no aliases.
         unsafe { drop(Box::from_raw(ptr)); }
     }
 }
@@ -1818,6 +1919,7 @@ pub unsafe extern "C" fn htm_conversion_options_builder_strip_tags(
         set_last_error(1, "Null pointer passed for parameter 'tags'");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees tags is a valid pointer; string is valid UTF-8 from caller.
     let tags_rs_str = match unsafe { CStr::from_ptr(tags) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -1856,6 +1958,7 @@ pub unsafe extern "C" fn htm_conversion_options_builder_preserve_tags(
         set_last_error(1, "Null pointer passed for parameter 'tags'");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees tags is a valid pointer; string is valid UTF-8 from caller.
     let tags_rs_str = match unsafe { CStr::from_ptr(tags) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -1894,6 +1997,7 @@ pub unsafe extern "C" fn htm_conversion_options_builder_keep_inline_images_in(
         set_last_error(1, "Null pointer passed for parameter 'tags'");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees tags is a valid pointer; string is valid UTF-8 from caller.
     let tags_rs_str = match unsafe { CStr::from_ptr(tags) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -1932,6 +2036,7 @@ pub unsafe extern "C" fn htm_conversion_options_builder_preprocessing(
         set_last_error(1, "Null pointer passed for parameter 'preprocessing'");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees preprocessing is a valid pointer.
     let preprocessing_rs = unsafe { &*preprocessing }.clone();
     let result = obj.preprocessing(preprocessing_rs);
     Box::into_raw(Box::new(result))
@@ -1967,6 +2072,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_from_json(json: *const c_
         set_last_error(1, "Null pointer passed for JSON string");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees json is a valid pointer; string is valid UTF-8 from caller.
     let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -1989,6 +2095,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_from_json(json: *const c_
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_conversion_options_update_free(ptr: *mut html_to_markdown_rs::options::ConversionOptionsUpdate) {
     if !ptr.is_null() {
+        // SAFETY: ptr was allocated by Box::into_raw; caller ensures no aliases.
         unsafe { drop(Box::from_raw(ptr)); }
     }
 }
@@ -2001,6 +2108,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_heading_style(ptr: *const
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.heading_style {
         Some(val) => {
@@ -2018,6 +2126,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_list_indent_type(ptr: *co
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.list_indent_type {
         Some(val) => {
@@ -2035,6 +2144,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_list_indent_width(ptr: *c
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.list_indent_width {
         Some(val) => {
@@ -2052,6 +2162,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_bullets(ptr: *const html_
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.bullets {
         Some(val) => {
@@ -2072,6 +2183,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_strong_em_symbol(ptr: *co
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.strong_em_symbol {
         Some(val) => {
@@ -2092,6 +2204,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_escape_asterisks(ptr: *co
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.escape_asterisks {
         Some(val) => {
@@ -2109,6 +2222,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_escape_underscores(ptr: *
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.escape_underscores {
         Some(val) => {
@@ -2126,6 +2240,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_escape_misc(ptr: *const h
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.escape_misc {
         Some(val) => {
@@ -2143,6 +2258,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_escape_ascii(ptr: *const 
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.escape_ascii {
         Some(val) => {
@@ -2160,6 +2276,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_code_language(ptr: *const
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.code_language {
         Some(val) => {
@@ -2180,6 +2297,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_autolinks(ptr: *const htm
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.autolinks {
         Some(val) => {
@@ -2197,6 +2315,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_default_title(ptr: *const
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.default_title {
         Some(val) => {
@@ -2214,6 +2333,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_br_in_tables(ptr: *const 
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.br_in_tables {
         Some(val) => {
@@ -2231,6 +2351,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_highlight_style(ptr: *con
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.highlight_style {
         Some(val) => {
@@ -2248,6 +2369,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_extract_metadata(ptr: *co
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.extract_metadata {
         Some(val) => {
@@ -2265,6 +2387,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_whitespace_mode(ptr: *con
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.whitespace_mode {
         Some(val) => {
@@ -2282,6 +2405,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_strip_newlines(ptr: *cons
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.strip_newlines {
         Some(val) => {
@@ -2299,6 +2423,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_wrap(ptr: *const html_to_
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.wrap {
         Some(val) => {
@@ -2316,6 +2441,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_wrap_width(ptr: *const ht
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.wrap_width {
         Some(val) => {
@@ -2333,6 +2459,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_convert_as_inline(ptr: *c
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.convert_as_inline {
         Some(val) => {
@@ -2350,6 +2477,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_sub_symbol(ptr: *const ht
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.sub_symbol {
         Some(val) => {
@@ -2370,6 +2498,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_sup_symbol(ptr: *const ht
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.sup_symbol {
         Some(val) => {
@@ -2390,6 +2519,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_newline_style(ptr: *const
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.newline_style {
         Some(val) => {
@@ -2407,6 +2537,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_code_block_style(ptr: *co
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.code_block_style {
         Some(val) => {
@@ -2424,6 +2555,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_keep_inline_images_in(ptr
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.keep_inline_images_in {
         Some(val) => {
@@ -2447,6 +2579,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_preprocessing(ptr: *const
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.preprocessing {
         Some(val) => {
@@ -2464,6 +2597,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_encoding(ptr: *const html
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.encoding {
         Some(val) => {
@@ -2484,6 +2618,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_debug(ptr: *const html_to
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.debug {
         Some(val) => {
@@ -2501,6 +2636,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_strip_tags(ptr: *const ht
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.strip_tags {
         Some(val) => {
@@ -2524,6 +2660,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_preserve_tags(ptr: *const
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.preserve_tags {
         Some(val) => {
@@ -2547,6 +2684,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_skip_images(ptr: *const h
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.skip_images {
         Some(val) => {
@@ -2564,6 +2702,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_link_style(ptr: *const ht
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.link_style {
         Some(val) => {
@@ -2581,6 +2720,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_output_format(ptr: *const
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.output_format {
         Some(val) => {
@@ -2598,6 +2738,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_include_document_structur
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.include_document_structure {
         Some(val) => {
@@ -2615,6 +2756,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_extract_images(ptr: *cons
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.extract_images {
         Some(val) => {
@@ -2632,6 +2774,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_max_image_size(ptr: *cons
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.max_image_size {
         Some(val) => {
@@ -2649,6 +2792,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_capture_svg(ptr: *const h
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.capture_svg {
         Some(val) => {
@@ -2666,6 +2810,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_infer_dimensions(ptr: *co
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.infer_dimensions {
         Some(val) => {
@@ -2683,6 +2828,7 @@ pub unsafe extern "C" fn htm_conversion_options_update_max_depth(ptr: *const htm
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.max_depth {
         Some(Some(inner_val)) => {
@@ -2704,6 +2850,7 @@ pub unsafe extern "C" fn htm_preprocessing_options_from_json(json: *const c_char
         set_last_error(1, "Null pointer passed for JSON string");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees json is a valid pointer; string is valid UTF-8 from caller.
     let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -2731,6 +2878,7 @@ pub unsafe extern "C" fn htm_preprocessing_options_to_json(ptr: *const html_to_m
         set_last_error(1, "Null pointer passed to to_json");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let val = unsafe { &*ptr };
     match serde_json::to_string(val) {
         Ok(s) => match CString::new(s) {
@@ -2753,6 +2901,7 @@ pub unsafe extern "C" fn htm_preprocessing_options_to_json(ptr: *const html_to_m
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_preprocessing_options_free(ptr: *mut html_to_markdown_rs::options::PreprocessingOptions) {
     if !ptr.is_null() {
+        // SAFETY: ptr was allocated by Box::into_raw; caller ensures no aliases.
         unsafe { drop(Box::from_raw(ptr)); }
     }
 }
@@ -2765,6 +2914,7 @@ pub unsafe extern "C" fn htm_preprocessing_options_enabled(ptr: *const html_to_m
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.enabled as i32
 }
@@ -2777,6 +2927,7 @@ pub unsafe extern "C" fn htm_preprocessing_options_preset(ptr: *const html_to_ma
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     Box::into_raw(Box::new(obj.preset.clone()))
 }
@@ -2789,6 +2940,7 @@ pub unsafe extern "C" fn htm_preprocessing_options_remove_navigation(ptr: *const
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.remove_navigation as i32
 }
@@ -2801,6 +2953,7 @@ pub unsafe extern "C" fn htm_preprocessing_options_remove_forms(ptr: *const html
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.remove_forms as i32
 }
@@ -2844,6 +2997,7 @@ pub unsafe extern "C" fn htm_preprocessing_options_apply_update(
         set_last_error(1, "Null pointer passed for parameter 'update'");
         return;
     }
+    // SAFETY: null check above guarantees update is a valid pointer.
     let update_rs = unsafe { &*update }.clone();
     let result = obj.apply_update(update_rs);
 }
@@ -2872,6 +3026,7 @@ pub unsafe extern "C" fn htm_preprocessing_options_from_update(
         set_last_error(1, "Null pointer passed for parameter 'update'");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees update is a valid pointer.
     let update_rs = unsafe { &*update }.clone();
     let result = html_to_markdown_rs::options::PreprocessingOptions::from_update(update_rs);
     Box::into_raw(Box::new(result))
@@ -2889,6 +3044,7 @@ pub unsafe extern "C" fn htm_preprocessing_options_from(
         set_last_error(1, "Null pointer passed for parameter 'update'");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees update is a valid pointer.
     let update_rs = unsafe { &*update }.clone();
     let result = html_to_markdown_rs::options::PreprocessingOptions::from(update_rs);
     Box::into_raw(Box::new(result))
@@ -2905,6 +3061,7 @@ pub unsafe extern "C" fn htm_preprocessing_options_update_from_json(json: *const
         set_last_error(1, "Null pointer passed for JSON string");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees json is a valid pointer; string is valid UTF-8 from caller.
     let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -2927,6 +3084,7 @@ pub unsafe extern "C" fn htm_preprocessing_options_update_from_json(json: *const
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_preprocessing_options_update_free(ptr: *mut html_to_markdown_rs::options::PreprocessingOptionsUpdate) {
     if !ptr.is_null() {
+        // SAFETY: ptr was allocated by Box::into_raw; caller ensures no aliases.
         unsafe { drop(Box::from_raw(ptr)); }
     }
 }
@@ -2939,6 +3097,7 @@ pub unsafe extern "C" fn htm_preprocessing_options_update_enabled(ptr: *const ht
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.enabled {
         Some(val) => {
@@ -2956,6 +3115,7 @@ pub unsafe extern "C" fn htm_preprocessing_options_update_preset(ptr: *const htm
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.preset {
         Some(val) => {
@@ -2973,6 +3133,7 @@ pub unsafe extern "C" fn htm_preprocessing_options_update_remove_navigation(ptr:
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.remove_navigation {
         Some(val) => {
@@ -2990,6 +3151,7 @@ pub unsafe extern "C" fn htm_preprocessing_options_update_remove_forms(ptr: *con
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.remove_forms {
         Some(val) => {
@@ -3010,6 +3172,7 @@ pub unsafe extern "C" fn htm_document_structure_from_json(json: *const c_char) -
         set_last_error(1, "Null pointer passed for JSON string");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees json is a valid pointer; string is valid UTF-8 from caller.
     let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -3037,6 +3200,7 @@ pub unsafe extern "C" fn htm_document_structure_to_json(ptr: *const html_to_mark
         set_last_error(1, "Null pointer passed to to_json");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let val = unsafe { &*ptr };
     match serde_json::to_string(val) {
         Ok(s) => match CString::new(s) {
@@ -3059,6 +3223,7 @@ pub unsafe extern "C" fn htm_document_structure_to_json(ptr: *const html_to_mark
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_document_structure_free(ptr: *mut html_to_markdown_rs::DocumentStructure) {
     if !ptr.is_null() {
+        // SAFETY: ptr was allocated by Box::into_raw; caller ensures no aliases.
         unsafe { drop(Box::from_raw(ptr)); }
     }
 }
@@ -3071,6 +3236,7 @@ pub unsafe extern "C" fn htm_document_structure_nodes(ptr: *const html_to_markdo
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match serde_json::to_string(&obj.nodes) {
         Ok(s) => match CString::new(s) {
@@ -3089,6 +3255,7 @@ pub unsafe extern "C" fn htm_document_structure_source_format(ptr: *const html_t
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.source_format {
         Some(val) => {
@@ -3112,6 +3279,7 @@ pub unsafe extern "C" fn htm_document_node_from_json(json: *const c_char) -> *mu
         set_last_error(1, "Null pointer passed for JSON string");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees json is a valid pointer; string is valid UTF-8 from caller.
     let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -3139,6 +3307,7 @@ pub unsafe extern "C" fn htm_document_node_to_json(ptr: *const html_to_markdown_
         set_last_error(1, "Null pointer passed to to_json");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let val = unsafe { &*ptr };
     match serde_json::to_string(val) {
         Ok(s) => match CString::new(s) {
@@ -3161,6 +3330,7 @@ pub unsafe extern "C" fn htm_document_node_to_json(ptr: *const html_to_markdown_
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_document_node_free(ptr: *mut html_to_markdown_rs::DocumentNode) {
     if !ptr.is_null() {
+        // SAFETY: ptr was allocated by Box::into_raw; caller ensures no aliases.
         unsafe { drop(Box::from_raw(ptr)); }
     }
 }
@@ -3173,6 +3343,7 @@ pub unsafe extern "C" fn htm_document_node_id(ptr: *const html_to_markdown_rs::D
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match CString::new(obj.id.to_string()) {
         Ok(cs) => cs.into_raw(),
@@ -3188,6 +3359,7 @@ pub unsafe extern "C" fn htm_document_node_content(ptr: *const html_to_markdown_
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     Box::into_raw(Box::new(obj.content.clone()))
 }
@@ -3200,6 +3372,7 @@ pub unsafe extern "C" fn htm_document_node_parent(ptr: *const html_to_markdown_r
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.parent {
         Some(val) => {
@@ -3217,6 +3390,7 @@ pub unsafe extern "C" fn htm_document_node_children(ptr: *const html_to_markdown
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match serde_json::to_string(&obj.children) {
         Ok(s) => match CString::new(s) {
@@ -3235,6 +3409,7 @@ pub unsafe extern "C" fn htm_document_node_annotations(ptr: *const html_to_markd
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match serde_json::to_string(&obj.annotations) {
         Ok(s) => match CString::new(s) {
@@ -3253,6 +3428,7 @@ pub unsafe extern "C" fn htm_document_node_attributes(ptr: *const html_to_markdo
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.attributes {
         Some(val) => {
@@ -3279,6 +3455,7 @@ pub unsafe extern "C" fn htm_text_annotation_from_json(json: *const c_char) -> *
         set_last_error(1, "Null pointer passed for JSON string");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees json is a valid pointer; string is valid UTF-8 from caller.
     let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -3306,6 +3483,7 @@ pub unsafe extern "C" fn htm_text_annotation_to_json(ptr: *const html_to_markdow
         set_last_error(1, "Null pointer passed to to_json");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let val = unsafe { &*ptr };
     match serde_json::to_string(val) {
         Ok(s) => match CString::new(s) {
@@ -3328,6 +3506,7 @@ pub unsafe extern "C" fn htm_text_annotation_to_json(ptr: *const html_to_markdow
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_text_annotation_free(ptr: *mut html_to_markdown_rs::TextAnnotation) {
     if !ptr.is_null() {
+        // SAFETY: ptr was allocated by Box::into_raw; caller ensures no aliases.
         unsafe { drop(Box::from_raw(ptr)); }
     }
 }
@@ -3340,6 +3519,7 @@ pub unsafe extern "C" fn htm_text_annotation_start(ptr: *const html_to_markdown_
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.start
 }
@@ -3352,6 +3532,7 @@ pub unsafe extern "C" fn htm_text_annotation_end(ptr: *const html_to_markdown_rs
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.end
 }
@@ -3364,6 +3545,7 @@ pub unsafe extern "C" fn htm_text_annotation_kind(ptr: *const html_to_markdown_r
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     Box::into_raw(Box::new(obj.kind.clone()))
 }
@@ -3379,6 +3561,7 @@ pub unsafe extern "C" fn htm_conversion_result_from_json(json: *const c_char) ->
         set_last_error(1, "Null pointer passed for JSON string");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees json is a valid pointer; string is valid UTF-8 from caller.
     let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -3406,6 +3589,7 @@ pub unsafe extern "C" fn htm_conversion_result_to_json(ptr: *const html_to_markd
         set_last_error(1, "Null pointer passed to to_json");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let val = unsafe { &*ptr };
     match serde_json::to_string(val) {
         Ok(s) => match CString::new(s) {
@@ -3428,6 +3612,7 @@ pub unsafe extern "C" fn htm_conversion_result_to_json(ptr: *const html_to_markd
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_conversion_result_free(ptr: *mut html_to_markdown_rs::ConversionResult) {
     if !ptr.is_null() {
+        // SAFETY: ptr was allocated by Box::into_raw; caller ensures no aliases.
         unsafe { drop(Box::from_raw(ptr)); }
     }
 }
@@ -3440,6 +3625,7 @@ pub unsafe extern "C" fn htm_conversion_result_content(ptr: *const html_to_markd
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.content {
         Some(val) => {
@@ -3460,6 +3646,7 @@ pub unsafe extern "C" fn htm_conversion_result_document(ptr: *const html_to_mark
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.document {
         Some(val) => {
@@ -3477,6 +3664,7 @@ pub unsafe extern "C" fn htm_conversion_result_metadata(ptr: *const html_to_mark
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     Box::into_raw(Box::new(obj.metadata.clone()))
 }
@@ -3489,6 +3677,7 @@ pub unsafe extern "C" fn htm_conversion_result_tables(ptr: *const html_to_markdo
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match serde_json::to_string(&obj.tables) {
         Ok(s) => match CString::new(s) {
@@ -3507,6 +3696,7 @@ pub unsafe extern "C" fn htm_conversion_result_warnings(ptr: *const html_to_mark
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match serde_json::to_string(&obj.warnings) {
         Ok(s) => match CString::new(s) {
@@ -3528,6 +3718,7 @@ pub unsafe extern "C" fn htm_table_grid_from_json(json: *const c_char) -> *mut h
         set_last_error(1, "Null pointer passed for JSON string");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees json is a valid pointer; string is valid UTF-8 from caller.
     let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -3555,6 +3746,7 @@ pub unsafe extern "C" fn htm_table_grid_to_json(ptr: *const html_to_markdown_rs:
         set_last_error(1, "Null pointer passed to to_json");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let val = unsafe { &*ptr };
     match serde_json::to_string(val) {
         Ok(s) => match CString::new(s) {
@@ -3577,6 +3769,7 @@ pub unsafe extern "C" fn htm_table_grid_to_json(ptr: *const html_to_markdown_rs:
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_table_grid_free(ptr: *mut html_to_markdown_rs::TableGrid) {
     if !ptr.is_null() {
+        // SAFETY: ptr was allocated by Box::into_raw; caller ensures no aliases.
         unsafe { drop(Box::from_raw(ptr)); }
     }
 }
@@ -3589,6 +3782,7 @@ pub unsafe extern "C" fn htm_table_grid_rows(ptr: *const html_to_markdown_rs::Ta
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.rows
 }
@@ -3601,6 +3795,7 @@ pub unsafe extern "C" fn htm_table_grid_cols(ptr: *const html_to_markdown_rs::Ta
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.cols
 }
@@ -3613,6 +3808,7 @@ pub unsafe extern "C" fn htm_table_grid_cells(ptr: *const html_to_markdown_rs::T
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match serde_json::to_string(&obj.cells) {
         Ok(s) => match CString::new(s) {
@@ -3634,6 +3830,7 @@ pub unsafe extern "C" fn htm_grid_cell_from_json(json: *const c_char) -> *mut ht
         set_last_error(1, "Null pointer passed for JSON string");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees json is a valid pointer; string is valid UTF-8 from caller.
     let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -3661,6 +3858,7 @@ pub unsafe extern "C" fn htm_grid_cell_to_json(ptr: *const html_to_markdown_rs::
         set_last_error(1, "Null pointer passed to to_json");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let val = unsafe { &*ptr };
     match serde_json::to_string(val) {
         Ok(s) => match CString::new(s) {
@@ -3683,6 +3881,7 @@ pub unsafe extern "C" fn htm_grid_cell_to_json(ptr: *const html_to_markdown_rs::
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_grid_cell_free(ptr: *mut html_to_markdown_rs::GridCell) {
     if !ptr.is_null() {
+        // SAFETY: ptr was allocated by Box::into_raw; caller ensures no aliases.
         unsafe { drop(Box::from_raw(ptr)); }
     }
 }
@@ -3695,6 +3894,7 @@ pub unsafe extern "C" fn htm_grid_cell_content(ptr: *const html_to_markdown_rs::
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match CString::new(obj.content.to_string()) {
         Ok(cs) => cs.into_raw(),
@@ -3710,6 +3910,7 @@ pub unsafe extern "C" fn htm_grid_cell_row(ptr: *const html_to_markdown_rs::Grid
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.row
 }
@@ -3722,6 +3923,7 @@ pub unsafe extern "C" fn htm_grid_cell_col(ptr: *const html_to_markdown_rs::Grid
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.col
 }
@@ -3734,6 +3936,7 @@ pub unsafe extern "C" fn htm_grid_cell_row_span(ptr: *const html_to_markdown_rs:
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.row_span
 }
@@ -3746,6 +3949,7 @@ pub unsafe extern "C" fn htm_grid_cell_col_span(ptr: *const html_to_markdown_rs:
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.col_span
 }
@@ -3758,6 +3962,7 @@ pub unsafe extern "C" fn htm_grid_cell_is_header(ptr: *const html_to_markdown_rs
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.is_header as i32
 }
@@ -3773,6 +3978,7 @@ pub unsafe extern "C" fn htm_table_data_from_json(json: *const c_char) -> *mut h
         set_last_error(1, "Null pointer passed for JSON string");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees json is a valid pointer; string is valid UTF-8 from caller.
     let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -3800,6 +4006,7 @@ pub unsafe extern "C" fn htm_table_data_to_json(ptr: *const html_to_markdown_rs:
         set_last_error(1, "Null pointer passed to to_json");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let val = unsafe { &*ptr };
     match serde_json::to_string(val) {
         Ok(s) => match CString::new(s) {
@@ -3822,6 +4029,7 @@ pub unsafe extern "C" fn htm_table_data_to_json(ptr: *const html_to_markdown_rs:
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_table_data_free(ptr: *mut html_to_markdown_rs::TableData) {
     if !ptr.is_null() {
+        // SAFETY: ptr was allocated by Box::into_raw; caller ensures no aliases.
         unsafe { drop(Box::from_raw(ptr)); }
     }
 }
@@ -3834,6 +4042,7 @@ pub unsafe extern "C" fn htm_table_data_grid(ptr: *const html_to_markdown_rs::Ta
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     Box::into_raw(Box::new(obj.grid.clone()))
 }
@@ -3846,6 +4055,7 @@ pub unsafe extern "C" fn htm_table_data_markdown(ptr: *const html_to_markdown_rs
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match CString::new(obj.markdown.to_string()) {
         Ok(cs) => cs.into_raw(),
@@ -3864,6 +4074,7 @@ pub unsafe extern "C" fn htm_processing_warning_from_json(json: *const c_char) -
         set_last_error(1, "Null pointer passed for JSON string");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees json is a valid pointer; string is valid UTF-8 from caller.
     let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -3891,6 +4102,7 @@ pub unsafe extern "C" fn htm_processing_warning_to_json(ptr: *const html_to_mark
         set_last_error(1, "Null pointer passed to to_json");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let val = unsafe { &*ptr };
     match serde_json::to_string(val) {
         Ok(s) => match CString::new(s) {
@@ -3913,6 +4125,7 @@ pub unsafe extern "C" fn htm_processing_warning_to_json(ptr: *const html_to_mark
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_processing_warning_free(ptr: *mut html_to_markdown_rs::ProcessingWarning) {
     if !ptr.is_null() {
+        // SAFETY: ptr was allocated by Box::into_raw; caller ensures no aliases.
         unsafe { drop(Box::from_raw(ptr)); }
     }
 }
@@ -3925,6 +4138,7 @@ pub unsafe extern "C" fn htm_processing_warning_message(ptr: *const html_to_mark
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match CString::new(obj.message.to_string()) {
         Ok(cs) => cs.into_raw(),
@@ -3940,6 +4154,7 @@ pub unsafe extern "C" fn htm_processing_warning_kind(ptr: *const html_to_markdow
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     Box::into_raw(Box::new(obj.kind.clone()))
 }
@@ -3955,6 +4170,7 @@ pub unsafe extern "C" fn htm_node_context_from_json(json: *const c_char) -> *mut
         set_last_error(1, "Null pointer passed for JSON string");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees json is a valid pointer; string is valid UTF-8 from caller.
     let c_str = match unsafe { CStr::from_ptr(json) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -3982,6 +4198,7 @@ pub unsafe extern "C" fn htm_node_context_to_json(ptr: *const html_to_markdown_r
         set_last_error(1, "Null pointer passed to to_json");
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let val = unsafe { &*ptr };
     match serde_json::to_string(val) {
         Ok(s) => match CString::new(s) {
@@ -4004,6 +4221,7 @@ pub unsafe extern "C" fn htm_node_context_to_json(ptr: *const html_to_markdown_r
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_node_context_free(ptr: *mut html_to_markdown_rs::NodeContext) {
     if !ptr.is_null() {
+        // SAFETY: ptr was allocated by Box::into_raw; caller ensures no aliases.
         unsafe { drop(Box::from_raw(ptr)); }
     }
 }
@@ -4016,6 +4234,7 @@ pub unsafe extern "C" fn htm_node_context_node_type(ptr: *const html_to_markdown
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     Box::into_raw(Box::new(obj.node_type.clone()))
 }
@@ -4028,6 +4247,7 @@ pub unsafe extern "C" fn htm_node_context_tag_name(ptr: *const html_to_markdown_
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match CString::new(obj.tag_name.to_string()) {
         Ok(cs) => cs.into_raw(),
@@ -4043,6 +4263,7 @@ pub unsafe extern "C" fn htm_node_context_attributes(ptr: *const html_to_markdow
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match serde_json::to_string(&obj.attributes) {
         Ok(s) => match CString::new(s) {
@@ -4061,6 +4282,7 @@ pub unsafe extern "C" fn htm_node_context_depth(ptr: *const html_to_markdown_rs:
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.depth
 }
@@ -4073,6 +4295,7 @@ pub unsafe extern "C" fn htm_node_context_index_in_parent(ptr: *const html_to_ma
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.index_in_parent
 }
@@ -4085,6 +4308,7 @@ pub unsafe extern "C" fn htm_node_context_parent_tag(ptr: *const html_to_markdow
     if ptr.is_null() {
         return std::ptr::null_mut();
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     match &obj.parent_tag {
         Some(val) => {
@@ -4105,6 +4329,7 @@ pub unsafe extern "C" fn htm_node_context_is_inline(ptr: *const html_to_markdown
     if ptr.is_null() {
         return 0;
     }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
     let obj = unsafe { &*ptr };
     obj.is_inline as i32
 }
@@ -4135,6 +4360,7 @@ pub unsafe extern "C" fn htm_text_direction_from_str(name: *const c_char) -> i32
         set_last_error(1, "Null pointer passed for enum name");
         return -1;
     }
+    // SAFETY: null check above guarantees name is a valid pointer; string is valid UTF-8 from caller.
     let s = match unsafe { CStr::from_ptr(name) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -4182,6 +4408,7 @@ pub unsafe extern "C" fn htm_link_type_from_str(name: *const c_char) -> i32 {
         set_last_error(1, "Null pointer passed for enum name");
         return -1;
     }
+    // SAFETY: null check above guarantees name is a valid pointer; string is valid UTF-8 from caller.
     let s = match unsafe { CStr::from_ptr(name) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -4230,6 +4457,7 @@ pub unsafe extern "C" fn htm_image_type_from_str(name: *const c_char) -> i32 {
         set_last_error(1, "Null pointer passed for enum name");
         return -1;
     }
+    // SAFETY: null check above guarantees name is a valid pointer; string is valid UTF-8 from caller.
     let s = match unsafe { CStr::from_ptr(name) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -4275,6 +4503,7 @@ pub unsafe extern "C" fn htm_structured_data_type_from_str(name: *const c_char) 
         set_last_error(1, "Null pointer passed for enum name");
         return -1;
     }
+    // SAFETY: null check above guarantees name is a valid pointer; string is valid UTF-8 from caller.
     let s = match unsafe { CStr::from_ptr(name) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -4319,6 +4548,7 @@ pub unsafe extern "C" fn htm_preprocessing_preset_from_str(name: *const c_char) 
         set_last_error(1, "Null pointer passed for enum name");
         return -1;
     }
+    // SAFETY: null check above guarantees name is a valid pointer; string is valid UTF-8 from caller.
     let s = match unsafe { CStr::from_ptr(name) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -4363,6 +4593,7 @@ pub unsafe extern "C" fn htm_heading_style_from_str(name: *const c_char) -> i32 
         set_last_error(1, "Null pointer passed for enum name");
         return -1;
     }
+    // SAFETY: null check above guarantees name is a valid pointer; string is valid UTF-8 from caller.
     let s = match unsafe { CStr::from_ptr(name) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -4406,6 +4637,7 @@ pub unsafe extern "C" fn htm_list_indent_type_from_str(name: *const c_char) -> i
         set_last_error(1, "Null pointer passed for enum name");
         return -1;
     }
+    // SAFETY: null check above guarantees name is a valid pointer; string is valid UTF-8 from caller.
     let s = match unsafe { CStr::from_ptr(name) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -4448,6 +4680,7 @@ pub unsafe extern "C" fn htm_whitespace_mode_from_str(name: *const c_char) -> i3
         set_last_error(1, "Null pointer passed for enum name");
         return -1;
     }
+    // SAFETY: null check above guarantees name is a valid pointer; string is valid UTF-8 from caller.
     let s = match unsafe { CStr::from_ptr(name) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -4490,6 +4723,7 @@ pub unsafe extern "C" fn htm_newline_style_from_str(name: *const c_char) -> i32 
         set_last_error(1, "Null pointer passed for enum name");
         return -1;
     }
+    // SAFETY: null check above guarantees name is a valid pointer; string is valid UTF-8 from caller.
     let s = match unsafe { CStr::from_ptr(name) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -4533,6 +4767,7 @@ pub unsafe extern "C" fn htm_code_block_style_from_str(name: *const c_char) -> i
         set_last_error(1, "Null pointer passed for enum name");
         return -1;
     }
+    // SAFETY: null check above guarantees name is a valid pointer; string is valid UTF-8 from caller.
     let s = match unsafe { CStr::from_ptr(name) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -4578,6 +4813,7 @@ pub unsafe extern "C" fn htm_highlight_style_from_str(name: *const c_char) -> i3
         set_last_error(1, "Null pointer passed for enum name");
         return -1;
     }
+    // SAFETY: null check above guarantees name is a valid pointer; string is valid UTF-8 from caller.
     let s = match unsafe { CStr::from_ptr(name) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -4622,6 +4858,7 @@ pub unsafe extern "C" fn htm_link_style_from_str(name: *const c_char) -> i32 {
         set_last_error(1, "Null pointer passed for enum name");
         return -1;
     }
+    // SAFETY: null check above guarantees name is a valid pointer; string is valid UTF-8 from caller.
     let s = match unsafe { CStr::from_ptr(name) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -4665,6 +4902,7 @@ pub unsafe extern "C" fn htm_output_format_from_str(name: *const c_char) -> i32 
         set_last_error(1, "Null pointer passed for enum name");
         return -1;
     }
+    // SAFETY: null check above guarantees name is a valid pointer; string is valid UTF-8 from caller.
     let s = match unsafe { CStr::from_ptr(name) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -4719,6 +4957,7 @@ pub unsafe extern "C" fn htm_node_content_from_str(name: *const c_char) -> i32 {
         set_last_error(1, "Null pointer passed for enum name");
         return -1;
     }
+    // SAFETY: null check above guarantees name is a valid pointer; string is valid UTF-8 from caller.
     let s = match unsafe { CStr::from_ptr(name) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -4779,6 +5018,7 @@ pub unsafe extern "C" fn htm_annotation_kind_from_str(name: *const c_char) -> i3
         set_last_error(1, "Null pointer passed for enum name");
         return -1;
     }
+    // SAFETY: null check above guarantees name is a valid pointer; string is valid UTF-8 from caller.
     let s = match unsafe { CStr::from_ptr(name) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -4832,6 +5072,7 @@ pub unsafe extern "C" fn htm_warning_kind_from_str(name: *const c_char) -> i32 {
         set_last_error(1, "Null pointer passed for enum name");
         return -1;
     }
+    // SAFETY: null check above guarantees name is a valid pointer; string is valid UTF-8 from caller.
     let s = match unsafe { CStr::from_ptr(name) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -4964,6 +5205,7 @@ pub unsafe extern "C" fn htm_node_type_from_str(name: *const c_char) -> i32 {
         set_last_error(1, "Null pointer passed for enum name");
         return -1;
     }
+    // SAFETY: null check above guarantees name is a valid pointer; string is valid UTF-8 from caller.
     let s = match unsafe { CStr::from_ptr(name) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -5095,6 +5337,7 @@ pub unsafe extern "C" fn htm_visit_result_from_str(name: *const c_char) -> i32 {
         set_last_error(1, "Null pointer passed for enum name");
         return -1;
     }
+    // SAFETY: null check above guarantees name is a valid pointer; string is valid UTF-8 from caller.
     let s = match unsafe { CStr::from_ptr(name) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -5143,6 +5386,7 @@ pub unsafe extern "C" fn htm_convert(
         return std::ptr::null_mut();
     }
 
+    // SAFETY: null check above guarantees html is a valid pointer; string is valid UTF-8 from caller.
     let html_str = match unsafe { std::ffi::CStr::from_ptr(html) }.to_str() {
         Ok(s) => s,
         Err(_) => {
@@ -6632,6 +6876,7 @@ pub unsafe extern "C" fn htm_convert_with_visitor(
         return std::ptr::null_mut();
     }
 
+    // SAFETY: null check above guarantees html is a valid pointer; string is valid UTF-8 from caller.
     let html_str = match unsafe { std::ffi::CStr::from_ptr(html) }.to_str() {
         Ok(s) => s.to_string(),
         Err(_) => {
@@ -6643,6 +6888,7 @@ pub unsafe extern "C" fn htm_convert_with_visitor(
     let options_rs: Option<html_to_markdown_rs::ConversionOptions> = if options.is_null() {
         None
     } else {
+        // SAFETY: null check above guarantees options is a valid pointer.
         Some(unsafe { &*options }.clone())
     };
 
@@ -6663,123 +6909,163 @@ pub unsafe extern "C" fn htm_convert_with_visitor(
         }
         impl html_to_markdown_rs::visitor::HtmlVisitor for VisitorRef {
             fn visit_text(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, text: &str) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_text(ctx, text) }
             }
             fn visit_element_start(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_element_start(ctx) }
             }
             fn visit_element_end(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, output: &str) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_element_end(ctx, output) }
             }
             fn visit_link(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, href: &str, text: &str, title: Option<&str>) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_link(ctx, href, text, title) }
             }
             fn visit_image(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, src: &str, alt: &str, title: Option<&str>) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_image(ctx, src, alt, title) }
             }
             fn visit_heading(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, level: u32, text: &str, id: Option<&str>) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_heading(ctx, level, text, id) }
             }
             fn visit_code_block(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, lang: Option<&str>, code: &str) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_code_block(ctx, lang, code) }
             }
             fn visit_code_inline(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, code: &str) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_code_inline(ctx, code) }
             }
             fn visit_list_item(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, ordered: bool, marker: &str, text: &str) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_list_item(ctx, ordered, marker, text) }
             }
             fn visit_list_start(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, ordered: bool) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_list_start(ctx, ordered) }
             }
             fn visit_list_end(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, ordered: bool, output: &str) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_list_end(ctx, ordered, output) }
             }
             fn visit_table_start(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_table_start(ctx) }
             }
             fn visit_table_row(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, cells: &[String], is_header: bool) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_table_row(ctx, cells, is_header) }
             }
             fn visit_table_end(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, output: &str) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_table_end(ctx, output) }
             }
             fn visit_blockquote(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, content: &str, depth: usize) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_blockquote(ctx, content, depth) }
             }
             fn visit_strong(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, text: &str) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_strong(ctx, text) }
             }
             fn visit_emphasis(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, text: &str) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_emphasis(ctx, text) }
             }
             fn visit_strikethrough(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, text: &str) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_strikethrough(ctx, text) }
             }
             fn visit_underline(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, text: &str) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_underline(ctx, text) }
             }
             fn visit_subscript(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, text: &str) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_subscript(ctx, text) }
             }
             fn visit_superscript(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, text: &str) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_superscript(ctx, text) }
             }
             fn visit_mark(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, text: &str) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_mark(ctx, text) }
             }
             fn visit_line_break(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_line_break(ctx) }
             }
             fn visit_horizontal_rule(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_horizontal_rule(ctx) }
             }
             fn visit_custom_element(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, tag_name: &str, html: &str) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_custom_element(ctx, tag_name, html) }
             }
             fn visit_definition_list_start(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_definition_list_start(ctx) }
             }
             fn visit_definition_term(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, text: &str) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_definition_term(ctx, text) }
             }
             fn visit_definition_description(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, text: &str) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_definition_description(ctx, text) }
             }
             fn visit_definition_list_end(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, output: &str) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_definition_list_end(ctx, output) }
             }
             fn visit_form(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, action: Option<&str>, method: Option<&str>) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_form(ctx, action, method) }
             }
             fn visit_input(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, input_type: &str, name: Option<&str>, value: Option<&str>) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_input(ctx, input_type, name, value) }
             }
             fn visit_button(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, text: &str) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_button(ctx, text) }
             }
             fn visit_audio(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, src: Option<&str>) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_audio(ctx, src) }
             }
             fn visit_video(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, src: Option<&str>) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_video(ctx, src) }
             }
             fn visit_iframe(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, src: Option<&str>) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_iframe(ctx, src) }
             }
             fn visit_details(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, open: bool) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_details(ctx, open) }
             }
             fn visit_summary(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, text: &str) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_summary(ctx, text) }
             }
             fn visit_figure_start(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_figure_start(ctx) }
             }
             fn visit_figcaption(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, text: &str) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_figcaption(ctx, text) }
             }
             fn visit_figure_end(&mut self, ctx: &html_to_markdown_rs::visitor::NodeContext, output: &str) -> html_to_markdown_rs::visitor::VisitResult {
+                // SAFETY: self.0 is a valid pointer for the duration of the conversion call.
                 unsafe { (*self.0).visit_figure_end(ctx, output) }
             }
         }

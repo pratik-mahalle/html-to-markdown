@@ -69,7 +69,7 @@ class ImageMetadata:
     src: str
     alt: str | None
     title: str | None
-    dimensions: str | None
+    dimensions: list[int] | None
     image_type: ImageType
     attributes: dict[str, str]
     def __init__(
@@ -79,7 +79,7 @@ class ImageMetadata:
         attributes: dict[str, str],
         alt: str | None = None,
         title: str | None = None,
-        dimensions: str | None = None,
+        dimensions: list[int] | None = None,
     ) -> None: ...
 
 class StructuredData:

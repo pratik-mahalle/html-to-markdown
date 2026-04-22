@@ -128,11 +128,11 @@ module HtmlToMarkdown
     attr_reader src: String
     attr_reader alt: String
     attr_reader title: String
-    attr_reader dimensions: String
+    attr_reader dimensions: Array[Integer]
     attr_reader image_type: ImageType
     attr_reader attributes: Hash[String, String]
 
-    def initialize: (src: String, ?alt: String, ?title: String, ?dimensions: String, image_type: ImageType, attributes: Hash[String, String]) -> void
+    def initialize: (src: String, ?alt: String, ?title: String, ?dimensions: Array[Integer], image_type: ImageType, attributes: Hash[String, String]) -> void
   end
 
   class StructuredData

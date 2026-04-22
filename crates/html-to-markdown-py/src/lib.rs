@@ -216,7 +216,7 @@ pub struct ImageMetadata {
     pub title: Option<String>,
     /// Image dimensions as (width, height) if available
     #[pyo3(get)]
-    pub dimensions: Option<String>,
+    pub dimensions: Option<Vec<u32>>,
     /// Image type classification
     #[pyo3(get)]
     pub image_type: ImageType,
@@ -236,7 +236,7 @@ impl ImageMetadata {
         attributes: HashMap<String, String>,
         alt: Option<String>,
         title: Option<String>,
-        dimensions: Option<String>,
+        dimensions: Option<Vec<u32>>,
     ) -> Self {
         Self {
             src,
@@ -978,7 +978,7 @@ impl PreprocessingOptionsUpdate {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(frozen, from_py_object)]
 pub struct DocumentStructure {
     /// All nodes in document reading order.
@@ -999,7 +999,7 @@ impl DocumentStructure {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(frozen, from_py_object)]
 pub struct DocumentNode {
     /// Deterministic node identifier.
@@ -1046,7 +1046,7 @@ impl DocumentNode {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(frozen, from_py_object)]
 pub struct TextAnnotation {
     /// Start byte offset (inclusive) into the parent node's text.
@@ -1070,7 +1070,7 @@ impl TextAnnotation {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 #[pyclass(frozen, from_py_object)]
 pub struct ConversionResult {
     /// Converted text output (markdown, djot, or plain text).

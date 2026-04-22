@@ -52,7 +52,7 @@ public sealed class ImageMetadata
     /// Image dimensions as (width, height) if available
     /// </summary>
     [JsonPropertyName("dimensions")]
-    public string? Dimensions { get; set; } = null;
+    public List<uint>? Dimensions { get; set; } = null;
 
     /// <summary>
     /// Image type classification

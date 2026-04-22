@@ -706,7 +706,7 @@ type ImageMetadata struct {
 	// Title attribute (often shown as tooltip)
 	Title *string `json:"title,omitempty"`
 	// Image dimensions as (width, height) if available
-	Dimensions *string `json:"dimensions,omitempty"`
+	Dimensions *[]uint32 `json:"dimensions,omitempty"`
 	// Image type classification
 	ImageType ImageType `json:"image_type"`
 	// Additional HTML attributes
@@ -1163,6 +1163,15 @@ func NewConversionOptions(opts ...ConversionOptionsOption) *ConversionOptions {
 // All fields start with default values. Call `.build()` to produce the final options.
 type ConversionOptionsBuilder struct {
 	ptr unsafe.Pointer
+}
+
+// NewConversionOptionsBuilder creates a new ConversionOptionsBuilder by calling the C constructor.
+func NewConversionOptionsBuilder() *ConversionOptionsBuilder {
+	ptr := C.htm_conversion_options_builder()
+	if ptr == nil {
+		return nil
+	}
+	return &ConversionOptionsBuilder{ptr: unsafe.Pointer(ptr)}
 }
 
 // Free releases the resources held by this handle.
@@ -1636,6 +1645,11 @@ func (r *ConversionOptions) ApplyUpdate(update ConversionOptionsUpdate) error {
 	C.free(unsafe.Pointer(tmpStrRecv))
 	defer C.htm_conversion_options_free(cRecv)
 	C.htm_conversion_options_apply_update(cRecv, cUpdate)
+	jsonPtrUpdated := C.htm_conversion_options_to_json(cRecv)
+	if jsonPtrUpdated != nil {
+		_ = json.Unmarshal([]byte(C.GoString(jsonPtrUpdated)), r)
+		C.htm_free_string(jsonPtrUpdated)
+	}
 	return nil
 }
 
@@ -1649,7 +1663,8 @@ func (r *ConversionOptionsBuilder) StripTags(tags []string) (*ConversionOptionsB
 	defer C.free(unsafe.Pointer(cTags))
 
 	ptr := C.htm_conversion_options_builder_strip_tags((*C.HTMConversionOptionsBuilder)(unsafe.Pointer(r.ptr)), cTags)
-	return &ConversionOptionsBuilder{ptr: unsafe.Pointer(ptr)}, nil
+	r.ptr = unsafe.Pointer(ptr)
+	return r, nil
 }
 
 // Set the list of HTML tag names that are preserved verbatim in output.
@@ -1662,7 +1677,8 @@ func (r *ConversionOptionsBuilder) PreserveTags(tags []string) (*ConversionOptio
 	defer C.free(unsafe.Pointer(cTags))
 
 	ptr := C.htm_conversion_options_builder_preserve_tags((*C.HTMConversionOptionsBuilder)(unsafe.Pointer(r.ptr)), cTags)
-	return &ConversionOptionsBuilder{ptr: unsafe.Pointer(ptr)}, nil
+	r.ptr = unsafe.Pointer(ptr)
+	return r, nil
 }
 
 // Set the list of HTML tag names whose `<img>` children are kept inline.
@@ -1675,7 +1691,8 @@ func (r *ConversionOptionsBuilder) KeepInlineImagesIn(tags []string) (*Conversio
 	defer C.free(unsafe.Pointer(cTags))
 
 	ptr := C.htm_conversion_options_builder_keep_inline_images_in((*C.HTMConversionOptionsBuilder)(unsafe.Pointer(r.ptr)), cTags)
-	return &ConversionOptionsBuilder{ptr: unsafe.Pointer(ptr)}, nil
+	r.ptr = unsafe.Pointer(ptr)
+	return r, nil
 }
 
 // Set the pre-processing options applied to the HTML before conversion.
@@ -1690,7 +1707,8 @@ func (r *ConversionOptionsBuilder) Preprocessing(preprocessing PreprocessingOpti
 	defer C.htm_preprocessing_options_free(cPreprocessing)
 
 	ptr := C.htm_conversion_options_builder_preprocessing((*C.HTMConversionOptionsBuilder)(unsafe.Pointer(r.ptr)), cPreprocessing)
-	return &ConversionOptionsBuilder{ptr: unsafe.Pointer(ptr)}, nil
+	r.ptr = unsafe.Pointer(ptr)
+	return r, nil
 }
 
 // Build the final [`ConversionOptions`].
@@ -1738,5 +1756,10 @@ func (r *PreprocessingOptions) ApplyUpdate(update PreprocessingOptionsUpdate) er
 	C.free(unsafe.Pointer(tmpStrRecv))
 	defer C.htm_preprocessing_options_free(cRecv)
 	C.htm_preprocessing_options_apply_update(cRecv, cUpdate)
+	jsonPtrUpdated := C.htm_preprocessing_options_to_json(cRecv)
+	if jsonPtrUpdated != nil {
+		_ = json.Unmarshal([]byte(C.GoString(jsonPtrUpdated)), r)
+		C.htm_free_string(jsonPtrUpdated)
+	}
 	return nil
 }

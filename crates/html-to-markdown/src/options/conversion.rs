@@ -108,6 +108,18 @@ pub struct ConversionOptions {
     /// Maximum DOM traversal depth. `None` means unlimited.
     /// When set, subtrees beyond this depth are silently truncated.
     pub max_depth: Option<usize>,
+    /// CSS selectors for elements to exclude entirely (element + all content).
+    ///
+    /// Unlike `strip_tags` (which removes the tag wrapper but keeps children),
+    /// excluded elements and all their descendants are dropped from the output.
+    /// Supports any CSS selector that `tl` supports: tag names, `.class`,
+    /// `#id`, `[attribute]`, etc.
+    ///
+    /// Invalid selectors are silently skipped at conversion time.
+    ///
+    /// Example: `vec![".cookie-banner".into(), "#ad-container".into(), "[role='complementary']".into()]`
+    #[serde(default)]
+    pub exclude_selectors: Vec<String>,
 }
 
 impl Default for ConversionOptions {
@@ -152,6 +164,7 @@ impl Default for ConversionOptions {
             capture_svg: false,
             infer_dimensions: true,
             max_depth: None,
+            exclude_selectors: Vec::new(),
         }
     }
 }
@@ -260,6 +273,13 @@ impl ConversionOptionsBuilder {
     builder_setter!(capture_svg, bool);
     builder_setter!(infer_dimensions, bool);
     builder_setter!(max_depth, Option<usize>);
+
+    /// Set the list of CSS selectors for elements to exclude entirely from output.
+    #[must_use]
+    pub fn exclude_selectors(mut self, selectors: Vec<String>) -> Self {
+        self.0.exclude_selectors = selectors;
+        self
+    }
 
     // Preprocessing
     /// Set the pre-processing options applied to the HTML before conversion.
@@ -375,6 +395,8 @@ pub struct ConversionOptionsUpdate {
     pub infer_dimensions: Option<bool>,
     /// Optional override for [`ConversionOptions::max_depth`].
     pub max_depth: Option<Option<usize>>,
+    /// Optional override for [`ConversionOptions::exclude_selectors`].
+    pub exclude_selectors: Option<Vec<String>>,
 }
 
 impl ConversionOptions {
@@ -425,6 +447,7 @@ impl ConversionOptions {
         apply!(capture_svg);
         apply!(infer_dimensions);
         apply!(max_depth);
+        apply!(exclude_selectors);
         if let Some(preprocessing) = update.preprocessing {
             self.preprocessing.apply_update(preprocessing);
         }

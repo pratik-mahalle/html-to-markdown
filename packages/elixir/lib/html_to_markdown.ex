@@ -9,10 +9,7 @@ defmodule HtmlToMarkdown do
   end
 
   @doc "Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images,"
-  @spec convert(
-          String.t(),
-          String.t() | nil | nil
-        ) :: {:ok, String.t() | nil} | {:error, String.t()}
+  @spec convert(String.t(), String.t() | nil) :: {:ok, String.t() | nil} | {:error, String.t()}
   def convert(html, options) do
     HtmlToMarkdown.Native.convert(html, options, nil)
   end
@@ -20,7 +17,7 @@ defmodule HtmlToMarkdown do
   @doc "Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images,"
   @spec convert(
           String.t(),
-          String.t() | nil | nil,
+          String.t() | nil,
           String.t() | nil
         ) :: {:ok, String.t() | nil} | {:error, String.t()}
   def convert(html, options, visitor) do

@@ -71,7 +71,7 @@ pub struct JsImageMetadata {
     pub src: String,
     pub alt: Option<String>,
     pub title: Option<String>,
-    pub dimensions: Option<String>,
+    pub dimensions: Option<Vec<u32>>,
     #[napi(js_name = "imageType")]
     pub image_type: JsImageType,
     pub attributes: HashMap<String, String>,

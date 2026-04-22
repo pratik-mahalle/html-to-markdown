@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`exclude_selectors` option** — CSS selector-based element exclusion. Unlike `strip_tags` (which removes the wrapper but keeps children), excluded elements and all descendants are dropped entirely. Supports any CSS selector: `.class`, `#id`, `[attribute]`, compound selectors. Works in both markdown and plain text output modes. Example: `exclude_selectors: [".cookie-banner", "#ad-container"]`.
+
 ## [3.3.0] - 2026-04-22
 
 ### Fixed

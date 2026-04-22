@@ -13,10 +13,29 @@ _TO_RUST_HIGHLIGHTSTYLE_MAP = {
 }
 
 
+_TO_RUST_NEWLINESTYLE_MAP = {
+    "spaces": _rust.NewlineStyle.Spaces,
+    "backslash": _rust.NewlineStyle.Backslash,
+}
+
+
+_TO_RUST_PREPROCESSINGPRESET_MAP = {
+    "minimal": _rust.PreprocessingPreset.Minimal,
+    "standard": _rust.PreprocessingPreset.Standard,
+    "aggressive": _rust.PreprocessingPreset.Aggressive,
+}
+
+
 _TO_RUST_HEADINGSTYLE_MAP = {
     "underlined": _rust.HeadingStyle.Underlined,
     "atx": _rust.HeadingStyle.Atx,
     "atx_closed": _rust.HeadingStyle.AtxClosed,
+}
+
+
+_TO_RUST_WHITESPACEMODE_MAP = {
+    "normalized": _rust.WhitespaceMode.Normalized,
+    "strict": _rust.WhitespaceMode.Strict,
 }
 
 
@@ -27,6 +46,12 @@ _TO_RUST_CODEBLOCKSTYLE_MAP = {
 }
 
 
+_TO_RUST_LISTINDENTTYPE_MAP = {
+    "spaces": _rust.ListIndentType.Spaces,
+    "tabs": _rust.ListIndentType.Tabs,
+}
+
+
 _TO_RUST_OUTPUTFORMAT_MAP = {
     "markdown": _rust.OutputFormat.Markdown,
     "djot": _rust.OutputFormat.Djot,
@@ -34,34 +59,9 @@ _TO_RUST_OUTPUTFORMAT_MAP = {
 }
 
 
-_TO_RUST_WHITESPACEMODE_MAP = {
-    "normalized": _rust.WhitespaceMode.Normalized,
-    "strict": _rust.WhitespaceMode.Strict,
-}
-
-
-_TO_RUST_NEWLINESTYLE_MAP = {
-    "spaces": _rust.NewlineStyle.Spaces,
-    "backslash": _rust.NewlineStyle.Backslash,
-}
-
-
 _TO_RUST_LINKSTYLE_MAP = {
     "inline": _rust.LinkStyle.Inline,
     "reference": _rust.LinkStyle.Reference,
-}
-
-
-_TO_RUST_LISTINDENTTYPE_MAP = {
-    "spaces": _rust.ListIndentType.Spaces,
-    "tabs": _rust.ListIndentType.Tabs,
-}
-
-
-_TO_RUST_PREPROCESSINGPRESET_MAP = {
-    "minimal": _rust.PreprocessingPreset.Minimal,
-    "standard": _rust.PreprocessingPreset.Standard,
-    "aggressive": _rust.PreprocessingPreset.Aggressive,
 }
 
 

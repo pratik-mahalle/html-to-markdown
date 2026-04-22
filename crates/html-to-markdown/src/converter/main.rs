@@ -11,7 +11,7 @@
 )]
 
 use std::borrow::Cow;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashSet};
 
 use crate::converter::dom_context::DomContext;
 use crate::converter::main_helpers::{
@@ -191,7 +191,7 @@ pub fn convert_html_impl(
     };
 
     #[cfg(all(feature = "metadata", feature = "visitor"))]
-    let ctx = Context::new(
+    let mut ctx = Context::new(
         options,
         inline_collector,
         metadata_collector,
@@ -200,7 +200,7 @@ pub fn convert_html_impl(
         reference_collector.as_ref().map(std::rc::Rc::clone),
     );
     #[cfg(all(feature = "metadata", not(feature = "visitor")))]
-    let ctx = Context::new(
+    let mut ctx = Context::new(
         options,
         inline_collector,
         metadata_collector,
@@ -209,7 +209,7 @@ pub fn convert_html_impl(
         reference_collector.as_ref().map(std::rc::Rc::clone),
     );
     #[cfg(all(not(feature = "metadata"), feature = "visitor"))]
-    let ctx = Context::new(
+    let mut ctx = Context::new(
         options,
         inline_collector,
         _metadata_collector,
@@ -218,7 +218,7 @@ pub fn convert_html_impl(
         reference_collector.as_ref().map(std::rc::Rc::clone),
     );
     #[cfg(all(not(feature = "metadata"), not(feature = "visitor")))]
-    let ctx = Context::new(
+    let mut ctx = Context::new(
         options,
         inline_collector,
         _metadata_collector,
@@ -226,6 +226,20 @@ pub fn convert_html_impl(
         structure_collector.as_ref().map(std::rc::Rc::clone),
         reference_collector.as_ref().map(std::rc::Rc::clone),
     );
+
+    // Pre-compute node IDs matching exclude_selectors so walk_node can skip them in O(1).
+    // Invalid or unsupported selectors are silently skipped.
+    if !options.exclude_selectors.is_empty() {
+        let mut excluded: HashSet<u32> = HashSet::new();
+        for selector in &options.exclude_selectors {
+            if let Some(iter) = dom.query_selector(selector) {
+                for handle in iter {
+                    excluded.insert(handle.get_inner());
+                }
+            }
+        }
+        ctx.set_excluded_node_ids(excluded);
+    }
 
     for child_handle in dom.children() {
         walk_node(child_handle, parser, &mut output, options, &ctx, 0, &dom_ctx);
@@ -346,6 +360,12 @@ pub fn walk_node(
             }
 
             if should_drop_for_preprocessing(node_handle, tag_name.as_ref(), tag, parser, dom_ctx, options) {
+                trim_trailing_whitespace(output);
+                return;
+            }
+
+            // Drop elements matching exclude_selectors, including all their descendants.
+            if !ctx.excluded_node_ids.is_empty() && ctx.excluded_node_ids.contains(&node_handle.get_inner()) {
                 trim_trailing_whitespace(output);
                 return;
             }

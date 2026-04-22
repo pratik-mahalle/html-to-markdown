@@ -180,7 +180,7 @@ pub struct ImageMetadata {
     pub title: Option<String>,
     /// Image dimensions as (width, height) if available
     #[php(prop, name = "dimensions")]
-    pub dimensions: Option<String>,
+    pub dimensions: Option<Vec<u32>>,
     /// Image type classification
     #[php(prop, name = "image_type")]
     pub image_type: String,
