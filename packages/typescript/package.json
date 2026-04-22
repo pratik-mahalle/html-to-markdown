@@ -20,7 +20,7 @@
 	"scripts": {
 		"build": "napi build --release",
 		"build:debug": "napi build",
-		"lint": "tsc --noEmit",
+		"lint": "echo 'TypeScript type-checking requires native build; use task node:lint:check instead'",
 		"test": "node -e \"console.log('Add test command')\""
 	},
 	"napi": {
