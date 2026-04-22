@@ -2,7 +2,13 @@
 defmodule HtmlToMarkdown.WarningKind do
   @moduledoc "Categories of processing warnings."
 
-  @type t :: :image_extraction_failed | :encoding_fallback | :truncated_input | :malformed_html | :sanitization_applied | :depth_limit_exceeded
+  @type t ::
+          :image_extraction_failed
+          | :encoding_fallback
+          | :truncated_input
+          | :malformed_html
+          | :sanitization_applied
+          | :depth_limit_exceeded
 
   @image_extraction_failed :image_extraction_failed
   @encoding_fallback :encoding_fallback

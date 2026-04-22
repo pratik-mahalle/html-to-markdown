@@ -15,6 +15,8 @@
     clippy::unnecessary_fallible_conversions
 )]
 
+use napi::JsValue;
+use napi::bindgen_prelude::{JsObjectValue, Object, ToNapiValue, Unknown};
 use napi::*;
 use napi_derive::napi;
 use std::collections::HashMap;

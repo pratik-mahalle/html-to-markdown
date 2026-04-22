@@ -83,6 +83,9 @@ namespace = "HtmlToMarkdown"
 [ruby]
 gem_name = "html-to-markdown"
 
+[ruby.stubs]
+output = "packages/ruby/sig/"
+
 [elixir]
 app_name = "html_to_markdown"
 

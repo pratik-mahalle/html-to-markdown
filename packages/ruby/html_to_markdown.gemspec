@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.metadata['keywords'] = %w[html markdown converter].join(',')
   spec.metadata['rubygems_mfa_required'] = 'true'
 
-  spec.files         = Dir.glob(['lib/**/*', 'ext/**/*'])
+  spec.files         = Dir.glob(%w[lib/**/* ext/**/* sig/**/*])
   spec.require_paths = ['lib']
   spec.extensions    = ['ext/html_to_markdown_rb/extconf.rb']
 

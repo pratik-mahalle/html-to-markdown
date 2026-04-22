@@ -978,7 +978,7 @@ impl PreprocessingOptionsUpdate {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 #[pyclass(frozen, from_py_object)]
 pub struct DocumentStructure {
     /// All nodes in document reading order.
@@ -999,7 +999,7 @@ impl DocumentStructure {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 #[pyclass(frozen, from_py_object)]
 pub struct DocumentNode {
     /// Deterministic node identifier.
@@ -1046,7 +1046,7 @@ impl DocumentNode {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 #[pyclass(frozen, from_py_object)]
 pub struct TextAnnotation {
     /// Start byte offset (inclusive) into the parent node's text.
@@ -1070,7 +1070,7 @@ impl TextAnnotation {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 #[pyclass(frozen, from_py_object)]
 pub struct ConversionResult {
     /// Converted text output (markdown, djot, or plain text).
