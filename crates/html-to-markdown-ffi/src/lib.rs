@@ -5115,39 +5115,56 @@ pub unsafe extern "C" fn htm_visit_result_from_str(name: *const c_char) -> i32 {
     }
 }
 
-/// Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images,
-/// and warnings.
+/// Convert HTML to Markdown.
+///
+/// Returns a heap-allocated [`ConversionResult`] on success, or null on failure.
+/// Check `htm_last_error_code` / `htm_last_error_context` for error details.
+/// The returned pointer must be freed with `htm_conversion_result_free`.
 ///
 /// # Arguments
 ///
-/// * `html` - The HTML string to convert
-/// * `options` - Optional conversion options (defaults to `ConversionOptions::default()`)
+/// - `html`: null-terminated, UTF-8 HTML input. Must not be null.
+/// - `options`: optional conversion options; pass null for defaults.
 ///
-/// # Example
-///
-/// ```
-/// use html_to_markdown_rs::{convert, ConversionOptions};
-///
-/// let html = "<h1>Hello World</h1>";
-/// let result = convert(html, None, None).unwrap();
-/// assert!(result.content.as_deref().unwrap_or("").contains("Hello World"));
-/// ```
-///
-/// # Errors
-///
-/// Returns an error if HTML parsing fails or if the input contains invalid UTF-8.
 /// # Safety
-/// Caller must ensure all pointer arguments are valid or null.
-/// Returned pointers must be freed with the appropriate free function.
+///
+/// `html` must be a valid, non-null, null-terminated UTF-8 string.
+/// `options` must be a valid pointer or null.
+/// Returned pointer must be freed with `htm_conversion_result_free`.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn htm_convert(
-    _html: *const std::ffi::c_char,
-    _options: *const html_to_markdown_rs::options::ConversionOptions,
-    _visitor: *const std::ffi::c_char
+    html: *const std::ffi::c_char,
+    options: *const html_to_markdown_rs::options::ConversionOptions,
 ) -> *mut html_to_markdown_rs::ConversionResult {
     clear_last_error();
-    set_last_error(99, "Not implemented: convert");
-    std::ptr::null_mut()
+
+    if html.is_null() {
+        set_last_error(1, "Null pointer passed for html");
+        return std::ptr::null_mut();
+    }
+
+    let html_str = match unsafe { std::ffi::CStr::from_ptr(html) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in html parameter");
+            return std::ptr::null_mut();
+        }
+    };
+
+    let options_rs: Option<html_to_markdown_rs::options::ConversionOptions> = if options.is_null() {
+        None
+    } else {
+        // SAFETY: options is a valid pointer guaranteed by the caller.
+        Some(unsafe { &*options }.clone())
+    };
+
+    match html_to_markdown_rs::convert(html_str, options_rs, None) {
+        Ok(result) => Box::into_raw(Box::new(result)),
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            std::ptr::null_mut()
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------

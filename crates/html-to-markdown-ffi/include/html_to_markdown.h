@@ -2533,8 +2533,7 @@ int32_t htm_visit_result_from_str(const char *name);
  * Returned pointers must be freed with the appropriate free function.
  */
 HTMConversionResult *htm_convert(const char *_html,
-                                 const HTMConversionOptions *_options,
-                                 const char *_visitor);
+                                 const HTMConversionOptions *_options);
 
 /**
  * Create a new visitor handle from a callbacks struct.

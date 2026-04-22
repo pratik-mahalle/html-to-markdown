@@ -499,119 +499,119 @@ class OutputFormat:
     Plain: OutputFormat = ...
     def __init__(self, value: int | str) -> None: ...
 
-class NodeContentHeading(TypedDict):
+class NodeContentHeadingVariant(TypedDict):
     node_type: Literal["heading"]
     level: int
     text: str
 
-class NodeContentParagraph(TypedDict):
+class NodeContentParagraphVariant(TypedDict):
     node_type: Literal["paragraph"]
     text: str
 
-class NodeContentList(TypedDict):
+class NodeContentListVariant(TypedDict):
     node_type: Literal["list"]
     ordered: bool
 
-class NodeContentListItem(TypedDict):
+class NodeContentListItemVariant(TypedDict):
     node_type: Literal["list_item"]
     text: str
 
-class NodeContentTable(TypedDict):
+class NodeContentTableVariant(TypedDict):
     node_type: Literal["table"]
     grid: TableGrid
 
-class NodeContentImage(TypedDict):
+class NodeContentImageVariant(TypedDict):
     node_type: Literal["image"]
     description: str | None
     src: str | None
     image_index: int | None
 
-class NodeContentCode(TypedDict):
+class NodeContentCodeVariant(TypedDict):
     node_type: Literal["code"]
     text: str
     language: str | None
 
-class NodeContentQuote(TypedDict):
+class NodeContentQuoteVariant(TypedDict):
     node_type: Literal["quote"]
 
-class NodeContentDefinitionList(TypedDict):
+class NodeContentDefinitionListVariant(TypedDict):
     node_type: Literal["definition_list"]
 
-class NodeContentDefinitionItem(TypedDict):
+class NodeContentDefinitionItemVariant(TypedDict):
     node_type: Literal["definition_item"]
     term: str
     definition: str
 
-class NodeContentRawBlock(TypedDict):
+class NodeContentRawBlockVariant(TypedDict):
     node_type: Literal["raw_block"]
     format: str
     content: str
 
-class NodeContentMetadataBlock(TypedDict):
+class NodeContentMetadataBlockVariant(TypedDict):
     node_type: Literal["metadata_block"]
     entries: list[str]
 
-class NodeContentGroup(TypedDict):
+class NodeContentGroupVariant(TypedDict):
     node_type: Literal["group"]
     label: str | None
     heading_level: int | None
     heading_text: str | None
 
 NodeContent: TypeAlias = (
-    NodeContentHeading
-    | NodeContentParagraph
-    | NodeContentList
-    | NodeContentListItem
-    | NodeContentTable
-    | NodeContentImage
-    | NodeContentCode
-    | NodeContentQuote
-    | NodeContentDefinitionList
-    | NodeContentDefinitionItem
-    | NodeContentRawBlock
-    | NodeContentMetadataBlock
-    | NodeContentGroup
+    NodeContentHeadingVariant
+    | NodeContentParagraphVariant
+    | NodeContentListVariant
+    | NodeContentListItemVariant
+    | NodeContentTableVariant
+    | NodeContentImageVariant
+    | NodeContentCodeVariant
+    | NodeContentQuoteVariant
+    | NodeContentDefinitionListVariant
+    | NodeContentDefinitionItemVariant
+    | NodeContentRawBlockVariant
+    | NodeContentMetadataBlockVariant
+    | NodeContentGroupVariant
 )
 
-class AnnotationKindBold(TypedDict):
+class AnnotationKindBoldVariant(TypedDict):
     annotation_type: Literal["bold"]
 
-class AnnotationKindItalic(TypedDict):
+class AnnotationKindItalicVariant(TypedDict):
     annotation_type: Literal["italic"]
 
-class AnnotationKindUnderline(TypedDict):
+class AnnotationKindUnderlineVariant(TypedDict):
     annotation_type: Literal["underline"]
 
-class AnnotationKindStrikethrough(TypedDict):
+class AnnotationKindStrikethroughVariant(TypedDict):
     annotation_type: Literal["strikethrough"]
 
-class AnnotationKindCode(TypedDict):
+class AnnotationKindCodeVariant(TypedDict):
     annotation_type: Literal["code"]
 
-class AnnotationKindSubscript(TypedDict):
+class AnnotationKindSubscriptVariant(TypedDict):
     annotation_type: Literal["subscript"]
 
-class AnnotationKindSuperscript(TypedDict):
+class AnnotationKindSuperscriptVariant(TypedDict):
     annotation_type: Literal["superscript"]
 
-class AnnotationKindHighlight(TypedDict):
+class AnnotationKindHighlightVariant(TypedDict):
     annotation_type: Literal["highlight"]
 
-class AnnotationKindLink(TypedDict):
+class AnnotationKindLinkVariant(TypedDict):
     annotation_type: Literal["link"]
     url: str
     title: str | None
 
 AnnotationKind: TypeAlias = (
-    AnnotationKindBold
-    | AnnotationKindItalic
-    | AnnotationKindUnderline
-    | AnnotationKindStrikethrough
-    | AnnotationKindCode
-    | AnnotationKindSubscript
-    | AnnotationKindSuperscript
-    | AnnotationKindHighlight
-    | AnnotationKindLink
+    AnnotationKindBoldVariant
+    | AnnotationKindItalicVariant
+    | AnnotationKindUnderlineVariant
+    | AnnotationKindStrikethroughVariant
+    | AnnotationKindCodeVariant
+    | AnnotationKindSubscriptVariant
+    | AnnotationKindSuperscriptVariant
+    | AnnotationKindHighlightVariant
+    | AnnotationKindLinkVariant
 )
 
 class WarningKind:
@@ -714,25 +714,29 @@ class NodeType:
     Custom: NodeType = ...
     def __init__(self, value: int | str) -> None: ...
 
-class VisitResultContinue(TypedDict):
+class VisitResultContinueVariant(TypedDict):
     type: Literal["Continue"]
 
-class VisitResultCustom(TypedDict):
+class VisitResultCustomVariant(TypedDict):
     type: Literal["Custom"]
     _0: str
 
-class VisitResultSkip(TypedDict):
+class VisitResultSkipVariant(TypedDict):
     type: Literal["Skip"]
 
-class VisitResultPreserveHtml(TypedDict):
+class VisitResultPreserveHtmlVariant(TypedDict):
     type: Literal["PreserveHtml"]
 
-class VisitResultError(TypedDict):
+class VisitResultErrorVariant(TypedDict):
     type: Literal["Error"]
     _0: str
 
 VisitResult: TypeAlias = (
-    VisitResultContinue | VisitResultCustom | VisitResultSkip | VisitResultPreserveHtml | VisitResultError
+    VisitResultContinueVariant
+    | VisitResultCustomVariant
+    | VisitResultSkipVariant
+    | VisitResultPreserveHtmlVariant
+    | VisitResultErrorVariant
 )
 
 def convert(
