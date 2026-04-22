@@ -7,24 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
-
-- **`PreprocessingPreset` not wired into preprocessing logic** — the `preset` field on `PreprocessingOptions` was defined and serializable but never checked by `should_drop_for_preprocessing()`. All three presets (Minimal, Standard, Aggressive) behaved identically. Now:
-  - **Minimal**: Drops nothing during DOM walk (scripts/styles already handled in earlier pipeline stage).
-  - **Standard** (default, no behavior change): Drops `<nav>` unconditionally; drops `<header>`/`<footer>`/`<aside>` only with navigation hints.
-  - **Aggressive**: Drops `<nav>`/`<footer>`/`<aside>` unconditionally; drops `<header>` only with navigation hints (preserves article titles).
-- **`remove_forms` flag was dead code** — `<form>` elements are now dropped when `remove_forms: true` (the default) and preset is Standard or Aggressive.
-
-## [3.2.7] - 2026-04-22
+## [3.3.0] - 2026-04-22
 
 ### Fixed
 
 - **`<h1>` inside `<header>` not exported** (#321) — top-level `<header>` elements were unconditionally dropped during preprocessing; now only `<header>` with navigation hints (e.g. `class="site-header"`, `role="navigation"`) is removed. Added explicit semantic dispatch for all sectioning elements (`article`, `section`, `nav`, `aside`, `header`, `footer`, `main`).
+- **`PreprocessingPreset` not wired into preprocessing logic** — the `preset` field on `PreprocessingOptions` was defined but never checked. Now Minimal/Standard/Aggressive presets have distinct behavior for element dropping.
+- **`remove_forms` flag was dead code** — `<form>` elements are now dropped when `remove_forms: true` and preset is Standard or Aggressive.
 - **Java FFI broken on all platforms** (#315) — native libraries were bundled under wrong JAR path (`natives/` vs `native/`).
 - **Java/C# visitor type conflicts** — alef generator produced conflicting VisitResult/NodeContext types from two code paths; fixed by skipping gen_bindings types when visitor bridge is active.
 - **Ruby `convert()` TypeError** (#319) — options type mismatch and wrong return type in Ruby binding.
 - **Ruby gemspec naming** — duplicate gemspec with wrong name broke Bundler; fixed scaffold to use snake_case file paths.
-- **Go CGO const mismatch** — visitor callback extern declarations used `const` qualifiers that conflict with CGO's export prolog; removed const.
+- **Go lint errors** — fixed CGO preamble extern declarations (plain C types, not Go CGo types), removed invalid `?` syntax from vtable assignments, fixed parameter colon syntax, removed unused `trait_bridges.go` (per-call visitor doesn't use plugin registration), fixed `NodeType` int-to-string mapping, fixed `id` variable shadowing.
+- **PHP binding panics** — `from_update` and `from` methods panicked with `todo!()`; fixed alef PHP backend to skip undelegatable methods instead of emitting panic stubs.
 - **R `ConversionOptionsBuilder`** — four methods panicked with `todo!()`; fixed alef extendr backend to handle opaque types correctly with `inner: Arc<CoreType>` delegation.
 - **CLI `autolinks` default** — library defaults to `true` but CLI had `false`; replaced `--autolinks` with `--no-autolinks` so defaults match.
 - **CLI dead metadata flags** — removed `--extract-document`, `--extract-headers`, `--extract-links`, `--extract-images`, `--extract-structured-data` flags that were parsed but never wired through.
@@ -35,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Visitor pattern for all bindings** (#314, #313) — restored visitor support across Python, TypeScript, Ruby, PHP, Go, Java, C#, Elixir, R, WASM, and C FFI.
 - **R visitor support** — added visitor callbacks for the R binding.
 - **E2E test coverage** — regenerated e2e tests with visitor coverage for all 12 languages.
+- **Ruby RBS type stubs** — auto-generated via alef from the Rust IR. Gemspec now includes `sig/**/*`.
+- **Alef pre-commit hook** — `alef-verify` hook added to `.pre-commit-config.yaml` to check generated code freshness. CI installs alef v0.5.3 binary.
 
 ### Changed
 
