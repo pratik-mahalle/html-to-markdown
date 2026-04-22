@@ -78,131 +78,131 @@ type HtmlVisitor interface {
 	Shutdown() error
 
 	// visit_element_start.
-	VisitElementStart(_ctx: map[string]interface{}) map[string]interface{}
+	VisitElementStart(_ctx map[string]interface{}) map[string]interface{}
 
 	// visit_element_end.
-	VisitElementEnd(_ctx: map[string]interface{}, _output: string) map[string]interface{}
+	VisitElementEnd(_ctx map[string]interface{}, _output string) map[string]interface{}
 
 	// visit_text.
-	VisitText(_ctx: map[string]interface{}, _text: string) map[string]interface{}
+	VisitText(_ctx map[string]interface{}, _text string) map[string]interface{}
 
 	// visit_link.
-	VisitLink(_ctx: map[string]interface{}, _href: string, _text: string, _title: string) map[string]interface{}
+	VisitLink(_ctx map[string]interface{}, _href string, _text string, _title string) map[string]interface{}
 
 	// visit_image.
-	VisitImage(_ctx: map[string]interface{}, _src: string, _alt: string, _title: string) map[string]interface{}
+	VisitImage(_ctx map[string]interface{}, _src string, _alt string, _title string) map[string]interface{}
 
 	// visit_heading.
-	VisitHeading(_ctx: map[string]interface{}, _level: uint32, _text: string, _id: string) map[string]interface{}
+	VisitHeading(_ctx map[string]interface{}, _level uint32, _text string, _id string) map[string]interface{}
 
 	// visit_code_block.
-	VisitCodeBlock(_ctx: map[string]interface{}, _lang: string, _code: string) map[string]interface{}
+	VisitCodeBlock(_ctx map[string]interface{}, _lang string, _code string) map[string]interface{}
 
 	// visit_code_inline.
-	VisitCodeInline(_ctx: map[string]interface{}, _code: string) map[string]interface{}
+	VisitCodeInline(_ctx map[string]interface{}, _code string) map[string]interface{}
 
 	// visit_list_item.
-	VisitListItem(_ctx: map[string]interface{}, _ordered: bool, _marker: string, _text: string) map[string]interface{}
+	VisitListItem(_ctx map[string]interface{}, _ordered bool, _marker string, _text string) map[string]interface{}
 
 	// visit_list_start.
-	VisitListStart(_ctx: map[string]interface{}, _ordered: bool) map[string]interface{}
+	VisitListStart(_ctx map[string]interface{}, _ordered bool) map[string]interface{}
 
 	// visit_list_end.
-	VisitListEnd(_ctx: map[string]interface{}, _ordered: bool, _output: string) map[string]interface{}
+	VisitListEnd(_ctx map[string]interface{}, _ordered bool, _output string) map[string]interface{}
 
 	// visit_table_start.
-	VisitTableStart(_ctx: map[string]interface{}) map[string]interface{}
+	VisitTableStart(_ctx map[string]interface{}) map[string]interface{}
 
 	// visit_table_row.
-	VisitTableRow(_ctx: map[string]interface{}, _cells: []string, _is_header: bool) map[string]interface{}
+	VisitTableRow(_ctx map[string]interface{}, _cells []string, _is_header bool) map[string]interface{}
 
 	// visit_table_end.
-	VisitTableEnd(_ctx: map[string]interface{}, _output: string) map[string]interface{}
+	VisitTableEnd(_ctx map[string]interface{}, _output string) map[string]interface{}
 
 	// visit_blockquote.
-	VisitBlockquote(_ctx: map[string]interface{}, _content: string, _depth: uint) map[string]interface{}
+	VisitBlockquote(_ctx map[string]interface{}, _content string, _depth uint) map[string]interface{}
 
 	// visit_strong.
-	VisitStrong(_ctx: map[string]interface{}, _text: string) map[string]interface{}
+	VisitStrong(_ctx map[string]interface{}, _text string) map[string]interface{}
 
 	// visit_emphasis.
-	VisitEmphasis(_ctx: map[string]interface{}, _text: string) map[string]interface{}
+	VisitEmphasis(_ctx map[string]interface{}, _text string) map[string]interface{}
 
 	// visit_strikethrough.
-	VisitStrikethrough(_ctx: map[string]interface{}, _text: string) map[string]interface{}
+	VisitStrikethrough(_ctx map[string]interface{}, _text string) map[string]interface{}
 
 	// visit_underline.
-	VisitUnderline(_ctx: map[string]interface{}, _text: string) map[string]interface{}
+	VisitUnderline(_ctx map[string]interface{}, _text string) map[string]interface{}
 
 	// visit_subscript.
-	VisitSubscript(_ctx: map[string]interface{}, _text: string) map[string]interface{}
+	VisitSubscript(_ctx map[string]interface{}, _text string) map[string]interface{}
 
 	// visit_superscript.
-	VisitSuperscript(_ctx: map[string]interface{}, _text: string) map[string]interface{}
+	VisitSuperscript(_ctx map[string]interface{}, _text string) map[string]interface{}
 
 	// visit_mark.
-	VisitMark(_ctx: map[string]interface{}, _text: string) map[string]interface{}
+	VisitMark(_ctx map[string]interface{}, _text string) map[string]interface{}
 
 	// visit_line_break.
-	VisitLineBreak(_ctx: map[string]interface{}) map[string]interface{}
+	VisitLineBreak(_ctx map[string]interface{}) map[string]interface{}
 
 	// visit_horizontal_rule.
-	VisitHorizontalRule(_ctx: map[string]interface{}) map[string]interface{}
+	VisitHorizontalRule(_ctx map[string]interface{}) map[string]interface{}
 
 	// visit_custom_element.
-	VisitCustomElement(_ctx: map[string]interface{}, _tag_name: string, _html: string) map[string]interface{}
+	VisitCustomElement(_ctx map[string]interface{}, _tag_name string, _html string) map[string]interface{}
 
 	// visit_definition_list_start.
-	VisitDefinitionListStart(_ctx: map[string]interface{}) map[string]interface{}
+	VisitDefinitionListStart(_ctx map[string]interface{}) map[string]interface{}
 
 	// visit_definition_term.
-	VisitDefinitionTerm(_ctx: map[string]interface{}, _text: string) map[string]interface{}
+	VisitDefinitionTerm(_ctx map[string]interface{}, _text string) map[string]interface{}
 
 	// visit_definition_description.
-	VisitDefinitionDescription(_ctx: map[string]interface{}, _text: string) map[string]interface{}
+	VisitDefinitionDescription(_ctx map[string]interface{}, _text string) map[string]interface{}
 
 	// visit_definition_list_end.
-	VisitDefinitionListEnd(_ctx: map[string]interface{}, _output: string) map[string]interface{}
+	VisitDefinitionListEnd(_ctx map[string]interface{}, _output string) map[string]interface{}
 
 	// visit_form.
-	VisitForm(_ctx: map[string]interface{}, _action: string, _method: string) map[string]interface{}
+	VisitForm(_ctx map[string]interface{}, _action string, _method string) map[string]interface{}
 
 	// visit_input.
-	VisitInput(_ctx: map[string]interface{}, _input_type: string, _name: string, _value: string) map[string]interface{}
+	VisitInput(_ctx map[string]interface{}, _input_type string, _name string, _value string) map[string]interface{}
 
 	// visit_button.
-	VisitButton(_ctx: map[string]interface{}, _text: string) map[string]interface{}
+	VisitButton(_ctx map[string]interface{}, _text string) map[string]interface{}
 
 	// visit_audio.
-	VisitAudio(_ctx: map[string]interface{}, _src: string) map[string]interface{}
+	VisitAudio(_ctx map[string]interface{}, _src string) map[string]interface{}
 
 	// visit_video.
-	VisitVideo(_ctx: map[string]interface{}, _src: string) map[string]interface{}
+	VisitVideo(_ctx map[string]interface{}, _src string) map[string]interface{}
 
 	// visit_iframe.
-	VisitIframe(_ctx: map[string]interface{}, _src: string) map[string]interface{}
+	VisitIframe(_ctx map[string]interface{}, _src string) map[string]interface{}
 
 	// visit_details.
-	VisitDetails(_ctx: map[string]interface{}, _open: bool) map[string]interface{}
+	VisitDetails(_ctx map[string]interface{}, _open bool) map[string]interface{}
 
 	// visit_summary.
-	VisitSummary(_ctx: map[string]interface{}, _text: string) map[string]interface{}
+	VisitSummary(_ctx map[string]interface{}, _text string) map[string]interface{}
 
 	// visit_figure_start.
-	VisitFigureStart(_ctx: map[string]interface{}) map[string]interface{}
+	VisitFigureStart(_ctx map[string]interface{}) map[string]interface{}
 
 	// visit_figcaption.
-	VisitFigcaption(_ctx: map[string]interface{}, _text: string) map[string]interface{}
+	VisitFigcaption(_ctx map[string]interface{}, _text string) map[string]interface{}
 
 	// visit_figure_end.
-	VisitFigureEnd(_ctx: map[string]interface{}, _output: string) map[string]interface{}
+	VisitFigureEnd(_ctx map[string]interface{}, _output string) map[string]interface{}
 
 }
 
 //export goHtmlVisitorVisitElementStart
 func goHtmlVisitorVisitElementStart(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
+	_ctx *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -227,8 +227,8 @@ func goHtmlVisitorVisitElementStart(
 //export goHtmlVisitorVisitElementEnd
 func goHtmlVisitorVisitElementEnd(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_output: *C.char,
+	_ctx *C.char,
+	_output *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -255,8 +255,8 @@ func goHtmlVisitorVisitElementEnd(
 //export goHtmlVisitorVisitText
 func goHtmlVisitorVisitText(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_text: *C.char,
+	_ctx *C.char,
+	_text *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -283,10 +283,10 @@ func goHtmlVisitorVisitText(
 //export goHtmlVisitorVisitLink
 func goHtmlVisitorVisitLink(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_href: *C.char,
-	_text: *C.char,
-	_title: *C.char,
+	_ctx *C.char,
+	_href *C.char,
+	_text *C.char,
+	_title *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -317,10 +317,10 @@ func goHtmlVisitorVisitLink(
 //export goHtmlVisitorVisitImage
 func goHtmlVisitorVisitImage(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_src: *C.char,
-	_alt: *C.char,
-	_title: *C.char,
+	_ctx *C.char,
+	_src *C.char,
+	_alt *C.char,
+	_title *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -351,10 +351,10 @@ func goHtmlVisitorVisitImage(
 //export goHtmlVisitorVisitHeading
 func goHtmlVisitorVisitHeading(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_level: C.uint32_t,
-	_text: *C.char,
-	_id: *C.char,
+	_ctx *C.char,
+	_level C.uint32_t,
+	_text *C.char,
+	_id *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -385,9 +385,9 @@ func goHtmlVisitorVisitHeading(
 //export goHtmlVisitorVisitCodeBlock
 func goHtmlVisitorVisitCodeBlock(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_lang: *C.char,
-	_code: *C.char,
+	_ctx *C.char,
+	_lang *C.char,
+	_code *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -416,8 +416,8 @@ func goHtmlVisitorVisitCodeBlock(
 //export goHtmlVisitorVisitCodeInline
 func goHtmlVisitorVisitCodeInline(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_code: *C.char,
+	_ctx *C.char,
+	_code *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -444,10 +444,10 @@ func goHtmlVisitorVisitCodeInline(
 //export goHtmlVisitorVisitListItem
 func goHtmlVisitorVisitListItem(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_ordered: C.int32_t,
-	_marker: *C.char,
-	_text: *C.char,
+	_ctx *C.char,
+	_ordered C.int32_t,
+	_marker *C.char,
+	_text *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -478,8 +478,8 @@ func goHtmlVisitorVisitListItem(
 //export goHtmlVisitorVisitListStart
 func goHtmlVisitorVisitListStart(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_ordered: C.int32_t,
+	_ctx *C.char,
+	_ordered C.int32_t,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -506,9 +506,9 @@ func goHtmlVisitorVisitListStart(
 //export goHtmlVisitorVisitListEnd
 func goHtmlVisitorVisitListEnd(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_ordered: C.int32_t,
-	_output: *C.char,
+	_ctx *C.char,
+	_ordered C.int32_t,
+	_output *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -537,7 +537,7 @@ func goHtmlVisitorVisitListEnd(
 //export goHtmlVisitorVisitTableStart
 func goHtmlVisitorVisitTableStart(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
+	_ctx *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -562,9 +562,9 @@ func goHtmlVisitorVisitTableStart(
 //export goHtmlVisitorVisitTableRow
 func goHtmlVisitorVisitTableRow(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_cells: *C.char,
-	_is_header: C.int32_t,
+	_ctx *C.char,
+	_cells *C.char,
+	_is_header C.int32_t,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -596,8 +596,8 @@ func goHtmlVisitorVisitTableRow(
 //export goHtmlVisitorVisitTableEnd
 func goHtmlVisitorVisitTableEnd(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_output: *C.char,
+	_ctx *C.char,
+	_output *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -624,9 +624,9 @@ func goHtmlVisitorVisitTableEnd(
 //export goHtmlVisitorVisitBlockquote
 func goHtmlVisitorVisitBlockquote(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_content: *C.char,
-	_depth: C.size_t,
+	_ctx *C.char,
+	_content *C.char,
+	_depth C.size_t,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -655,8 +655,8 @@ func goHtmlVisitorVisitBlockquote(
 //export goHtmlVisitorVisitStrong
 func goHtmlVisitorVisitStrong(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_text: *C.char,
+	_ctx *C.char,
+	_text *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -683,8 +683,8 @@ func goHtmlVisitorVisitStrong(
 //export goHtmlVisitorVisitEmphasis
 func goHtmlVisitorVisitEmphasis(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_text: *C.char,
+	_ctx *C.char,
+	_text *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -711,8 +711,8 @@ func goHtmlVisitorVisitEmphasis(
 //export goHtmlVisitorVisitStrikethrough
 func goHtmlVisitorVisitStrikethrough(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_text: *C.char,
+	_ctx *C.char,
+	_text *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -739,8 +739,8 @@ func goHtmlVisitorVisitStrikethrough(
 //export goHtmlVisitorVisitUnderline
 func goHtmlVisitorVisitUnderline(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_text: *C.char,
+	_ctx *C.char,
+	_text *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -767,8 +767,8 @@ func goHtmlVisitorVisitUnderline(
 //export goHtmlVisitorVisitSubscript
 func goHtmlVisitorVisitSubscript(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_text: *C.char,
+	_ctx *C.char,
+	_text *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -795,8 +795,8 @@ func goHtmlVisitorVisitSubscript(
 //export goHtmlVisitorVisitSuperscript
 func goHtmlVisitorVisitSuperscript(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_text: *C.char,
+	_ctx *C.char,
+	_text *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -823,8 +823,8 @@ func goHtmlVisitorVisitSuperscript(
 //export goHtmlVisitorVisitMark
 func goHtmlVisitorVisitMark(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_text: *C.char,
+	_ctx *C.char,
+	_text *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -851,7 +851,7 @@ func goHtmlVisitorVisitMark(
 //export goHtmlVisitorVisitLineBreak
 func goHtmlVisitorVisitLineBreak(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
+	_ctx *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -876,7 +876,7 @@ func goHtmlVisitorVisitLineBreak(
 //export goHtmlVisitorVisitHorizontalRule
 func goHtmlVisitorVisitHorizontalRule(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
+	_ctx *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -901,9 +901,9 @@ func goHtmlVisitorVisitHorizontalRule(
 //export goHtmlVisitorVisitCustomElement
 func goHtmlVisitorVisitCustomElement(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_tag_name: *C.char,
-	_html: *C.char,
+	_ctx *C.char,
+	_tag_name *C.char,
+	_html *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -932,7 +932,7 @@ func goHtmlVisitorVisitCustomElement(
 //export goHtmlVisitorVisitDefinitionListStart
 func goHtmlVisitorVisitDefinitionListStart(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
+	_ctx *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -957,8 +957,8 @@ func goHtmlVisitorVisitDefinitionListStart(
 //export goHtmlVisitorVisitDefinitionTerm
 func goHtmlVisitorVisitDefinitionTerm(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_text: *C.char,
+	_ctx *C.char,
+	_text *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -985,8 +985,8 @@ func goHtmlVisitorVisitDefinitionTerm(
 //export goHtmlVisitorVisitDefinitionDescription
 func goHtmlVisitorVisitDefinitionDescription(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_text: *C.char,
+	_ctx *C.char,
+	_text *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -1013,8 +1013,8 @@ func goHtmlVisitorVisitDefinitionDescription(
 //export goHtmlVisitorVisitDefinitionListEnd
 func goHtmlVisitorVisitDefinitionListEnd(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_output: *C.char,
+	_ctx *C.char,
+	_output *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -1041,9 +1041,9 @@ func goHtmlVisitorVisitDefinitionListEnd(
 //export goHtmlVisitorVisitForm
 func goHtmlVisitorVisitForm(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_action: *C.char,
-	_method: *C.char,
+	_ctx *C.char,
+	_action *C.char,
+	_method *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -1072,10 +1072,10 @@ func goHtmlVisitorVisitForm(
 //export goHtmlVisitorVisitInput
 func goHtmlVisitorVisitInput(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_input_type: *C.char,
-	_name: *C.char,
-	_value: *C.char,
+	_ctx *C.char,
+	_input_type *C.char,
+	_name *C.char,
+	_value *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -1106,8 +1106,8 @@ func goHtmlVisitorVisitInput(
 //export goHtmlVisitorVisitButton
 func goHtmlVisitorVisitButton(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_text: *C.char,
+	_ctx *C.char,
+	_text *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -1134,8 +1134,8 @@ func goHtmlVisitorVisitButton(
 //export goHtmlVisitorVisitAudio
 func goHtmlVisitorVisitAudio(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_src: *C.char,
+	_ctx *C.char,
+	_src *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -1162,8 +1162,8 @@ func goHtmlVisitorVisitAudio(
 //export goHtmlVisitorVisitVideo
 func goHtmlVisitorVisitVideo(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_src: *C.char,
+	_ctx *C.char,
+	_src *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -1190,8 +1190,8 @@ func goHtmlVisitorVisitVideo(
 //export goHtmlVisitorVisitIframe
 func goHtmlVisitorVisitIframe(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_src: *C.char,
+	_ctx *C.char,
+	_src *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -1218,8 +1218,8 @@ func goHtmlVisitorVisitIframe(
 //export goHtmlVisitorVisitDetails
 func goHtmlVisitorVisitDetails(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_open: C.int32_t,
+	_ctx *C.char,
+	_open C.int32_t,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -1246,8 +1246,8 @@ func goHtmlVisitorVisitDetails(
 //export goHtmlVisitorVisitSummary
 func goHtmlVisitorVisitSummary(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_text: *C.char,
+	_ctx *C.char,
+	_text *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -1274,7 +1274,7 @@ func goHtmlVisitorVisitSummary(
 //export goHtmlVisitorVisitFigureStart
 func goHtmlVisitorVisitFigureStart(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
+	_ctx *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -1299,8 +1299,8 @@ func goHtmlVisitorVisitFigureStart(
 //export goHtmlVisitorVisitFigcaption
 func goHtmlVisitorVisitFigcaption(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_text: *C.char,
+	_ctx *C.char,
+	_text *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -1327,8 +1327,8 @@ func goHtmlVisitorVisitFigcaption(
 //export goHtmlVisitorVisitFigureEnd
 func goHtmlVisitorVisitFigureEnd(
 	userData unsafe.Pointer,
-	_ctx: *C.char,
-	_output: *C.char,
+	_ctx *C.char,
+	_output *C.char,
 	outError **C.char,
 ) C.int32_t {
 	handle := cgo.Handle(uintptr(unsafe.Pointer(userData)))
@@ -1421,51 +1421,51 @@ func RegisterHtmlVisitor(impl HtmlVisitor) error {
 
 	// Build the C vtable
 	vtable := C.htm_html_visitor_VTable{
-		visit_element_start: C.goHtmlVisitorVisitElementStart?,
-		visit_element_end: C.goHtmlVisitorVisitElementEnd?,
-		visit_text: C.goHtmlVisitorVisitText?,
-		visit_link: C.goHtmlVisitorVisitLink?,
-		visit_image: C.goHtmlVisitorVisitImage?,
-		visit_heading: C.goHtmlVisitorVisitHeading?,
-		visit_code_block: C.goHtmlVisitorVisitCodeBlock?,
-		visit_code_inline: C.goHtmlVisitorVisitCodeInline?,
-		visit_list_item: C.goHtmlVisitorVisitListItem?,
-		visit_list_start: C.goHtmlVisitorVisitListStart?,
-		visit_list_end: C.goHtmlVisitorVisitListEnd?,
-		visit_table_start: C.goHtmlVisitorVisitTableStart?,
-		visit_table_row: C.goHtmlVisitorVisitTableRow?,
-		visit_table_end: C.goHtmlVisitorVisitTableEnd?,
-		visit_blockquote: C.goHtmlVisitorVisitBlockquote?,
-		visit_strong: C.goHtmlVisitorVisitStrong?,
-		visit_emphasis: C.goHtmlVisitorVisitEmphasis?,
-		visit_strikethrough: C.goHtmlVisitorVisitStrikethrough?,
-		visit_underline: C.goHtmlVisitorVisitUnderline?,
-		visit_subscript: C.goHtmlVisitorVisitSubscript?,
-		visit_superscript: C.goHtmlVisitorVisitSuperscript?,
-		visit_mark: C.goHtmlVisitorVisitMark?,
-		visit_line_break: C.goHtmlVisitorVisitLineBreak?,
-		visit_horizontal_rule: C.goHtmlVisitorVisitHorizontalRule?,
-		visit_custom_element: C.goHtmlVisitorVisitCustomElement?,
-		visit_definition_list_start: C.goHtmlVisitorVisitDefinitionListStart?,
-		visit_definition_term: C.goHtmlVisitorVisitDefinitionTerm?,
-		visit_definition_description: C.goHtmlVisitorVisitDefinitionDescription?,
-		visit_definition_list_end: C.goHtmlVisitorVisitDefinitionListEnd?,
-		visit_form: C.goHtmlVisitorVisitForm?,
-		visit_input: C.goHtmlVisitorVisitInput?,
-		visit_button: C.goHtmlVisitorVisitButton?,
-		visit_audio: C.goHtmlVisitorVisitAudio?,
-		visit_video: C.goHtmlVisitorVisitVideo?,
-		visit_iframe: C.goHtmlVisitorVisitIframe?,
-		visit_details: C.goHtmlVisitorVisitDetails?,
-		visit_summary: C.goHtmlVisitorVisitSummary?,
-		visit_figure_start: C.goHtmlVisitorVisitFigureStart?,
-		visit_figcaption: C.goHtmlVisitorVisitFigcaption?,
-		visit_figure_end: C.goHtmlVisitorVisitFigureEnd?,
-		name: C.goHtmlVisitorName?,
-		version: C.goHtmlVisitorVersion?,
-		initialize: C.goHtmlVisitorInitialize?,
-		shutdown: C.goHtmlVisitorShutdown?,
-		free_user_data: C.goHtmlVisitorFreeUserData?,
+		visit_element_start: C.goHtmlVisitorVisitElementStart,
+		visit_element_end: C.goHtmlVisitorVisitElementEnd,
+		visit_text: C.goHtmlVisitorVisitText,
+		visit_link: C.goHtmlVisitorVisitLink,
+		visit_image: C.goHtmlVisitorVisitImage,
+		visit_heading: C.goHtmlVisitorVisitHeading,
+		visit_code_block: C.goHtmlVisitorVisitCodeBlock,
+		visit_code_inline: C.goHtmlVisitorVisitCodeInline,
+		visit_list_item: C.goHtmlVisitorVisitListItem,
+		visit_list_start: C.goHtmlVisitorVisitListStart,
+		visit_list_end: C.goHtmlVisitorVisitListEnd,
+		visit_table_start: C.goHtmlVisitorVisitTableStart,
+		visit_table_row: C.goHtmlVisitorVisitTableRow,
+		visit_table_end: C.goHtmlVisitorVisitTableEnd,
+		visit_blockquote: C.goHtmlVisitorVisitBlockquote,
+		visit_strong: C.goHtmlVisitorVisitStrong,
+		visit_emphasis: C.goHtmlVisitorVisitEmphasis,
+		visit_strikethrough: C.goHtmlVisitorVisitStrikethrough,
+		visit_underline: C.goHtmlVisitorVisitUnderline,
+		visit_subscript: C.goHtmlVisitorVisitSubscript,
+		visit_superscript: C.goHtmlVisitorVisitSuperscript,
+		visit_mark: C.goHtmlVisitorVisitMark,
+		visit_line_break: C.goHtmlVisitorVisitLineBreak,
+		visit_horizontal_rule: C.goHtmlVisitorVisitHorizontalRule,
+		visit_custom_element: C.goHtmlVisitorVisitCustomElement,
+		visit_definition_list_start: C.goHtmlVisitorVisitDefinitionListStart,
+		visit_definition_term: C.goHtmlVisitorVisitDefinitionTerm,
+		visit_definition_description: C.goHtmlVisitorVisitDefinitionDescription,
+		visit_definition_list_end: C.goHtmlVisitorVisitDefinitionListEnd,
+		visit_form: C.goHtmlVisitorVisitForm,
+		visit_input: C.goHtmlVisitorVisitInput,
+		visit_button: C.goHtmlVisitorVisitButton,
+		visit_audio: C.goHtmlVisitorVisitAudio,
+		visit_video: C.goHtmlVisitorVisitVideo,
+		visit_iframe: C.goHtmlVisitorVisitIframe,
+		visit_details: C.goHtmlVisitorVisitDetails,
+		visit_summary: C.goHtmlVisitorVisitSummary,
+		visit_figure_start: C.goHtmlVisitorVisitFigureStart,
+		visit_figcaption: C.goHtmlVisitorVisitFigcaption,
+		visit_figure_end: C.goHtmlVisitorVisitFigureEnd,
+		name: C.goHtmlVisitorName,
+		version: C.goHtmlVisitorVersion,
+		initialize: C.goHtmlVisitorInitialize,
+		shutdown: C.goHtmlVisitorShutdown,
+		free_user_data: C.goHtmlVisitorFreeUserData,
 	}
 
 	// Call C registration

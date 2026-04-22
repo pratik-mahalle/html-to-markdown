@@ -11,17 +11,30 @@ if TYPE_CHECKING:
     from ._html_to_markdown import ConversionOptions, ConversionResult, PreprocessingOptions
 
 
-_TO_RUST_PREPROCESSINGPRESET_MAP = {
-    "minimal": _rust.PreprocessingPreset.Minimal,
-    "standard": _rust.PreprocessingPreset.Standard,
-    "aggressive": _rust.PreprocessingPreset.Aggressive,
-}
-
-
 _TO_RUST_CODEBLOCKSTYLE_MAP = {
     "indented": _rust.CodeBlockStyle.Indented,
     "backticks": _rust.CodeBlockStyle.Backticks,
     "tildes": _rust.CodeBlockStyle.Tildes,
+}
+
+
+_TO_RUST_LINKSTYLE_MAP = {
+    "inline": _rust.LinkStyle.Inline,
+    "reference": _rust.LinkStyle.Reference,
+}
+
+
+_TO_RUST_LISTINDENTTYPE_MAP = {
+    "spaces": _rust.ListIndentType.Spaces,
+    "tabs": _rust.ListIndentType.Tabs,
+}
+
+
+_TO_RUST_HIGHLIGHTSTYLE_MAP = {
+    "double_equal": _rust.HighlightStyle.DoubleEqual,
+    "html": _rust.HighlightStyle.Html,
+    "bold": _rust.HighlightStyle.Bold,
+    "none": _rust.HighlightStyle.None_,
 }
 
 
@@ -38,36 +51,23 @@ _TO_RUST_NEWLINESTYLE_MAP = {
 }
 
 
-_TO_RUST_HIGHLIGHTSTYLE_MAP = {
-    "double_equal": _rust.HighlightStyle.DoubleEqual,
-    "html": _rust.HighlightStyle.Html,
-    "bold": _rust.HighlightStyle.Bold,
-    "none": _rust.HighlightStyle.None_,
+_TO_RUST_HEADINGSTYLE_MAP = {
+    "underlined": _rust.HeadingStyle.Underlined,
+    "atx": _rust.HeadingStyle.Atx,
+    "atx_closed": _rust.HeadingStyle.AtxClosed,
 }
 
 
-_TO_RUST_LISTINDENTTYPE_MAP = {
-    "spaces": _rust.ListIndentType.Spaces,
-    "tabs": _rust.ListIndentType.Tabs,
+_TO_RUST_PREPROCESSINGPRESET_MAP = {
+    "minimal": _rust.PreprocessingPreset.Minimal,
+    "standard": _rust.PreprocessingPreset.Standard,
+    "aggressive": _rust.PreprocessingPreset.Aggressive,
 }
 
 
 _TO_RUST_WHITESPACEMODE_MAP = {
     "normalized": _rust.WhitespaceMode.Normalized,
     "strict": _rust.WhitespaceMode.Strict,
-}
-
-
-_TO_RUST_LINKSTYLE_MAP = {
-    "inline": _rust.LinkStyle.Inline,
-    "reference": _rust.LinkStyle.Reference,
-}
-
-
-_TO_RUST_HEADINGSTYLE_MAP = {
-    "underlined": _rust.HeadingStyle.Underlined,
-    "atx": _rust.HeadingStyle.Atx,
-    "atx_closed": _rust.HeadingStyle.AtxClosed,
 }
 
 
