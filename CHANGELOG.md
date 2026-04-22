@@ -7,17 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.3.0] - 2026-04-22
+
 ### Added
 
-- **`exclude_selectors` option** — CSS selector-based element exclusion. Unlike `strip_tags` (which removes the wrapper but keeps children), excluded elements and all descendants are dropped entirely. Supports any CSS selector: `.class`, `#id`, `[attribute]`, compound selectors. Works in both markdown and plain text output modes. Example: `exclude_selectors: [".cookie-banner", "#ad-container"]`.
-
-## [3.3.0] - 2026-04-22
+- **`exclude_selectors` option** — CSS selector-based element exclusion. Unlike `strip_tags` (which removes the wrapper but keeps children), excluded elements and all descendants are dropped entirely. Supports any CSS selector: `.class`, `#id`, `[attribute]`, compound selectors. Works in both markdown and plain text output modes.
 
 ### Fixed
 
 - **`<h1>` inside `<header>` not exported** (#321) — top-level `<header>` elements were unconditionally dropped during preprocessing; now only `<header>` with navigation hints (e.g. `class="site-header"`, `role="navigation"`) is removed. Added explicit semantic dispatch for all sectioning elements (`article`, `section`, `nav`, `aside`, `header`, `footer`, `main`).
 - **`PreprocessingPreset` not wired into preprocessing logic** — the `preset` field on `PreprocessingOptions` was defined but never checked. Now Minimal/Standard/Aggressive presets have distinct behavior for element dropping.
 - **`remove_forms` flag was dead code** — `<form>` elements are now dropped when `remove_forms: true` and preset is Standard or Aggressive.
+- **Aggressive preset now drops navigation-hinted elements of any tag type** — catches `<div class="sidebar">`, `<section class="menu">`, and similar non-semantic navigation containers.
+- **Aggressive preset drops `<noscript>` elements and noise-hinted elements** — cookie banners, ad containers, social sharing buttons detected by class/id keywords.
 - **Java FFI broken on all platforms** (#315) — native libraries were bundled under wrong JAR path (`natives/` vs `native/`).
 - **Java/C# visitor type conflicts** — alef generator produced conflicting VisitResult/NodeContext types from two code paths; fixed by skipping gen_bindings types when visitor bridge is active.
 - **Ruby `convert()` TypeError** (#319) — options type mismatch and wrong return type in Ruby binding.

@@ -392,6 +392,18 @@ pub struct ConversionOptions {
     /// When set, subtrees beyond this depth are silently truncated.
     #[php(prop, name = "max_depth")]
     pub max_depth: Option<i64>,
+    /// CSS selectors for elements to exclude entirely (element + all content).
+    ///
+    /// Unlike `strip_tags` (which removes the tag wrapper but keeps children),
+    /// excluded elements and all their descendants are dropped from the output.
+    /// Supports any CSS selector that `tl` supports: tag names, `.class`,
+    /// `#id`, `[attribute]`, etc.
+    ///
+    /// Invalid selectors are silently skipped at conversion time.
+    ///
+    /// Example: `vec![".cookie-banner".into(), "#ad-container".into(), "[role='complementary']".into()]`
+    #[php(prop, name = "exclude_selectors")]
+    pub exclude_selectors: Vec<String>,
 }
 
 #[php_impl]
@@ -441,6 +453,12 @@ impl ConversionOptionsBuilder {
     pub fn keep_inline_images_in(&self, tags: Vec<String>) -> ConversionOptionsBuilder {
         Self {
             inner: Arc::new((*self.inner).clone().keep_inline_images_in(tags)),
+        }
+    }
+
+    pub fn exclude_selectors(&self, selectors: Vec<String>) -> ConversionOptionsBuilder {
+        Self {
+            inner: Arc::new((*self.inner).clone().exclude_selectors(selectors)),
         }
     }
 
@@ -576,6 +594,9 @@ pub struct ConversionOptionsUpdate {
     /// Optional override for [`ConversionOptions::max_depth`].
     #[php(prop, name = "max_depth")]
     pub max_depth: Option<i64>,
+    /// Optional override for [`ConversionOptions::exclude_selectors`].
+    #[php(prop, name = "exclude_selectors")]
+    pub exclude_selectors: Option<Vec<String>>,
 }
 
 #[php_impl]
@@ -2710,6 +2731,7 @@ impl From<html_to_markdown_rs::options::ConversionOptions> for ConversionOptions
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
             max_depth: val.max_depth.map(|v| v as i64),
+            exclude_selectors: val.exclude_selectors,
         }
     }
 }
@@ -2803,6 +2825,7 @@ impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for ConversionO
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
             max_depth: val.max_depth.flatten().map(|v| v as i64),
+            exclude_selectors: val.exclude_selectors,
         }
     }
 }

@@ -83,7 +83,15 @@ pub fn extract_plain_text(dom: &tl::VDom, parser: &tl::Parser, options: &Convers
     };
 
     for child_handle in dom.children() {
-        walk_plain(child_handle, parser, &mut buf, options, false, &mut list_ctx, &excluded_node_ids);
+        walk_plain(
+            child_handle,
+            parser,
+            &mut buf,
+            options,
+            false,
+            &mut list_ctx,
+            &excluded_node_ids,
+        );
     }
 
     post_process(&mut buf);
@@ -270,7 +278,15 @@ fn walk_table(
             let mut cell_buf = String::new();
             if let Some(tl::Node::Tag(cell_tag)) = cell_handle.get(parser) {
                 let mut cell_list_ctx = ListContext::None;
-                walk_children(cell_tag, parser, &mut cell_buf, options, false, &mut cell_list_ctx, excluded_node_ids);
+                walk_children(
+                    cell_tag,
+                    parser,
+                    &mut cell_buf,
+                    options,
+                    false,
+                    &mut cell_list_ctx,
+                    excluded_node_ids,
+                );
             }
             buf.push_str(cell_buf.trim());
         }

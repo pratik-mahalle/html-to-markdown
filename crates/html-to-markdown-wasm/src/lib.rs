@@ -795,6 +795,7 @@ pub struct WasmConversionOptions {
     capture_svg: bool,
     infer_dimensions: bool,
     max_depth: Option<usize>,
+    exclude_selectors: Vec<String>,
 }
 
 #[wasm_bindgen]
@@ -840,6 +841,7 @@ impl WasmConversionOptions {
         max_image_size: Option<u64>,
         capture_svg: Option<bool>,
         infer_dimensions: Option<bool>,
+        exclude_selectors: Option<Vec<String>>,
         max_depth: Option<usize>,
     ) -> WasmConversionOptions {
         WasmConversionOptions {
@@ -882,6 +884,7 @@ impl WasmConversionOptions {
             capture_svg: capture_svg.unwrap_or(false),
             infer_dimensions: infer_dimensions.unwrap_or(true),
             max_depth,
+            exclude_selectors: exclude_selectors.unwrap_or_default(),
         }
     }
 
@@ -1275,6 +1278,16 @@ impl WasmConversionOptions {
         self.max_depth = value;
     }
 
+    #[wasm_bindgen(getter, js_name = "excludeSelectors")]
+    pub fn exclude_selectors(&self) -> Vec<String> {
+        self.exclude_selectors.clone()
+    }
+
+    #[wasm_bindgen(setter, js_name = "excludeSelectors")]
+    pub fn set_exclude_selectors(&mut self, value: Vec<String>) {
+        self.exclude_selectors = value;
+    }
+
     #[allow(clippy::should_implement_trait)]
     #[wasm_bindgen]
     pub fn default() -> WasmConversionOptions {
@@ -1345,6 +1358,14 @@ impl WasmConversionOptionsBuilder {
         }
     }
 
+    /// Set the list of CSS selectors for elements to exclude entirely from output.
+    #[wasm_bindgen(js_name = "excludeSelectors")]
+    pub fn exclude_selectors(&self, selectors: Vec<String>) -> WasmConversionOptionsBuilder {
+        Self {
+            inner: Arc::new((*self.inner).clone().exclude_selectors(selectors)),
+        }
+    }
+
     /// Set the pre-processing options applied to the HTML before conversion.
     #[wasm_bindgen]
     pub fn preprocessing(&self, preprocessing: WasmPreprocessingOptions) -> WasmConversionOptionsBuilder {
@@ -1406,6 +1427,7 @@ pub struct WasmConversionOptionsUpdate {
     capture_svg: Option<bool>,
     infer_dimensions: Option<bool>,
     max_depth: Option<usize>,
+    exclude_selectors: Option<Vec<String>>,
 }
 
 #[wasm_bindgen]
@@ -1452,6 +1474,7 @@ impl WasmConversionOptionsUpdate {
         capture_svg: Option<bool>,
         infer_dimensions: Option<bool>,
         max_depth: Option<usize>,
+        exclude_selectors: Option<Vec<String>>,
     ) -> WasmConversionOptionsUpdate {
         WasmConversionOptionsUpdate {
             heading_style,
@@ -1493,6 +1516,7 @@ impl WasmConversionOptionsUpdate {
             capture_svg,
             infer_dimensions,
             max_depth,
+            exclude_selectors,
         }
     }
 
@@ -1884,6 +1908,16 @@ impl WasmConversionOptionsUpdate {
     #[wasm_bindgen(setter, js_name = "maxDepth")]
     pub fn set_max_depth(&mut self, value: Option<usize>) {
         self.max_depth = value;
+    }
+
+    #[wasm_bindgen(getter, js_name = "excludeSelectors")]
+    pub fn exclude_selectors(&self) -> Option<Vec<String>> {
+        self.exclude_selectors.clone()
+    }
+
+    #[wasm_bindgen(setter, js_name = "excludeSelectors")]
+    pub fn set_exclude_selectors(&mut self, value: Option<Vec<String>>) {
+        self.exclude_selectors = value;
     }
 }
 
@@ -4986,6 +5020,7 @@ impl From<WasmConversionOptions> for html_to_markdown_rs::options::ConversionOpt
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
             max_depth: val.max_depth,
+            exclude_selectors: val.exclude_selectors,
         }
     }
 }
@@ -5032,6 +5067,7 @@ impl From<html_to_markdown_rs::options::ConversionOptions> for WasmConversionOpt
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
             max_depth: val.max_depth,
+            exclude_selectors: val.exclude_selectors,
         }
     }
 }
@@ -5078,6 +5114,7 @@ impl From<WasmConversionOptionsUpdate> for html_to_markdown_rs::options::Convers
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
             max_depth: (val.max_depth).map(Some),
+            exclude_selectors: val.exclude_selectors,
         }
     }
 }
@@ -5124,6 +5161,7 @@ impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for WasmConvers
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
             max_depth: val.max_depth.flatten(),
+            exclude_selectors: val.exclude_selectors,
         }
     }
 }

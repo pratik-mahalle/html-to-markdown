@@ -89,7 +89,9 @@ public record ConversionOptionsUpdate(
     /** Optional override for [{@code ConversionOptions::infer_dimensions}]. */
     @JsonProperty("infer_dimensions") Optional<Boolean> inferDimensions,
     /** Optional override for [{@code ConversionOptions::max_depth}]. */
-    @JsonProperty("max_depth") Optional<Long> maxDepth
+    @JsonProperty("max_depth") Optional<Long> maxDepth,
+    /** Optional override for [{@code ConversionOptions::exclude_selectors}]. */
+    @JsonProperty("exclude_selectors") Optional<List<String>> excludeSelectors
 ) {
     public static ConversionOptionsUpdateBuilder builder() {
         return new ConversionOptionsUpdateBuilder();

@@ -97,6 +97,11 @@ internal static partial class NativeMethods
         IntPtr tags
     );
 
+    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_conversion_options_builder_exclude_selectors")]
+    internal static extern IntPtr ConversionOptionsBuilderExcludeSelectors(
+        IntPtr selectors
+    );
+
     [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_conversion_options_builder_preprocessing")]
     internal static extern IntPtr ConversionOptionsBuilderPreprocessing(
         IntPtr preprocessing

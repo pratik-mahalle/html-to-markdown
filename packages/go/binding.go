@@ -28,13 +28,13 @@ func lastError() error {
 }
 
 var (
-	ErrParseError        = errors.New("HTML parsing error")
+	ErrParseError = errors.New("HTML parsing error")
 	ErrSanitizationError = errors.New("Sanitization error")
-	ErrConfigError       = errors.New("Invalid configuration")
-	ErrIoError           = errors.New("I/O error")
-	ErrPanic             = errors.New("Internal panic")
-	ErrInvalidInput      = errors.New("Invalid input")
-	ErrOther             = errors.New("Conversion error")
+	ErrConfigError = errors.New("Invalid configuration")
+	ErrIoError = errors.New("I/O error")
+	ErrPanic = errors.New("Internal panic")
+	ErrInvalidInput = errors.New("Invalid input")
+	ErrOther = errors.New("Conversion error")
 )
 
 // ConversionError is a structured error type.
@@ -59,6 +59,7 @@ const (
 	TextDirectionAuto TextDirection = "auto"
 )
 
+
 // Link classification based on href value and document context.
 //
 // Used to categorize links during extraction for filtering and analysis.
@@ -79,6 +80,7 @@ const (
 	LinkTypeOther LinkType = "other"
 )
 
+
 // Image source classification for proper handling and processing.
 //
 // Determines whether an image is embedded (data URI), inline SVG, external, or relative.
@@ -95,6 +97,7 @@ const (
 	ImageTypeRelative ImageType = "relative"
 )
 
+
 // Structured data format type.
 //
 // Identifies the schema/format used for structured data markup.
@@ -108,6 +111,7 @@ const (
 	// RDF in Attributes (RDFa) markup
 	StructuredDataTypeRdFa StructuredDataType = "rdfa"
 )
+
 
 // HTML preprocessing aggressiveness level.
 //
@@ -123,6 +127,7 @@ const (
 	PreprocessingPresetAggressive PreprocessingPreset = "aggressive"
 )
 
+
 // Heading style options for Markdown output.
 //
 // Controls how headings (h1-h6) are rendered in the output Markdown.
@@ -137,6 +142,7 @@ const (
 	HeadingStyleAtxClosed HeadingStyle = "atx_closed"
 )
 
+
 // List indentation character type.
 //
 // Controls whether list items are indented with spaces or tabs.
@@ -148,6 +154,7 @@ const (
 	// Use tabs for indentation.
 	ListIndentTypeTabs ListIndentType = "tabs"
 )
+
 
 // Whitespace handling strategy during conversion.
 //
@@ -161,6 +168,7 @@ const (
 	WhitespaceModeStrict WhitespaceMode = "strict"
 )
 
+
 // Line break syntax in Markdown output.
 //
 // Controls how soft line breaks (from `<br>` or line breaks in source) are rendered.
@@ -172,6 +180,7 @@ const (
 	// Backslash at end of line. Alternative Markdown syntax.
 	NewlineStyleBackslash NewlineStyle = "backslash"
 )
+
 
 // Code block fence style in Markdown output.
 //
@@ -186,6 +195,7 @@ const (
 	// Fenced code blocks with tildes (~~~). Supports language hints.
 	CodeBlockStyleTildes CodeBlockStyle = "tildes"
 )
+
 
 // Highlight rendering style for `<mark>` elements.
 //
@@ -203,6 +213,7 @@ const (
 	HighlightStyleNone HighlightStyle = "none"
 )
 
+
 // Link rendering style in Markdown output.
 //
 // Controls whether links and images use inline `[text](url)` syntax or
@@ -215,6 +226,7 @@ const (
 	// Reference-style links: `[text][1]` with `[1]: url` at end of document.
 	LinkStyleReference LinkStyle = "reference"
 )
+
 
 // Output format for conversion.
 //
@@ -229,6 +241,7 @@ const (
 	// Plain text output (no markup, visible text only).
 	OutputFormatPlain OutputFormat = "plain"
 )
+
 
 // The semantic content type of a document node.
 //
@@ -270,6 +283,7 @@ type NodeContent struct {
 	HeadingText *string `json:"heading_text,omitempty"`
 }
 
+
 // The type of an inline text annotation.
 //
 // Uses internally tagged representation (`"annotation_type": "bold"`) for JSON serialization.
@@ -281,6 +295,7 @@ type AnnotationKind struct {
 	// Optional link title attribute.
 	Title *string `json:"title,omitempty"`
 }
+
 
 // Categories of processing warnings.
 type WarningKind string
@@ -299,6 +314,7 @@ const (
 	// DOM traversal was truncated because max_depth was exceeded.
 	WarningKindDepthLimitExceeded WarningKind = "depth_limit_exceeded"
 )
+
 
 // Node type enumeration covering all HTML element types.
 //
@@ -485,6 +501,7 @@ const (
 	NodeTypeCustom NodeType = "custom"
 )
 
+
 // Document-level metadata extracted from `<head>` and top-level elements.
 //
 // Contains all metadata typically used by search engines, social media platforms,
@@ -530,6 +547,7 @@ type DocumentMetadata struct {
 	// Keys are meta name/property attributes, values are content
 	MetaTags map[string]string `json:"meta_tags,omitempty"`
 }
+
 
 // DocumentMetadata option function
 type DocumentMetadataOption func(*DocumentMetadata)
@@ -591,24 +609,25 @@ func WithDocumentMetadataMetaTags(v map[string]string) DocumentMetadataOption {
 
 // NewDocumentMetadata creates a DocumentMetadata with optional parameters.
 func NewDocumentMetadata(opts ...DocumentMetadataOption) *DocumentMetadata {
-	c := &DocumentMetadata{
-		Title:         nil,
-		Description:   nil,
-		Keywords:      nil,
-		Author:        nil,
-		CanonicalUrl:  nil,
-		BaseHref:      nil,
-		Language:      nil,
+	c := &DocumentMetadata {
+		Title: nil,
+		Description: nil,
+		Keywords: nil,
+		Author: nil,
+		CanonicalUrl: nil,
+		BaseHref: nil,
+		Language: nil,
 		TextDirection: nil,
-		OpenGraph:     nil,
-		TwitterCard:   nil,
-		MetaTags:      nil,
+		OpenGraph: nil,
+		TwitterCard: nil,
+		MetaTags: nil,
 	}
 	for _, opt := range opts {
 		opt(c)
 	}
 	return c
 }
+
 
 // Header element metadata with hierarchy tracking.
 //
@@ -642,6 +661,7 @@ type HeaderMetadata struct {
 	// Byte offset in original HTML document
 	HtmlOffset uint `json:"html_offset"`
 }
+
 
 // Hyperlink metadata with categorization and attributes.
 //
@@ -678,6 +698,7 @@ type LinkMetadata struct {
 	Attributes map[string]string `json:"attributes,omitempty"`
 }
 
+
 // Image metadata with source and dimensions.
 //
 // Captures `<img>` elements and inline `<svg>` elements with metadata
@@ -713,6 +734,7 @@ type ImageMetadata struct {
 	Attributes map[string]string `json:"attributes,omitempty"`
 }
 
+
 // Structured data block (JSON-LD, Microdata, or RDFa).
 //
 // Represents machine-readable structured data found in the document.
@@ -738,6 +760,7 @@ type StructuredData struct {
 	// Schema type if detectable (e.g., "Article", "Event", "Product")
 	SchemaType *string `json:"schema_type,omitempty"`
 }
+
 
 // Comprehensive metadata extraction result from HTML document.
 //
@@ -771,6 +794,7 @@ type HtmlMetadata struct {
 	StructuredData []StructuredData `json:"structured_data,omitempty"`
 }
 
+
 // HtmlMetadata option function
 type HtmlMetadataOption func(*HtmlMetadata)
 
@@ -801,11 +825,11 @@ func WithHtmlMetadataStructuredData(v []StructuredData) HtmlMetadataOption {
 
 // NewHtmlMetadata creates a HtmlMetadata with optional parameters.
 func NewHtmlMetadata(opts ...HtmlMetadataOption) *HtmlMetadata {
-	c := &HtmlMetadata{
-		Document:       DocumentMetadata{},
-		Headers:        nil,
-		Links:          nil,
-		Images:         nil,
+	c := &HtmlMetadata {
+		Document: DocumentMetadata{},
+		Headers: nil,
+		Links: nil,
+		Images: nil,
 		StructuredData: nil,
 	}
 	for _, opt := range opts {
@@ -813,6 +837,7 @@ func NewHtmlMetadata(opts ...HtmlMetadataOption) *HtmlMetadata {
 	}
 	return c
 }
+
 
 // Main conversion options for HTML to Markdown conversion.
 //
@@ -909,7 +934,19 @@ type ConversionOptions struct {
 	// Maximum DOM traversal depth. `None` means unlimited.
 	// When set, subtrees beyond this depth are silently truncated.
 	MaxDepth *uint `json:"max_depth,omitempty"`
+	// CSS selectors for elements to exclude entirely (element + all content).
+	//
+	// Unlike `strip_tags` (which removes the tag wrapper but keeps children),
+	// excluded elements and all their descendants are dropped from the output.
+	// Supports any CSS selector that `tl` supports: tag names, `.class`,
+	// `#id`, `[attribute]`, etc.
+	//
+	// Invalid selectors are silently skipped at conversion time.
+	//
+	// Example: `vec![".cookie-banner".into(), "#ad-container".into(), "[role='complementary']".into()]`
+	ExcludeSelectors []string `json:"exclude_selectors,omitempty"`
 }
+
 
 // ConversionOptions option function
 type ConversionOptionsOption func(*ConversionOptions)
@@ -1109,54 +1146,61 @@ func WithConversionOptionsMaxDepth(v uint) ConversionOptionsOption {
 	return func(c *ConversionOptions) { c.MaxDepth = &v }
 }
 
+// WithConversionOptionsExcludeSelectors sets the exclude_selectors field.
+func WithConversionOptionsExcludeSelectors(v []string) ConversionOptionsOption {
+	return func(c *ConversionOptions) { c.ExcludeSelectors = v }
+}
+
 // NewConversionOptions creates a ConversionOptions with optional parameters.
 func NewConversionOptions(opts ...ConversionOptionsOption) *ConversionOptions {
-	c := &ConversionOptions{
-		HeadingStyle:             "",
-		ListIndentType:           "",
-		ListIndentWidth:          nil,
-		Bullets:                  nil,
-		StrongEmSymbol:           nil,
-		EscapeAsterisks:          false,
-		EscapeUnderscores:        false,
-		EscapeMisc:               false,
-		EscapeAscii:              false,
-		CodeLanguage:             "",
-		Autolinks:                nil,
-		DefaultTitle:             false,
-		BrInTables:               false,
-		HighlightStyle:           "",
-		ExtractMetadata:          nil,
-		WhitespaceMode:           "",
-		StripNewlines:            false,
-		Wrap:                     false,
-		WrapWidth:                nil,
-		ConvertAsInline:          false,
-		SubSymbol:                "",
-		SupSymbol:                "",
-		NewlineStyle:             nil,
-		CodeBlockStyle:           "",
-		KeepInlineImagesIn:       nil,
-		Preprocessing:            PreprocessingOptions{},
-		Encoding:                 nil,
-		Debug:                    false,
-		StripTags:                nil,
-		PreserveTags:             nil,
-		SkipImages:               false,
-		LinkStyle:                "",
-		OutputFormat:             "",
+	c := &ConversionOptions {
+		HeadingStyle: "",
+		ListIndentType: "",
+		ListIndentWidth: nil,
+		Bullets: nil,
+		StrongEmSymbol: nil,
+		EscapeAsterisks: false,
+		EscapeUnderscores: false,
+		EscapeMisc: false,
+		EscapeAscii: false,
+		CodeLanguage: "",
+		Autolinks: nil,
+		DefaultTitle: false,
+		BrInTables: false,
+		HighlightStyle: "",
+		ExtractMetadata: nil,
+		WhitespaceMode: "",
+		StripNewlines: false,
+		Wrap: false,
+		WrapWidth: nil,
+		ConvertAsInline: false,
+		SubSymbol: "",
+		SupSymbol: "",
+		NewlineStyle: nil,
+		CodeBlockStyle: "",
+		KeepInlineImagesIn: nil,
+		Preprocessing: PreprocessingOptions{},
+		Encoding: nil,
+		Debug: false,
+		StripTags: nil,
+		PreserveTags: nil,
+		SkipImages: false,
+		LinkStyle: "",
+		OutputFormat: "",
 		IncludeDocumentStructure: false,
-		ExtractImages:            false,
-		MaxImageSize:             nil,
-		CaptureSvg:               false,
-		InferDimensions:          nil,
-		MaxDepth:                 nil,
+		ExtractImages: false,
+		MaxImageSize: nil,
+		CaptureSvg: false,
+		InferDimensions: nil,
+		MaxDepth: nil,
+		ExcludeSelectors: nil,
 	}
 	for _, opt := range opts {
 		opt(c)
 	}
 	return c
 }
+
 
 // Builder for [`ConversionOptions`].
 //
@@ -1181,6 +1225,7 @@ func (h *ConversionOptionsBuilder) Free() {
 		h.ptr = nil
 	}
 }
+
 
 // Partial update for `ConversionOptions`.
 //
@@ -1265,7 +1310,10 @@ type ConversionOptionsUpdate struct {
 	InferDimensions *bool `json:"infer_dimensions,omitempty"`
 	// Optional override for [`ConversionOptions::max_depth`].
 	MaxDepth *uint `json:"max_depth,omitempty"`
+	// Optional override for [`ConversionOptions::exclude_selectors`].
+	ExcludeSelectors *[]string `json:"exclude_selectors,omitempty"`
 }
+
 
 // HTML preprocessing options for document cleanup before conversion.
 type PreprocessingOptions struct {
@@ -1278,6 +1326,7 @@ type PreprocessingOptions struct {
 	// Remove form elements (forms, inputs, buttons, etc.)
 	RemoveForms *bool `json:"remove_forms,omitempty"`
 }
+
 
 // PreprocessingOptions option function
 type PreprocessingOptionsOption func(*PreprocessingOptions)
@@ -1304,17 +1353,18 @@ func WithPreprocessingOptionsRemoveForms(v bool) PreprocessingOptionsOption {
 
 // NewPreprocessingOptions creates a PreprocessingOptions with optional parameters.
 func NewPreprocessingOptions(opts ...PreprocessingOptionsOption) *PreprocessingOptions {
-	c := &PreprocessingOptions{
-		Enabled:          nil,
-		Preset:           "",
+	c := &PreprocessingOptions {
+		Enabled: nil,
+		Preset: "",
 		RemoveNavigation: nil,
-		RemoveForms:      nil,
+		RemoveForms: nil,
 	}
 	for _, opt := range opts {
 		opt(c)
 	}
 	return c
 }
+
 
 // Partial update for `PreprocessingOptions`.
 //
@@ -1332,6 +1382,7 @@ type PreprocessingOptionsUpdate struct {
 	RemoveForms *bool `json:"remove_forms,omitempty"`
 }
 
+
 // A structured document tree representing the semantic content of an HTML document.
 //
 // Uses a flat node array with index-based parent/child references for efficient traversal.
@@ -1341,6 +1392,7 @@ type DocumentStructure struct {
 	// The source format (always "html" for this crate).
 	SourceFormat *string `json:"source_format,omitempty"`
 }
+
 
 // A single node in the document tree.
 type DocumentNode struct {
@@ -1358,6 +1410,7 @@ type DocumentNode struct {
 	Attributes *map[string]string `json:"attributes,omitempty"`
 }
 
+
 // An inline text annotation with byte-range offsets.
 //
 // Annotations describe formatting (bold, italic, etc.) and links within a node's text content.
@@ -1369,6 +1422,7 @@ type TextAnnotation struct {
 	// The type of annotation.
 	Kind AnnotationKind `json:"kind"`
 }
+
 
 // The primary result of HTML conversion and extraction.
 //
@@ -1406,6 +1460,7 @@ type ConversionResult struct {
 	Warnings []ProcessingWarning `json:"warnings,omitempty"`
 }
 
+
 // ConversionResult option function
 type ConversionResultOption func(*ConversionResult)
 
@@ -1441,12 +1496,12 @@ func WithConversionResultWarnings(v []ProcessingWarning) ConversionResultOption 
 
 // NewConversionResult creates a ConversionResult with optional parameters.
 func NewConversionResult(opts ...ConversionResultOption) *ConversionResult {
-	c := &ConversionResult{
-		Content:  nil,
+	c := &ConversionResult {
+		Content: nil,
 		Document: nil,
 		Metadata: HtmlMetadata{},
-		Tables:   nil,
-		Images:   nil,
+		Tables: nil,
+		Images: nil,
 		Warnings: nil,
 	}
 	for _, opt := range opts {
@@ -1454,6 +1509,7 @@ func NewConversionResult(opts ...ConversionResultOption) *ConversionResult {
 	}
 	return c
 }
+
 
 // A structured table grid with cell-level data including spans.
 type TableGrid struct {
@@ -1464,6 +1520,7 @@ type TableGrid struct {
 	// All cells in the table (may be fewer than rows*cols due to spans).
 	Cells []GridCell `json:"cells,omitempty"`
 }
+
 
 // TableGrid option function
 type TableGridOption func(*TableGrid)
@@ -1485,9 +1542,9 @@ func WithTableGridCells(v []GridCell) TableGridOption {
 
 // NewTableGrid creates a TableGrid with optional parameters.
 func NewTableGrid(opts ...TableGridOption) *TableGrid {
-	c := &TableGrid{
-		Rows:  0,
-		Cols:  0,
+	c := &TableGrid {
+		Rows: 0,
+		Cols: 0,
 		Cells: nil,
 	}
 	for _, opt := range opts {
@@ -1495,6 +1552,7 @@ func NewTableGrid(opts ...TableGridOption) *TableGrid {
 	}
 	return c
 }
+
 
 // A single cell in a table grid.
 type GridCell struct {
@@ -1512,6 +1570,7 @@ type GridCell struct {
 	IsHeader bool `json:"is_header"`
 }
 
+
 // A top-level extracted table with both structured data and markdown representation.
 type TableData struct {
 	// The structured table grid.
@@ -1520,6 +1579,7 @@ type TableData struct {
 	Markdown string `json:"markdown"`
 }
 
+
 // A non-fatal warning generated during HTML processing.
 type ProcessingWarning struct {
 	// Human-readable warning message.
@@ -1527,6 +1587,7 @@ type ProcessingWarning struct {
 	// The category of warning.
 	Kind WarningKind `json:"kind"`
 }
+
 
 // Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images,
 // and warnings.
@@ -1571,18 +1632,15 @@ func Convert(html string, options *ConversionOptions) (*ConversionResult, error)
 	}
 	defer C.htm_conversion_result_free(ptr)
 	return func() *ConversionResult {
-		jsonPtr := C.htm_conversion_result_to_json(ptr)
-		if jsonPtr == nil {
-			return nil
-		}
-		defer C.htm_free_string(jsonPtr)
-		var result ConversionResult
-		if err := json.Unmarshal([]byte(C.GoString(jsonPtr)), &result); err != nil {
-			return nil
-		}
-		return &result
-	}(), nil
+	jsonPtr := C.htm_conversion_result_to_json(ptr)
+	if jsonPtr == nil { return nil }
+	defer C.htm_free_string(jsonPtr)
+	var result ConversionResult
+	if err := json.Unmarshal([]byte(C.GoString(jsonPtr)), &result); err != nil { return nil }
+	return &result
+}(), nil
 }
+
 
 // Validate that the header level is within valid range (1-6).
 //
@@ -1625,6 +1683,7 @@ func (r *HeaderMetadata) IsValid() (*bool, error) {
 	return func() *bool { v := ptr != 0; return &v }(), nil
 }
 
+
 // Apply a partial update to these conversion options.
 func (r *ConversionOptions) ApplyUpdate(update ConversionOptionsUpdate) error {
 	jsonBytescUpdate, err := json.Marshal(update)
@@ -1653,6 +1712,7 @@ func (r *ConversionOptions) ApplyUpdate(update ConversionOptionsUpdate) error {
 	return nil
 }
 
+
 // Set the list of HTML tag names whose content is stripped from output.
 func (r *ConversionOptionsBuilder) StripTags(tags []string) (*ConversionOptionsBuilder, error) {
 	jsonBytescTags, err := json.Marshal(tags)
@@ -1666,6 +1726,7 @@ func (r *ConversionOptionsBuilder) StripTags(tags []string) (*ConversionOptionsB
 	r.ptr = unsafe.Pointer(ptr)
 	return r, nil
 }
+
 
 // Set the list of HTML tag names that are preserved verbatim in output.
 func (r *ConversionOptionsBuilder) PreserveTags(tags []string) (*ConversionOptionsBuilder, error) {
@@ -1681,6 +1742,7 @@ func (r *ConversionOptionsBuilder) PreserveTags(tags []string) (*ConversionOptio
 	return r, nil
 }
 
+
 // Set the list of HTML tag names whose `<img>` children are kept inline.
 func (r *ConversionOptionsBuilder) KeepInlineImagesIn(tags []string) (*ConversionOptionsBuilder, error) {
 	jsonBytescTags, err := json.Marshal(tags)
@@ -1694,6 +1756,22 @@ func (r *ConversionOptionsBuilder) KeepInlineImagesIn(tags []string) (*Conversio
 	r.ptr = unsafe.Pointer(ptr)
 	return r, nil
 }
+
+
+// Set the list of CSS selectors for elements to exclude entirely from output.
+func (r *ConversionOptionsBuilder) ExcludeSelectors(selectors []string) (*ConversionOptionsBuilder, error) {
+	jsonBytescSelectors, err := json.Marshal(selectors)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal: %w", err)
+	}
+	cSelectors := C.CString(string(jsonBytescSelectors))
+	defer C.free(unsafe.Pointer(cSelectors))
+
+	ptr := C.htm_conversion_options_builder_exclude_selectors((*C.HTMConversionOptionsBuilder)(unsafe.Pointer(r.ptr)), cSelectors)
+	r.ptr = unsafe.Pointer(ptr)
+	return r, nil
+}
+
 
 // Set the pre-processing options applied to the HTML before conversion.
 func (r *ConversionOptionsBuilder) Preprocessing(preprocessing PreprocessingOptions) (*ConversionOptionsBuilder, error) {
@@ -1711,23 +1789,21 @@ func (r *ConversionOptionsBuilder) Preprocessing(preprocessing PreprocessingOpti
 	return r, nil
 }
 
+
 // Build the final [`ConversionOptions`].
 func (r *ConversionOptionsBuilder) Build() *ConversionOptions {
 	ptr := C.htm_conversion_options_builder_build((*C.HTMConversionOptionsBuilder)(unsafe.Pointer(r.ptr)))
 	defer C.htm_conversion_options_free(ptr)
 	return func() *ConversionOptions {
-		jsonPtr := C.htm_conversion_options_to_json(ptr)
-		if jsonPtr == nil {
-			return nil
-		}
-		defer C.htm_free_string(jsonPtr)
-		var result ConversionOptions
-		if err := json.Unmarshal([]byte(C.GoString(jsonPtr)), &result); err != nil {
-			return nil
-		}
-		return &result
-	}()
+	jsonPtr := C.htm_conversion_options_to_json(ptr)
+	if jsonPtr == nil { return nil }
+	defer C.htm_free_string(jsonPtr)
+	var result ConversionOptions
+	if err := json.Unmarshal([]byte(C.GoString(jsonPtr)), &result); err != nil { return nil }
+	return &result
+}()
 }
+
 
 // Apply a partial update to these preprocessing options.
 //

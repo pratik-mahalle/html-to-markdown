@@ -27,6 +27,9 @@ defmodule HtmlToMarkdown.Native do
   def conversionoptionsbuilder_keep_inline_images_in(_obj, _tags),
     do: :erlang.nif_error(:nif_not_loaded)
 
+  def conversionoptionsbuilder_exclude_selectors(_obj, _selectors),
+    do: :erlang.nif_error(:nif_not_loaded)
+
   def conversionoptionsbuilder_preprocessing(_obj, _preprocessing),
     do: :erlang.nif_error(:nif_not_loaded)
 

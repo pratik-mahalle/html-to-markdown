@@ -160,6 +160,7 @@ pub struct ConversionOptions {
     pub capture_svg: bool,
     pub infer_dimensions: bool,
     pub max_depth: Option<usize>,
+    pub exclude_selectors: Vec<String>,
 }
 
 impl ConversionOptions {
@@ -267,6 +268,10 @@ impl ConversionOptions {
                 .and_then(|t| t.decode().ok())
                 .unwrap_or(true),
             max_depth: opts.get("max_depth").and_then(|t| t.decode().ok()),
+            exclude_selectors: opts
+                .get("exclude_selectors")
+                .and_then(|t| t.decode().ok())
+                .unwrap_or_default(),
         }
     }
 }
@@ -322,6 +327,7 @@ pub struct ConversionOptionsUpdate {
     pub capture_svg: Option<bool>,
     pub infer_dimensions: Option<bool>,
     pub max_depth: Option<Option<usize>>,
+    pub exclude_selectors: Option<Vec<String>>,
 }
 
 impl ConversionOptionsUpdate {
@@ -366,6 +372,7 @@ impl ConversionOptionsUpdate {
             capture_svg: opts.get("capture_svg").and_then(|t| t.decode().ok()),
             infer_dimensions: opts.get("infer_dimensions").and_then(|t| t.decode().ok()),
             max_depth: opts.get("max_depth").and_then(|t| t.decode().ok()),
+            exclude_selectors: opts.get("exclude_selectors").and_then(|t| t.decode().ok()),
         }
     }
 }
@@ -2244,6 +2251,16 @@ pub fn conversionoptionsbuilder_keep_inline_images_in(
 }
 
 #[rustler::nif]
+pub fn conversionoptionsbuilder_exclude_selectors(
+    resource: ResourceArc<ConversionOptionsBuilder>,
+    selectors: Vec<String>,
+) -> ResourceArc<ConversionOptionsBuilder> {
+    ResourceArc::new(ConversionOptionsBuilder {
+        inner: Arc::new(resource.inner.as_ref().clone().exclude_selectors(selectors)),
+    })
+}
+
+#[rustler::nif]
 pub fn conversionoptionsbuilder_preprocessing(
     resource: ResourceArc<ConversionOptionsBuilder>,
     preprocessing: PreprocessingOptions,
@@ -2476,6 +2493,7 @@ impl From<ConversionOptions> for html_to_markdown_rs::options::ConversionOptions
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
             max_depth: val.max_depth,
+            exclude_selectors: val.exclude_selectors,
         }
     }
 }
@@ -2522,6 +2540,7 @@ impl From<html_to_markdown_rs::options::ConversionOptions> for ConversionOptions
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
             max_depth: val.max_depth,
+            exclude_selectors: val.exclude_selectors,
         }
     }
 }
@@ -2568,6 +2587,7 @@ impl From<ConversionOptionsUpdate> for html_to_markdown_rs::options::ConversionO
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
             max_depth: (val.max_depth).map(Some),
+            exclude_selectors: val.exclude_selectors,
         }
     }
 }
@@ -2614,6 +2634,7 @@ impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for ConversionO
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
             max_depth: val.max_depth.flatten(),
+            exclude_selectors: val.exclude_selectors,
         }
     }
 }

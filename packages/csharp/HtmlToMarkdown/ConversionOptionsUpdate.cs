@@ -248,4 +248,10 @@ public sealed class ConversionOptionsUpdate
     [JsonPropertyName("max_depth")]
     public ulong? MaxDepth { get; set; } = null;
 
+    /// <summary>
+    /// Optional override for [`ConversionOptions::exclude_selectors`].
+    /// </summary>
+    [JsonPropertyName("exclude_selectors")]
+    public List<string>? ExcludeSelectors { get; set; } = null;
+
 }

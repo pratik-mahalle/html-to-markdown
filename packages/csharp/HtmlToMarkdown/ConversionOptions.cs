@@ -260,4 +260,19 @@ public sealed class ConversionOptions
     [JsonPropertyName("max_depth")]
     public ulong? MaxDepth { get; set; } = null;
 
+    /// <summary>
+    /// CSS selectors for elements to exclude entirely (element + all content).
+    ///
+    /// Unlike `strip_tags` (which removes the tag wrapper but keeps children),
+    /// excluded elements and all their descendants are dropped from the output.
+    /// Supports any CSS selector that `tl` supports: tag names, `.class`,
+    /// `#id`, `[attribute]`, etc.
+    ///
+    /// Invalid selectors are silently skipped at conversion time.
+    ///
+    /// Example: `vec![".cookie-banner".into(), "#ad-container".into(), "[role='complementary']".into()]`
+    /// </summary>
+    [JsonPropertyName("exclude_selectors")]
+    public List<string> ExcludeSelectors { get; set; } = [];
+
 }

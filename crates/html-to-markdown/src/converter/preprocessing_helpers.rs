@@ -5,7 +5,7 @@
 
 use crate::converter::dom_context::DomContext;
 use crate::converter::main_helpers::is_inline_element;
-use crate::converter::utility::attributes::element_has_navigation_hint;
+use crate::converter::utility::attributes::{attribute_matches_any, element_has_navigation_hint};
 use crate::converter::utility::content::normalized_tag_name;
 use crate::options::ConversionOptions;
 
@@ -76,9 +76,9 @@ pub fn has_inline_block_misnest(dom_ctx: &DomContext, parser: &tl::Parser) -> bo
 /// - **Standard** (default): Drops `<nav>` unconditionally. Drops `<header>`, `<footer>`,
 ///   and `<aside>` only when they have navigation hints (class/role/aria attributes
 ///   indicating site chrome). Drops `<form>` when `remove_forms` is enabled.
-/// - **Aggressive**: Drops `<nav>`, `<footer>`, `<aside>` unconditionally. Drops
-///   `<header>` only with navigation hints (to preserve article titles). Drops `<form>`
-///   when `remove_forms` is enabled.
+/// - **Aggressive**: All of Standard, plus: drops `<footer>`, `<aside>`, `<noscript>`
+///   unconditionally. Drops ANY element with navigation hints in class/id/role
+///   (e.g. `<div class="sidebar">`). Drops elements with noise-related classes/roles.
 pub fn should_drop_for_preprocessing(
     _node_handle: &tl::NodeHandle,
     tag_name: &str,
@@ -105,13 +105,19 @@ pub fn should_drop_for_preprocessing(
         return true;
     }
 
+    let is_aggressive = preset == PreprocessingPreset::Aggressive;
+
+    // Aggressive: drop <noscript> — its content is fallback for no-JS browsers.
+    if is_aggressive && tag_name == "noscript" {
+        return true;
+    }
+
     // Navigation removal — only when the flag is enabled.
     if !options.preprocessing.remove_navigation {
         return false;
     }
 
     let has_nav_hint = element_has_navigation_hint(tag);
-    let is_aggressive = preset == PreprocessingPreset::Aggressive;
 
     // <nav> is always navigation — drop in both Standard and Aggressive.
     if tag_name == "nav" {
@@ -122,16 +128,49 @@ pub fn should_drop_for_preprocessing(
         // Drop <header> only with navigation hints (e.g. class="site-header",
         // role="navigation"). A plain <header> often wraps article titles like
         // <header><h1>Title</h1></header> — dropping it loses content.
-        // This applies to BOTH Standard and Aggressive.
         return has_nav_hint;
     }
 
     if tag_name == "footer" || tag_name == "aside" {
         // Standard: drop only with navigation hints.
-        // Aggressive: drop unconditionally — footer/aside content is rarely
-        // the primary article content.
+        // Aggressive: drop unconditionally.
         return is_aggressive || has_nav_hint;
     }
 
+    // Aggressive: drop ANY element that has navigation hints in class/id/role.
+    // This catches <div class="sidebar">, <div class="menu">, <section class="navigation">,
+    // and similar non-semantic navigation containers.
+    if is_aggressive && has_nav_hint {
+        return true;
+    }
+
+    // Aggressive: drop elements with noise-related roles.
+    if is_aggressive {
+        if element_has_noise_hint(tag) {
+            return true;
+        }
+    }
+
     false
+}
+
+/// Check if an element has noise-related hints (ads, cookie banners, social sharing).
+fn element_has_noise_hint(tag: &tl::HTMLTag) -> bool {
+    const NOISE_KEYWORDS: &[&str] = &[
+        "cookie",
+        "consent",
+        "gdpr",
+        "banner",
+        "advertisement",
+        "ad-container",
+        "advert",
+        "social-share",
+        "share-buttons",
+        "popup",
+        "modal-overlay",
+        "newsletter-signup",
+    ];
+
+    attribute_matches_any(tag, "class", NOISE_KEYWORDS)
+        || attribute_matches_any(tag, "id", NOISE_KEYWORDS)
 }

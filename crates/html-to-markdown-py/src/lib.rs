@@ -441,13 +441,25 @@ pub struct ConversionOptions {
     /// When set, subtrees beyond this depth are silently truncated.
     #[pyo3(get)]
     pub max_depth: Option<usize>,
+    /// CSS selectors for elements to exclude entirely (element + all content).
+    ///
+    /// Unlike `strip_tags` (which removes the tag wrapper but keeps children),
+    /// excluded elements and all their descendants are dropped from the output.
+    /// Supports any CSS selector that `tl` supports: tag names, `.class`,
+    /// `#id`, `[attribute]`, etc.
+    ///
+    /// Invalid selectors are silently skipped at conversion time.
+    ///
+    /// Example: `vec![".cookie-banner".into(), "#ad-container".into(), "[role='complementary']".into()]`
+    #[pyo3(get)]
+    pub exclude_selectors: Vec<String>,
 }
 
 #[pymethods]
 impl ConversionOptions {
     #[allow(clippy::too_many_arguments)]
     #[must_use]
-    #[pyo3(signature = (heading_style=None, list_indent_type=None, list_indent_width=None, bullets=None, strong_em_symbol=None, escape_asterisks=None, escape_underscores=None, escape_misc=None, escape_ascii=None, code_language=None, autolinks=None, default_title=None, br_in_tables=None, highlight_style=None, extract_metadata=None, whitespace_mode=None, strip_newlines=None, wrap=None, wrap_width=None, convert_as_inline=None, sub_symbol=None, sup_symbol=None, newline_style=None, code_block_style=None, keep_inline_images_in=None, preprocessing=None, encoding=None, debug=None, strip_tags=None, preserve_tags=None, skip_images=None, link_style=None, output_format=None, include_document_structure=None, extract_images=None, max_image_size=None, capture_svg=None, infer_dimensions=None, max_depth=None))]
+    #[pyo3(signature = (heading_style=None, list_indent_type=None, list_indent_width=None, bullets=None, strong_em_symbol=None, escape_asterisks=None, escape_underscores=None, escape_misc=None, escape_ascii=None, code_language=None, autolinks=None, default_title=None, br_in_tables=None, highlight_style=None, extract_metadata=None, whitespace_mode=None, strip_newlines=None, wrap=None, wrap_width=None, convert_as_inline=None, sub_symbol=None, sup_symbol=None, newline_style=None, code_block_style=None, keep_inline_images_in=None, preprocessing=None, encoding=None, debug=None, strip_tags=None, preserve_tags=None, skip_images=None, link_style=None, output_format=None, include_document_structure=None, extract_images=None, max_image_size=None, capture_svg=None, infer_dimensions=None, exclude_selectors=None, max_depth=None))]
     #[new]
     pub fn new(
         heading_style: Option<HeadingStyle>,
@@ -488,6 +500,7 @@ impl ConversionOptions {
         max_image_size: Option<u64>,
         capture_svg: Option<bool>,
         infer_dimensions: Option<bool>,
+        exclude_selectors: Option<Vec<String>>,
         max_depth: Option<usize>,
     ) -> Self {
         Self {
@@ -530,6 +543,7 @@ impl ConversionOptions {
             capture_svg: capture_svg.unwrap_or(false),
             infer_dimensions: infer_dimensions.unwrap_or(true),
             max_depth,
+            exclude_selectors: exclude_selectors.unwrap_or_default(),
         }
     }
 
@@ -576,6 +590,7 @@ impl ConversionOptions {
             capture_svg: self.capture_svg,
             infer_dimensions: self.infer_dimensions,
             max_depth: self.max_depth,
+            exclude_selectors: self.exclude_selectors.clone(),
         };
         core_self.apply_update(update_core);
         core_self.into()
@@ -638,6 +653,13 @@ impl ConversionOptionsBuilder {
     pub fn keep_inline_images_in(&self, tags: Vec<String>) -> ConversionOptionsBuilder {
         Self {
             inner: Arc::new((*self.inner).clone().keep_inline_images_in(tags)),
+        }
+    }
+
+    #[pyo3(signature = (selectors))]
+    pub fn exclude_selectors(&self, selectors: Vec<String>) -> ConversionOptionsBuilder {
+        Self {
+            inner: Arc::new((*self.inner).clone().exclude_selectors(selectors)),
         }
     }
 
@@ -776,13 +798,16 @@ pub struct ConversionOptionsUpdate {
     /// Optional override for [`ConversionOptions::max_depth`].
     #[pyo3(get)]
     pub max_depth: Option<usize>,
+    /// Optional override for [`ConversionOptions::exclude_selectors`].
+    #[pyo3(get)]
+    pub exclude_selectors: Option<Vec<String>>,
 }
 
 #[pymethods]
 impl ConversionOptionsUpdate {
     #[allow(clippy::too_many_arguments)]
     #[must_use]
-    #[pyo3(signature = (heading_style=None, list_indent_type=None, list_indent_width=None, bullets=None, strong_em_symbol=None, escape_asterisks=None, escape_underscores=None, escape_misc=None, escape_ascii=None, code_language=None, autolinks=None, default_title=None, br_in_tables=None, highlight_style=None, extract_metadata=None, whitespace_mode=None, strip_newlines=None, wrap=None, wrap_width=None, convert_as_inline=None, sub_symbol=None, sup_symbol=None, newline_style=None, code_block_style=None, keep_inline_images_in=None, preprocessing=None, encoding=None, debug=None, strip_tags=None, preserve_tags=None, skip_images=None, link_style=None, output_format=None, include_document_structure=None, extract_images=None, max_image_size=None, capture_svg=None, infer_dimensions=None, max_depth=None))]
+    #[pyo3(signature = (heading_style=None, list_indent_type=None, list_indent_width=None, bullets=None, strong_em_symbol=None, escape_asterisks=None, escape_underscores=None, escape_misc=None, escape_ascii=None, code_language=None, autolinks=None, default_title=None, br_in_tables=None, highlight_style=None, extract_metadata=None, whitespace_mode=None, strip_newlines=None, wrap=None, wrap_width=None, convert_as_inline=None, sub_symbol=None, sup_symbol=None, newline_style=None, code_block_style=None, keep_inline_images_in=None, preprocessing=None, encoding=None, debug=None, strip_tags=None, preserve_tags=None, skip_images=None, link_style=None, output_format=None, include_document_structure=None, extract_images=None, max_image_size=None, capture_svg=None, infer_dimensions=None, max_depth=None, exclude_selectors=None))]
     #[new]
     pub fn new(
         heading_style: Option<HeadingStyle>,
@@ -824,6 +849,7 @@ impl ConversionOptionsUpdate {
         capture_svg: Option<bool>,
         infer_dimensions: Option<bool>,
         max_depth: Option<usize>,
+        exclude_selectors: Option<Vec<String>>,
     ) -> Self {
         Self {
             heading_style,
@@ -865,6 +891,7 @@ impl ConversionOptionsUpdate {
             capture_svg,
             infer_dimensions,
             max_depth,
+            exclude_selectors,
         }
     }
 }
@@ -3558,6 +3585,7 @@ impl From<ConversionOptions> for html_to_markdown_rs::options::ConversionOptions
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
             max_depth: val.max_depth,
+            exclude_selectors: val.exclude_selectors,
         }
     }
 }
@@ -3604,6 +3632,7 @@ impl From<html_to_markdown_rs::options::ConversionOptions> for ConversionOptions
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
             max_depth: val.max_depth,
+            exclude_selectors: val.exclude_selectors,
         }
     }
 }
@@ -3650,6 +3679,7 @@ impl From<ConversionOptionsUpdate> for html_to_markdown_rs::options::ConversionO
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
             max_depth: (val.max_depth).map(Some),
+            exclude_selectors: val.exclude_selectors,
         }
     }
 }
@@ -3696,6 +3726,7 @@ impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for ConversionO
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
             max_depth: val.max_depth.flatten(),
+            exclude_selectors: val.exclude_selectors,
         }
     }
 }

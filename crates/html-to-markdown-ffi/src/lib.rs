@@ -1801,6 +1801,25 @@ pub unsafe extern "C" fn htm_conversion_options_max_depth(ptr: *const html_to_ma
     }
 }
 
+/// Get the `exclude_selectors` field from a `ConversionOptions`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_exclude_selectors(ptr: *const html_to_markdown_rs::options::ConversionOptions) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
+    let obj = unsafe { &*ptr };
+    match serde_json::to_string(&obj.exclude_selectors) {
+        Ok(s) => match CString::new(s) {
+            Ok(cs) => cs.into_raw(),
+            Err(_) => std::ptr::null_mut(),
+        },
+        Err(_) => std::ptr::null_mut(),
+    }
+}
+
 /// # Safety
 /// Caller must ensure all pointer arguments are valid or null.
 /// Returned pointers must be freed with the appropriate free function.
@@ -2013,6 +2032,45 @@ pub unsafe extern "C" fn htm_conversion_options_builder_keep_inline_images_in(
         }
     };
     let result = obj.keep_inline_images_in(tags_rs);
+    Box::into_raw(Box::new(result))
+}
+
+/// Set the list of CSS selectors for elements to exclude entirely from output.
+/// # Safety
+/// Caller must ensure all pointer arguments are valid or null.
+/// Returned pointers must be freed with the appropriate free function.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_builder_exclude_selectors(
+    this: *mut html_to_markdown_rs::options::ConversionOptionsBuilder,
+    selectors: *const std::ffi::c_char
+) -> *mut html_to_markdown_rs::options::ConversionOptionsBuilder {
+    clear_last_error();
+    if this.is_null() {
+        set_last_error(1, "Null pointer passed for self");
+        return std::ptr::null_mut();
+    }
+    // SAFETY: null check above guarantees this is a valid pointer originally from Box::into_raw.
+    let obj = unsafe { *Box::from_raw(this) };
+    if selectors.is_null() {
+        set_last_error(1, "Null pointer passed for parameter 'selectors'");
+        return std::ptr::null_mut();
+    }
+    // SAFETY: null check above guarantees selectors is a valid pointer; string is valid UTF-8 from caller.
+    let selectors_rs_str = match unsafe { CStr::from_ptr(selectors) }.to_str() {
+        Ok(s) => s,
+        Err(_) => {
+            set_last_error(1, "Invalid UTF-8 in parameter 'selectors'");
+            return std::ptr::null_mut();
+        }
+    };
+    let selectors_rs = match serde_json::from_str(selectors_rs_str) {
+        Ok(v) => v,
+        Err(e) => {
+            set_last_error(2, &e.to_string());
+            return std::ptr::null_mut();
+        }
+    };
+    let result = obj.exclude_selectors(selectors_rs);
     Box::into_raw(Box::new(result))
 }
 
@@ -2836,6 +2894,30 @@ pub unsafe extern "C" fn htm_conversion_options_update_max_depth(ptr: *const htm
         }
         Some(None) => 0,
         None => 0,
+    }
+}
+
+/// Get the `exclude_selectors` field from a `ConversionOptionsUpdate`.
+/// # Safety
+/// Pointer must be a valid handle returned by this library.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn htm_conversion_options_update_exclude_selectors(ptr: *const html_to_markdown_rs::options::ConversionOptionsUpdate) -> *mut std::ffi::c_char {
+    if ptr.is_null() {
+        return std::ptr::null_mut();
+    }
+    // SAFETY: null check above guarantees ptr is a valid pointer.
+    let obj = unsafe { &*ptr };
+    match &obj.exclude_selectors {
+        Some(val) => {
+            match serde_json::to_string(&val) {
+                Ok(s) => match CString::new(s) {
+                    Ok(cs) => cs.into_raw(),
+                    Err(_) => std::ptr::null_mut(),
+                },
+                Err(_) => std::ptr::null_mut(),
+            }
+        }
+        None => std::ptr::null_mut(),
     }
 }
 

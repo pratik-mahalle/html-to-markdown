@@ -40,5 +40,6 @@ defmodule HtmlToMarkdown.ConversionOptions do
             max_image_size: 5_242_880,
             capture_svg: false,
             infer_dimensions: true,
-            max_depth: nil
+            max_depth: nil,
+            exclude_selectors: []
 end

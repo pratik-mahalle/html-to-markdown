@@ -331,6 +331,17 @@ pub struct ConversionOptions {
     /// Maximum DOM traversal depth. `None` means unlimited.
     /// When set, subtrees beyond this depth are silently truncated.
     pub max_depth: Option<f64>,
+    /// CSS selectors for elements to exclude entirely (element + all content).
+    ///
+    /// Unlike `strip_tags` (which removes the tag wrapper but keeps children),
+    /// excluded elements and all their descendants are dropped from the output.
+    /// Supports any CSS selector that `tl` supports: tag names, `.class`,
+    /// `#id`, `[attribute]`, etc.
+    ///
+    /// Invalid selectors are silently skipped at conversion time.
+    ///
+    /// Example: `vec![".cookie-banner".into(), "#ad-container".into(), "[role='complementary']".into()]`
+    pub exclude_selectors: Vec<String>,
 }
 
 impl ConversionOptions {
@@ -376,9 +387,10 @@ impl ConversionOptions {
         max_image_size: Option<f64>,
         capture_svg: Option<bool>,
         infer_dimensions: Option<bool>,
+        exclude_selectors: Option<Vec<String>>,
         max_depth: Option<f64>,
     ) -> Self {
-        Self { heading_style: heading_style.unwrap_or_default(), list_indent_type: list_indent_type.unwrap_or_default(), list_indent_width: list_indent_width.unwrap_or(2), bullets: bullets.unwrap_or_else(|| "-*+".to_string()), strong_em_symbol: strong_em_symbol.unwrap_or_else(|| "*".to_string()), escape_asterisks: escape_asterisks.unwrap_or(false), escape_underscores: escape_underscores.unwrap_or(false), escape_misc: escape_misc.unwrap_or(false), escape_ascii: escape_ascii.unwrap_or(false), code_language: code_language.unwrap_or_else(|| "".to_string()), autolinks: autolinks.unwrap_or(true), default_title: default_title.unwrap_or(false), br_in_tables: br_in_tables.unwrap_or(false), highlight_style: highlight_style.unwrap_or_default(), extract_metadata: extract_metadata.unwrap_or(true), whitespace_mode: whitespace_mode.unwrap_or_default(), strip_newlines: strip_newlines.unwrap_or(false), wrap: wrap.unwrap_or(false), wrap_width: wrap_width.unwrap_or(80), convert_as_inline: convert_as_inline.unwrap_or(false), sub_symbol: sub_symbol.unwrap_or_else(|| "".to_string()), sup_symbol: sup_symbol.unwrap_or_else(|| "".to_string()), newline_style: newline_style.unwrap_or_default(), code_block_style: code_block_style.unwrap_or_default(), keep_inline_images_in: keep_inline_images_in.unwrap_or_default(), preprocessing: preprocessing.unwrap_or_default(), encoding: encoding.unwrap_or_else(|| "utf-8".to_string()), debug: debug.unwrap_or(false), strip_tags: strip_tags.unwrap_or_default(), preserve_tags: preserve_tags.unwrap_or_default(), skip_images: skip_images.unwrap_or(false), link_style: link_style.unwrap_or_default(), output_format: output_format.unwrap_or_default(), include_document_structure: include_document_structure.unwrap_or(false), extract_images: extract_images.unwrap_or(false), max_image_size: max_image_size.unwrap_or(5242880), capture_svg: capture_svg.unwrap_or(false), infer_dimensions: infer_dimensions.unwrap_or(true), max_depth: max_depth }
+        Self { heading_style: heading_style.unwrap_or_default(), list_indent_type: list_indent_type.unwrap_or_default(), list_indent_width: list_indent_width.unwrap_or(2), bullets: bullets.unwrap_or_else(|| "-*+".to_string()), strong_em_symbol: strong_em_symbol.unwrap_or_else(|| "*".to_string()), escape_asterisks: escape_asterisks.unwrap_or(false), escape_underscores: escape_underscores.unwrap_or(false), escape_misc: escape_misc.unwrap_or(false), escape_ascii: escape_ascii.unwrap_or(false), code_language: code_language.unwrap_or_else(|| "".to_string()), autolinks: autolinks.unwrap_or(true), default_title: default_title.unwrap_or(false), br_in_tables: br_in_tables.unwrap_or(false), highlight_style: highlight_style.unwrap_or_default(), extract_metadata: extract_metadata.unwrap_or(true), whitespace_mode: whitespace_mode.unwrap_or_default(), strip_newlines: strip_newlines.unwrap_or(false), wrap: wrap.unwrap_or(false), wrap_width: wrap_width.unwrap_or(80), convert_as_inline: convert_as_inline.unwrap_or(false), sub_symbol: sub_symbol.unwrap_or_else(|| "".to_string()), sup_symbol: sup_symbol.unwrap_or_else(|| "".to_string()), newline_style: newline_style.unwrap_or_default(), code_block_style: code_block_style.unwrap_or_default(), keep_inline_images_in: keep_inline_images_in.unwrap_or_default(), preprocessing: preprocessing.unwrap_or_default(), encoding: encoding.unwrap_or_else(|| "utf-8".to_string()), debug: debug.unwrap_or(false), strip_tags: strip_tags.unwrap_or_default(), preserve_tags: preserve_tags.unwrap_or_default(), skip_images: skip_images.unwrap_or(false), link_style: link_style.unwrap_or_default(), output_format: output_format.unwrap_or_default(), include_document_structure: include_document_structure.unwrap_or(false), extract_images: extract_images.unwrap_or(false), max_image_size: max_image_size.unwrap_or(5242880), capture_svg: capture_svg.unwrap_or(false), infer_dimensions: infer_dimensions.unwrap_or(true), max_depth: max_depth, exclude_selectors: exclude_selectors.unwrap_or_default() }
     }
 
     pub fn apply_update(&self, update: ConversionOptionsUpdate) -> Self {
@@ -423,6 +435,7 @@ impl ConversionOptions {
             capture_svg: self.capture_svg,
             infer_dimensions: self.infer_dimensions,
             max_depth: self.max_depth,
+            exclude_selectors: self.exclude_selectors.clone(),
         };
         core_self.apply_update(update_core);
         core_self.into()
@@ -489,7 +502,8 @@ pub fn new_conversionoptions(
     max_image_size: f64 = 5242880,
     capture_svg: bool = FALSE,
     infer_dimensions: bool = TRUE,
-    max_depth: f64 = NULL
+    max_depth: f64 = NULL,
+    exclude_selectors: Vec<String> = c()
 ) -> ConversionOptions {
     ConversionOptions {
         heading_style,
@@ -531,6 +545,7 @@ pub fn new_conversionoptions(
         capture_svg,
         infer_dimensions,
         max_depth,
+        exclude_selectors,
     }
 }
 
@@ -551,6 +566,10 @@ impl ConversionOptionsBuilder {
 
     pub fn keep_inline_images_in(&self, tags: Vec<String>) -> ConversionOptionsBuilder {
         Self { inner: Arc::new((*self.inner).clone().keep_inline_images_in(tags)) }
+    }
+
+    pub fn exclude_selectors(&self, selectors: Vec<String>) -> ConversionOptionsBuilder {
+        Self { inner: Arc::new((*self.inner).clone().exclude_selectors(selectors)) }
     }
 
     pub fn preprocessing(&self, preprocessing: PreprocessingOptions) -> ConversionOptionsBuilder {
@@ -644,6 +663,8 @@ pub struct ConversionOptionsUpdate {
     pub infer_dimensions: Option<bool>,
     /// Optional override for [`ConversionOptions::max_depth`].
     pub max_depth: Option<f64>,
+    /// Optional override for [`ConversionOptions::exclude_selectors`].
+    pub exclude_selectors: Option<Vec<String>>,
 }
 
 impl ConversionOptionsUpdate {
@@ -690,8 +711,9 @@ impl ConversionOptionsUpdate {
         capture_svg: Option<bool>,
         infer_dimensions: Option<bool>,
         max_depth: Option<f64>,
+        exclude_selectors: Option<Vec<String>>,
     ) -> Self {
-        Self { heading_style: heading_style, list_indent_type: list_indent_type, list_indent_width: list_indent_width, bullets: bullets, strong_em_symbol: strong_em_symbol, escape_asterisks: escape_asterisks, escape_underscores: escape_underscores, escape_misc: escape_misc, escape_ascii: escape_ascii, code_language: code_language, autolinks: autolinks, default_title: default_title, br_in_tables: br_in_tables, highlight_style: highlight_style, extract_metadata: extract_metadata, whitespace_mode: whitespace_mode, strip_newlines: strip_newlines, wrap: wrap, wrap_width: wrap_width, convert_as_inline: convert_as_inline, sub_symbol: sub_symbol, sup_symbol: sup_symbol, newline_style: newline_style, code_block_style: code_block_style, keep_inline_images_in: keep_inline_images_in, preprocessing: preprocessing, encoding: encoding, debug: debug, strip_tags: strip_tags, preserve_tags: preserve_tags, skip_images: skip_images, link_style: link_style, output_format: output_format, include_document_structure: include_document_structure, extract_images: extract_images, max_image_size: max_image_size, capture_svg: capture_svg, infer_dimensions: infer_dimensions, max_depth: max_depth }
+        Self { heading_style: heading_style, list_indent_type: list_indent_type, list_indent_width: list_indent_width, bullets: bullets, strong_em_symbol: strong_em_symbol, escape_asterisks: escape_asterisks, escape_underscores: escape_underscores, escape_misc: escape_misc, escape_ascii: escape_ascii, code_language: code_language, autolinks: autolinks, default_title: default_title, br_in_tables: br_in_tables, highlight_style: highlight_style, extract_metadata: extract_metadata, whitespace_mode: whitespace_mode, strip_newlines: strip_newlines, wrap: wrap, wrap_width: wrap_width, convert_as_inline: convert_as_inline, sub_symbol: sub_symbol, sup_symbol: sup_symbol, newline_style: newline_style, code_block_style: code_block_style, keep_inline_images_in: keep_inline_images_in, preprocessing: preprocessing, encoding: encoding, debug: debug, strip_tags: strip_tags, preserve_tags: preserve_tags, skip_images: skip_images, link_style: link_style, output_format: output_format, include_document_structure: include_document_structure, extract_images: extract_images, max_image_size: max_image_size, capture_svg: capture_svg, infer_dimensions: infer_dimensions, max_depth: max_depth, exclude_selectors: exclude_selectors }
     }
 }
 
@@ -735,7 +757,8 @@ pub fn new_conversionoptionsupdate(
     max_image_size: f64 = 0,
     capture_svg: bool = false,
     infer_dimensions: bool = false,
-    max_depth: Option<f64> = null
+    max_depth: Option<f64> = null,
+    exclude_selectors: Vec<String> = c()
 ) -> ConversionOptionsUpdate {
     ConversionOptionsUpdate {
         heading_style,
@@ -777,6 +800,7 @@ pub fn new_conversionoptionsupdate(
         capture_svg,
         infer_dimensions,
         max_depth,
+        exclude_selectors,
     }
 }
 

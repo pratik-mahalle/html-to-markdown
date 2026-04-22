@@ -48,13 +48,19 @@ fn test_exclude_selectors_drops_nested_content() {
     let result = convert(html, Some(options)).unwrap();
 
     assert!(result.contains("Primary content"), "Should keep main content");
-    assert!(!result.contains("Related articles"), "Should drop heading inside excluded element");
-    assert!(!result.contains("sidebar content"), "Should drop paragraph inside excluded element");
+    assert!(
+        !result.contains("Related articles"),
+        "Should drop heading inside excluded element"
+    );
+    assert!(
+        !result.contains("sidebar content"),
+        "Should drop paragraph inside excluded element"
+    );
 }
 
 #[test]
 fn test_exclude_selectors_empty_list_is_noop() {
-    let html = r#"<body><p>Hello world</p></body>"#;
+    let html = r"<body><p>Hello world</p></body>";
 
     let options = ConversionOptions {
         exclude_selectors: vec![],
@@ -62,16 +68,19 @@ fn test_exclude_selectors_empty_list_is_noop() {
     };
 
     let result = convert(html, Some(options)).unwrap();
-    assert!(result.contains("Hello world"), "Empty exclude_selectors should not affect output");
+    assert!(
+        result.contains("Hello world"),
+        "Empty exclude_selectors should not affect output"
+    );
 }
 
 #[test]
 fn test_exclude_selectors_invalid_selector_is_skipped() {
-    let html = r#"<body><p>Visible text</p></body>"#;
+    let html = r"<body><p>Visible text</p></body>";
 
     // An empty string or garbled selector should not panic or error — just be ignored.
     let options = ConversionOptions {
-        exclude_selectors: vec!["".to_string(), "p".to_string()],
+        exclude_selectors: vec![String::new(), "p".to_string()],
         ..Default::default()
     };
 
@@ -95,7 +104,10 @@ fn test_exclude_selectors_attribute_selector() {
     let result = convert(html, Some(options)).unwrap();
 
     assert!(result.contains("Main text"), "Should keep non-excluded content");
-    assert!(!result.contains("Sidebar"), "Should drop element matching attribute selector");
+    assert!(
+        !result.contains("Sidebar"),
+        "Should drop element matching attribute selector"
+    );
 }
 
 #[test]
@@ -113,6 +125,12 @@ fn test_exclude_selectors_plain_text_output() {
 
     let result = convert(html, Some(options)).unwrap();
 
-    assert!(result.contains("Article body text"), "Should keep body text in plain output");
-    assert!(!result.contains("Navigation links"), "Should drop excluded element in plain output");
+    assert!(
+        result.contains("Article body text"),
+        "Should keep body text in plain output"
+    );
+    assert!(
+        !result.contains("Navigation links"),
+        "Should drop excluded element in plain output"
+    );
 }

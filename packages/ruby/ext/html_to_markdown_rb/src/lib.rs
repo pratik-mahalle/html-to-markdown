@@ -489,6 +489,7 @@ pub struct ConversionOptions {
     pub capture_svg: bool,
     pub infer_dimensions: bool,
     pub max_depth: Option<usize>,
+    pub exclude_selectors: Vec<String>,
 }
 
 unsafe impl IntoValueFromNative for ConversionOptions {}
@@ -660,6 +661,10 @@ impl ConversionOptions {
             max_depth: kwargs
                 .get(ruby.to_symbol("max_depth"))
                 .and_then(|v| usize::try_convert(v).ok()),
+            exclude_selectors: kwargs
+                .get(ruby.to_symbol("exclude_selectors"))
+                .and_then(|v| <Vec<String>>::try_convert(v).ok())
+                .unwrap_or_default(),
         })
     }
 
@@ -819,6 +824,10 @@ impl ConversionOptions {
         self.max_depth
     }
 
+    fn exclude_selectors(&self) -> Vec<String> {
+        self.exclude_selectors.clone()
+    }
+
     fn apply_update(&self, update: ConversionOptionsUpdate) -> () {
         ()
     }
@@ -856,6 +865,12 @@ impl ConversionOptionsBuilder {
     fn keep_inline_images_in(&self, tags: Vec<String>) -> ConversionOptionsBuilder {
         Self {
             inner: Arc::new(self.inner.as_ref().clone().keep_inline_images_in(tags)),
+        }
+    }
+
+    fn exclude_selectors(&self, selectors: Vec<String>) -> ConversionOptionsBuilder {
+        Self {
+            inner: Arc::new(self.inner.as_ref().clone().exclude_selectors(selectors)),
         }
     }
 
@@ -913,6 +928,7 @@ pub struct ConversionOptionsUpdate {
     pub capture_svg: Option<bool>,
     pub infer_dimensions: Option<bool>,
     pub max_depth: Option<Option<usize>>,
+    pub exclude_selectors: Option<Vec<String>>,
 }
 
 unsafe impl IntoValueFromNative for ConversionOptionsUpdate {}
@@ -1046,6 +1062,9 @@ impl ConversionOptionsUpdate {
             max_depth: kwargs
                 .get(ruby.to_symbol("max_depth"))
                 .and_then(|v| <Option<usize>>::try_convert(v).ok()),
+            exclude_selectors: kwargs
+                .get(ruby.to_symbol("exclude_selectors"))
+                .and_then(|v| <Vec<String>>::try_convert(v).ok()),
         })
     }
 
@@ -1203,6 +1222,10 @@ impl ConversionOptionsUpdate {
 
     fn max_depth(&self) -> Option<Option<usize>> {
         self.max_depth.clone()
+    }
+
+    fn exclude_selectors(&self) -> Option<Vec<String>> {
+        self.exclude_selectors.clone()
     }
 }
 
@@ -4187,6 +4210,7 @@ impl From<ConversionOptions> for html_to_markdown_rs::options::ConversionOptions
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
             max_depth: val.max_depth,
+            exclude_selectors: val.exclude_selectors,
         }
     }
 }
@@ -4233,6 +4257,7 @@ impl From<html_to_markdown_rs::options::ConversionOptions> for ConversionOptions
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
             max_depth: val.max_depth,
+            exclude_selectors: val.exclude_selectors,
         }
     }
 }
@@ -4279,6 +4304,7 @@ impl From<ConversionOptionsUpdate> for html_to_markdown_rs::options::ConversionO
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
             max_depth: (val.max_depth).map(Some),
+            exclude_selectors: val.exclude_selectors,
         }
     }
 }
@@ -4325,6 +4351,7 @@ impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for ConversionO
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
             max_depth: val.max_depth.flatten(),
+            exclude_selectors: val.exclude_selectors,
         }
     }
 }
@@ -5179,6 +5206,7 @@ fn init(ruby: &Ruby) -> Result<(), Error> {
     class.define_method("capture_svg", method!(ConversionOptions::capture_svg, 0))?;
     class.define_method("infer_dimensions", method!(ConversionOptions::infer_dimensions, 0))?;
     class.define_method("max_depth", method!(ConversionOptions::max_depth, 0))?;
+    class.define_method("exclude_selectors", method!(ConversionOptions::exclude_selectors, 0))?;
     class.define_method("apply_update", method!(ConversionOptions::apply_update, 1))?;
 
     let class = module.define_class("ConversionOptionsBuilder", ruby.class_object())?;
@@ -5187,6 +5215,10 @@ fn init(ruby: &Ruby) -> Result<(), Error> {
     class.define_method(
         "keep_inline_images_in",
         method!(ConversionOptionsBuilder::keep_inline_images_in, 1),
+    )?;
+    class.define_method(
+        "exclude_selectors",
+        method!(ConversionOptionsBuilder::exclude_selectors, 1),
     )?;
     class.define_method("preprocessing", method!(ConversionOptionsBuilder::preprocessing, 1))?;
     class.define_method("build", method!(ConversionOptionsBuilder::build, 0))?;
@@ -5265,6 +5297,10 @@ fn init(ruby: &Ruby) -> Result<(), Error> {
         method!(ConversionOptionsUpdate::infer_dimensions, 0),
     )?;
     class.define_method("max_depth", method!(ConversionOptionsUpdate::max_depth, 0))?;
+    class.define_method(
+        "exclude_selectors",
+        method!(ConversionOptionsUpdate::exclude_selectors, 0),
+    )?;
 
     let class = module.define_class("PreprocessingOptions", ruby.class_object())?;
     class.define_singleton_method("new", function!(PreprocessingOptions::new, 4))?;

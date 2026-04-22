@@ -100,7 +100,9 @@ public record ConversionOptions(
     /** Infer image dimensions from data. */
     @JsonProperty("infer_dimensions") boolean inferDimensions,
     /** Maximum DOM traversal depth. {@code None} means unlimited. */
-    @JsonProperty("max_depth") Optional<Long> maxDepth
+    @JsonProperty("max_depth") Optional<Long> maxDepth,
+    /** CSS selectors for elements to exclude entirely (element + all content). */
+    @JsonProperty("exclude_selectors") List<String> excludeSelectors
 ) {
     public static ConversionOptionsBuilder builder() {
         return new ConversionOptionsBuilder();

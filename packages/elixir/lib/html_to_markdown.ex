@@ -84,6 +84,12 @@ defmodule HtmlToMarkdown do
     HtmlToMarkdown.Native.conversionoptionsbuilder_keep_inline_images_in(obj, tags)
   end
 
+  @doc "Set the list of CSS selectors for elements to exclude entirely from output."
+  @spec conversionoptionsbuilder_exclude_selectors(map(), [String.t()]) :: reference()
+  def conversionoptionsbuilder_exclude_selectors(obj, selectors) do
+    HtmlToMarkdown.Native.conversionoptionsbuilder_exclude_selectors(obj, selectors)
+  end
+
   @doc "Set the pre-processing options applied to the HTML before conversion."
   @spec conversionoptionsbuilder_preprocessing(map(), String.t() | nil) :: reference()
   def conversionoptionsbuilder_preprocessing(obj, preprocessing) do

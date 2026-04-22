@@ -148,6 +148,7 @@ class ConversionOptions:
     capture_svg: bool
     infer_dimensions: bool
     max_depth: int | None
+    exclude_selectors: list[str]
     def __init__(
         self,
         heading_style: HeadingStyle | str | None = None,
@@ -189,6 +190,7 @@ class ConversionOptions:
         capture_svg: bool | None = None,
         infer_dimensions: bool | None = None,
         max_depth: int | None = None,
+        exclude_selectors: list[str] | None = None,
     ) -> None: ...
     def apply_update(self, update: ConversionOptionsUpdate) -> None: ...
     @staticmethod
@@ -240,6 +242,7 @@ class ConversionOptionsUpdate:
     capture_svg: bool | None
     infer_dimensions: bool | None
     max_depth: int | None
+    exclude_selectors: list[str] | None
     def __init__(
         self,
         heading_style: HeadingStyle | str | None = None,
@@ -281,6 +284,7 @@ class ConversionOptionsUpdate:
         capture_svg: bool | None = None,
         infer_dimensions: bool | None = None,
         max_depth: int | None = None,
+        exclude_selectors: list[str] | None = None,
     ) -> None: ...
 
 class PreprocessingOptions:
@@ -422,6 +426,7 @@ class ConversionOptionsBuilder:
     def strip_tags(self, tags: list[str]) -> ConversionOptionsBuilder: ...
     def preserve_tags(self, tags: list[str]) -> ConversionOptionsBuilder: ...
     def keep_inline_images_in(self, tags: list[str]) -> ConversionOptionsBuilder: ...
+    def exclude_selectors(self, selectors: list[str]) -> ConversionOptionsBuilder: ...
     def preprocessing(self, preprocessing: PreprocessingOptions) -> ConversionOptionsBuilder: ...
     def build(self) -> ConversionOptions: ...
 

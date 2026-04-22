@@ -174,6 +174,8 @@ pub struct JsConversionOptions {
     pub infer_dimensions: Option<bool>,
     #[napi(js_name = "maxDepth")]
     pub max_depth: Option<i64>,
+    #[napi(js_name = "excludeSelectors")]
+    pub exclude_selectors: Option<Vec<String>>,
 }
 
 #[derive(Clone)]
@@ -202,6 +204,13 @@ impl JsConversionOptionsBuilder {
     pub fn keep_inline_images_in(&self, tags: Vec<String>) -> JsConversionOptionsBuilder {
         Self {
             inner: Arc::new((*self.inner).clone().keep_inline_images_in(tags)),
+        }
+    }
+
+    #[napi(js_name = "excludeSelectors")]
+    pub fn exclude_selectors(&self, selectors: Vec<String>) -> JsConversionOptionsBuilder {
+        Self {
+            inner: Arc::new((*self.inner).clone().exclude_selectors(selectors)),
         }
     }
 
@@ -294,6 +303,8 @@ pub struct JsConversionOptionsUpdate {
     pub infer_dimensions: Option<bool>,
     #[napi(js_name = "maxDepth")]
     pub max_depth: Option<i64>,
+    #[napi(js_name = "excludeSelectors")]
+    pub exclude_selectors: Option<Vec<String>>,
 }
 
 #[derive(Clone, Default)]
@@ -3434,6 +3445,7 @@ impl From<JsConversionOptions> for html_to_markdown_rs::options::ConversionOptio
             capture_svg: val.capture_svg.unwrap_or_default(),
             infer_dimensions: val.infer_dimensions.unwrap_or_default(),
             max_depth: val.max_depth.map(|v| v as usize),
+            exclude_selectors: val.exclude_selectors.unwrap_or_default(),
         }
     }
 }
@@ -3480,6 +3492,7 @@ impl From<html_to_markdown_rs::options::ConversionOptions> for JsConversionOptio
             capture_svg: Some(val.capture_svg),
             infer_dimensions: Some(val.infer_dimensions),
             max_depth: val.max_depth.map(|v| v as i64),
+            exclude_selectors: Some(val.exclude_selectors),
         }
     }
 }
@@ -3526,6 +3539,7 @@ impl From<JsConversionOptionsUpdate> for html_to_markdown_rs::options::Conversio
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
             max_depth: (val.max_depth.map(|v| v as usize)).map(Some),
+            exclude_selectors: val.exclude_selectors,
         }
     }
 }
@@ -3572,6 +3586,7 @@ impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for JsConversio
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
             max_depth: val.max_depth.flatten().map(|v| v as i64),
+            exclude_selectors: val.exclude_selectors,
         }
     }
 }

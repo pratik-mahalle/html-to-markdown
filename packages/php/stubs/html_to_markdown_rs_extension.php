@@ -409,11 +409,14 @@ class ConversionOptions
     public bool $capture_svg;
     public bool $infer_dimensions;
     public ?int $max_depth;
+    /** @var array<string> */
+    public array $exclude_selectors;
 
     /**
      * @param array<string> $keep_inline_images_in
      * @param array<string> $strip_tags
      * @param array<string> $preserve_tags
+     * @param array<string> $exclude_selectors
      */
     public function __construct(
         HeadingStyle $heading_style,
@@ -454,6 +457,7 @@ class ConversionOptions
         int $max_image_size,
         bool $capture_svg,
         bool $infer_dimensions,
+        array $exclude_selectors,
         ?int $max_depth = null
     ) { }
 
@@ -499,6 +503,8 @@ class ConversionOptions
     public function getCaptureSvg(): bool { }
     public function getInferDimensions(): bool { }
     public function getMaxDepth(): ?int { }
+    /** @return array<string> */
+    public function getExcludeSelectors(): array { }
 }
 
 /**
@@ -551,11 +557,14 @@ class ConversionOptionsUpdate
     public ?bool $capture_svg;
     public ?bool $infer_dimensions;
     public ?int $max_depth;
+    /** @var ?array<string> */
+    public ?array $exclude_selectors;
 
     /**
      * @param ?array<string> $keep_inline_images_in
      * @param ?array<string> $strip_tags
      * @param ?array<string> $preserve_tags
+     * @param ?array<string> $exclude_selectors
      */
     public function __construct(
         ?HeadingStyle $heading_style = null,
@@ -596,7 +605,8 @@ class ConversionOptionsUpdate
         ?int $max_image_size = null,
         ?bool $capture_svg = null,
         ?bool $infer_dimensions = null,
-        ?int $max_depth = null
+        ?int $max_depth = null,
+        ?array $exclude_selectors = null
     ) { }
 
     public function getHeadingStyle(): ?HeadingStyle { }
@@ -641,6 +651,8 @@ class ConversionOptionsUpdate
     public function getCaptureSvg(): ?bool { }
     public function getInferDimensions(): ?bool { }
     public function getMaxDepth(): ?int { }
+    /** @return ?array<string> */
+    public function getExcludeSelectors(): ?array { }
 }
 
 /**
