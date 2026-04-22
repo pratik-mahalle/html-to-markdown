@@ -2799,41 +2799,6 @@ impl magnus::TryConvert for VisitResult {
 unsafe impl IntoValueFromNative for VisitResult {}
 unsafe impl TryConvertOwned for VisitResult {}
 
-#[allow(clippy::missing_errors_doc)]
-pub fn convert(
-    html: String,
-    options: Option<ConversionOptions>,
-    visitor: Option<magnus::Value>,
-) -> Result<ConversionResult, Error> {
-    let visitor: Option<html_to_markdown_rs::visitor::VisitorHandle> = match visitor {
-        Some(v) if !v.is_nil() => {
-            let bridge = RbHtmlVisitorBridge::new(v);
-            Some(std::rc::Rc::new(std::cell::RefCell::new(bridge)) as html_to_markdown_rs::visitor::VisitorHandle)
-        }
-        _ => None,
-    };
-    let options_core: Option<html_to_markdown_rs::ConversionOptions> = options
-        .as_deref()
-        .filter(|s| *s != "nil")
-        .map(|s| {
-            serde_json::from_str(s).map_err(|e| {
-                magnus::Error::new(
-                    unsafe { magnus::Ruby::get_unchecked() }.exception_runtime_error(),
-                    e.to_string(),
-                )
-            })
-        })
-        .transpose()?;
-    html_to_markdown_rs::convert(&html, options_core, visitor)
-        .map(|val| val.into())
-        .map_err(|e| {
-            magnus::Error::new(
-                unsafe { magnus::Ruby::get_unchecked() }.exception_runtime_error(),
-                e.to_string(),
-            )
-        })
-}
-
 fn nodecontext_to_rb_hash(ctx: &html_to_markdown_rs::visitor::NodeContext) -> magnus::RHash {
     let ruby = unsafe { magnus::Ruby::get_unchecked() };
     let h = ruby.hash_new();
@@ -5382,8 +5347,6 @@ fn init(ruby: &Ruby) -> Result<(), Error> {
     class.define_method("index_in_parent", method!(NodeContext::index_in_parent, 0))?;
     class.define_method("parent_tag", method!(NodeContext::parent_tag, 0))?;
     class.define_method("is_inline", method!(NodeContext::is_inline, 0))?;
-
-    module.define_module_function("convert", function!(convert, 3))?;
 
     Ok(())
 }

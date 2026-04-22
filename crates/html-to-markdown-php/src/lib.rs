@@ -405,10 +405,6 @@ impl ConversionOptions {
         self.preprocessing.clone()
     }
 
-    pub fn apply_update(&self, update: &ConversionOptionsUpdate) {
-        ()
-    }
-
     #[allow(clippy::should_implement_trait)]
     pub fn default() -> ConversionOptions {
         html_to_markdown_rs::options::ConversionOptions::default().into()
@@ -418,15 +414,6 @@ impl ConversionOptions {
         ConversionOptionsBuilder {
             inner: Arc::new(html_to_markdown_rs::options::ConversionOptions::builder()),
         }
-    }
-
-    pub fn from_update(update: &ConversionOptionsUpdate) -> ConversionOptions {
-        panic!("alef: from_update not auto-delegatable")
-    }
-
-    #[allow(clippy::should_implement_trait)]
-    pub fn from(update: &ConversionOptionsUpdate) -> ConversionOptions {
-        panic!("alef: from not auto-delegatable")
     }
 }
 
@@ -627,22 +614,9 @@ impl PreprocessingOptions {
         serde_json::from_str(&json).map_err(|e| PhpException::default(e.to_string()))
     }
 
-    pub fn apply_update(&self, update: &PreprocessingOptionsUpdate) {
-        ()
-    }
-
     #[allow(clippy::should_implement_trait)]
     pub fn default() -> PreprocessingOptions {
         html_to_markdown_rs::options::PreprocessingOptions::default().into()
-    }
-
-    pub fn from_update(update: &PreprocessingOptionsUpdate) -> PreprocessingOptions {
-        panic!("alef: from_update not auto-delegatable")
-    }
-
-    #[allow(clippy::should_implement_trait)]
-    pub fn from(update: &PreprocessingOptionsUpdate) -> PreprocessingOptions {
-        panic!("alef: from not auto-delegatable")
     }
 }
 

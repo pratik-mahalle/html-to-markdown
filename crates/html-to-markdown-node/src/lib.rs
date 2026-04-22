@@ -811,23 +811,6 @@ impl Default for JsVisitResult {
     }
 }
 
-#[allow(clippy::missing_errors_doc)]
-#[napi]
-pub fn convert(
-    html: String,
-    options: Option<JsConversionOptions>,
-    visitor: Option<napi::bindgen_prelude::Object>,
-) -> Result<JsConversionResult> {
-    let visitor = visitor.map(|v| {
-        let bridge = JsHtmlVisitorBridge::new(v);
-        std::rc::Rc::new(std::cell::RefCell::new(bridge)) as html_to_markdown_rs::visitor::VisitorHandle
-    });
-    let options_core: Option<html_to_markdown_rs::ConversionOptions> = options.map(|v| v.into());
-    html_to_markdown_rs::convert(&html, options_core, visitor)
-        .map(|val| val.into())
-        .map_err(|e| napi::Error::new(napi::Status::GenericFailure, e.to_string()))
-}
-
 #[allow(unused_imports)]
 use napi::JsValue;
 #[allow(unused_imports)]

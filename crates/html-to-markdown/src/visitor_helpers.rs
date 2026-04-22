@@ -296,7 +296,10 @@ macro_rules! try_visitor {
                 return Ok(String::new());
             }
             $crate::visitor_helpers::VisitorDispatch::PreserveHtml => {
-                // TODO: Implement HTML preservation logic
+                // Falls through to default conversion — full HTML preservation requires
+                // the node handle and parser context which aren't available in this macro.
+                // Callers that need PreserveHtml support should match on the dispatch
+                // result directly and call serialize_tag_to_html.
             }
         }
     }};
