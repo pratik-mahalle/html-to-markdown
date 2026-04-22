@@ -80,11 +80,8 @@ pub fn has_inline_block_misnest(dom_ctx: &DomContext, parser: &tl::Parser) -> bo
 ///   unconditionally. Drops ANY element with navigation hints in class/id/role
 ///   (e.g. `<div class="sidebar">`). Drops elements with noise-related classes/roles.
 pub fn should_drop_for_preprocessing(
-    _node_handle: &tl::NodeHandle,
     tag_name: &str,
     tag: &tl::HTMLTag,
-    _parser: &tl::Parser,
-    _dom_ctx: &DomContext,
     options: &ConversionOptions,
 ) -> bool {
     use crate::options::PreprocessingPreset;
@@ -171,6 +168,5 @@ fn element_has_noise_hint(tag: &tl::HTMLTag) -> bool {
         "newsletter-signup",
     ];
 
-    attribute_matches_any(tag, "class", NOISE_KEYWORDS)
-        || attribute_matches_any(tag, "id", NOISE_KEYWORDS)
+    attribute_matches_any(tag, "class", NOISE_KEYWORDS) || attribute_matches_any(tag, "id", NOISE_KEYWORDS)
 }

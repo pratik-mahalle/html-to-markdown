@@ -3327,7 +3327,11 @@ impl From<JsImageMetadata> for html_to_markdown_rs::metadata::ImageMetadata {
             src: val.src,
             alt: val.alt,
             title: val.title,
-            dimensions: Default::default(),
+            dimensions: val
+                .dimensions
+                .as_ref()
+                .and_then(|v| serde_json::to_value(v).ok())
+                .and_then(|v| serde_json::from_value(v).ok()),
             image_type: val.image_type.into(),
             attributes: val.attributes.into_iter().collect(),
         }
@@ -3340,7 +3344,11 @@ impl From<html_to_markdown_rs::metadata::ImageMetadata> for JsImageMetadata {
             src: val.src,
             alt: val.alt,
             title: val.title,
-            dimensions: val.dimensions.as_ref().map(|v| format!("{v:?}")),
+            dimensions: val
+                .dimensions
+                .as_ref()
+                .and_then(|v| serde_json::to_value(v).ok())
+                .and_then(|v| serde_json::from_value(v).ok()),
             image_type: val.image_type.into(),
             attributes: val.attributes.into_iter().collect(),
         }

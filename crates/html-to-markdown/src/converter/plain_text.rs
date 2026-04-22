@@ -7,6 +7,7 @@
 use std::collections::HashSet;
 use std::fmt::Write;
 
+use crate::converter::preprocessing_helpers::should_drop_for_preprocessing;
 use crate::options::ConversionOptions;
 use crate::text;
 
@@ -140,6 +141,12 @@ fn walk_plain(
 
             // Skip invisible content
             if SKIP_TAGS.contains(&tag_str) {
+                return;
+            }
+
+            // Apply preprocessing: drop nav/footer/aside/noise elements
+            // (shared logic with the markdown path).
+            if should_drop_for_preprocessing(tag_str, tag, options) {
                 return;
             }
 
@@ -389,3 +396,4 @@ fn post_process(buf: &mut String) {
         buf.push('\n');
     }
 }
+

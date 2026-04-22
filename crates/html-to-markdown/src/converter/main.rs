@@ -359,7 +359,7 @@ pub fn walk_node(
                 }
             }
 
-            if should_drop_for_preprocessing(node_handle, tag_name.as_ref(), tag, parser, dom_ctx, options) {
+            if should_drop_for_preprocessing(tag_name.as_ref(), tag, options) {
                 trim_trailing_whitespace(output);
                 return;
             }
