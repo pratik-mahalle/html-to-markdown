@@ -85,6 +85,7 @@ Use `ConversionOptions.builder()` to construct, or `the default constructor` for
 | `capture_svg` | `bool` | `False` | Capture SVG elements as images. |
 | `infer_dimensions` | `bool` | `True` | Infer image dimensions from data. |
 | `max_depth` | `int | None` | `None` | Maximum DOM traversal depth. `None` means unlimited. When set, subtrees beyond this depth are silently truncated. |
+| `exclude_selectors` | `list[str]` | `[]` | CSS selectors for elements to exclude entirely (element + all content). Unlike `strip_tags` (which removes the tag wrapper but keeps children), excluded elements and all their descendants are dropped from the output. Supports any CSS selector that `tl` supports: tag names, `.class`, `#id`, `[attribute]`, etc. Invalid selectors are silently skipped at conversion time. Example: `vec![".cookie-banner".into(), "#ad-container".into(), "[role='complementary']".into()]` |
 
 ##### Methods
 
@@ -196,6 +197,16 @@ Set the list of HTML tag names whose `<img>` children are kept inline.
 
 ```python
 def keep_inline_images_in(self, tags: list[str]) -> ConversionOptionsBuilder
+```
+
+###### exclude_selectors()
+
+Set the list of CSS selectors for elements to exclude entirely from output.
+
+**Signature:**
+
+```python
+def exclude_selectors(self, selectors: list[str]) -> ConversionOptionsBuilder
 ```
 
 ###### preprocessing()
@@ -833,102 +844,6 @@ Appropriate `LinkType` based on protocol and content.
 ```python
 @staticmethod
 def classify_link(href: str) -> LinkType
-```
-
-
----
-
-##### MetadataConfig
-
-Configuration for metadata extraction granularity.
-
-Controls which metadata types are extracted and size limits for safety.
-Enables selective extraction of different metadata categories from HTML documents,
-allowing fine-grained control over which types of information to collect during
-the HTML-to-Markdown conversion process.
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `extract_document` | `bool` | `True` | Extract document-level metadata (title, description, author, etc.). When enabled, collects metadata from `<head>` section including: - `<title>` element content - `<meta name="description">` and other standard meta tags - Open Graph (og:*) properties for social media optimization - Twitter Card (twitter:*) properties - Language and text direction attributes - Canonical URL and base href references |
-| `extract_headers` | `bool` | `True` | Extract h1-h6 header elements and their hierarchy. When enabled, collects all heading elements with: - Header level (1-6) - Text content (normalized) - HTML id attribute if present - Document tree depth for hierarchy tracking - Byte offset in original HTML for positioning |
-| `extract_links` | `bool` | `True` | Extract anchor (a) elements as links with type classification. When enabled, collects all hyperlinks with: - href attribute value - Link text content - Title attribute (tooltip text) - Automatic link type classification (anchor, internal, external, email, phone, other) - Rel attribute values - Additional custom attributes |
-| `extract_images` | `bool` | `True` | Extract image elements and data URIs. When enabled, collects all image elements with: - Source URL or data URI - Alt text for accessibility - Title attribute - Dimensions (width, height) if available - Automatic image type classification (data URI, external, relative, inline SVG) - Additional custom attributes |
-| `extract_structured_data` | `bool` | `True` | Extract structured data (JSON-LD, Microdata, RDFa). When enabled, collects machine-readable structured data including: - JSON-LD script blocks with schema detection - Microdata attributes (itemscope, itemtype, itemprop) - RDFa markup - Extracted schema type if detectable |
-| `max_structured_data_size` | `int` | — | Maximum total size of structured data to collect (bytes). Prevents memory exhaustion attacks on malformed or adversarial documents containing excessively large structured data blocks. When the accumulated size of structured data exceeds this limit, further collection stops. Default: `1_000_000` bytes (1 MB) |
-
-###### Methods
-
-###### default()
-
-Create default metadata configuration.
-
-Defaults to extracting all metadata types with 1MB limit on structured data.
-
-**Signature:**
-
-```python
-@staticmethod
-def default() -> MetadataConfig
-```
-
-###### any_enabled()
-
-Check if any metadata extraction is enabled.
-
-Returns `True` if at least one extraction category is enabled, `False` if all are disabled.
-This is useful for early exit optimization when the application doesn't need metadata.
-
-**Returns:**
-
-`True` if any of the extraction flags are enabled, `False` if all are disabled.
-
-**Signature:**
-
-```python
-def any_enabled(self) -> bool
-```
-
-###### apply_update()
-
-Apply a partial update to this metadata configuration.
-
-Any specified fields in the update (Some values) will override the current values.
-Unspecified fields (None) are left unchanged. This allows selective modification
-of configuration without affecting unrelated settings.
-
-**Signature:**
-
-```python
-def apply_update(self, update: MetadataConfigUpdate) -> None
-```
-
-###### from_update()
-
-Create new metadata configuration from a partial update.
-
-Creates a new `MetadataConfig` struct with defaults, then applies the update.
-Fields not specified in the update (None) keep their default values.
-This is a convenience method for constructing a configuration from a partial specification
-without needing to explicitly call `.default()` first.
-
-**Returns:**
-
-New `MetadataConfig` with specified updates applied to defaults
-
-**Signature:**
-
-```python
-@staticmethod
-def from_update(update: MetadataConfigUpdate) -> MetadataConfig
-```
-
-###### from()
-
-**Signature:**
-
-```python
-@staticmethod
-def from(update: MetadataConfigUpdate) -> MetadataConfig
 ```
 
 
