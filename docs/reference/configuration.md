@@ -6,26 +6,6 @@ title: "Configuration Reference"
 
 This page documents all configuration types and their defaults across all languages.
 
-### MetadataConfig
-
-Configuration for metadata extraction granularity.
-
-Controls which metadata types are extracted and size limits for safety.
-Enables selective extraction of different metadata categories from HTML documents,
-allowing fine-grained control over which types of information to collect during
-the HTML-to-Markdown conversion process.
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `extract_document` | `bool` | `True` | Extract document-level metadata (title, description, author, etc.). When enabled, collects metadata from `<head>` section including: - `<title>` element content - `<meta name="description">` and other standard meta tags - Open Graph (og:*) properties for social media optimization - Twitter Card (twitter:*) properties - Language and text direction attributes - Canonical URL and base href references |
-| `extract_headers` | `bool` | `True` | Extract h1-h6 header elements and their hierarchy. When enabled, collects all heading elements with: - Header level (1-6) - Text content (normalized) - HTML id attribute if present - Document tree depth for hierarchy tracking - Byte offset in original HTML for positioning |
-| `extract_links` | `bool` | `True` | Extract anchor (a) elements as links with type classification. When enabled, collects all hyperlinks with: - href attribute value - Link text content - Title attribute (tooltip text) - Automatic link type classification (anchor, internal, external, email, phone, other) - Rel attribute values - Additional custom attributes |
-| `extract_images` | `bool` | `True` | Extract image elements and data URIs. When enabled, collects all image elements with: - Source URL or data URI - Alt text for accessibility - Title attribute - Dimensions (width, height) if available - Automatic image type classification (data URI, external, relative, inline SVG) - Additional custom attributes |
-| `extract_structured_data` | `bool` | `True` | Extract structured data (JSON-LD, Microdata, RDFa). When enabled, collects machine-readable structured data including: - JSON-LD script blocks with schema detection - Microdata attributes (itemscope, itemtype, itemprop) - RDFa markup - Extracted schema type if detectable |
-| `max_structured_data_size` | `int` | — | Maximum total size of structured data to collect (bytes). Prevents memory exhaustion attacks on malformed or adversarial documents containing excessively large structured data blocks. When the accumulated size of structured data exceeds this limit, further collection stops. Default: `1_000_000` bytes (1 MB) |
-
----
-
 ### DocumentMetadata
 
 Document-level metadata extracted from `<head>` and top-level elements.
@@ -113,6 +93,7 @@ Use `ConversionOptions.builder()` to construct, or `the default constructor` for
 | `capture_svg` | `bool` | `False` | Capture SVG elements as images. |
 | `infer_dimensions` | `bool` | `True` | Infer image dimensions from data. |
 | `max_depth` | `int | None` | `None` | Maximum DOM traversal depth. `None` means unlimited. When set, subtrees beyond this depth are silently truncated. |
+| `exclude_selectors` | `list[str]` | `[]` | CSS selectors for elements to exclude entirely (element + all content). Unlike `strip_tags` (which removes the tag wrapper but keeps children), excluded elements and all their descendants are dropped from the output. Supports any CSS selector that `tl` supports: tag names, `.class`, `#id`, `[attribute]`, etc. Invalid selectors are silently skipped at conversion time. Example: `vec![".cookie-banner".into(), "#ad-container".into(), "[role='complementary']".into()]` |
 
 ---
 
