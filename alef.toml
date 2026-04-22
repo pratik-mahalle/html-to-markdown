@@ -80,6 +80,9 @@ package = "dev.kreuzberg.htmltomarkdown"
 [csharp]
 namespace = "HtmlToMarkdown"
 
+[ruby]
+gem_name = "html-to-markdown"
+
 [elixir]
 app_name = "html_to_markdown"
 

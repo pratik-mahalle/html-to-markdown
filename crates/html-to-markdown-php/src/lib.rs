@@ -4,7 +4,13 @@
     clippy::let_unit_value,
     clippy::needless_borrow,
     clippy::map_identity,
-    clippy::just_underscores_and_digits
+    clippy::just_underscores_and_digits,
+    clippy::unnecessary_cast,
+    clippy::unused_unit,
+    clippy::unwrap_or_default,
+    clippy::derivable_impls,
+    clippy::needless_borrows_for_generic_args,
+    clippy::unnecessary_fallible_conversions
 )]
 
 use ext_php_rs::prelude::*;
@@ -399,7 +405,7 @@ impl ConversionOptions {
         self.preprocessing.clone()
     }
 
-    pub fn apply_update(&self, update: &ConversionOptionsUpdate) -> () {
+    pub fn apply_update(&self, update: &ConversionOptionsUpdate) {
         ()
     }
 
@@ -621,7 +627,7 @@ impl PreprocessingOptions {
         serde_json::from_str(&json).map_err(|e| PhpException::default(e.to_string()))
     }
 
-    pub fn apply_update(&self, update: &PreprocessingOptionsUpdate) -> () {
+    pub fn apply_update(&self, update: &PreprocessingOptionsUpdate) {
         ()
     }
 

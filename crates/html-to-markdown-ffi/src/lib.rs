@@ -6,7 +6,13 @@
     clippy::let_unit_value,
     clippy::needless_borrow,
     clippy::redundant_locals,
-    dropping_references
+    dropping_references,
+    clippy::unnecessary_cast,
+    clippy::unused_unit,
+    clippy::unwrap_or_default,
+    clippy::derivable_impls,
+    clippy::needless_borrows_for_generic_args,
+    clippy::unnecessary_fallible_conversions
 )]
 
 use std::cell::RefCell;
@@ -7005,7 +7011,7 @@ pub unsafe extern "C" fn htm_convert_with_visitor(
     let options_rs: Option<html_to_markdown_rs::ConversionOptions> = if options.is_null() {
         None
     } else {
-        Some(unsafe { &*(options as *const html_to_markdown_rs::ConversionOptions) }.clone())
+        Some(unsafe { &*options }.clone())
     };
 
     // Build the visitor handle if provided.

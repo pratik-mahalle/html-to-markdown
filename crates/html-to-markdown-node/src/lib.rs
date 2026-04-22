@@ -6,7 +6,13 @@
     clippy::let_unit_value,
     clippy::needless_borrow,
     clippy::map_identity,
-    clippy::just_underscores_and_digits
+    clippy::just_underscores_and_digits,
+    clippy::unnecessary_cast,
+    clippy::unused_unit,
+    clippy::unwrap_or_default,
+    clippy::derivable_impls,
+    clippy::needless_borrows_for_generic_args,
+    clippy::unnecessary_fallible_conversions
 )]
 
 use napi::*;
@@ -1230,14 +1236,15 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
                     .unwrap_or(std::ptr::null_mut());
                 napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
             });
-        let arg_1: napi::bindgen_prelude::Unknown = __env
-            .create_uint32(_level as u32)
-            .map(|n| n.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
+        let arg_1: napi::bindgen_prelude::Unknown =
+            __env
+                .create_uint32(_level)
+                .map(|n| n.to_unknown())
+                .unwrap_or_else(|_| unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+                        .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                });
         let arg_2: napi::bindgen_prelude::Unknown =
             __env
                 .create_string(_text)
@@ -4111,7 +4118,7 @@ impl From<JsNodeContent> for html_to_markdown_rs::NodeContent {
             "image" => Self::Image {
                 description: val.description,
                 src: val.src,
-                image_index: val.image_index.map(|v| v as u32),
+                image_index: val.image_index,
             },
             "code" => Self::Code {
                 text: val.text.unwrap_or_default(),

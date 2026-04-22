@@ -12,7 +12,12 @@
     clippy::let_unit_value,
     clippy::needless_borrow,
     clippy::too_many_arguments,
-    clippy::map_identity
+    clippy::map_identity,
+    clippy::unnecessary_cast,
+    clippy::unwrap_or_default,
+    clippy::derivable_impls,
+    clippy::needless_borrows_for_generic_args,
+    clippy::unnecessary_fallible_conversions
 )]
 
 use pyo3::prelude::*;
