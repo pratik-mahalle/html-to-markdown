@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     html-to-markdown (3.2.6)
-      rb_sys (>= 0.9, < 1.0)
+      rb_sys (~> 0.9)
 
 GEM
   remote: https://rubygems.org/
