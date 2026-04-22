@@ -17,6 +17,18 @@ _TO_RUST_NEWLINESTYLE_MAP = {
 }
 
 
+_TO_RUST_WHITESPACEMODE_MAP = {
+    "normalized": _rust.WhitespaceMode.Normalized,
+    "strict": _rust.WhitespaceMode.Strict,
+}
+
+
+_TO_RUST_LISTINDENTTYPE_MAP = {
+    "spaces": _rust.ListIndentType.Spaces,
+    "tabs": _rust.ListIndentType.Tabs,
+}
+
+
 _TO_RUST_PREPROCESSINGPRESET_MAP = {
     "minimal": _rust.PreprocessingPreset.Minimal,
     "standard": _rust.PreprocessingPreset.Standard,
@@ -24,9 +36,9 @@ _TO_RUST_PREPROCESSINGPRESET_MAP = {
 }
 
 
-_TO_RUST_LISTINDENTTYPE_MAP = {
-    "spaces": _rust.ListIndentType.Spaces,
-    "tabs": _rust.ListIndentType.Tabs,
+_TO_RUST_LINKSTYLE_MAP = {
+    "inline": _rust.LinkStyle.Inline,
+    "reference": _rust.LinkStyle.Reference,
 }
 
 
@@ -44,12 +56,6 @@ _TO_RUST_CODEBLOCKSTYLE_MAP = {
 }
 
 
-_TO_RUST_LINKSTYLE_MAP = {
-    "inline": _rust.LinkStyle.Inline,
-    "reference": _rust.LinkStyle.Reference,
-}
-
-
 _TO_RUST_HEADINGSTYLE_MAP = {
     "underlined": _rust.HeadingStyle.Underlined,
     "atx": _rust.HeadingStyle.Atx,
@@ -62,12 +68,6 @@ _TO_RUST_HIGHLIGHTSTYLE_MAP = {
     "html": _rust.HighlightStyle.Html,
     "bold": _rust.HighlightStyle.Bold,
     "none": _rust.HighlightStyle.None_,
-}
-
-
-_TO_RUST_WHITESPACEMODE_MAP = {
-    "normalized": _rust.WhitespaceMode.Normalized,
-    "strict": _rust.WhitespaceMode.Strict,
 }
 
 
@@ -135,4 +135,4 @@ def _to_rust_conversion_options(value: ConversionOptions | None) -> _rust.Conver
 def convert(html: str, options: ConversionOptions | None = None, visitor: str | None = None) -> ConversionResult:
     """Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images."""
     _rust_options = _to_rust_conversion_options(options)
-    return _rust.convert(html, _rust_options, visitor)
+    return _rust.convert(html, _rust_options, visitor)  # type: ignore[arg-type]

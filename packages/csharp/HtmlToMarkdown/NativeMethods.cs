@@ -142,4 +142,13 @@ internal static partial class NativeMethods
 
     [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_convert_with_visitor")]
     internal static extern IntPtr ConvertWithVisitor([MarshalAs(UnmanagedType.LPStr)] string html, IntPtr options, IntPtr visitor);
+
+
+    // Trait Bridge FFI
+
+    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_register_html_visitor")]
+    internal static extern int RegisterHtmlVisitor([MarshalAs(UnmanagedType.LPUTF8Str)] string name, IntPtr vtable, IntPtr userData, out IntPtr outError);
+
+    [DllImport(LibName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "htm_unregister_html_visitor")]
+    internal static extern int UnregisterHtmlVisitor([MarshalAs(UnmanagedType.LPUTF8Str)] string name, out IntPtr outError);
 }

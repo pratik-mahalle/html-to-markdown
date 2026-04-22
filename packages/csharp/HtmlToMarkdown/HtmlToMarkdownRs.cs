@@ -51,9 +51,7 @@ public static class HtmlToMarkdownRs
             optionsHandle
         );
         if (result == IntPtr.Zero)
-        {
-            var err = GetLastError();
-            if (err.Code != 0)
+        { var err = GetLastError(); if (err.Code != 0)
             {
                 throw err;
             }

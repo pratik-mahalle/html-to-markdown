@@ -2812,7 +2812,18 @@ pub fn convert(
         }
         _ => None,
     };
-    let options_core: Option<html_to_markdown_rs::ConversionOptions> = options.map(Into::into);
+    let options_core: Option<html_to_markdown_rs::ConversionOptions> = options
+        .as_deref()
+        .filter(|s| *s != "nil")
+        .map(|s| {
+            serde_json::from_str(s).map_err(|e| {
+                magnus::Error::new(
+                    unsafe { magnus::Ruby::get_unchecked() }.exception_runtime_error(),
+                    e.to_string(),
+                )
+            })
+        })
+        .transpose()?;
     html_to_markdown_rs::convert(&html, options_core, visitor)
         .map(|val| val.into())
         .map_err(|e| {
@@ -2834,7 +2845,7 @@ fn nodecontext_to_rb_hash(ctx: &html_to_markdown_rs::visitor::NodeContext) -> ma
     h.aset(ruby.to_symbol("is_inline"), ctx.is_inline).ok();
     h.aset(
         ruby.to_symbol("parent_tag"),
-        ctx.parent_tag.as_deref().map(|s| ruby.str_new(s)),
+        ctx.parent_tag.as_deref().map(|s| magnus::Value::from(ruby.str_new(s))),
     )
     .ok();
     let attrs = ruby.hash_new();
@@ -2868,7 +2879,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
             return html_to_markdown_rs::VisitResult::Continue;
         }
         let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_element_start", (nodecontext_to_rb_hash(_ctx),));
+            magnus::method::Method::funcall(self.rb_obj, "visit_element_start", (nodecontext_to_rb_hash(_ctx),));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -2892,8 +2903,11 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_element_end", (nodecontext_to_rb_hash(_ctx), _output));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_element_end",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_output)),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -2913,8 +2927,11 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_text", (nodecontext_to_rb_hash(_ctx), _text));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_text",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_text)),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -2940,8 +2957,16 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_link", (nodecontext_to_rb_hash(_ctx), _href, _text, _title));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_link",
+            (
+                nodecontext_to_rb_hash(_ctx),
+                magnus::RString::new(_href),
+                magnus::RString::new(_text),
+                magnus::RString::new(_title),
+            ),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -2967,8 +2992,16 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_image", (nodecontext_to_rb_hash(_ctx), _src, _alt, _title));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_image",
+            (
+                nodecontext_to_rb_hash(_ctx),
+                magnus::RString::new(_src),
+                magnus::RString::new(_alt),
+                magnus::RString::new(_title),
+            ),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -2994,8 +3027,16 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_heading", (nodecontext_to_rb_hash(_ctx), _level, _text, _id));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_heading",
+            (
+                nodecontext_to_rb_hash(_ctx),
+                magnus::Value::from(_level),
+                magnus::RString::new(_text),
+                magnus::RString::new(_id),
+            ),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3020,8 +3061,15 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_code_block", (nodecontext_to_rb_hash(_ctx), _lang, _code));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_code_block",
+            (
+                nodecontext_to_rb_hash(_ctx),
+                magnus::RString::new(_lang),
+                magnus::RString::new(_code),
+            ),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3045,8 +3093,11 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_code_inline", (nodecontext_to_rb_hash(_ctx), _code));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_code_inline",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_code)),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3072,8 +3123,16 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_list_item", (nodecontext_to_rb_hash(_ctx), _ordered, _marker, _text));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_list_item",
+            (
+                nodecontext_to_rb_hash(_ctx),
+                magnus::Value::from(_ordered),
+                magnus::RString::new(_marker),
+                magnus::RString::new(_text),
+            ),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3097,8 +3156,11 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_list_start", (nodecontext_to_rb_hash(_ctx), _ordered));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_list_start",
+            (nodecontext_to_rb_hash(_ctx), magnus::Value::from(_ordered)),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3123,8 +3185,15 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_list_end", (nodecontext_to_rb_hash(_ctx), _ordered, _output));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_list_end",
+            (
+                nodecontext_to_rb_hash(_ctx),
+                magnus::Value::from(_ordered),
+                magnus::RString::new(_output),
+            ),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3145,7 +3214,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
             return html_to_markdown_rs::VisitResult::Continue;
         }
         let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_table_start", (nodecontext_to_rb_hash(_ctx),));
+            magnus::method::Method::funcall(self.rb_obj, "visit_table_start", (nodecontext_to_rb_hash(_ctx),));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3170,8 +3239,15 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_table_row", (nodecontext_to_rb_hash(_ctx), _cells.to_vec(), _is_header));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_table_row",
+            (
+                nodecontext_to_rb_hash(_ctx),
+                magnus::Value::from(_cells),
+                magnus::Value::from(_is_header),
+            ),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3195,8 +3271,11 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_table_end", (nodecontext_to_rb_hash(_ctx), _output));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_table_end",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_output)),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3221,8 +3300,15 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_blockquote", (nodecontext_to_rb_hash(_ctx), _content, _depth));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_blockquote",
+            (
+                nodecontext_to_rb_hash(_ctx),
+                magnus::RString::new(_content),
+                magnus::Value::from(_depth),
+            ),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3246,8 +3332,11 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_strong", (nodecontext_to_rb_hash(_ctx), _text));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_strong",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_text)),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3271,8 +3360,11 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_emphasis", (nodecontext_to_rb_hash(_ctx), _text));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_emphasis",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_text)),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3296,8 +3388,11 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_strikethrough", (nodecontext_to_rb_hash(_ctx), _text));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_strikethrough",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_text)),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3321,8 +3416,11 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_underline", (nodecontext_to_rb_hash(_ctx), _text));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_underline",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_text)),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3346,8 +3444,11 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_subscript", (nodecontext_to_rb_hash(_ctx), _text));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_subscript",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_text)),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3371,8 +3472,11 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_superscript", (nodecontext_to_rb_hash(_ctx), _text));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_superscript",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_text)),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3392,8 +3496,11 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_mark", (nodecontext_to_rb_hash(_ctx), _text));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_mark",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_text)),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3414,7 +3521,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
             return html_to_markdown_rs::VisitResult::Continue;
         }
         let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_line_break", (nodecontext_to_rb_hash(_ctx),));
+            magnus::method::Method::funcall(self.rb_obj, "visit_line_break", (nodecontext_to_rb_hash(_ctx),));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3435,7 +3542,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
             return html_to_markdown_rs::VisitResult::Continue;
         }
         let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_horizontal_rule", (nodecontext_to_rb_hash(_ctx),));
+            magnus::method::Method::funcall(self.rb_obj, "visit_horizontal_rule", (nodecontext_to_rb_hash(_ctx),));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3460,8 +3567,15 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_custom_element", (nodecontext_to_rb_hash(_ctx), _tag_name, _html));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_custom_element",
+            (
+                nodecontext_to_rb_hash(_ctx),
+                magnus::RString::new(_tag_name),
+                magnus::RString::new(_html),
+            ),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3487,8 +3601,11 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_definition_list_start", (nodecontext_to_rb_hash(_ctx),));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_definition_list_start",
+            (nodecontext_to_rb_hash(_ctx),),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3512,8 +3629,11 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_definition_term", (nodecontext_to_rb_hash(_ctx), _text));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_definition_term",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_text)),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3540,8 +3660,11 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_definition_description", (nodecontext_to_rb_hash(_ctx), _text));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_definition_description",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_text)),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3568,8 +3691,11 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_definition_list_end", (nodecontext_to_rb_hash(_ctx), _output));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_definition_list_end",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_output)),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3594,8 +3720,15 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_form", (nodecontext_to_rb_hash(_ctx), _action, _method));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_form",
+            (
+                nodecontext_to_rb_hash(_ctx),
+                magnus::RString::new(_action),
+                magnus::RString::new(_method),
+            ),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3621,8 +3754,16 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_input", (nodecontext_to_rb_hash(_ctx), _input_type, _name.map(|s| s.to_string()), _value.map(|s| s.to_string())));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_input",
+            (
+                nodecontext_to_rb_hash(_ctx),
+                magnus::RString::new(_input_type),
+                magnus::RString::new(_name),
+                magnus::RString::new(_value),
+            ),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3646,8 +3787,11 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_button", (nodecontext_to_rb_hash(_ctx), _text));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_button",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_text)),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3671,8 +3815,11 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_audio", (nodecontext_to_rb_hash(_ctx), _src));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_audio",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_src)),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3696,8 +3843,11 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_video", (nodecontext_to_rb_hash(_ctx), _src));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_video",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_src)),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3721,8 +3871,11 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_iframe", (nodecontext_to_rb_hash(_ctx), _src));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_iframe",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_src)),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3746,8 +3899,11 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_details", (nodecontext_to_rb_hash(_ctx), _open));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_details",
+            (nodecontext_to_rb_hash(_ctx), magnus::Value::from(_open)),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3771,8 +3927,11 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_summary", (nodecontext_to_rb_hash(_ctx), _text));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_summary",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_text)),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3793,7 +3952,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
             return html_to_markdown_rs::VisitResult::Continue;
         }
         let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_figure_start", (nodecontext_to_rb_hash(_ctx),));
+            magnus::method::Method::funcall(self.rb_obj, "visit_figure_start", (nodecontext_to_rb_hash(_ctx),));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3817,8 +3976,11 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_figcaption", (nodecontext_to_rb_hash(_ctx), _text));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_figcaption",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_text)),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -3842,8 +4004,11 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for RbHtmlVisitorBridge {
         if !responds {
             return html_to_markdown_rs::VisitResult::Continue;
         }
-        let result: Result<magnus::Value, magnus::Error> =
-            self.rb_obj.funcall("visit_figure_end", (nodecontext_to_rb_hash(_ctx), _output));
+        let result: Result<magnus::Value, magnus::Error> = magnus::method::Method::funcall(
+            self.rb_obj,
+            "visit_figure_end",
+            (nodecontext_to_rb_hash(_ctx), magnus::RString::new(_output)),
+        );
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
             Ok(val) => {
@@ -4148,7 +4313,7 @@ impl From<ConversionOptionsUpdate> for html_to_markdown_rs::options::ConversionO
             max_image_size: val.max_image_size,
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
-            max_depth: val.max_depth,
+            max_depth: (val.max_depth).map(Some),
         }
     }
 }
@@ -4194,7 +4359,7 @@ impl From<html_to_markdown_rs::options::ConversionOptionsUpdate> for ConversionO
             max_image_size: val.max_image_size,
             capture_svg: val.capture_svg,
             infer_dimensions: val.infer_dimensions,
-            max_depth: val.max_depth,
+            max_depth: val.max_depth.flatten(),
         }
     }
 }

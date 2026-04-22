@@ -1234,12 +1234,22 @@ fn nodecontext_to_php_array(
 
 pub struct PhpHtmlVisitorBridge {
     php_obj: *mut ext_php_rs::types::ZendObject,
+    cached_name: String,
 }
 
 // SAFETY: PHP objects are single-threaded; the bridge is used
 // only within a single PHP request, never across threads.
 unsafe impl Send for PhpHtmlVisitorBridge {}
 unsafe impl Sync for PhpHtmlVisitorBridge {}
+
+impl Clone for PhpHtmlVisitorBridge {
+    fn clone(&self) -> Self {
+        Self {
+            php_obj: self.php_obj,
+            cached_name: self.cached_name.clone(),
+        }
+    }
+}
 
 impl std::fmt::Debug for PhpHtmlVisitorBridge {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -1249,8 +1259,15 @@ impl std::fmt::Debug for PhpHtmlVisitorBridge {
 
 impl PhpHtmlVisitorBridge {
     pub fn new(php_obj: &mut ext_php_rs::types::ZendObject) -> Self {
+        let cached_name = php_obj
+            .try_call_method("name", vec![])
+            .ok()
+            .and_then(|v| v.string())
+            .unwrap_or("unknown".into())
+            .to_string();
         Self {
             php_obj: php_obj as *mut _,
+            cached_name,
         }
     }
 }
@@ -1258,7 +1275,7 @@ impl PhpHtmlVisitorBridge {
 impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
     fn visit_element_start(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -1287,7 +1304,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _output: &str,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -1313,7 +1330,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
 
     fn visit_text(&mut self, _ctx: &html_to_markdown_rs::NodeContext, _text: &str) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -1345,7 +1362,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _title: Option<&str>,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -1382,7 +1399,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _title: Option<&str>,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -1419,7 +1436,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _id: Option<&str>,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -1455,7 +1472,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _code: &str,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -1489,7 +1506,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _code: &str,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -1521,7 +1538,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _text: &str,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -1557,7 +1574,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _ordered: bool,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -1592,7 +1609,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _output: &str,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -1623,7 +1640,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
 
     fn visit_table_start(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -1653,7 +1670,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _is_header: bool,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -1688,7 +1705,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _output: &str,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -1719,7 +1736,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _depth: usize,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -1750,7 +1767,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _text: &str,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -1780,7 +1797,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _text: &str,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -1810,7 +1827,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _text: &str,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -1840,7 +1857,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _text: &str,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -1870,7 +1887,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _text: &str,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -1900,7 +1917,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _text: &str,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -1926,7 +1943,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
 
     fn visit_mark(&mut self, _ctx: &html_to_markdown_rs::NodeContext, _text: &str) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -1952,7 +1969,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
 
     fn visit_line_break(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -1977,7 +1994,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
 
     fn visit_horizontal_rule(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -2007,7 +2024,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _html: &str,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -2037,7 +2054,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _ctx: &html_to_markdown_rs::NodeContext,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -2066,7 +2083,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _text: &str,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -2096,7 +2113,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _text: &str,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -2126,7 +2143,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _output: &str,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -2157,7 +2174,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _method: Option<&str>,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -2196,7 +2213,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _value: Option<&str>,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -2234,7 +2251,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _text: &str,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -2264,7 +2281,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _src: Option<&str>,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -2297,7 +2314,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _src: Option<&str>,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -2330,7 +2347,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _src: Option<&str>,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -2363,7 +2380,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _open: bool,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -2397,7 +2414,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _text: &str,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -2423,7 +2440,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
 
     fn visit_figure_start(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -2452,7 +2469,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _text: &str,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
@@ -2482,7 +2499,7 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for PhpHtmlVisitorBridge {
         _output: &str,
     ) -> html_to_markdown_rs::VisitResult {
         // SAFETY: php_obj is a valid ZendObject pointer for the duration of this call.
-        let php_obj_ref = unsafe { &*self.php_obj };
+        let php_obj_ref = unsafe { &mut *self.php_obj };
         let mut args: Vec<ext_php_rs::types::Zval> = Vec::new();
         let ctx_arr = nodecontext_to_php_array(_ctx);
         args.push(ext_php_rs::convert::IntoZval::into_zval(ctx_arr, false).unwrap_or_default());
