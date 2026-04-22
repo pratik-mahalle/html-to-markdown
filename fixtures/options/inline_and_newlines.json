@@ -1,0 +1,36 @@
+[
+  {
+    "id": "options_strip_newlines",
+    "description": "Strip newlines produces single-line paragraphs",
+    "input": {
+      "html": "<p>First paragraph.</p><p>Second paragraph.</p>",
+      "options": {
+        "stripNewlines": true
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": ["First paragraph.", "Second paragraph."]
+      }
+    ]
+  },
+  {
+    "id": "options_convert_as_inline",
+    "description": "Block elements treated as inline",
+    "input": {
+      "html": "<p>One</p><p>Two</p>",
+      "options": {
+        "convertAsInline": true
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": ["One", "Two"]
+      }
+    ]
+  }
+]

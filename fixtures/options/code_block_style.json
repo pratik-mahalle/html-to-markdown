@@ -1,0 +1,58 @@
+[
+  {
+    "id": "options_code_block_tildes",
+    "description": "Code blocks use tilde fences",
+    "input": {
+      "html": "<pre><code>let x = 1;</code></pre>",
+      "options": {
+        "codeBlockStyle": "Tildes"
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": ["~~~", "let x = 1;"]
+      }
+    ]
+  },
+  {
+    "id": "options_code_block_indented",
+    "description": "Code blocks use 4-space indentation",
+    "input": {
+      "html": "<pre><code>print('hello')</code></pre>",
+      "options": {
+        "codeBlockStyle": "Indented"
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": ["print('hello')"]
+      },
+      {
+        "type": "not_contains",
+        "field": "content",
+        "value": "```"
+      }
+    ]
+  },
+  {
+    "id": "options_code_language_python",
+    "description": "Default code language annotation on blocks without lang attribute",
+    "input": {
+      "html": "<pre><code>def hello(): pass</code></pre>",
+      "options": {
+        "codeLanguage": "python"
+      }
+    },
+    "assertions": [
+      {
+        "type": "contains_all",
+        "field": "content",
+        "values": ["```python", "def hello"]
+      }
+    ]
+  }
+]
