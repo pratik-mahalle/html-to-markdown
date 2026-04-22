@@ -18,6 +18,12 @@ repos:
     hooks:
       - id: ai-rulez-generate
 
+  # Alef: verify generated bindings, stubs, and docs are up to date
+  - repo: https://github.com/kreuzberg-dev/alef
+    rev: v0.5.3
+    hooks:
+      - id: alef-verify
+
   # General file checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
