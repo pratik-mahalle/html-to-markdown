@@ -41,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **R `ConversionOptionsBuilder`** — fixed `todo!()` panics in opaque type delegation.
 - **CLI `autolinks` default** — replaced `--autolinks` with `--no-autolinks` so defaults match library.
 - **CLI dead metadata flags** — removed flags that were parsed but never wired through.
+- **Python 3.14 wheels** (#322) — enabled `abi3-py310` stable ABI for PyO3 crate, so a single wheel works on Python 3.10 through 3.14+ without per-version builds.
 
 ### Changed
 
