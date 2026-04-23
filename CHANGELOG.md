@@ -7,43 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [3.3.0] - 2026-04-22
+## [3.3.0] - 2026-04-23
 
 ### Added
 
 - **`exclude_selectors` option** — CSS selector-based element exclusion. Unlike `strip_tags` (which removes the wrapper but keeps children), excluded elements and all descendants are dropped entirely. Supports any CSS selector: `.class`, `#id`, `[attribute]`, compound selectors. Works in both markdown and plain text output modes.
-
-### Fixed
-
-- **`<h1>` inside `<header>` not exported** (#321) — top-level `<header>` elements were unconditionally dropped during preprocessing; now only `<header>` with navigation hints (e.g. `class="site-header"`, `role="navigation"`) is removed. Added explicit semantic dispatch for all sectioning elements (`article`, `section`, `nav`, `aside`, `header`, `footer`, `main`).
-- **`PreprocessingPreset` not wired into preprocessing logic** — the `preset` field on `PreprocessingOptions` was defined but never checked. Now Minimal/Standard/Aggressive presets have distinct behavior for element dropping.
-- **`remove_forms` flag was dead code** — `<form>` elements are now dropped when `remove_forms: true` and preset is Standard or Aggressive.
-- **Aggressive preset now drops navigation-hinted elements of any tag type** — catches `<div class="sidebar">`, `<section class="menu">`, and similar non-semantic navigation containers.
-- **Aggressive preset drops `<noscript>` elements and noise-hinted elements** — cookie banners, ad containers, social sharing buttons detected by class/id keywords.
-- **Java FFI broken on all platforms** (#315) — native libraries were bundled under wrong JAR path (`natives/` vs `native/`).
-- **Java/C# visitor type conflicts** — alef generator produced conflicting VisitResult/NodeContext types from two code paths; fixed by skipping gen_bindings types when visitor bridge is active.
-- **Ruby `convert()` TypeError** (#319) — options type mismatch and wrong return type in Ruby binding.
-- **Ruby gemspec naming** — duplicate gemspec with wrong name broke Bundler; fixed scaffold to use snake_case file paths.
-- **Go lint errors** — fixed CGO preamble extern declarations (plain C types, not Go CGo types), removed invalid `?` syntax from vtable assignments, fixed parameter colon syntax, removed unused `trait_bridges.go` (per-call visitor doesn't use plugin registration), fixed `NodeType` int-to-string mapping, fixed `id` variable shadowing.
-- **PHP binding panics** — `from_update` and `from` methods panicked with `todo!()`; fixed alef PHP backend to skip undelegatable methods instead of emitting panic stubs.
-- **R `ConversionOptionsBuilder`** — four methods panicked with `todo!()`; fixed alef extendr backend to handle opaque types correctly with `inner: Arc<CoreType>` delegation.
-- **CLI `autolinks` default** — library defaults to `true` but CLI had `false`; replaced `--autolinks` with `--no-autolinks` so defaults match.
-- **CLI dead metadata flags** — removed `--extract-document`, `--extract-headers`, `--extract-links`, `--extract-images`, `--extract-structured-data` flags that were parsed but never wired through.
-
-### Added
-
 - **CLI flags** — `--preserve-tags`, `--skip-images`, `--max-depth` for full ConversionOptions parity.
 - **Visitor pattern for all bindings** (#314, #313) — restored visitor support across Python, TypeScript, Ruby, PHP, Go, Java, C#, Elixir, R, WASM, and C FFI.
 - **R visitor support** — added visitor callbacks for the R binding.
-- **E2E test coverage** — regenerated e2e tests with visitor coverage for all 12 languages.
-- **Ruby RBS type stubs** — auto-generated via alef from the Rust IR. Gemspec now includes `sig/**/*`.
+- **E2E test fixtures** — 78 new fixtures for 100% ConversionOptions field coverage (35/35 fields). Added fixtures for `exclude_selectors`, `ConversionResult.tables`, and `ConversionResult.warnings`.
+- **Ruby RBS type stubs** — auto-generated via alef from the Rust IR, including `VERSION` constant. Gemspec now includes `sig/**/*`.
 - **Alef pre-commit hook** — `alef-verify` hook added to `.pre-commit-config.yaml` to check generated code freshness. CI installs alef v0.5.3 binary.
+
+### Fixed
+
+- **`<h1>` inside `<header>` not exported** (#321) — top-level `<header>` elements were unconditionally dropped during preprocessing; now only `<header>` with navigation hints (e.g. `class="site-header"`, `role="navigation"`) is removed.
+- **`PreprocessingPreset` not wired into preprocessing logic** — the `preset` field on `PreprocessingOptions` was defined but never checked. Now Minimal/Standard/Aggressive presets have distinct behavior.
+- **`remove_forms` flag was dead code** — `<form>` elements are now dropped when `remove_forms: true` and preset is Standard or Aggressive.
+- **Aggressive preset** — now drops navigation-hinted elements of any tag type, `<noscript>` elements, and noise-hinted elements (cookie banners, ad containers).
+- **Python `NodeContent` type** — binding wrapper now implements `Default`, `Serialize`, `Deserialize` via forwarding to core type, fixing compilation when `DocumentNode` (which contains `NodeContent`) derives these traits.
+- **Python `dict[str, Any]` for data enums** — `NodeContent`, `AnnotationKind`, `VisitResult` now use TypedDicts with `Literal` discriminators instead of untyped dicts.
+- **Python `__init__.py` exports** — all public types now exported from the package.
+- **`ImageMetadata.dimensions`** — tuple type `(u32, u32)` correctly maps to `Vec<u32>` / `number[]` / `[]uint32` in all bindings via serde round-trip conversion.
+- **FFI doc comments** — multi-line doc strings on VTable struct fields now properly prefixed with `///` on every line (was breaking `cargo fmt`).
+- **FFI optional parameters** — visitor methods with optional string params (`title`, `id`, `lang`) correctly generate `Option<&str>` instead of `&str`.
+- **FFI duplicate imports** — removed duplicate `use std::ffi::...` in trait bridge output.
+- **Go `htm_convert` stub** — FFI function was always returning "Not implemented"; now delegates to `core::convert(html, options, None)`.
+- **Go lint errors** — fixed CGO preamble types, removed invalid `?` syntax, fixed parameter syntax, `NodeType` mapping, variable shadowing, gofmt indentation.
+- **Java FFI broken on all platforms** (#315) — native libraries were bundled under wrong JAR path.
+- **Java/C# visitor type conflicts** — fixed by skipping gen_bindings types when visitor bridge is active.
+- **Ruby `convert()` TypeError** (#319) — options type mismatch and wrong return type.
+- **PHP binding panics** — `from_update` and `from` methods now emit safe return values instead of `panic!()`.
+- **R `ConversionOptionsBuilder`** — fixed `todo!()` panics in opaque type delegation.
+- **CLI `autolinks` default** — replaced `--autolinks` with `--no-autolinks` so defaults match library.
+- **CLI dead metadata flags** — removed flags that were parsed but never wired through.
 
 ### Changed
 
-- **Public API surface restricted** — internal Rust modules (`converter`, `safety`, `text`, `wrapper`, `visitor_helpers`) changed from `pub` to `pub(crate)`. API docs now document only the public API (down from 233 to 66 items).
-- **alef.toml simplified** — switched from 20-item include whitelist to minimal 3-type + 1-function include (`ConversionOptions`, `ConversionResult`, `HtmlVisitor`, `convert`). Transitive dependencies expand automatically.
-- **Generated code lint-clean** — alef now emits `#![allow(clippy::...)]` in generated binding files for patterns inherent to codegen output.
+- **Public API surface restricted** — internal Rust modules changed from `pub` to `pub(crate)`. API docs now document only the public API (down from 233 to 66 items).
+- **alef.toml simplified** — switched from 20-item include whitelist to minimal 3-type + 1-function include. Transitive dependencies expand automatically.
+- **Generated code lint-clean** — all generated bindings pass their respective language linters (`cargo fmt`, `cargo clippy`, `mypy`, `ruff`, `gofmt`, `dotnet format`, `mix format`, `steep check`, `rubocop`, `phpstan`, `biome`).
 - **Dead code removed** — deleted unused dispatch functions, duplicate text utilities, and unused safety module from core crate.
 - **CI consolidated** (#317) — 13 workflows merged into single `ci.yaml`.
 

@@ -20,7 +20,7 @@ repos:
 
   # Alef: verify generated bindings, stubs, and docs are up to date
   - repo: https://github.com/kreuzberg-dev/alef
-    rev: v0.5.3
+    rev: v0.5.7
     hooks:
       - id: alef-verify
 
@@ -68,7 +68,7 @@ repos:
       - id: ruff-format
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.20.1
+    rev: v1.20.2
     hooks:
       - id: mypy
         exclude: "e2e/|scripts/|crates/|test_apps/"
@@ -182,7 +182,7 @@ repos:
         exclude: ^\.mvn/wrapper/|^e2e/
 
   - repo: https://github.com/rvben/rumdl-pre-commit
-    rev: "v0.1.78"
+    rev: "v0.1.80"
     hooks:
       - id: rumdl-fmt
         exclude: 'test_documents/|\.ai-rulez/|\.remote-cache/|e2e/|fixtures/'
