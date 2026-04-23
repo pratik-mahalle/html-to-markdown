@@ -179,7 +179,7 @@ repos:
             "-p",
             "packages/java/checkstyle.properties",
           ]
-        exclude: ^\.mvn/wrapper/|^e2e/
+        exclude: ^\.mvn/wrapper/|^e2e/|^test_apps/
 
   - repo: https://github.com/rvben/rumdl-pre-commit
     rev: "v0.1.80"

@@ -86,11 +86,10 @@ tasks:
         ignore_error: false
 
   format:check:
-    desc: "Check Node.js formatting without modifications"
-    silent: false
+    desc: "Check Node.js formatting (handled by prek via biome hook)"
+    silent: true
     cmds:
-      - cmd: cd {{.NODE_PKG}} && pnpm format:check
-        ignore_error: false
+      - cmd: "true"
 
   update:
     desc: "Update Node.js dependencies with pnpm"
