@@ -20,7 +20,7 @@ repos:
 
   # Alef: verify generated bindings, stubs, and docs are up to date
   - repo: https://github.com/kreuzberg-dev/alef
-    rev: v0.6.0
+    rev: v0.6.1
     hooks:
       - id: alef-verify
 
