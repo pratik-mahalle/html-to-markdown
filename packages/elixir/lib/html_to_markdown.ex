@@ -15,19 +15,14 @@ defmodule HtmlToMarkdown do
   end
 
   @doc "Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images,"
-  @spec convert(
-          String.t(),
-          String.t() | nil,
-          String.t() | nil
-        ) :: {:ok, String.t() | nil} | {:error, String.t()}
+  @spec convert(String.t(), String.t() | nil, String.t() | nil) :: {:ok, String.t() | nil} | {:error, String.t()}
   def convert(html, options, visitor) when is_map(visitor) do
     :ok = HtmlToMarkdown.Native.convert_with_visitor(html, options, visitor)
     do_visitor_receive_loop(visitor)
   end
 
   @doc "Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images,"
-  @spec convert(String.t(), String.t() | nil, String.t() | nil) ::
-          {:ok, String.t() | nil} | {:error, String.t()}
+  @spec convert(String.t(), String.t() | nil, String.t() | nil) :: {:ok, String.t() | nil} | {:error, String.t()}
   def convert(html, options, visitor) do
     HtmlToMarkdown.Native.convert(html, options, visitor)
   end
