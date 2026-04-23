@@ -5,7 +5,7 @@
 # Issues & docs: https://github.com/kreuzberg-dev/alef
 """Public API for the conversion library.
 
-Version: 3.3.2
+Version: 3.3.3
 """
 
 from ._html_to_markdown import (
@@ -108,4 +108,4 @@ __all__ = [
     "convert",
 ]
 
-__version__ = "3.3.2"
+__version__ = "3.3.3"

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.3.3] - 2026-04-23
+
+### Fixed
+
+- **Python enum KeyError** (#324) — `ConversionOptions()` with default enums no longer crashes; PyO3 enum fields are passed directly instead of broken `str()` + map lookup.
+- **Ruby Magnus binding** — fixed 65 compilation errors: `funcall` API, visitor bridge args, `Vec` conversion, optional flattening, sanitized field serde round-trip.
+- **Elixir `.formatter.exs`** — 120-char line length, generated code now passes `mix format --check-formatted`.
+- **Unused deps** — removed `serde_json` from Node and WASM binding crates.
+- **Checkstyle** — excluded `test_apps/` from pre-commit checkstyle hook.
+
 ## [3.3.2] - 2026-04-23
 
 ### Fixed
