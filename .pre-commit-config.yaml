@@ -240,7 +240,7 @@ repos:
         pass_filenames: false
       - id: mix-format
         name: mix format
-        entry: bash -c 'cd packages/elixir && MIX_ENV=dev mix format --check-formatted'
+        entry: bash -c 'cd packages/elixir && MIX_ENV=dev mix format'
         language: system
         files: ^packages/elixir/
         pass_filenames: false

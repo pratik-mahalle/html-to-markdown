@@ -21,7 +21,11 @@ dependencies = [ "html-to-markdown", "pytest>=7.4", "pytest-asyncio>=0.23", "pyt
 packages = []
 
 [tool.uv]
-sources.html-to-markdown = { path = "../../packages/python", editable = true }
+sources.html-to-markdown = { workspace = true }
+
+[tool.ruff]
+lint.ignore = [ "PLR2004" ]
+lint.per-file-ignores."tests/**" = [ "B017", "PT011", "S101", "S108" ]
 
 [tool.pytest]
 ini_options.asyncio_mode = "auto"
