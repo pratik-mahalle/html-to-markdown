@@ -995,9 +995,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1024,9 +1023,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _output.encode(env)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1049,9 +1047,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1085,9 +1082,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 _text.encode(env),
                 _title.encode(env),
             ];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1121,9 +1117,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 _alt.encode(env),
                 _title.encode(env),
             ];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1157,9 +1152,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 _text.encode(env),
                 _id.encode(env),
             ];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1191,9 +1185,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 _lang.encode(env),
                 _code.encode(env),
             ];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1220,9 +1213,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _code.encode(env)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1256,9 +1248,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 _marker.encode(env),
                 _text.encode(env),
             ];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1285,9 +1276,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _ordered.encode(env)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1319,9 +1309,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 _ordered.encode(env),
                 _output.encode(env),
             ];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1344,9 +1333,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1378,9 +1366,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 format!("{:?}", _cells).encode(env),
                 _is_header.encode(env),
             ];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1407,9 +1394,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _output.encode(env)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1441,9 +1427,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 _content.encode(env),
                 format!("{:?}", _depth).encode(env),
             ];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1470,9 +1455,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1499,9 +1483,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1528,9 +1511,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1557,9 +1539,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1586,9 +1567,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1615,9 +1595,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1640,9 +1619,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1665,9 +1643,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1690,9 +1667,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1724,9 +1700,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 _tag_name.encode(env),
                 _html.encode(env),
             ];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1752,9 +1727,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1781,9 +1755,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1810,9 +1783,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1839,9 +1811,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _output.encode(env)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1873,9 +1844,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 _action.encode(env),
                 _method.encode(env),
             ];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1909,9 +1879,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 _name.encode(env),
                 _value.encode(env),
             ];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1938,9 +1907,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1967,9 +1935,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _src.encode(env)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -1996,9 +1963,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _src.encode(env)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -2025,9 +1991,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _src.encode(env)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -2054,9 +2019,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _open.encode(env)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -2083,9 +2047,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -2108,9 +2071,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -2137,9 +2099,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
@@ -2166,9 +2127,8 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
                 return None;
             }
             let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _output.encode(env)];
-            let result: rustler::Term<'_> = rustler::types::Pid::spawn_monitor(env, func_term, args.as_slice())
-                .ok()?
-                .0;
+            let result: rustler::Term<'_> = env.call(func_term, &args)
+                .ok()?;
             result.decode::<String>().ok()
         });
         match result_str {
