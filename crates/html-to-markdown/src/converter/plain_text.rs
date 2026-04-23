@@ -396,4 +396,3 @@ fn post_process(buf: &mut String) {
         buf.push('\n');
     }
 }
-

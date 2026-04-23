@@ -63,6 +63,7 @@ pub fn build_conversion_options(cli: &Cli) -> ConversionOptions {
         capture_svg: false,
         infer_dimensions: true,
         max_depth: cli.max_depth,
+        exclude_selectors: Vec::new(),
     }
 }
 

@@ -79,11 +79,7 @@ pub fn has_inline_block_misnest(dom_ctx: &DomContext, parser: &tl::Parser) -> bo
 /// - **Aggressive**: All of Standard, plus: drops `<footer>`, `<aside>`, `<noscript>`
 ///   unconditionally. Drops ANY element with navigation hints in class/id/role
 ///   (e.g. `<div class="sidebar">`). Drops elements with noise-related classes/roles.
-pub fn should_drop_for_preprocessing(
-    tag_name: &str,
-    tag: &tl::HTMLTag,
-    options: &ConversionOptions,
-) -> bool {
+pub fn should_drop_for_preprocessing(tag_name: &str, tag: &tl::HTMLTag, options: &ConversionOptions) -> bool {
     use crate::options::PreprocessingPreset;
 
     if !options.preprocessing.enabled {

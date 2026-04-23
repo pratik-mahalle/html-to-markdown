@@ -3,6 +3,8 @@
 
 module HtmlToMarkdown
 
+  VERSION: String
+
   class DocumentMetadata
     # Document-level metadata extracted from `<head>` and top-level elements.
     #

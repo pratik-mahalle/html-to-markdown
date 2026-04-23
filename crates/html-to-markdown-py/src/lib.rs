@@ -1455,6 +1455,27 @@ impl From<html_to_markdown_rs::NodeContent> for NodeContent {
     }
 }
 
+impl serde::Serialize for NodeContent {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        self.inner.serialize(serializer)
+    }
+}
+
+impl Default for NodeContent {
+    fn default() -> Self {
+        Self {
+            inner: Default::default(),
+        }
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for NodeContent {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let inner = html_to_markdown_rs::NodeContent::deserialize(deserializer)?;
+        Ok(Self { inner })
+    }
+}
+
 #[derive(Clone)]
 #[pyclass(frozen)]
 pub struct AnnotationKind {

@@ -5,6 +5,13 @@ import html_to_markdown._html_to_markdown as _rust
 
 from ._html_to_markdown import ConversionOptions, ConversionResult, PreprocessingOptions
 
+_TO_RUST_OUTPUTFORMAT_MAP = {
+    "markdown": _rust.OutputFormat.Markdown,
+    "djot": _rust.OutputFormat.Djot,
+    "plain": _rust.OutputFormat.Plain,
+}
+
+
 _TO_RUST_HIGHLIGHTSTYLE_MAP = {
     "double_equal": _rust.HighlightStyle.DoubleEqual,
     "html": _rust.HighlightStyle.Html,
@@ -13,9 +20,10 @@ _TO_RUST_HIGHLIGHTSTYLE_MAP = {
 }
 
 
-_TO_RUST_NEWLINESTYLE_MAP = {
-    "spaces": _rust.NewlineStyle.Spaces,
-    "backslash": _rust.NewlineStyle.Backslash,
+_TO_RUST_CODEBLOCKSTYLE_MAP = {
+    "indented": _rust.CodeBlockStyle.Indented,
+    "backticks": _rust.CodeBlockStyle.Backticks,
+    "tildes": _rust.CodeBlockStyle.Tildes,
 }
 
 
@@ -23,18 +31,6 @@ _TO_RUST_HEADINGSTYLE_MAP = {
     "underlined": _rust.HeadingStyle.Underlined,
     "atx": _rust.HeadingStyle.Atx,
     "atx_closed": _rust.HeadingStyle.AtxClosed,
-}
-
-
-_TO_RUST_WHITESPACEMODE_MAP = {
-    "normalized": _rust.WhitespaceMode.Normalized,
-    "strict": _rust.WhitespaceMode.Strict,
-}
-
-
-_TO_RUST_LISTINDENTTYPE_MAP = {
-    "spaces": _rust.ListIndentType.Spaces,
-    "tabs": _rust.ListIndentType.Tabs,
 }
 
 
@@ -51,17 +47,21 @@ _TO_RUST_PREPROCESSINGPRESET_MAP = {
 }
 
 
-_TO_RUST_OUTPUTFORMAT_MAP = {
-    "markdown": _rust.OutputFormat.Markdown,
-    "djot": _rust.OutputFormat.Djot,
-    "plain": _rust.OutputFormat.Plain,
+_TO_RUST_LISTINDENTTYPE_MAP = {
+    "spaces": _rust.ListIndentType.Spaces,
+    "tabs": _rust.ListIndentType.Tabs,
 }
 
 
-_TO_RUST_CODEBLOCKSTYLE_MAP = {
-    "indented": _rust.CodeBlockStyle.Indented,
-    "backticks": _rust.CodeBlockStyle.Backticks,
-    "tildes": _rust.CodeBlockStyle.Tildes,
+_TO_RUST_WHITESPACEMODE_MAP = {
+    "normalized": _rust.WhitespaceMode.Normalized,
+    "strict": _rust.WhitespaceMode.Strict,
+}
+
+
+_TO_RUST_NEWLINESTYLE_MAP = {
+    "spaces": _rust.NewlineStyle.Spaces,
+    "backslash": _rust.NewlineStyle.Backslash,
 }
 
 
@@ -109,7 +109,7 @@ def _to_rust_conversion_options(value: ConversionOptions | None) -> _rust.Conver
         newline_style=_TO_RUST_NEWLINESTYLE_MAP[str(value.newline_style)],
         code_block_style=_TO_RUST_CODEBLOCKSTYLE_MAP[str(value.code_block_style)],
         keep_inline_images_in=value.keep_inline_images_in,
-        preprocessing=_to_rust_preprocessing_options(value.preprocessing),  # type: ignore[arg-type]
+        preprocessing=_to_rust_preprocessing_options(value.preprocessing),
         encoding=value.encoding,
         debug=value.debug,
         strip_tags=value.strip_tags,
@@ -130,4 +130,4 @@ def _to_rust_conversion_options(value: ConversionOptions | None) -> _rust.Conver
 def convert(html: str, options: ConversionOptions | None = None, visitor: object | None = None) -> ConversionResult:
     """Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images."""
     _rust_options = _to_rust_conversion_options(options)
-    return _rust.convert(html, _rust_options, visitor)  # type: ignore[arg-type]
+    return _rust.convert(html, _rust_options, visitor)

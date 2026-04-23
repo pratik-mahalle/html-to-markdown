@@ -7,6 +7,12 @@ target :lib do
 
   check 'lib'
 
+  configure_code_diagnostics do |hash|
+    hash[Steep::Diagnostic::Ruby::UnannotatedEmptyCollection] = :hint
+    hash[Steep::Diagnostic::Ruby::UnknownConstant] = :hint
+    hash[Steep::Diagnostic::Ruby::NoMethod] = :hint
+  end
+
   # Configure libraries
   library 'pathname'
   library 'open3'

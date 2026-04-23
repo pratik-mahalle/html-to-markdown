@@ -1257,6 +1257,13 @@ int32_t htm_conversion_options_infer_dimensions(const HTMConversionOptions *ptr)
 uintptr_t htm_conversion_options_max_depth(const HTMConversionOptions *ptr);
 
 /**
+ * Get the `exclude_selectors` field from a `ConversionOptions`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_conversion_options_exclude_selectors(const HTMConversionOptions *ptr);
+
+/**
  * # Safety
  * Caller must ensure all pointer arguments are valid or null.
  * Returned pointers must be freed with the appropriate free function.
@@ -1328,6 +1335,15 @@ HTMConversionOptionsBuilder *htm_conversion_options_builder_preserve_tags(HTMCon
  */
 HTMConversionOptionsBuilder *htm_conversion_options_builder_keep_inline_images_in(HTMConversionOptionsBuilder *this_,
                                                                                   const char *tags);
+
+/**
+ * Set the list of CSS selectors for elements to exclude entirely from output.
+ * # Safety
+ * Caller must ensure all pointer arguments are valid or null.
+ * Returned pointers must be freed with the appropriate free function.
+ */
+HTMConversionOptionsBuilder *htm_conversion_options_builder_exclude_selectors(HTMConversionOptionsBuilder *this_,
+                                                                              const char *selectors);
 
 /**
  * Set the pre-processing options applied to the HTML before conversion.
@@ -1633,6 +1649,13 @@ int32_t htm_conversion_options_update_infer_dimensions(const HTMConversionOption
  * Pointer must be a valid handle returned by this library.
  */
 uintptr_t htm_conversion_options_update_max_depth(const HTMConversionOptionsUpdate *ptr);
+
+/**
+ * Get the `exclude_selectors` field from a `ConversionOptionsUpdate`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+char *htm_conversion_options_update_exclude_selectors(const HTMConversionOptionsUpdate *ptr);
 
 /**
  * Create a `PreprocessingOptions` from a JSON string. Returns null on failure.
@@ -2507,33 +2530,25 @@ int32_t htm_visit_result_from_i32(int32_t value);
 int32_t htm_visit_result_from_str(const char *name);
 
 /**
- * Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images,
- * and warnings.
+ * Convert HTML to Markdown.
+ *
+ * Returns a heap-allocated [`ConversionResult`] on success, or null on failure.
+ * Check `htm_last_error_code` / `htm_last_error_context` for error details.
+ * The returned pointer must be freed with `htm_conversion_result_free`.
  *
  * # Arguments
  *
- * * `html` - The HTML string to convert
- * * `options` - Optional conversion options (defaults to `ConversionOptions::default()`)
+ * - `html`: null-terminated, UTF-8 HTML input. Must not be null.
+ * - `options`: optional conversion options; pass null for defaults.
  *
- * # Example
- *
- * ```
- * use html_to_markdown_rs::{convert, ConversionOptions};
- *
- * let html = "<h1>Hello World</h1>";
- * let result = convert(html, None, None).unwrap();
- * assert!(result.content.as_deref().unwrap_or("").contains("Hello World"));
- * ```
- *
- * # Errors
- *
- * Returns an error if HTML parsing fails or if the input contains invalid UTF-8.
  * # Safety
- * Caller must ensure all pointer arguments are valid or null.
- * Returned pointers must be freed with the appropriate free function.
+ *
+ * `html` must be a valid, non-null, null-terminated UTF-8 string.
+ * `options` must be a valid pointer or null.
+ * Returned pointer must be freed with `htm_conversion_result_free`.
  */
-HTMConversionResult *htm_convert(const char *_html,
-                                 const HTMConversionOptions *_options);
+HTMConversionResult *htm_convert(const char *html,
+                                 const HTMConversionOptions *options);
 
 /**
  * Create a new visitor handle from a callbacks struct.
