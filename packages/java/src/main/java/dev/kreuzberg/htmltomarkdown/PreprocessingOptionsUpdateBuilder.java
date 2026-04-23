@@ -6,9 +6,9 @@ import java.util.Optional;
 /**
  * Partial update for {@code PreprocessingOptions}.
  *
- * This struct uses {@code Option<T>} to represent optional fields that can be selectively updated.
- * Only specified fields (Some values) will override existing options; None values leave the
- * corresponding fields unchanged when applied via [{@code PreprocessingOptions::apply_update}].
+ * This struct uses {@code Option<T>} to represent optional fields that can be selectively updated. Only specified
+ * fields (Some values) will override existing options; None values leave the corresponding fields unchanged when
+ * applied via [{@code PreprocessingOptions::apply_update}].
  */
 public class PreprocessingOptionsUpdateBuilder {
 
@@ -17,32 +17,32 @@ public class PreprocessingOptionsUpdateBuilder {
     private Optional<Boolean> removeNavigation = Optional.empty();
     private Optional<Boolean> removeForms = Optional.empty();
 
-    public PreprocessingOptionsUpdateBuilder withEnabled(Optional<Boolean> value) {
+    /** Sets the enabled field. */
+    public PreprocessingOptionsUpdateBuilder withEnabled(final Optional<Boolean> value) {
         this.enabled = value;
         return this;
     }
 
-    public PreprocessingOptionsUpdateBuilder withPreset(Optional<PreprocessingPreset> value) {
+    /** Sets the preset field. */
+    public PreprocessingOptionsUpdateBuilder withPreset(final Optional<PreprocessingPreset> value) {
         this.preset = value;
         return this;
     }
 
-    public PreprocessingOptionsUpdateBuilder withRemoveNavigation(Optional<Boolean> value) {
+    /** Sets the removeNavigation field. */
+    public PreprocessingOptionsUpdateBuilder withRemoveNavigation(final Optional<Boolean> value) {
         this.removeNavigation = value;
         return this;
     }
 
-    public PreprocessingOptionsUpdateBuilder withRemoveForms(Optional<Boolean> value) {
+    /** Sets the removeForms field. */
+    public PreprocessingOptionsUpdateBuilder withRemoveForms(final Optional<Boolean> value) {
         this.removeForms = value;
         return this;
     }
 
+    /** Builds the PreprocessingOptionsUpdate instance. */
     public PreprocessingOptionsUpdate build() {
-        return new PreprocessingOptionsUpdate(
-            enabled,
-            preset,
-            removeNavigation,
-            removeForms
-        );
+        return new PreprocessingOptionsUpdate(enabled, preset, removeNavigation, removeForms);
     }
 }

@@ -6,8 +6,8 @@ import java.util.List;
 /**
  * Inline image configuration that specifies contexts where images remain as markdown links.
  *
- * This is a wrapper type that provides semantic clarity for the vector of element
- * names where inline images should be preserved.
+ * This is a wrapper type that provides semantic clarity for the vector of element names where inline images should be
+ * preserved.
  */
 public class InlineImageConfigBuilder {
 
@@ -19,8 +19,6 @@ public class InlineImageConfigBuilder {
     }
 
     public InlineImageConfig build() {
-        return new InlineImageConfig(
-            keepInlineImagesIn
-        );
+        return new InlineImageConfig(keepInlineImagesIn);
     }
 }

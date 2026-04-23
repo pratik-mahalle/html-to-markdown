@@ -8,7 +8,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * Categories of processing warnings.
  */
 public enum WarningKind {
-    /** An image could not be extracted (e.g. invalid data URI, unsupported format). */
+    /**
+     * An image could not be extracted (e.g. invalid data URI, unsupported format).
+     */
     ImageExtractionFailed("image_extraction_failed"),
     /** The input encoding was not recognized; fell back to UTF-8. */
     EncodingFallback("encoding_fallback"),
@@ -21,19 +23,22 @@ public enum WarningKind {
     /** DOM traversal was truncated because max_depth was exceeded. */
     DepthLimitExceeded("depth_limit_exceeded");
 
+    /** The string value. */
     private final String value;
 
-    WarningKind(String value) {
+    WarningKind(final String value) {
         this.value = value;
     }
 
+    /** Returns the string value. */
     @JsonValue
     public String getValue() {
         return value;
     }
 
+    /** Creates an instance from a string value. */
     @JsonCreator
-    public static WarningKind fromValue(String value) {
+    public static WarningKind fromValue(final String value) {
         for (WarningKind e : values()) {
             if (e.value.equalsIgnoreCase(value)) {
                 return e;

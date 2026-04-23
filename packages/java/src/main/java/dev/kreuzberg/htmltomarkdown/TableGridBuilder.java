@@ -12,26 +12,26 @@ public class TableGridBuilder {
     private int cols = 0;
     private List<GridCell> cells = List.of();
 
-    public TableGridBuilder withRows(int value) {
+    /** Sets the rows field. */
+    public TableGridBuilder withRows(final int value) {
         this.rows = value;
         return this;
     }
 
-    public TableGridBuilder withCols(int value) {
+    /** Sets the cols field. */
+    public TableGridBuilder withCols(final int value) {
         this.cols = value;
         return this;
     }
 
-    public TableGridBuilder withCells(List<GridCell> value) {
+    /** Sets the cells field. */
+    public TableGridBuilder withCells(final List<GridCell> value) {
         this.cells = value;
         return this;
     }
 
+    /** Builds the TableGrid instance. */
     public TableGrid build() {
-        return new TableGrid(
-            rows,
-            cols,
-            cells
-        );
+        return new TableGrid(rows, cols, cells);
     }
 }

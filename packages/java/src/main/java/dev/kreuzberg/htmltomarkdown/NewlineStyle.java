@@ -7,27 +7,33 @@ import com.fasterxml.jackson.annotation.JsonValue;
 /**
  * Line break syntax in Markdown output.
  *
- * Controls how soft line breaks (from {@code <br>} or line breaks in source) are rendered.
+ * Controls how soft line breaks (from {@code <br>
+ * } or line breaks in source) are rendered.
  */
 public enum NewlineStyle {
-    /** Two trailing spaces at end of line. Default. Standard Markdown syntax. */
+    /**
+     * Two trailing spaces at end of line. Default. Standard Markdown syntax.
+     */
     Spaces("spaces"),
     /** Backslash at end of line. Alternative Markdown syntax. */
     Backslash("backslash");
 
+    /** The string value. */
     private final String value;
 
-    NewlineStyle(String value) {
+    NewlineStyle(final String value) {
         this.value = value;
     }
 
+    /** Returns the string value. */
     @JsonValue
     public String getValue() {
         return value;
     }
 
+    /** Creates an instance from a string value. */
     @JsonCreator
-    public static NewlineStyle fromValue(String value) {
+    public static NewlineStyle fromValue(final String value) {
         for (NewlineStyle e : values()) {
             if (e.value.equalsIgnoreCase(value)) {
                 return e;

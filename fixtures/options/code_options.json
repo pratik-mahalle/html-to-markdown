@@ -20,7 +20,7 @@
     ]
   },
   {
-    "id": "options_code_block_tildes",
+    "id": "options_code_block_tildes_style",
     "description": "Tildes code block style uses triple tilde fences",
     "input": {
       "html": "<pre><code>some code</code></pre>",

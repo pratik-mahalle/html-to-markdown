@@ -6,7 +6,7 @@ defmodule HtmlToMarkdown.NodeContent do
 
   @type heading :: %{type: :heading, level: term(), text: term()}
   @type paragraph :: %{type: :paragraph, text: term()}
-  @type list :: %{type: :list, ordered: term()}
+  @type list_variant :: %{type: :list, ordered: term()}
   @type list_item :: %{type: :list_item, text: term()}
   @type table :: %{type: :table, grid: term()}
   @type image :: %{type: :image, description: term(), src: term(), image_index: term()}

@@ -118,7 +118,7 @@ jobs:
 
       - name: Install Alef
         run: |
-          curl -sSfL https://github.com/kreuzberg-dev/alef/releases/download/v0.5.3/alef-x86_64-unknown-linux-gnu.tar.gz | tar xz --strip-components=1 -C /usr/local/bin
+          curl -sSfL https://github.com/kreuzberg-dev/alef/releases/download/v0.5.8/alef-x86_64-unknown-linux-gnu.tar.gz | tar xz --strip-components=1 -C /usr/local/bin
         shell: bash
 
       - name: Setup Go
@@ -669,7 +669,7 @@ jobs:
         uses: ruby/setup-ruby@v1 # v1
         with:
           ruby-version: ${{ matrix.ruby }}
-          bundler: "2.7.2"
+          bundler: "4.0.3"
           bundler-cache: false
           working-directory: packages/ruby
 
@@ -678,7 +678,7 @@ jobs:
         uses: ruby/setup-ruby@v1 # v1
         with:
           ruby-version: ${{ matrix.ruby }}
-          bundler: "2.7.2"
+          bundler: "4.0.3"
           bundler-cache: false
           working-directory: packages/ruby
           windows-toolchain: UCRT64
@@ -1001,7 +1001,7 @@ jobs:
         uses: ruby/setup-ruby@v1 # v1
         with:
           ruby-version: ${{ matrix.ruby }}
-          bundler: "2.7.2"
+          bundler: "4.0.3"
           bundler-cache: false
           working-directory: packages/ruby
 
@@ -1010,7 +1010,7 @@ jobs:
         uses: ruby/setup-ruby@v1 # v1
         with:
           ruby-version: ${{ matrix.ruby }}
-          bundler: "2.7.2"
+          bundler: "4.0.3"
           bundler-cache: false
           working-directory: packages/ruby
           windows-toolchain: UCRT64

@@ -11,9 +11,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Uses a flat node array with index-based parent/child references for efficient traversal.
  */
 public record DocumentStructure(
-    /** All nodes in document reading order. */
-    List<DocumentNode> nodes,
-    /** The source format (always "html" for this crate). */
-    @JsonProperty("source_format") Optional<String> sourceFormat
-) {
+        /** All nodes in document reading order. */
+        List<DocumentNode> nodes,
+        /** The source format (always "html" for this crate). */
+        @JsonProperty("source_format") Optional<String> sourceFormat) {
 }

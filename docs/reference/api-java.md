@@ -2,7 +2,7 @@
 title: "Java API Reference"
 ---
 
-## Java API Reference <span class="version-badge">v3.2.6</span>
+## Java API Reference <span class="version-badge">v3.3.4</span>
 
 ### Functions
 
@@ -803,7 +803,7 @@ for image analysis and optimization.
 | `src` | `String` | — | Image source (URL, data URI, or SVG content identifier) |
 | `alt` | `Optional<String>` | `null` | Alternative text from alt attribute (for accessibility) |
 | `title` | `Optional<String>` | `null` | Title attribute (often shown as tooltip) |
-| `dimensions` | `Optional<String>` | `null` | Image dimensions as (width, height) if available |
+| `dimensions` | `Optional<List<Integer>>` | `null` | Image dimensions as (width, height) if available |
 | `imageType` | `ImageType` | — | Image type classification |
 | `attributes` | `Map<String, String>` | — | Additional HTML attributes |
 

@@ -3,11 +3,13 @@ package dev.kreuzberg.htmltomarkdown;
 
 /** Errors that can occur during HTML to Markdown conversion. */
 public class ConversionErrorException extends Exception {
-    public ConversionErrorException(String message) {
+    /** Creates a new ConversionErrorException with the given message. */
+    public ConversionErrorException(final String message) {
         super(message);
     }
 
-    public ConversionErrorException(String message, Throwable cause) {
+    /** Creates a new ConversionErrorException with the given message and cause. */
+    public ConversionErrorException(final String message, final Throwable cause) {
         super(message, cause);
     }
 }

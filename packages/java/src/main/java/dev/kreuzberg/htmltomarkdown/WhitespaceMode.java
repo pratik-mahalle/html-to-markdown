@@ -10,24 +10,29 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * Determines how sequences of whitespace characters (spaces, tabs, newlines) are processed.
  */
 public enum WhitespaceMode {
-    /** Collapse multiple whitespace characters to single spaces. Default. Matches browser behavior. */
+    /**
+     * Collapse multiple whitespace characters to single spaces. Default. Matches browser behavior.
+     */
     Normalized("normalized"),
     /** Preserve all whitespace exactly as it appears in the HTML. */
     Strict("strict");
 
+    /** The string value. */
     private final String value;
 
-    WhitespaceMode(String value) {
+    WhitespaceMode(final String value) {
         this.value = value;
     }
 
+    /** Returns the string value. */
     @JsonValue
     public String getValue() {
         return value;
     }
 
+    /** Creates an instance from a string value. */
     @JsonCreator
-    public static WhitespaceMode fromValue(String value) {
+    public static WhitespaceMode fromValue(final String value) {
         for (WhitespaceMode e : values()) {
             if (e.value.equalsIgnoreCase(value)) {
                 return e;

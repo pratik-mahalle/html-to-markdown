@@ -7,8 +7,8 @@ import java.util.Optional;
 /**
  * Partial update for {@code ConversionOptions}.
  *
- * Uses {@code Option<T>} fields for selective updates. Bindings use this to construct
- * options from language-native types. Prefer [{@code ConversionOptionsBuilder}] for Rust code.
+ * Uses {@code Option<T>} fields for selective updates. Bindings use this to construct options from language-native
+ * types. Prefer [{@code ConversionOptionsBuilder}] for Rust code.
  */
 public class ConversionOptionsUpdateBuilder {
 
@@ -53,248 +53,253 @@ public class ConversionOptionsUpdateBuilder {
     private Optional<Long> maxDepth = Optional.empty();
     private Optional<List<String>> excludeSelectors = Optional.empty();
 
-    public ConversionOptionsUpdateBuilder withHeadingStyle(Optional<HeadingStyle> value) {
+    /** Sets the headingStyle field. */
+    public ConversionOptionsUpdateBuilder withHeadingStyle(final Optional<HeadingStyle> value) {
         this.headingStyle = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withListIndentType(Optional<ListIndentType> value) {
+    /** Sets the listIndentType field. */
+    public ConversionOptionsUpdateBuilder withListIndentType(final Optional<ListIndentType> value) {
         this.listIndentType = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withListIndentWidth(Optional<Long> value) {
+    /** Sets the listIndentWidth field. */
+    public ConversionOptionsUpdateBuilder withListIndentWidth(final Optional<Long> value) {
         this.listIndentWidth = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withBullets(Optional<String> value) {
+    /** Sets the bullets field. */
+    public ConversionOptionsUpdateBuilder withBullets(final Optional<String> value) {
         this.bullets = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withStrongEmSymbol(Optional<String> value) {
+    /** Sets the strongEmSymbol field. */
+    public ConversionOptionsUpdateBuilder withStrongEmSymbol(final Optional<String> value) {
         this.strongEmSymbol = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withEscapeAsterisks(Optional<Boolean> value) {
+    /** Sets the escapeAsterisks field. */
+    public ConversionOptionsUpdateBuilder withEscapeAsterisks(final Optional<Boolean> value) {
         this.escapeAsterisks = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withEscapeUnderscores(Optional<Boolean> value) {
+    /** Sets the escapeUnderscores field. */
+    public ConversionOptionsUpdateBuilder withEscapeUnderscores(final Optional<Boolean> value) {
         this.escapeUnderscores = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withEscapeMisc(Optional<Boolean> value) {
+    /** Sets the escapeMisc field. */
+    public ConversionOptionsUpdateBuilder withEscapeMisc(final Optional<Boolean> value) {
         this.escapeMisc = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withEscapeAscii(Optional<Boolean> value) {
+    /** Sets the escapeAscii field. */
+    public ConversionOptionsUpdateBuilder withEscapeAscii(final Optional<Boolean> value) {
         this.escapeAscii = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withCodeLanguage(Optional<String> value) {
+    /** Sets the codeLanguage field. */
+    public ConversionOptionsUpdateBuilder withCodeLanguage(final Optional<String> value) {
         this.codeLanguage = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withAutolinks(Optional<Boolean> value) {
+    /** Sets the autolinks field. */
+    public ConversionOptionsUpdateBuilder withAutolinks(final Optional<Boolean> value) {
         this.autolinks = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withDefaultTitle(Optional<Boolean> value) {
+    /** Sets the defaultTitle field. */
+    public ConversionOptionsUpdateBuilder withDefaultTitle(final Optional<Boolean> value) {
         this.defaultTitle = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withBrInTables(Optional<Boolean> value) {
+    /** Sets the brInTables field. */
+    public ConversionOptionsUpdateBuilder withBrInTables(final Optional<Boolean> value) {
         this.brInTables = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withHighlightStyle(Optional<HighlightStyle> value) {
+    /** Sets the highlightStyle field. */
+    public ConversionOptionsUpdateBuilder withHighlightStyle(final Optional<HighlightStyle> value) {
         this.highlightStyle = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withExtractMetadata(Optional<Boolean> value) {
+    /** Sets the extractMetadata field. */
+    public ConversionOptionsUpdateBuilder withExtractMetadata(final Optional<Boolean> value) {
         this.extractMetadata = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withWhitespaceMode(Optional<WhitespaceMode> value) {
+    /** Sets the whitespaceMode field. */
+    public ConversionOptionsUpdateBuilder withWhitespaceMode(final Optional<WhitespaceMode> value) {
         this.whitespaceMode = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withStripNewlines(Optional<Boolean> value) {
+    /** Sets the stripNewlines field. */
+    public ConversionOptionsUpdateBuilder withStripNewlines(final Optional<Boolean> value) {
         this.stripNewlines = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withWrap(Optional<Boolean> value) {
+    /** Sets the wrap field. */
+    public ConversionOptionsUpdateBuilder withWrap(final Optional<Boolean> value) {
         this.wrap = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withWrapWidth(Optional<Long> value) {
+    /** Sets the wrapWidth field. */
+    public ConversionOptionsUpdateBuilder withWrapWidth(final Optional<Long> value) {
         this.wrapWidth = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withConvertAsInline(Optional<Boolean> value) {
+    /** Sets the convertAsInline field. */
+    public ConversionOptionsUpdateBuilder withConvertAsInline(final Optional<Boolean> value) {
         this.convertAsInline = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withSubSymbol(Optional<String> value) {
+    /** Sets the subSymbol field. */
+    public ConversionOptionsUpdateBuilder withSubSymbol(final Optional<String> value) {
         this.subSymbol = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withSupSymbol(Optional<String> value) {
+    /** Sets the supSymbol field. */
+    public ConversionOptionsUpdateBuilder withSupSymbol(final Optional<String> value) {
         this.supSymbol = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withNewlineStyle(Optional<NewlineStyle> value) {
+    /** Sets the newlineStyle field. */
+    public ConversionOptionsUpdateBuilder withNewlineStyle(final Optional<NewlineStyle> value) {
         this.newlineStyle = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withCodeBlockStyle(Optional<CodeBlockStyle> value) {
+    /** Sets the codeBlockStyle field. */
+    public ConversionOptionsUpdateBuilder withCodeBlockStyle(final Optional<CodeBlockStyle> value) {
         this.codeBlockStyle = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withKeepInlineImagesIn(Optional<List<String>> value) {
+    /** Sets the keepInlineImagesIn field. */
+    public ConversionOptionsUpdateBuilder withKeepInlineImagesIn(final Optional<List<String>> value) {
         this.keepInlineImagesIn = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withPreprocessing(Optional<PreprocessingOptionsUpdate> value) {
+    /** Sets the preprocessing field. */
+    public ConversionOptionsUpdateBuilder withPreprocessing(final Optional<PreprocessingOptionsUpdate> value) {
         this.preprocessing = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withEncoding(Optional<String> value) {
+    /** Sets the encoding field. */
+    public ConversionOptionsUpdateBuilder withEncoding(final Optional<String> value) {
         this.encoding = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withDebug(Optional<Boolean> value) {
+    /** Sets the debug field. */
+    public ConversionOptionsUpdateBuilder withDebug(final Optional<Boolean> value) {
         this.debug = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withStripTags(Optional<List<String>> value) {
+    /** Sets the stripTags field. */
+    public ConversionOptionsUpdateBuilder withStripTags(final Optional<List<String>> value) {
         this.stripTags = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withPreserveTags(Optional<List<String>> value) {
+    /** Sets the preserveTags field. */
+    public ConversionOptionsUpdateBuilder withPreserveTags(final Optional<List<String>> value) {
         this.preserveTags = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withSkipImages(Optional<Boolean> value) {
+    /** Sets the skipImages field. */
+    public ConversionOptionsUpdateBuilder withSkipImages(final Optional<Boolean> value) {
         this.skipImages = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withLinkStyle(Optional<LinkStyle> value) {
+    /** Sets the linkStyle field. */
+    public ConversionOptionsUpdateBuilder withLinkStyle(final Optional<LinkStyle> value) {
         this.linkStyle = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withOutputFormat(Optional<OutputFormat> value) {
+    /** Sets the outputFormat field. */
+    public ConversionOptionsUpdateBuilder withOutputFormat(final Optional<OutputFormat> value) {
         this.outputFormat = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withIncludeDocumentStructure(Optional<Boolean> value) {
+    /** Sets the includeDocumentStructure field. */
+    public ConversionOptionsUpdateBuilder withIncludeDocumentStructure(final Optional<Boolean> value) {
         this.includeDocumentStructure = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withExtractImages(Optional<Boolean> value) {
+    /** Sets the extractImages field. */
+    public ConversionOptionsUpdateBuilder withExtractImages(final Optional<Boolean> value) {
         this.extractImages = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withMaxImageSize(Optional<Long> value) {
+    /** Sets the maxImageSize field. */
+    public ConversionOptionsUpdateBuilder withMaxImageSize(final Optional<Long> value) {
         this.maxImageSize = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withCaptureSvg(Optional<Boolean> value) {
+    /** Sets the captureSvg field. */
+    public ConversionOptionsUpdateBuilder withCaptureSvg(final Optional<Boolean> value) {
         this.captureSvg = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withInferDimensions(Optional<Boolean> value) {
+    /** Sets the inferDimensions field. */
+    public ConversionOptionsUpdateBuilder withInferDimensions(final Optional<Boolean> value) {
         this.inferDimensions = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withMaxDepth(Optional<Long> value) {
+    /** Sets the maxDepth field. */
+    public ConversionOptionsUpdateBuilder withMaxDepth(final Optional<Long> value) {
         this.maxDepth = value;
         return this;
     }
 
-    public ConversionOptionsUpdateBuilder withExcludeSelectors(Optional<List<String>> value) {
+    /** Sets the excludeSelectors field. */
+    public ConversionOptionsUpdateBuilder withExcludeSelectors(final Optional<List<String>> value) {
         this.excludeSelectors = value;
         return this;
     }
 
+    /** Builds the ConversionOptionsUpdate instance. */
     public ConversionOptionsUpdate build() {
-        return new ConversionOptionsUpdate(
-            headingStyle,
-            listIndentType,
-            listIndentWidth,
-            bullets,
-            strongEmSymbol,
-            escapeAsterisks,
-            escapeUnderscores,
-            escapeMisc,
-            escapeAscii,
-            codeLanguage,
-            autolinks,
-            defaultTitle,
-            brInTables,
-            highlightStyle,
-            extractMetadata,
-            whitespaceMode,
-            stripNewlines,
-            wrap,
-            wrapWidth,
-            convertAsInline,
-            subSymbol,
-            supSymbol,
-            newlineStyle,
-            codeBlockStyle,
-            keepInlineImagesIn,
-            preprocessing,
-            encoding,
-            debug,
-            stripTags,
-            preserveTags,
-            skipImages,
-            linkStyle,
-            outputFormat,
-            includeDocumentStructure,
-            extractImages,
-            maxImageSize,
-            captureSvg,
-            inferDimensions,
-            maxDepth,
-            excludeSelectors
-        );
+        return new ConversionOptionsUpdate(headingStyle, listIndentType, listIndentWidth, bullets, strongEmSymbol,
+                escapeAsterisks, escapeUnderscores, escapeMisc, escapeAscii, codeLanguage, autolinks, defaultTitle,
+                brInTables, highlightStyle, extractMetadata, whitespaceMode, stripNewlines, wrap, wrapWidth,
+                convertAsInline, subSymbol, supSymbol, newlineStyle, codeBlockStyle, keepInlineImagesIn, preprocessing,
+                encoding, debug, stripTags, preserveTags, skipImages, linkStyle, outputFormat, includeDocumentStructure,
+                extractImages, maxImageSize, captureSvg, inferDimensions, maxDepth, excludeSelectors);
     }
 }

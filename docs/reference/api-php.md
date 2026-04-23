@@ -2,7 +2,7 @@
 title: "PHP API Reference"
 ---
 
-## PHP API Reference <span class="version-badge">v3.2.6</span>
+## PHP API Reference <span class="version-badge">v3.3.4</span>
 
 ### Functions
 
@@ -803,7 +803,7 @@ for image analysis and optimization.
 | `src` | `string` | — | Image source (URL, data URI, or SVG content identifier) |
 | `alt` | `?string` | `null` | Alternative text from alt attribute (for accessibility) |
 | `title` | `?string` | `null` | Title attribute (often shown as tooltip) |
-| `dimensions` | `?string` | `null` | Image dimensions as (width, height) if available |
+| `dimensions` | `?array<int>` | `null` | Image dimensions as (width, height) if available |
 | `imageType` | `ImageType` | — | Image type classification |
 | `attributes` | `array<string, string>` | — | Additional HTML attributes |
 

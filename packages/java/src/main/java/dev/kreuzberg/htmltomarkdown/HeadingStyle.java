@@ -17,19 +17,22 @@ public enum HeadingStyle {
     /** ATX closed style (# title #, with closing hashes). */
     AtxClosed("atxclosed");
 
+    /** The string value. */
     private final String value;
 
-    HeadingStyle(String value) {
+    HeadingStyle(final String value) {
         this.value = value;
     }
 
+    /** Returns the string value. */
     @JsonValue
     public String getValue() {
         return value;
     }
 
+    /** Creates an instance from a string value. */
     @JsonCreator
-    public static HeadingStyle fromValue(String value) {
+    public static HeadingStyle fromValue(final String value) {
         for (HeadingStyle e : values()) {
             if (e.value.equalsIgnoreCase(value)) {
                 return e;

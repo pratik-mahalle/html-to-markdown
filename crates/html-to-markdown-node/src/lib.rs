@@ -893,13 +893,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
                 Err(_) => return html_to_markdown_rs::VisitResult::Continue,
             };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0,));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -939,21 +943,28 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_1: napi::bindgen_prelude::Unknown = __env
-            .create_string(_output)
-            .map(|s| s.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_1: napi::bindgen_prelude::Unknown = match __env.create_string(_output) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0, arg_1));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -989,22 +1000,28 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_1: napi::bindgen_prelude::Unknown =
-            __env
-                .create_string(_text)
-                .map(|s| s.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_1: napi::bindgen_prelude::Unknown = match __env.create_string(_text) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0, arg_1));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -1051,44 +1068,58 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_1: napi::bindgen_prelude::Unknown =
-            __env
-                .create_string(_href)
-                .map(|s| s.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                });
-        let arg_2: napi::bindgen_prelude::Unknown =
-            __env
-                .create_string(_text)
-                .map(|s| s.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_1: napi::bindgen_prelude::Unknown = match __env.create_string(_href) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_2: napi::bindgen_prelude::Unknown = match __env.create_string(_text) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let arg_3: napi::bindgen_prelude::Unknown = match _title {
-            Some(s) => __env
-                .create_string(s)
-                .map(|v| v.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                }),
-            None => unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+            Some(s) => match __env.create_string(s) {
+                Ok(v) => v.to_unknown(),
+                Err(_) => unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                        std::ptr::null_mut(),
+                        napi::bindgen_prelude::Null,
+                    )
                     .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+                },
+            },
+            None => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
             },
         };
         let result = func.call((arg_0, arg_1, arg_2, arg_3));
@@ -1137,44 +1168,58 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_1: napi::bindgen_prelude::Unknown =
-            __env
-                .create_string(_src)
-                .map(|s| s.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                });
-        let arg_2: napi::bindgen_prelude::Unknown =
-            __env
-                .create_string(_alt)
-                .map(|s| s.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_1: napi::bindgen_prelude::Unknown = match __env.create_string(_src) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_2: napi::bindgen_prelude::Unknown = match __env.create_string(_alt) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let arg_3: napi::bindgen_prelude::Unknown = match _title {
-            Some(s) => __env
-                .create_string(s)
-                .map(|v| v.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                }),
-            None => unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+            Some(s) => match __env.create_string(s) {
+                Ok(v) => v.to_unknown(),
+                Err(_) => unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                        std::ptr::null_mut(),
+                        napi::bindgen_prelude::Null,
+                    )
                     .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+                },
+            },
+            None => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
             },
         };
         let result = func.call((arg_0, arg_1, arg_2, arg_3));
@@ -1223,44 +1268,58 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_1: napi::bindgen_prelude::Unknown =
-            __env
-                .create_uint32(_level)
-                .map(|n| n.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                });
-        let arg_2: napi::bindgen_prelude::Unknown =
-            __env
-                .create_string(_text)
-                .map(|s| s.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_1: napi::bindgen_prelude::Unknown = match __env.create_uint32(_level) {
+            Ok(n) => n.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_2: napi::bindgen_prelude::Unknown = match __env.create_string(_text) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let arg_3: napi::bindgen_prelude::Unknown = match _id {
-            Some(s) => __env
-                .create_string(s)
-                .map(|v| v.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                }),
-            None => unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+            Some(s) => match __env.create_string(s) {
+                Ok(v) => v.to_unknown(),
+                Err(_) => unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                        std::ptr::null_mut(),
+                        napi::bindgen_prelude::Null,
+                    )
                     .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+                },
+            },
+            None => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
             },
         };
         let result = func.call((arg_0, arg_1, arg_2, arg_3));
@@ -1307,37 +1366,49 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_1: napi::bindgen_prelude::Unknown = match _lang {
-            Some(s) => __env
-                .create_string(s)
-                .map(|v| v.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                }),
-            None => unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
             },
         };
-        let arg_2: napi::bindgen_prelude::Unknown =
-            __env
-                .create_string(_code)
-                .map(|s| s.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                });
+        let arg_1: napi::bindgen_prelude::Unknown = match _lang {
+            Some(s) => match __env.create_string(s) {
+                Ok(v) => v.to_unknown(),
+                Err(_) => unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                        std::ptr::null_mut(),
+                        napi::bindgen_prelude::Null,
+                    )
+                    .unwrap_or(std::ptr::null_mut());
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+                },
+            },
+            None => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_2: napi::bindgen_prelude::Unknown = match __env.create_string(_code) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0, arg_1, arg_2));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -1377,22 +1448,28 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_1: napi::bindgen_prelude::Unknown =
-            __env
-                .create_string(_code)
-                .map(|s| s.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_1: napi::bindgen_prelude::Unknown = match __env.create_string(_code) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0, arg_1));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -1439,35 +1516,44 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let arg_1: napi::bindgen_prelude::Unknown = unsafe {
             let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), _ordered)
                 .unwrap_or(std::ptr::null_mut());
             napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
         };
-        let arg_2: napi::bindgen_prelude::Unknown = __env
-            .create_string(_marker)
-            .map(|s| s.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_3: napi::bindgen_prelude::Unknown =
-            __env
-                .create_string(_text)
-                .map(|s| s.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                });
+        let arg_2: napi::bindgen_prelude::Unknown = match __env.create_string(_marker) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_3: napi::bindgen_prelude::Unknown = match __env.create_string(_text) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0, arg_1, arg_2, arg_3));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -1507,13 +1593,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let arg_1: napi::bindgen_prelude::Unknown = unsafe {
             let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), _ordered)
                 .unwrap_or(std::ptr::null_mut());
@@ -1563,26 +1653,33 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let arg_1: napi::bindgen_prelude::Unknown = unsafe {
             let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), _ordered)
                 .unwrap_or(std::ptr::null_mut());
             napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
         };
-        let arg_2: napi::bindgen_prelude::Unknown = __env
-            .create_string(_output)
-            .map(|s| s.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
+        let arg_2: napi::bindgen_prelude::Unknown = match __env.create_string(_output) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0, arg_1, arg_2));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -1616,13 +1713,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
                 Err(_) => return html_to_markdown_rs::VisitResult::Continue,
             };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0,));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -1667,21 +1768,28 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_1: napi::bindgen_prelude::Unknown = __env
-            .create_string(&format!("{:?}", _cells))
-            .map(|s| s.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_1: napi::bindgen_prelude::Unknown = match __env.create_string(&format!("{:?}", _cells)) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let arg_2: napi::bindgen_prelude::Unknown = unsafe {
             let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), _is_header)
                 .unwrap_or(std::ptr::null_mut());
@@ -1726,21 +1834,28 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_1: napi::bindgen_prelude::Unknown = __env
-            .create_string(_output)
-            .map(|s| s.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_1: napi::bindgen_prelude::Unknown = match __env.create_string(_output) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0, arg_1));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -1785,29 +1900,39 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_1: napi::bindgen_prelude::Unknown = __env
-            .create_string(_content)
-            .map(|s| s.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_2: napi::bindgen_prelude::Unknown = __env
-            .create_uint32(_depth as u32)
-            .map(|n| n.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_1: napi::bindgen_prelude::Unknown = match __env.create_string(_content) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_2: napi::bindgen_prelude::Unknown = match __env.create_uint32(_depth as u32) {
+            Ok(n) => n.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0, arg_1, arg_2));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -1847,22 +1972,28 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_1: napi::bindgen_prelude::Unknown =
-            __env
-                .create_string(_text)
-                .map(|s| s.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_1: napi::bindgen_prelude::Unknown = match __env.create_string(_text) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0, arg_1));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -1902,22 +2033,28 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_1: napi::bindgen_prelude::Unknown =
-            __env
-                .create_string(_text)
-                .map(|s| s.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_1: napi::bindgen_prelude::Unknown = match __env.create_string(_text) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0, arg_1));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -1957,22 +2094,28 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_1: napi::bindgen_prelude::Unknown =
-            __env
-                .create_string(_text)
-                .map(|s| s.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_1: napi::bindgen_prelude::Unknown = match __env.create_string(_text) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0, arg_1));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -2012,22 +2155,28 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_1: napi::bindgen_prelude::Unknown =
-            __env
-                .create_string(_text)
-                .map(|s| s.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_1: napi::bindgen_prelude::Unknown = match __env.create_string(_text) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0, arg_1));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -2067,22 +2216,28 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_1: napi::bindgen_prelude::Unknown =
-            __env
-                .create_string(_text)
-                .map(|s| s.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_1: napi::bindgen_prelude::Unknown = match __env.create_string(_text) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0, arg_1));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -2122,22 +2277,28 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_1: napi::bindgen_prelude::Unknown =
-            __env
-                .create_string(_text)
-                .map(|s| s.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_1: napi::bindgen_prelude::Unknown = match __env.create_string(_text) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0, arg_1));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -2173,22 +2334,28 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_1: napi::bindgen_prelude::Unknown =
-            __env
-                .create_string(_text)
-                .map(|s| s.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_1: napi::bindgen_prelude::Unknown = match __env.create_string(_text) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0, arg_1));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -2222,13 +2389,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
                 Err(_) => return html_to_markdown_rs::VisitResult::Continue,
             };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0,));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -2262,13 +2433,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
                 Err(_) => return html_to_markdown_rs::VisitResult::Continue,
             };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0,));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -2313,30 +2488,39 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_1: napi::bindgen_prelude::Unknown = __env
-            .create_string(_tag_name)
-            .map(|s| s.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_2: napi::bindgen_prelude::Unknown =
-            __env
-                .create_string(_html)
-                .map(|s| s.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_1: napi::bindgen_prelude::Unknown = match __env.create_string(_tag_name) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_2: napi::bindgen_prelude::Unknown = match __env.create_string(_html) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0, arg_1, arg_2));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -2373,13 +2557,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
                 Err(_) => return html_to_markdown_rs::VisitResult::Continue,
             };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0,));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -2419,22 +2607,28 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_1: napi::bindgen_prelude::Unknown =
-            __env
-                .create_string(_text)
-                .map(|s| s.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_1: napi::bindgen_prelude::Unknown = match __env.create_string(_text) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0, arg_1));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -2477,22 +2671,28 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_1: napi::bindgen_prelude::Unknown =
-            __env
-                .create_string(_text)
-                .map(|s| s.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_1: napi::bindgen_prelude::Unknown = match __env.create_string(_text) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0, arg_1));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -2532,21 +2732,28 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_1: napi::bindgen_prelude::Unknown = __env
-            .create_string(_output)
-            .map(|s| s.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_1: napi::bindgen_prelude::Unknown = match __env.create_string(_output) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0, arg_1));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -2591,41 +2798,57 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let arg_1: napi::bindgen_prelude::Unknown = match _action {
-            Some(s) => __env
-                .create_string(s)
-                .map(|v| v.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                }),
-            None => unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+            Some(s) => match __env.create_string(s) {
+                Ok(v) => v.to_unknown(),
+                Err(_) => unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                        std::ptr::null_mut(),
+                        napi::bindgen_prelude::Null,
+                    )
                     .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+                },
+            },
+            None => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
             },
         };
         let arg_2: napi::bindgen_prelude::Unknown = match _method {
-            Some(s) => __env
-                .create_string(s)
-                .map(|v| v.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                }),
-            None => unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+            Some(s) => match __env.create_string(s) {
+                Ok(v) => v.to_unknown(),
+                Err(_) => unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                        std::ptr::null_mut(),
+                        napi::bindgen_prelude::Null,
+                    )
                     .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+                },
+            },
+            None => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
             },
         };
         let result = func.call((arg_0, arg_1, arg_2));
@@ -2674,49 +2897,68 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_1: napi::bindgen_prelude::Unknown = __env
-            .create_string(_input_type)
-            .map(|s| s.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_1: napi::bindgen_prelude::Unknown = match __env.create_string(_input_type) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let arg_2: napi::bindgen_prelude::Unknown = match _name {
-            Some(s) => __env
-                .create_string(s)
-                .map(|v| v.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                }),
-            None => unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+            Some(s) => match __env.create_string(s) {
+                Ok(v) => v.to_unknown(),
+                Err(_) => unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                        std::ptr::null_mut(),
+                        napi::bindgen_prelude::Null,
+                    )
                     .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+                },
+            },
+            None => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
             },
         };
         let arg_3: napi::bindgen_prelude::Unknown = match _value {
-            Some(s) => __env
-                .create_string(s)
-                .map(|v| v.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                }),
-            None => unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+            Some(s) => match __env.create_string(s) {
+                Ok(v) => v.to_unknown(),
+                Err(_) => unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                        std::ptr::null_mut(),
+                        napi::bindgen_prelude::Null,
+                    )
                     .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+                },
+            },
+            None => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
             },
         };
         let result = func.call((arg_0, arg_1, arg_2, arg_3));
@@ -2758,22 +3000,28 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_1: napi::bindgen_prelude::Unknown =
-            __env
-                .create_string(_text)
-                .map(|s| s.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_1: napi::bindgen_prelude::Unknown = match __env.create_string(_text) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0, arg_1));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -2813,26 +3061,36 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let arg_1: napi::bindgen_prelude::Unknown = match _src {
-            Some(s) => __env
-                .create_string(s)
-                .map(|v| v.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                }),
-            None => unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+            Some(s) => match __env.create_string(s) {
+                Ok(v) => v.to_unknown(),
+                Err(_) => unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                        std::ptr::null_mut(),
+                        napi::bindgen_prelude::Null,
+                    )
                     .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+                },
+            },
+            None => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
             },
         };
         let result = func.call((arg_0, arg_1));
@@ -2874,26 +3132,36 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let arg_1: napi::bindgen_prelude::Unknown = match _src {
-            Some(s) => __env
-                .create_string(s)
-                .map(|v| v.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                }),
-            None => unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+            Some(s) => match __env.create_string(s) {
+                Ok(v) => v.to_unknown(),
+                Err(_) => unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                        std::ptr::null_mut(),
+                        napi::bindgen_prelude::Null,
+                    )
                     .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+                },
+            },
+            None => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
             },
         };
         let result = func.call((arg_0, arg_1));
@@ -2935,26 +3203,36 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let arg_1: napi::bindgen_prelude::Unknown = match _src {
-            Some(s) => __env
-                .create_string(s)
-                .map(|v| v.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                }),
-            None => unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
+            Some(s) => match __env.create_string(s) {
+                Ok(v) => v.to_unknown(),
+                Err(_) => unsafe {
+                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                        std::ptr::null_mut(),
+                        napi::bindgen_prelude::Null,
+                    )
                     .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
+                    napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+                },
+            },
+            None => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
             },
         };
         let result = func.call((arg_0, arg_1));
@@ -2996,13 +3274,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let arg_1: napi::bindgen_prelude::Unknown = unsafe {
             let r =
                 napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), _open).unwrap_or(std::ptr::null_mut());
@@ -3047,22 +3329,28 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_1: napi::bindgen_prelude::Unknown =
-            __env
-                .create_string(_text)
-                .map(|s| s.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_1: napi::bindgen_prelude::Unknown = match __env.create_string(_text) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0, arg_1));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -3096,13 +3384,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
                 Err(_) => return html_to_markdown_rs::VisitResult::Continue,
             };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0,));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -3142,22 +3434,28 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_1: napi::bindgen_prelude::Unknown =
-            __env
-                .create_string(_text)
-                .map(|s| s.to_unknown())
-                .unwrap_or_else(|_| unsafe {
-                    let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                        .unwrap_or(std::ptr::null_mut());
-                    napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-                });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_1: napi::bindgen_prelude::Unknown = match __env.create_string(_text) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0, arg_1));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,
@@ -3197,21 +3495,28 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for JsHtmlVisitorBridge {
             Err(_) => return html_to_markdown_rs::VisitResult::Continue,
         };
         let __env = self.env();
-        let arg_0: napi::bindgen_prelude::Unknown = nodecontext_to_js_object(&__env, _ctx)
-            .map(|o| o.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
-        let arg_1: napi::bindgen_prelude::Unknown = __env
-            .create_string(_output)
-            .map(|s| s.to_unknown())
-            .unwrap_or_else(|_| unsafe {
-                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(__env.raw(), napi::bindgen_prelude::Null)
-                    .unwrap_or(std::ptr::null_mut());
-                napi::bindgen_prelude::Unknown::from_raw_unchecked(__env.raw(), r)
-            });
+        let arg_0: napi::bindgen_prelude::Unknown = match nodecontext_to_js_object(&__env, _ctx) {
+            Ok(o) => o.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
+        let arg_1: napi::bindgen_prelude::Unknown = match __env.create_string(_output) {
+            Ok(s) => s.to_unknown(),
+            Err(_) => unsafe {
+                let r = napi::bindgen_prelude::ToNapiValue::to_napi_value(
+                    std::ptr::null_mut(),
+                    napi::bindgen_prelude::Null,
+                )
+                .unwrap_or(std::ptr::null_mut());
+                napi::bindgen_prelude::Unknown::from_raw_unchecked(std::ptr::null_mut(), r)
+            },
+        };
         let result = func.call((arg_0, arg_1));
         match result {
             Err(_) => html_to_markdown_rs::VisitResult::Continue,

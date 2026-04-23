@@ -2,7 +2,7 @@
 title: "Ruby API Reference"
 ---
 
-## Ruby API Reference <span class="version-badge">v3.2.6</span>
+## Ruby API Reference <span class="version-badge">v3.3.4</span>
 
 ### Functions
 
@@ -803,7 +803,7 @@ for image analysis and optimization.
 | `src` | `String` | — | Image source (URL, data URI, or SVG content identifier) |
 | `alt` | `String?` | `nil` | Alternative text from alt attribute (for accessibility) |
 | `title` | `String?` | `nil` | Title attribute (often shown as tooltip) |
-| `dimensions` | `String?` | `nil` | Image dimensions as (width, height) if available |
+| `dimensions` | `Array<Integer>?` | `nil` | Image dimensions as (width, height) if available |
 | `image_type` | `ImageType` | — | Image type classification |
 | `attributes` | `Hash{String=>String}` | — | Additional HTML attributes |
 

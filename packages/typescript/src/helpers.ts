@@ -7,7 +7,7 @@ import { convert } from "@kreuzberg/html-to-markdown-node";
  */
 export async function convertFile(path: string, options?: Partial<JsConversionOptions>): Promise<JsConversionResult> {
 	const html = await readFile(path, "utf-8");
-	return convert(html, options);
+	return convert(html, options as JsConversionOptions | undefined);
 }
 
 /**
@@ -22,5 +22,5 @@ export async function convertStream(
 		chunks.push(Buffer.from(chunk));
 	}
 	const html = Buffer.concat(chunks).toString("utf-8");
-	return convert(html, options);
+	return convert(html, options as JsConversionOptions | undefined);
 }

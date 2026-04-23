@@ -2,7 +2,7 @@
 title: "R API Reference"
 ---
 
-## R API Reference <span class="version-badge">v3.2.6</span>
+## R API Reference <span class="version-badge">v3.3.4</span>
 
 ### Functions
 
@@ -803,7 +803,7 @@ for image analysis and optimization.
 | `src` | `character` | — | Image source (URL, data URI, or SVG content identifier) |
 | `alt` | `character or NULL` | `NULL` | Alternative text from alt attribute (for accessibility) |
 | `title` | `character or NULL` | `NULL` | Title attribute (often shown as tooltip) |
-| `dimensions` | `character or NULL` | `NULL` | Image dimensions as (width, height) if available |
+| `dimensions` | `list or NULL` | `NULL` | Image dimensions as (width, height) if available |
 | `image_type` | `ImageType` | — | Image type classification |
 | `attributes` | `list` | — | Additional HTML attributes |
 

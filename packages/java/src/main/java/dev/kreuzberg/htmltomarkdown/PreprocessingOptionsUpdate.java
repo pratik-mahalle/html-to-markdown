@@ -7,20 +7,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Partial update for {@code PreprocessingOptions}.
  *
- * This struct uses {@code Option<T>} to represent optional fields that can be selectively updated.
- * Only specified fields (Some values) will override existing options; None values leave the
- * corresponding fields unchanged when applied via [{@code PreprocessingOptions::apply_update}].
+ * This struct uses {@code Option<T>} to represent optional fields that can be selectively updated. Only specified
+ * fields (Some values) will override existing options; None values leave the corresponding fields unchanged when
+ * applied via [{@code PreprocessingOptions::apply_update}].
  */
 public record PreprocessingOptionsUpdate(
-    /** Optional global preprocessing enablement override */
-    Optional<Boolean> enabled,
-    /** Optional preprocessing preset level override (Minimal, Standard, Aggressive) */
-    Optional<PreprocessingPreset> preset,
-    /** Optional navigation element removal override (nav, breadcrumbs, menus, sidebars) */
-    @JsonProperty("remove_navigation") Optional<Boolean> removeNavigation,
-    /** Optional form element removal override (forms, inputs, buttons, etc.) */
-    @JsonProperty("remove_forms") Optional<Boolean> removeForms
-) {
+        /** Optional global preprocessing enablement override */
+        Optional<Boolean> enabled,
+        /** Optional preprocessing preset level override (Minimal, Standard, Aggressive) */
+        Optional<PreprocessingPreset> preset,
+        /** Optional navigation element removal override (nav, breadcrumbs, menus, sidebars) */
+        @JsonProperty("remove_navigation") Optional<Boolean> removeNavigation,
+        /** Optional form element removal override (forms, inputs, buttons, etc.) */
+        @JsonProperty("remove_forms") Optional<Boolean> removeForms) {
     public static PreprocessingOptionsUpdateBuilder builder() {
         return new PreprocessingOptionsUpdateBuilder();
     }

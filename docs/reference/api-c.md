@@ -2,7 +2,7 @@
 title: "C API Reference"
 ---
 
-## C API Reference <span class="version-badge">v3.2.6</span>
+## C API Reference <span class="version-badge">v3.3.4</span>
 
 ### Functions
 
@@ -803,7 +803,7 @@ for image analysis and optimization.
 | `src` | `const char*` | — | Image source (URL, data URI, or SVG content identifier) |
 | `alt` | `const char**` | `NULL` | Alternative text from alt attribute (for accessibility) |
 | `title` | `const char**` | `NULL` | Title attribute (often shown as tooltip) |
-| `dimensions` | `const char**` | `NULL` | Image dimensions as (width, height) if available |
+| `dimensions` | `uint32_t**` | `NULL` | Image dimensions as (width, height) if available |
 | `image_type` | `HtmImageType` | — | Image type classification |
 | `attributes` | `void*` | — | Additional HTML attributes |
 

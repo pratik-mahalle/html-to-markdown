@@ -7,29 +7,39 @@ import com.fasterxml.jackson.annotation.JsonValue;
 /**
  * Code block fence style in Markdown output.
  *
- * Determines how code blocks ({@code <pre><code>}) are rendered in Markdown.
+ * Determines how code blocks ({@code
+ *
+ *
+
+<pre>
+ * <code>}) are rendered in Markdown.
  */
 public enum CodeBlockStyle {
     /** Indented code blocks (4 spaces). {@code CommonMark} standard. */
     Indented("indented"),
-    /** Fenced code blocks with backticks ({@code }{@code ). Default (GFM). Supports language hints.} */
+    /**
+     * Fenced code blocks with backticks ({@code }{@code ). Default (GFM). Supports language hints.}
+     */
     Backticks("backticks"),
     /** Fenced code blocks with tildes (~~~). Supports language hints. */
     Tildes("tildes");
 
+    /** The string value. */
     private final String value;
 
-    CodeBlockStyle(String value) {
+    CodeBlockStyle(final String value) {
         this.value = value;
     }
 
+    /** Returns the string value. */
     @JsonValue
     public String getValue() {
         return value;
     }
 
+    /** Creates an instance from a string value. */
     @JsonCreator
-    public static CodeBlockStyle fromValue(String value) {
+    public static CodeBlockStyle fromValue(final String value) {
         for (CodeBlockStyle e : values()) {
             if (e.value.equalsIgnoreCase(value)) {
                 return e;

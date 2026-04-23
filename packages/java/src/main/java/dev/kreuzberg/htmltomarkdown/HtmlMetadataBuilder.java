@@ -6,23 +6,15 @@ import java.util.List;
 /**
  * Comprehensive metadata extraction result from HTML document.
  *
- * Contains all extracted metadata types in a single structure,
- * suitable for serialization and transmission across language boundaries.
+ * Contains all extracted metadata types in a single structure, suitable for serialization and transmission across
+ * language boundaries.
  *
  * # Examples
  *
- * {@code }{@code }
- * # use html_to_markdown_rs::metadata::HtmlMetadata;
- * let metadata = HtmlMetadata {
- *     document: Default::default(),
- *     headers: Vec::new(),
- *     links: Vec::new(),
- *     images: Vec::new(),
- *     structured_data: Vec::new(),
- * };
+ * {@code }{@code } # use html_to_markdown_rs::metadata::HtmlMetadata; let metadata = HtmlMetadata { document:
+ * Default::default(), headers: Vec::new(), links: Vec::new(), images: Vec::new(), structured_data: Vec::new(), };
  *
- * assert!(metadata.headers.is_empty());
- * {@code }{@code }
+ * assert!(metadata.headers.is_empty()); {@code }{@code }
  */
 public class HtmlMetadataBuilder {
 
@@ -32,38 +24,38 @@ public class HtmlMetadataBuilder {
     private List<ImageMetadata> images = List.of();
     private List<StructuredData> structuredData = List.of();
 
-    public HtmlMetadataBuilder withDocument(DocumentMetadata value) {
+    /** Sets the document field. */
+    public HtmlMetadataBuilder withDocument(final DocumentMetadata value) {
         this.document = value;
         return this;
     }
 
-    public HtmlMetadataBuilder withHeaders(List<HeaderMetadata> value) {
+    /** Sets the headers field. */
+    public HtmlMetadataBuilder withHeaders(final List<HeaderMetadata> value) {
         this.headers = value;
         return this;
     }
 
-    public HtmlMetadataBuilder withLinks(List<LinkMetadata> value) {
+    /** Sets the links field. */
+    public HtmlMetadataBuilder withLinks(final List<LinkMetadata> value) {
         this.links = value;
         return this;
     }
 
-    public HtmlMetadataBuilder withImages(List<ImageMetadata> value) {
+    /** Sets the images field. */
+    public HtmlMetadataBuilder withImages(final List<ImageMetadata> value) {
         this.images = value;
         return this;
     }
 
-    public HtmlMetadataBuilder withStructuredData(List<StructuredData> value) {
+    /** Sets the structuredData field. */
+    public HtmlMetadataBuilder withStructuredData(final List<StructuredData> value) {
         this.structuredData = value;
         return this;
     }
 
+    /** Builds the HtmlMetadata instance. */
     public HtmlMetadata build() {
-        return new HtmlMetadata(
-            document,
-            headers,
-            links,
-            images,
-            structuredData
-        );
+        return new HtmlMetadata(document, headers, links, images, structuredData);
     }
 }

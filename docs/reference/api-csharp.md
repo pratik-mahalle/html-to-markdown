@@ -2,7 +2,7 @@
 title: "C# API Reference"
 ---
 
-## C# API Reference <span class="version-badge">v3.2.6</span>
+## C# API Reference <span class="version-badge">v3.3.4</span>
 
 ### Functions
 
@@ -803,7 +803,7 @@ for image analysis and optimization.
 | `Src` | `string` | — | Image source (URL, data URI, or SVG content identifier) |
 | `Alt` | `string?` | `null` | Alternative text from alt attribute (for accessibility) |
 | `Title` | `string?` | `null` | Title attribute (often shown as tooltip) |
-| `Dimensions` | `string?` | `null` | Image dimensions as (width, height) if available |
+| `Dimensions` | `List<uint>?` | `null` | Image dimensions as (width, height) if available |
 | `ImageType` | `ImageType` | — | Image type classification |
 | `Attributes` | `Dictionary<string, string>` | — | Additional HTML attributes |
 

@@ -2,7 +2,7 @@
 title: "Go API Reference"
 ---
 
-## Go API Reference <span class="version-badge">v3.2.6</span>
+## Go API Reference <span class="version-badge">v3.3.4</span>
 
 ### Functions
 
@@ -803,7 +803,7 @@ for image analysis and optimization.
 | `Src` | `string` | — | Image source (URL, data URI, or SVG content identifier) |
 | `Alt` | `*string` | `nil` | Alternative text from alt attribute (for accessibility) |
 | `Title` | `*string` | `nil` | Title attribute (often shown as tooltip) |
-| `Dimensions` | `*string` | `nil` | Image dimensions as (width, height) if available |
+| `Dimensions` | `*[]uint32` | `nil` | Image dimensions as (width, height) if available |
 | `ImageType` | `ImageType` | — | Image type classification |
 | `Attributes` | `map[string]string` | — | Additional HTML attributes |
 

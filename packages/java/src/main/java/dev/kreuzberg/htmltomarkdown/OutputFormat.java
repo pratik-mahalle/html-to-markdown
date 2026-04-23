@@ -17,19 +17,22 @@ public enum OutputFormat {
     /** Plain text output (no markup, visible text only). */
     Plain("plain");
 
+    /** The string value. */
     private final String value;
 
-    OutputFormat(String value) {
+    OutputFormat(final String value) {
         this.value = value;
     }
 
+    /** Returns the string value. */
     @JsonValue
     public String getValue() {
         return value;
     }
 
+    /** Creates an instance from a string value. */
     @JsonCreator
-    public static OutputFormat fromValue(String value) {
+    public static OutputFormat fromValue(final String value) {
         for (OutputFormat e : values()) {
             if (e.value.equalsIgnoreCase(value)) {
                 return e;

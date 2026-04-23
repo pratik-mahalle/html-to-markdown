@@ -8,22 +8,16 @@ import java.util.Optional;
 /**
  * Document-level metadata extracted from {@code <head>} and top-level elements.
  *
- * Contains all metadata typically used by search engines, social media platforms,
- * and browsers for document indexing and presentation.
+ * Contains all metadata typically used by search engines, social media platforms, and browsers for document indexing
+ * and presentation.
  *
  * # Examples
  *
- * {@code }{@code }
- * # use html_to_markdown_rs::metadata::DocumentMetadata;
- * let doc = DocumentMetadata {
- *     title: Some("My Article".to_string()),
- *     description: Some("A great article about Rust".to_string()),
- *     keywords: vec!["rust".to_string(), "programming".to_string()],
- *     ..Default::default()
- * };
+ * {@code }{@code } # use html_to_markdown_rs::metadata::DocumentMetadata; let doc = DocumentMetadata { title: Some("My
+ * Article".to_string()), description: Some("A great article about Rust".to_string()), keywords:
+ * vec!["rust".to_string(), "programming".to_string()], ..Default::default() };
  *
- * assert_eq!(doc.title, Some("My Article".to_string()));
- * {@code }{@code }
+ * assert_eq!(doc.title, Some("My Article".to_string())); {@code }{@code }
  */
 public class DocumentMetadataBuilder {
 
@@ -39,74 +33,75 @@ public class DocumentMetadataBuilder {
     private Map<String, String> twitterCard = Map.of();
     private Map<String, String> metaTags = Map.of();
 
-    public DocumentMetadataBuilder withTitle(Optional<String> value) {
+    /** Sets the title field. */
+    public DocumentMetadataBuilder withTitle(final Optional<String> value) {
         this.title = value;
         return this;
     }
 
-    public DocumentMetadataBuilder withDescription(Optional<String> value) {
+    /** Sets the description field. */
+    public DocumentMetadataBuilder withDescription(final Optional<String> value) {
         this.description = value;
         return this;
     }
 
-    public DocumentMetadataBuilder withKeywords(List<String> value) {
+    /** Sets the keywords field. */
+    public DocumentMetadataBuilder withKeywords(final List<String> value) {
         this.keywords = value;
         return this;
     }
 
-    public DocumentMetadataBuilder withAuthor(Optional<String> value) {
+    /** Sets the author field. */
+    public DocumentMetadataBuilder withAuthor(final Optional<String> value) {
         this.author = value;
         return this;
     }
 
-    public DocumentMetadataBuilder withCanonicalUrl(Optional<String> value) {
+    /** Sets the canonicalUrl field. */
+    public DocumentMetadataBuilder withCanonicalUrl(final Optional<String> value) {
         this.canonicalUrl = value;
         return this;
     }
 
-    public DocumentMetadataBuilder withBaseHref(Optional<String> value) {
+    /** Sets the baseHref field. */
+    public DocumentMetadataBuilder withBaseHref(final Optional<String> value) {
         this.baseHref = value;
         return this;
     }
 
-    public DocumentMetadataBuilder withLanguage(Optional<String> value) {
+    /** Sets the language field. */
+    public DocumentMetadataBuilder withLanguage(final Optional<String> value) {
         this.language = value;
         return this;
     }
 
-    public DocumentMetadataBuilder withTextDirection(Optional<TextDirection> value) {
+    /** Sets the textDirection field. */
+    public DocumentMetadataBuilder withTextDirection(final Optional<TextDirection> value) {
         this.textDirection = value;
         return this;
     }
 
-    public DocumentMetadataBuilder withOpenGraph(Map<String, String> value) {
+    /** Sets the openGraph field. */
+    public DocumentMetadataBuilder withOpenGraph(final Map<String, String> value) {
         this.openGraph = value;
         return this;
     }
 
-    public DocumentMetadataBuilder withTwitterCard(Map<String, String> value) {
+    /** Sets the twitterCard field. */
+    public DocumentMetadataBuilder withTwitterCard(final Map<String, String> value) {
         this.twitterCard = value;
         return this;
     }
 
-    public DocumentMetadataBuilder withMetaTags(Map<String, String> value) {
+    /** Sets the metaTags field. */
+    public DocumentMetadataBuilder withMetaTags(final Map<String, String> value) {
         this.metaTags = value;
         return this;
     }
 
+    /** Builds the DocumentMetadata instance. */
     public DocumentMetadata build() {
-        return new DocumentMetadata(
-            title,
-            description,
-            keywords,
-            author,
-            canonicalUrl,
-            baseHref,
-            language,
-            textDirection,
-            openGraph,
-            twitterCard,
-            metaTags
-        );
+        return new DocumentMetadata(title, description, keywords, author, canonicalUrl, baseHref, language,
+                textDirection, openGraph, twitterCard, metaTags);
     }
 }

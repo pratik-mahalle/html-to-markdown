@@ -2,7 +2,7 @@
 title: "Elixir API Reference"
 ---
 
-## Elixir API Reference <span class="version-badge">v3.2.6</span>
+## Elixir API Reference <span class="version-badge">v3.3.4</span>
 
 ### Functions
 
@@ -804,7 +804,7 @@ for image analysis and optimization.
 | `src` | `String.t()` | — | Image source (URL, data URI, or SVG content identifier) |
 | `alt` | `String.t() | nil` | `nil` | Alternative text from alt attribute (for accessibility) |
 | `title` | `String.t() | nil` | `nil` | Title attribute (often shown as tooltip) |
-| `dimensions` | `String.t() | nil` | `nil` | Image dimensions as (width, height) if available |
+| `dimensions` | `list(integer()) | nil` | `nil` | Image dimensions as (width, height) if available |
 | `image_type` | `ImageType` | — | Image type classification |
 | `attributes` | `map()` | — | Additional HTML attributes |
 

@@ -2,7 +2,7 @@
 title: "Rust API Reference"
 ---
 
-## Rust API Reference <span class="version-badge">v3.2.6</span>
+## Rust API Reference <span class="version-badge">v3.3.4</span>
 
 ### Functions
 
@@ -803,7 +803,7 @@ for image analysis and optimization.
 | `src` | `String` | — | Image source (URL, data URI, or SVG content identifier) |
 | `alt` | `Option<String>` | `None` | Alternative text from alt attribute (for accessibility) |
 | `title` | `Option<String>` | `None` | Title attribute (often shown as tooltip) |
-| `dimensions` | `Option<String>` | `None` | Image dimensions as (width, height) if available |
+| `dimensions` | `Option<Vec<u32>>` | `None` | Image dimensions as (width, height) if available |
 | `image_type` | `ImageType` | — | Image type classification |
 | `attributes` | `HashMap<String, String>` | — | Additional HTML attributes |
 

@@ -2,7 +2,7 @@
 title: "Python API Reference"
 ---
 
-## Python API Reference <span class="version-badge">v3.2.6</span>
+## Python API Reference <span class="version-badge">v3.3.4</span>
 
 ### Functions
 
@@ -807,7 +807,7 @@ for image analysis and optimization.
 | `src` | `str` | — | Image source (URL, data URI, or SVG content identifier) |
 | `alt` | `str | None` | `None` | Alternative text from alt attribute (for accessibility) |
 | `title` | `str | None` | `None` | Title attribute (often shown as tooltip) |
-| `dimensions` | `str | None` | `None` | Image dimensions as (width, height) if available |
+| `dimensions` | `list[int] | None` | `None` | Image dimensions as (width, height) if available |
 | `image_type` | `ImageType` | — | Image type classification |
 | `attributes` | `dict[str, str]` | — | Additional HTML attributes |
 

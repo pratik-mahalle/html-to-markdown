@@ -17,19 +17,22 @@ public enum TextDirection {
     /** Automatic directionality detection */
     Auto("auto");
 
+    /** The string value. */
     private final String value;
 
-    TextDirection(String value) {
+    TextDirection(final String value) {
         this.value = value;
     }
 
+    /** Returns the string value. */
     @JsonValue
     public String getValue() {
         return value;
     }
 
+    /** Creates an instance from a string value. */
     @JsonCreator
-    public static TextDirection fromValue(String value) {
+    public static TextDirection fromValue(final String value) {
         for (TextDirection e : values()) {
             if (e.value.equalsIgnoreCase(value)) {
                 return e;

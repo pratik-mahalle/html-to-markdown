@@ -2,7 +2,7 @@
 title: "WebAssembly API Reference"
 ---
 
-## WebAssembly API Reference <span class="version-badge">v3.2.6</span>
+## WebAssembly API Reference <span class="version-badge">v3.3.4</span>
 
 ### Functions
 
@@ -803,7 +803,7 @@ for image analysis and optimization.
 | `src` | `string` | — | Image source (URL, data URI, or SVG content identifier) |
 | `alt` | `string | null` | `null` | Alternative text from alt attribute (for accessibility) |
 | `title` | `string | null` | `null` | Title attribute (often shown as tooltip) |
-| `dimensions` | `string | null` | `null` | Image dimensions as (width, height) if available |
+| `dimensions` | `Array<number> | null` | `null` | Image dimensions as (width, height) if available |
 | `imageType` | `ImageType` | — | Image type classification |
 | `attributes` | `Record<string, string>` | — | Additional HTML attributes |
 

@@ -9,47 +9,40 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Document-level metadata extracted from {@code <head>} and top-level elements.
  *
- * Contains all metadata typically used by search engines, social media platforms,
- * and browsers for document indexing and presentation.
+ * Contains all metadata typically used by search engines, social media platforms, and browsers for document indexing
+ * and presentation.
  *
  * # Examples
  *
- * {@code }{@code }
- * # use html_to_markdown_rs::metadata::DocumentMetadata;
- * let doc = DocumentMetadata {
- *     title: Some("My Article".to_string()),
- *     description: Some("A great article about Rust".to_string()),
- *     keywords: vec!["rust".to_string(), "programming".to_string()],
- *     ..Default::default()
- * };
+ * {@code }{@code } # use html_to_markdown_rs::metadata::DocumentMetadata; let doc = DocumentMetadata { title: Some("My
+ * Article".to_string()), description: Some("A great article about Rust".to_string()), keywords:
+ * vec!["rust".to_string(), "programming".to_string()], ..Default::default() };
  *
- * assert_eq!(doc.title, Some("My Article".to_string()));
- * {@code }{@code }
+ * assert_eq!(doc.title, Some("My Article".to_string())); {@code }{@code }
  */
 public record DocumentMetadata(
-    /** Document title from {@code <title>} tag */
-    Optional<String> title,
-    /** Document description from {@code <meta name="description">} tag */
-    Optional<String> description,
-    /** Document keywords from {@code <meta name="keywords">} tag, split on commas */
-    List<String> keywords,
-    /** Document author from {@code <meta name="author">} tag */
-    Optional<String> author,
-    /** Canonical URL from {@code <link rel="canonical">} tag */
-    @JsonProperty("canonical_url") Optional<String> canonicalUrl,
-    /** Base URL from {@code <base href="">} tag for resolving relative URLs */
-    @JsonProperty("base_href") Optional<String> baseHref,
-    /** Document language from {@code lang} attribute */
-    Optional<String> language,
-    /** Document text direction from {@code dir} attribute */
-    @JsonProperty("text_direction") Optional<TextDirection> textDirection,
-    /** Open Graph metadata (og:* properties) for social media */
-    @JsonProperty("open_graph") Map<String, String> openGraph,
-    /** Twitter Card metadata (twitter:* properties) */
-    @JsonProperty("twitter_card") Map<String, String> twitterCard,
-    /** Additional meta tags not covered by specific fields */
-    @JsonProperty("meta_tags") Map<String, String> metaTags
-) {
+        /** Document title from {@code <title>} tag */
+        Optional<String> title,
+        /** Document description from {@code <meta name="description">} tag */
+        Optional<String> description,
+        /** Document keywords from {@code <meta name="keywords">} tag, split on commas */
+        List<String> keywords,
+        /** Document author from {@code <meta name="author">} tag */
+        Optional<String> author,
+        /** Canonical URL from {@code <link rel="canonical">} tag */
+        @JsonProperty("canonical_url") Optional<String> canonicalUrl,
+        /** Base URL from {@code <base href="">} tag for resolving relative URLs */
+        @JsonProperty("base_href") Optional<String> baseHref,
+        /** Document language from {@code lang} attribute */
+        Optional<String> language,
+        /** Document text direction from {@code dir} attribute */
+        @JsonProperty("text_direction") Optional<TextDirection> textDirection,
+        /** Open Graph metadata (og:* properties) for social media */
+        @JsonProperty("open_graph") Map<String, String> openGraph,
+        /** Twitter Card metadata (twitter:* properties) */
+        @JsonProperty("twitter_card") Map<String, String> twitterCard,
+        /** Additional meta tags not covered by specific fields */
+        @JsonProperty("meta_tags") Map<String, String> metaTags) {
     public static DocumentMetadataBuilder builder() {
         return new DocumentMetadataBuilder();
     }

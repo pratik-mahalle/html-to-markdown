@@ -4,83 +4,166 @@ package dev.kreuzberg.htmltomarkdown;
 /** Visitor interface for the HTML-to-Markdown conversion pipeline. */
 public interface Visitor {
     /** Called for text nodes. */
-    default VisitResult visitText(NodeContext context, String text) { return VisitResult.continueDefault(); }
+    default VisitResult visitText(final NodeContext context, final String text) {
+        return VisitResult.continueDefault();
+    }
     /** Called before entering any element. */
-    default VisitResult visitElementStart(NodeContext context) { return VisitResult.continueDefault(); }
+    default VisitResult visitElementStart(final NodeContext context) {
+        return VisitResult.continueDefault();
+    }
     /** Called after exiting any element; receives the default markdown output. */
-    default VisitResult visitElementEnd(NodeContext context, String output) { return VisitResult.continueDefault(); }
+    default VisitResult visitElementEnd(final NodeContext context, final String output) {
+        return VisitResult.continueDefault();
+    }
     /** Called for anchor links. title is null when the attribute is absent. */
-    default VisitResult visitLink(NodeContext context, String href, String text, String title) { return VisitResult.continueDefault(); }
+    default VisitResult visitLink(final NodeContext context, final String href, final String text, final String title) {
+        return VisitResult.continueDefault();
+    }
     /** Called for images. title is null when absent. */
-    default VisitResult visitImage(NodeContext context, String src, String alt, String title) { return VisitResult.continueDefault(); }
+    default VisitResult visitImage(final NodeContext context, final String src, final String alt, final String title) {
+        return VisitResult.continueDefault();
+    }
     /** Called for heading elements h1-h6. id is null when absent. */
-    default VisitResult visitHeading(NodeContext context, int level, String text, String id) { return VisitResult.continueDefault(); }
+    default VisitResult visitHeading(final NodeContext context, final int level, final String text, final String id) {
+        return VisitResult.continueDefault();
+    }
     /** Called for code blocks. lang is null when absent. */
-    default VisitResult visitCodeBlock(NodeContext context, String lang, String code) { return VisitResult.continueDefault(); }
+    default VisitResult visitCodeBlock(final NodeContext context, final String lang, final String code) {
+        return VisitResult.continueDefault();
+    }
     /** Called for inline code elements. */
-    default VisitResult visitCodeInline(NodeContext context, String code) { return VisitResult.continueDefault(); }
+    default VisitResult visitCodeInline(final NodeContext context, final String code) {
+        return VisitResult.continueDefault();
+    }
     /** Called for list items. */
-    default VisitResult visitListItem(NodeContext context, boolean ordered, String marker, String text) { return VisitResult.continueDefault(); }
+    default VisitResult visitListItem(final NodeContext context, final boolean ordered, final String marker,
+            final String text) {
+        return VisitResult.continueDefault();
+    }
     /** Called before processing a list. */
-    default VisitResult visitListStart(NodeContext context, boolean ordered) { return VisitResult.continueDefault(); }
+    default VisitResult visitListStart(final NodeContext context, final boolean ordered) {
+        return VisitResult.continueDefault();
+    }
     /** Called after processing a list. */
-    default VisitResult visitListEnd(NodeContext context, boolean ordered, String output) { return VisitResult.continueDefault(); }
+    default VisitResult visitListEnd(final NodeContext context, final boolean ordered, final String output) {
+        return VisitResult.continueDefault();
+    }
     /** Called before processing a table. */
-    default VisitResult visitTableStart(NodeContext context) { return VisitResult.continueDefault(); }
+    default VisitResult visitTableStart(final NodeContext context) {
+        return VisitResult.continueDefault();
+    }
     /** Called for table rows. cells contains the cell text values. */
-    default VisitResult visitTableRow(NodeContext context, java.util.List<String> cells, boolean isHeader) { return VisitResult.continueDefault(); }
+    default VisitResult visitTableRow(final NodeContext context, final java.util.List<String> cells,
+            final boolean isHeader) {
+        return VisitResult.continueDefault();
+    }
     /** Called after processing a table. */
-    default VisitResult visitTableEnd(NodeContext context, String output) { return VisitResult.continueDefault(); }
+    default VisitResult visitTableEnd(final NodeContext context, final String output) {
+        return VisitResult.continueDefault();
+    }
     /** Called for blockquote elements. */
-    default VisitResult visitBlockquote(NodeContext context, String content, long depth) { return VisitResult.continueDefault(); }
+    default VisitResult visitBlockquote(final NodeContext context, final String content, final long depth) {
+        return VisitResult.continueDefault();
+    }
     /** Called for strong/bold elements. */
-    default VisitResult visitStrong(NodeContext context, String text) { return VisitResult.continueDefault(); }
+    default VisitResult visitStrong(final NodeContext context, final String text) {
+        return VisitResult.continueDefault();
+    }
     /** Called for emphasis/italic elements. */
-    default VisitResult visitEmphasis(NodeContext context, String text) { return VisitResult.continueDefault(); }
+    default VisitResult visitEmphasis(final NodeContext context, final String text) {
+        return VisitResult.continueDefault();
+    }
     /** Called for strikethrough elements. */
-    default VisitResult visitStrikethrough(NodeContext context, String text) { return VisitResult.continueDefault(); }
+    default VisitResult visitStrikethrough(final NodeContext context, final String text) {
+        return VisitResult.continueDefault();
+    }
     /** Called for underline elements. */
-    default VisitResult visitUnderline(NodeContext context, String text) { return VisitResult.continueDefault(); }
+    default VisitResult visitUnderline(final NodeContext context, final String text) {
+        return VisitResult.continueDefault();
+    }
     /** Called for subscript elements. */
-    default VisitResult visitSubscript(NodeContext context, String text) { return VisitResult.continueDefault(); }
+    default VisitResult visitSubscript(final NodeContext context, final String text) {
+        return VisitResult.continueDefault();
+    }
     /** Called for superscript elements. */
-    default VisitResult visitSuperscript(NodeContext context, String text) { return VisitResult.continueDefault(); }
+    default VisitResult visitSuperscript(final NodeContext context, final String text) {
+        return VisitResult.continueDefault();
+    }
     /** Called for mark/highlight elements. */
-    default VisitResult visitMark(NodeContext context, String text) { return VisitResult.continueDefault(); }
+    default VisitResult visitMark(final NodeContext context, final String text) {
+        return VisitResult.continueDefault();
+    }
     /** Called for line break elements. */
-    default VisitResult visitLineBreak(NodeContext context) { return VisitResult.continueDefault(); }
+    default VisitResult visitLineBreak(final NodeContext context) {
+        return VisitResult.continueDefault();
+    }
     /** Called for horizontal rule elements. */
-    default VisitResult visitHorizontalRule(NodeContext context) { return VisitResult.continueDefault(); }
+    default VisitResult visitHorizontalRule(final NodeContext context) {
+        return VisitResult.continueDefault();
+    }
     /** Called for custom or unknown elements. */
-    default VisitResult visitCustomElement(NodeContext context, String tagName, String html) { return VisitResult.continueDefault(); }
+    default VisitResult visitCustomElement(final NodeContext context, final String tagName, final String html) {
+        return VisitResult.continueDefault();
+    }
     /** Called before a definition list. */
-    default VisitResult visitDefinitionListStart(NodeContext context) { return VisitResult.continueDefault(); }
+    default VisitResult visitDefinitionListStart(final NodeContext context) {
+        return VisitResult.continueDefault();
+    }
     /** Called for definition term elements. */
-    default VisitResult visitDefinitionTerm(NodeContext context, String text) { return VisitResult.continueDefault(); }
+    default VisitResult visitDefinitionTerm(final NodeContext context, final String text) {
+        return VisitResult.continueDefault();
+    }
     /** Called for definition description elements. */
-    default VisitResult visitDefinitionDescription(NodeContext context, String text) { return VisitResult.continueDefault(); }
+    default VisitResult visitDefinitionDescription(final NodeContext context, final String text) {
+        return VisitResult.continueDefault();
+    }
     /** Called after a definition list. */
-    default VisitResult visitDefinitionListEnd(NodeContext context, String output) { return VisitResult.continueDefault(); }
+    default VisitResult visitDefinitionListEnd(final NodeContext context, final String output) {
+        return VisitResult.continueDefault();
+    }
     /** Called for form elements. action and method may be null. */
-    default VisitResult visitForm(NodeContext context, String action, String method) { return VisitResult.continueDefault(); }
+    default VisitResult visitForm(final NodeContext context, final String action, final String method) {
+        return VisitResult.continueDefault();
+    }
     /** Called for input elements. name and value may be null. */
-    default VisitResult visitInput(NodeContext context, String inputType, String name, String value) { return VisitResult.continueDefault(); }
+    default VisitResult visitInput(final NodeContext context, final String inputType, final String name,
+            final String value) {
+        return VisitResult.continueDefault();
+    }
     /** Called for button elements. */
-    default VisitResult visitButton(NodeContext context, String text) { return VisitResult.continueDefault(); }
+    default VisitResult visitButton(final NodeContext context, final String text) {
+        return VisitResult.continueDefault();
+    }
     /** Called for audio elements. src may be null. */
-    default VisitResult visitAudio(NodeContext context, String src) { return VisitResult.continueDefault(); }
+    default VisitResult visitAudio(final NodeContext context, final String src) {
+        return VisitResult.continueDefault();
+    }
     /** Called for video elements. src may be null. */
-    default VisitResult visitVideo(NodeContext context, String src) { return VisitResult.continueDefault(); }
+    default VisitResult visitVideo(final NodeContext context, final String src) {
+        return VisitResult.continueDefault();
+    }
     /** Called for iframe elements. src may be null. */
-    default VisitResult visitIframe(NodeContext context, String src) { return VisitResult.continueDefault(); }
+    default VisitResult visitIframe(final NodeContext context, final String src) {
+        return VisitResult.continueDefault();
+    }
     /** Called for details elements. */
-    default VisitResult visitDetails(NodeContext context, boolean open) { return VisitResult.continueDefault(); }
+    default VisitResult visitDetails(final NodeContext context, final boolean open) {
+        return VisitResult.continueDefault();
+    }
     /** Called for summary elements. */
-    default VisitResult visitSummary(NodeContext context, String text) { return VisitResult.continueDefault(); }
+    default VisitResult visitSummary(final NodeContext context, final String text) {
+        return VisitResult.continueDefault();
+    }
     /** Called before a figure element. */
-    default VisitResult visitFigureStart(NodeContext context) { return VisitResult.continueDefault(); }
+    default VisitResult visitFigureStart(final NodeContext context) {
+        return VisitResult.continueDefault();
+    }
     /** Called for figcaption elements. */
-    default VisitResult visitFigcaption(NodeContext context, String text) { return VisitResult.continueDefault(); }
+    default VisitResult visitFigcaption(final NodeContext context, final String text) {
+        return VisitResult.continueDefault();
+    }
     /** Called after a figure element. */
-    default VisitResult visitFigureEnd(NodeContext context, String output) { return VisitResult.continueDefault(); }
+    default VisitResult visitFigureEnd(final NodeContext context, final String output) {
+        return VisitResult.continueDefault();
+    }
 }

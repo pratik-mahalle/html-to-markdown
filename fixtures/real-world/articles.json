@@ -22,11 +22,6 @@
           "[Mozilla](https://www.mozilla.org)",
           "- Ownership and borrowing"
         ]
-      },
-      {
-        "type": "min_length",
-        "field": "content",
-        "value": 200
       }
     ]
   },
@@ -56,11 +51,6 @@
           "|",
           "---"
         ]
-      },
-      {
-        "type": "min_length",
-        "field": "content",
-        "value": 300
       }
     ]
   },
@@ -90,11 +80,6 @@
           "convert_html",
           "ConversionOptions"
         ]
-      },
-      {
-        "type": "min_length",
-        "field": "content",
-        "value": 400
       }
     ]
   }

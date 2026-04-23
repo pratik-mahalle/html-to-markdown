@@ -19,19 +19,22 @@ public enum ImageType {
     /** Relative image path */
     Relative("relative");
 
+    /** The string value. */
     private final String value;
 
-    ImageType(String value) {
+    ImageType(final String value) {
         this.value = value;
     }
 
+    /** Returns the string value. */
     @JsonValue
     public String getValue() {
         return value;
     }
 
+    /** Creates an instance from a string value. */
     @JsonCreator
-    public static ImageType fromValue(String value) {
+    public static ImageType fromValue(final String value) {
         for (ImageType e : values()) {
             if (e.value.equalsIgnoreCase(value)) {
                 return e;

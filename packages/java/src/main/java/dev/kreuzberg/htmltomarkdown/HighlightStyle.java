@@ -19,19 +19,22 @@ public enum HighlightStyle {
     /** Strip formatting, render as plain text. No markup. */
     None("none");
 
+    /** The string value. */
     private final String value;
 
-    HighlightStyle(String value) {
+    HighlightStyle(final String value) {
         this.value = value;
     }
 
+    /** Returns the string value. */
     @JsonValue
     public String getValue() {
         return value;
     }
 
+    /** Creates an instance from a string value. */
     @JsonCreator
-    public static HighlightStyle fromValue(String value) {
+    public static HighlightStyle fromValue(final String value) {
         for (HighlightStyle e : values()) {
             if (e.value.equalsIgnoreCase(value)) {
                 return e;

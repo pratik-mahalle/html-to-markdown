@@ -13,33 +13,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  * # Examples
  *
- * {@code }{@code }
- * # use html_to_markdown_rs::metadata::{LinkMetadata, LinkType};
- * let link = LinkMetadata {
- *     href: "https://example.com".to_string(),
- *     text: "Example".to_string(),
- *     title: Some("Visit Example".to_string()),
- *     link_type: LinkType::External,
- *     rel: vec!["nofollow".to_string()],
- *     attributes: Default::default(),
- * };
+ * {@code }{@code } # use html_to_markdown_rs::metadata::{LinkMetadata, LinkType}; let link = LinkMetadata { href:
+ * "https://example.com".to_string(), text: "Example".to_string(), title: Some("Visit Example".to_string()), link_type:
+ * LinkType::External, rel: vec!["nofollow".to_string()], attributes: Default::default(), };
  *
- * assert_eq!(link.link_type, LinkType::External);
- * assert_eq!(link.text, "Example");
- * {@code }{@code }
+ * assert_eq!(link.link_type, LinkType::External); assert_eq!(link.text, "Example"); {@code }{@code }
  */
 public record LinkMetadata(
-    /** The href URL value */
-    String href,
-    /** Link text content (normalized, concatenated if mixed with elements) */
-    String text,
-    /** Optional title attribute (often shown as tooltip) */
-    Optional<String> title,
-    /** Link type classification */
-    @JsonProperty("link_type") LinkType linkType,
-    /** Rel attribute values (e.g., "nofollow", "stylesheet", "canonical") */
-    List<String> rel,
-    /** Additional HTML attributes */
-    Map<String, String> attributes
-) {
+        /** The href URL value */
+        String href,
+        /** Link text content (normalized, concatenated if mixed with elements) */
+        String text,
+        /** Optional title attribute (often shown as tooltip) */
+        Optional<String> title,
+        /** Link type classification */
+        @JsonProperty("link_type") LinkType linkType,
+        /** Rel attribute values (e.g., "nofollow", "stylesheet", "canonical") */
+        List<String> rel,
+        /** Additional HTML attributes */
+        Map<String, String> attributes) {
 }

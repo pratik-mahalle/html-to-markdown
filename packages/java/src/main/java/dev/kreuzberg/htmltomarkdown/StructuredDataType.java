@@ -17,19 +17,22 @@ public enum StructuredDataType {
     /** RDF in Attributes (RDFa) markup */
     RDFa("rdfa");
 
+    /** The string value. */
     private final String value;
 
-    StructuredDataType(String value) {
+    StructuredDataType(final String value) {
         this.value = value;
     }
 
+    /** Returns the string value. */
     @JsonValue
     public String getValue() {
         return value;
     }
 
+    /** Creates an instance from a string value. */
     @JsonCreator
-    public static StructuredDataType fromValue(String value) {
+    public static StructuredDataType fromValue(final String value) {
         for (StructuredDataType e : values()) {
             if (e.value.equalsIgnoreCase(value)) {
                 return e;

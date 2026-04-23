@@ -7,36 +7,26 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Comprehensive metadata extraction result from HTML document.
  *
- * Contains all extracted metadata types in a single structure,
- * suitable for serialization and transmission across language boundaries.
+ * Contains all extracted metadata types in a single structure, suitable for serialization and transmission across
+ * language boundaries.
  *
  * # Examples
  *
- * {@code }{@code }
- * # use html_to_markdown_rs::metadata::HtmlMetadata;
- * let metadata = HtmlMetadata {
- *     document: Default::default(),
- *     headers: Vec::new(),
- *     links: Vec::new(),
- *     images: Vec::new(),
- *     structured_data: Vec::new(),
- * };
+ * {@code }{@code } # use html_to_markdown_rs::metadata::HtmlMetadata; let metadata = HtmlMetadata { document:
+ * Default::default(), headers: Vec::new(), links: Vec::new(), images: Vec::new(), structured_data: Vec::new(), };
  *
- * assert!(metadata.headers.is_empty());
- * {@code }{@code }
+ * assert!(metadata.headers.is_empty()); {@code }{@code }
  */
 public record HtmlMetadata(
-    /** Document-level metadata (title, description, canonical, etc.) */
-    DocumentMetadata document,
-    /** Extracted header elements with hierarchy */
-    List<HeaderMetadata> headers,
-    /** Extracted hyperlinks with type classification */
-    List<LinkMetadata> links,
-    /** Extracted images with source and dimensions */
-    List<ImageMetadata> images,
-    /** Extracted structured data blocks */
-    @JsonProperty("structured_data") List<StructuredData> structuredData
-) {
+        /** Document-level metadata (title, description, canonical, etc.) */
+        DocumentMetadata document,
+        /** Extracted header elements with hierarchy */
+        List<HeaderMetadata> headers,
+        /** Extracted hyperlinks with type classification */
+        List<LinkMetadata> links,
+        /** Extracted images with source and dimensions */
+        List<ImageMetadata> images, /** Extracted structured data blocks */
+        @JsonProperty("structured_data") List<StructuredData> structuredData) {
     public static HtmlMetadataBuilder builder() {
         return new HtmlMetadataBuilder();
     }

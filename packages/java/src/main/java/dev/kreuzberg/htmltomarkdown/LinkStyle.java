@@ -7,28 +7,33 @@ import com.fasterxml.jackson.annotation.JsonValue;
 /**
  * Link rendering style in Markdown output.
  *
- * Controls whether links and images use inline {@code [text](url)} syntax or
- * reference-style {@code [text][1]} syntax with definitions collected at the end.
+ * Controls whether links and images use inline {@code [text](url)} syntax or reference-style {@code [text][1]} syntax
+ * with definitions collected at the end.
  */
 public enum LinkStyle {
     /** Inline links: {@code [text](url)}. Default. */
     Inline("inline"),
-    /** Reference-style links: {@code [text][1]} with {@code [1]: url} at end of document. */
+    /**
+     * Reference-style links: {@code [text][1]} with {@code [1]: url} at end of document.
+     */
     Reference("reference");
 
+    /** The string value. */
     private final String value;
 
-    LinkStyle(String value) {
+    LinkStyle(final String value) {
         this.value = value;
     }
 
+    /** Returns the string value. */
     @JsonValue
     public String getValue() {
         return value;
     }
 
+    /** Creates an instance from a string value. */
     @JsonCreator
-    public static LinkStyle fromValue(String value) {
+    public static LinkStyle fromValue(final String value) {
         for (LinkStyle e : values()) {
             if (e.value.equalsIgnoreCase(value)) {
                 return e;

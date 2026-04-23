@@ -11,14 +11,9 @@ import java.util.Optional;
  *
  * # Example
  *
- * {@code }{@code text}
- * use html_to_markdown_rs::ConversionOptions;
+ * {@code }{@code text} use html_to_markdown_rs::ConversionOptions;
  *
- * let options = ConversionOptions::builder()
- *     .heading_style(HeadingStyle::Atx)
- *     .wrap(true)
- *     .wrap_width(100)
- *     .build();
+ * let options = ConversionOptions::builder() .heading_style(HeadingStyle::Atx) .wrap(true) .wrap_width(100) .build();
  * {@code }{@code }
  */
 public class ConversionOptionsBuilder {
@@ -64,248 +59,253 @@ public class ConversionOptionsBuilder {
     private Optional<Long> maxDepth = Optional.empty();
     private List<String> excludeSelectors = List.of();
 
-    public ConversionOptionsBuilder withHeadingStyle(HeadingStyle value) {
+    /** Sets the headingStyle field. */
+    public ConversionOptionsBuilder withHeadingStyle(final HeadingStyle value) {
         this.headingStyle = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withListIndentType(ListIndentType value) {
+    /** Sets the listIndentType field. */
+    public ConversionOptionsBuilder withListIndentType(final ListIndentType value) {
         this.listIndentType = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withListIndentWidth(long value) {
+    /** Sets the listIndentWidth field. */
+    public ConversionOptionsBuilder withListIndentWidth(final long value) {
         this.listIndentWidth = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withBullets(String value) {
+    /** Sets the bullets field. */
+    public ConversionOptionsBuilder withBullets(final String value) {
         this.bullets = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withStrongEmSymbol(String value) {
+    /** Sets the strongEmSymbol field. */
+    public ConversionOptionsBuilder withStrongEmSymbol(final String value) {
         this.strongEmSymbol = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withEscapeAsterisks(boolean value) {
+    /** Sets the escapeAsterisks field. */
+    public ConversionOptionsBuilder withEscapeAsterisks(final boolean value) {
         this.escapeAsterisks = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withEscapeUnderscores(boolean value) {
+    /** Sets the escapeUnderscores field. */
+    public ConversionOptionsBuilder withEscapeUnderscores(final boolean value) {
         this.escapeUnderscores = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withEscapeMisc(boolean value) {
+    /** Sets the escapeMisc field. */
+    public ConversionOptionsBuilder withEscapeMisc(final boolean value) {
         this.escapeMisc = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withEscapeAscii(boolean value) {
+    /** Sets the escapeAscii field. */
+    public ConversionOptionsBuilder withEscapeAscii(final boolean value) {
         this.escapeAscii = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withCodeLanguage(String value) {
+    /** Sets the codeLanguage field. */
+    public ConversionOptionsBuilder withCodeLanguage(final String value) {
         this.codeLanguage = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withAutolinks(boolean value) {
+    /** Sets the autolinks field. */
+    public ConversionOptionsBuilder withAutolinks(final boolean value) {
         this.autolinks = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withDefaultTitle(boolean value) {
+    /** Sets the defaultTitle field. */
+    public ConversionOptionsBuilder withDefaultTitle(final boolean value) {
         this.defaultTitle = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withBrInTables(boolean value) {
+    /** Sets the brInTables field. */
+    public ConversionOptionsBuilder withBrInTables(final boolean value) {
         this.brInTables = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withHighlightStyle(HighlightStyle value) {
+    /** Sets the highlightStyle field. */
+    public ConversionOptionsBuilder withHighlightStyle(final HighlightStyle value) {
         this.highlightStyle = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withExtractMetadata(boolean value) {
+    /** Sets the extractMetadata field. */
+    public ConversionOptionsBuilder withExtractMetadata(final boolean value) {
         this.extractMetadata = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withWhitespaceMode(WhitespaceMode value) {
+    /** Sets the whitespaceMode field. */
+    public ConversionOptionsBuilder withWhitespaceMode(final WhitespaceMode value) {
         this.whitespaceMode = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withStripNewlines(boolean value) {
+    /** Sets the stripNewlines field. */
+    public ConversionOptionsBuilder withStripNewlines(final boolean value) {
         this.stripNewlines = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withWrap(boolean value) {
+    /** Sets the wrap field. */
+    public ConversionOptionsBuilder withWrap(final boolean value) {
         this.wrap = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withWrapWidth(long value) {
+    /** Sets the wrapWidth field. */
+    public ConversionOptionsBuilder withWrapWidth(final long value) {
         this.wrapWidth = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withConvertAsInline(boolean value) {
+    /** Sets the convertAsInline field. */
+    public ConversionOptionsBuilder withConvertAsInline(final boolean value) {
         this.convertAsInline = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withSubSymbol(String value) {
+    /** Sets the subSymbol field. */
+    public ConversionOptionsBuilder withSubSymbol(final String value) {
         this.subSymbol = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withSupSymbol(String value) {
+    /** Sets the supSymbol field. */
+    public ConversionOptionsBuilder withSupSymbol(final String value) {
         this.supSymbol = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withNewlineStyle(NewlineStyle value) {
+    /** Sets the newlineStyle field. */
+    public ConversionOptionsBuilder withNewlineStyle(final NewlineStyle value) {
         this.newlineStyle = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withCodeBlockStyle(CodeBlockStyle value) {
+    /** Sets the codeBlockStyle field. */
+    public ConversionOptionsBuilder withCodeBlockStyle(final CodeBlockStyle value) {
         this.codeBlockStyle = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withKeepInlineImagesIn(List<String> value) {
+    /** Sets the keepInlineImagesIn field. */
+    public ConversionOptionsBuilder withKeepInlineImagesIn(final List<String> value) {
         this.keepInlineImagesIn = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withPreprocessing(PreprocessingOptions value) {
+    /** Sets the preprocessing field. */
+    public ConversionOptionsBuilder withPreprocessing(final PreprocessingOptions value) {
         this.preprocessing = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withEncoding(String value) {
+    /** Sets the encoding field. */
+    public ConversionOptionsBuilder withEncoding(final String value) {
         this.encoding = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withDebug(boolean value) {
+    /** Sets the debug field. */
+    public ConversionOptionsBuilder withDebug(final boolean value) {
         this.debug = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withStripTags(List<String> value) {
+    /** Sets the stripTags field. */
+    public ConversionOptionsBuilder withStripTags(final List<String> value) {
         this.stripTags = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withPreserveTags(List<String> value) {
+    /** Sets the preserveTags field. */
+    public ConversionOptionsBuilder withPreserveTags(final List<String> value) {
         this.preserveTags = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withSkipImages(boolean value) {
+    /** Sets the skipImages field. */
+    public ConversionOptionsBuilder withSkipImages(final boolean value) {
         this.skipImages = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withLinkStyle(LinkStyle value) {
+    /** Sets the linkStyle field. */
+    public ConversionOptionsBuilder withLinkStyle(final LinkStyle value) {
         this.linkStyle = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withOutputFormat(OutputFormat value) {
+    /** Sets the outputFormat field. */
+    public ConversionOptionsBuilder withOutputFormat(final OutputFormat value) {
         this.outputFormat = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withIncludeDocumentStructure(boolean value) {
+    /** Sets the includeDocumentStructure field. */
+    public ConversionOptionsBuilder withIncludeDocumentStructure(final boolean value) {
         this.includeDocumentStructure = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withExtractImages(boolean value) {
+    /** Sets the extractImages field. */
+    public ConversionOptionsBuilder withExtractImages(final boolean value) {
         this.extractImages = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withMaxImageSize(long value) {
+    /** Sets the maxImageSize field. */
+    public ConversionOptionsBuilder withMaxImageSize(final long value) {
         this.maxImageSize = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withCaptureSvg(boolean value) {
+    /** Sets the captureSvg field. */
+    public ConversionOptionsBuilder withCaptureSvg(final boolean value) {
         this.captureSvg = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withInferDimensions(boolean value) {
+    /** Sets the inferDimensions field. */
+    public ConversionOptionsBuilder withInferDimensions(final boolean value) {
         this.inferDimensions = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withMaxDepth(Optional<Long> value) {
+    /** Sets the maxDepth field. */
+    public ConversionOptionsBuilder withMaxDepth(final Optional<Long> value) {
         this.maxDepth = value;
         return this;
     }
 
-    public ConversionOptionsBuilder withExcludeSelectors(List<String> value) {
+    /** Sets the excludeSelectors field. */
+    public ConversionOptionsBuilder withExcludeSelectors(final List<String> value) {
         this.excludeSelectors = value;
         return this;
     }
 
+    /** Builds the ConversionOptions instance. */
     public ConversionOptions build() {
-        return new ConversionOptions(
-            headingStyle,
-            listIndentType,
-            listIndentWidth,
-            bullets,
-            strongEmSymbol,
-            escapeAsterisks,
-            escapeUnderscores,
-            escapeMisc,
-            escapeAscii,
-            codeLanguage,
-            autolinks,
-            defaultTitle,
-            brInTables,
-            highlightStyle,
-            extractMetadata,
-            whitespaceMode,
-            stripNewlines,
-            wrap,
-            wrapWidth,
-            convertAsInline,
-            subSymbol,
-            supSymbol,
-            newlineStyle,
-            codeBlockStyle,
-            keepInlineImagesIn,
-            preprocessing,
-            encoding,
-            debug,
-            stripTags,
-            preserveTags,
-            skipImages,
-            linkStyle,
-            outputFormat,
-            includeDocumentStructure,
-            extractImages,
-            maxImageSize,
-            captureSvg,
-            inferDimensions,
-            maxDepth,
-            excludeSelectors
-        );
+        return new ConversionOptions(headingStyle, listIndentType, listIndentWidth, bullets, strongEmSymbol,
+                escapeAsterisks, escapeUnderscores, escapeMisc, escapeAscii, codeLanguage, autolinks, defaultTitle,
+                brInTables, highlightStyle, extractMetadata, whitespaceMode, stripNewlines, wrap, wrapWidth,
+                convertAsInline, subSymbol, supSymbol, newlineStyle, codeBlockStyle, keepInlineImagesIn, preprocessing,
+                encoding, debug, stripTags, preserveTags, skipImages, linkStyle, outputFormat, includeDocumentStructure,
+                extractImages, maxImageSize, captureSvg, inferDimensions, maxDepth, excludeSelectors);
     }
 }

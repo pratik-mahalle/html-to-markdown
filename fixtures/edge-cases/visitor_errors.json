@@ -1,47 +1,5 @@
 [
   {
-    "id": "visitor_exception_returns_error",
-    "description": "Visitor callback returns Error result, conversion handles gracefully",
-    "input": {
-      "html": "<p>Normal paragraph</p><blockquote><p>Quoted text</p></blockquote><p>Another paragraph</p>"
-    },
-    "visitor": {
-      "callbacks": {
-        "visit_blockquote": {
-          "action": "error",
-          "message": "Blockquotes not allowed in this context"
-        }
-      }
-    },
-    "assertions": [
-      {
-        "type": "not_empty",
-        "field": "content"
-      }
-    ]
-  },
-  {
-    "id": "visitor_multiple_error_callbacks",
-    "description": "Multiple visitor callbacks with error handling",
-    "input": {
-      "html": "<div><h1>Title</h1><table><tr><td>Cell</td></tr></table><p>Text</p></div>"
-    },
-    "visitor": {
-      "callbacks": {
-        "visit_table_start": {
-          "action": "error",
-          "message": "Tables cannot be processed"
-        }
-      }
-    },
-    "assertions": [
-      {
-        "type": "not_empty",
-        "field": "content"
-      }
-    ]
-  },
-  {
     "id": "visitor_custom_element_with_nesting",
     "description": "Visitor handles custom elements with nested content",
     "input": {

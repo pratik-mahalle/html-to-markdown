@@ -10,24 +10,29 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * Controls whether list items are indented with spaces or tabs.
  */
 public enum ListIndentType {
-    /** Use spaces for indentation. Default. Width controlled by {@code list_indent_width}. */
+    /**
+     * Use spaces for indentation. Default. Width controlled by {@code list_indent_width}.
+     */
     Spaces("spaces"),
     /** Use tabs for indentation. */
     Tabs("tabs");
 
+    /** The string value. */
     private final String value;
 
-    ListIndentType(String value) {
+    ListIndentType(final String value) {
         this.value = value;
     }
 
+    /** Returns the string value. */
     @JsonValue
     public String getValue() {
         return value;
     }
 
+    /** Creates an instance from a string value. */
     @JsonCreator
-    public static ListIndentType fromValue(String value) {
+    public static ListIndentType fromValue(final String value) {
         for (ListIndentType e : values()) {
             if (e.value.equalsIgnoreCase(value)) {
                 return e;

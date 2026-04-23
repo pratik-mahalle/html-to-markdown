@@ -7,18 +7,15 @@ import java.util.Optional;
 /**
  * The primary result of HTML conversion and extraction.
  *
- * Contains the converted text output, optional structured document tree,
- * metadata, extracted tables, images, and processing warnings.
+ * Contains the converted text output, optional structured document tree, metadata, extracted tables, images, and
+ * processing warnings.
  *
  * # Example
  *
- * {@code }{@code text}
- * use html_to_markdown_rs::{convert, ConversionOptions};
+ * {@code }{@code text} use html_to_markdown_rs::{convert, ConversionOptions};
  *
- * let result = convert("&lt;h1&gt;Hello&lt;/h1&gt;&lt;p&gt;World&lt;/p&gt;", None)?;
- * assert!(result.content.is_some());
- * assert!(result.warnings.is_empty());
- * {@code }{@code }
+ * let result = convert("&lt;h1&gt;Hello&lt;/h1&gt;&lt;p&gt;World&lt;/p&gt;", None)?; assert!(result.content.is_some());
+ * assert!(result.warnings.is_empty()); {@code }{@code }
  */
 public class ConversionResultBuilder {
 
@@ -29,44 +26,44 @@ public class ConversionResultBuilder {
     private List<String> images = List.of();
     private List<ProcessingWarning> warnings = List.of();
 
-    public ConversionResultBuilder withContent(Optional<String> value) {
+    /** Sets the content field. */
+    public ConversionResultBuilder withContent(final Optional<String> value) {
         this.content = value;
         return this;
     }
 
-    public ConversionResultBuilder withDocument(Optional<DocumentStructure> value) {
+    /** Sets the document field. */
+    public ConversionResultBuilder withDocument(final Optional<DocumentStructure> value) {
         this.document = value;
         return this;
     }
 
-    public ConversionResultBuilder withMetadata(HtmlMetadata value) {
+    /** Sets the metadata field. */
+    public ConversionResultBuilder withMetadata(final HtmlMetadata value) {
         this.metadata = value;
         return this;
     }
 
-    public ConversionResultBuilder withTables(List<TableData> value) {
+    /** Sets the tables field. */
+    public ConversionResultBuilder withTables(final List<TableData> value) {
         this.tables = value;
         return this;
     }
 
-    public ConversionResultBuilder withImages(List<String> value) {
+    /** Sets the images field. */
+    public ConversionResultBuilder withImages(final List<String> value) {
         this.images = value;
         return this;
     }
 
-    public ConversionResultBuilder withWarnings(List<ProcessingWarning> value) {
+    /** Sets the warnings field. */
+    public ConversionResultBuilder withWarnings(final List<ProcessingWarning> value) {
         this.warnings = value;
         return this;
     }
 
+    /** Builds the ConversionResult instance. */
     public ConversionResult build() {
-        return new ConversionResult(
-            content,
-            document,
-            metadata,
-            tables,
-            images,
-            warnings
-        );
+        return new ConversionResult(content, document, metadata, tables, images, warnings);
     }
 }

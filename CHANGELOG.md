@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.3.1] - 2026-04-23
+
+### Fixed
+
+- **Java checkstyle** — switched to 120-char line limit, added Spotless auto-formatting with Eclipse JDT formatter, added `final` params and javadoc to all generated code.
+- **Elixir `list` type collision** — `NodeContent::List` variant no longer redefines Elixir's built-in `list/0` type (now emits `list_variant`).
+- **Elixir NIF missing `serde`** — added `serde` with derive feature as direct dependency to the NIF crate.
+- **C# `VisitResult.Continue`** — default visitor methods now use `new VisitResult.Continue()` instead of non-invocable `VisitResult.Continue()`.
+- **Node `convert` export** — restored the missing `#[napi] pub fn convert` function dropped during binding regeneration.
+- **Ruby CI** — updated Bundler from 2.7.2 to 4.0.3 to match `Gemfile.lock`.
+
 ## [3.3.0] - 2026-04-23
 
 ### Added

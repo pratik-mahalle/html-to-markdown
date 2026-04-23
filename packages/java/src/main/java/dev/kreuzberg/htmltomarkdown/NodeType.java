@@ -7,8 +7,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 /**
  * Node type enumeration covering all HTML element types.
  *
- * This enum categorizes all HTML elements that the converter recognizes,
- * providing a coarse-grained classification for visitor dispatch.
+ * This enum categorizes all HTML elements that the converter recognizes, providing a coarse-grained classification for
+ * visitor dispatch.
  */
 public enum NodeType {
     /** Text node (most frequent - 100+ per document) */
@@ -188,19 +188,22 @@ public enum NodeType {
     /** Custom element (web components) or unknown tag */
     Custom("custom");
 
+    /** The string value. */
     private final String value;
 
-    NodeType(String value) {
+    NodeType(final String value) {
         this.value = value;
     }
 
+    /** Returns the string value. */
     @JsonValue
     public String getValue() {
         return value;
     }
 
+    /** Creates an instance from a string value. */
     @JsonCreator
-    public static NodeType fromValue(String value) {
+    public static NodeType fromValue(final String value) {
         for (NodeType e : values()) {
             if (e.value.equalsIgnoreCase(value)) {
                 return e;

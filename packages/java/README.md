@@ -18,7 +18,7 @@
     <img src="https://img.shields.io/maven-central/v/dev.kreuzberg/html-to-markdown?label=Java&color=007ec6" alt="Java">
   </a>
   <a href="https://pkg.go.dev/github.com/kreuzberg-dev/html-to-markdown/packages/go/v3/htmltomarkdown">
-    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/html-to-markdown?label=Go&color=007ec6&filter=v3.2.0" alt="Go">
+    <img src="https://img.shields.io/github/v/tag/kreuzberg-dev/html-to-markdown?label=Go&color=007ec6&filter=v3.3.4" alt="Go">
   </a>
   <a href="https://www.nuget.org/packages/KreuzbergDev.HtmlToMarkdown/">
     <img src="https://img.shields.io/nuget/v/KreuzbergDev.HtmlToMarkdown?label=C%23&color=007ec6" alt="C#">
@@ -81,14 +81,14 @@ Requires Java 25+ with Panama FFI support.
 <dependency>
     <groupId>dev.kreuzberg</groupId>
     <artifactId>html-to-markdown</artifactId>
-    <version>3.2.0</version>
+    <version>3.3.4</version>
 </dependency>
 ```
 
 **Gradle (Kotlin DSL):**
 
 ```kotlin
-implementation("dev.kreuzberg:html-to-markdown:3.2.0")
+implementation("dev.kreuzberg:html-to-markdown:3.3.4")
 ```
 
 
@@ -250,6 +250,25 @@ String plain = HtmlToMarkdown.convert(html,
 
 Plain text mode is useful for search indexing, text extraction, and feeding content to LLMs.
 
+
+
+
+
+## Visitor Pattern
+
+The visitor pattern enables custom HTML→Markdown conversion logic by providing callbacks for specific HTML elements during traversal. Pass a visitor as the third argument to `convert()`.
+
+**Use Cases:**
+
+- **Custom Markdown dialects** – Convert to Obsidian, Notion, or other flavors
+- **Content filtering** – Remove tracking pixels, ads, or unwanted elements
+- **URL rewriting** – Rewrite CDN URLs, add query parameters, validate links
+- **Accessibility validation** – Check alt text, heading hierarchy, link text
+- **Analytics** – Track element usage, link destinations, image sources
+
+**Supported Visitor Methods:** 40+ callbacks for text, inline elements, links, images, headings, lists, blocks, and tables.
+
+### Example: Quick Start
 
 
 

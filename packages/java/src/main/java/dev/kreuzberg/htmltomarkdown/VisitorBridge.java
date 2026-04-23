@@ -13,8 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Allocates Panama FFM upcall stubs for a Visitor and assembles
- * the C HTMHtmVisitorCallbacks struct in native memory.
+ * Allocates Panama FFM upcall stubs for a Visitor and assembles the C HTMHtmVisitorCallbacks struct in native memory.
  */
 final class VisitorBridge implements AutoCloseable {
     private static final Linker LINKER = Linker.nativeLinker();
@@ -27,7 +26,8 @@ final class VisitorBridge implements AutoCloseable {
     private static final int VISIT_RESULT_CUSTOM = 3;
     private static final int VISIT_RESULT_ERROR = 4;
 
-    // HTMHtmVisitorCallbacks: user_data + 40 callback pointers = 41 pointer-sized slots
+    // HTMHtmVisitorCallbacks: user_data + 40 callbacks
+    // = 41 pointer-sized slots
     private static final long CALLBACKS_STRUCT_SIZE = (long) ValueLayout.ADDRESS.byteSize() * 41L;
 
     // HTMHtmNodeContext field offsets
@@ -45,7 +45,8 @@ final class VisitorBridge implements AutoCloseable {
         this.visitor = visitor;
         this.arena = Arena.ofConfined();
         this.struct = arena.allocate(CALLBACKS_STRUCT_SIZE);
-        // Slot 0: user_data = NULL (not needed; visitor captured via lambda closure)
+        // Slot 0: user_data = NULL
+        // (visitor captured via lambda closure)
         struct.set(ValueLayout.ADDRESS, 0L, MemorySegment.NULL);
         try {
             long offset = ValueLayout.ADDRESS.byteSize();
@@ -59,309 +60,439 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    private long registerStubs1(long offset) throws ReflectiveOperationException {
+    private long registerStubs1(final long offset) throws ReflectiveOperationException {
+        long off = offset;
         // visit_text
         var stubVisitText = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitText", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitText",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitText);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitText);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_element_start
         var stubVisitElementStart = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitElementStart", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitElementStart",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitElementStart);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitElementStart);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_element_end
         var stubVisitElementEnd = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitElementEnd", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitElementEnd",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitElementEnd);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitElementEnd);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_link
         var stubVisitLink = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitLink", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitLink",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitLink);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitLink);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_image
         var stubVisitImage = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitImage", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitImage",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitImage);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitImage);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_heading
         var stubVisitHeading = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitHeading", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitHeading",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, int.class,
+                                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitHeading);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitHeading);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_code_block
         var stubVisitCodeBlock = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitCodeBlock", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitCodeBlock",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class, MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitCodeBlock);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitCodeBlock);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_code_inline
         var stubVisitCodeInline = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitCodeInline", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitCodeInline",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitCodeInline);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitCodeInline);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_list_item
         var stubVisitListItem = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitListItem", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitListItem",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, int.class,
+                                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitListItem);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitListItem);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_list_start
         var stubVisitListStart = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitListStart", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, int.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitListStart",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, int.class,
+                                MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitListStart);
-        offset += ValueLayout.ADDRESS.byteSize();
-        return offset;
+        struct.set(ValueLayout.ADDRESS, off, stubVisitListStart);
+        off += ValueLayout.ADDRESS.byteSize();
+        return off;
     }
 
-    private long registerStubs2(long offset) throws ReflectiveOperationException {
+    private long registerStubs2(final long offset) throws ReflectiveOperationException {
+        long off = offset;
         // visit_list_end
         var stubVisitListEnd = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitListEnd", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitListEnd",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, int.class,
+                                MemorySegment.class, MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitListEnd);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitListEnd);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_table_start
         var stubVisitTableStart = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitTableStart", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitTableStart",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitTableStart);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitTableStart);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_table_row
         var stubVisitTableRow = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitTableRow", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, long.class, int.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.JAVA_LONG, ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitTableRow",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                long.class, int.class, MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.JAVA_LONG, ValueLayout.JAVA_INT, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitTableRow);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitTableRow);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_table_end
         var stubVisitTableEnd = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitTableEnd", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitTableEnd",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitTableEnd);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitTableEnd);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_blockquote
         var stubVisitBlockquote = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitBlockquote", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, long.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.JAVA_LONG, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitBlockquote",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                long.class, MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.JAVA_LONG, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitBlockquote);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitBlockquote);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_strong
         var stubVisitStrong = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitStrong", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitStrong",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitStrong);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitStrong);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_emphasis
         var stubVisitEmphasis = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitEmphasis", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitEmphasis",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitEmphasis);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitEmphasis);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_strikethrough
         var stubVisitStrikethrough = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitStrikethrough", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitStrikethrough",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitStrikethrough);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitStrikethrough);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_underline
         var stubVisitUnderline = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitUnderline", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitUnderline",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitUnderline);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitUnderline);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_subscript
         var stubVisitSubscript = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitSubscript", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitSubscript",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitSubscript);
-        offset += ValueLayout.ADDRESS.byteSize();
-        return offset;
+        struct.set(ValueLayout.ADDRESS, off, stubVisitSubscript);
+        off += ValueLayout.ADDRESS.byteSize();
+        return off;
     }
 
-    private long registerStubs3(long offset) throws ReflectiveOperationException {
+    private long registerStubs3(final long offset) throws ReflectiveOperationException {
+        long off = offset;
         // visit_superscript
         var stubVisitSuperscript = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitSuperscript", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitSuperscript",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitSuperscript);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitSuperscript);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_mark
         var stubVisitMark = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitMark", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitMark",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitMark);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitMark);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_line_break
         var stubVisitLineBreak = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitLineBreak", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitLineBreak",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitLineBreak);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitLineBreak);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_horizontal_rule
         var stubVisitHorizontalRule = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitHorizontalRule", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitHorizontalRule",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitHorizontalRule);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitHorizontalRule);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_custom_element
         var stubVisitCustomElement = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitCustomElement", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitCustomElement",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class, MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitCustomElement);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitCustomElement);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_definition_list_start
         var stubVisitDefinitionListStart = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitDefinitionListStart", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitDefinitionListStart",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitDefinitionListStart);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitDefinitionListStart);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_definition_term
         var stubVisitDefinitionTerm = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitDefinitionTerm", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitDefinitionTerm",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitDefinitionTerm);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitDefinitionTerm);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_definition_description
         var stubVisitDefinitionDescription = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitDefinitionDescription", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitDefinitionDescription",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitDefinitionDescription);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitDefinitionDescription);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_definition_list_end
         var stubVisitDefinitionListEnd = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitDefinitionListEnd", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitDefinitionListEnd",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitDefinitionListEnd);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitDefinitionListEnd);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_form
         var stubVisitForm = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitForm", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitForm",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class, MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitForm);
-        offset += ValueLayout.ADDRESS.byteSize();
-        return offset;
+        struct.set(ValueLayout.ADDRESS, off, stubVisitForm);
+        off += ValueLayout.ADDRESS.byteSize();
+        return off;
     }
 
-    private long registerStubs4(long offset) throws ReflectiveOperationException {
+    private long registerStubs4(final long offset) throws ReflectiveOperationException {
+        long off = offset;
         // visit_input
         var stubVisitInput = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitInput", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitInput",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitInput);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitInput);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_button
         var stubVisitButton = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitButton", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitButton",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitButton);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitButton);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_audio
         var stubVisitAudio = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitAudio", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitAudio",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitAudio);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitAudio);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_video
         var stubVisitVideo = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitVideo", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitVideo",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitVideo);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitVideo);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_iframe
         var stubVisitIframe = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitIframe", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitIframe",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitIframe);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitIframe);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_details
         var stubVisitDetails = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitDetails", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, int.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitDetails",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, int.class,
+                                MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitDetails);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitDetails);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_summary
         var stubVisitSummary = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitSummary", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitSummary",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitSummary);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitSummary);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_figure_start
         var stubVisitFigureStart = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitFigureStart", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitFigureStart",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitFigureStart);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitFigureStart);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_figcaption
         var stubVisitFigcaption = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitFigcaption", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitFigcaption",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitFigcaption);
-        offset += ValueLayout.ADDRESS.byteSize();
+        struct.set(ValueLayout.ADDRESS, off, stubVisitFigcaption);
+        off += ValueLayout.ADDRESS.byteSize();
         // visit_figure_end
         var stubVisitFigureEnd = LINKER.upcallStub(
-                LOOKUP.bind(this, "handleVisitFigureEnd", MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class, MemorySegment.class)),
-                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
+                LOOKUP.bind(this, "handleVisitFigureEnd",
+                        MethodType.methodType(int.class, MemorySegment.class, MemorySegment.class, MemorySegment.class,
+                                MemorySegment.class, MemorySegment.class)),
+                FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS,
+                        ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS),
                 arena);
-        struct.set(ValueLayout.ADDRESS, offset, stubVisitFigureEnd);
-        offset += ValueLayout.ADDRESS.byteSize();
-        return offset;
+        struct.set(ValueLayout.ADDRESS, off, stubVisitFigureEnd);
+        off += ValueLayout.ADDRESS.byteSize();
+        return off;
     }
-
 
     /** Returns the native HTMHtmVisitorCallbacks struct pointer. */
     MemorySegment callbacksStruct() {
         return struct;
     }
 
-    int handleVisitText(MemorySegment ctx, MemorySegment userData, MemorySegment rawText0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitText(final MemorySegment ctx, final MemorySegment userData, final MemorySegment rawText0,
+            final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var text = rawText0.reinterpret(Long.MAX_VALUE).getString(0);
@@ -372,7 +503,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitElementStart(MemorySegment ctx, MemorySegment userData, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitElementStart(final MemorySegment ctx, final MemorySegment userData, final MemorySegment outCustom,
+            final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var result = visitor.visitElementStart(context);
@@ -382,7 +514,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitElementEnd(MemorySegment ctx, MemorySegment userData, MemorySegment rawOutput0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitElementEnd(final MemorySegment ctx, final MemorySegment userData, final MemorySegment rawOutput0,
+            final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var output = rawOutput0.reinterpret(Long.MAX_VALUE).getString(0);
@@ -393,12 +526,16 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitLink(MemorySegment ctx, MemorySegment userData, MemorySegment rawHref0, MemorySegment rawText0, MemorySegment rawTitle0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitLink(final MemorySegment ctx, final MemorySegment userData, final MemorySegment rawHref0,
+            final MemorySegment rawText0, final MemorySegment rawTitle0, final MemorySegment outCustom,
+            final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var href = rawHref0.reinterpret(Long.MAX_VALUE).getString(0);
             var text = rawText0.reinterpret(Long.MAX_VALUE).getString(0);
-            var title = rawTitle0.equals(MemorySegment.NULL) ? null : rawTitle0.reinterpret(Long.MAX_VALUE).getString(0);
+            var title = rawTitle0.equals(MemorySegment.NULL)
+                    ? null
+                    : rawTitle0.reinterpret(Long.MAX_VALUE).getString(0);
             var result = visitor.visitLink(context, href, text, title);
             return encodeVisitResult(result, outCustom, outLen, encArena);
         } catch (Throwable ignored) {
@@ -406,12 +543,16 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitImage(MemorySegment ctx, MemorySegment userData, MemorySegment rawSrc0, MemorySegment rawAlt0, MemorySegment rawTitle0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitImage(final MemorySegment ctx, final MemorySegment userData, final MemorySegment rawSrc0,
+            final MemorySegment rawAlt0, final MemorySegment rawTitle0, final MemorySegment outCustom,
+            final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var src = rawSrc0.reinterpret(Long.MAX_VALUE).getString(0);
             var alt = rawAlt0.reinterpret(Long.MAX_VALUE).getString(0);
-            var title = rawTitle0.equals(MemorySegment.NULL) ? null : rawTitle0.reinterpret(Long.MAX_VALUE).getString(0);
+            var title = rawTitle0.equals(MemorySegment.NULL)
+                    ? null
+                    : rawTitle0.reinterpret(Long.MAX_VALUE).getString(0);
             var result = visitor.visitImage(context, src, alt, title);
             return encodeVisitResult(result, outCustom, outLen, encArena);
         } catch (Throwable ignored) {
@@ -419,7 +560,9 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitHeading(MemorySegment ctx, MemorySegment userData, int rawLevel0, MemorySegment rawText0, MemorySegment rawId0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitHeading(final MemorySegment ctx, final MemorySegment userData, final int rawLevel0,
+            final MemorySegment rawText0, final MemorySegment rawId0, final MemorySegment outCustom,
+            final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var level = (int) rawLevel0;
@@ -432,7 +575,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitCodeBlock(MemorySegment ctx, MemorySegment userData, MemorySegment rawLang0, MemorySegment rawCode0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitCodeBlock(final MemorySegment ctx, final MemorySegment userData, final MemorySegment rawLang0,
+            final MemorySegment rawCode0, final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var lang = rawLang0.equals(MemorySegment.NULL) ? null : rawLang0.reinterpret(Long.MAX_VALUE).getString(0);
@@ -444,7 +588,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitCodeInline(MemorySegment ctx, MemorySegment userData, MemorySegment rawCode0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitCodeInline(final MemorySegment ctx, final MemorySegment userData, final MemorySegment rawCode0,
+            final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var code = rawCode0.reinterpret(Long.MAX_VALUE).getString(0);
@@ -455,7 +600,9 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitListItem(MemorySegment ctx, MemorySegment userData, int rawOrdered0, MemorySegment rawMarker0, MemorySegment rawText0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitListItem(final MemorySegment ctx, final MemorySegment userData, final int rawOrdered0,
+            final MemorySegment rawMarker0, final MemorySegment rawText0, final MemorySegment outCustom,
+            final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var ordered = ((int) rawOrdered0) != 0;
@@ -468,7 +615,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitListStart(MemorySegment ctx, MemorySegment userData, int rawOrdered0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitListStart(final MemorySegment ctx, final MemorySegment userData, final int rawOrdered0,
+            final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var ordered = ((int) rawOrdered0) != 0;
@@ -479,7 +627,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitListEnd(MemorySegment ctx, MemorySegment userData, int rawOrdered0, MemorySegment rawOutput0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitListEnd(final MemorySegment ctx, final MemorySegment userData, final int rawOrdered0,
+            final MemorySegment rawOutput0, final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var ordered = ((int) rawOrdered0) != 0;
@@ -491,7 +640,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitTableStart(MemorySegment ctx, MemorySegment userData, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitTableStart(final MemorySegment ctx, final MemorySegment userData, final MemorySegment outCustom,
+            final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var result = visitor.visitTableStart(context);
@@ -501,7 +651,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitTableRow(MemorySegment ctx, MemorySegment userData, MemorySegment rawCells0, long rawCells1, int isHeader, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitTableRow(final MemorySegment ctx, final MemorySegment userData, final MemorySegment rawCells0,
+            final long rawCells1, final int isHeader, final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var cells = decodeCells(rawCells0, (long) rawCells1);
@@ -513,7 +664,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitTableEnd(MemorySegment ctx, MemorySegment userData, MemorySegment rawOutput0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitTableEnd(final MemorySegment ctx, final MemorySegment userData, final MemorySegment rawOutput0,
+            final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var output = rawOutput0.reinterpret(Long.MAX_VALUE).getString(0);
@@ -524,7 +676,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitBlockquote(MemorySegment ctx, MemorySegment userData, MemorySegment rawContent0, long rawDepth0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitBlockquote(final MemorySegment ctx, final MemorySegment userData, final MemorySegment rawContent0,
+            final long rawDepth0, final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var content = rawContent0.reinterpret(Long.MAX_VALUE).getString(0);
@@ -536,7 +689,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitStrong(MemorySegment ctx, MemorySegment userData, MemorySegment rawText0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitStrong(final MemorySegment ctx, final MemorySegment userData, final MemorySegment rawText0,
+            final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var text = rawText0.reinterpret(Long.MAX_VALUE).getString(0);
@@ -547,7 +701,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitEmphasis(MemorySegment ctx, MemorySegment userData, MemorySegment rawText0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitEmphasis(final MemorySegment ctx, final MemorySegment userData, final MemorySegment rawText0,
+            final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var text = rawText0.reinterpret(Long.MAX_VALUE).getString(0);
@@ -558,7 +713,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitStrikethrough(MemorySegment ctx, MemorySegment userData, MemorySegment rawText0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitStrikethrough(final MemorySegment ctx, final MemorySegment userData, final MemorySegment rawText0,
+            final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var text = rawText0.reinterpret(Long.MAX_VALUE).getString(0);
@@ -569,7 +725,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitUnderline(MemorySegment ctx, MemorySegment userData, MemorySegment rawText0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitUnderline(final MemorySegment ctx, final MemorySegment userData, final MemorySegment rawText0,
+            final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var text = rawText0.reinterpret(Long.MAX_VALUE).getString(0);
@@ -580,7 +737,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitSubscript(MemorySegment ctx, MemorySegment userData, MemorySegment rawText0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitSubscript(final MemorySegment ctx, final MemorySegment userData, final MemorySegment rawText0,
+            final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var text = rawText0.reinterpret(Long.MAX_VALUE).getString(0);
@@ -591,7 +749,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitSuperscript(MemorySegment ctx, MemorySegment userData, MemorySegment rawText0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitSuperscript(final MemorySegment ctx, final MemorySegment userData, final MemorySegment rawText0,
+            final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var text = rawText0.reinterpret(Long.MAX_VALUE).getString(0);
@@ -602,7 +761,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitMark(MemorySegment ctx, MemorySegment userData, MemorySegment rawText0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitMark(final MemorySegment ctx, final MemorySegment userData, final MemorySegment rawText0,
+            final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var text = rawText0.reinterpret(Long.MAX_VALUE).getString(0);
@@ -613,7 +773,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitLineBreak(MemorySegment ctx, MemorySegment userData, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitLineBreak(final MemorySegment ctx, final MemorySegment userData, final MemorySegment outCustom,
+            final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var result = visitor.visitLineBreak(context);
@@ -623,7 +784,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitHorizontalRule(MemorySegment ctx, MemorySegment userData, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitHorizontalRule(final MemorySegment ctx, final MemorySegment userData, final MemorySegment outCustom,
+            final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var result = visitor.visitHorizontalRule(context);
@@ -633,7 +795,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitCustomElement(MemorySegment ctx, MemorySegment userData, MemorySegment rawTagName0, MemorySegment rawHtml0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitCustomElement(final MemorySegment ctx, final MemorySegment userData, final MemorySegment rawTagName0,
+            final MemorySegment rawHtml0, final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var tagName = rawTagName0.reinterpret(Long.MAX_VALUE).getString(0);
@@ -645,7 +808,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitDefinitionListStart(MemorySegment ctx, MemorySegment userData, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitDefinitionListStart(final MemorySegment ctx, final MemorySegment userData,
+            final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var result = visitor.visitDefinitionListStart(context);
@@ -655,7 +819,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitDefinitionTerm(MemorySegment ctx, MemorySegment userData, MemorySegment rawText0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitDefinitionTerm(final MemorySegment ctx, final MemorySegment userData, final MemorySegment rawText0,
+            final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var text = rawText0.reinterpret(Long.MAX_VALUE).getString(0);
@@ -666,7 +831,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitDefinitionDescription(MemorySegment ctx, MemorySegment userData, MemorySegment rawText0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitDefinitionDescription(final MemorySegment ctx, final MemorySegment userData,
+            final MemorySegment rawText0, final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var text = rawText0.reinterpret(Long.MAX_VALUE).getString(0);
@@ -677,7 +843,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitDefinitionListEnd(MemorySegment ctx, MemorySegment userData, MemorySegment rawOutput0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitDefinitionListEnd(final MemorySegment ctx, final MemorySegment userData,
+            final MemorySegment rawOutput0, final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var output = rawOutput0.reinterpret(Long.MAX_VALUE).getString(0);
@@ -688,11 +855,16 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitForm(MemorySegment ctx, MemorySegment userData, MemorySegment rawAction0, MemorySegment rawMethod0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitForm(final MemorySegment ctx, final MemorySegment userData, final MemorySegment rawAction0,
+            final MemorySegment rawMethod0, final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
-            var action = rawAction0.equals(MemorySegment.NULL) ? null : rawAction0.reinterpret(Long.MAX_VALUE).getString(0);
-            var method = rawMethod0.equals(MemorySegment.NULL) ? null : rawMethod0.reinterpret(Long.MAX_VALUE).getString(0);
+            var action = rawAction0.equals(MemorySegment.NULL)
+                    ? null
+                    : rawAction0.reinterpret(Long.MAX_VALUE).getString(0);
+            var method = rawMethod0.equals(MemorySegment.NULL)
+                    ? null
+                    : rawMethod0.reinterpret(Long.MAX_VALUE).getString(0);
             var result = visitor.visitForm(context, action, method);
             return encodeVisitResult(result, outCustom, outLen, encArena);
         } catch (Throwable ignored) {
@@ -700,12 +872,16 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitInput(MemorySegment ctx, MemorySegment userData, MemorySegment rawInputType0, MemorySegment rawName0, MemorySegment rawValue0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitInput(final MemorySegment ctx, final MemorySegment userData, final MemorySegment rawInputType0,
+            final MemorySegment rawName0, final MemorySegment rawValue0, final MemorySegment outCustom,
+            final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var inputType = rawInputType0.reinterpret(Long.MAX_VALUE).getString(0);
             var name = rawName0.equals(MemorySegment.NULL) ? null : rawName0.reinterpret(Long.MAX_VALUE).getString(0);
-            var value = rawValue0.equals(MemorySegment.NULL) ? null : rawValue0.reinterpret(Long.MAX_VALUE).getString(0);
+            var value = rawValue0.equals(MemorySegment.NULL)
+                    ? null
+                    : rawValue0.reinterpret(Long.MAX_VALUE).getString(0);
             var result = visitor.visitInput(context, inputType, name, value);
             return encodeVisitResult(result, outCustom, outLen, encArena);
         } catch (Throwable ignored) {
@@ -713,7 +889,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitButton(MemorySegment ctx, MemorySegment userData, MemorySegment rawText0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitButton(final MemorySegment ctx, final MemorySegment userData, final MemorySegment rawText0,
+            final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var text = rawText0.reinterpret(Long.MAX_VALUE).getString(0);
@@ -724,7 +901,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitAudio(MemorySegment ctx, MemorySegment userData, MemorySegment rawSrc0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitAudio(final MemorySegment ctx, final MemorySegment userData, final MemorySegment rawSrc0,
+            final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var src = rawSrc0.equals(MemorySegment.NULL) ? null : rawSrc0.reinterpret(Long.MAX_VALUE).getString(0);
@@ -735,7 +913,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitVideo(MemorySegment ctx, MemorySegment userData, MemorySegment rawSrc0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitVideo(final MemorySegment ctx, final MemorySegment userData, final MemorySegment rawSrc0,
+            final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var src = rawSrc0.equals(MemorySegment.NULL) ? null : rawSrc0.reinterpret(Long.MAX_VALUE).getString(0);
@@ -746,7 +925,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitIframe(MemorySegment ctx, MemorySegment userData, MemorySegment rawSrc0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitIframe(final MemorySegment ctx, final MemorySegment userData, final MemorySegment rawSrc0,
+            final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var src = rawSrc0.equals(MemorySegment.NULL) ? null : rawSrc0.reinterpret(Long.MAX_VALUE).getString(0);
@@ -757,7 +937,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitDetails(MemorySegment ctx, MemorySegment userData, int rawOpen0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitDetails(final MemorySegment ctx, final MemorySegment userData, final int rawOpen0,
+            final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var open = ((int) rawOpen0) != 0;
@@ -768,7 +949,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitSummary(MemorySegment ctx, MemorySegment userData, MemorySegment rawText0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitSummary(final MemorySegment ctx, final MemorySegment userData, final MemorySegment rawText0,
+            final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var text = rawText0.reinterpret(Long.MAX_VALUE).getString(0);
@@ -779,7 +961,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitFigureStart(MemorySegment ctx, MemorySegment userData, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitFigureStart(final MemorySegment ctx, final MemorySegment userData, final MemorySegment outCustom,
+            final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var result = visitor.visitFigureStart(context);
@@ -789,7 +972,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitFigcaption(MemorySegment ctx, MemorySegment userData, MemorySegment rawText0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitFigcaption(final MemorySegment ctx, final MemorySegment userData, final MemorySegment rawText0,
+            final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var text = rawText0.reinterpret(Long.MAX_VALUE).getString(0);
@@ -800,7 +984,8 @@ final class VisitorBridge implements AutoCloseable {
         }
     }
 
-    int handleVisitFigureEnd(MemorySegment ctx, MemorySegment userData, MemorySegment rawOutput0, MemorySegment outCustom, MemorySegment outLen) {
+    int handleVisitFigureEnd(final MemorySegment ctx, final MemorySegment userData, final MemorySegment rawOutput0,
+            final MemorySegment outCustom, final MemorySegment outLen) {
         try (var encArena = Arena.ofConfined()) {
             var context = decodeNodeContext(ctx);
             var output = rawOutput0.reinterpret(Long.MAX_VALUE).getString(0);
@@ -812,19 +997,15 @@ final class VisitorBridge implements AutoCloseable {
     }
 
     // HTMHtmNodeContext: int32 node_type, char* tag_name, uintptr depth,
-    //                    uintptr index_in_parent, char* parent_tag, int32 is_inline
-    private static final MemoryLayout CTX_LAYOUT = MemoryLayout.structLayout(
-            ValueLayout.JAVA_INT.withName("node_type"),
-            MemoryLayout.paddingLayout(4),
-            ValueLayout.ADDRESS.withName("tag_name"),
-            ValueLayout.JAVA_LONG.withName("depth"),
-            ValueLayout.JAVA_LONG.withName("index_in_parent"),
-            ValueLayout.ADDRESS.withName("parent_tag"),
-            ValueLayout.JAVA_INT.withName("is_inline"),
-            MemoryLayout.paddingLayout(4)
-    );
+    // uintptr index_in_parent, char* parent_tag,
+    // int32 is_inline
+    private static final MemoryLayout CTX_LAYOUT = MemoryLayout.structLayout(ValueLayout.JAVA_INT.withName("node_type"),
+            MemoryLayout.paddingLayout(4), ValueLayout.ADDRESS.withName("tag_name"),
+            ValueLayout.JAVA_LONG.withName("depth"), ValueLayout.JAVA_LONG.withName("index_in_parent"),
+            ValueLayout.ADDRESS.withName("parent_tag"), ValueLayout.JAVA_INT.withName("is_inline"),
+            MemoryLayout.paddingLayout(4));
 
-    private static NodeContext decodeNodeContext(MemorySegment ctxPtr) {
+    private static NodeContext decodeNodeContext(final MemorySegment ctxPtr) {
         var ctx = ctxPtr.reinterpret(CTX_LAYOUT.byteSize());
         int nodeType = ctx.get(ValueLayout.JAVA_INT, 0L);
         var tagNamePtr = ctx.get(ValueLayout.ADDRESS, CTX_OFFSET_TAG_NAME);
@@ -832,7 +1013,8 @@ final class VisitorBridge implements AutoCloseable {
         long depth = ctx.get(ValueLayout.JAVA_LONG, CTX_OFFSET_DEPTH);
         long indexInParent = ctx.get(ValueLayout.JAVA_LONG, CTX_OFFSET_INDEX_IN_PARENT);
         var parentTagPtr = ctx.get(ValueLayout.ADDRESS, CTX_OFFSET_PARENT_TAG);
-        String parentTag = parentTagPtr.equals(MemorySegment.NULL) ? null
+        String parentTag = parentTagPtr.equals(MemorySegment.NULL)
+                ? null
                 : parentTagPtr.reinterpret(Long.MAX_VALUE).getString(0);
         int isInlineRaw = ctx.get(ValueLayout.JAVA_INT, CTX_OFFSET_IS_INLINE);
         return new NodeContext(nodeType, tagName, depth, indexInParent, parentTag, isInlineRaw != 0);
@@ -847,7 +1029,8 @@ final class VisitorBridge implements AutoCloseable {
         return result;
     }
 
-    private static int encodeVisitResult(VisitResult result, MemorySegment outCustom, MemorySegment outLen, Arena encArena) {
+    private static int encodeVisitResult(VisitResult result, MemorySegment outCustom, MemorySegment outLen,
+            Arena encArena) {
         return switch (result) {
             case VisitResult.Continue ignored -> VISIT_RESULT_CONTINUE;
             case VisitResult.Skip ignored -> VISIT_RESULT_SKIP;
@@ -855,13 +1038,15 @@ final class VisitorBridge implements AutoCloseable {
             case VisitResult.Custom c -> {
                 var buf = encArena.allocateFrom(c.markdown());
                 outCustom.set(ValueLayout.ADDRESS, 0L, buf);
-                outLen.set(ValueLayout.JAVA_LONG, 0L, (long) c.markdown().getBytes(java.nio.charset.StandardCharsets.UTF_8).length);
+                outLen.set(ValueLayout.JAVA_LONG, 0L,
+                        (long) c.markdown().getBytes(java.nio.charset.StandardCharsets.UTF_8).length);
                 yield VISIT_RESULT_CUSTOM;
             }
             case VisitResult.Error e -> {
                 var buf = encArena.allocateFrom(e.message());
                 outCustom.set(ValueLayout.ADDRESS, 0L, buf);
-                outLen.set(ValueLayout.JAVA_LONG, 0L, (long) e.message().getBytes(java.nio.charset.StandardCharsets.UTF_8).length);
+                outLen.set(ValueLayout.JAVA_LONG, 0L,
+                        (long) e.message().getBytes(java.nio.charset.StandardCharsets.UTF_8).length);
                 yield VISIT_RESULT_ERROR;
             }
         };

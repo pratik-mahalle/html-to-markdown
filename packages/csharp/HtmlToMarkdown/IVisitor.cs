@@ -7,83 +7,83 @@ namespace HtmlToMarkdown;
 public interface IVisitor
 {
     /// <summary>Called for text nodes.</summary>
-    public VisitResult VisitText(NodeContext context, string text) => VisitResult.Continue();
+    public VisitResult VisitText(NodeContext context, string text) => new VisitResult.Continue();
     /// <summary>Called before entering any element.</summary>
-    public VisitResult VisitElementStart(NodeContext context) => VisitResult.Continue();
+    public VisitResult VisitElementStart(NodeContext context) => new VisitResult.Continue();
     /// <summary>Called after exiting any element; receives the default markdown output.</summary>
-    public VisitResult VisitElementEnd(NodeContext context, string output) => VisitResult.Continue();
+    public VisitResult VisitElementEnd(NodeContext context, string output) => new VisitResult.Continue();
     /// <summary>Called for anchor links. title is null when the attribute is absent.</summary>
-    public VisitResult VisitLink(NodeContext context, string href, string text, string? title) => VisitResult.Continue();
+    public VisitResult VisitLink(NodeContext context, string href, string text, string? title) => new VisitResult.Continue();
     /// <summary>Called for images. title is null when absent.</summary>
-    public VisitResult VisitImage(NodeContext context, string src, string alt, string? title) => VisitResult.Continue();
+    public VisitResult VisitImage(NodeContext context, string src, string alt, string? title) => new VisitResult.Continue();
     /// <summary>Called for heading elements h1-h6. id is null when absent.</summary>
-    public VisitResult VisitHeading(NodeContext context, uint level, string text, string? id) => VisitResult.Continue();
+    public VisitResult VisitHeading(NodeContext context, uint level, string text, string? id) => new VisitResult.Continue();
     /// <summary>Called for code blocks. lang is null when absent.</summary>
-    public VisitResult VisitCodeBlock(NodeContext context, string? lang, string code) => VisitResult.Continue();
+    public VisitResult VisitCodeBlock(NodeContext context, string? lang, string code) => new VisitResult.Continue();
     /// <summary>Called for inline code elements.</summary>
-    public VisitResult VisitCodeInline(NodeContext context, string code) => VisitResult.Continue();
+    public VisitResult VisitCodeInline(NodeContext context, string code) => new VisitResult.Continue();
     /// <summary>Called for list items.</summary>
-    public VisitResult VisitListItem(NodeContext context, bool ordered, string marker, string text) => VisitResult.Continue();
+    public VisitResult VisitListItem(NodeContext context, bool ordered, string marker, string text) => new VisitResult.Continue();
     /// <summary>Called before processing a list.</summary>
-    public VisitResult VisitListStart(NodeContext context, bool ordered) => VisitResult.Continue();
+    public VisitResult VisitListStart(NodeContext context, bool ordered) => new VisitResult.Continue();
     /// <summary>Called after processing a list.</summary>
-    public VisitResult VisitListEnd(NodeContext context, bool ordered, string output) => VisitResult.Continue();
+    public VisitResult VisitListEnd(NodeContext context, bool ordered, string output) => new VisitResult.Continue();
     /// <summary>Called before processing a table.</summary>
-    public VisitResult VisitTableStart(NodeContext context) => VisitResult.Continue();
+    public VisitResult VisitTableStart(NodeContext context) => new VisitResult.Continue();
     /// <summary>Called for table rows. cells contains the cell text values.</summary>
-    public VisitResult VisitTableRow(NodeContext context, string[] cells, bool isHeader) => VisitResult.Continue();
+    public VisitResult VisitTableRow(NodeContext context, string[] cells, bool isHeader) => new VisitResult.Continue();
     /// <summary>Called after processing a table.</summary>
-    public VisitResult VisitTableEnd(NodeContext context, string output) => VisitResult.Continue();
+    public VisitResult VisitTableEnd(NodeContext context, string output) => new VisitResult.Continue();
     /// <summary>Called for blockquote elements.</summary>
-    public VisitResult VisitBlockquote(NodeContext context, string content, ulong depth) => VisitResult.Continue();
+    public VisitResult VisitBlockquote(NodeContext context, string content, ulong depth) => new VisitResult.Continue();
     /// <summary>Called for strong/bold elements.</summary>
-    public VisitResult VisitStrong(NodeContext context, string text) => VisitResult.Continue();
+    public VisitResult VisitStrong(NodeContext context, string text) => new VisitResult.Continue();
     /// <summary>Called for emphasis/italic elements.</summary>
-    public VisitResult VisitEmphasis(NodeContext context, string text) => VisitResult.Continue();
+    public VisitResult VisitEmphasis(NodeContext context, string text) => new VisitResult.Continue();
     /// <summary>Called for strikethrough elements.</summary>
-    public VisitResult VisitStrikethrough(NodeContext context, string text) => VisitResult.Continue();
+    public VisitResult VisitStrikethrough(NodeContext context, string text) => new VisitResult.Continue();
     /// <summary>Called for underline elements.</summary>
-    public VisitResult VisitUnderline(NodeContext context, string text) => VisitResult.Continue();
+    public VisitResult VisitUnderline(NodeContext context, string text) => new VisitResult.Continue();
     /// <summary>Called for subscript elements.</summary>
-    public VisitResult VisitSubscript(NodeContext context, string text) => VisitResult.Continue();
+    public VisitResult VisitSubscript(NodeContext context, string text) => new VisitResult.Continue();
     /// <summary>Called for superscript elements.</summary>
-    public VisitResult VisitSuperscript(NodeContext context, string text) => VisitResult.Continue();
+    public VisitResult VisitSuperscript(NodeContext context, string text) => new VisitResult.Continue();
     /// <summary>Called for mark/highlight elements.</summary>
-    public VisitResult VisitMark(NodeContext context, string text) => VisitResult.Continue();
+    public VisitResult VisitMark(NodeContext context, string text) => new VisitResult.Continue();
     /// <summary>Called for line break elements.</summary>
-    public VisitResult VisitLineBreak(NodeContext context) => VisitResult.Continue();
+    public VisitResult VisitLineBreak(NodeContext context) => new VisitResult.Continue();
     /// <summary>Called for horizontal rule elements.</summary>
-    public VisitResult VisitHorizontalRule(NodeContext context) => VisitResult.Continue();
+    public VisitResult VisitHorizontalRule(NodeContext context) => new VisitResult.Continue();
     /// <summary>Called for custom or unknown elements.</summary>
-    public VisitResult VisitCustomElement(NodeContext context, string tagName, string html) => VisitResult.Continue();
+    public VisitResult VisitCustomElement(NodeContext context, string tagName, string html) => new VisitResult.Continue();
     /// <summary>Called before a definition list.</summary>
-    public VisitResult VisitDefinitionListStart(NodeContext context) => VisitResult.Continue();
+    public VisitResult VisitDefinitionListStart(NodeContext context) => new VisitResult.Continue();
     /// <summary>Called for definition term elements.</summary>
-    public VisitResult VisitDefinitionTerm(NodeContext context, string text) => VisitResult.Continue();
+    public VisitResult VisitDefinitionTerm(NodeContext context, string text) => new VisitResult.Continue();
     /// <summary>Called for definition description elements.</summary>
-    public VisitResult VisitDefinitionDescription(NodeContext context, string text) => VisitResult.Continue();
+    public VisitResult VisitDefinitionDescription(NodeContext context, string text) => new VisitResult.Continue();
     /// <summary>Called after a definition list.</summary>
-    public VisitResult VisitDefinitionListEnd(NodeContext context, string output) => VisitResult.Continue();
+    public VisitResult VisitDefinitionListEnd(NodeContext context, string output) => new VisitResult.Continue();
     /// <summary>Called for form elements. action and method may be null.</summary>
-    public VisitResult VisitForm(NodeContext context, string? action, string? method) => VisitResult.Continue();
+    public VisitResult VisitForm(NodeContext context, string? action, string? method) => new VisitResult.Continue();
     /// <summary>Called for input elements. name and value may be null.</summary>
-    public VisitResult VisitInput(NodeContext context, string inputType, string? name, string? value) => VisitResult.Continue();
+    public VisitResult VisitInput(NodeContext context, string inputType, string? name, string? value) => new VisitResult.Continue();
     /// <summary>Called for button elements.</summary>
-    public VisitResult VisitButton(NodeContext context, string text) => VisitResult.Continue();
+    public VisitResult VisitButton(NodeContext context, string text) => new VisitResult.Continue();
     /// <summary>Called for audio elements. src may be null.</summary>
-    public VisitResult VisitAudio(NodeContext context, string? src) => VisitResult.Continue();
+    public VisitResult VisitAudio(NodeContext context, string? src) => new VisitResult.Continue();
     /// <summary>Called for video elements. src may be null.</summary>
-    public VisitResult VisitVideo(NodeContext context, string? src) => VisitResult.Continue();
+    public VisitResult VisitVideo(NodeContext context, string? src) => new VisitResult.Continue();
     /// <summary>Called for iframe elements. src may be null.</summary>
-    public VisitResult VisitIframe(NodeContext context, string? src) => VisitResult.Continue();
+    public VisitResult VisitIframe(NodeContext context, string? src) => new VisitResult.Continue();
     /// <summary>Called for details elements.</summary>
-    public VisitResult VisitDetails(NodeContext context, bool open) => VisitResult.Continue();
+    public VisitResult VisitDetails(NodeContext context, bool open) => new VisitResult.Continue();
     /// <summary>Called for summary elements.</summary>
-    public VisitResult VisitSummary(NodeContext context, string text) => VisitResult.Continue();
+    public VisitResult VisitSummary(NodeContext context, string text) => new VisitResult.Continue();
     /// <summary>Called before a figure element.</summary>
-    public VisitResult VisitFigureStart(NodeContext context) => VisitResult.Continue();
+    public VisitResult VisitFigureStart(NodeContext context) => new VisitResult.Continue();
     /// <summary>Called for figcaption elements.</summary>
-    public VisitResult VisitFigcaption(NodeContext context, string text) => VisitResult.Continue();
+    public VisitResult VisitFigcaption(NodeContext context, string text) => new VisitResult.Continue();
     /// <summary>Called after a figure element.</summary>
-    public VisitResult VisitFigureEnd(NodeContext context, string output) => VisitResult.Continue();
+    public VisitResult VisitFigureEnd(NodeContext context, string output) => new VisitResult.Continue();
 }

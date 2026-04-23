@@ -7,28 +7,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Structured data block (JSON-LD, Microdata, or RDFa).
  *
- * Represents machine-readable structured data found in the document.
- * JSON-LD blocks are collected as raw JSON strings for flexibility.
+ * Represents machine-readable structured data found in the document. JSON-LD blocks are collected as raw JSON strings
+ * for flexibility.
  *
  * # Examples
  *
- * {@code }{@code }
- * # use html_to_markdown_rs::metadata::{StructuredData, StructuredDataType};
- * let schema = StructuredData {
- *     data_type: StructuredDataType::JsonLd,
- *     raw_json: r#"{"{@literal @}context":"https://schema.org","{@literal @}type":"Article"}"#.to_string(),
- *     schema_type: Some("Article".to_string()),
- * };
+ * {@code }{@code } # use html_to_markdown_rs::metadata::{StructuredData, StructuredDataType}; let schema =
+ * StructuredData { data_type: StructuredDataType::JsonLd, raw_json:
+ * r#"{"{@literal @}context":"https://schema.org","{@literal @}type":"Article"}"#.to_string(), schema_type:
+ * Some("Article".to_string()), };
  *
- * assert_eq!(schema.data_type, StructuredDataType::JsonLd);
- * {@code }{@code }
+ * assert_eq!(schema.data_type, StructuredDataType::JsonLd); {@code }{@code }
  */
 public record StructuredData(
-    /** Type of structured data (JSON-LD, Microdata, RDFa) */
-    @JsonProperty("data_type") StructuredDataType dataType,
-    /** Raw JSON string (for JSON-LD) or serialized representation */
-    @JsonProperty("raw_json") String rawJson,
-    /** Schema type if detectable (e.g., "Article", "Event", "Product") */
-    @JsonProperty("schema_type") Optional<String> schemaType
-) {
+        /** Type of structured data (JSON-LD, Microdata, RDFa) */
+        @JsonProperty("data_type") StructuredDataType dataType,
+        /** Raw JSON string (for JSON-LD) or serialized representation */
+        @JsonProperty("raw_json") String rawJson,
+        /** Schema type if detectable (e.g., "Article", "Event", "Product") */
+        @JsonProperty("schema_type") Optional<String> schemaType) {
 }

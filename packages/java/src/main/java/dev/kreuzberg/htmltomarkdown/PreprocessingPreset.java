@@ -12,24 +12,31 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum PreprocessingPreset {
     /** Minimal cleanup. Remove only essential noise (scripts, styles). */
     Minimal("minimal"),
-    /** Standard cleanup. Default. Removes navigation, forms, and other auxiliary content. */
+    /**
+     * Standard cleanup. Default. Removes navigation, forms, and other auxiliary content.
+     */
     Standard("standard"),
-    /** Aggressive cleanup. Remove extensive non-content elements and structure. */
+    /**
+     * Aggressive cleanup. Remove extensive non-content elements and structure.
+     */
     Aggressive("aggressive");
 
+    /** The string value. */
     private final String value;
 
-    PreprocessingPreset(String value) {
+    PreprocessingPreset(final String value) {
         this.value = value;
     }
 
+    /** Returns the string value. */
     @JsonValue
     public String getValue() {
         return value;
     }
 
+    /** Creates an instance from a string value. */
     @JsonCreator
-    public static PreprocessingPreset fromValue(String value) {
+    public static PreprocessingPreset fromValue(final String value) {
         for (PreprocessingPreset e : values()) {
             if (e.value.equalsIgnoreCase(value)) {
                 return e;
