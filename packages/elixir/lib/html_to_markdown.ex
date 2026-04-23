@@ -20,8 +20,46 @@ defmodule HtmlToMarkdown do
           String.t() | nil,
           String.t() | nil
         ) :: {:ok, String.t() | nil} | {:error, String.t()}
+  def convert(html, options, visitor) when is_map(visitor) do
+    :ok = HtmlToMarkdown.Native.convert_with_visitor(html, options, visitor)
+    do_visitor_receive_loop(visitor)
+  end
+
+  @doc "Convert HTML to Markdown, returning a [`ConversionResult`] with content, metadata, images,"
+  @spec convert(String.t(), String.t() | nil, String.t() | nil) :: {:ok, String.t() | nil} | {:error, String.t()}
   def convert(html, options, visitor) do
     HtmlToMarkdown.Native.convert(html, options, visitor)
+  end
+
+  @doc false
+  defp do_visitor_receive_loop(visitor) do
+    receive do
+      {:visitor_callback, ref_id, callback_name, args_json} ->
+        result =
+          case Map.get(visitor, callback_name) do
+            nil -> "continue"
+            fun -> apply_visitor_callback(fun, args_json)
+          end
+
+        HtmlToMarkdown.Native.visitor_reply(ref_id, result)
+        do_visitor_receive_loop(visitor)
+
+      {:ok, result} ->
+        {:ok, result}
+
+      {:error, reason} ->
+        {:error, reason}
+    after
+      30_000 ->
+        {:error, "visitor callback timeout after 30s"}
+    end
+  end
+
+  @doc false
+  defp apply_visitor_callback(fun, args_json) do
+    args = Jason.decode!(args_json)
+    result = fun.(args)
+    if is_binary(result), do: result, else: "continue"
   end
 
   @doc "Validate that the header level is within valid range (1-6)."

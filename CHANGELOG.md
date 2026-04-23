@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.3.2] - 2026-04-23
+
+### Fixed
+
+- **Elixir visitor bridge** — implemented async thread-based visitor protocol using `rustler::thread::spawn` + `OwnedEnv::send_and_clear` + `mpsc` channels, replacing the impossible synchronous `env.call()` approach.
+- **Elixir NIF rustler 0.37** — replaced removed `SavedTerm`, `is_nil()`, `Pid::spawn_monitor`, `.encode()` APIs with 0.37-compatible equivalents.
+- **Elixir type conversions** — fixed double-optional wrapping (`map(Some)`) and ambiguous `From` impl in generated `_from` methods.
+- **Java checkstyle** — added `maven-checkstyle-plugin` to pom.xml pointing to project `checkstyle.xml` (120-char limit), so `mvn checkstyle:check` uses our config instead of default Sun checks.
+- **Ruby Rakefile** — explicit `Bundler::GemHelper.install_tasks name:` for Bundler 4 compatibility.
+
 ## [3.3.1] - 2026-04-23
 
 ### Fixed

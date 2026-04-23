@@ -1209,15 +1209,6 @@ type ConversionOptionsBuilder struct {
 	ptr unsafe.Pointer
 }
 
-// NewConversionOptionsBuilder creates a new ConversionOptionsBuilder by calling the C constructor.
-func NewConversionOptionsBuilder() *ConversionOptionsBuilder {
-	ptr := C.htm_conversion_options_builder()
-	if ptr == nil {
-		return nil
-	}
-	return &ConversionOptionsBuilder{ptr: unsafe.Pointer(ptr)}
-}
-
 // Free releases the resources held by this handle.
 func (h *ConversionOptionsBuilder) Free() {
 	if h.ptr != nil {

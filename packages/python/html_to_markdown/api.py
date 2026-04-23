@@ -5,24 +5,15 @@ import html_to_markdown._html_to_markdown as _rust
 
 from ._html_to_markdown import ConversionOptions, ConversionResult, PreprocessingOptions
 
-_TO_RUST_HEADINGSTYLE_MAP = {
-    "underlined": _rust.HeadingStyle.Underlined,
-    "atx": _rust.HeadingStyle.Atx,
-    "atx_closed": _rust.HeadingStyle.AtxClosed,
+_TO_RUST_NEWLINESTYLE_MAP = {
+    "spaces": _rust.NewlineStyle.Spaces,
+    "backslash": _rust.NewlineStyle.Backslash,
 }
 
 
 _TO_RUST_LINKSTYLE_MAP = {
     "inline": _rust.LinkStyle.Inline,
     "reference": _rust.LinkStyle.Reference,
-}
-
-
-_TO_RUST_HIGHLIGHTSTYLE_MAP = {
-    "double_equal": _rust.HighlightStyle.DoubleEqual,
-    "html": _rust.HighlightStyle.Html,
-    "bold": _rust.HighlightStyle.Bold,
-    "none": _rust.HighlightStyle.None_,
 }
 
 
@@ -39,6 +30,27 @@ _TO_RUST_PREPROCESSINGPRESET_MAP = {
 }
 
 
+_TO_RUST_HEADINGSTYLE_MAP = {
+    "underlined": _rust.HeadingStyle.Underlined,
+    "atx": _rust.HeadingStyle.Atx,
+    "atx_closed": _rust.HeadingStyle.AtxClosed,
+}
+
+
+_TO_RUST_HIGHLIGHTSTYLE_MAP = {
+    "double_equal": _rust.HighlightStyle.DoubleEqual,
+    "html": _rust.HighlightStyle.Html,
+    "bold": _rust.HighlightStyle.Bold,
+    "none": _rust.HighlightStyle.None_,
+}
+
+
+_TO_RUST_WHITESPACEMODE_MAP = {
+    "normalized": _rust.WhitespaceMode.Normalized,
+    "strict": _rust.WhitespaceMode.Strict,
+}
+
+
 _TO_RUST_CODEBLOCKSTYLE_MAP = {
     "indented": _rust.CodeBlockStyle.Indented,
     "backticks": _rust.CodeBlockStyle.Backticks,
@@ -50,18 +62,6 @@ _TO_RUST_OUTPUTFORMAT_MAP = {
     "markdown": _rust.OutputFormat.Markdown,
     "djot": _rust.OutputFormat.Djot,
     "plain": _rust.OutputFormat.Plain,
-}
-
-
-_TO_RUST_NEWLINESTYLE_MAP = {
-    "spaces": _rust.NewlineStyle.Spaces,
-    "backslash": _rust.NewlineStyle.Backslash,
-}
-
-
-_TO_RUST_WHITESPACEMODE_MAP = {
-    "normalized": _rust.WhitespaceMode.Normalized,
-    "strict": _rust.WhitespaceMode.Strict,
 }
 
 

@@ -15,6 +15,7 @@
     clippy::unnecessary_fallible_conversions
 )]
 
+use rustler::Encoder;
 use rustler::ResourceArc;
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -326,7 +327,7 @@ pub struct ConversionOptionsUpdate {
     pub max_image_size: Option<u64>,
     pub capture_svg: Option<bool>,
     pub infer_dimensions: Option<bool>,
-    pub max_depth: Option<Option<usize>>,
+    pub max_depth: Option<usize>,
     pub exclude_selectors: Option<Vec<String>>,
 }
 
@@ -888,8 +889,8 @@ pub fn convert(
     visitor: Option<rustler::Term<'_>>,
 ) -> Result<ConversionResult, String> {
     let visitor: Option<html_to_markdown_rs::visitor::VisitorHandle> = match visitor {
-        Some(term) if !term.is_nil() => {
-            let bridge = ElixirHtmlVisitorBridge::new(env, term);
+        Some(term) if term.atom_to_string().ok().as_deref() != Some("nil") => {
+            let bridge = ElixirHtmlVisitorBridge::new(env, env.pid(), term);
             Some(std::rc::Rc::new(std::cell::RefCell::new(bridge)) as html_to_markdown_rs::visitor::VisitorHandle)
         }
         _ => None,
@@ -898,9 +899,52 @@ pub fn convert(
         .map(|s| serde_json::from_str::<html_to_markdown_rs::ConversionOptions>(&s).map_err(|e| e.to_string()))
         .transpose()
         .map_err(|e| e.to_string())?;
-    html_to_markdown_rs::convert(&html, options_core.unwrap_or_default(), visitor)
+    html_to_markdown_rs::convert(&html, options_core, visitor)
         .map(|val| val.into())
         .map_err(|e| e.to_string())
+}
+
+// Async visitor variant: spawns a system thread, sends result as a message.
+#[rustler::nif]
+pub fn convert_with_visitor(
+    env: rustler::Env<'_>,
+    html: String,
+    options: Option<String>,
+    visitor: rustler::Term<'_>,
+) -> Result<(), String> {
+    let pid = env.pid();
+    let options_core: Option<html_to_markdown_rs::ConversionOptions> = options
+        .map(|s| serde_json::from_str::<html_to_markdown_rs::ConversionOptions>(&s).map_err(|e| e.to_string()))
+        .transpose()
+        .map_err(|e| e.to_string())?;
+
+    let visitor_owned_env = rustler::OwnedEnv::new();
+    let visitor_saved = visitor_owned_env.save(visitor);
+    let html = html.clone();
+    let options_core = options_core;
+
+    std::thread::spawn(move || {
+        let bridge = ElixirHtmlVisitorBridge::new_from_saved(pid, visitor_owned_env, visitor_saved);
+        let visitor: Option<html_to_markdown_rs::visitor::VisitorHandle> =
+            Some(std::rc::Rc::new(std::cell::RefCell::new(bridge)) as html_to_markdown_rs::visitor::VisitorHandle);
+        let mut result_env = rustler::OwnedEnv::new();
+        let _ = result_env.send_and_clear(&pid, |env| {
+            match html_to_markdown_rs::convert(&html, options_core, visitor) {
+                Ok(val) => {
+                    let result: ConversionResult = val.into();
+                    let ok_atom = rustler::types::atom::Atom::from_str(env, "ok").unwrap().to_term(env);
+                    let result_term = result.encode(env);
+                    rustler::types::tuple::make_tuple(env, &[ok_atom, result_term])
+                }
+                Err(e) => {
+                    let err_atom = rustler::types::atom::Atom::from_str(env, "error").unwrap().to_term(env);
+                    let reason = e.to_string().encode(env);
+                    rustler::types::tuple::make_tuple(env, &[err_atom, reason])
+                }
+            }
+        });
+    });
+    Ok(())
 }
 
 fn nodecontext_to_elixir_map<'a>(
@@ -963,9 +1007,15 @@ fn nodecontext_to_elixir_map<'a>(
         .unwrap_or_else(|_| rustler::types::atom::Atom::from_str(env, "nil").unwrap().to_term(env))
 }
 
+static VISITOR_REPLY_COUNTER: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
+static VISITOR_CHANNELS: std::sync::LazyLock<
+    std::sync::Mutex<std::collections::HashMap<u64, std::sync::mpsc::SyncSender<Option<String>>>>,
+> = std::sync::LazyLock::new(|| std::sync::Mutex::new(std::collections::HashMap::new()));
+
 pub struct ElixirHtmlVisitorBridge {
-    env: rustler::OwnedEnv,
-    visitor_term: rustler::SavedTerm,
+    caller_pid: rustler::types::LocalPid,
+    visitor_env: rustler::OwnedEnv,
+    visitor_saved: rustler::env::SavedTerm,
 }
 
 impl std::fmt::Debug for ElixirHtmlVisitorBridge {
@@ -975,33 +1025,71 @@ impl std::fmt::Debug for ElixirHtmlVisitorBridge {
 }
 
 impl ElixirHtmlVisitorBridge {
-    pub fn new(env: rustler::Env<'_>, visitor_term: rustler::Term<'_>) -> Self {
+    pub fn new(env: rustler::Env<'_>, caller_pid: rustler::types::LocalPid, visitor_term: rustler::Term<'_>) -> Self {
         let owned = rustler::OwnedEnv::new();
         let saved = owned.save(visitor_term);
         Self {
-            env: owned,
-            visitor_term: saved,
+            caller_pid,
+            visitor_env: owned,
+            visitor_saved: saved,
         }
+    }
+
+    pub fn new_from_saved(
+        caller_pid: rustler::types::LocalPid,
+        visitor_env: rustler::OwnedEnv,
+        visitor_saved: rustler::env::SavedTerm,
+    ) -> Self {
+        Self {
+            caller_pid,
+            visitor_env,
+            visitor_saved,
+        }
+    }
+}
+
+fn visitor_send_and_wait(bridge: &ElixirHtmlVisitorBridge, callback_name: &str, args_json: String) -> Option<String> {
+    let (tx, rx) = std::sync::mpsc::sync_channel::<Option<String>>(1);
+    let ref_id = VISITOR_REPLY_COUNTER.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+    VISITOR_CHANNELS.lock().unwrap().insert(ref_id, tx);
+    let pid = bridge.caller_pid;
+    let cb_name = callback_name.to_string();
+    let mut msg_env = rustler::OwnedEnv::new();
+    let _ = msg_env.send_and_clear(&pid, |env| {
+        let tag = rustler::types::atom::Atom::from_str(env, "visitor_callback")
+            .unwrap()
+            .to_term(env);
+        let ref_term = ref_id.encode(env);
+        let name_term = rustler::types::atom::Atom::from_str(env, &cb_name)
+            .unwrap()
+            .to_term(env);
+        let args_term = args_json.encode(env);
+        rustler::types::tuple::make_tuple(env, &[tag, ref_term, name_term, args_term])
+    });
+    let result = rx.recv().ok().flatten();
+    VISITOR_CHANNELS.lock().unwrap().remove(&ref_id);
+    result
+}
+
+#[rustler::nif]
+pub fn visitor_reply(ref_id: u64, result: Option<String>) {
+    if let Some(tx) = VISITOR_CHANNELS.lock().unwrap().get(&ref_id) {
+        let _ = tx.send(result);
     }
 }
 
 impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
     fn visit_element_start(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_element_start").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_element_start", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1015,21 +1103,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _ctx: &html_to_markdown_rs::NodeContext,
         _output: &str,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_element_end").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _output.encode(env)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert("_output".to_string(), serde_json::Value::String(_output.to_string()));
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_element_end", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1039,21 +1123,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
     }
 
     fn visit_text(&mut self, _ctx: &html_to_markdown_rs::NodeContext, _text: &str) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_text").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert("_text".to_string(), serde_json::Value::String(_text.to_string()));
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_text", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1069,26 +1149,25 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _text: &str,
         _title: Option<&str>,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_link").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![
-                nodecontext_to_elixir_map(env, _ctx),
-                _href.encode(env),
-                _text.encode(env),
-                _title.encode(env),
-            ];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert("_href".to_string(), serde_json::Value::String(_href.to_string()));
+        args_map.insert("_text".to_string(), serde_json::Value::String(_text.to_string()));
+        args_map.insert(
+            "_title".to_string(),
+            match _title {
+                Some(s) => serde_json::Value::String(s.to_string()),
+                None => serde_json::Value::Null,
+            },
+        );
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_link", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1104,26 +1183,25 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _alt: &str,
         _title: Option<&str>,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_image").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![
-                nodecontext_to_elixir_map(env, _ctx),
-                _src.encode(env),
-                _alt.encode(env),
-                _title.encode(env),
-            ];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert("_src".to_string(), serde_json::Value::String(_src.to_string()));
+        args_map.insert("_alt".to_string(), serde_json::Value::String(_alt.to_string()));
+        args_map.insert(
+            "_title".to_string(),
+            match _title {
+                Some(s) => serde_json::Value::String(s.to_string()),
+                None => serde_json::Value::Null,
+            },
+        );
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_image", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1139,26 +1217,28 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _text: &str,
         _id: Option<&str>,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_heading").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![
-                nodecontext_to_elixir_map(env, _ctx),
-                format!("{:?}", _level).encode(env),
-                _text.encode(env),
-                _id.encode(env),
-            ];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert(
+            "_level".to_string(),
+            serde_json::Value::Number(serde_json::Number::from(_level as u64)),
+        );
+        args_map.insert("_text".to_string(), serde_json::Value::String(_text.to_string()));
+        args_map.insert(
+            "_id".to_string(),
+            match _id {
+                Some(s) => serde_json::Value::String(s.to_string()),
+                None => serde_json::Value::Null,
+            },
+        );
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_heading", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1173,25 +1253,24 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _lang: Option<&str>,
         _code: &str,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_code_block").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![
-                nodecontext_to_elixir_map(env, _ctx),
-                _lang.encode(env),
-                _code.encode(env),
-            ];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert(
+            "_lang".to_string(),
+            match _lang {
+                Some(s) => serde_json::Value::String(s.to_string()),
+                None => serde_json::Value::Null,
+            },
+        );
+        args_map.insert("_code".to_string(), serde_json::Value::String(_code.to_string()));
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_code_block", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1205,21 +1284,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _ctx: &html_to_markdown_rs::NodeContext,
         _code: &str,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_code_inline").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _code.encode(env)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert("_code".to_string(), serde_json::Value::String(_code.to_string()));
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_code_inline", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1235,26 +1310,19 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _marker: &str,
         _text: &str,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_list_item").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![
-                nodecontext_to_elixir_map(env, _ctx),
-                _ordered.encode(env),
-                _marker.encode(env),
-                _text.encode(env),
-            ];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert("_ordered".to_string(), serde_json::Value::Bool(_ordered));
+        args_map.insert("_marker".to_string(), serde_json::Value::String(_marker.to_string()));
+        args_map.insert("_text".to_string(), serde_json::Value::String(_text.to_string()));
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_list_item", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1268,21 +1336,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _ctx: &html_to_markdown_rs::NodeContext,
         _ordered: bool,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_list_start").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _ordered.encode(env)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert("_ordered".to_string(), serde_json::Value::Bool(_ordered));
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_list_start", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1297,25 +1361,18 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _ordered: bool,
         _output: &str,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_list_end").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![
-                nodecontext_to_elixir_map(env, _ctx),
-                _ordered.encode(env),
-                _output.encode(env),
-            ];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert("_ordered".to_string(), serde_json::Value::Bool(_ordered));
+        args_map.insert("_output".to_string(), serde_json::Value::String(_output.to_string()));
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_list_end", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1325,21 +1382,16 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
     }
 
     fn visit_table_start(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_table_start").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_table_start", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1354,25 +1406,21 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _cells: &[String],
         _is_header: bool,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_table_row").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![
-                nodecontext_to_elixir_map(env, _ctx),
-                format!("{:?}", _cells).encode(env),
-                _is_header.encode(env),
-            ];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert(
+            "_cells".to_string(),
+            serde_json::to_value(_cells).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert("_is_header".to_string(), serde_json::Value::Bool(_is_header));
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_table_row", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1386,21 +1434,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _ctx: &html_to_markdown_rs::NodeContext,
         _output: &str,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_table_end").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _output.encode(env)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert("_output".to_string(), serde_json::Value::String(_output.to_string()));
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_table_end", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1415,25 +1459,21 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _content: &str,
         _depth: usize,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_blockquote").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![
-                nodecontext_to_elixir_map(env, _ctx),
-                _content.encode(env),
-                format!("{:?}", _depth).encode(env),
-            ];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert("_content".to_string(), serde_json::Value::String(_content.to_string()));
+        args_map.insert(
+            "_depth".to_string(),
+            serde_json::Value::Number(serde_json::Number::from(_depth as u64)),
+        );
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_blockquote", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1447,21 +1487,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _ctx: &html_to_markdown_rs::NodeContext,
         _text: &str,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_strong").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert("_text".to_string(), serde_json::Value::String(_text.to_string()));
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_strong", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1475,21 +1511,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _ctx: &html_to_markdown_rs::NodeContext,
         _text: &str,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_emphasis").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert("_text".to_string(), serde_json::Value::String(_text.to_string()));
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_emphasis", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1503,21 +1535,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _ctx: &html_to_markdown_rs::NodeContext,
         _text: &str,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_strikethrough").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert("_text".to_string(), serde_json::Value::String(_text.to_string()));
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_strikethrough", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1531,21 +1559,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _ctx: &html_to_markdown_rs::NodeContext,
         _text: &str,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_underline").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert("_text".to_string(), serde_json::Value::String(_text.to_string()));
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_underline", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1559,21 +1583,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _ctx: &html_to_markdown_rs::NodeContext,
         _text: &str,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_subscript").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert("_text".to_string(), serde_json::Value::String(_text.to_string()));
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_subscript", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1587,21 +1607,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _ctx: &html_to_markdown_rs::NodeContext,
         _text: &str,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_superscript").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert("_text".to_string(), serde_json::Value::String(_text.to_string()));
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_superscript", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1611,21 +1627,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
     }
 
     fn visit_mark(&mut self, _ctx: &html_to_markdown_rs::NodeContext, _text: &str) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_mark").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert("_text".to_string(), serde_json::Value::String(_text.to_string()));
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_mark", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1635,21 +1647,16 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
     }
 
     fn visit_line_break(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_line_break").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_line_break", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1659,21 +1666,16 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
     }
 
     fn visit_horizontal_rule(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_horizontal_rule").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_horizontal_rule", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1688,25 +1690,21 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _tag_name: &str,
         _html: &str,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_custom_element").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![
-                nodecontext_to_elixir_map(env, _ctx),
-                _tag_name.encode(env),
-                _html.encode(env),
-            ];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert(
+            "_tag_name".to_string(),
+            serde_json::Value::String(_tag_name.to_string()),
+        );
+        args_map.insert("_html".to_string(), serde_json::Value::String(_html.to_string()));
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_custom_element", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1719,21 +1717,16 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         &mut self,
         _ctx: &html_to_markdown_rs::NodeContext,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_definition_list_start").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_definition_list_start", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1747,21 +1740,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _ctx: &html_to_markdown_rs::NodeContext,
         _text: &str,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_definition_term").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert("_text".to_string(), serde_json::Value::String(_text.to_string()));
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_definition_term", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1775,21 +1764,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _ctx: &html_to_markdown_rs::NodeContext,
         _text: &str,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_definition_description").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert("_text".to_string(), serde_json::Value::String(_text.to_string()));
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_definition_description", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1803,21 +1788,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _ctx: &html_to_markdown_rs::NodeContext,
         _output: &str,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_definition_list_end").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _output.encode(env)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert("_output".to_string(), serde_json::Value::String(_output.to_string()));
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_definition_list_end", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1832,25 +1813,30 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _action: Option<&str>,
         _method: Option<&str>,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_form").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![
-                nodecontext_to_elixir_map(env, _ctx),
-                _action.encode(env),
-                _method.encode(env),
-            ];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert(
+            "_action".to_string(),
+            match _action {
+                Some(s) => serde_json::Value::String(s.to_string()),
+                None => serde_json::Value::Null,
+            },
+        );
+        args_map.insert(
+            "_method".to_string(),
+            match _method {
+                Some(s) => serde_json::Value::String(s.to_string()),
+                None => serde_json::Value::Null,
+            },
+        );
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_form", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1866,26 +1852,34 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _name: Option<&str>,
         _value: Option<&str>,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_input").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![
-                nodecontext_to_elixir_map(env, _ctx),
-                _input_type.encode(env),
-                _name.encode(env),
-                _value.encode(env),
-            ];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert(
+            "_input_type".to_string(),
+            serde_json::Value::String(_input_type.to_string()),
+        );
+        args_map.insert(
+            "_name".to_string(),
+            match _name {
+                Some(s) => serde_json::Value::String(s.to_string()),
+                None => serde_json::Value::Null,
+            },
+        );
+        args_map.insert(
+            "_value".to_string(),
+            match _value {
+                Some(s) => serde_json::Value::String(s.to_string()),
+                None => serde_json::Value::Null,
+            },
+        );
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_input", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1899,21 +1893,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _ctx: &html_to_markdown_rs::NodeContext,
         _text: &str,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_button").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert("_text".to_string(), serde_json::Value::String(_text.to_string()));
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_button", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1927,21 +1917,23 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _ctx: &html_to_markdown_rs::NodeContext,
         _src: Option<&str>,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_audio").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _src.encode(env)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert(
+            "_src".to_string(),
+            match _src {
+                Some(s) => serde_json::Value::String(s.to_string()),
+                None => serde_json::Value::Null,
+            },
+        );
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_audio", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1955,21 +1947,23 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _ctx: &html_to_markdown_rs::NodeContext,
         _src: Option<&str>,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_video").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _src.encode(env)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert(
+            "_src".to_string(),
+            match _src {
+                Some(s) => serde_json::Value::String(s.to_string()),
+                None => serde_json::Value::Null,
+            },
+        );
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_video", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -1983,21 +1977,23 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _ctx: &html_to_markdown_rs::NodeContext,
         _src: Option<&str>,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_iframe").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _src.encode(env)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert(
+            "_src".to_string(),
+            match _src {
+                Some(s) => serde_json::Value::String(s.to_string()),
+                None => serde_json::Value::Null,
+            },
+        );
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_iframe", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -2011,21 +2007,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _ctx: &html_to_markdown_rs::NodeContext,
         _open: bool,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_details").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _open.encode(env)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert("_open".to_string(), serde_json::Value::Bool(_open));
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_details", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -2039,21 +2031,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _ctx: &html_to_markdown_rs::NodeContext,
         _text: &str,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_summary").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert("_text".to_string(), serde_json::Value::String(_text.to_string()));
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_summary", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -2063,21 +2051,16 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
     }
 
     fn visit_figure_start(&mut self, _ctx: &html_to_markdown_rs::NodeContext) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_figure_start").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_figure_start", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -2091,21 +2074,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _ctx: &html_to_markdown_rs::NodeContext,
         _text: &str,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_figcaption").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _text.encode(env)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert("_text".to_string(), serde_json::Value::String(_text.to_string()));
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_figcaption", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -2119,21 +2098,17 @@ impl html_to_markdown_rs::visitor::HtmlVisitor for ElixirHtmlVisitorBridge {
         _ctx: &html_to_markdown_rs::NodeContext,
         _output: &str,
     ) -> html_to_markdown_rs::VisitResult {
-        let result_str = self.env.run(|env| {
-            let visitor = self.visitor_term.load(env);
-            let key = rustler::types::atom::Atom::from_str(env, "visit_figure_end").ok()?;
-            let func_term: rustler::Term<'_> = rustler::Term::map_get(visitor, key).ok()??;
-            if func_term.is_nil() {
-                return None;
-            }
-            let args: Vec<rustler::Term<'_>> = vec![nodecontext_to_elixir_map(env, _ctx), _output.encode(env)];
-            let result: rustler::Term<'_> = env.call(func_term, &args)
-                .ok()?;
-            result.decode::<String>().ok()
-        });
-        match result_str {
-            None | Some(Err(_)) => html_to_markdown_rs::VisitResult::Continue,
-            Some(Ok(s)) => match s.to_lowercase().as_str() {
+        let mut args_map = serde_json::Map::new();
+        args_map.insert(
+            "_ctx".to_string(),
+            serde_json::to_value(_ctx).unwrap_or(serde_json::Value::Null),
+        );
+        args_map.insert("_output".to_string(), serde_json::Value::String(_output.to_string()));
+        let args_json = serde_json::Value::Object(args_map).to_string();
+        let result = visitor_send_and_wait(self, "visit_figure_end", args_json);
+        match result {
+            None => html_to_markdown_rs::VisitResult::Continue,
+            Some(s) => match s.to_lowercase().as_str() {
                 "continue" => html_to_markdown_rs::VisitResult::Continue,
                 "skip" => html_to_markdown_rs::VisitResult::Skip,
                 "preserve_html" | "preservehtml" => html_to_markdown_rs::VisitResult::PreserveHtml,
@@ -2172,12 +2147,14 @@ pub fn conversionoptions_apply_update(obj: ConversionOptions, update: Conversion
 
 #[rustler::nif]
 pub fn conversionoptions_from_update(update: ConversionOptionsUpdate) -> ConversionOptions {
-    html_to_markdown_rs::ConversionOptions::from_update(update.into()).into()
+    let update_core: html_to_markdown_rs::ConversionOptionsUpdate = update.into();
+    html_to_markdown_rs::ConversionOptions::from_update(update_core).into()
 }
 
 #[rustler::nif]
 pub fn conversionoptions_from(update: ConversionOptionsUpdate) -> ConversionOptions {
-    html_to_markdown_rs::ConversionOptions::from(update.into()).into()
+    let update_core: html_to_markdown_rs::ConversionOptionsUpdate = update.into();
+    html_to_markdown_rs::ConversionOptions::from(update_core).into()
 }
 
 #[rustler::nif]
@@ -2247,12 +2224,14 @@ pub fn preprocessingoptions_apply_update(obj: PreprocessingOptions, update: Prep
 
 #[rustler::nif]
 pub fn preprocessingoptions_from_update(update: PreprocessingOptionsUpdate) -> PreprocessingOptions {
-    html_to_markdown_rs::PreprocessingOptions::from_update(update.into()).into()
+    let update_core: html_to_markdown_rs::PreprocessingOptionsUpdate = update.into();
+    html_to_markdown_rs::PreprocessingOptions::from_update(update_core).into()
 }
 
 #[rustler::nif]
 pub fn preprocessingoptions_from(update: PreprocessingOptionsUpdate) -> PreprocessingOptions {
-    html_to_markdown_rs::PreprocessingOptions::from(update.into()).into()
+    let update_core: html_to_markdown_rs::PreprocessingOptionsUpdate = update.into();
+    html_to_markdown_rs::PreprocessingOptions::from(update_core).into()
 }
 
 impl From<DocumentMetadata> for html_to_markdown_rs::metadata::DocumentMetadata {
