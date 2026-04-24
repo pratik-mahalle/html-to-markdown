@@ -1,0 +1,43 @@
+{
+  "name": "@kreuzberg/html-to-markdown-node",
+  "version": "3.3.2",
+  "description": "High-performance HTML to Markdown converter",
+  "keywords": [
+    "converter",
+    "html",
+    "markdown"
+  ],
+  "license": "MIT",
+  "author": "Kreuzberg Team",
+  "repository": "https://github.com/kreuzberg-dev/html-to-markdown",
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "**/*.node"
+  ],
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "build": "napi build --release",
+    "build:debug": "napi build",
+    "build:ts": "echo 'No TypeScript wrapper to build'",
+    "test": "node -e \"console.log('Add test command')\"",
+    "lint": "biome check src",
+    "lint:fix": "biome check --write src",
+    "format": "biome format --write src"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.12",
+    "@napi-rs/cli": "^3.0.0",
+    "typescript": "^6.0.3"
+  },
+  "napi": {
+    "name": "html-to-markdown-rs",
+    "triples": [
+      "x86_64-unknown-linux-gnu",
+      "x86_64-apple-darwin",
+      "aarch64-apple-darwin",
+      "x86_64-pc-windows-msvc"
+    ]
+  }
+}

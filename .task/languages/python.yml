@@ -1,12 +1,5 @@
-# Cross-platform Python tasks using uv and maturin
-# Compatible with Windows (PowerShell/cmd), macOS, and Linux
-
 version: "3"
 internal: true
-
-includes:
-  platforms: ../config/platforms.yml
-  _cfg: ../config/vars.yml
 
 vars:
   BUILD_PROFILE: "{{.BUILD_PROFILE | default \"release\"}}"
@@ -15,109 +8,42 @@ vars:
 tasks:
   install:
     desc: "Install Python dependencies with uv"
-    silent: false
     cmds:
-      - cmd: cd {{.PYTHON_PKG}} && uv sync
-        ignore_error: false
-      - cmd: cd {{.PYTHON_PKG}} && uv pip install -e .
-        ignore_error: false
+      - cd {{.PYTHON_PKG}} && uv sync
+      - cd {{.PYTHON_PKG}} && uv pip install -e .
 
   build:
     desc: "Build Python bindings with maturin ({{.BUILD_PROFILE}} profile)"
-    silent: false
     cmds:
-      - cmd: cd {{.PYTHON_PKG}} && maturin develop{{if eq .BUILD_PROFILE "release"}} --release{{end}}
-        ignore_error: false
+      - cd {{.PYTHON_PKG}} && maturin develop{{if eq .BUILD_PROFILE "release"}} --release{{end}}
 
   build:dev:
     desc: "Build Python bindings in debug mode"
-    silent: false
     cmds:
-      - cmd: cd {{.PYTHON_PKG}} && maturin develop
-        ignore_error: false
+      - cd {{.PYTHON_PKG}} && maturin develop
 
   build:release:
     desc: "Build Python bindings in release mode"
-    silent: false
     cmds:
-      - cmd: cd {{.PYTHON_PKG}} && maturin develop --release
-        ignore_error: false
+      - cd {{.PYTHON_PKG}} && maturin develop --release
 
   build:ci:
     desc: "Build Python bindings for CI (release with debug info)"
-    silent: false
     cmds:
-      - cmd: cd {{.PYTHON_PKG}} && maturin develop --release
-        ignore_error: false
+      - cd {{.PYTHON_PKG}} && maturin develop --release
 
-  test:
-    desc: "Run Python tests with pytest"
-    silent: false
+  wheel:
+    desc: "Build Python wheel distribution"
     cmds:
-      - cmd: cd {{.PYTHON_PKG}} && uv run pytest -v tests/
-        ignore_error: false
-
-  test:ci:
-    desc: "Run Python tests with coverage for CI (generates lcov)"
-    silent: false
-    cmds:
-      - cmd: cd {{.PYTHON_PKG}} && uv run pytest -v --cov=. --cov-report=lcov:coverage.lcov tests/
-        ignore_error: false
+      - cd {{.PYTHON_PKG}} && maturin build --release
 
   coverage:
     desc: "Generate Python code coverage report (lcov format)"
-    silent: false
     cmds:
-      - cmd: cd {{.PYTHON_PKG}} && uv run pytest -v --cov=. --cov-report=lcov:coverage.lcov tests/
-        ignore_error: false
-
-  lint:
-    desc: "Lint Python code WITH auto-fix (ruff check --fix)"
-    silent: false
-    cmds:
-      - cmd: cd {{.PYTHON_PKG}} && uv run ruff check --fix html_to_markdown tests/
-        ignore_error: false
-
-  lint:check:
-    desc: "Lint Python code WITHOUT auto-fix (check-only)"
-    silent: false
-    cmds:
-      - cmd: cd {{.PYTHON_PKG}} && uv run ruff check html_to_markdown tests/
-        ignore_error: false
-
-  format:
-    desc: "Format Python code with ruff format"
-    silent: false
-    cmds:
-      - cmd: cd {{.PYTHON_PKG}} && uv run ruff format html_to_markdown tests/
-        ignore_error: false
-
-  format:check:
-    desc: "Check Python formatting without modifications"
-    silent: false
-    cmds:
-      - cmd: cd {{.PYTHON_PKG}} && uv run ruff format --check html_to_markdown tests/
-        ignore_error: false
-
-  typecheck:
-    desc: "Run mypy type checking in strict mode"
-    silent: false
-    cmds:
-      - cmd: cd {{.PYTHON_PKG}} && uv run mypy --strict html_to_markdown tests/
-        ignore_error: false
-
-  update:
-    desc: "Update Python dependencies to latest versions (including major versions)"
-    dir: "{{.PYTHON_PKG}}"
-    cmds:
-      - echo "Updating Python dependencies to latest versions..."
-      - uv sync --all-packages --all-extras --upgrade --no-install-workspace --no-install-project
-      - echo "Checking remaining outdated dependencies..."
-      - uv pip list --outdated || true
+      - cd {{.PYTHON_PKG}} && uv run pytest -v --cov=. --cov-report=lcov:coverage.lcov tests/
 
   clean:
     desc: "Clean Python build artifacts"
-    silent: false
     cmds:
       - cmd: |
           cd {{.PYTHON_PKG}} && python -c "
@@ -129,24 +55,3 @@ tasks:
               shutil.rmtree(f, ignore_errors=True)
           "
         ignore_error: true
-
-  e2e:generate:
-    desc: "Generate E2E tests from fixtures using alef"
-    silent: false
-    cmds:
-      - cmd: alef e2e generate --lang python
-        ignore_error: false
-
-  e2e:test:
-    desc: "Run Python E2E tests in e2e/python directory"
-    silent: false
-    cmds:
-      - cmd: cd e2e/python && uv run pytest tests/ -v
-        ignore_error: false
-
-  wheel:
-    desc: "Build Python wheel distribution"
-    silent: false
-    cmds:
-      - cmd: cd {{.PYTHON_PKG}} && maturin build --release
-        ignore_error: false

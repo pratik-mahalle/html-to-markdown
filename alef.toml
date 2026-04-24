@@ -594,45 +594,80 @@ keywords = ["html", "markdown", "converter"]
 [custom_modules]
 node = ["helpers"]
 
+[build_commands.ruby]
+build = "cd packages/ruby/ext/html_to_markdown_rb && cargo build"
+build_release = "cd packages/ruby/ext/html_to_markdown_rb && cargo build --release"
+
+[lint.python]
+before = "cd packages/python && uv sync"
+format = "ruff format packages/python"
+check = "ruff check --fix packages/python"
+typecheck = "cd packages/python && uv run mypy ."
+
+[lint.go]
+before = "cargo build --release -p html-to-markdown-ffi"
+format = "gofmt -w packages/go"
+check = "cd packages/go && golangci-lint run ./..."
+
+[lint.ffi]
+precondition = "test -d e2e/c"
+format = "find e2e/c -name '*.c' -o -name '*.h' | xargs clang-format -i"
+check = "cppcheck --std=c11 --enable=warning,style,performance --suppress=missingIncludeSystem --suppress=unusedStructMember e2e/c/"
+
 [test.python]
-command = "task python:test"
+before = "cd packages/python && maturin develop --release"
+command = "cd packages/python && uv run pytest tests/ -v"
 e2e = "cd e2e/python && python3 -m pytest tests/ -q"
 
 [test.node]
+before = "cd crates/html-to-markdown-node && napi build --output-dir . --release"
 command = "npx vitest run --config packages/typescript/vitest.config.ts"
 e2e = "cd e2e/typescript && npx vitest run"
 
 [test.go]
-command = "task go:test"
+before = "cargo build --release -p html-to-markdown-ffi"
+command = "cd packages/go && go test ./..."
 e2e = "cd e2e/go && go test ./... -count=1"
 
 [test.ruby]
-command = "task ruby:test"
+before = "cd e2e/ruby && bundle install"
+command = "cd e2e/ruby && bundle exec rspec"
+e2e = "cd e2e/ruby && bundle exec rspec"
 
 [test.php]
-command = "task php:test"
+before = "cd e2e/php && composer install"
+command = "cd e2e/php && composer test"
+e2e = "cd e2e/php && composer test"
 
 [test.java]
-command = "task java:test"
+before = "cargo build --release -p html-to-markdown-ffi"
+command = "cd e2e/java && mvn test -q"
+e2e = "cd e2e/java && mvn test -q"
 
 [test.csharp]
-command = "task csharp:test"
+before = "cargo build --release -p html-to-markdown-ffi"
+command = "dotnet test e2e/csharp"
+e2e = "dotnet test e2e/csharp"
 
 [test.elixir]
-command = "task elixir:test"
+before = "cd packages/elixir && mix deps.get && mix compile"
+command = "cd e2e/elixir && mix test"
 e2e = "cd e2e/elixir && mix test"
 
 [test.r]
-command = "task r:test"
+precondition = "which Rscript 2>/dev/null"
+command = "cd e2e/r && Rscript -e \"devtools::load_all('../../packages/r'); testthat::set_max_fails(Inf); testthat::test_dir('tests')\""
 e2e = "cd e2e/r && Rscript -e \"devtools::load_all('../../packages/r'); testthat::set_max_fails(Inf); testthat::test_dir('tests')\""
 
 [test.wasm]
+before = "wasm-pack build crates/html-to-markdown-wasm --release --target bundler && cd e2e/wasm && npm install"
 e2e = "cd e2e/wasm && npm test"
 
 [test.rust]
 e2e = "cd e2e/rust && cargo test"
 
 [test.c]
+before = "cargo build --release -p html-to-markdown-ffi"
 e2e = "cd e2e/c && make clean && make && DYLD_LIBRARY_PATH=../../target/release ./test_runner"
 
 # E2E test generation configuration

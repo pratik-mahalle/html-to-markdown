@@ -14,7 +14,7 @@ on:
       - ".cargo/config.toml"
       - ".pre-commit-config.yaml"
       - ".golangci.yml"
-      - "biome.json"
+      - "alef.toml"
       - "pyproject.toml"
       - "uv.lock"
       - "uv.toml"
@@ -46,7 +46,7 @@ on:
       - ".cargo/config.toml"
       - ".pre-commit-config.yaml"
       - ".golangci.yml"
-      - "biome.json"
+      - "alef.toml"
       - "pyproject.toml"
       - "uv.lock"
       - "uv.toml"
@@ -117,9 +117,7 @@ jobs:
           components: rustfmt, clippy, llvm-tools-preview
 
       - name: Install Alef
-        run: |
-          curl -sSfL https://github.com/kreuzberg-dev/alef/releases/download/v0.6.0/alef-x86_64-unknown-linux-gnu.tar.gz | tar xz --strip-components=1 -C /usr/local/bin
-        shell: bash
+        uses: kreuzberg-dev/actions/install-alef@v1
 
       - name: Setup Go
         uses: actions/setup-go@v6 # v6
@@ -139,10 +137,6 @@ jobs:
           elixir-version: "1.19"
           otp-version: "28.1"
 
-      - name: Install Elixir Dependencies
-        run: task elixir:install
-        shell: bash
-
       - name: Setup R
         uses: kreuzberg-dev/actions/setup-r@v1 # v1
         with:
@@ -154,25 +148,8 @@ jobs:
           ruby-version: "3.3"
           bundler-cache: false
 
-      - name: Install Ruby Dependencies
-        run: task ruby:install
-        shell: bash
-
       - name: Setup Node Workspace
         uses: kreuzberg-dev/actions/setup-node-workspace@v1 # v1
-
-      - name: Install Python Dependencies
-        uses: nick-fields/retry@v4 # v4
-        with:
-          timeout_minutes: 5
-          max_attempts: 3
-          retry_wait_seconds: 30
-          command: uv sync --all-extras --no-install-workspace
-          shell: bash
-
-      - name: Install Go Lint Dependencies
-        run: task go:install
-        shell: bash
 
       - name: Setup PHP
         uses: shivammathur/setup-php@2.37.0 # 2
@@ -181,8 +158,8 @@ jobs:
           tools: composer:2.9.1
           coverage: none
 
-      - name: Install PHP Dependencies
-        run: task php:install
+      - name: Install All Binding Dependencies
+        run: alef setup
         shell: bash
 
       - name: Run Lint Checks
@@ -206,9 +183,7 @@ jobs:
           key: prek|${{ env.pythonLocation }}|${{ hashFiles('.prek-config.yaml') }}
 
       - name: Run Pre-commit Hooks
-        env:
-          SKIP: golangci-lint-packages,golangci-lint-examples
-        run: task pre-commit:run
+        run: prek run --all-files
         shell: bash
 
       - name: Install Python README Dependencies
@@ -904,7 +879,7 @@ jobs:
         shell: bash
 
       - name: Run E2E tests
-        run: task python:e2e:test
+        run: alef test --e2e --lang python
         shell: bash
 
   test-node:
@@ -975,7 +950,7 @@ jobs:
 
       - name: Run E2E tests (Node.js only)
         if: matrix.runtime == 'node'
-        run: task node:e2e:test
+        run: alef test --e2e --lang node
         shell: bash
 
   test-ruby:
@@ -1067,7 +1042,7 @@ jobs:
 
       - name: Run E2E tests (Unix only)
         if: runner.os != 'Windows'
-        run: task ruby:e2e:test
+        run: alef test --e2e --lang ruby
         shell: bash
 
   test-php:
@@ -1130,7 +1105,7 @@ jobs:
         uses: kreuzberg-dev/actions/install-task@v1 # v1
 
       - name: Run E2E tests
-        run: task php:e2e:test
+        run: alef test --e2e --lang php
         shell: bash
         env:
           EXTENSION_PATH: ${{ steps.build-php-extension.outputs.extension-path }}
@@ -1188,7 +1163,7 @@ jobs:
         uses: kreuzberg-dev/actions/install-task@v1 # v1
 
       - name: Run E2E tests
-        run: task go:e2e:test
+        run: alef test --e2e --lang go
         shell: bash
 
   test-java:
@@ -1221,7 +1196,7 @@ jobs:
 
       - name: Run E2E tests (Ubuntu only)
         if: matrix.os == 'ubuntu-latest'
-        run: task java:e2e:test
+        run: alef test --e2e --lang java
         shell: bash
 
   test-elixir:
@@ -1271,7 +1246,7 @@ jobs:
         uses: kreuzberg-dev/actions/install-task@v1 # v1
 
       - name: Run E2E tests
-        run: task elixir:e2e:test
+        run: alef test --e2e --lang elixir
         shell: bash
 
   test-r:
@@ -1310,7 +1285,7 @@ jobs:
         uses: kreuzberg-dev/actions/install-task@v1 # v1
 
       - name: Run E2E tests
-        run: task r:e2e:test
+        run: alef test --e2e --lang r
         shell: bash
 
   test-c-ffi:

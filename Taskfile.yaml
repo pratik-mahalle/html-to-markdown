@@ -1,227 +1,184 @@
 version: "3"
 
 # ============================================================================
-# KREUZBERG THIN ROUTER - html-to-markdown
+# html-to-markdown — Root Taskfile
 # ============================================================================
-# This is the root Taskfile that delegates all work to modular task files.
-# Structure:
-#   - .task/config/vars.yml       -> shared variables and platform detection
-#   - .task/config/platforms.yml  -> platform-specific configuration
-#   - .task/languages/*           -> language-specific build/test/lint tasks
-#   - .task/workflows/*           -> aggregated multi-language workflows
-#   - .task/tools/*               -> utility tasks (version sync, validation, etc.)
+# Primary development interface. Rust core tasks delegate to .task/languages/rust.yml.
+# All binding language operations (setup, build, test, lint, format, clean, update)
+# are handled by alef v0.7.0.
 #
 # Command patterns:
-#   task setup         -> installs all dependencies
-#   task test          -> runs all language tests
-#   task lint          -> lints all languages with auto-fix
-#   task format:check  -> checks format without modifications
-#   task rust:build    -> language-specific tasks (delegated to .task/languages/rust.yml)
-#
+#   task setup         -> install all dependencies
+#   task build         -> build core + bindings
+#   task test          -> run all tests
+#   task lint          -> run all linters via prek
+#   task fmt           -> format all code
+#   task rust:build    -> Rust-specific tasks
 # ============================================================================
 
-# === INCLUDES ===
 includes:
-  # Internal configuration (not exposed as tasks)
-  _cfg:
-    taskfile: ./.task/config/vars.yml
-    internal: true
-  _platforms:
-    taskfile: ./.task/config/platforms.yml
-    internal: true
-
-  # Language modules (exposed with prefix: rust:*, python:*, node:*, etc.)
   rust:
     taskfile: ./.task/languages/rust.yml
   python:
     taskfile: ./.task/languages/python.yml
-  node:
-    taskfile: ./.task/languages/node.yml
-  typescript:
-    taskfile: ./.task/languages/typescript.yml
-  wasm:
-    taskfile: ./.task/languages/wasm.yml
-  ruby:
-    taskfile: ./.task/languages/ruby.yml
-  php:
-    taskfile: ./.task/languages/php.yml
-  go:
-    taskfile: ./.task/languages/go.yml
-  java:
-    taskfile: ./.task/languages/java.yml
-  csharp:
-    taskfile: ./.task/languages/csharp.yml
-  elixir:
-    taskfile: ./.task/languages/elixir.yml
-  r:
-    taskfile: ./.task/languages/r.yml
-
-  # Workflow aggregators (internal, used by root-level tasks)
-  _build:
-    taskfile: ./.task/workflows/build.yml
-    internal: true
-  _test:
-    taskfile: ./.task/workflows/test.yml
-    internal: true
-  _lint:
-    taskfile: ./.task/workflows/lint.yml
-    internal: true
-    optional: true
-
-  # Version sync workflow
   version:
     taskfile: ./.task/tools/version-sync.yml
-
-  # Documentation generation (exposed as docs:*)
   docs:
     taskfile: ./.task/tools/docs.yml
-
-  # General tools (flatten to expose pre-commit:*, toml:*, shell:*, etc. at root)
   _tools:
     taskfile: ./.task/tools/general.yml
     flatten: true
 
-# ============================================================================
-# ROOT TASKS - PRIMARY DEVELOPMENT INTERFACE
-# ============================================================================
-
 tasks:
-  # Setup: Install all dependencies across all languages
+  # === Setup ===
   setup:
     desc: "Install all dependencies and setup development environment"
     cmds:
       - task: rust:install
-      - task: python:install
-      - task: node:install
-      - task: typescript:install
-      - task: wasm:install
-      - task: ruby:install
-      - task: php:install
-      - task: go:install
-      - task: java:install
-      - task: csharp:install
-      - task: elixir:install
-      - task: r:install
+      - alef setup
       - task: pre-commit:install
 
-  # Build tasks: compile all languages
+  # === Build ===
   build:
-    desc: "Build all language bindings (default: release mode)"
+    desc: "Build core Rust library and all language bindings"
     cmds:
-      - task: _build:all
+      - task: rust:build
+      - alef build
 
   build:dev:
     desc: "Build all in debug mode"
     cmds:
-      - task: _build:all:dev
+      - task: rust:build:dev
 
   build:release:
     desc: "Build all in release mode"
     cmds:
-      - task: _build:all:release
+      - task: rust:build:release
 
   build:ci:
     desc: "Build all in CI mode"
     cmds:
-      - task: _build:all:ci
+      - task: rust:build:ci
 
   build:core:
     desc: "Build Rust core library only"
     cmds:
-      - task: _build:core
+      - task: rust:build
 
   build:bindings:
     desc: "Build all language bindings (skip Rust core)"
     cmds:
-      - task: _build:bindings
+      - alef build
 
   build:cli:
     desc: "Build the html-to-markdown CLI binary"
     cmds:
-      - task: rust:cli:build
+      - task: rust:build:release
 
-  # Test tasks: run all test suites
+  # === Test ===
   test:
     desc: "Run all test suites across all languages"
     cmds:
-      - task: _test:all
+      - task: rust:test
+      - alef test
+
+  test:bindings:
+    desc: "Run binding test suites only (skip Rust core)"
+    cmds:
+      - alef test
 
   test:ci:
     desc: "Run all tests with coverage (CI mode)"
     cmds:
-      - task: _test:all:ci
+      - task: rust:test:ci
+      - alef test --coverage
 
-  # Lint tasks: linting with and without auto-fix
+  # === Lint & Format ===
   lint:
-    desc: "Lint all code WITH auto-fix enabled"
+    desc: "Lint all code via prek (pre-commit framework)"
     cmds:
-      - task: _lint:all
+      - prek run --all-files
 
   lint:check:
     desc: "Lint all code WITHOUT auto-fix (check-only)"
     cmds:
-      - task: _lint:check
+      - task: rust:lint:check
 
-  # Format tasks: formatting with and without modifications
-  format:
-    desc: "Format all code (with modifications)"
+  fmt:
+    desc: "Format all code"
     cmds:
-      - task: _lint:format
+      - cargo fmt --all
+      - alef fmt
+
+  format:
+    desc: "Format all code (alias for fmt)"
+    cmds:
+      - task: fmt
 
   format:check:
     desc: "Check code formatting without modifications"
     cmds:
-      - task: _lint:format:check
+      - task: rust:format:check
 
-  # Combined check: format + lint without modifications
   check:
     desc: "Run all checks (format + lint, no modifications)"
     cmds:
       - task: format:check
       - task: lint:check
 
-  # Update dependencies: all languages
+  # === Update ===
   update:
     desc: "Update all dependencies across all languages"
     cmds:
       - task: rust:update
-      - task: python:update
-      - task: node:update
-      - task: typescript:update
-      - task: wasm:update
-      - task: ruby:update
-      - task: php:update
-      - task: go:update
-      - task: java:update
-      - task: csharp:update
-      - task: elixir:update
-      - task: r:update
-      - uv tool update prek
+      - alef update
       - prek autoupdate
 
-  # Version synchronization: propagate version across all manifests
-  versions:sync:
-    desc: "Synchronize version from Cargo.toml to all package manifests"
-    cmds:
-      - task: version:sync
-
-  # Coverage tasks: generate coverage reports
+  # === Coverage ===
   cov:rust:
     desc: "Generate Rust coverage report"
     cmds:
       - task: rust:coverage
 
-  cov:python:
-    desc: "Generate Python coverage report"
-    cmds:
-      - task: python:coverage
-
   cov:all:
-    desc: "Generate coverage for all languages (Rust + Python)"
+    desc: "Generate coverage for all languages"
     cmds:
-      - task: _test:coverage
+      - task: rust:test:ci
+      - alef test --coverage
 
-  # E2E tests for published packages
+  # === Version ===
+  versions:sync:
+    desc: "Synchronize version from Cargo.toml to all package manifests"
+    cmds:
+      - task: version:sync
+
+  # === Alef lifecycle ===
+  alef:generate:
+    desc: "Run full alef pipeline (generate + stubs + scaffold + readme + docs + e2e)"
+    cmds:
+      - alef all
+
+  alef:verify:
+    desc: "Check bindings are up-to-date (CI mode)"
+    cmds:
+      - alef verify --exit-code
+
+  alef:sync:
+    desc: "Sync version from Cargo.toml to all manifests"
+    cmds:
+      - alef sync-versions
+
+  # === E2E tests ===
+  e2e:generate:
+    desc: "Generate E2E tests for all languages from fixtures"
+    cmds:
+      - alef e2e generate
+
+  e2e:test:
+    desc: "Run E2E tests for all languages"
+    cmds:
+      - alef test --e2e
+
   e2e:smoke:all:
     desc: "Run smoke tests for all published packages (fast validation)"
     cmds:
@@ -297,7 +254,6 @@ tasks:
     cmds:
       - Rscript smoke_test.R
 
-  # Comprehensive e2e tests (post-release validation)
   e2e:test:all:
     desc: "Run comprehensive tests for all published packages"
     cmds:
@@ -370,7 +326,7 @@ tasks:
     cmds:
       - Rscript -e 'devtools::test()'
 
-  # Demo tasks
+  # === Demo ===
   build:demo:
     desc: "Build the GitHub Pages demo"
     cmds:
@@ -382,7 +338,7 @@ tasks:
     cmds:
       - python3 -m http.server 8000
 
-  # Documentation
+  # === Documentation ===
   docs:build:
     desc: "Build documentation site with zensical"
     cmds:
@@ -390,24 +346,14 @@ tasks:
       - uv sync --group doc
       - uv run zensical build --clean --strict
 
-  # Clean artifacts
+  # === Clean ===
   clean:
     desc: "Remove build artifacts across all languages"
     cmds:
       - task: rust:clean
-      - task: python:clean
-      - task: ruby:clean
-      - task: node:clean
-      - task: typescript:clean
-      - task: wasm:clean
-      - task: php:clean
-      - task: go:clean
-      - task: java:clean
-      - task: csharp:clean
-      - task: elixir:clean
-      - task: r:clean
+      - alef clean
 
-  # Default task: show available tasks
+  # === Default ===
   default:
     desc: "List available tasks"
     cmds:
