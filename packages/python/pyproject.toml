@@ -21,46 +21,54 @@ classifiers = [
 urls.repository = "https://github.com/kreuzberg-dev/html-to-markdown"
 
 [dependency-groups]
-dev = [ "mypy>=1.19.0", "pytest>=9.0.2", "ruff>=0.14.8" ]
-
-[tool.ruff]
-target-version = "py310"
-line-length = 120
-
-[tool.ruff.lint]
-select = [ "ALL" ]
-ignore = [
-  "ANN401", "ASYNC109", "ASYNC110", "BLE001", "COM812",
-  "D100", "D104", "D107", "D203", "D213", "ERA001", "FBT", "FIX002",
-  "ISC001", "N818", "PLR0913", "PLR0912", "PLR0911",
-  "PLW0603", "S104", "S110", "S603", "TD", "TRY",
-]
-
-[tool.ruff.lint.mccabe]
-max-complexity = 15
-
-[tool.ruff.lint.pylint]
-max-args = 10
-max-branches = 15
-max-returns = 10
-
-[tool.ruff.lint.pydocstyle]
-convention = "google"
-
-[tool.ruff.lint.per-file-ignores]
-"tests/**" = [ "S101", "D103", "ANN", "PLR2004" ]
-
-[tool.ruff.format]
-docstring-code-line-length = 120
-docstring-code-format = true
-
-[tool.mypy]
-python_version = "3.10"
-strict = true
-show_error_codes = true
+dev = [ "mypy>=1.19", "pytest>=9.0.2", "ruff>=0.14.8" ]
 
 [tool.maturin]
 module-name = "html_to_markdown._html_to_markdown"
 manifest-path = "../../crates/html-to-markdown-py/Cargo.toml"
 features = [ "pyo3/extension-module" ]
 python-packages = [ "html_to_markdown" ]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+format.docstring-code-line-length = 120
+format.docstring-code-format = true
+lint.select = [ "ALL" ]
+lint.ignore = [
+  "ANN401",
+  "ASYNC109",
+  "ASYNC110",
+  "BLE001",
+  "COM812",
+  "D100",
+  "D104",
+  "D107",
+  "D203",
+  "D213",
+  "ERA001",
+  "FBT",
+  "FIX002",
+  "ISC001",
+  "N818",
+  "PLR0911",
+  "PLR0912",
+  "PLR0913",
+  "PLW0603",
+  "S104",
+  "S110",
+  "S603",
+  "TD",
+  "TRY",
+]
+lint.per-file-ignores."tests/**" = [ "ANN", "D103", "PLR2004", "S101" ]
+lint.mccabe.max-complexity = 15
+lint.pydocstyle.convention = "google"
+lint.pylint.max-args = 10
+lint.pylint.max-branches = 15
+lint.pylint.max-returns = 10
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+show_error_codes = true
