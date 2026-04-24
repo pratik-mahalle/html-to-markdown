@@ -401,9 +401,11 @@ jobs:
           - os: ubuntu-latest
             label: linux-x86_64
             platform: linux-x86_64
+            target: x86_64-unknown-linux-gnu
           - os: macos-latest
             label: macos-arm64
             platform: macos-arm64
+            target: aarch64-apple-darwin
     steps:
       - name: Checkout
         uses: actions/checkout@v6 # v6
@@ -424,15 +426,14 @@ jobs:
           cache-key-prefix: publish-php-${{ matrix.settings.label }}
           toolchain: stable
 
-      - name: Build PHP extension
-        shell: bash
-        run: cargo build --release -p html-to-markdown-php
+      - name: Install alef
+        uses: kreuzberg-dev/actions/install-alef@v1
 
-      - name: Build PIE package
+      - name: Build and package PHP extension
         shell: bash
-        env:
-          VERSION: ${{ needs.prepare.outputs.version }}
-        run: scripts/publish/php/build-pie-package.sh "${{ matrix.settings.platform }}" "dist/php"
+        run: |
+          alef publish build --lang php --target ${{ matrix.settings.target }}
+          alef publish package --lang php --target ${{ matrix.settings.target }} -o dist/php
 
       - name: Upload PHP PIE package artifact
         uses: actions/upload-artifact@v7 # v7
@@ -1107,10 +1108,13 @@ jobs:
         include:
           - os: ubuntu-latest
             rid: linux-x64
+            target: x86_64-unknown-linux-gnu
           - os: windows-latest
             rid: win-x64
+            target: x86_64-pc-windows-msvc
           - os: macos-latest
             rid: osx-arm64
+            target: aarch64-apple-darwin
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     permissions:
@@ -1132,11 +1136,15 @@ jobs:
       - name: Setup Rust
         uses: kreuzberg-dev/actions/setup-rust@v1 # v1
 
-      - name: Build FFI library
-        env:
-          RID: ${{ matrix.rid }}
-        run: scripts/publish/csharp/build-ffi.sh "${RID}" dist/csharp-ffi
+      - name: Install alef
+        uses: kreuzberg-dev/actions/install-alef@v1
+
+      - name: Build and stage FFI library
         shell: bash
+        run: |
+          alef publish build --lang ffi --target ${{ matrix.target }}
+          mkdir -p dist/csharp-ffi/${{ matrix.rid }}/native
+          find target/release -maxdepth 1 -type f \( -name '*.so' -o -name '*.dylib' -o -name '*.dll' \) -name '*html_to_markdown_ffi*' -exec cp {} dist/csharp-ffi/${{ matrix.rid }}/native/ \;
 
       - name: Upload FFI artifact
         uses: actions/upload-artifact@v7 # v7
@@ -1154,12 +1162,16 @@ jobs:
         include:
           - os: ubuntu-latest
             platform: linux-x64
+            target: x86_64-unknown-linux-gnu
           - os: ubuntu-24.04-arm
             platform: linux-arm64
+            target: aarch64-unknown-linux-gnu
           - os: windows-latest
             platform: windows-x64
+            target: x86_64-pc-windows-msvc
           - os: macos-latest
             platform: darwin-arm64
+            target: aarch64-apple-darwin
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -1178,12 +1190,14 @@ jobs:
       - name: Setup Rust
         uses: kreuzberg-dev/actions/setup-rust@v1 # v1
 
-      - name: Package Go FFI library
-        env:
-          PLATFORM: ${{ matrix.platform }}
-          VERSION: ${{ needs.prepare.outputs.version }}
-        run: scripts/publish/go/package-ffi.sh "${PLATFORM}" "${VERSION}" dist/go-ffi
+      - name: Install alef
+        uses: kreuzberg-dev/actions/install-alef@v1
+
+      - name: Build and package Go FFI library
         shell: bash
+        run: |
+          alef publish build --lang ffi --target ${{ matrix.target }}
+          alef publish package --lang go --target ${{ matrix.target }} -o dist/go-ffi
 
       - name: Upload Go FFI artifact
         uses: actions/upload-artifact@v7 # v7
@@ -1201,12 +1215,16 @@ jobs:
         include:
           - os: ubuntu-latest
             platform: linux-x64
+            target: x86_64-unknown-linux-gnu
           - os: ubuntu-24.04-arm
             platform: linux-arm64
+            target: aarch64-unknown-linux-gnu
           - os: windows-latest
             platform: windows-x64
+            target: x86_64-pc-windows-msvc
           - os: macos-latest
             platform: darwin-arm64
+            target: aarch64-apple-darwin
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -1225,12 +1243,14 @@ jobs:
       - name: Setup Rust
         uses: kreuzberg-dev/actions/setup-rust@v1 # v1
 
-      - name: Package C FFI distribution
-        env:
-          PLATFORM: ${{ matrix.platform }}
-          VERSION: ${{ needs.prepare.outputs.version }}
-        run: scripts/publish/c-ffi/package-c-ffi.sh "${PLATFORM}" "${VERSION}" dist/c-ffi
+      - name: Install alef
+        uses: kreuzberg-dev/actions/install-alef@v1
+
+      - name: Build and package C FFI distribution
         shell: bash
+        run: |
+          alef publish build --lang ffi --target ${{ matrix.target }}
+          alef publish package --lang ffi --target ${{ matrix.target }} -o dist/c-ffi
 
       - name: Upload C FFI artifact
         uses: actions/upload-artifact@v7 # v7
@@ -1682,12 +1702,16 @@ jobs:
         include:
           - os: ubuntu-latest
             platform: linux-x86_64
+            target: x86_64-unknown-linux-gnu
           - os: ubuntu-24.04-arm
             platform: linux-aarch64
+            target: aarch64-unknown-linux-gnu
           - os: windows-latest
             platform: windows-x86_64
+            target: x86_64-pc-windows-msvc
           - os: macos-latest
             platform: osx-aarch64
+            target: aarch64-apple-darwin
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     permissions:
@@ -1709,11 +1733,15 @@ jobs:
       - name: Setup Rust
         uses: kreuzberg-dev/actions/setup-rust@v1 # v1
 
-      - name: Build FFI library
-        env:
-          PLATFORM: ${{ matrix.platform }}
-        run: scripts/publish/java/build-ffi.sh "${PLATFORM}" dist/java-ffi
+      - name: Install alef
+        uses: kreuzberg-dev/actions/install-alef@v1
+
+      - name: Build and stage FFI library
         shell: bash
+        run: |
+          alef publish build --lang ffi --target ${{ matrix.target }}
+          mkdir -p dist/java-ffi/${{ matrix.platform }}/native
+          find target/release -maxdepth 1 -type f \( -name '*.so' -o -name '*.dylib' -o -name '*.dll' \) -name '*html_to_markdown_ffi*' -exec cp {} dist/java-ffi/${{ matrix.platform }}/native/ \;
 
       - name: Upload FFI artifact
         uses: actions/upload-artifact@v7 # v7
