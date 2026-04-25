@@ -114,7 +114,12 @@ jobs:
         uses: actions/setup-go@v6 # v6
         with:
           go-version: ${{ env.GO_VERSION }}
-          check-latest: true
+          cache-dependency-path: packages/go/go.sum
+
+      - name: Install golangci-lint
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$(go env GOPATH)/bin" v2.1.6
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
 
       - name: Setup Java
         uses: actions/setup-java@v5 # v5
