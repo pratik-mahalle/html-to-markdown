@@ -13,11 +13,15 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ._html_to_markdown import (
+        DocumentStructure,
         GridCell,
         HeaderMetadata,
         ImageMetadata,
         LinkMetadata,
+        PreprocessingOptionsUpdate,
+        ProcessingWarning,
         StructuredData,
+        TableData,
     )
 
 
