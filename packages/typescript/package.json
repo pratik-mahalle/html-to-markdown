@@ -1,38 +1,38 @@
 {
-	"name": "@kreuzberg/html-to-markdown-node",
-	"version": "3.3.3",
-	"description": "High-performance HTML to Markdown converter",
-	"license": "MIT",
-	"main": "index.js",
-	"types": "index.d.ts",
-	"repository": "https://github.com/kreuzberg-dev/html-to-markdown",
-	"author": "Kreuzberg Team",
-	"keywords": [
-		"html",
-		"markdown",
-		"converter"
-	],
-	"files": [
-		"index.js",
-		"index.d.ts",
-		"**/*.node"
-	],
-	"scripts": {
-		"build": "napi build --release",
-		"build:debug": "napi build",
-		"lint": "echo 'TypeScript type-checking requires native build; use task node:lint:check instead'",
-		"test": "node -e \"console.log('Add test command')\""
-	},
-	"napi": {
-		"name": "html-to-markdown-rs",
-		"triples": [
-			"x86_64-unknown-linux-gnu",
-			"x86_64-apple-darwin",
-			"aarch64-apple-darwin",
-			"x86_64-pc-windows-msvc"
-		]
-	},
-	"devDependencies": {
-		"@napi-rs/cli": "^3.6.2"
-	}
+  "name": "@kreuzberg/html-to-markdown-node",
+  "version": "3.3.3",
+  "description": "High-performance HTML to Markdown converter",
+  "keywords": [
+    "converter",
+    "html",
+    "markdown"
+  ],
+  "license": "MIT",
+  "author": "Kreuzberg Team",
+  "repository": "https://github.com/kreuzberg-dev/html-to-markdown",
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "**/*.node"
+  ],
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "build": "napi build --release",
+    "build:debug": "napi build",
+    "lint": "echo 'TypeScript type-checking requires native build; use task node:lint:check instead'",
+    "test": "node -e \"console.log('Add test command')\""
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^3.6.2"
+  },
+  "napi": {
+    "name": "html-to-markdown-rs",
+    "triples": [
+      "x86_64-unknown-linux-gnu",
+      "x86_64-apple-darwin",
+      "aarch64-apple-darwin",
+      "x86_64-pc-windows-msvc"
+    ]
+  }
 }
