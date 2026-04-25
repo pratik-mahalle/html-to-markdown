@@ -138,18 +138,6 @@ crates/html-to-markdown-ffi/tests/c/test_*
 crates/html-to-markdown-ffi/tests/c/*.o
 crates/html-to-markdown-ffi/tests/c/*.dSYM/
 
-# BEGIN ai-rulez (DO NOT EDIT - managed by ai-rulez)
-.agents/
-.claude/
-.codex/
-.cursor/
-.github/agents/
-.github/skills/
-.mcp.json
-AGENTS.md
-CLAUDE.md
-GEMINI.md
-# END ai-rulez
 
 # Additional generated artifacts
 .remote-cache/
@@ -165,3 +153,17 @@ vendor/bundle/
 *.nupkg
 pkg/
 .gems/
+
+# BEGIN ai-rulez (DO NOT EDIT - managed by ai-rulez)
+.agents/
+.claude/
+.codex/
+.cursor/
+.github/agents/
+.github/commands/
+.github/copilot-instructions.md
+.github/skills/
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+# END ai-rulez
