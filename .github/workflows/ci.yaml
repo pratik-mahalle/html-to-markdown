@@ -88,7 +88,7 @@ permissions:
 jobs:
   validate:
     name: "Validate"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     timeout-minutes: 60
     steps:
       - name: Checkout
@@ -117,9 +117,9 @@ jobs:
           cache-dependency-path: packages/go/go.sum
 
       - name: Install golangci-lint
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$(go env GOPATH)/bin" v2.1.6
-          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+        uses: golangci/golangci-lint-action@v9
+        with:
+          install-only: true
 
       - name: Setup Java
         uses: actions/setup-java@v5 # v5
@@ -179,7 +179,7 @@ jobs:
 
   validate-rust:
     name: "Validate: Rust"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     timeout-minutes: 60
     steps:
       - name: Checkout
@@ -203,7 +203,7 @@ jobs:
 
   changes:
     name: "Detect Changes"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     outputs:
       core: ${{ steps.filter.outputs.core }}
       rust: ${{ steps.filter.outputs.rust }}
