@@ -535,7 +535,7 @@ func (BaseVisitor) VisitFigureEnd(ctx NodeContext, output string) VisitResult {
 // CGo does not allow passing Go function values as C function pointers;
 // we use a numeric ID (stored in user_data) to look up the Visitor at callback time.
 var (
-	visitorRegistry  sync.Map
+	visitorRegistry sync.Map
 	visitorIDCounter atomic.Uint64
 )
 
@@ -575,184 +575,95 @@ func decodeNodeContext(c *C.HTMHtmNodeContext) NodeContext {
 // nodeTypeFromC maps the C node_type enum ordinal to the Go NodeType string constant.
 func nodeTypeFromC(i C.int32_t) NodeType {
 	switch int(i) {
-	case 0:
-		return NodeTypeText
-	case 1:
-		return NodeTypeElement
-	case 2:
-		return NodeTypeHeading
-	case 3:
-		return NodeTypeParagraph
-	case 4:
-		return NodeTypeDiv
-	case 5:
-		return NodeTypeBlockquote
-	case 6:
-		return NodeTypePre
-	case 7:
-		return NodeTypeHr
-	case 8:
-		return NodeTypeList
-	case 9:
-		return NodeTypeListItem
-	case 10:
-		return NodeTypeDefinitionList
-	case 11:
-		return NodeTypeDefinitionTerm
-	case 12:
-		return NodeTypeDefinitionDescription
-	case 13:
-		return NodeTypeTable
-	case 14:
-		return NodeTypeTableRow
-	case 15:
-		return NodeTypeTableCell
-	case 16:
-		return NodeTypeTableHeader
-	case 17:
-		return NodeTypeTableBody
-	case 18:
-		return NodeTypeTableHead
-	case 19:
-		return NodeTypeTableFoot
-	case 20:
-		return NodeTypeLink
-	case 21:
-		return NodeTypeImage
-	case 22:
-		return NodeTypeStrong
-	case 23:
-		return NodeTypeEm
-	case 24:
-		return NodeTypeCode
-	case 25:
-		return NodeTypeStrikethrough
-	case 26:
-		return NodeTypeUnderline
-	case 27:
-		return NodeTypeSubscript
-	case 28:
-		return NodeTypeSuperscript
-	case 29:
-		return NodeTypeMark
-	case 30:
-		return NodeTypeSmall
-	case 31:
-		return NodeTypeBr
-	case 32:
-		return NodeTypeSpan
-	case 33:
-		return NodeTypeArticle
-	case 34:
-		return NodeTypeSection
-	case 35:
-		return NodeTypeNav
-	case 36:
-		return NodeTypeAside
-	case 37:
-		return NodeTypeHeader
-	case 38:
-		return NodeTypeFooter
-	case 39:
-		return NodeTypeMain
-	case 40:
-		return NodeTypeFigure
-	case 41:
-		return NodeTypeFigcaption
-	case 42:
-		return NodeTypeTime
-	case 43:
-		return NodeTypeDetails
-	case 44:
-		return NodeTypeSummary
-	case 45:
-		return NodeTypeForm
-	case 46:
-		return NodeTypeInput
-	case 47:
-		return NodeTypeSelect
-	case 48:
-		return NodeTypeOption
-	case 49:
-		return NodeTypeButton
-	case 50:
-		return NodeTypeTextarea
-	case 51:
-		return NodeTypeLabel
-	case 52:
-		return NodeTypeFieldset
-	case 53:
-		return NodeTypeLegend
-	case 54:
-		return NodeTypeAudio
-	case 55:
-		return NodeTypeVideo
-	case 56:
-		return NodeTypePicture
-	case 57:
-		return NodeTypeSource
-	case 58:
-		return NodeTypeIframe
-	case 59:
-		return NodeTypeSvg
-	case 60:
-		return NodeTypeCanvas
-	case 61:
-		return NodeTypeRuby
-	case 62:
-		return NodeTypeRt
-	case 63:
-		return NodeTypeRp
-	case 64:
-		return NodeTypeAbbr
-	case 65:
-		return NodeTypeKbd
-	case 66:
-		return NodeTypeSamp
-	case 67:
-		return NodeTypeVar
-	case 68:
-		return NodeTypeCite
-	case 69:
-		return NodeTypeQ
-	case 70:
-		return NodeTypeDel
-	case 71:
-		return NodeTypeIns
-	case 72:
-		return NodeTypeData
-	case 73:
-		return NodeTypeMeter
-	case 74:
-		return NodeTypeProgress
-	case 75:
-		return NodeTypeOutput
-	case 76:
-		return NodeTypeTemplate
-	case 77:
-		return NodeTypeSlot
-	case 78:
-		return NodeTypeHTML
-	case 79:
-		return NodeTypeHead
-	case 80:
-		return NodeTypeBody
-	case 81:
-		return NodeTypeTitle
-	case 82:
-		return NodeTypeMeta
-	case 83:
-		return NodeTypeLinkTag
-	case 84:
-		return NodeTypeStyle
-	case 85:
-		return NodeTypeScript
-	case 86:
-		return NodeTypeBase
-	case 87:
-		return NodeTypeCustom
-	default:
-		return NodeType("unknown")
+	case 0: return NodeTypeText
+	case 1: return NodeTypeElement
+	case 2: return NodeTypeHeading
+	case 3: return NodeTypeParagraph
+	case 4: return NodeTypeDiv
+	case 5: return NodeTypeBlockquote
+	case 6: return NodeTypePre
+	case 7: return NodeTypeHr
+	case 8: return NodeTypeList
+	case 9: return NodeTypeListItem
+	case 10: return NodeTypeDefinitionList
+	case 11: return NodeTypeDefinitionTerm
+	case 12: return NodeTypeDefinitionDescription
+	case 13: return NodeTypeTable
+	case 14: return NodeTypeTableRow
+	case 15: return NodeTypeTableCell
+	case 16: return NodeTypeTableHeader
+	case 17: return NodeTypeTableBody
+	case 18: return NodeTypeTableHead
+	case 19: return NodeTypeTableFoot
+	case 20: return NodeTypeLink
+	case 21: return NodeTypeImage
+	case 22: return NodeTypeStrong
+	case 23: return NodeTypeEm
+	case 24: return NodeTypeCode
+	case 25: return NodeTypeStrikethrough
+	case 26: return NodeTypeUnderline
+	case 27: return NodeTypeSubscript
+	case 28: return NodeTypeSuperscript
+	case 29: return NodeTypeMark
+	case 30: return NodeTypeSmall
+	case 31: return NodeTypeBr
+	case 32: return NodeTypeSpan
+	case 33: return NodeTypeArticle
+	case 34: return NodeTypeSection
+	case 35: return NodeTypeNav
+	case 36: return NodeTypeAside
+	case 37: return NodeTypeHeader
+	case 38: return NodeTypeFooter
+	case 39: return NodeTypeMain
+	case 40: return NodeTypeFigure
+	case 41: return NodeTypeFigcaption
+	case 42: return NodeTypeTime
+	case 43: return NodeTypeDetails
+	case 44: return NodeTypeSummary
+	case 45: return NodeTypeForm
+	case 46: return NodeTypeInput
+	case 47: return NodeTypeSelect
+	case 48: return NodeTypeOption
+	case 49: return NodeTypeButton
+	case 50: return NodeTypeTextarea
+	case 51: return NodeTypeLabel
+	case 52: return NodeTypeFieldset
+	case 53: return NodeTypeLegend
+	case 54: return NodeTypeAudio
+	case 55: return NodeTypeVideo
+	case 56: return NodeTypePicture
+	case 57: return NodeTypeSource
+	case 58: return NodeTypeIframe
+	case 59: return NodeTypeSvg
+	case 60: return NodeTypeCanvas
+	case 61: return NodeTypeRuby
+	case 62: return NodeTypeRt
+	case 63: return NodeTypeRp
+	case 64: return NodeTypeAbbr
+	case 65: return NodeTypeKbd
+	case 66: return NodeTypeSamp
+	case 67: return NodeTypeVar
+	case 68: return NodeTypeCite
+	case 69: return NodeTypeQ
+	case 70: return NodeTypeDel
+	case 71: return NodeTypeIns
+	case 72: return NodeTypeData
+	case 73: return NodeTypeMeter
+	case 74: return NodeTypeProgress
+	case 75: return NodeTypeOutput
+	case 76: return NodeTypeTemplate
+	case 77: return NodeTypeSlot
+	case 78: return NodeTypeHTML
+	case 79: return NodeTypeHead
+	case 80: return NodeTypeBody
+	case 81: return NodeTypeTitle
+	case 82: return NodeTypeMeta
+	case 83: return NodeTypeLinkTag
+	case 84: return NodeTypeStyle
+	case 85: return NodeTypeScript
+	case 86: return NodeTypeBase
+	case 87: return NodeTypeCustom
+	default: return NodeType("unknown")
 	}
 }
 

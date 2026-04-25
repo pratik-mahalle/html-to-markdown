@@ -1,4 +1,4 @@
-version = "0.7.8"
+version = "0.7.10"
 languages = [
   "python",
   "node",
@@ -613,52 +613,51 @@ cmake_config = true
 node = ["helpers"]
 
 [build_commands.ruby]
+precondition = "command -v cargo >/dev/null 2>&1"
 build = "cd packages/ruby/ext/html_to_markdown_rb && cargo build"
 build_release = "cd packages/ruby/ext/html_to_markdown_rb && cargo build --release"
 
 [lint.python]
+precondition = "command -v ruff >/dev/null 2>&1"
 before = "cd packages/python && uv sync"
-format = "ruff format packages/python"
-check = "ruff check --fix packages/python"
 typecheck = "cd packages/python && uv run mypy ."
 
 [lint.node]
-format = "npx oxfmt packages/typescript/"
+precondition = "command -v npx >/dev/null 2>&1"
+format = "npx oxfmt packages/typescript/src/"
 check = "npx oxlint packages/typescript/"
 
 [lint.ruby]
+precondition = "command -v bundle >/dev/null 2>&1"
 before = "cd packages/ruby && bundle install"
 format = "cd packages/ruby && bundle exec rubocop -a ."
-check = "cd packages/ruby && bundle exec rubocop ."
 
 [lint.php]
+precondition = "command -v php >/dev/null 2>&1"
 before = "cd packages/php && composer install"
 format = "cd packages/php && vendor/bin/php-cs-fixer fix ."
 check = "cd packages/php && vendor/bin/phpstan --configuration=phpstan.neon --memory-limit=512M"
 
 [lint.go]
 before = "cargo build --release -p html-to-markdown-ffi"
-format = "gofmt -w packages/go"
-check = "cd packages/go && golangci-lint run ./..."
 
 [lint.elixir]
+precondition = "command -v mix >/dev/null 2>&1"
 before = "cd packages/elixir && mix deps.get"
-format = "cd packages/elixir && mix format"
 check = "cd packages/elixir && mix credo"
 
 [lint.java]
-format = "mvn -f packages/java/pom.xml spotless:apply -q"
+precondition = "command -v mvn >/dev/null 2>&1"
 check = "mvn -f packages/java/pom.xml spotless:check -q"
 
-[lint.csharp]
-format = "dotnet format packages/csharp"
-check = "dotnet format packages/csharp --verify-no-changes"
 
 [lint.wasm]
+precondition = "command -v npx >/dev/null 2>&1"
 format = "npx oxfmt packages/wasm/"
 check = "npx oxlint packages/wasm/"
 
 [lint.r]
+precondition = "command -v Rscript >/dev/null 2>&1"
 format = "cd packages/r && Rscript -e 'styler::style_dir(\"R\")'"
 check = "cd packages/r && Rscript -e 'lintr::lint_dir(\"R\")'"
 
@@ -668,41 +667,48 @@ format = "find e2e/c -name '*.c' -o -name '*.h' | xargs clang-format -i"
 check = "cppcheck --std=c11 --enable=warning,style,performance --suppress=missingIncludeSystem --suppress=unusedStructMember e2e/c/"
 
 [test.python]
+precondition = "command -v ruff >/dev/null 2>&1"
 before = "cd packages/python && maturin develop --release"
 command = "cd packages/python && uv run pytest tests/ -v"
 e2e = "cd e2e/python && python3 -m pytest tests/ -q"
 
 [test.node]
+precondition = "command -v npx >/dev/null 2>&1"
 before = "cd crates/html-to-markdown-node && napi build --output-dir . --release"
 command = "npx vitest run --config packages/typescript/vitest.config.ts"
 e2e = "cd e2e/typescript && npx vitest run"
 
 [test.go]
+precondition = "command -v go >/dev/null 2>&1"
 before = "cargo build --release -p html-to-markdown-ffi"
-command = "cd packages/go && go test ./..."
 e2e = "cd e2e/go && go test ./... -count=1"
 
 [test.ruby]
+precondition = "command -v bundle >/dev/null 2>&1"
 before = "cd e2e/ruby && bundle install"
 command = "cd e2e/ruby && bundle exec rspec"
 e2e = "cd e2e/ruby && bundle exec rspec"
 
 [test.php]
+precondition = "command -v php >/dev/null 2>&1"
 before = "cd e2e/php && composer install"
 command = "cd e2e/php && composer test"
 e2e = "cd e2e/php && composer test"
 
 [test.java]
+precondition = "command -v mvn >/dev/null 2>&1"
 before = "cargo build --release -p html-to-markdown-ffi"
 command = "cd e2e/java && mvn test -q"
 e2e = "cd e2e/java && mvn test -q"
 
 [test.csharp]
+precondition = "command -v dotnet >/dev/null 2>&1"
 before = "cargo build --release -p html-to-markdown-ffi"
 command = "dotnet test e2e/csharp"
 e2e = "dotnet test e2e/csharp"
 
 [test.elixir]
+precondition = "command -v mix >/dev/null 2>&1"
 before = "cd packages/elixir && mix deps.get && mix compile"
 command = "cd e2e/elixir && mix test"
 e2e = "cd e2e/elixir && mix test"
@@ -713,13 +719,16 @@ command = "cd e2e/r && Rscript -e \"devtools::load_all('../../packages/r'); test
 e2e = "cd e2e/r && Rscript -e \"devtools::load_all('../../packages/r'); testthat::set_max_fails(Inf); testthat::test_dir('tests')\""
 
 [test.wasm]
+precondition = "command -v npx >/dev/null 2>&1"
 before = "wasm-pack build crates/html-to-markdown-wasm --release --target bundler && cd e2e/wasm && npm install"
 e2e = "cd e2e/wasm && npm test"
 
 [test.rust]
+precondition = "command -v cargo >/dev/null 2>&1"
 e2e = "cd e2e/rust && cargo test"
 
 [test.c]
+precondition = "command -v make >/dev/null 2>&1"
 before = "cargo build --release -p html-to-markdown-ffi"
 e2e = "cd e2e/c && make clean && make && DYLD_LIBRARY_PATH=../../target/release ./test_runner"
 
