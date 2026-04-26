@@ -125,7 +125,20 @@ tasks:
         ignore_error: false
 
   update:
-    desc: "Update Rust dependencies (cargo-upgrades + cargo update)"
+    desc: "Update Rust dependencies within major versions (cargo update)"
+    silent: false
+    cmds:
+      - cmd: cargo update
+        ignore_error: false
+      - cmd: cargo update --manifest-path packages/ruby/ext/html_to_markdown_rb/Cargo.toml
+        ignore_error: false
+      - cmd: cargo update --manifest-path packages/elixir/native/html_to_markdown_nif/Cargo.toml
+        ignore_error: false
+      - cmd: cargo update --manifest-path packages/r/src/rust/Cargo.toml
+        ignore_error: false
+
+  upgrade:
+    desc: "Upgrade Rust dependencies to latest including breaking changes (cargo upgrade --incompatible + cargo update)"
     silent: false
     cmds:
       - cmd: cargo upgrade --incompatible

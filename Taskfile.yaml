@@ -162,12 +162,17 @@ tasks:
       - task: format:check
       - task: lint:check
 
-  # === Update ===
+  # === Update / Upgrade ===
   update:
-    desc: "Update all dependencies across all languages"
+    desc: "Update all dependencies (within major versions)"
     cmds:
-      - task: rust:update
       - alef update
+      - prek autoupdate
+
+  upgrade:
+    desc: "Upgrade all dependencies to latest (including breaking changes)"
+    cmds:
+      - alef update --latest
       - prek autoupdate
 
   # === Coverage ===
