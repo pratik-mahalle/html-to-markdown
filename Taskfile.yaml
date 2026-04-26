@@ -104,6 +104,42 @@ tasks:
     cmds:
       - task: rust:lint:check
 
+  go:lint:
+    desc: "Lint Go bindings with golangci-lint"
+    cmds:
+      - golangci-lint run ./... --config .golangci.yml
+    dir: packages/go
+
+  ruby:format:
+    desc: "Format Ruby bindings with rubocop"
+    cmds:
+      - alef fmt --lang ruby
+
+  ruby:lint:
+    desc: "Lint Ruby bindings with rubocop and steep"
+    cmds:
+      - alef lint --lang ruby
+
+  php:format:
+    desc: "Format PHP bindings with php-cs-fixer"
+    cmds:
+      - alef fmt --lang php
+
+  php:lint:
+    desc: "Lint PHP bindings with phpstan and php-cs-fixer"
+    cmds:
+      - alef lint --lang php
+
+  csharp:format:
+    desc: "Format C# bindings with dotnet format"
+    cmds:
+      - alef fmt --lang csharp
+
+  csharp:lint:
+    desc: "Lint C# bindings with dotnet format"
+    cmds:
+      - alef lint --lang csharp
+
   fmt:
     desc: "Format all code"
     cmds:

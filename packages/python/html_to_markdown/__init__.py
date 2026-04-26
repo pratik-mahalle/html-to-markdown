@@ -8,17 +8,6 @@
 Version: 3.3.3
 """
 
-from .api import convert
-from .exceptions import (
-    ConfigError,
-    ConversionError,
-    InvalidInputError,
-    IoError,
-    OtherError,
-    PanicError,
-    ParseError,
-    SanitizationError,
-)
 from ._html_to_markdown import (
     AnnotationKind,
     ConversionOptions,
@@ -42,6 +31,17 @@ from ._html_to_markdown import (
     TextAnnotation,
     VisitResult,
     WarningKind,
+)
+from .api import convert
+from .exceptions import (
+    ConfigError,
+    ConversionError,
+    InvalidInputError,
+    IoError,
+    OtherError,
+    PanicError,
+    ParseError,
+    SanitizationError,
 )
 from .options import (
     CodeBlockStyle,

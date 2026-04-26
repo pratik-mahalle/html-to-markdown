@@ -7,7 +7,7 @@
 
 import html_to_markdown._html_to_markdown as _rust
 
-from ._html_to_markdown import PreprocessingOptions, ConversionOptions, ConversionResult
+from ._html_to_markdown import ConversionOptions, ConversionResult, PreprocessingOptions
 
 
 def _to_rust_preprocessing_options(

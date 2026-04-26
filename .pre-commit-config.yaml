@@ -103,6 +103,7 @@ repos:
     hooks:
       - id: oxlint
         args: ["--fix"]
+        exclude: ^(docs/demo/|e2e/)
 
   # C/FFI: formatting and linting
   - repo: https://github.com/pocc/pre-commit-hooks
@@ -137,7 +138,7 @@ repos:
     rev: "v0.1.81"
     hooks:
       - id: rumdl-fmt
-        exclude: 'test_documents/|\.ai-rulez/|\.remote-cache/|e2e/|fixtures/'
+        exclude: 'test_documents/|\.ai-rulez/|\.remote-cache/|e2e/|fixtures/|test_apps/|\.github/copilot-instructions\.md|CLAUDE\.md|\.claude/|\.agents/|\.codex/'
 
   # Shell scripts: formatting and linting
   - repo: https://github.com/scop/pre-commit-shfmt
@@ -169,7 +170,7 @@ repos:
     rev: v0.6.37
     hooks:
       - id: cpd
-        exclude: ^(\.mvn/wrapper/|e2e/)
+        exclude: ^(\.mvn/wrapper/|e2e/|test_apps/)
       - id: checkstyle
         args:
           [
@@ -178,7 +179,7 @@ repos:
             "-p",
             "packages/java/checkstyle.properties",
           ]
-        exclude: ^(\.mvn/wrapper/|e2e/|packages/java/src/)
+        exclude: ^(\.mvn/wrapper/|e2e/|test_apps/|packages/java/src/)
 
   # Spelling (last — runs after all formatters and generators)
   - repo: https://github.com/crate-ci/typos
