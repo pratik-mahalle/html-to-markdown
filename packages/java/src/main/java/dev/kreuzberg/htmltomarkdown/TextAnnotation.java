@@ -5,6 +5,7 @@
 // Issues & docs: https://github.com/kreuzberg-dev/alef
 package dev.kreuzberg.htmltomarkdown;
 
+
 /**
  * An inline text annotation with byte-range offsets.
  *

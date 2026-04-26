@@ -11,12 +11,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 /**
  * Code block fence style in Markdown output.
  *
- * Determines how code blocks ({@code
- *
- *
-
-<pre>
- * <code>}) are rendered in Markdown.
+ * Determines how code blocks ({@code <pre><code>}) are rendered in Markdown.
  */
 public enum CodeBlockStyle {
     /** Indented code blocks (4 spaces). {@code CommonMark} standard. */

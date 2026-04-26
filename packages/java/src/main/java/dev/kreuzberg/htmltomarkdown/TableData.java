@@ -5,6 +5,7 @@
 // Issues & docs: https://github.com/kreuzberg-dev/alef
 package dev.kreuzberg.htmltomarkdown;
 
+
 /**
  * A top-level extracted table with both structured data and markdown representation.
  */

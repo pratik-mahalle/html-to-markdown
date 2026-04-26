@@ -10,15 +10,23 @@ import java.util.List;
 /**
  * Comprehensive metadata extraction result from HTML document.
  *
- * Contains all extracted metadata types in a single structure, suitable for serialization and transmission across
- * language boundaries.
+ * Contains all extracted metadata types in a single structure,
+ * suitable for serialization and transmission across language boundaries.
  *
  * # Examples
  *
- * {@code }{@code } # use html_to_markdown_rs::metadata::HtmlMetadata; let metadata = HtmlMetadata { document:
- * Default::default(), headers: Vec::new(), links: Vec::new(), images: Vec::new(), structured_data: Vec::new(), };
+ * {@code }{@code }
+ * # use html_to_markdown_rs::metadata::HtmlMetadata;
+ * let metadata = HtmlMetadata {
+ *     document: Default::default(),
+ *     headers: Vec::new(),
+ *     links: Vec::new(),
+ *     images: Vec::new(),
+ *     structured_data: Vec::new(),
+ * };
  *
- * assert!(metadata.headers.is_empty()); {@code }{@code }
+ * assert!(metadata.headers.is_empty());
+ * {@code }{@code }
  */
 public class HtmlMetadataBuilder {
 
@@ -60,6 +68,12 @@ public class HtmlMetadataBuilder {
 
     /** Builds the HtmlMetadata instance. */
     public HtmlMetadata build() {
-        return new HtmlMetadata(document, headers, links, images, structuredData);
+        return new HtmlMetadata(
+            document,
+            headers,
+            links,
+            images,
+            structuredData
+        );
     }
 }

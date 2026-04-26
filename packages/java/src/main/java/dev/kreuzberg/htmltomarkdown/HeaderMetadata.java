@@ -11,24 +11,35 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Header element metadata with hierarchy tracking.
  *
- * Captures heading elements (h1-h6) with their text content, identifiers, and position in the document structure.
+ * Captures heading elements (h1-h6) with their text content, identifiers,
+ * and position in the document structure.
  *
  * # Examples
  *
- * {@code }{@code } # use html_to_markdown_rs::metadata::HeaderMetadata; let header = HeaderMetadata { level: 1, text:
- * "Main Title".to_string(), id: Some("main-title".to_string()), depth: 0, html_offset: 145, };
+ * {@code }{@code }
+ * # use html_to_markdown_rs::metadata::HeaderMetadata;
+ * let header = HeaderMetadata {
+ *     level: 1,
+ *     text: "Main Title".to_string(),
+ *     id: Some("main-title".to_string()),
+ *     depth: 0,
+ *     html_offset: 145,
+ * };
  *
- * assert_eq!(header.level, 1); assert!(header.is_valid()); {@code }{@code }
+ * assert_eq!(header.level, 1);
+ * assert!(header.is_valid());
+ * {@code }{@code }
  */
 public record HeaderMetadata(
-        /** Header level: 1 (h1) through 6 (h6) */
-        byte level,
-        /** Normalized text content of the header */
-        String text,
-        /** HTML id attribute if present */
-        Optional<String> id,
-        /** Document tree depth at the header element */
-        long depth,
-        /** Byte offset in original HTML document */
-        @JsonProperty("html_offset") long htmlOffset) {
+    /** Header level: 1 (h1) through 6 (h6) */
+    byte level,
+    /** Normalized text content of the header */
+    String text,
+    /** HTML id attribute if present */
+    Optional<String> id,
+    /** Document tree depth at the header element */
+    long depth,
+    /** Byte offset in original HTML document */
+    @JsonProperty("html_offset") long htmlOffset
+) {
 }

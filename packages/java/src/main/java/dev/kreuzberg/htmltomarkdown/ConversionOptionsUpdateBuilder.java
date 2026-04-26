@@ -11,8 +11,8 @@ import java.util.Optional;
 /**
  * Partial update for {@code ConversionOptions}.
  *
- * Uses {@code Option<T>} fields for selective updates. Bindings use this to construct options from language-native
- * types. Prefer [{@code ConversionOptionsBuilder}] for Rust code.
+ * Uses {@code Option<T>} fields for selective updates. Bindings use this to construct
+ * options from language-native types. Prefer [{@code ConversionOptionsBuilder}] for Rust code.
  */
 public class ConversionOptionsUpdateBuilder {
 
@@ -299,11 +299,47 @@ public class ConversionOptionsUpdateBuilder {
 
     /** Builds the ConversionOptionsUpdate instance. */
     public ConversionOptionsUpdate build() {
-        return new ConversionOptionsUpdate(headingStyle, listIndentType, listIndentWidth, bullets, strongEmSymbol,
-                escapeAsterisks, escapeUnderscores, escapeMisc, escapeAscii, codeLanguage, autolinks, defaultTitle,
-                brInTables, highlightStyle, extractMetadata, whitespaceMode, stripNewlines, wrap, wrapWidth,
-                convertAsInline, subSymbol, supSymbol, newlineStyle, codeBlockStyle, keepInlineImagesIn, preprocessing,
-                encoding, debug, stripTags, preserveTags, skipImages, linkStyle, outputFormat, includeDocumentStructure,
-                extractImages, maxImageSize, captureSvg, inferDimensions, maxDepth, excludeSelectors);
+        return new ConversionOptionsUpdate(
+            headingStyle,
+            listIndentType,
+            listIndentWidth,
+            bullets,
+            strongEmSymbol,
+            escapeAsterisks,
+            escapeUnderscores,
+            escapeMisc,
+            escapeAscii,
+            codeLanguage,
+            autolinks,
+            defaultTitle,
+            brInTables,
+            highlightStyle,
+            extractMetadata,
+            whitespaceMode,
+            stripNewlines,
+            wrap,
+            wrapWidth,
+            convertAsInline,
+            subSymbol,
+            supSymbol,
+            newlineStyle,
+            codeBlockStyle,
+            keepInlineImagesIn,
+            preprocessing,
+            encoding,
+            debug,
+            stripTags,
+            preserveTags,
+            skipImages,
+            linkStyle,
+            outputFormat,
+            includeDocumentStructure,
+            extractImages,
+            maxImageSize,
+            captureSvg,
+            inferDimensions,
+            maxDepth,
+            excludeSelectors
+        );
     }
 }

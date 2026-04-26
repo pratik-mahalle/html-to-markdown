@@ -13,28 +13,37 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Image metadata with source and dimensions.
  *
- * Captures {@code <img>} elements and inline {@code <svg>} elements with metadata for image analysis and optimization.
+ * Captures {@code <img>} elements and inline {@code <svg>} elements with metadata
+ * for image analysis and optimization.
  *
  * # Examples
  *
- * {@code }{@code } # use html_to_markdown_rs::metadata::{ImageMetadata, ImageType}; let img = ImageMetadata { src:
- * "https://example.com/image.jpg".to_string(), alt: Some("An example image".to_string()), title:
- * Some("Example".to_string()), dimensions: Some((800, 600)), image_type: ImageType::External, attributes:
- * Default::default(), };
+ * {@code }{@code }
+ * # use html_to_markdown_rs::metadata::{ImageMetadata, ImageType};
+ * let img = ImageMetadata {
+ *     src: "https://example.com/image.jpg".to_string(),
+ *     alt: Some("An example image".to_string()),
+ *     title: Some("Example".to_string()),
+ *     dimensions: Some((800, 600)),
+ *     image_type: ImageType::External,
+ *     attributes: Default::default(),
+ * };
  *
- * assert_eq!(img.image_type, ImageType::External); {@code }{@code }
+ * assert_eq!(img.image_type, ImageType::External);
+ * {@code }{@code }
  */
 public record ImageMetadata(
-        /** Image source (URL, data URI, or SVG content identifier) */
-        String src,
-        /** Alternative text from alt attribute (for accessibility) */
-        Optional<String> alt,
-        /** Title attribute (often shown as tooltip) */
-        Optional<String> title,
-        /** Image dimensions as (width, height) if available */
-        Optional<List<Integer>> dimensions,
-        /** Image type classification */
-        @JsonProperty("image_type") ImageType imageType,
-        /** Additional HTML attributes */
-        Map<String, String> attributes) {
+    /** Image source (URL, data URI, or SVG content identifier) */
+    String src,
+    /** Alternative text from alt attribute (for accessibility) */
+    Optional<String> alt,
+    /** Title attribute (often shown as tooltip) */
+    Optional<String> title,
+    /** Image dimensions as (width, height) if available */
+    Optional<List<Integer>> dimensions,
+    /** Image type classification */
+    @JsonProperty("image_type") ImageType imageType,
+    /** Additional HTML attributes */
+    Map<String, String> attributes
+) {
 }

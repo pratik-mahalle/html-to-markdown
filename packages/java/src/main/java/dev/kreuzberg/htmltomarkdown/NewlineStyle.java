@@ -11,8 +11,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 /**
  * Line break syntax in Markdown output.
  *
- * Controls how soft line breaks (from {@code <br>
- * } or line breaks in source) are rendered.
+ * Controls how soft line breaks (from {@code <br>} or line breaks in source) are rendered.
  */
 public enum NewlineStyle {
     /**

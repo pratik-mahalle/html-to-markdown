@@ -15,9 +15,14 @@ import java.util.Optional;
  *
  * # Example
  *
- * {@code }{@code text} use html_to_markdown_rs::ConversionOptions;
+ * {@code }{@code text}
+ * use html_to_markdown_rs::ConversionOptions;
  *
- * let options = ConversionOptions::builder() .heading_style(HeadingStyle::Atx) .wrap(true) .wrap_width(100) .build();
+ * let options = ConversionOptions::builder()
+ *     .heading_style(HeadingStyle::Atx)
+ *     .wrap(true)
+ *     .wrap_width(100)
+ *     .build();
  * {@code }{@code }
  */
 public class ConversionOptionsBuilder {
@@ -305,11 +310,47 @@ public class ConversionOptionsBuilder {
 
     /** Builds the ConversionOptions instance. */
     public ConversionOptions build() {
-        return new ConversionOptions(headingStyle, listIndentType, listIndentWidth, bullets, strongEmSymbol,
-                escapeAsterisks, escapeUnderscores, escapeMisc, escapeAscii, codeLanguage, autolinks, defaultTitle,
-                brInTables, highlightStyle, extractMetadata, whitespaceMode, stripNewlines, wrap, wrapWidth,
-                convertAsInline, subSymbol, supSymbol, newlineStyle, codeBlockStyle, keepInlineImagesIn, preprocessing,
-                encoding, debug, stripTags, preserveTags, skipImages, linkStyle, outputFormat, includeDocumentStructure,
-                extractImages, maxImageSize, captureSvg, inferDimensions, maxDepth, excludeSelectors);
+        return new ConversionOptions(
+            headingStyle,
+            listIndentType,
+            listIndentWidth,
+            bullets,
+            strongEmSymbol,
+            escapeAsterisks,
+            escapeUnderscores,
+            escapeMisc,
+            escapeAscii,
+            codeLanguage,
+            autolinks,
+            defaultTitle,
+            brInTables,
+            highlightStyle,
+            extractMetadata,
+            whitespaceMode,
+            stripNewlines,
+            wrap,
+            wrapWidth,
+            convertAsInline,
+            subSymbol,
+            supSymbol,
+            newlineStyle,
+            codeBlockStyle,
+            keepInlineImagesIn,
+            preprocessing,
+            encoding,
+            debug,
+            stripTags,
+            preserveTags,
+            skipImages,
+            linkStyle,
+            outputFormat,
+            includeDocumentStructure,
+            extractImages,
+            maxImageSize,
+            captureSvg,
+            inferDimensions,
+            maxDepth,
+            excludeSelectors
+        );
     }
 }

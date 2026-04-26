@@ -11,15 +11,18 @@ import java.util.Optional;
 /**
  * The primary result of HTML conversion and extraction.
  *
- * Contains the converted text output, optional structured document tree, metadata, extracted tables, images, and
- * processing warnings.
+ * Contains the converted text output, optional structured document tree,
+ * metadata, extracted tables, images, and processing warnings.
  *
  * # Example
  *
- * {@code }{@code text} use html_to_markdown_rs::{convert, ConversionOptions};
+ * {@code }{@code text}
+ * use html_to_markdown_rs::{convert, ConversionOptions};
  *
- * let result = convert("&lt;h1&gt;Hello&lt;/h1&gt;&lt;p&gt;World&lt;/p&gt;", None)?; assert!(result.content.is_some());
- * assert!(result.warnings.is_empty()); {@code }{@code }
+ * let result = convert("&lt;h1&gt;Hello&lt;/h1&gt;&lt;p&gt;World&lt;/p&gt;", None)?;
+ * assert!(result.content.is_some());
+ * assert!(result.warnings.is_empty());
+ * {@code }{@code }
  */
 public class ConversionResultBuilder {
 
@@ -68,6 +71,13 @@ public class ConversionResultBuilder {
 
     /** Builds the ConversionResult instance. */
     public ConversionResult build() {
-        return new ConversionResult(content, document, metadata, tables, images, warnings);
+        return new ConversionResult(
+            content,
+            document,
+            metadata,
+            tables,
+            images,
+            warnings
+        );
     }
 }

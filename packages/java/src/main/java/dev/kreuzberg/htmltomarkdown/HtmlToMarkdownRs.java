@@ -9,18 +9,16 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 
 public final class HtmlToMarkdownRs {
-    private HtmlToMarkdownRs() {
-    }
+    private HtmlToMarkdownRs() { }
 
-    public static ConversionResult convert(final String html, final ConversionOptions options)
-            throws HtmlToMarkdownRsException {
+    public static ConversionResult convert(final String html, final ConversionOptions options) throws HtmlToMarkdownRsException {
         try (var arena = Arena.ofConfined()) {
             var chtml = arena.allocateFrom(html);
             var coptionsJson = options != null ? createObjectMapper().writeValueAsString(options) : null;
             var coptionsJsonSeg = coptionsJson != null ? arena.allocateFrom(coptionsJson) : MemorySegment.NULL;
             var coptions = coptionsJson != null
-                    ? (MemorySegment) NativeLib.HTM_CONVERSION_OPTIONS_FROM_JSON.invoke(coptionsJsonSeg)
-                    : MemorySegment.NULL;
+                ? (MemorySegment) NativeLib.HTM_CONVERSION_OPTIONS_FROM_JSON.invoke(coptionsJsonSeg)
+                : MemorySegment.NULL;
             var resultPtr = (MemorySegment) NativeLib.HTM_CONVERT.invoke(chtml, coptions, MemorySegment.NULL);
             if (!coptions.equals(MemorySegment.NULL)) {
                 NativeLib.HTM_CONVERSION_OPTIONS_FREE.invoke(coptions);
@@ -43,9 +41,9 @@ public final class HtmlToMarkdownRs {
         }
     }
 
-    public static ConversionResult convertWithVisitor(String html, ConversionOptions options, Visitor visitor)
-            throws HtmlToMarkdownRsException {
-        try (var arena = Arena.ofConfined(); var bridge = new VisitorBridge(visitor)) {
+    public static ConversionResult convertWithVisitor(String html, ConversionOptions options, Visitor visitor) throws HtmlToMarkdownRsException {
+        try (var arena = Arena.ofConfined();
+             var bridge = new VisitorBridge(visitor)) {
             var cHtml = arena.allocateFrom(html);
 
             MemorySegment optionsPtr = MemorySegment.NULL;
@@ -60,8 +58,7 @@ public final class HtmlToMarkdownRs {
             }
 
             try {
-                var resultPtr = (MemorySegment) NativeLib.HTM_CONVERT_WITH_VISITOR.invoke(cHtml, optionsPtr,
-                        visitorHandle);
+                var resultPtr = (MemorySegment) NativeLib.HTM_CONVERT_WITH_VISITOR.invoke(cHtml, optionsPtr, visitorHandle);
                 if (!optionsPtr.equals(MemorySegment.NULL)) {
                     NativeLib.HTM_CONVERSION_OPTIONS_FREE.invoke(optionsPtr);
                 }
@@ -97,9 +94,10 @@ public final class HtmlToMarkdownRs {
 
     private static com.fasterxml.jackson.databind.ObjectMapper createObjectMapper() {
         return new com.fasterxml.jackson.databind.ObjectMapper()
-                .registerModule(new com.fasterxml.jackson.datatype.jdk8.Jdk8Module()).findAndRegisterModules()
-                .setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
-                .configure(com.fasterxml.jackson.databind.MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true);
+            .registerModule(new com.fasterxml.jackson.datatype.jdk8.Jdk8Module())
+            .findAndRegisterModules()
+            .setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
+            .configure(com.fasterxml.jackson.databind.MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true);
     }
 
 }
