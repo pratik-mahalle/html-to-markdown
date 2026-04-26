@@ -44,5 +44,5 @@ export {
   WasmVisitResult,
   WasmWarningKind,
   WasmWhitespaceMode,
-  convert,
-} from "./wasm";
+  convert
+} from './wasm';
