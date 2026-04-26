@@ -6,7 +6,10 @@ REPO_ROOT="$SCRIPT_DIR/../../.."
 
 # Clean up any vendored files and build artifacts from previous runs
 rm -rf packages/ruby/vendor/html-to-markdown-rs packages/ruby/vendor/Cargo.toml packages/ruby/pkg
-git restore packages/ruby/ext/html-to-markdown-rb/native/Cargo.toml 2>/dev/null || true
+git restore \
+  packages/ruby/ext/html_to_markdown_rb/Cargo.toml \
+  packages/ruby/ext/html_to_markdown_rb/native/Cargo.toml \
+  2>/dev/null || true
 
 # Build CLI binary BEFORE vendoring to avoid package collision
 echo "Building CLI binary before vendoring..."

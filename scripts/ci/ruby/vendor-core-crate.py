@@ -398,40 +398,45 @@ def main() -> None:
     generate_vendor_cargo_toml(repo_root, workspace_deps, metadata, copied_crates)
     print("Generated vendor/Cargo.toml")
 
-    # Update native extension Cargo.toml to use vendored crate
-    native_toml = (
-        repo_root
-        / "packages"
-        / "ruby"
-        / "ext"
-        / "html-to-markdown-rb"
-        / "native"
-        / "Cargo.toml"
-    )
+    ext_dir = repo_root / "packages" / "ruby" / "ext" / "html_to_markdown_rb"
+
+    # Outer Cargo.toml (used by rb_sys/mkmf at gem install time)
+    # From: path = "../../../../crates/html-to-markdown"
+    # To:   path = "../../vendor/html-to-markdown-rs"
+    outer_toml = ext_dir / "Cargo.toml"
+    if outer_toml.exists():
+        with open(outer_toml, "r") as f:
+            content = f.read()
+        content = re.sub(
+            r'path = "\.\./\.\./\.\./\.\./crates/html-to-markdown"',
+            'path = "../../vendor/html-to-markdown-rs"',
+            content,
+        )
+        with open(outer_toml, "w") as f:
+            f.write(content)
+        print("Updated ext/html_to_markdown_rb/Cargo.toml to use vendored crate")
+
+    # Inner native/Cargo.toml (used by rake-compiler-dock cross-compile)
+    # From: path = "../../../../../crates/html-to-markdown"
+    # To:   path = "../../../vendor/html-to-markdown-rs"
+    native_toml = ext_dir / "native" / "Cargo.toml"
     if native_toml.exists():
         with open(native_toml, "r") as f:
             content = f.read()
-
-        # Replace path dependencies to point to vendored crate
-        # From: path = "../../../../../crates/html-to-markdown"
-        # To:   path = "../../../vendor/html-to-markdown-rs"
         content = re.sub(
             r'path = "\.\./\.\./\.\./\.\./\.\./crates/html-to-markdown"',
             'path = "../../../vendor/html-to-markdown-rs"',
             content,
         )
-
         with open(native_toml, "w") as f:
             f.write(content)
-
-        print("Updated native extension Cargo.toml to use vendored crate")
+        print("Updated ext/html_to_markdown_rb/native/Cargo.toml to use vendored crate")
 
     print(f"\nVendoring complete (core version: {core_version})")
     print(f"Copied crates: {', '.join(sorted(copied_crates))}")
 
     if "html-to-markdown-rs" in copied_crates:
-        print("Native extension Cargo.toml uses:")
-        print("  - path '../../../vendor/html-to-markdown-rs' for core crate")
+        print("Extension Cargo.toml files updated to use vendored crate")
 
 
 if __name__ == "__main__":
