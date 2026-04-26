@@ -4,7 +4,7 @@
 # To verify freshness: alef verify --exit-code
 # Issues & docs: https://github.com/kreuzberg-dev/alef
 
-from typing import Any, Literal, TypeAlias, TypedDict
+from typing import Literal, TypeAlias, TypedDict
 
 class DocumentMetadata:
     title: str | None
@@ -570,7 +570,7 @@ class NodeContentGroupVariant(TypedDict):
     heading_level: int | None
     heading_text: str | None
 
-NodeContent = (
+NodeContent: TypeAlias = (
     NodeContentHeadingVariant
     | NodeContentParagraphVariant
     | NodeContentListVariant
@@ -615,7 +615,7 @@ class AnnotationKindLinkVariant(TypedDict):
     url: str
     title: str | None
 
-AnnotationKind = (
+AnnotationKind: TypeAlias = (
     AnnotationKindBoldVariant
     | AnnotationKindItalicVariant
     | AnnotationKindUnderlineVariant
@@ -744,7 +744,7 @@ class VisitResultErrorVariant(TypedDict):
     type: Literal["Error"]
     _0: str
 
-VisitResult = (
+VisitResult: TypeAlias = (
     VisitResultContinueVariant
     | VisitResultCustomVariant
     | VisitResultSkipVariant
