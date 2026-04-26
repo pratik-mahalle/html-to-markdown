@@ -3,12 +3,19 @@ name = "html_to_markdown_nif"
 version = "3.4.0-rc.2"
 edition = "2024"
 license = "MIT"
+description = "High-performance HTML to Markdown converter"
+readme = false
+keywords = ["html", "markdown", "converter"]
+categories = ["text-processing"]
 
 [lib]
+name = "html_to_markdown_nif"
 crate-type = ["cdylib"]
 
 [dependencies]
 html-to-markdown-rs = { path = "../../../../crates/html-to-markdown", features = ["full", "metadata", "visitor", "serde", "inline-images"] }
 rustler = "0.37"
+async-trait = "0.1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "sync"] }

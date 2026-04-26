@@ -9,15 +9,19 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING  # noqa: F401
 
 if TYPE_CHECKING:
     from ._html_to_markdown import (
+        DocumentStructure,
         GridCell,
         HeaderMetadata,
         ImageMetadata,
         LinkMetadata,
+        PreprocessingOptionsUpdate,
+        ProcessingWarning,
         StructuredData,
+        TableData,
     )
 
 
