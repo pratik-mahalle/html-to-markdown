@@ -16,6 +16,14 @@ version: "3"
 #   task rust:build    -> Rust-specific tasks
 # ============================================================================
 
+# Preconditions for task setup:
+# - Rust toolchain (rustup) — install via https://rustup.rs
+# - alef CLI — install via cargo install --git https://github.com/kreuzberg-dev/alef
+# - prek — install via cargo install prek
+# - Per-language tools auto-skipped via alef preconditions; install as needed:
+#   - Python: uv, Node: pnpm (corepack enable), Ruby: bundle, PHP: composer
+#   - Go: go, Java: mvn, C#: dotnet, Elixir: mix, R: Rscript
+
 includes:
   rust:
     taskfile: ./.task/languages/rust.yml
@@ -32,11 +40,12 @@ includes:
 tasks:
   # === Setup ===
   setup:
-    desc: "Install all dependencies and setup development environment"
+    desc: "Install all dependencies and dev tools"
     cmds:
       - task: rust:install
       - alef setup
-      - task: pre-commit:install
+      - prek install
+      - prek install --hook-type commit-msg
 
   # === Build ===
   build:
