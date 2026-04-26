@@ -5,8 +5,8 @@
  * To verify freshness: alef verify --exit-code
  * Issues & docs: https://github.com/kreuzberg-dev/alef
  */
-#include "test_runner.h"
 #include <stdio.h>
+#include "test_runner.h"
 
 int main(void) {
     int passed = 0;
