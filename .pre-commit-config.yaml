@@ -263,13 +263,14 @@ repos:
         files: ^packages/elixir/
         pass_filenames: false
 
-      # R
+      # R (manual only — Rscript not available in all CI environments)
       - id: r-styler
         name: R formatting (styler)
         entry: bash -c 'cd packages/r && Rscript -e "styler::style_dir(\".\")"'
         language: system
         files: ^packages/r/
         pass_filenames: false
+        stages: [manual]
 
       - id: r-lintr
         name: R linting (lintr)
@@ -277,3 +278,4 @@ repos:
         language: system
         files: ^packages/r/
         pass_filenames: false
+        stages: [manual]
