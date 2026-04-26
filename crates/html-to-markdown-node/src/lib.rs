@@ -4961,6 +4961,35 @@ impl From<html_to_markdown_rs::VisitResult> for JsVisitResult {
     }
 }
 
+/// Convert HTML to Markdown, returning a [`JsConversionResult`] with content, metadata, images,
+/// and warnings.
+///
+/// # Arguments
+///
+/// * `html` - The HTML string to convert
+/// * `options` - Optional conversion options (defaults to `ConversionOptions::default()`)
+/// * `visitor` - Optional visitor object implementing the `JsHtmlVisitor` interface
+///
+/// # Errors
+///
+/// Returns an error if HTML parsing fails or if the input contains invalid UTF-8.
+#[napi]
+pub fn convert(
+    html: String,
+    options: Option<JsConversionOptions>,
+    visitor: Option<napi::bindgen_prelude::Object>,
+) -> napi::Result<JsConversionResult> {
+    let visitor = visitor.map(|obj| {
+        let bridge = JsHtmlVisitorBridge::new(obj);
+        std::rc::Rc::new(std::cell::RefCell::new(bridge)) as html_to_markdown_rs::visitor::VisitorHandle
+    });
+    let options_core: Option<html_to_markdown_rs::ConversionOptions> =
+        options.map(html_to_markdown_rs::ConversionOptions::from);
+    html_to_markdown_rs::convert(&html, options_core, visitor)
+        .map(JsConversionResult::from)
+        .map_err(conversion_error_to_napi_err)
+}
+
 // Error variant name constants
 pub const CONVERSION_ERROR_ERROR_PARSE_ERROR: &str = "ParseError";
 pub const CONVERSION_ERROR_ERROR_SANITIZATION_ERROR: &str = "SanitizationError";

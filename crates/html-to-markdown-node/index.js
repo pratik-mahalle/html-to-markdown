@@ -576,6 +576,7 @@ if (!nativeBinding) {
 }
 
 module.exports = nativeBinding
+module.exports.convert = nativeBinding.convert
 module.exports.JsConversionOptionsBuilder = nativeBinding.JsConversionOptionsBuilder
 module.exports.JsCodeBlockStyle = nativeBinding.JsCodeBlockStyle
 module.exports.JsHeadingStyle = nativeBinding.JsHeadingStyle
