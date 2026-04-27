@@ -14,7 +14,7 @@ npm install html-to-markdown-rs-wasm
 import init from 'html-to-markdown-rs-wasm';
 
 await init();
-// TODO: add usage example
+// See https://github.com/kreuzberg-dev/html-to-markdown-rs for usage examples.
 ```
 
 ## Documentation
