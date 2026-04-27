@@ -85,7 +85,7 @@ Install **html-to-markdown** for your language using the commands below. Each bi
     **Verify:**
 
     ```bash
-    python -c "from html_to_markdown import convert; print(convert('<h1>Hello</h1>')['content'])"
+    python -c "from html_to_markdown import convert; print(convert('<h1>Hello</h1>').content)"
     # # Hello
     ```
 

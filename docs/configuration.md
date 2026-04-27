@@ -113,12 +113,7 @@ All options are passed via `ConversionOptions` (builder pattern in Rust, keyword
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `extract_metadata` | `bool` | `false` | Populate `result.metadata` with title, headers, links, images, and structured data. |
-| `extract_document` | `bool` | `false` | Extract document-level metadata (title, description, charset, language, Open Graph, etc.). Requires `extract_metadata`. |
-| `extract_headers` | `bool` | `false` | Extract heading elements with level, text, and id. Requires `extract_metadata`. |
-| `extract_links` | `bool` | `false` | Extract anchor tags with href, text, rel, and link type. Requires `extract_metadata`. |
-| `extract_structured_data` | `bool` | `false` | Extract JSON-LD, Microdata, and RDFa blocks. Requires `extract_metadata`. |
-| `max_structured_data_size` | `int` | `100000` | Maximum byte size of structured data blocks to extract. |
+| `extract_metadata` | `bool` | `true` | Populate `result.metadata` (and `result.tables`) with extracted document metadata. |
 
 ### Document Structure
 

@@ -27,10 +27,10 @@ pip install html-to-markdown
 from html_to_markdown import convert, ConversionOptions
 
 result = convert("<h1>Title</h1>", ConversionOptions(heading_style="atx"))
-print(result["content"])
+print(result.content)
 ```
 
-Option keys match the Rust field names (`snake_case`). `ConversionOptions` accepts keyword arguments. `result` is a dict with the same structure as `ConversionResult`. Access fields as `result["content"]`, `result["metadata"]`, etc.
+Option keys match the Rust field names (`snake_case`). `ConversionOptions` accepts keyword arguments. `ConversionResult` is a class with attributes — access fields as `result.content`, `result.metadata`, `result.tables`, `result.images`, `result.document`, `result.warnings`.
 
 ## TypeScript
 

@@ -9,11 +9,10 @@ html = """
 </table>
 """
 
-options = ConversionOptions(extract_tables=True)
-result = convert(html, options)
+result = convert(html, ConversionOptions())
 
-for table in result["tables"]:
-    for i, row in enumerate(table["cells"]):
-        prefix = "Header" if table["is_header_row"][i] else "Row"
-        print(f"  {prefix}: {row}")
+for table in result.tables:
+    for cell in table.grid.cells:
+        prefix = "Header" if cell.is_header else "Cell"
+        print(f"  {prefix} (r{cell.row},c{cell.col}): {cell.content}")
 ```

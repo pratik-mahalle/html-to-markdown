@@ -53,7 +53,7 @@ let markdown = result.content.unwrap_or_default();
 from html_to_markdown import convert
 
 result = convert("<h1>Hello</h1><p>World</p>")
-markdown = result["content"]
+markdown = result.content
 # "# Hello\n\nWorld"
 ```
 
@@ -171,13 +171,8 @@ All options are passed to `convert()` as the second argument via a `ConversionOp
 - infer_dimensions: bool — decode image bytes to infer width/height (default: true)
 - encoding: string — CLI only; input file character encoding (default: "utf-8"); ignored by the core library
 - debug: bool — CLI only; prints diagnostic lines to stderr after each conversion (default: false)
-- extract_metadata: bool — populate result.metadata (default: false)
-- extract_document: bool — extract title, description, Open Graph, etc. (default: false)
-- extract_headers: bool — extract h1-h6 elements (default: false)
-- extract_links: bool — extract anchor tags (default: false)
+- extract_metadata: bool — populate result.metadata and result.tables (default: true)
 - extract_images: bool — extract img elements and populate result.images (default: false)
-- extract_structured_data: bool — extract JSON-LD, Microdata, RDFa (default: false)
-- max_structured_data_size: int byte limit for structured data (default: 100000)
 - include_document_structure: bool — populate result.document (default: false)
 - preprocess: bool — clean HTML before conversion (default: false)
 - preset: "minimal" | "standard" | "aggressive" preprocessing aggressiveness (default: "standard")
