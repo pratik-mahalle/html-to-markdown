@@ -417,6 +417,13 @@ tasks:
       - uv sync --group doc
       - uv run zensical build --clean --strict
 
+  docs:serve:
+    desc: "Serve documentation site locally with zensical (hot-reload)"
+    cmds:
+      - task: python:install
+      - uv sync --group doc
+      - uv run zensical serve
+
   # === Clean ===
   clean:
     desc: "Remove build artifacts across all languages"
