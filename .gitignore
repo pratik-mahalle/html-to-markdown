@@ -34,9 +34,6 @@ rust-coverage.lcov
 *.node
 examples/**/.cargo/config.toml
 
-# NAPI-RS generated files
-crates/html-to-markdown-node/index.d.ts
-
 # Node.js / TypeScript
 node_modules/
 **/node_modules/
