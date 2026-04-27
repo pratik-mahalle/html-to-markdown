@@ -61,6 +61,8 @@ which = "8"
 unsafe_code = "allow"
 unused_must_use = "deny"
 missing_docs = "allow"
+dropping_references = { level = "allow", priority = 1 }
+renamed_and_removed_lints = { level = "allow", priority = 1 }
 
 [workspace.lints.clippy]
 all = { level = "deny", priority = -1 }
@@ -79,8 +81,6 @@ needless_borrows_for_generic_args = { level = "allow", priority = 1 }
 useless_conversion = { level = "allow", priority = 1 }
 unnecessary_fallible_conversions = { level = "allow", priority = 1 }
 # Rust 1.95.0+ compatibility
-renamed_and_removed_lints = { level = "allow", priority = 1 }
-dropping_references = { level = "allow", priority = 1 }
 clone_on_copy = { level = "allow", priority = 1 }
 single_component_path_imports = { level = "allow", priority = 1 }
 uninlined_format_args = { level = "allow", priority = 1 }
