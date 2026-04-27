@@ -14,7 +14,7 @@ See the build instructions in the main repository.
 #include "html_to_markdown.h"
 
 int main(void) {
-    // See https://github.com/kreuzberg-dev/html-to-markdown-rs for usage examples.
+    // TODO: add usage example
     return 0;
 }
 ```

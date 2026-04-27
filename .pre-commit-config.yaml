@@ -105,7 +105,7 @@ repos:
     hooks:
       - id: oxlint
         args: ["--fix"]
-        exclude: ^(docs/demo/|e2e/)
+        exclude: ^(docs/demo/|e2e/)|.*\.d\.ts$
 
   # C/FFI: formatting and linting
   - repo: https://github.com/pocc/pre-commit-hooks
