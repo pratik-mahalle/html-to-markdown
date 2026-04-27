@@ -6,7 +6,7 @@ exclude: ^docs/snippets/|vendor/|node_modules/|target/|dist/|artifacts/|scripts/
 repos:
   # AI-Rulez: auto-generate AI assistant configuration files
   - repo: https://github.com/Goldziher/ai-rulez
-    rev: v4.0.6
+    rev: v4.0.7
     hooks:
       - id: ai-rulez-generate
 
@@ -23,7 +23,9 @@ repos:
     rev: v6.0.0
     hooks:
       - id: trailing-whitespace
+        exclude: \.github/copilot-instructions\.md
       - id: end-of-file-fixer
+        exclude: \.github/copilot-instructions\.md
       - id: check-merge-conflict
       - id: check-added-large-files
         exclude: uv.lock
@@ -154,7 +156,7 @@ repos:
 
   # Alef: verify bindings and sync versions
   - repo: https://github.com/kreuzberg-dev/alef
-    rev: v0.8.7
+    rev: v0.10.0
     hooks:
       - id: alef-verify
       - id: alef-sync-versions
@@ -170,7 +172,7 @@ repos:
     rev: v0.6.37
     hooks:
       - id: cpd
-        exclude: ^(\.mvn/wrapper/|e2e/|test_apps/)
+        exclude: ^(\.mvn/wrapper/|e2e/|test_apps/|packages/java/src/)
       - id: checkstyle
         args:
           [

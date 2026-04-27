@@ -139,4 +139,3 @@ A structured table grid with cell-level data including spans.
 | `cells` | `list[GridCell]` | `[]` | All cells in the table (may be fewer than rows*cols due to spans). |
 
 ---
-

@@ -1,4 +1,4 @@
-defmodule Html_to_markdownHtmlVisitorBridge do
+defmodule HtmlToMarkdownHtmlVisitorBridge do
   @moduledoc """
   GenServer bridge for HtmlVisitor implementation in html_to_markdown.
 
@@ -37,11 +37,11 @@ defmodule Html_to_markdownHtmlVisitorBridge do
       result = apply(impl_module, String.to_atom(method), args)
 
       # Send result back to Rust
-      Html_to_markdown.Native.complete_trait_call(reply_id, Jason.encode!(result))
+      HtmlToMarkdown.Native.complete_trait_call(reply_id, Jason.encode!(result))
     rescue
       e ->
         Logger.error("Error calling {impl_module}.{method}: {Exception.message(e)}")
-        Html_to_markdown.Native.fail_trait_call(reply_id, Exception.message(e))
+        HtmlToMarkdown.Native.fail_trait_call(reply_id, Exception.message(e))
     end
 
     {:noreply, impl_module}
@@ -52,6 +52,6 @@ defmodule Html_to_markdownHtmlVisitorBridge do
   """
   def register(impl_module) do
     {:ok, _pid} = start_link(impl_module)
-    Html_to_markdown.Native.register_html_visitor(self(), Atom.to_string(impl_module))
+    HtmlToMarkdown.Native.register_html_visitor(self(), Atom.to_string(impl_module))
   end
 end

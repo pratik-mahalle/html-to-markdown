@@ -358,30 +358,31 @@ Implement this trait to customize the conversion behavior for any HTML element t
 All methods have default implementations that return `VisitResult.Continue`, allowing
 selective override of only the elements you care about.
 
-# Method Naming Convention
+## Method Naming Convention
 
 - `visit_*_start`: Called before entering an element (pre-order traversal)
 - `visit_*_end`: Called after exiting an element (post-order traversal)
 - `visit_*`: Called for specific element types (e.g., `visit_link`, `visit_image`)
 
-# Execution Order
+## Execution Order
 
 For a typical element like `<div><p>text</p></div>`:
+
 1. `visit_element_start` for `<div>`
 2. `visit_element_start` for `<p>`
 3. `visit_text` for "text"
 4. `visit_element_end` for `<p>`
 5. `visit_element_end` for `</div>`
 
-# Performance Notes
+## Performance Notes
 
 - `visit_text` is the most frequently called method (~100+ times per document)
 - Return `VisitResult.Continue` quickly for elements you don't need to customize
 - Avoid heavy computation in visitor methods; consider caching if needed
 
-##### Methods
+### Methods
 
-###### htm_visit_element_start()
+#### htm_visit_element_start()
 
 Called before entering any element.
 
@@ -394,7 +395,7 @@ visitors to implement generic element handling before tag-specific logic.
 HtmVisitResult htm_visit_element_start(HtmNodeContext ctx);
 ```
 
-###### htm_visit_element_end()
+##### htm_visit_element_end()
 
 Called after exiting any element.
 
@@ -790,7 +791,7 @@ HtmVisitResult htm_visit_figure_end(HtmNodeContext ctx, const char* output);
 
 ---
 
-#### HtmImageMetadata
+##### HtmImageMetadata
 
 Image metadata with source and dimensions.
 
@@ -809,7 +810,7 @@ for image analysis and optimization.
 
 ---
 
-#### HtmLinkMetadata
+##### HtmLinkMetadata
 
 Hyperlink metadata with categorization and attributes.
 
@@ -824,7 +825,7 @@ Represents `<a>` elements with parsed href values, text content, and link type c
 | `rel` | `const char**` | — | Rel attribute values (e.g., "nofollow", "stylesheet", "canonical") |
 | `attributes` | `void*` | — | Additional HTML attributes |
 
-##### Methods
+###### Methods
 
 ###### htm_classify_link()
 
@@ -843,7 +844,7 @@ HtmLinkType htm_classify_link(const char* href);
 
 ---
 
-#### HtmNodeContext
+##### HtmNodeContext
 
 Context information passed to all visitor methods.
 
@@ -863,7 +864,7 @@ including its type, attributes, position in the DOM tree, and parent context.
 
 ---
 
-#### HtmPreprocessingOptions
+##### HtmPreprocessingOptions
 
 HTML preprocessing options for document cleanup before conversion.
 
@@ -874,7 +875,7 @@ HTML preprocessing options for document cleanup before conversion.
 | `remove_navigation` | `bool` | `true` | Remove navigation elements (nav, breadcrumbs, menus, sidebars) |
 | `remove_forms` | `bool` | `true` | Remove form elements (forms, inputs, buttons, etc.) |
 
-##### Methods
+###### Methods
 
 ###### htm_default()
 
@@ -925,7 +926,7 @@ HtmPreprocessingOptions htm_from(HtmPreprocessingOptionsUpdate update);
 
 ---
 
-#### HtmProcessingWarning
+##### HtmProcessingWarning
 
 A non-fatal warning generated during HTML processing.
 
@@ -937,7 +938,7 @@ A non-fatal warning generated during HTML processing.
 
 ---
 
-#### HtmStructuredData
+##### HtmStructuredData
 
 Structured data block (JSON-LD, Microdata, or RDFa).
 
@@ -953,7 +954,7 @@ JSON-LD blocks are collected as raw JSON strings for flexibility.
 
 ---
 
-#### HtmTableData
+##### HtmTableData
 
 A top-level extracted table with both structured data and markdown representation.
 
@@ -965,7 +966,7 @@ A top-level extracted table with both structured data and markdown representatio
 
 ---
 
-#### HtmTableGrid
+##### HtmTableGrid
 
 A structured table grid with cell-level data including spans.
 
@@ -978,7 +979,7 @@ A structured table grid with cell-level data including spans.
 
 ---
 
-#### HtmTextAnnotation
+##### HtmTextAnnotation
 
 An inline text annotation with byte-range offsets.
 
@@ -993,9 +994,9 @@ Annotations describe formatting (bold, italic, etc.) and links within a node's t
 
 ---
 
-### Enums
+#### Enums
 
-#### HtmTextDirection
+##### HtmTextDirection
 
 Text directionality of document content.
 
@@ -1010,7 +1011,7 @@ Corresponds to the HTML `dir` attribute and `bdi` element directionality.
 
 ---
 
-#### HtmLinkType
+##### HtmLinkType
 
 Link classification based on href value and document context.
 
@@ -1028,7 +1029,7 @@ Used to categorize links during extraction for filtering and analysis.
 
 ---
 
-#### HtmImageType
+##### HtmImageType
 
 Image source classification for proper handling and processing.
 
@@ -1044,7 +1045,7 @@ Determines whether an image is embedded (data URI), inline SVG, external, or rel
 
 ---
 
-#### HtmStructuredDataType
+##### HtmStructuredDataType
 
 Structured data format type.
 
@@ -1059,7 +1060,7 @@ Identifies the schema/format used for structured data markup.
 
 ---
 
-#### HtmPreprocessingPreset
+##### HtmPreprocessingPreset
 
 HTML preprocessing aggressiveness level.
 
@@ -1074,7 +1075,7 @@ Controls the extent of cleanup performed before conversion. Higher levels remove
 
 ---
 
-#### HtmHeadingStyle
+##### HtmHeadingStyle
 
 Heading style options for Markdown output.
 
@@ -1089,7 +1090,7 @@ Controls how headings (h1-h6) are rendered in the output Markdown.
 
 ---
 
-#### HtmListIndentType
+##### HtmListIndentType
 
 List indentation character type.
 
@@ -1103,7 +1104,7 @@ Controls whether list items are indented with spaces or tabs.
 
 ---
 
-#### HtmWhitespaceMode
+##### HtmWhitespaceMode
 
 Whitespace handling strategy during conversion.
 
@@ -1117,7 +1118,7 @@ Determines how sequences of whitespace characters (spaces, tabs, newlines) are p
 
 ---
 
-#### HtmNewlineStyle
+##### HtmNewlineStyle
 
 Line break syntax in Markdown output.
 
@@ -1131,7 +1132,7 @@ Controls how soft line breaks (from `<br>` or line breaks in source) are rendere
 
 ---
 
-#### HtmCodeBlockStyle
+##### HtmCodeBlockStyle
 
 Code block fence style in Markdown output.
 
@@ -1146,7 +1147,7 @@ Determines how code blocks (`<pre><code>`) are rendered in Markdown.
 
 ---
 
-#### HtmHighlightStyle
+##### HtmHighlightStyle
 
 Highlight rendering style for `<mark>` elements.
 
@@ -1162,7 +1163,7 @@ Controls how highlighted text is rendered in Markdown output.
 
 ---
 
-#### HtmLinkStyle
+##### HtmLinkStyle
 
 Link rendering style in Markdown output.
 
@@ -1177,7 +1178,7 @@ reference-style `[text][1]` syntax with definitions collected at the end.
 
 ---
 
-#### HtmOutputFormat
+##### HtmOutputFormat
 
 Output format for conversion.
 
@@ -1192,7 +1193,7 @@ Specifies the target markup language format for the conversion output.
 
 ---
 
-#### HtmNodeContent
+##### HtmNodeContent
 
 The semantic content type of a document node.
 
@@ -1217,7 +1218,7 @@ Uses internally tagged representation (`"node_type": "heading"`) for JSON serial
 
 ---
 
-#### HtmAnnotationKind
+##### HtmAnnotationKind
 
 The type of an inline text annotation.
 
@@ -1238,7 +1239,7 @@ Uses internally tagged representation (`"annotation_type": "bold"`) for JSON ser
 
 ---
 
-#### HtmWarningKind
+##### HtmWarningKind
 
 Categories of processing warnings.
 
@@ -1254,7 +1255,7 @@ Categories of processing warnings.
 
 ---
 
-#### HtmNodeType
+##### HtmNodeType
 
 Node type enumeration covering all HTML element types.
 
@@ -1355,7 +1356,7 @@ providing a coarse-grained classification for visitor dispatch.
 
 ---
 
-#### HtmVisitResult
+##### HtmVisitResult
 
 Result of a visitor callback.
 
@@ -1374,9 +1375,9 @@ preserving HTML, or signaling errors.
 
 ---
 
-### Errors
+#### Errors
 
-#### HtmConversionError
+##### HtmConversionError
 
 Errors that can occur during HTML to Markdown conversion.
 
@@ -1392,4 +1393,3 @@ Errors that can occur during HTML to Markdown conversion.
 
 
 ---
-

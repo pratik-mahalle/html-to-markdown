@@ -21,4 +21,3 @@ Errors that can occur during HTML to Markdown conversion.
 | `Other` | Conversion error: {0} | Generic conversion error |
 
 ---
-
