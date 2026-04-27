@@ -1,7 +1,7 @@
 <!--
 🤖 AI-RULEZ :: GENERATED FILE — DO NOT EDIT
 Project: html-to-markdown
-Generated: 2026-04-27 15:19:58
+Generated: 2026-04-27 20:04:43
 Source: .ai-rulez/config.toml
 
 NEVER edit this file - modify .ai-rulez/ content instead
@@ -9,7 +9,7 @@ Use MCP server: npx -y ai-rulez@latest mcp
 Regenerate: ai-rulez generate
 
 Docs: https://github.com/Goldziher/ai-rulez
-Content-Hash: blake3:190e7d3bae994bb7370a8e0051b056f66f59f7c7615c978a5e82642299f1fc28
+Content-Hash: blake3:d0c6756ad753702b71194ed5f462e86b13df01319a61b9aeb40fc111d926ff5d
 -->
 
 # html-to-markdown
@@ -160,59 +160,52 @@ High-performance HTML to Markdown converter with Rust core and polyglot bindings
 - To change: modify fixtures or generator source, run task generate:e2e, run task test:e2e, commit together
 - CI validates freshness: task generate:e2e && git diff --exit-code e2e/
 
-### go-conventions
+### java-conventions
 
 **Priority:** high
 
-- Follow Effective Go and Go Code Review Comments guidelines.
-- Handle every error return. Wrap errors with context: `fmt.Errorf("operation failed: %w", err)`.
-- Linting: `golangci-lint` with strict config (enable `govet`, `staticcheck`, `errcheck`, `gosec`, `gocritic`). Format with `gofmt`/`goimports`.
-- Security: `govulncheck` for CVE scanning, `gosec` for SAST. Run both in CI.
-- Testing: table-driven tests with `t.Run()`. Use `t.Parallel()` where safe. Use `testify` for assertions. Coverage with `go test -coverprofile`.
-- Naming: use short, descriptive names. Receivers are 1-2 letters. Exported names are descriptive.
-- Prefer composition over inheritance. Use interfaces for abstraction (accept interfaces, return structs).
-- Keep packages small and focused. Avoid package-level state and `init()` functions.
-- Use `context.Context` as first parameter for cancelable operations. Never store contexts in structs.
-- Error types: use `errors.Is()`/`errors.As()` for comparison. Define sentinel errors with `errors.New()`.
-- Modules: use Go modules. Commit `go.sum`. Use semantic version tags. Prefer stdlib over third-party when reasonable.
-- Concurrency: prefer channels over mutexes. Use `sync.WaitGroup` for fan-out. Guard shared state.
-- Benchmarking: use `testing.B` benchmarks. Profile with `go tool pprof`. Use `benchstat` for comparison.
+- Java 17+ LTS, records for immutable data, sealed classes for restricted hierarchies, pattern matching.
+- Google Java Style (4-space, 100 char), `google-java-format`. Static analysis: `Error Prone` + `SpotBugs`.
+- Build: Maven or Gradle with wrapper scripts (`mvnw`/`gradlew`). Commit wrapper files.
+- Testing: JUnit 5 with `@ParameterizedTest`, AssertJ assertions, `JaCoCo` (80%+ coverage).
+- Benchmarking: JMH for microbenchmarks — never use `System.nanoTime()` loops.
+- Error handling: specific exceptions only, never `catch (Exception)`, use try-with-resources for `AutoCloseable`.
+- `var` for obvious types, `Optional<T>` for returns (never params/fields), `final` fields by default.
+- Prefer constructor injection over field injection for DI. Immutable collections: `List.of()`, `Map.of()`.
+- Streams for collection transforms, `instanceof` pattern matching, switch expressions.
+- Security: OWASP `dependency-check` Maven/Gradle plugin for CVE scanning.
+- Dependencies: commit lock files, use BOM for version alignment, avoid `SNAPSHOT` in releases.
+- Anti-patterns: public fields, mutable static state, raw types, checked exceptions in lambdas.
 
-### meaningful-assertions
+### batch-operations
 
 **Priority:** medium
 
-Assert exact expected values, not just truthiness (`assert result == 42`, not `assert result`). Use snapshot testing for complex structured output. Consider property-based testing for functions with wide input ranges. Include descriptive failure messages. Always test error paths and edge cases, not just the happy path.
+Group related file reads and writes into single operations. Combine independent tool calls in parallel rather than sequentially. When making multiple edits to the same file, batch them into one edit operation. Prefer multi-file search tools over individual file reads when exploring.
 
-### tdd-workflow
-
-**Priority:** high
-
-Write tests before writing code, update tests when modifying behavior. When fixing bugs, write a failing test first — RED (failing test) → GREEN (minimal code to pass) → REFACTOR. Wrote production code before the test? Delete it, start over — no exceptions, don't keep as reference. Integration tests for API surfaces, unit tests for business logic, property tests for edge-case-heavy code. Run the full test suite before committing — never push untested code.
-
-### test-alongside-code
-
-**Priority:** high
-
-Write tests when writing code, update tests when modifying behavior. When fixing bugs, write a failing test first (TDD). Use integration tests for the public API surface and unit tests for complex internal logic. Run the full test suite before committing.
-
-### test-independence
-
-**Priority:** high
-
-Tests must be independent and idempotent — runnable in any order, in parallel. No shared mutable state between tests. Use factories or fixtures for setup. Clean up created resources (files, DB rows, env vars) after each test. Never rely on test execution order.
-
-### test-naming
+### context-preservation
 
 **Priority:** medium
 
-Name tests to describe behavior: `should_return_error_when_input_is_empty`, `test_parse_handles_nested_objects`. Use `describe`/`it` blocks for grouping in languages that support them. Follow `given_when_then` or `should_when` patterns. Test names are specifications — a reader should understand the expected behavior without reading the test body.
+Record key findings (file paths, function signatures, patterns discovered) before they scroll out of context. Summarize investigation results before acting on them. When working on multi-step tasks, note intermediate decisions and their rationale to avoid re-deriving them later.
 
-### testing-anti-patterns
+### incremental-approach
+
+**Priority:** medium
+
+Start with the smallest viable change, verify it works, then extend. Avoid generating large blocks of speculative code. Build iteratively: implement one piece, test, then move to the next. When uncertain about an approach, prototype the critical part first before committing to the full implementation.
+
+### output-awareness
+
+**Priority:** medium
+
+Limit explanations to 1-3 sentences unless asked for detail. Use code blocks for code, not prose. Omit unchanged code when showing diffs — use comments like `// ... existing code ...` to indicate skipped sections. Never repeat information already visible in context. Prefer short, direct answers over comprehensive walkthroughs.
+
+### task-runner
 
 **Priority:** high
 
-Do not test mock behavior instead of real behavior. Do not add test-only methods to production code. Do not mock what you don't own — wrap it and test the wrapper. Do not test implementation details — test observable behavior. Do not write tests that pass when the code is broken. If a test never fails, it's not testing anything.
+Prefer `task` commands over raw build/test/lint commands when a Taskfile.yaml exists. Task runners provide consistent, documented workflows. Use `task --list` to discover available tasks. Always check for a Taskfile before running manual commands. Standard task names: setup, build, test, lint, format, bench — prefer these conventions. Lock files always committed for reproducible builds.
 
 ### python-conventions
 
@@ -231,118 +224,75 @@ Do not test mock behavior instead of real behavior. Do not add test-only methods
 - Pattern matching (`match`/`case`) for multi-branch type dispatch (3.10+).
 - Anti-patterns: mutable default args, `import *`, global state, `time.sleep` in async.
 
-### java-conventions
+### dependency-awareness
 
 **Priority:** high
 
-- Java 17+ LTS, records for immutable data, sealed classes for restricted hierarchies, pattern matching.
-- Google Java Style (4-space, 100 char), `google-java-format`. Static analysis: `Error Prone` + `SpotBugs`.
-- Build: Maven or Gradle with wrapper scripts (`mvnw`/`gradlew`). Commit wrapper files.
-- Testing: JUnit 5 with `@ParameterizedTest`, AssertJ assertions, `JaCoCo` (80%+ coverage).
-- Benchmarking: JMH for microbenchmarks — never use `System.nanoTime()` loops.
-- Error handling: specific exceptions only, never `catch (Exception)`, use try-with-resources for `AutoCloseable`.
-- `var` for obvious types, `Optional<T>` for returns (never params/fields), `final` fields by default.
-- Prefer constructor injection over field injection for DI. Immutable collections: `List.of()`, `Map.of()`.
-- Streams for collection transforms, `instanceof` pattern matching, switch expressions.
-- Security: OWASP `dependency-check` Maven/Gradle plugin for CVE scanning.
-- Dependencies: commit lock files, use BOM for version alignment, avoid `SNAPSHOT` in releases.
-- Anti-patterns: public fields, mutable static state, raw types, checked exceptions in lambdas.
+Audit dependencies before adding them. Prefer well-maintained, widely-used packages with active maintenance. Pin versions and commit lock files. Use language-specific audit tools in CI:
+- Rust: `cargo audit`, `cargo deny` (license + advisory policies)
+- Python: `pip-audit`, `bandit` (SAST)
+- JavaScript/TypeScript: `npm audit`, `pnpm audit`
+- Go: `govulncheck`
+- Ruby: `bundler-audit`
+- PHP: `composer audit`
+- Java: OWASP `dependency-check` Maven/Gradle plugin
+- C#: `dotnet list package --vulnerable`
+- Elixir: `mix_audit`
+Zero tolerance for critical/high CVEs. Automate dependency update PRs where possible.
 
-### typescript-conventions
-
-**Priority:** high
-
-- `strict: true` + `noUncheckedIndexedAccess` in tsconfig, never `any` — use `unknown` with type guards.
-- ESM imports only, `const` over `let`, `as const` for literals, `interface` over `type` for objects.
-- `import type` for type-only imports to avoid runtime overhead. Discriminated unions for type-safe state.
-- Formatting/linting: `biome` + `oxlint`. Type checking: `tsc --noEmit` in CI.
-- Testing: `vitest` (80%+ coverage). Runtime validation at system boundaries with `zod`.
-- Error handling: discriminated unions for expected errors, throw only for unexpected.
-- Package manager: `pnpm` with `pnpm-lock.yaml` committed, build: `tsup` or `esbuild`.
-- Monorepo: workspace protocol (`workspace:*`), shared tsconfig base, `pnpm-workspace.yaml`.
-- Node.js: `node:` prefix for core modules, `fetch` over `axios`.
-- Security: `pnpm audit` for dependency CVE scanning. Zero tolerance for critical/high vulnerabilities.
-- Anti-patterns: non-null assertions (`!`), type assertions (`as`), `enum` (use unions), `@ts-ignore`.
-
-### rust-conventions
+### input-validation
 
 **Priority:** high
 
-- Rust 2024 edition, `cargo fmt` + `clippy -D warnings`, zero warnings policy.
-- `Result<T, E>` with `thiserror` for library errors, `anyhow` for applications. `?` for propagation — never `.unwrap()` in library code.
-- Minimize `unsafe` — every block needs `// SAFETY:` comment explaining invariants.
-- Prefer `&str` over `String` in params, `Cow<'_, str>` for conditional ownership, `Arc` for shared ownership.
-- `impl Trait` in argument position for static dispatch, `dyn Trait` for dynamic dispatch when heterogeneous collections needed.
-- Small, focused modules. Use `pub(crate)` for internal visibility. Workspace inheritance for multi-crate repos.
-- `#[cfg(test)]` for unit tests, `tests/` for integration, `cargo-llvm-cov` for coverage.
-- Benchmarking: `criterion` for microbenchmarks, profile with `cargo flamegraph`.
-- Async: `tokio` runtime, `'static + Send + Sync` bounds, `tokio::spawn` for concurrency.
-- Security: `cargo audit` for CVE scanning, `cargo deny` for license and advisory policies.
-- Dependencies: pin versions, commit `Cargo.lock`, prefer well-maintained crates.
-- Structured logging with `tracing` crate — use spans and events, not `println!`.
-- API naming: follow `as_`/`to_`/`into_` conventions for conversions, `iter()`/`iter_mut()`/`into_iter()` for iterators. Getters are `field()` not `get_field()`. See [Rust API Guidelines](https://rust-lang.github.io/api-guidelines).
-- Eagerly implement common traits: `Clone`, `Debug`, `Default`, `Eq`, `PartialEq`, `Hash`, `Send`, `Sync`. Use `From`/`AsRef`/`AsMut` for conversions, `FromIterator`/`Extend` for collections.
-- Type safety: newtypes for static distinctions, builder pattern for complex construction, `bitflags` over enums for flag sets. Avoid `bool` params — use custom types or enums.
-- Constructors: `new()` as static inherent methods. No out-parameters. Only smart pointers implement `Deref`/`DerefMut`.
-- API flexibility: minimize parameter assumptions via generics, make traits object-safe when trait objects may be useful. Let callers decide where to copy and place data.
-- Rustdoc: all public items have doc examples using `?` (not `unwrap`). Document errors, panics, and safety invariants. Hyperlink related items.
-- Future-proofing: seal traits to prevent downstream implementations, keep struct fields private, don't duplicate derived trait bounds on structs. See [Rust Design Patterns](https://rust-unofficial.github.io/patterns).
-- Anti-patterns: `unwrap()`, unguarded `unsafe`, panics in libraries, `Vec`/`HashMap` across FFI.
+Validate and sanitize all external input at system boundaries. Use allowlists over denylists. Validate types, ranges, and formats. Never trust user input.
 
-### atomic-commits
-
-**Priority:** high
-
-Each commit represents one logical change. Don't mix unrelated changes. Use conventional commits format (`feat:`, `fix:`, `chore:`, `refactor:`, `docs:`, `test:`). Keep commits small and focused for easier review and bisection.
-
-### branch-hygiene
+### least-privilege
 
 **Priority:** medium
 
-Use descriptive branch names. Keep branches short-lived. Delete merged branches. Rebase or merge from main regularly to avoid drift.
+Request only necessary permissions. Minimize file system access, network access, and API scopes. Run processes with minimal required privileges.
 
-### commit-messages
-
-**Priority:** high
-
-Use conventional commits: `feat: add user auth`, `fix: handle null input`, `chore: update deps`, `refactor: extract parser`, `docs: add API guide`, `test: cover edge case`. First line under 72 chars, imperative mood. Body explains *why*, not *what*. Add scope when useful: `feat(api): add pagination`.
-
-### safe-git-operations
+### secrets-handling
 
 **Priority:** critical
 
-Never force-push to shared branches. Always pull before pushing. Use `--force-with-lease` instead of `--force` when necessary. Confirm destructive operations with the user.
+Never hardcode secrets, API keys, tokens, or passwords. Use environment variables or secret management systems. Never log or expose sensitive values. Reject commits containing secrets.
 
-### php-conventions
-
-**Priority:** high
-
-- PHP 8.2+, `declare(strict_types=1)`, typed properties, union types, enums, readonly classes.
-- Formatting: PSR-12 via `phpcs`/`phpcbf` or `php-cs-fixer`. Static analysis: `PHPStan` level 9 or `Psalm`.
-- Testing: PHPUnit with `@dataProvider`, 80%+ coverage.
-- Error handling: specific exceptions extending `RuntimeException`, constructor promotion for value objects.
-- First-class callable syntax (`$fn = strlen(...)`) for callbacks. Arrow functions (`fn() =>`) for simple closures.
-- Dependencies: Composer with `composer.lock` committed, `^` version constraints. `composer audit` in CI.
-- Security: require `roave/security-advisories` as dev dependency to block vulnerable packages.
-- PSR-4 autoloading exclusively — no `require`/`include` for classes.
-- Intersection types for strict parameter contracts. Named arguments for readability.
-- Anti-patterns: `@` suppression, `eval()`, dynamic property access, `extract()`.
-
-### ruby-conventions
+### anti-patterns
 
 **Priority:** high
 
-- Ruby 3.2+, `frozen_string_literal: true`, `.ruby-version` file.
-- Linting: `rubocop` with auto-fix (120 char max). Plugins: `rubocop-rspec`, `rubocop-performance`.
-- Type checking: RBS + `steep check`. Use `rbs prototype` for scaffolding type signatures.
-- Testing: RSpec with `describe`/`context`/`it`, `factory_bot` over fixtures, `simplecov` (80%+).
-- Security: `brakeman` for SAST (Rails), `bundler-audit` for dependency CVE scanning.
-- Error handling: specific exceptions inheriting `StandardError`, no bare `rescue`.
-- Composition over inheritance, `Comparable`/`Enumerable` mixins, `case/in` pattern matching.
-- Dependencies: `bundler`, commit `Gemfile.lock`, pessimistic `~>` constraints.
-- Gem packaging: use `gemspec` with `bundler` gem template, `rake release` for distribution.
-- `&:method_name` block shorthand, `=>` pattern matching destructuring (3.2+).
-- Anti-patterns: monkey patching, `method_missing` without `respond_to_missing?`, `eval` with user input.
+No magic numbers — use named constants. No global state — use dependency injection. No inheritance for code reuse — prefer composition. No bare exception handlers — catch specific types. No mocking internal services — use real objects for integration tests. No blocking I/O in async code paths — keep async paths fully async.
+
+### avoid-duplication
+
+**Priority:** medium
+
+Extract shared logic after the third repetition, not before. Three similar lines of code are better than a premature abstraction. When extracting, ensure the shared code has a single reason to change — if two callers would evolve the logic differently, keep them separate. Premature abstraction creates worse coupling than duplication.
+
+### complexity-limits
+
+**Priority:** medium
+
+Enforce concrete limits: max 20 cyclomatic complexity per function, max 4 levels of nesting depth, max 50 lines per function. Use early returns to flatten conditionals. Break complex functions into well-named helpers that each do one thing.
+
+### dead-code
+
+**Priority:** low
+
+Remove dead code instead of commenting it out. Version control preserves history. Commented-out code creates confusion and maintenance burden.
+
+### error-handling
+
+**Priority:** high
+
+Always wrap errors with context describing what operation failed. Never swallow errors silently — either handle, propagate, or log them. Use language-idiomatic patterns: `Result<T, E>` in Rust, `if err != nil` with `fmt.Errorf("doing X: %w", err)` in Go, typed exceptions in Python/Java. Fail fast on unrecoverable errors.
+
+### readability-first
+
+**Priority:** high
+
+Max 120 character line width. Prefer explicit code over clever tricks — if it needs a comment to explain what it does, rewrite it. No abbreviations in public API names (`context` not `ctx` in public signatures, `repository` not `repo`). Keep functions short and focused on a single responsibility.
 
 ### agent-workflow
 
@@ -398,41 +348,87 @@ Never claim success without fresh verification. Run the test and see it pass. Ch
 
 Verify assumptions before taking action. Check current state (branch, working directory, running processes) before making changes. Confirm file existence before editing. Test that build passes before committing. Never assume — confirm.
 
-### anti-patterns
+### php-conventions
 
 **Priority:** high
 
-No magic numbers — use named constants. No global state — use dependency injection. No inheritance for code reuse — prefer composition. No bare exception handlers — catch specific types. No mocking internal services — use real objects for integration tests. No blocking I/O in async code paths — keep async paths fully async.
+- PHP 8.2+, `declare(strict_types=1)`, typed properties, union types, enums, readonly classes.
+- Formatting: PSR-12 via `phpcs`/`phpcbf` or `php-cs-fixer`. Static analysis: `PHPStan` level 9 or `Psalm`.
+- Testing: PHPUnit with `@dataProvider`, 80%+ coverage.
+- Error handling: specific exceptions extending `RuntimeException`, constructor promotion for value objects.
+- First-class callable syntax (`$fn = strlen(...)`) for callbacks. Arrow functions (`fn() =>`) for simple closures.
+- Dependencies: Composer with `composer.lock` committed, `^` version constraints. `composer audit` in CI.
+- Security: require `roave/security-advisories` as dev dependency to block vulnerable packages.
+- PSR-4 autoloading exclusively — no `require`/`include` for classes.
+- Intersection types for strict parameter contracts. Named arguments for readability.
+- Anti-patterns: `@` suppression, `eval()`, dynamic property access, `extract()`.
 
-### avoid-duplication
+### atomic-commits
+
+**Priority:** high
+
+Each commit represents one logical change. Don't mix unrelated changes. Use conventional commits format (`feat:`, `fix:`, `chore:`, `refactor:`, `docs:`, `test:`). Keep commits small and focused for easier review and bisection.
+
+### branch-hygiene
 
 **Priority:** medium
 
-Extract shared logic after the third repetition, not before. Three similar lines of code are better than a premature abstraction. When extracting, ensure the shared code has a single reason to change — if two callers would evolve the logic differently, keep them separate. Premature abstraction creates worse coupling than duplication.
+Use descriptive branch names. Keep branches short-lived. Delete merged branches. Rebase or merge from main regularly to avoid drift.
 
-### complexity-limits
-
-**Priority:** medium
-
-Enforce concrete limits: max 20 cyclomatic complexity per function, max 4 levels of nesting depth, max 50 lines per function. Use early returns to flatten conditionals. Break complex functions into well-named helpers that each do one thing.
-
-### dead-code
-
-**Priority:** low
-
-Remove dead code instead of commenting it out. Version control preserves history. Commented-out code creates confusion and maintenance burden.
-
-### error-handling
+### commit-messages
 
 **Priority:** high
 
-Always wrap errors with context describing what operation failed. Never swallow errors silently — either handle, propagate, or log them. Use language-idiomatic patterns: `Result<T, E>` in Rust, `if err != nil` with `fmt.Errorf("doing X: %w", err)` in Go, typed exceptions in Python/Java. Fail fast on unrecoverable errors.
+Use conventional commits: `feat: add user auth`, `fix: handle null input`, `chore: update deps`, `refactor: extract parser`, `docs: add API guide`, `test: cover edge case`. First line under 72 chars, imperative mood. Body explains *why*, not *what*. Add scope when useful: `feat(api): add pagination`.
 
-### readability-first
+### safe-git-operations
+
+**Priority:** critical
+
+Never force-push to shared branches. Always pull before pushing. Use `--force-with-lease` instead of `--force` when necessary. Confirm destructive operations with the user.
+
+### go-conventions
 
 **Priority:** high
 
-Max 120 character line width. Prefer explicit code over clever tricks — if it needs a comment to explain what it does, rewrite it. No abbreviations in public API names (`context` not `ctx` in public signatures, `repository` not `repo`). Keep functions short and focused on a single responsibility.
+- Follow Effective Go and Go Code Review Comments guidelines.
+- Handle every error return. Wrap errors with context: `fmt.Errorf("operation failed: %w", err)`.
+- Linting: `golangci-lint` with strict config (enable `govet`, `staticcheck`, `errcheck`, `gosec`, `gocritic`). Format with `gofmt`/`goimports`.
+- Security: `govulncheck` for CVE scanning, `gosec` for SAST. Run both in CI.
+- Testing: table-driven tests with `t.Run()`. Use `t.Parallel()` where safe. Use `testify` for assertions. Coverage with `go test -coverprofile`.
+- Naming: use short, descriptive names. Receivers are 1-2 letters. Exported names are descriptive.
+- Prefer composition over inheritance. Use interfaces for abstraction (accept interfaces, return structs).
+- Keep packages small and focused. Avoid package-level state and `init()` functions.
+- Use `context.Context` as first parameter for cancelable operations. Never store contexts in structs.
+- Error types: use `errors.Is()`/`errors.As()` for comparison. Define sentinel errors with `errors.New()`.
+- Modules: use Go modules. Commit `go.sum`. Use semantic version tags. Prefer stdlib over third-party when reasonable.
+- Concurrency: prefer channels over mutexes. Use `sync.WaitGroup` for fan-out. Guard shared state.
+- Benchmarking: use `testing.B` benchmarks. Profile with `go tool pprof`. Use `benchstat` for comparison.
+
+### rust-conventions
+
+**Priority:** high
+
+- Rust 2024 edition, `cargo fmt` + `clippy -D warnings`, zero warnings policy.
+- `Result<T, E>` with `thiserror` for library errors, `anyhow` for applications. `?` for propagation — never `.unwrap()` in library code.
+- Minimize `unsafe` — every block needs `// SAFETY:` comment explaining invariants.
+- Prefer `&str` over `String` in params, `Cow<'_, str>` for conditional ownership, `Arc` for shared ownership.
+- `impl Trait` in argument position for static dispatch, `dyn Trait` for dynamic dispatch when heterogeneous collections needed.
+- Small, focused modules. Use `pub(crate)` for internal visibility. Workspace inheritance for multi-crate repos.
+- `#[cfg(test)]` for unit tests, `tests/` for integration, `cargo-llvm-cov` for coverage.
+- Benchmarking: `criterion` for microbenchmarks, profile with `cargo flamegraph`.
+- Async: `tokio` runtime, `'static + Send + Sync` bounds, `tokio::spawn` for concurrency.
+- Security: `cargo audit` for CVE scanning, `cargo deny` for license and advisory policies.
+- Dependencies: pin versions, commit `Cargo.lock`, prefer well-maintained crates.
+- Structured logging with `tracing` crate — use spans and events, not `println!`.
+- API naming: follow `as_`/`to_`/`into_` conventions for conversions, `iter()`/`iter_mut()`/`into_iter()` for iterators. Getters are `field()` not `get_field()`. See [Rust API Guidelines](https://rust-lang.github.io/api-guidelines).
+- Eagerly implement common traits: `Clone`, `Debug`, `Default`, `Eq`, `PartialEq`, `Hash`, `Send`, `Sync`. Use `From`/`AsRef`/`AsMut` for conversions, `FromIterator`/`Extend` for collections.
+- Type safety: newtypes for static distinctions, builder pattern for complex construction, `bitflags` over enums for flag sets. Avoid `bool` params — use custom types or enums.
+- Constructors: `new()` as static inherent methods. No out-parameters. Only smart pointers implement `Deref`/`DerefMut`.
+- API flexibility: minimize parameter assumptions via generics, make traits object-safe when trait objects may be useful. Let callers decide where to copy and place data.
+- Rustdoc: all public items have doc examples using `?` (not `unwrap`). Document errors, panics, and safety invariants. Hyperlink related items.
+- Future-proofing: seal traits to prevent downstream implementations, keep struct fields private, don't duplicate derived trait bounds on structs. See [Rust Design Patterns](https://rust-unofficial.github.io/patterns).
+- Anti-patterns: `unwrap()`, unguarded `unsafe`, panics in libraries, `Vec`/`HashMap` across FFI.
 
 ### csharp-conventions
 
@@ -450,6 +446,58 @@ Max 120 character line width. Prefer explicit code over clever tricks — if it 
 - Collection expressions (`[1, 2, 3]`), `required` modifier, raw string literals for multi-line.
 - Anti-patterns: `dynamic`, `object` params, unguarded `catch (Exception)`, `#pragma warning disable`.
 
+### typescript-conventions
+
+**Priority:** high
+
+- `strict: true` + `noUncheckedIndexedAccess` in tsconfig, never `any` — use `unknown` with type guards.
+- ESM imports only, `const` over `let`, `as const` for literals, `interface` over `type` for objects.
+- `import type` for type-only imports to avoid runtime overhead. Discriminated unions for type-safe state.
+- Formatting/linting: `biome` + `oxlint`. Type checking: `tsc --noEmit` in CI.
+- Testing: `vitest` (80%+ coverage). Runtime validation at system boundaries with `zod`.
+- Error handling: discriminated unions for expected errors, throw only for unexpected.
+- Package manager: `pnpm` with `pnpm-lock.yaml` committed, build: `tsup` or `esbuild`.
+- Monorepo: workspace protocol (`workspace:*`), shared tsconfig base, `pnpm-workspace.yaml`.
+- Node.js: `node:` prefix for core modules, `fetch` over `axios`.
+- Security: `pnpm audit` for dependency CVE scanning. Zero tolerance for critical/high vulnerabilities.
+- Anti-patterns: non-null assertions (`!`), type assertions (`as`), `enum` (use unions), `@ts-ignore`.
+
+### meaningful-assertions
+
+**Priority:** medium
+
+Assert exact expected values, not just truthiness (`assert result == 42`, not `assert result`). Use snapshot testing for complex structured output. Consider property-based testing for functions with wide input ranges. Include descriptive failure messages. Always test error paths and edge cases, not just the happy path.
+
+### tdd-workflow
+
+**Priority:** high
+
+Write tests before writing code, update tests when modifying behavior. When fixing bugs, write a failing test first — RED (failing test) → GREEN (minimal code to pass) → REFACTOR. Wrote production code before the test? Delete it, start over — no exceptions, don't keep as reference. Integration tests for API surfaces, unit tests for business logic, property tests for edge-case-heavy code. Run the full test suite before committing — never push untested code.
+
+### test-alongside-code
+
+**Priority:** high
+
+Write tests when writing code, update tests when modifying behavior. When fixing bugs, write a failing test first (TDD). Use integration tests for the public API surface and unit tests for complex internal logic. Run the full test suite before committing.
+
+### test-independence
+
+**Priority:** high
+
+Tests must be independent and idempotent — runnable in any order, in parallel. No shared mutable state between tests. Use factories or fixtures for setup. Clean up created resources (files, DB rows, env vars) after each test. Never rely on test execution order.
+
+### test-naming
+
+**Priority:** medium
+
+Name tests to describe behavior: `should_return_error_when_input_is_empty`, `test_parse_handles_nested_objects`. Use `describe`/`it` blocks for grouping in languages that support them. Follow `given_when_then` or `should_when` patterns. Test names are specifications — a reader should understand the expected behavior without reading the test body.
+
+### testing-anti-patterns
+
+**Priority:** high
+
+Do not test mock behavior instead of real behavior. Do not add test-only methods to production code. Do not mock what you don't own — wrap it and test the wrapper. Do not test implementation details — test observable behavior. Do not write tests that pass when the code is broken. If a test never fails, it's not testing anything.
+
 ### elixir-conventions
 
 **Priority:** high
@@ -465,36 +513,6 @@ Max 120 character line width. Prefer explicit code over clever tricks — if it 
 - OTP: GenServer for state, Supervisor for fault tolerance, `|>` pipe for transforms.
 - Dependencies: commit `mix.lock`, `hex` with `~>` constraints.
 - Anti-patterns: mutable state outside processes, long-running NIFs, `String.to_atom` with user input.
-
-### batch-operations
-
-**Priority:** medium
-
-Group related file reads and writes into single operations. Combine independent tool calls in parallel rather than sequentially. When making multiple edits to the same file, batch them into one edit operation. Prefer multi-file search tools over individual file reads when exploring.
-
-### context-preservation
-
-**Priority:** medium
-
-Record key findings (file paths, function signatures, patterns discovered) before they scroll out of context. Summarize investigation results before acting on them. When working on multi-step tasks, note intermediate decisions and their rationale to avoid re-deriving them later.
-
-### incremental-approach
-
-**Priority:** medium
-
-Start with the smallest viable change, verify it works, then extend. Avoid generating large blocks of speculative code. Build iteratively: implement one piece, test, then move to the next. When uncertain about an approach, prototype the critical part first before committing to the full implementation.
-
-### output-awareness
-
-**Priority:** medium
-
-Limit explanations to 1-3 sentences unless asked for detail. Use code blocks for code, not prose. Omit unchanged code when showing diffs — use comments like `// ... existing code ...` to indicate skipped sections. Never repeat information already visible in context. Prefer short, direct answers over comprehensive walkthroughs.
-
-### task-runner
-
-**Priority:** high
-
-Prefer `task` commands over raw build/test/lint commands when a Taskfile.yaml exists. Task runners provide consistent, documented workflows. Use `task --list` to discover available tasks. Always check for a Taskfile before running manual commands. Standard task names: setup, build, test, lint, format, bench — prefer these conventions. Lock files always committed for reproducible builds.
 
 ### r-conventions
 
@@ -512,39 +530,21 @@ Prefer `task` commands over raw build/test/lint commands when a Taskfile.yaml ex
 - CRAN: `R CMD check --as-cran` zero warnings/notes, maintain DESCRIPTION with proper versioning.
 - Anti-patterns: `eval(parse(text=))` with user input, mixing Rcpp and raw C API, `T`/`F` instead of `TRUE`/`FALSE`.
 
-### dependency-awareness
+### ruby-conventions
 
 **Priority:** high
 
-Audit dependencies before adding them. Prefer well-maintained, widely-used packages with active maintenance. Pin versions and commit lock files. Use language-specific audit tools in CI:
-- Rust: `cargo audit`, `cargo deny` (license + advisory policies)
-- Python: `pip-audit`, `bandit` (SAST)
-- JavaScript/TypeScript: `npm audit`, `pnpm audit`
-- Go: `govulncheck`
-- Ruby: `bundler-audit`
-- PHP: `composer audit`
-- Java: OWASP `dependency-check` Maven/Gradle plugin
-- C#: `dotnet list package --vulnerable`
-- Elixir: `mix_audit`
-Zero tolerance for critical/high CVEs. Automate dependency update PRs where possible.
-
-### input-validation
-
-**Priority:** high
-
-Validate and sanitize all external input at system boundaries. Use allowlists over denylists. Validate types, ranges, and formats. Never trust user input.
-
-### least-privilege
-
-**Priority:** medium
-
-Request only necessary permissions. Minimize file system access, network access, and API scopes. Run processes with minimal required privileges.
-
-### secrets-handling
-
-**Priority:** critical
-
-Never hardcode secrets, API keys, tokens, or passwords. Use environment variables or secret management systems. Never log or expose sensitive values. Reject commits containing secrets.
+- Ruby 3.2+, `frozen_string_literal: true`, `.ruby-version` file.
+- Linting: `rubocop` with auto-fix (120 char max). Plugins: `rubocop-rspec`, `rubocop-performance`.
+- Type checking: RBS + `steep check`. Use `rbs prototype` for scaffolding type signatures.
+- Testing: RSpec with `describe`/`context`/`it`, `factory_bot` over fixtures, `simplecov` (80%+).
+- Security: `brakeman` for SAST (Rails), `bundler-audit` for dependency CVE scanning.
+- Error handling: specific exceptions inheriting `StandardError`, no bare `rescue`.
+- Composition over inheritance, `Comparable`/`Enumerable` mixins, `case/in` pattern matching.
+- Dependencies: `bundler`, commit `Gemfile.lock`, pessimistic `~>` constraints.
+- Gem packaging: use `gemspec` with `bundler` gem template, `rake release` for distribution.
+- `&:method_name` block shorthand, `=>` pattern matching destructuring (3.2+).
+- Anti-patterns: monkey patching, `method_missing` without `respond_to_missing?`, `eval` with user input.
 
 ## Context
 
