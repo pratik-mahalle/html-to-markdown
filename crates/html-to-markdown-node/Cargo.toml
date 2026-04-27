@@ -19,3 +19,7 @@ napi-derive = "3"
 
 [build-dependencies]
 napi-build = "2"
+
+
+[lints]
+workspace = true

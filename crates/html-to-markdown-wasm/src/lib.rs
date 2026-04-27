@@ -19,8 +19,6 @@
 use std::sync::Arc;
 use wasm_bindgen::prelude::*;
 
-use js_sys;
-
 /// Document-level metadata extracted from `<head>` and top-level elements.
 ///
 /// Contains all metadata typically used by search engines, social media platforms,
